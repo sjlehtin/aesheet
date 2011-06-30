@@ -25,6 +25,7 @@ class Character(models.Model):
     # XXX can be used to fill in basic edges and stats later for, e.g.,
     # GM usage.
     race = models.CharField(max_length=256)
+    description = models.TextField(max_length=256, blank=True)
     age =  models.IntegerField(validators=[validate_nonnegative], default=20)
     unnatural_aging = models.IntegerField(default=0)
     height = models.IntegerField(default=175)
@@ -102,7 +103,9 @@ class Character(models.Model):
     
 
     def __unicode__(self):
-        return self.name
+        return "%s: a %s %s%s" % (self.name, self.race, self.occupation,
+                                    ((": %s" % self.description) 
+                                     if self.description else ""))
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
