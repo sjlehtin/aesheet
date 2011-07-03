@@ -33,6 +33,7 @@ class Character(models.Model):
     times_wounded  =  models.IntegerField(validators=[validate_nonnegative], 
                                           default=0)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
+
     deity = models.CharField(max_length=256, default="Kord")
     adventures = models.IntegerField(validators=[validate_nonnegative], 
                                      default=0)
@@ -145,37 +146,37 @@ class Character(models.Model):
         return self.cur_imm() + self.base_mod_imm
 
     def eff_fit(self):
-        return self.fit + self.mod_fit()
+        return self.fit() + self.mod_fit()
 
     def eff_ref(self):
-        return self.ref + self.mod_ref()
+        return self.ref() + self.mod_ref()
 
     def eff_lrn(self):
-        return self.lrn + self.mod_lrn()
+        return self.lrn() + self.mod_lrn()
 
     def eff_int(self):
-        return self.int + self.mod_int()
+        return self.int() + self.mod_int()
 
     def eff_psy(self):
-        return self.psy + self.mod_psy()
+        return self.psy() + self.mod_psy()
 
     def eff_wil(self):
-        return self.wil + self.mod_wil()
+        return self.wil() + self.mod_wil()
 
     def eff_cha(self):
-        return self.cha + self.mod_cha()
+        return self.cha() + self.mod_cha()
 
     def eff_pos(self):
-        return self.pos + self.mod_pos()
+        return self.pos() + self.mod_pos()
 
     def eff_mov(self):
-        return self.mov + self.mod_mov()
+        return self.mov() + self.mod_mov()
 
     def eff_dex(self):
-        return self.dex + self.mod_dex()
+        return self.dex() + self.mod_dex()
 
     def eff_imm(self):
-        return self.imm + self.mod_imm()
+        return self.imm() + self.mod_imm()
 
     def mod_fit(self):
         return 0
@@ -215,45 +216,86 @@ class Character(models.Model):
                                     ((": %s" % self.description) 
                                      if self.description else ""))
 
+class WeaponQuality(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    short_name = models.CharField(max_length=5)
+    roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    ccv = models.IntegerField(default=0)
+    damage = models.IntegerField(default=0)
+    leth = models.IntegerField(default=0)
+    plus_leth = models.IntegerField(default=0)
+    defense_leth = models.IntegerField(default=0)
+    durability = models.IntegerField(default=0)
+    dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
+                                        default=1)
+    weight_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
+                                            default=1)
+    versus_missile_modifier = models.IntegerField(default=0)
+    versus_area_save_modifier = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["roa", "ccv"]
+
+    def __unicode__(self):
+        return self.name
+
+class WeaponTemplate(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    ccv = models.IntegerField(default=10)
+    ccv_unskilled_modifier = models.IntegerField(default=-10)
+    draw_initiative = models.IntegerField(default=-3, null=True)
+    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+    num_dice = models.IntegerField(default=1)
+    dice = models.IntegerField(default=6)
+    extra_damage = models.IntegerField(default=0)
+    leth = models.IntegerField(default=5)
+    plus_leth = models.IntegerField(default=0)
+    defense_leth = models.IntegerField(default=5)
+    type = models.CharField(max_length=5, default="S")
+    durability = models.IntegerField(default=5)
+    dp = models.IntegerField(default=10)
+    notes = models.CharField(max_length=64, blank=True)
+    short_name = models.CharField(max_length=64)
+
+    is_lance = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+class WeaponSpecialQuality(models.Model):
+    description = models.TextField(blank=True)
+    short_description = models.CharField(max_length=256)
+
+    def __unicode__(self):
+        return "%s" % (self.short_description)
+
+class Weapon(models.Model):
+    # XXX name from template (appended with quality or something to that
+    # effect) will be used if this is not set (= is blank).  If this is
+    # set, the name given here should be unique.  Add a validator to
+    # verify this.
+    name = models.CharField(max_length=256, blank=True)
+    description = models.TextField(blank=True)
+    base = models.ForeignKey(WeaponTemplate)
+    quality = models.ForeignKey(WeaponQuality)
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.base)
+
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
     description = models.TextField()
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
     
+    weapons = models.ManyToManyField(Weapon, blank=True)
+
+    def __getattr__(self, v):
+        # pass through all attribute references not handled by us to
+        # base character.
+        if v.startswith("_"):
+            raise AttributeError()
+        return getattr(self.character, v)
+
     def __unicode__(self):
         return "sheet for %s: %s" % (self.character.name, self.description)
-
-QUALITY_CHOICES = (
-    ( "Bone", "Bone" ),
-    ( "Stone", "Stone" ),
-    ( "Bronze", "Bronze" ),
-    ( "Poor", "Poor" ),
-    ( "Normal", "Normal" ),
-    ( "Damascan", "Damascan" ),
-    ( "Mithril", "Mithril" ),
-    ( "Adamantite", "Adamantite" ),
-    ( "L1", "L1" ),
-    ( "L2", "L2" ),
-    ( "L3", "L3" ),
-    ( "L4", "L4" ),
-    ( "L5", "L5" ),
-    ( "L6", "L6" ),
-    ( "L7", "L7" ),
-    ( "L1 of Speed", "L1Speed" ),
-    ( "L2 of Speed", "L2Speed" ),
-    )
-
-class WeaponTemplate(models.Model):
-    name = models.CharField(max_length=256)
-
-    def __unicode__(self):
-        return "%s" % (self.name)
-
-class Weapon(models.Model):
-    name = models.CharField(max_length=256, blank=True)
-    description = models.TextField(blank=True)
-    base = models.ForeignKey(WeaponTemplate)
-    quality = models.CharField(max_length=64, choices=QUALITY_CHOICES, 
-                               default='Normal')
-    def __unicode__(self):
-        return "%s: %s" % (self.name, self.base)

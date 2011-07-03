@@ -1,0 +1,9 @@
+{% if all_sheets %}
+    <ul>
+    {% for sheet in all_sheets %}
+        <li><a href="/sheets/{{ sheet.id }}/">{{ sheet }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No sheets.</p>
+{% endif %}

@@ -15,9 +15,11 @@ def character_detail(request, char_id):
                               { 'char' : character })
 
 def sheets_index(request):
-    all_sheets = Sheet.objects.all().order_by('name')
-    return render_to_response('sheet/sheet_index.html', 
+    all_sheets = Sheet.objects.all()
+    return render_to_response('sheet/sheets_index.html', 
                               { 'all_sheets' : all_sheets })
 
 def sheet_detail(request, sheet_id):
-    return HttpResponse("You're looking at sheet %s." % sheet_id)
+    sheet = get_object_or_404(Sheet, pk=sheet_id)
+    return render_to_response('sheet/sheet_detail.html', 
+                              { 'char' : sheet })

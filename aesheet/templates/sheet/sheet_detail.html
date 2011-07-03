@@ -1,0 +1,151 @@
+<h1>{{ char.name }}</h1>
+{{ char.race }}
+{{ char.occupation }}
+<p>
+{{ char.character.description }}
+</p>
+<p>
+{{ char.description }}
+</p>
+<table>
+<tr>
+<td>
+</td>
+<td>
+base
+</td>
+<td>
+eff
+</td>
+</tr>
+<tr>
+<td>
+<strong>FIT</strong>
+</td>
+<td>
+{{ char.fit}}
+</td>
+<td>
+{{ char.eff_fit}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>REF</strong>
+</td>
+<td>
+{{ char.ref}}
+</td>
+<td>
+{{ char.eff_ref }}
+</td>
+</tr>
+<tr>
+<td>
+<strong>LRN</strong>
+</td>
+<td>
+{{ char.lrn}}
+</td>
+<td>
+{{ char.eff_lrn }}
+</td>
+</tr>
+<tr>
+<td>
+<strong>INT</strong>
+</td>
+<td>
+{{ char.int}}
+</td>
+<td>
+{{ char.eff_int}}
+</td>
+<tr>
+<td>
+<strong>PSY</strong>
+</td>
+<td>
+{{ char.psy}}
+</td>
+<td>
+{{ char.eff_psy}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>WIL</strong>
+</td>
+<td>
+{{ char.wil}}
+</td>
+<td>
+{{ char.eff_wil}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>CHA</strong>
+</td>
+<td>
+{{ char.cha}}
+</td>
+<td>
+{{ char.eff_cha}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>POS</strong>
+</td>
+<td>
+{{ char.pos}}
+</td>
+<td>
+{{ char.eff_pos}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>MOV</strong>
+</td>
+<td>
+{{ char.mov}}
+</td>
+<td>
+{{ char.eff_mov}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>DEX</strong>
+</td>
+<td>
+{{ char.dex}}
+</td>
+<td>
+{{ char.eff_dex}}
+</td>
+</tr>
+<tr>
+<td>
+<strong>IMM</strong>
+</td>
+<td>
+{{ char.imm}}
+</td>
+<td>
+{{ char.eff_imm}}
+</td>
+</tr>
+</table>
+
+{% if char.weapons.all %}
+<ul>
+    {% for wpn in char.weapons.all %}
+        <li>{{ wpn }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No weapons.</p>
+{% endif %}
