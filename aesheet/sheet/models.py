@@ -22,8 +22,8 @@ SIZE_CHOICES = (
 class Character(models.Model):
     name = models.CharField(max_length=256)
     occupation = models.CharField(max_length=256)
-    # XXX can be used to fill in basic edges and stats later for, e.g.,
-    # GM usage.
+    # XXX race can be used to fill in basic edges and stats later for,
+    # e.g., GM usage.
     race = models.CharField(max_length=256)
     description = models.TextField(max_length=256, blank=True)
     age =  models.IntegerField(validators=[validate_nonnegative], default=20)
@@ -50,6 +50,7 @@ class Character(models.Model):
     total_xp = models.IntegerField(validators=[validate_nonnegative], 
                                    default=0)
 
+    # The abilities the character was rolled with.
     start_fit = models.IntegerField(validators=[validate_nonnegative], 
                                     default=43)
     start_ref = models.IntegerField(validators=[validate_nonnegative], 
@@ -67,7 +68,8 @@ class Character(models.Model):
     start_pos = models.IntegerField(validators=[validate_nonnegative], 
                                     default=43)
 
-
+    # Current ability scores, i.e., start ability plus increases with
+    # XP.
     cur_fit = models.IntegerField(validators=[validate_nonnegative], 
                                   default=43)
     cur_ref = models.IntegerField(validators=[validate_nonnegative], 
@@ -85,22 +87,28 @@ class Character(models.Model):
     cur_pos = models.IntegerField(validators=[validate_nonnegative], 
                                   default=43)
 
-    mod_fit = models.IntegerField(default=0)
-    mod_ref = models.IntegerField(default=0)
-    mod_lrn = models.IntegerField(default=0)
-    mod_int = models.IntegerField(default=0)
-    mod_psy = models.IntegerField(default=0)
-    mod_wil = models.IntegerField(default=0)
-    mod_cha = models.IntegerField(default=0)
-    mod_pos = models.IntegerField(default=0)
+    # Permanent modifiers to ability scores.
+    base_mod_fit = models.IntegerField(default=0)
+    base_mod_ref = models.IntegerField(default=0)
+    base_mod_lrn = models.IntegerField(default=0)
+    base_mod_int = models.IntegerField(default=0)
+    base_mod_psy = models.IntegerField(default=0)
+    base_mod_wil = models.IntegerField(default=0)
+    base_mod_cha = models.IntegerField(default=0)
+    base_mod_pos = models.IntegerField(default=0)
 
-    mod_mov = models.IntegerField(validators=[validate_nonnegative], 
-                                  default=0)
-    mod_dex = models.IntegerField(validators=[validate_nonnegative], 
-                                  default=0)
-    mod_imm = models.IntegerField(validators=[validate_nonnegative], 
-                                  default=0)
-    
+    base_mod_mov = models.IntegerField(default=0)
+    base_mod_dex = models.IntegerField(default=0)
+    base_mod_imm = models.IntegerField(default=0)    
+
+    def cur_mov(self):
+        return (self.cur_ref + self.cur_fit)/2
+
+    def cur_dex(self):
+        return (self.cur_ref + self.cur_int)/2
+
+    def cur_imm(self):
+        return (self.cur_fit + self.cur_psy)/2
 
     def __unicode__(self):
         return "%s: a %s %s%s" % (self.name, self.race, self.occupation,
@@ -112,5 +120,6 @@ class Sheet(models.Model):
     description = models.TextField()
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
+    
     def __unicode__(self):
         return "sheet for %s: %s" % (self.character.name, self.description)

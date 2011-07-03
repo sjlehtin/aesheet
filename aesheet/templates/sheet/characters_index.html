@@ -1,0 +1,9 @@
+{% if all_characters %}
+    <ul>
+    {% for char in all_characters %}
+        <li><a href="/characters/{{ char.id }}/">{{ char }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No characters.</p>
+{% endif %}
