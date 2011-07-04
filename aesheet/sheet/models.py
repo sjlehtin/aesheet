@@ -1,5 +1,7 @@
 from django.db import models
 
+from functools import wraps
+
 # Create your models here.
 from django.core.exceptions import ValidationError
 
@@ -294,54 +296,65 @@ class Sheet(models.Model):
         return self.pos() + self.mod_pos()
 
     def eff_mov(self):
-        return self.mov() + self.mod_mov()
+        return (self.eff_fit() + self.eff_ref())/2 + self.mod_mov()
 
     def eff_dex(self):
-        return self.dex() + self.mod_dex()
+        return (self.eff_ref() + self.eff_int())/2 + self.mod_mov()
 
     def eff_imm(self):
-        return self.imm() + self.mod_imm()
+        return (self.eff_fit() + self.eff_psy())/2 + self.mod_mov()
 
-    def mod_fit(self):
-        print self.spell_effects.all()
-        effects = self.spell_effects.exclude(fit=0)
-        print effects
+    def mod_stat(self, stat):
+        # XXX allow different types of effects stack.
+        # Exclude effects which don't have an effect on stat.
+        kwargs = { stat : 0}
+        effects = self.spell_effects.exclude(**kwargs)
         if effects:
-            eff = max(effects, key=lambda xx: xx.fit)
-            print eff
-            return eff.fit
+            eff = max(effects, key=lambda xx: getattr(xx, stat))
+            return getattr(eff, stat)
         return 0
 
-    def mod_ref(self):
-        return 0
+    def pass_func_name(func):
+        "Name of decorated function will be passed as keyword arg _func_name"
+        @wraps(func)
+        def _pass_name(*args, **kwds):
+            kwds['_func_name'] = func.func_name
+            return func(*args, **kwds)
+        return _pass_name
 
-    def mod_lrn(self):
-        return 0
-
-    def mod_int(self):
-        return 0
-
-    def mod_psy(self):
-        return 0
-
-    def mod_wil(self):
-        return 0
-
-    def mod_cha(self):
-        return 0
-
-    def mod_pos(self):
-        return 0
-
-    def mod_mov(self):
-        return 0
-
-    def mod_dex(self):
-        return 0
-
-    def mod_imm(self):
-        return 0
-
+    @pass_func_name
+    def mod_fit(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_ref(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_lrn(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_int(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_psy(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_wil(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_cha(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_pos(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_mov(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_dex(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
+    @pass_func_name
+    def mod_imm(self, _func_name=None):
+        return self.mod_stat(_func_name[4:])
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
