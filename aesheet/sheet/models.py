@@ -145,72 +145,6 @@ class Character(models.Model):
     def imm(self):
         return self.cur_imm() + self.base_mod_imm
 
-    def eff_fit(self):
-        return self.fit() + self.mod_fit()
-
-    def eff_ref(self):
-        return self.ref() + self.mod_ref()
-
-    def eff_lrn(self):
-        return self.lrn() + self.mod_lrn()
-
-    def eff_int(self):
-        return self.int() + self.mod_int()
-
-    def eff_psy(self):
-        return self.psy() + self.mod_psy()
-
-    def eff_wil(self):
-        return self.wil() + self.mod_wil()
-
-    def eff_cha(self):
-        return self.cha() + self.mod_cha()
-
-    def eff_pos(self):
-        return self.pos() + self.mod_pos()
-
-    def eff_mov(self):
-        return self.mov() + self.mod_mov()
-
-    def eff_dex(self):
-        return self.dex() + self.mod_dex()
-
-    def eff_imm(self):
-        return self.imm() + self.mod_imm()
-
-    def mod_fit(self):
-        return 0
-
-    def mod_ref(self):
-        return 0
-
-    def mod_lrn(self):
-        return 0
-
-    def mod_int(self):
-        return 0
-
-    def mod_psy(self):
-        return 0
-
-    def mod_wil(self):
-        return 0
-
-    def mod_cha(self):
-        return 0
-
-    def mod_pos(self):
-        return 0
-
-    def mod_mov(self):
-        return 0
-
-    def mod_dex(self):
-        return 0
-
-    def mod_imm(self):
-        return 0
-
     def __unicode__(self):
         return "%s: a %s %s%s" % (self.name, self.race, self.occupation,
                                     ((": %s" % self.description) 
@@ -266,6 +200,9 @@ class WeaponSpecialQuality(models.Model):
     description = models.TextField(blank=True)
     short_description = models.CharField(max_length=256)
 
+    # Effects come with the foreign key in WeaponEffect() class to the
+    # name "effects".
+
     def __unicode__(self):
         return "%s" % (self.short_description)
 
@@ -283,12 +220,128 @@ class Weapon(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.name, self.base)
 
+class Effect(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    # will be added to the effects list, which describes all the
+    # noteworthy resistances and immunities of the character not
+    # immediately visible from stats, saves and such.
+    notes = models.TextField(blank=True)
+    cc_skill_levels = models.IntegerField(default=0)
+
+    fit = models.IntegerField(default=0)
+    fit = models.IntegerField(default=0)
+    ref = models.IntegerField(default=0)
+    lrn = models.IntegerField(default=0)
+    int = models.IntegerField(default=0)
+    psy = models.IntegerField(default=0)
+    wil = models.IntegerField(default=0)
+    cha = models.IntegerField(default=0)
+    pos = models.IntegerField(default=0)
+    mov = models.IntegerField(default=0)
+    dex = models.IntegerField(default=0)
+    imm = models.IntegerField(default=0)
+
+    saves_vs_fire = models.IntegerField(default=0)
+    saves_vs_cold = models.IntegerField(default=0)
+    saves_vs_lightning = models.IntegerField(default=0)
+    saves_vs_poison = models.IntegerField(default=0)
+    saves_vs_all = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+    
+class WeaponEffect(Effect):
+    weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
+
+class SpellEffect(Effect):
+    pass
+
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
     description = models.TextField()
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
     
     weapons = models.ManyToManyField(Weapon, blank=True)
+    
+    spell_effects = models.ManyToManyField(SpellEffect, blank=True)
+
+    def eff_fit(self):
+        return self.fit() + self.mod_fit()
+
+    def eff_ref(self):
+        return self.ref() + self.mod_ref()
+
+    def eff_lrn(self):
+        return self.lrn() + self.mod_lrn()
+
+    def eff_int(self):
+        return self.int() + self.mod_int()
+
+    def eff_psy(self):
+        return self.psy() + self.mod_psy()
+
+    def eff_wil(self):
+        return self.wil() + self.mod_wil()
+
+    def eff_cha(self):
+        return self.cha() + self.mod_cha()
+
+    def eff_pos(self):
+        return self.pos() + self.mod_pos()
+
+    def eff_mov(self):
+        return self.mov() + self.mod_mov()
+
+    def eff_dex(self):
+        return self.dex() + self.mod_dex()
+
+    def eff_imm(self):
+        return self.imm() + self.mod_imm()
+
+    def mod_fit(self):
+        print self.spell_effects.all()
+        effects = self.spell_effects.exclude(fit=0)
+        print effects
+        if effects:
+            eff = max(effects, key=lambda xx: xx.fit)
+            print eff
+            return eff.fit
+        return 0
+
+    def mod_ref(self):
+        return 0
+
+    def mod_lrn(self):
+        return 0
+
+    def mod_int(self):
+        return 0
+
+    def mod_psy(self):
+        return 0
+
+    def mod_wil(self):
+        return 0
+
+    def mod_cha(self):
+        return 0
+
+    def mod_pos(self):
+        return 0
+
+    def mod_mov(self):
+        return 0
+
+    def mod_dex(self):
+        return 0
+
+    def mod_imm(self):
+        return 0
+
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -299,3 +352,4 @@ class Sheet(models.Model):
 
     def __unicode__(self):
         return "sheet for %s: %s" % (self.character.name, self.description)
+

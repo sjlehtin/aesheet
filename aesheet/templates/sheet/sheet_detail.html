@@ -140,6 +140,7 @@ eff
 </tr>
 </table>
 
+<h3>Weapons</h3>
 {% if char.weapons.all %}
 <ul>
     {% for wpn in char.weapons.all %}
@@ -148,4 +149,15 @@ eff
 </ul>
 {% else %}
 <p>No weapons.</p>
+{% endif %}
+
+<h3>Spell effects</h3>
+{% if char.spell_effects.all %}
+<ul>
+    {% for eff in char.spell_effects.all %}
+        <li>{{ eff }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No spell effects.</p>
 {% endif %}
