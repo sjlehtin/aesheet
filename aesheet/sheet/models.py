@@ -314,16 +314,30 @@ class Skill(models.Model):
         else:
             cost_at_this_level = self.skill_cost_3
 
+        if cost_at_this_level == None:
+            raise ValueError("Skill doesn't support level %s" % level)
         return cost_at_this_level + self.cost(level - 1)
 
     def __unicode__(self):
         return "%s" % (self.name)
 
 class CharacterSkill(models.Model):
-    # XXX A skill with a with a key (character, skill) should be unique.
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
     skill_level = models.IntegerField(default=0)
+
+    def clean(self):
+        # A skill with a with a key (character, skill) should be unique.
+        if CharacterSkill.objects.filter(skill=self.skill, 
+                                         character=self.character):
+            raise ValidationError("Character `%s' already has skill `%s'." %
+                                  (self.character, self.skill))
+        # Verify that skill level is supported by the skill.
+        try:
+            cost = self.skill.cost(self.skill_level)
+        except ValueError as e:
+            raise ValidationError("Invalid level for skill %s: %s (%s)" %
+                                  (self.skill, self.skill_level, e))
 
     def cost(self):
         return self.skill.cost(self.skill_level)
