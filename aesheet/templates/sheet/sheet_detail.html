@@ -152,7 +152,7 @@ eff
 {% endif %}
 
 <h3>Spell effects</h3>
-{% if char.spell_effects.all %}
+{% if char.spell_effects.exists %}
 <ul>
     {% for eff in char.spell_effects.all %}
         <li>{{ eff }}</li>
@@ -160,4 +160,16 @@ eff
 </ul>
 {% else %}
 <p>No spell effects.</p>
+{% endif %}
+
+<h3>Skills</h3>
+{% if char.skills.exists %}
+<table>
+    {% for skill in char.skills.all %}
+        <tr><td>{{ skill.skill }}</td><td>{{ skill.skill_level }}</td>
+            <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td></tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No skills.</p>
 {% endif %}

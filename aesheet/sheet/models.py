@@ -179,7 +179,7 @@ class WeaponTemplate(models.Model):
     name = models.CharField(max_length=256, unique=True)
     ccv = models.IntegerField(default=10)
     ccv_unskilled_modifier = models.IntegerField(default=-10)
-    draw_initiative = models.IntegerField(default=-3, null=True)
+    draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
     roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
     num_dice = models.IntegerField(default=1)
     dice = models.IntegerField(default=6)
@@ -225,7 +225,7 @@ class Weapon(models.Model):
 class Effect(models.Model):
     name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
-    # will be added to the effects list, which describes all the
+    # `notes' will be added to the effects list, which describes all the
     # noteworthy resistances and immunities of the character not
     # immediately visible from stats, saves and such.
     notes = models.TextField(blank=True)
@@ -261,6 +261,84 @@ class WeaponEffect(Effect):
 
 class SpellEffect(Effect):
     pass
+
+class Edge(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+    
+SKILL_TYPES = [
+    "Physical",
+    "Combat",
+    "Trade",
+    "Education",
+    "Specialty",
+    "Social",
+    "Mage",
+    "Priest",
+    "Language"
+    ]
+SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
+
+class Skill(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    can_be_defaulted = models.BooleanField(default=True)
+    is_specialization = models.BooleanField(default=False)
+
+    required_skills = models.ManyToManyField('self', symmetrical=False, 
+                                             blank=True, null=True)
+    required_edges = models.ManyToManyField(Edge, blank=True, null=True)
+
+    skill_cost_0 = models.IntegerField(blank=True, null=True)
+    skill_cost_1 = models.IntegerField(blank=True, null=True)
+    skill_cost_2 = models.IntegerField(blank=True, null=True)
+    skill_cost_3 = models.IntegerField(blank=True, null=True)
+
+    type = models.CharField(max_length=64, choices=SKILL_TYPES)
+
+    def cost(self, level):
+        if level == 0:
+            return self.skill_cost_0
+
+        if level == 1:
+            cost_at_this_level = self.skill_cost_1
+        elif level == 2:
+            cost_at_this_level = self.skill_cost_2
+        elif level > 5:
+            cost_at_this_level = self.skill_cost_3 + 2
+        else:
+            cost_at_this_level = self.skill_cost_3
+
+        return cost_at_this_level + self.cost(level - 1)
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+class CharacterSkill(models.Model):
+    # XXX A skill with a with a key (character, skill) should be unique.
+    character = models.ForeignKey(Character, related_name='skills')
+    skill = models.ForeignKey(Skill)
+    skill_level = models.IntegerField(default=0)
+
+    def cost(self):
+        return self.skill.cost(self.skill_level)
+
+    def comments(self):
+        comments = []
+        diff = set(self.skill.required_skills.all()).difference(
+            self.character.skills.all())
+        diff = [unicode(xx) for xx in diff]
+        if len(diff) > 0:
+            comments.append("Required skill %s missing." % ','.join(diff))
+        return "\n".join(comments)
+
+    def __unicode__(self):
+        return "%s: %s %s" % (self.character, self.skill, self.skill_level)
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
