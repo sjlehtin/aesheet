@@ -1,0 +1,6 @@
+<form action="/sheets/{{char.id}}/add_weapon/" method="post">{% csrf_token %}
+<table>
+{{ form.as_table }}
+</table>
+<input type="submit" value="Submit" />
+</form>
