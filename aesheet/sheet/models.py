@@ -148,119 +148,7 @@ class Character(models.Model):
         return self.cur_imm() + self.base_mod_imm
 
     def __unicode__(self):
-        return "%s: a %s %s%s" % (self.name, self.race, self.occupation,
-                                    ((": %s" % self.description) 
-                                     if self.description else ""))
-
-class WeaponQuality(models.Model):
-    name = models.CharField(max_length=256, unique=True)
-    short_name = models.CharField(max_length=5)
-    roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
-    ccv = models.IntegerField(default=0)
-    damage = models.IntegerField(default=0)
-    leth = models.IntegerField(default=0)
-    plus_leth = models.IntegerField(default=0)
-    defense_leth = models.IntegerField(default=0)
-    durability = models.IntegerField(default=0)
-    dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
-                                        default=1)
-    weight_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
-                                            default=1)
-    versus_missile_modifier = models.IntegerField(default=0)
-    versus_area_save_modifier = models.IntegerField(default=0)
-
-    class Meta:
-        ordering = ["roa", "ccv"]
-
-    def __unicode__(self):
-        return self.name
-
-class WeaponTemplate(models.Model):
-    name = models.CharField(max_length=256, unique=True)
-    ccv = models.IntegerField(default=10)
-    ccv_unskilled_modifier = models.IntegerField(default=-10)
-    draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
-    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
-    num_dice = models.IntegerField(default=1)
-    dice = models.IntegerField(default=6)
-    extra_damage = models.IntegerField(default=0)
-    leth = models.IntegerField(default=5)
-    plus_leth = models.IntegerField(default=0)
-    defense_leth = models.IntegerField(default=5)
-    type = models.CharField(max_length=5, default="S")
-    durability = models.IntegerField(default=5)
-    dp = models.IntegerField(default=10)
-    notes = models.CharField(max_length=64, blank=True)
-    short_name = models.CharField(max_length=64)
-
-    is_lance = models.BooleanField(default=False)
-
-    def __unicode__(self):
-        return "%s" % (self.name)
-
-class WeaponSpecialQuality(models.Model):
-    description = models.TextField(blank=True)
-    short_description = models.CharField(max_length=256)
-
-    # Effects come with the foreign key in WeaponEffect() class to the
-    # name "effects".
-
-    def __unicode__(self):
-        return "%s" % (self.short_description)
-
-class Weapon(models.Model):
-    # XXX name from template (appended with quality or something to that
-    # effect) will be used if this is not set (= is blank).  If this is
-    # set, the name given here should be unique.  Add a validator to
-    # verify this.
-    name = models.CharField(max_length=256, blank=True)
-    description = models.TextField(blank=True)
-    base = models.ForeignKey(WeaponTemplate)
-    quality = models.ForeignKey(WeaponQuality)
-    special_qualities = models.ManyToManyField(WeaponSpecialQuality)
-
-    def __unicode__(self):
-        return "%s: %s" % (self.name, self.base)
-
-class Effect(models.Model):
-    name = models.CharField(max_length=256, unique=True)
-    description = models.TextField(blank=True)
-    # `notes' will be added to the effects list, which describes all the
-    # noteworthy resistances and immunities of the character not
-    # immediately visible from stats, saves and such.
-    notes = models.TextField(blank=True)
-    cc_skill_levels = models.IntegerField(default=0)
-
-    fit = models.IntegerField(default=0)
-    fit = models.IntegerField(default=0)
-    ref = models.IntegerField(default=0)
-    lrn = models.IntegerField(default=0)
-    int = models.IntegerField(default=0)
-    psy = models.IntegerField(default=0)
-    wil = models.IntegerField(default=0)
-    cha = models.IntegerField(default=0)
-    pos = models.IntegerField(default=0)
-    mov = models.IntegerField(default=0)
-    dex = models.IntegerField(default=0)
-    imm = models.IntegerField(default=0)
-
-    saves_vs_fire = models.IntegerField(default=0)
-    saves_vs_cold = models.IntegerField(default=0)
-    saves_vs_lightning = models.IntegerField(default=0)
-    saves_vs_poison = models.IntegerField(default=0)
-    saves_vs_all = models.IntegerField(default=0)
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        return "%s" % (self.name)
-    
-class WeaponEffect(Effect):
-    weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
-
-class SpellEffect(Effect):
-    pass
+        return "%s: %s %s" % (self.name, self.race, self.occupation)
 
 class Edge(models.Model):
     name = models.CharField(max_length=256, unique=True)
@@ -353,6 +241,119 @@ class CharacterSkill(models.Model):
 
     def __unicode__(self):
         return "%s: %s %s" % (self.character, self.skill, self.skill_level)
+
+class WeaponQuality(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    short_name = models.CharField(max_length=5)
+    roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    ccv = models.IntegerField(default=0)
+    damage = models.IntegerField(default=0)
+    leth = models.IntegerField(default=0)
+    plus_leth = models.IntegerField(default=0)
+    defense_leth = models.IntegerField(default=0)
+    durability = models.IntegerField(default=0)
+    dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
+                                        default=1)
+    weight_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
+                                            default=1)
+    versus_missile_modifier = models.IntegerField(default=0)
+    versus_area_save_modifier = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["roa", "ccv"]
+
+    def __unicode__(self):
+        return self.name
+
+class WeaponTemplate(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    ccv = models.IntegerField(default=10)
+    ccv_unskilled_modifier = models.IntegerField(default=-10)
+    draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
+    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+    num_dice = models.IntegerField(default=1)
+    dice = models.IntegerField(default=6)
+    extra_damage = models.IntegerField(default=0)
+    leth = models.IntegerField(default=5)
+    plus_leth = models.IntegerField(default=0)
+    defense_leth = models.IntegerField(default=5)
+    type = models.CharField(max_length=5, default="S")
+    durability = models.IntegerField(default=5)
+    dp = models.IntegerField(default=10)
+    notes = models.CharField(max_length=64, blank=True)
+    short_name = models.CharField(max_length=64)
+    skill = models.ForeignKey(Skill, 
+                              related_name="primary_for_weapons")
+    skill2 = models.ForeignKey(Skill, blank=True, null=True,
+                               related_name="secondary_for_weapons")
+    is_lance = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+class WeaponSpecialQuality(models.Model):
+    description = models.TextField(blank=True)
+    short_description = models.CharField(max_length=256)
+
+    # Effects come with the foreign key in WeaponEffect() class to the
+    # name "effects".
+
+    def __unicode__(self):
+        return "%s" % (self.short_description)
+
+class Weapon(models.Model):
+    # XXX name from template (appended with quality or something to that
+    # effect) will be used if this is not set (= is blank).  If this is
+    # set, the name given here should be unique.  Add a validator to
+    # verify this.
+    name = models.CharField(max_length=256, blank=True)
+    description = models.TextField(blank=True)
+    base = models.ForeignKey(WeaponTemplate)
+    quality = models.ForeignKey(WeaponQuality)
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.base)
+
+class Effect(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    # `notes' will be added to the effects list, which describes all the
+    # noteworthy resistances and immunities of the character not
+    # immediately visible from stats, saves and such.
+    notes = models.TextField(blank=True)
+    cc_skill_levels = models.IntegerField(default=0)
+
+    fit = models.IntegerField(default=0)
+    fit = models.IntegerField(default=0)
+    ref = models.IntegerField(default=0)
+    lrn = models.IntegerField(default=0)
+    int = models.IntegerField(default=0)
+    psy = models.IntegerField(default=0)
+    wil = models.IntegerField(default=0)
+    cha = models.IntegerField(default=0)
+    pos = models.IntegerField(default=0)
+    mov = models.IntegerField(default=0)
+    dex = models.IntegerField(default=0)
+    imm = models.IntegerField(default=0)
+
+    saves_vs_fire = models.IntegerField(default=0)
+    saves_vs_cold = models.IntegerField(default=0)
+    saves_vs_lightning = models.IntegerField(default=0)
+    saves_vs_poison = models.IntegerField(default=0)
+    saves_vs_all = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+    
+class WeaponEffect(Effect):
+    weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
+
+class SpellEffect(Effect):
+    pass
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
