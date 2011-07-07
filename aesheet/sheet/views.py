@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from sheet.models import Character, Sheet, Weapon
-from sheet.forms import AddWeapon, RemoveWeapon
+from sheet.forms import AddWeapon, RemoveGeneric
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
@@ -47,16 +47,17 @@ def sheet_detail(request, sheet_id):
 
     if request.method == "POST":
         if request.POST.get('form_id') == "remove_weapon":
-            remove_weapon_form = RemoveWeapon(request.POST)
+            remove_weapon_form = RemoveGeneric(request.POST)
             print "*** fooo %s" % remove_weapon_form
             print "*** fooo2 %s" % dir(remove_weapon_form)
             if remove_weapon_form.is_valid():
-                weapon = remove_weapon_form.cleaned_data['weapon']
+                weapon = remove_weapon_form.cleaned_data['item']
                 weapon = get_object_or_404(Weapon, pk=weapon)
                 sheet.weapons.remove(weapon)
                 sheet.full_clean()
                 sheet.save()
                 return HttpResponseRedirect('/sheets/%s/' % sheet.id)
+            # removal forms are forgotten and not updated on failures.
         else:
             add_weapon_form = AddWeapon(request.POST, sheet=sheet, 
                                         form_id="add_weapon")
@@ -71,8 +72,8 @@ def sheet_detail(request, sheet_id):
     weapons = []
     if sheet.weapons.exists():
         weapons = [{ 'weapon' : wpn,
-                     'remove_form' : RemoveWeapon(weapon=wpn, 
-                                                  form_id="remove_weapon") } 
+                     'remove_form' : RemoveGeneric(item=wpn, 
+                                                   form_id="remove_weapon") } 
                    for wpn in sheet.weapons.all()]
         
     return render_to_response('sheet/sheet_detail.html', 

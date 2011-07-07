@@ -16,14 +16,14 @@ class AddWeapon(forms.Form):
     # choices overridden in __init__()
     weapon = forms.ChoiceField(choices=())
 
-class RemoveWeapon(forms.Form):
+class RemoveGeneric(forms.Form):
     def __init__(self, *args, **kwargs):
-        weapon = kwargs.pop('weapon', None)
-        form_id = kwargs.pop('form_id', "remove_weapon")
-        super(RemoveWeapon, self).__init__(*args, **kwargs)
-        if weapon:
-            self.fields['weapon'].initial = weapon.id
+        item = kwargs.pop('item', None)
+        form_id = kwargs.pop('form_id', "")
+        super(RemoveGeneric, self).__init__(*args, **kwargs)
+        if item:
+            self.fields['item'].initial = item.id
         self.fields['form_id'].initial = form_id
 
     form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
-    weapon = forms.IntegerField(widget=widgets.HiddenInput)
+    item = forms.IntegerField(widget=widgets.HiddenInput)
