@@ -141,10 +141,18 @@ eff
 </table>
 
 <h3>Weapons</h3>
-{% if char.weapons.all %}
+{% if weapons %}
 <ul>
-    {% for wpn in char.weapons.all %}
-        <li>{{ wpn }}</li>
+    {% for wpn in weapons %}
+        <li>{{ wpn.weapon }} 
+           <span class="edit_form">
+              <form action="/sheets/{{char.id}}/" method="post">
+                {% csrf_token %}
+                {{ wpn.remove_form }}
+              <input type="submit" value="Remove" />
+              </form>
+           </span>
+        </li>
     {% endfor %}
 </ul>
 {% else %}
@@ -153,10 +161,10 @@ eff
 
 <div id="add_weapon" class="edit_form">
 <label for="add_weapon_form"><strong>Add a weapon</strong></label>
-<form action="/sheets/{{char.id}}/add_weapon/" method="post" 
+<form action="/sheets/{{char.id}}/" method="post" 
       id="add_weapon_form">{% csrf_token %}
 <table>
-{{ weapon_form.as_table }}
+{{ add_weapon_form.as_table }}
 </table>
 <input type="submit" value="Submit" />
 </form>
