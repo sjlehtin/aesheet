@@ -143,12 +143,12 @@ eff
 <h3>Weapons</h3>
 {% if weapons %}
 <ul>
-    {% for wpn in weapons %}
-        <li>{{ wpn.weapon }} 
+    {% for item in weapons %}
+        <li>{{ item.item }} 
            <span class="edit_form">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
-                {{ wpn.remove_form }}
+                {{ item.remove_form }}
               <input type="submit" value="Remove" />
               </form>
            </span>
@@ -171,15 +171,32 @@ eff
 </div>
 
 <h3>Spell effects</h3>
-{% if char.spell_effects.exists %}
+{% if spell_effects %}
 <ul>
-    {% for eff in char.spell_effects.all %}
-        <li>{{ eff }}</li>
+    {% for item in spell_effects %}
+        <li>{{ item.item }} 
+           <span class="edit_form">
+              <form action="/sheets/{{char.id}}/" method="post">
+                {% csrf_token %}
+                {{ item.remove_form }}
+              <input type="submit" value="Remove" />
+              </form>
+           </span>
+        </li>
     {% endfor %}
 </ul>
 {% else %}
 <p>No spell effects.</p>
 {% endif %}
+
+<div id="add_spell_effect" class="edit_form">
+<label for="add_spell_effect_form"><strong>Add a spell effect</strong></label>
+<form action="/sheets/{{char.id}}/" method="post" 
+      id="add_spell_effect_form">{% csrf_token %}
+<table>
+{{ add_spell_effect_form.as_table }}
+</table>
+<input type="submit" value="Submit" />
 
 <h3>Skills</h3>
 {% if char.skills.exists %}
