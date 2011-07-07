@@ -233,7 +233,7 @@ class CharacterSkill(models.Model):
     def comments(self):
         comments = []
         diff = set(self.skill.required_skills.all()).difference(
-            self.character.skills.all())
+            [cs.skill for cs in self.character.skills.all()])
         diff = [unicode(xx) for xx in diff]
         if len(diff) > 0:
             comments.append("Required skill %s missing." % ','.join(diff))
