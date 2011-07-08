@@ -2,7 +2,7 @@ from sheet.models import Sheet, Character, WeaponTemplate, Weapon
 from sheet.models import WeaponQuality, WeaponSpecialQuality
 from sheet.models import WeaponEffect, SpellEffect
 from sheet.models import Skill, CharacterSkill
-from sheet.models import Edge
+from sheet.models import Edge, EdgeLevel, CharacterEdge
 
 from django.contrib import admin
 
@@ -12,8 +12,10 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
                     'notes', 'is_lance', 'skill', 'skill2')
 admin.site.register(Character)
+admin.site.register(CharacterEdge)
 admin.site.register(CharacterSkill)
 admin.site.register(Edge)
+admin.site.register(EdgeLevel)
 admin.site.register(Sheet)
 admin.site.register(Skill)
 admin.site.register(SpellEffect)

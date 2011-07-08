@@ -141,9 +141,9 @@ eff
 </table>
 
 <h3>Weapons</h3>
-{% if weapons %}
+{% if char.weapons %}
 <ul>
-    {% for item in weapons %}
+    {% for item in char.weapons %}
         <li>{{ item.item }} 
            <span class="edit_form">
               <form action="/sheets/{{char.id}}/" method="post">
@@ -171,9 +171,9 @@ eff
 </div>
 
 <h3>Spell effects</h3>
-{% if spell_effects %}
+{% if char.spell_effects %}
 <ul>
-    {% for item in spell_effects %}
+    {% for item in char.spell_effects %}
         <li>{{ item.item }} 
            <span class="edit_form">
               <form action="/sheets/{{char.id}}/" method="post">
@@ -199,13 +199,53 @@ eff
 <input type="submit" value="Add" />
 
 <h3>Skills</h3>
-{% if char.skills.exists %}
+{% if char.skills %}
 <table>
-    {% for skill in char.skills.all %}
-        <tr><td>{{ skill.skill }}</td><td>{{ skill.skill_level }}</td>
-            <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td></tr>
+    {% for skill in char.skills %}
+        <tr><td>{{ skill.skill }}</td><td>{{ skill.level }}</td>
+            <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td>
+            <td>
+              <span class="edit_form">
+                 <form action="/sheets/{{char.id}}/" method="post">
+                   {% csrf_token %}
+                   {{ skill.remove_form }}
+                 <input type="submit" value="Remove" />
+                 </form>
+              </span>
+            </td>
+        </tr>
     {% endfor %}
 </table>
 {% else %}
 <p>No skills.</p>
+{% endif %}
+
+<div id="add_skill" class="edit_form">
+<label for="add_skill_form"><strong>Add skill</strong></label>
+<form action="/sheets/{{char.id}}/" method="post" 
+      id="add_skill_form">{% csrf_token %}
+<table>
+{{ add_skill_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+
+<h3>Edges</h3>
+{% if char.edges.exists %}
+<table>
+    {% for edge in char.edges.all %}
+        <tr><td>{{ edge.edge }}</td>
+            <td>
+              <span class="edit_form">
+                 <form action="/sheets/{{char.id}}/" method="post">
+                   {% csrf_token %}
+                   {{ edge.remove_form }}
+                 <input type="submit" value="Remove" />
+                 </form>
+              </span>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No edges.</p>
 {% endif %}

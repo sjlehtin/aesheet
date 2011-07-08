@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import widgets
-from sheet.models import CharacterSkill, Sheet, SpellEffect, Weapon
+from sheet.models import CharacterSkill, Skill, Sheet, SpellEffect, Weapon
 
 class AddWeapon(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -29,6 +29,24 @@ class AddSpellEffect(forms.Form):
     form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     # choices overridden in __init__()
     item = forms.ChoiceField(choices=())
+
+class AddSkill(forms.Form):
+    def __init__(self, *args, **kwargs):
+        sheet = kwargs.pop('sheet')
+        form_id = kwargs.pop('form_id', "add_skill")
+        items = Skill.objects.all()
+        choices = [(item.id, unicode(item)) for item in items]
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.fields['item'].choices = choices
+        self.fields['form_id'].initial = form_id
+
+    form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
+    # choices overridden in __init__()
+    item = forms.ChoiceField(choices=())
+    # XXX
+    choices = range(0,8)
+    choices = zip(choices, choices)
+    level = forms.ChoiceField(choices=choices)
 
 class RemoveGeneric(forms.Form):
     def __init__(self, *args, **kwargs):

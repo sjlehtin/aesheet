@@ -212,7 +212,7 @@ class Skill(models.Model):
 class CharacterSkill(models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
-    skill_level = models.IntegerField(default=0)
+    level = models.IntegerField(default=0)
 
     def clean(self):
         # A skill with a with a key (character, skill) should be unique.
@@ -222,13 +222,13 @@ class CharacterSkill(models.Model):
                                   (self.character, self.skill))
         # Verify that skill level is supported by the skill.
         try:
-            cost = self.skill.cost(self.skill_level)
+            cost = self.skill.cost(self.level)
         except ValueError as e:
             raise ValidationError("Invalid level for skill %s: %s (%s)" %
-                                  (self.skill, self.skill_level, e))
+                                  (self.skill, self.level, e))
 
     def cost(self):
-        return self.skill.cost(self.skill_level)
+        return self.skill.cost(self.level)
 
     def comments(self):
         comments = []
@@ -240,7 +240,53 @@ class CharacterSkill(models.Model):
         return "\n".join(comments)
 
     def __unicode__(self):
-        return "%s: %s %s" % (self.character, self.skill, self.skill_level)
+        return "%s: %s %s" % (self.character, self.skill, self.level)
+
+class StatModifier(models.Model):
+    # `notes' will be added to the effects list, which describes all the
+    # noteworthy resistances and immunities of the character not
+    # immediately visible from stats, saves and such.
+    notes = models.TextField(blank=True)
+
+    cc_skill_levels = models.IntegerField(default=0)
+
+    fit = models.IntegerField(default=0)
+    fit = models.IntegerField(default=0)
+    ref = models.IntegerField(default=0)
+    lrn = models.IntegerField(default=0)
+    int = models.IntegerField(default=0)
+    psy = models.IntegerField(default=0)
+    wil = models.IntegerField(default=0)
+    cha = models.IntegerField(default=0)
+    pos = models.IntegerField(default=0)
+    mov = models.IntegerField(default=0)
+    dex = models.IntegerField(default=0)
+    imm = models.IntegerField(default=0)
+
+    saves_vs_fire = models.IntegerField(default=0)
+    saves_vs_cold = models.IntegerField(default=0)
+    saves_vs_lightning = models.IntegerField(default=0)
+    saves_vs_poison = models.IntegerField(default=0)
+    saves_vs_all = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+class EdgeLevel(StatModifier):
+    edge = models.ForeignKey(Edge)
+    level = models.IntegerField(default=1)
+    cost = models.DecimalField(max_digits=4, decimal_places=1)
+    requires_hero = models.BooleanField(default=False)
+    # XXX race requirement?
+    def __unicode__(self):
+        return "%s %s (%s)" % (self.edge, self.level, self.cost)
+
+class CharacterEdge(models.Model):
+    character = models.ForeignKey(Character, related_name='edges')
+    edge = models.ForeignKey(EdgeLevel)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.character, self.edge)
 
 class WeaponQuality(models.Model):
     name = models.CharField(max_length=256, unique=True)
@@ -315,34 +361,9 @@ class Weapon(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.name, self.base)
 
-class Effect(models.Model):
+class Effect(StatModifier):
     name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
-    # `notes' will be added to the effects list, which describes all the
-    # noteworthy resistances and immunities of the character not
-    # immediately visible from stats, saves and such.
-    notes = models.TextField(blank=True)
-    cc_skill_levels = models.IntegerField(default=0)
-
-    fit = models.IntegerField(default=0)
-    fit = models.IntegerField(default=0)
-    ref = models.IntegerField(default=0)
-    lrn = models.IntegerField(default=0)
-    int = models.IntegerField(default=0)
-    psy = models.IntegerField(default=0)
-    wil = models.IntegerField(default=0)
-    cha = models.IntegerField(default=0)
-    pos = models.IntegerField(default=0)
-    mov = models.IntegerField(default=0)
-    dex = models.IntegerField(default=0)
-    imm = models.IntegerField(default=0)
-
-    saves_vs_fire = models.IntegerField(default=0)
-    saves_vs_cold = models.IntegerField(default=0)
-    saves_vs_lightning = models.IntegerField(default=0)
-    saves_vs_poison = models.IntegerField(default=0)
-    saves_vs_all = models.IntegerField(default=0)
-
     class Meta:
         abstract = True
 
