@@ -4,8 +4,8 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from sheet.models import Character, CharacterSkill, Sheet, Skill, SpellEffect
-from sheet.models import Weapon
-from sheet.forms import AddSkill, AddSpellEffect, AddWeapon, RemoveGeneric
+from sheet.models import Weapon, CharacterEdge
+from sheet.forms import *
 from django.core.exceptions import ValidationError
 
 def characters_index(request):
@@ -24,11 +24,18 @@ def sheets_index(request):
                               { 'all_sheets' : all_sheets })
 
 def process_sheet_change_request(request, sheet):
+    assert request.method == "POST"
     form_id = request.POST.get('form_id')
     if not form_id:
         raise ValidationError("No form id")
     forms = {}
 
+    f = SheetForm(request.POST)
+    print "Form id: %s" % form_id
+    if not f.is_valid():
+        print "Invalid form: %s" % f
+        return
+    print "XX Form id: %s" % f.cleaned_data['form_id']
     if form_id == "remove":
         item_type = request.POST.get('item_type')
         if not item_type:
@@ -36,6 +43,7 @@ def process_sheet_change_request(request, sheet):
         form = RemoveGeneric(request.POST)
         if form.is_valid():            
             item = form.cleaned_data['item']
+            print "Removing %s" % item_type
             if item_type == "weapon":
                 item = get_object_or_404(Weapon, pk=item)
                 sheet.weapons.remove(item)
@@ -44,6 +52,9 @@ def process_sheet_change_request(request, sheet):
                 sheet.spell_effects.remove(item)
             elif item_type == "CharacterSkill":
                 item = get_object_or_404(CharacterSkill, pk=item)
+                item.delete()
+            elif item_type == "CharacterEdge":
+                item = get_object_or_404(CharacterEdge, pk=item)
                 item.delete()
             else:
                 raise ValidationError("Invalid item type")
@@ -86,6 +97,19 @@ def process_sheet_change_request(request, sheet):
             cs.full_clean()
             cs.save()
             return (True, forms)
+
+    elif form_id == "add_edge":
+        form = AddEdge(request.POST, sheet=sheet, form_id=form_id)
+        if form.is_valid():
+            skill = form.cleaned_data['item']
+            skill = get_object_or_404(EdgeLevel, pk=skill)
+            cs = CharacterEdge()
+            cs.character = sheet.character
+            cs.edge = skill
+            cs.full_clean()
+            cs.save()
+            return (True, forms)
+
     return (False, forms)
 
 class RemoveWrap(object):
@@ -133,6 +157,11 @@ class SheetView(object):
             return []
         return [RemoveWrap(xx) for xx in self.sheet.skills.all()]
 
+    def edges(self):
+        if not self.sheet.edges.exists():
+            return []
+        return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
+
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
         # base character.
@@ -149,6 +178,8 @@ def sheet_detail(request, sheet_id):
                                     form_id="add_spell_effect")
     add_skill_form = AddSkill(sheet=sheet, 
                               form_id="add_skill")
+    add_edge_form = AddEdge(sheet=sheet, 
+                            form_id="add_edge")
 
     forms = {}
     if request.method == "POST":
@@ -157,12 +188,15 @@ def sheet_detail(request, sheet_id):
         # render_to_response, below.    
         if should_change:
             return HttpResponseRedirect('/sheets/%s/' % sheet.id)
-    c = { 'char' : SheetView(sheet),
+
+    c = {}
+    c.update(forms)
+    c.update({ 'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,
           'add_spell_effect_form' : add_spell_form,
           'add_skill_form' : add_skill_form,
-          }
-    c.update(forms)
+          'add_edge_form' : add_edge_form,
+          })
     return render_to_response('sheet/sheet_detail.html', 
                               c,
                               context_instance=RequestContext(request))

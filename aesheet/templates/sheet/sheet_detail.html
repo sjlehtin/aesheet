@@ -197,6 +197,7 @@ eff
 {{ add_spell_effect_form.as_table }}
 </table>
 <input type="submit" value="Add" />
+</form>
 
 <h3>Skills</h3>
 {% if char.skills %}
@@ -221,18 +222,19 @@ eff
 {% endif %}
 
 <div id="add_skill" class="edit_form">
-<label for="add_skill_form"><strong>Add skill</strong></label>
+<label for="add_skill_form"><strong>Add a skill</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_skill_form">{% csrf_token %}
 <table>
 {{ add_skill_form.as_table }}
 </table>
 <input type="submit" value="Add" />
+</form>
 
 <h3>Edges</h3>
-{% if char.edges.exists %}
+{% if char.edges %}
 <table>
-    {% for edge in char.edges.all %}
+    {% for edge in char.edges %}
         <tr><td>{{ edge.edge }}</td>
             <td>
               <span class="edit_form">
@@ -249,3 +251,13 @@ eff
 {% else %}
 <p>No edges.</p>
 {% endif %}
+
+<div id="add_edge" class="edit_form">
+<label for="add_edge_form"><strong>Add an edge</strong></label>
+<form action="/sheets/{{char.id}}/" method="post" 
+      id="add_edge_form">{% csrf_token %}
+<table>
+{{ add_edge_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>

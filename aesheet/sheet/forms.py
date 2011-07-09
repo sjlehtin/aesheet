@@ -1,65 +1,68 @@
 from django import forms
 from django.forms import widgets
 from sheet.models import CharacterSkill, Skill, Sheet, SpellEffect, Weapon
+from sheet.models import EdgeLevel
 
-class AddWeapon(forms.Form):
+class SheetForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        sheet = kwargs.pop('sheet')
-        form_id = kwargs.pop('form_id', "add_weapon")
-        wpns = Weapon.objects.all()
-        choices = [(wpn.id, unicode(wpn)) for wpn in wpns]
-        super(AddWeapon, self).__init__(*args, **kwargs)
-        self.fields['item'].choices = choices
-        self.fields['form_id'].initial = form_id
+        form_id = None
+        if kwargs.has_key('form_id'):
+            form_id = kwargs.pop('form_id')
+        super(SheetForm, self).__init__(*args, **kwargs)
+        if form_id:
+            self.fields['form_id'].initial = form_id
 
     form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
-    # choices overridden in __init__()
-    item = forms.ChoiceField(choices=())
 
-class AddSpellEffect(forms.Form):
+class AddForm(SheetForm):
+    sheet = None
+    """
+    The sheet object.  Can be used by subclasses.
+    """
+
     def __init__(self, *args, **kwargs):
-        sheet = kwargs.pop('sheet')
-        form_id = kwargs.pop('form_id', "add_spell_effect")
-        items = SpellEffect.objects.all()
-        choices = [(item.id, unicode(item)) for item in items]
-        super(AddSpellEffect, self).__init__(*args, **kwargs)
-        self.fields['item'].choices = choices
-        self.fields['form_id'].initial = form_id
+        self.sheet = kwargs.pop('sheet')
+        super(AddForm, self).__init__(*args, **kwargs)
+        self.fields['item'].choices = self.get_choices()
 
-    form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
-    # choices overridden in __init__()
+    def get_choices(self):
+        """
+        Override this.  Return a choices iterable for adding various
+        things for the sheet.
+        """
+        pass
     item = forms.ChoiceField(choices=())
 
-class AddSkill(forms.Form):
-    def __init__(self, *args, **kwargs):
-        sheet = kwargs.pop('sheet')
-        form_id = kwargs.pop('form_id', "add_skill")
-        items = Skill.objects.all()
-        choices = [(item.id, unicode(item)) for item in items]
-        super(self.__class__, self).__init__(*args, **kwargs)
-        self.fields['item'].choices = choices
-        self.fields['form_id'].initial = form_id
+class AddWeapon(AddForm):
+    def get_choices(self):
+        return [(wpn.id, unicode(wpn)) for wpn in Weapon.objects.all()]
 
-    form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
-    # choices overridden in __init__()
-    item = forms.ChoiceField(choices=())
-    # XXX
+class AddSpellEffect(AddForm):
+    def get_choices(self):
+        return [(item.id, unicode(item)) for item in SpellEffect.objects.all()]
+
+class AddSkill(AddForm):
+    def get_choices(self):
+        return [(item.id, unicode(item)) for item in Skill.objects.all()]
+
+    # XXX Ajax update based on the chosen skill.
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
 
-class RemoveGeneric(forms.Form):
+class AddEdge(AddForm):
+    def get_choices(self):
+        return [(item.id, unicode(item)) for item in EdgeLevel.objects.all()]
+
+class RemoveGeneric(SheetForm):
     def __init__(self, *args, **kwargs):
         item = kwargs.pop('item', None)
-        form_id = kwargs.pop('form_id', "")
         item_type = kwargs.pop('item_type', "")
         super(RemoveGeneric, self).__init__(*args, **kwargs)
         if item:
             self.fields['item'].initial = item.id
         if item_type:
             self.fields['item_type'].initial = item_type
-        self.fields['form_id'].initial = form_id
 
-    form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     item_type = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     item = forms.IntegerField(widget=widgets.HiddenInput)
