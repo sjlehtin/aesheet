@@ -33,10 +33,9 @@ def process_sheet_change_request(request, sheet):
     f = SheetForm(request.POST)
     print "Form id: %s" % form_id
     if not f.is_valid():
-        print "Invalid form: %s" % f
         return
-    print "XX Form id: %s" % f.cleaned_data['form_id']
-    if form_id == "remove":
+
+    if form_id == "RemoveGeneric":
         item_type = request.POST.get('item_type')
         if not item_type:
             raise ValidationError("No item_type")
@@ -44,10 +43,10 @@ def process_sheet_change_request(request, sheet):
         if form.is_valid():            
             item = form.cleaned_data['item']
             print "Removing %s" % item_type
-            if item_type == "weapon":
+            if item_type == "Weapon":
                 item = get_object_or_404(Weapon, pk=item)
                 sheet.weapons.remove(item)
-            elif item_type == "spell_effect":
+            elif item_type == "SpellEffect":
                 item = get_object_or_404(SpellEffect, pk=item)
                 sheet.spell_effects.remove(item)
             elif item_type == "CharacterSkill":
@@ -63,7 +62,7 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
         # removal forms are forgotten and not updated on failures.
 
-    elif form_id == "add_weapon":
+    elif form_id == "AddWeapon":
         form = AddWeapon(request.POST, sheet=sheet, form_id=form_id)
         if form.is_valid():
             weapon = form.cleaned_data['item']
@@ -73,7 +72,7 @@ def process_sheet_change_request(request, sheet):
             sheet.save()
             return (True, forms)
 
-    elif form_id == "add_spell_effect":
+    elif form_id == "AddSpellEffect":
         form = AddSpellEffect(request.POST, sheet=sheet, form_id=form_id)
         if form.is_valid():
             spell = form.cleaned_data['item']
@@ -83,7 +82,7 @@ def process_sheet_change_request(request, sheet):
             sheet.save()
             return (True, forms)
 
-    elif form_id == "add_skill":
+    elif form_id == "AddSkill":
         form = AddSkill(request.POST, sheet=sheet, form_id=form_id)
         if form.is_valid():
             skill = form.cleaned_data['item']
@@ -92,20 +91,18 @@ def process_sheet_change_request(request, sheet):
             cs.character = sheet.character
             cs.skill = skill
             cs.level = form.cleaned_data['level']
-            print "*** foo level: %s" % cs.level
-            print "*** foo: %s" % cs
             cs.full_clean()
             cs.save()
             return (True, forms)
 
-    elif form_id == "add_edge":
+    elif form_id == "AddEdge":
         form = AddEdge(request.POST, sheet=sheet, form_id=form_id)
         if form.is_valid():
-            skill = form.cleaned_data['item']
-            skill = get_object_or_404(EdgeLevel, pk=skill)
+            edge = form.cleaned_data['item']
+            edge = get_object_or_404(EdgeLevel, pk=edge)
             cs = CharacterEdge()
             cs.character = sheet.character
-            cs.edge = skill
+            cs.edge = edge
             cs.full_clean()
             cs.save()
             return (True, forms)
@@ -117,7 +114,7 @@ class RemoveWrap(object):
         self.item = item
 
     def remove_form(self):
-        return RemoveGeneric(item=self.item, form_id="remove", 
+        return RemoveGeneric(item=self.item,
                              item_type=self.item.__class__.__name__)
 
     def __getattr__(self, v):
@@ -134,23 +131,13 @@ class SheetView(object):
     def weapons(self):
         if not self.sheet.weapons.exists():
             return []
-
-        return [{ 'item' : wpn,
-                  'remove_form' : RemoveGeneric(item=wpn, 
-                                                form_id="remove",
-                                                item_type="weapon") } 
-                for wpn in self.sheet.weapons.all()]
+        return [RemoveWrap(xx) for xx in self.sheet.weapons.all()]
 
     def spell_effects(self):
         if not self.sheet.spell_effects.exists():
             return []
 
-        return [{ 'item' : item,
-                  'remove_form' : RemoveGeneric(
-                    item=item, 
-                    form_id="remove",
-                    item_type="spell_effect") } 
-                for item in self.sheet.spell_effects.all()]
+        return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
 
     def skills(self):
         if not self.sheet.skills.exists():
@@ -172,14 +159,10 @@ class SheetView(object):
 def sheet_detail(request, sheet_id):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
-    add_weapon_form = AddWeapon(sheet=sheet, 
-                                form_id="add_weapon")
-    add_spell_form = AddSpellEffect(sheet=sheet, 
-                                    form_id="add_spell_effect")
-    add_skill_form = AddSkill(sheet=sheet, 
-                              form_id="add_skill")
-    add_edge_form = AddEdge(sheet=sheet, 
-                            form_id="add_edge")
+    add_weapon_form = AddWeapon(sheet=sheet)
+    add_spell_form = AddSpellEffect(sheet=sheet)
+    add_skill_form = AddSkill(sheet=sheet)
+    add_edge_form = AddEdge(sheet=sheet)
 
     forms = {}
     if request.method == "POST":

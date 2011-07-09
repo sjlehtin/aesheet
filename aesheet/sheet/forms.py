@@ -5,12 +5,10 @@ from sheet.models import EdgeLevel
 
 class SheetForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        form_id = None
         if kwargs.has_key('form_id'):
             form_id = kwargs.pop('form_id')
         super(SheetForm, self).__init__(*args, **kwargs)
-        if form_id:
-            self.fields['form_id'].initial = form_id
+        self.fields['form_id'].initial = self.__class__.__name__
 
     form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
 
