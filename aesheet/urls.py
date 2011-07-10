@@ -4,6 +4,11 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
+from dajaxice.core import dajaxice_autodiscover
+dajaxice_autodiscover()
+
+from django.conf import settings
+
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'aesheet.views.home', name='home'),
@@ -21,4 +26,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+    
+    url(r'^%s/' % settings.DAJAXICE_MEDIA_PREFIX, include('dajaxice.urls')),
 )

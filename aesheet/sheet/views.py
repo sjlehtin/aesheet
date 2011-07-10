@@ -3,8 +3,7 @@
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from sheet.models import Character, CharacterSkill, Sheet, Skill, SpellEffect
-from sheet.models import Weapon, CharacterEdge
+from sheet.models import *
 from sheet.forms import *
 from django.core.exceptions import ValidationError
 
@@ -68,6 +67,26 @@ def process_sheet_change_request(request, sheet):
             weapon = form.cleaned_data['item']
             weapon = get_object_or_404(Weapon, pk=weapon)
             sheet.weapons.add(weapon)
+            sheet.full_clean()
+            sheet.save()
+            return (True, forms)
+
+    elif form_id == "AddArmor":
+        form = AddArmor(request.POST, sheet=sheet, form_id=form_id)
+        if form.is_valid():
+            armor = form.cleaned_data['item']
+            armor = get_object_or_404(Armor, pk=armor)
+            sheet.armor.add(armor)
+            sheet.full_clean()
+            sheet.save()
+            return (True, forms)
+
+    elif form_id == "AddHelm":
+        form = AddHelm(request.POST, sheet=sheet, form_id=form_id)
+        if form.is_valid():
+            helm = form.cleaned_data['item']
+            helm = get_object_or_404(Armor, pk=helm)
+            sheet.helm.add(helm)
             sheet.full_clean()
             sheet.save()
             return (True, forms)
@@ -149,12 +168,23 @@ class SheetView(object):
             return []
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
+    def armor(self):
+        if not self.sheet.armor.exists():
+            return []
+        return [RemoveWrap(xx) for xx in self.sheet.armor.all()]
+
+    def helm(self):
+        if not self.helm:
+            return []
+        return [RemoveWrap(xx) for xx in self.sheet.helm.all()]
+
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
         # base character.
         if v.startswith("_"):
             raise AttributeError()
         return getattr(self.sheet, v)
+
 
 def sheet_detail(request, sheet_id):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
@@ -163,6 +193,8 @@ def sheet_detail(request, sheet_id):
     add_spell_form = AddSpellEffect(sheet=sheet)
     add_skill_form = AddSkill(sheet=sheet)
     add_edge_form = AddEdge(sheet=sheet)
+    add_helm_form = AddHelm(sheet=sheet)
+    add_armor_form = AddArmor(sheet=sheet)
 
     forms = {}
     if request.method == "POST":
@@ -179,6 +211,8 @@ def sheet_detail(request, sheet_id):
           'add_spell_effect_form' : add_spell_form,
           'add_skill_form' : add_skill_form,
           'add_edge_form' : add_edge_form,
+          'add_helm_form' : add_helm_form,
+          'add_armor_form' : add_armor_form,
           })
     return render_to_response('sheet/sheet_detail.html', 
                               c,

@@ -1,7 +1,6 @@
 from django import forms
 from django.forms import widgets
-from sheet.models import CharacterSkill, Skill, Sheet, SpellEffect, Weapon
-from sheet.models import EdgeLevel
+from sheet.models import *
 
 class SheetForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -34,6 +33,15 @@ class AddForm(SheetForm):
 class AddWeapon(AddForm):
     def get_choices(self):
         return [(wpn.id, unicode(wpn)) for wpn in Weapon.objects.all()]
+
+class AddArmor(AddForm):
+    def get_choices(self):
+        return [(wpn.id, unicode(wpn)) for wpn in Armor.objects.all()]
+
+class AddHelm(AddForm):
+    def get_choices(self):
+        return [(armor.id, unicode(armor)) for armor in 
+                filter(lambda xx: xx.base.is_helm, Armor.objects.all())]
 
 class AddSpellEffect(AddForm):
     def get_choices(self):

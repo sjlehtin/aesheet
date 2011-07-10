@@ -290,7 +290,7 @@ class CharacterEdge(models.Model):
 
 class WeaponQuality(models.Model):
     name = models.CharField(max_length=256, unique=True)
-    short_name = models.CharField(max_length=5)
+    short_name = models.CharField(max_length=5, blank=True)
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ccv = models.IntegerField(default=0)
     damage = models.IntegerField(default=0)
@@ -313,6 +313,7 @@ class WeaponQuality(models.Model):
 
 class WeaponTemplate(models.Model):
     name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
     ccv = models.IntegerField(default=10)
     ccv_unskilled_modifier = models.IntegerField(default=-10)
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
@@ -337,11 +338,30 @@ class WeaponTemplate(models.Model):
     def __unicode__(self):
         return "%s" % (self.name)
 
+class Effect(StatModifier):
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    class Meta:
+        abstract = True
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+    
 class WeaponSpecialQuality(models.Model):
     description = models.TextField(blank=True)
     short_description = models.CharField(max_length=256)
 
     # Effects come with the foreign key in WeaponEffect() class to the
+    # name "effects".
+
+    def __unicode__(self):
+        return "%s" % (self.short_description)
+
+class ArmorSpecialQuality(models.Model):
+    description = models.TextField(blank=True)
+    short_description = models.CharField(max_length=256)
+
+    # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
 
     def __unicode__(self):
@@ -356,22 +376,132 @@ class Weapon(models.Model):
     description = models.TextField(blank=True)
     base = models.ForeignKey(WeaponTemplate)
     quality = models.ForeignKey(WeaponQuality)
-    special_qualities = models.ManyToManyField(WeaponSpecialQuality)
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
 
     def __unicode__(self):
-        return "%s: %s" % (self.name, self.base)
+        if self.name:
+            return self.name
+        quality = ""
+        if self.quality.name != "Normal":
+            quality = self.quality
+        return "%s %s" % (quality, self.base, )
 
-class Effect(StatModifier):
-    name = models.CharField(max_length=256, unique=True)
+class ArmorTemplate(models.Model):
+    name = models.CharField(max_length=256)
     description = models.TextField(blank=True)
-    class Meta:
-        abstract = True
+    armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+
+    is_helm = models.BooleanField(default=False)
+
+    mod_fit = models.IntegerField(default=0)
+    mod_ref = models.IntegerField(default=0)
+    mod_psy = models.IntegerField(default=0)
+
+    mod_vision = models.IntegerField(default=0)
+    mod_hear = models.IntegerField(default=0)
+    mod_smell = models.IntegerField(default=0)
+    mod_surprise = models.IntegerField(default=0)
+
+    mod_stealth = models.IntegerField(default=0)
+    mod_conceal = models.IntegerField(default=0)
+    mod_climb = models.IntegerField(default=0)
+    mod_tumble = models.IntegerField(default=0)
+
+    weight = models.DecimalField(max_digits=4, decimal_places=1, 
+                                 default=1.0)
+    # 0 no armor, 1 light, 2 medium, 3 heavy
+    encumbrance_class = models.IntegerField(default=0)
 
     def __unicode__(self):
         return "%s" % (self.name)
-    
+
+class ArmorQuality(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    short_name = models.CharField(max_length=5, blank=True)
+
+    dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1, 
+                                        default=1.0)
+
+    armor_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+
+    mod_fit_multiplier = models.DecimalField(max_digits=4, decimal_places=1, 
+                                             default=1.0)
+    mod_fit = models.IntegerField(default=0)
+    mod_ref = models.IntegerField(default=0)
+    mod_psy = models.IntegerField(default=0)
+    mod_sensory = models.IntegerField(default=0)
+    mod_stealth = models.IntegerField(default=0)
+    mod_conceal = models.IntegerField(default=0)
+    mod_climb = models.IntegerField(default=0)
+
+    mod_weight_multiplier = models.DecimalField(max_digits=4, decimal_places=1, 
+                                                default=1.0)
+    mod_encumbrance_class = models.IntegerField(default=0)
+
+    def __unicode__(self):
+        return self.name
+
+class Armor(models.Model):
+    # XXX name from template (appended with quality or something to that
+    # effect) will be used if this is not set (= is blank).  If this is
+    # set, the name given here should be unique.  Add a validator to
+    # verify this.
+    name = models.CharField(max_length=256, blank=True)
+    description = models.TextField(blank=True)
+    base = models.ForeignKey(ArmorTemplate)
+    quality = models.ForeignKey(ArmorQuality)
+    special_qualities = models.ManyToManyField(ArmorSpecialQuality, blank=True)
+
+    def __unicode__(self):
+        if self.name:
+            return self.name
+        return "%s %s" % (self.base.name, self.quality)
+
 class WeaponEffect(Effect):
     weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
+
+class ArmorEffect(Effect):
+    armor = models.ForeignKey(ArmorSpecialQuality, related_name="effects")
 
 class SpellEffect(Effect):
     pass
@@ -384,6 +514,9 @@ class Sheet(models.Model):
     weapons = models.ManyToManyField(Weapon, blank=True)
     
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
+
+    armor = models.ManyToManyField(Armor, blank=True)
+    helm = models.ManyToManyField(Armor, blank=True, related_name='helm_for')
 
     def eff_fit(self):
         return self.fit() + self.mod_fit()
@@ -479,4 +612,3 @@ class Sheet(models.Model):
 
     def __unicode__(self):
         return "sheet for %s: %s" % (self.character.name, self.description)
-

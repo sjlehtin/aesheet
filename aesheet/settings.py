@@ -89,7 +89,7 @@ SECRET_KEY = 'wDbImXEkn/v9oAnEjxquj/3u9DY'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -111,6 +111,8 @@ TEMPLATE_DIRS = (
     sys.path[0] + "/templates/"
 )
 
+DAJAXICE_MEDIA_PREFIX="dajaxice"
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -122,6 +124,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+    'dajaxice',
+    'dajax',
     'south',
     'sheet'
 )
