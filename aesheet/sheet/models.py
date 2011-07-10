@@ -2,6 +2,8 @@ from django.db import models
 
 from functools import wraps
 
+import math
+
 # Create your models here.
 from django.core.exceptions import ValidationError
 
@@ -46,7 +48,7 @@ class Character(models.Model):
                                          default=0)
     bought_stamina = models.IntegerField(validators=[validate_nonnegative], 
                                          default=0)
-    bougth_mana = models.IntegerField(validators=[validate_nonnegative], 
+    bought_mana = models.IntegerField(validators=[validate_nonnegative], 
                                       default=0)
     edges_bougth = models.IntegerField(validators=[validate_nonnegative], 
                                        default=0)
@@ -104,6 +106,9 @@ class Character(models.Model):
     base_mod_dex = models.IntegerField(default=0)
     base_mod_imm = models.IntegerField(default=0)    
 
+    free_edges = models.IntegerField(default=2)    
+    gained_edges = models.IntegerField(default=0)    
+
     def cur_mov(self):
         return (self.cur_ref + self.cur_fit)/2
 
@@ -146,6 +151,22 @@ class Character(models.Model):
 
     def imm(self):
         return self.cur_imm() + self.base_mod_imm
+
+    def xp_used_stats(self):
+        xp_used_stats = 0
+        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
+            xp_used_stats += (getattr(self, "cur_" + st) - 
+                              getattr(self, "start_" + st))
+        xp_used_stats += self.bought_stamina
+        xp_used_stats += self.bought_mana
+        xp_used_stats *= 5
+        return xp_used_stats
+
+    def xp_used_edges(self):
+        return 25 * sum([ee.edge.cost for ee in self.edges.all()])
+
+    def xp_used(self):
+        return self.xp_used_edges() + self.xp_used_ingame + self.xp_used_stats()
 
     def __unicode__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
@@ -191,6 +212,8 @@ class Skill(models.Model):
 
     def cost(self, level):
         if level == 0:
+            if not self.skill_cost_0:
+                return 0
             return self.skill_cost_0
 
         if level == 1:
@@ -329,6 +352,8 @@ class WeaponTemplate(models.Model):
     dp = models.IntegerField(default=10)
     notes = models.CharField(max_length=64, blank=True)
     short_name = models.CharField(max_length=64)
+    base_skill = models.ForeignKey(Skill, 
+                                   related_name="base_skill_for_weapons")
     skill = models.ForeignKey(Skill, 
                               related_name="primary_for_weapons")
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
@@ -377,6 +402,9 @@ class Weapon(models.Model):
     base = models.ForeignKey(WeaponTemplate)
     quality = models.ForeignKey(WeaponQuality)
     special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+
+    def roa(self):
+        return float(self.base.roa + self.quality.roa)
 
     def __unicode__(self):
         if self.name:
@@ -517,6 +545,28 @@ class Sheet(models.Model):
 
     armor = models.ManyToManyField(Armor, blank=True)
     helm = models.ManyToManyField(Armor, blank=True, related_name='helm_for')
+
+    (FULL, PRI, SEC) = (0, 1, 2)
+
+    def roa(self, weapon, use_type=FULL):
+        roa = weapon.roa()
+        cs = self.character.skills.get(skill=weapon.base.base_skill)
+        roa += cs.level * 0.10
+        if use_type == self.FULL:
+            sws = Skill.objects.get(name="Single-weapon style")
+            cs = self.character.skills.get(skill=sws)
+            roa += cs.level * 0.05
+        return roa
+
+    def initiatives(self, weapon, use_type=FULL):
+        bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
+        roa = self.roa(weapon, use_type=use_type)
+        bi = -5 / roa
+        max_attacks = min(int(math.floor(roa * 2)), 9)
+        inits = []
+        for ii in range(1, max_attacks + 1):
+            inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
+        return inits
 
     def eff_fit(self):
         return self.fit() + self.mod_fit()

@@ -155,11 +155,17 @@ eff
 </tr>
 </table>
 
+XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
+
 <h3>Weapons</h3>
 {% if char.weapons %}
-<ul>
+<table>
     {% for item in char.weapons %}
-        <li>{{ item.item }} 
+       <tr><td>{{ item.item }}</td><td>{{ item.full_roa }}</td>
+      {% for init in item.full_initiatives %}
+         <td>{{ init }}</td>
+      {% endfor %}
+       <td>
            <div class="edit_form">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
@@ -167,9 +173,10 @@ eff
               <input type="submit" value="Remove" />
               </form>
            </div>
-        </li>
+       </td>
+       </tr>
     {% endfor %}
-</ul>
+</table>
 {% else %}
 <p>No weapons.</p>
 {% endif %}

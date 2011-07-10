@@ -45,6 +45,12 @@ def process_sheet_change_request(request, sheet):
             if item_type == "Weapon":
                 item = get_object_or_404(Weapon, pk=item)
                 sheet.weapons.remove(item)
+            elif item_type == "Armor":
+                item = get_object_or_404(Armor, pk=item)
+                sheet.armor.remove(item)
+            elif item_type == "Helm":
+                item = get_object_or_404(Armor, pk=item)
+                sheet.helm.remove(item)
             elif item_type == "SpellEffect":
                 item = get_object_or_404(SpellEffect, pk=item)
                 sheet.spell_effects.remove(item)
@@ -129,12 +135,37 @@ def process_sheet_change_request(request, sheet):
     return (False, forms)
 
 class RemoveWrap(object):
-    def __init__(self, item):
+    def __init__(self, item, type=None):
         self.item = item
-
+        self.type = type
     def remove_form(self):
+        if self.type:
+            type = self.type
+        else:
+            type = self.item.__class__.__name__
         return RemoveGeneric(item=self.item,
-                             item_type=self.item.__class__.__name__)
+                             item_type=type)
+
+    def __getattr__(self, v):
+        # pass through all attribute references not handled by us to
+        # base character.
+        if v.startswith("_"):
+            raise AttributeError()
+        return getattr(self.item, v)
+
+class WeaponWrap(object):
+    def __init__(self, item, sheet):
+        self.item = item
+        self.sheet = sheet
+
+    def full_roa(self):
+        return self.sheet.roa(self.item)
+
+    def full_initiatives(self):
+        return self.sheet.initiatives(self.item)
+
+    def __unicode__(self):
+        return unicode(self.item)
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -150,7 +181,8 @@ class SheetView(object):
     def weapons(self):
         if not self.sheet.weapons.exists():
             return []
-        return [RemoveWrap(xx) for xx in self.sheet.weapons.all()]
+        return [RemoveWrap(WeaponWrap(xx, self.sheet)) 
+                for xx in self.sheet.weapons.all()]
 
     def spell_effects(self):
         if not self.sheet.spell_effects.exists():
@@ -176,7 +208,7 @@ class SheetView(object):
     def helm(self):
         if not self.helm:
             return []
-        return [RemoveWrap(xx) for xx in self.sheet.helm.all()]
+        return [RemoveWrap(xx, type="Helm") for xx in self.sheet.helm.all()]
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to

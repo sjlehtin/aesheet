@@ -6,7 +6,7 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
     list_display = ('name', 'ccv', 'draw_initiative', 'roa', 'num_dice', 
                     'dice', 'extra_damage', 'leth', 'plus_leth', 
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
-                    'notes', 'is_lance', 'skill', 'skill2')
+                    'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
 admin.site.register(Armor)
 admin.site.register(ArmorQuality)
 admin.site.register(ArmorTemplate)
