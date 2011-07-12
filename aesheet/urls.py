@@ -17,9 +17,12 @@ urlpatterns = patterns('',
     # List of all created characters.
     url(r'^characters/$', 'sheet.views.characters_index'),
     url(r'^characters/(?P<char_id>\d+)/$', 'sheet.views.character_detail'),
+    url(r'^characters/add_char/$', 'sheet.views.add_character'),
+
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheet.views.sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet.views.sheet_detail'),
+
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

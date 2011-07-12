@@ -1,0 +1,14 @@
+{% extends "sheet/base_generic.html" %}
+
+{% block title %} Add character {% endblock %}
+
+{% block content %}
+
+<form action="/characters/add_char/" method="post" 
+      id="add_char_form">
+{% csrf_token %}
+{{ add_char_form.as_p }}
+<input type="submit" value="Add" />
+</form>
+
+{% endblock %}

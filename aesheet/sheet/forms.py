@@ -2,6 +2,11 @@ from django import forms
 from django.forms import widgets
 from sheet.models import *
 
+class AddCharacter(forms.ModelForm):
+
+    class Meta:
+        model = Character
+
 class SheetForm(forms.Form):
     def __init__(self, *args, **kwargs):
         if kwargs.has_key('form_id'):

@@ -287,3 +287,22 @@ def sheet_detail(request, sheet_id):
     return render_to_response('sheet/sheet_detail.html', 
                               c,
                               context_instance=RequestContext(request))
+
+def add_character(request):
+    form = AddCharacter()
+
+    forms = {}
+    if request.method == "POST":
+        form = AddCharacter(request.POST)
+
+        form.full_clean()
+        form.save()
+        return HttpResponseRedirect('/characters/')
+
+    c = {}
+    c.update(forms)
+    c.update({ 'add_char_form' : form,
+               })
+    return render_to_response('sheet/add_char.html', 
+                              c,
+                              context_instance=RequestContext(request))
