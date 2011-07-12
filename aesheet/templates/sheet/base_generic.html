@@ -1,9 +1,9 @@
-{% load dajaxice_templatetags %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    {% load dajaxice_templatetags %}
+
     {% dajaxice_js_import %}
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <title>{% block title %}AE Sheet{% endblock %}</title>

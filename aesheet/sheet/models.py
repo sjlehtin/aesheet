@@ -316,10 +316,12 @@ class WeaponQuality(models.Model):
     short_name = models.CharField(max_length=5, blank=True)
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ccv = models.IntegerField(default=0)
+
     damage = models.IntegerField(default=0)
     leth = models.IntegerField(default=0)
     plus_leth = models.IntegerField(default=0)
     defense_leth = models.IntegerField(default=0)
+
     durability = models.IntegerField(default=0)
     dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
                                         default=1)
@@ -334,31 +336,66 @@ class WeaponQuality(models.Model):
     def __unicode__(self):
         return self.name
 
+class WeaponDamage(object):
+    def __init__(self, num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
+        self.num_dice = num_dice
+        self.dice = dice
+        self.extra_damage = extra_damage
+        self.leth = leth
+        self.plus_leth = plus_leth
+
+    def add_damage(self, dmg):
+        self.extra_damage += dmg
+
+    # XXX remove and add size modification on the fly?
+    def multiply_damage(self, mult):
+        self.num_dice *= mult
+        self.extra_damage *= mult
+
+    def add_leth(self, leth):
+        self.leth += leth
+
+    # XXX remove?
+    def max_damage(self):
+        return self.num_dice * self.dice + self.extra_damage
+
+    def __unicode__(self):
+        return "%sd%s%+d/%d" % (self.num_dice, self.dice, 
+                                self.extra_damage, self.leth)
+
 class WeaponTemplate(models.Model):
     name = models.CharField(max_length=256, unique=True)
+    short_name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
+    notes = models.CharField(max_length=64, blank=True)
+
     ccv = models.IntegerField(default=10)
     ccv_unskilled_modifier = models.IntegerField(default=-10)
+
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
+
     roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+
     num_dice = models.IntegerField(default=1)
     dice = models.IntegerField(default=6)
     extra_damage = models.IntegerField(default=0)
     leth = models.IntegerField(default=5)
     plus_leth = models.IntegerField(default=0)
     defense_leth = models.IntegerField(default=5)
+
     type = models.CharField(max_length=5, default="S")
+
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
-    notes = models.CharField(max_length=64, blank=True)
-    short_name = models.CharField(max_length=64)
+
     base_skill = models.ForeignKey(Skill, 
                                    related_name="base_skill_for_weapons")
-    skill = models.ForeignKey(Skill, 
+    skill = models.ForeignKey(Skill, blank=True, null=True,
                               related_name="primary_for_weapons")
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
                                related_name="secondary_for_weapons")
     is_lance = models.BooleanField(default=False)
+    is_shield = models.BooleanField(default=False)
 
     def __unicode__(self):
         return "%s" % (self.name)
@@ -404,7 +441,16 @@ class Weapon(models.Model):
     special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
 
     def roa(self):
+        # XXX modifiers for size of weapon.
         return float(self.base.roa + self.quality.roa)
+
+    def damage(self):
+        # XXX modifiers for size of weapon.
+        return WeaponDamage(
+            self.base.num_dice, self.base.dice, 
+            extra_damage=self.base.extra_damage + self.quality.damage,
+            leth=self.base.leth + self.quality.leth,
+            plus_leth=self.base.plus_leth + self.quality.plus_leth)
 
     def __unicode__(self):
         if self.name:
@@ -546,27 +592,108 @@ class Sheet(models.Model):
     armor = models.ManyToManyField(Armor, blank=True)
     helm = models.ManyToManyField(Armor, blank=True, related_name='helm_for')
 
-    (FULL, PRI, SEC) = (0, 1, 2)
+    (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
+
+    fit_modifiers_for_damage = {
+        SPECIAL : 5,
+        FULL : 7.5,
+        PRI : 10,
+        SEC : 15
+        }
+
+    fit_modifiers_for_lethality = {
+        SPECIAL : 15,
+        FULL : 22.5,
+        PRI : 30,
+        SEC : 45
+        }
+    
 
     def roa(self, weapon, use_type=FULL):
         roa = weapon.roa()
         cs = self.character.skills.get(skill=weapon.base.base_skill)
-        roa += cs.level * 0.10
-        if use_type == self.FULL:
-            sws = Skill.objects.get(name="Single-weapon style")
-            cs = self.character.skills.get(skill=sws)
-            roa += cs.level * 0.05
+        if use_type == self.PRI:
+            roa -= 0.25
+        elif use_type == self.SEC:
+            roa -= 0.5
+
+        try:
+            if use_type in [self.FULL, self.SPECIAL]:
+                spec = Skill.objects.get(name="Single-weapon style")
+                spec = self.character.skills.get(skill=spec)
+                roa += spec.level * 0.05
+            else:
+                spec = Skill.objects.get(name="Two-weapon style")
+                spec = self.character.skills.get(skill=spec)
+                roa += spec.level * 0.05
+        except CharacterSkill.DoesNotExist as e:
+            pass
+
+        roa *= (1 + cs.level * 0.10)
+        
+        # XXX maximum is 5.0 with ranged.
+        roa = min(roa, 2.5)
+
         return roa
+
+    actions = [xx/2.0 for xx in range(1, 10, 1)]
+
+    def max_attacks(self, roa):
+        return min(int(math.floor(roa * 2)), 9)
+
+    def max_defenses(self, roa):
+        return min(int(math.floor(roa * 4)), 9)
 
     def initiatives(self, weapon, use_type=FULL):
         bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
         roa = self.roa(weapon, use_type=use_type)
         bi = -5 / roa
-        max_attacks = min(int(math.floor(roa * 2)), 9)
         inits = []
-        for ii in range(1, max_attacks + 1):
+        for ii in range(1, self.max_attacks(roa) + 1):
             inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
         return inits
+
+    def defense_initiatives(self, weapon, use_type=FULL):
+        bi_multipliers = [0, 3, 6, 0, 5, 6, 0, 3, 6]
+        roa = self.roa(weapon, use_type=use_type)
+        bi = -5 / roa
+        inits = []
+        for ii in range(1, self.max_defenses(roa) + 1):
+            inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
+        return inits
+    
+    def weapon_skill_checks(self, weapon, use_type=FULL):
+        roa = self.roa(weapon, use_type=use_type)
+        roa = float(roa)
+        def check_mod_from_action_index(act):
+            act = float(act)
+            if 1/act >= 1/roa + 1:
+                return 5        # XXX 10 with ranged.
+            if act > roa:
+                return - act/roa * 20 + 10
+            if act < 0.5 * roa:
+                return roa / act
+            return 0
+        # XXX skill level/unskilled
+        # XXX CCV bonus (penalty for unskilled)
+        checks = [check_mod_from_action_index(act) 
+                           # cap number of actions.
+                           for act in filter(lambda act: act < roa * 2, 
+                                             self.actions)]
+        # XXX intuition counters cc-penalties, fitness counters ranged
+        # weapon penalties.
+        mov = self.eff_mov()
+        return [int(round(xx)) + mov for xx in checks]    
+
+    def damage(self, weapon, use_type=FULL):
+        dmg = weapon.damage()
+        
+        # XXX fit under 45.
+        dmg.add_damage(self.eff_fit() / self.fit_modifiers_for_damage[use_type])
+        return dmg
+
+    def defense_damage(self, weapon, use_type=FULL):
+        return weapon.damage()
 
     def eff_fit(self):
         return self.fit() + self.mod_fit()

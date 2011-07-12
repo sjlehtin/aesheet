@@ -1,0 +1,8 @@
+tr.close-combat.header { font-weight: bold; }
+td.defense { color: blue; }
+
+div.skills { position : absolute;
+	     font-size : 14px;
+	     right: 5px;
+	     top: 2em;
+	   }

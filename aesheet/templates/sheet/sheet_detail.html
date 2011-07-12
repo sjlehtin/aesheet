@@ -157,14 +157,35 @@ eff
 
 XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
 
-<h3>Weapons</h3>
+<h3>Close combat</h3>
 {% if char.weapons %}
 <table>
-    {% for item in char.weapons %}
-       <tr><td>{{ item.item }}</td><td>{{ item.full_roa }}</td>
-      {% for init in item.full_initiatives %}
-         <td>{{ init }}</td>
+      <tr class="close-combat header">
+      <td />
+      <td>ROA</td>
+      {% for act in char.actions %}
+         <td>{{ act }}</td>
       {% endfor %}
+      <td colspan="5">Attack</td>
+      <td colspan="10">Defenses</td>
+       </tr>
+
+    {% for item in char.weapons %}
+      <tr>
+      <td class="weapon name" rowspan="3">{{ item.item }}</td>
+        <td>{{ item.full.roa }}</td>
+        {% for act in item.full.skill_checks %}
+           <td>{{ act }}</td>
+        {% endfor %}
+        {% for init in item.full.initiatives %}
+           <td>{{ init }}</td>
+        {% endfor %}
+        <td>{{ item.full.damage }}</td>
+        {% for init in item.full.defense_initiatives %}
+           <td class="defense initiative">{{ init }}</td>
+        {% endfor %}
+        <td class="defense damage">{{ item.full.defense_damage }}</td>
+        <td>{{ item.durability }}</td>
        <td>
            <div class="edit_form">
               <form action="/sheets/{{char.id}}/" method="post">
@@ -173,8 +194,36 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
               <input type="submit" value="Remove" />
               </form>
            </div>
-       </td>
+       </td> 
        </tr>
+        <tr>
+        <td>{{ item.pri.roa }}</td>
+        {% for act in item.pri.skill_checks %}
+           <td>{{ act }}</td>
+        {% endfor %}
+        {% for init in item.pri.initiatives %}
+           <td>{{ init }}</td>
+        {% endfor %}
+        <td>{{ item.pri.damage }}</td>
+        {% for init in item.pri.defense_initiatives %}
+           <td class="defense initiative">{{ init }}</td>
+        {% endfor %}
+        <td class="defense damage">{{ item.pri.defense_damage }}</td>
+        </tr>
+        <tr>
+        <td>{{ item.sec.roa }}</td>
+        {% for act in item.sec.skill_checks %}
+           <td>{{ act }}</td>
+        {% endfor %}
+        {% for init in item.sec.initiatives %}
+           <td class="attack initiative">{{ init }}</td>
+        {% endfor %}
+        <td>{{ item.sec.damage }}</td>
+        {% for init in item.sec.defense_initiatives %}
+           <td class="defense initiative">{{ init }}</td>
+        {% endfor %}
+        <td class="defense damage">{{ item.sec.defense_damage }}</td>
+        </tr>
     {% endfor %}
 </table>
 {% else %}
@@ -222,6 +271,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 </form>
 </div>
 
+<div class="skills">
 <h3>Skills</h3>
 {% if char.skills %}
 <table>
@@ -253,6 +303,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 </table>
 <input type="submit" value="Add" />
 </form>
+</div>
 </div>
 
 <h3>Edges</h3>

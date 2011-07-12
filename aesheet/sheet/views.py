@@ -138,6 +138,7 @@ class RemoveWrap(object):
     def __init__(self, item, type=None):
         self.item = item
         self.type = type
+
     def remove_form(self):
         if self.type:
             type = self.type
@@ -153,16 +154,53 @@ class RemoveWrap(object):
             raise AttributeError()
         return getattr(self.item, v)
 
+    def __unicode__(self):
+        return unicode(self.item)
+
 class WeaponWrap(object):
+    class Stats:
+        rendered_attack_inits = 4
+        rendered_defense_inits = 9
+        def __init__(self, item, sheet, use_type):
+            self.use_type = use_type
+            self.sheet = sheet
+            self.item = item
+
+        def roa(self):
+            return self.sheet.roa(self.item, use_type=self.use_type)
+
+        def skill_checks(self):
+            checks = self.sheet.weapon_skill_checks(self.item, 
+                                                    use_type=self.use_type)
+            if len(checks) < len(self.sheet.actions):
+                checks.extend([''] * (len(self.sheet.actions) - len(checks)))
+            return checks
+
+        def initiatives(self):
+            inits = self.sheet.initiatives(self.item, use_type=self.use_type)
+            if len(inits) < self.rendered_attack_inits:
+                inits.extend([''] * (self.rendered_attack_inits - len(inits)))
+            return inits
+
+        def defense_initiatives(self):
+            inits = self.sheet.defense_initiatives(self.item, 
+                                                   use_type=self.use_type)
+            if len(inits) < self.rendered_defense_inits:
+                inits.extend([''] * (self.rendered_defense_inits - len(inits)))
+            return inits
+
+        def damage(self):
+            return self.sheet.damage(self.item, use_type=self.use_type)
+
+        def defense_damage(self):
+            return self.sheet.defense_damage(self.item, use_type=self.use_type)
+
     def __init__(self, item, sheet):
         self.item = item
         self.sheet = sheet
-
-    def full_roa(self):
-        return self.sheet.roa(self.item)
-
-    def full_initiatives(self):
-        return self.sheet.initiatives(self.item)
+        self.full = self.Stats(self.item, self.sheet, use_type=sheet.FULL)
+        self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
+        self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
 
     def __unicode__(self):
         return unicode(self.item)
@@ -181,7 +219,7 @@ class SheetView(object):
     def weapons(self):
         if not self.sheet.weapons.exists():
             return []
-        return [RemoveWrap(WeaponWrap(xx, self.sheet)) 
+        return [WeaponWrap(RemoveWrap(xx), self.sheet)
                 for xx in self.sheet.weapons.all()]
 
     def spell_effects(self):
