@@ -654,7 +654,7 @@ class Sheet(models.Model):
         return inits
 
     def defense_initiatives(self, weapon, use_type=FULL):
-        bi_multipliers = [0, 3, 6, 0, 5, 6, 0, 3, 6]
+        bi_multipliers = [0, 3, 6, 0, 3, 6, 0, 3, 6]
         roa = self.roa(weapon, use_type=use_type)
         bi = -5 / roa
         inits = []
