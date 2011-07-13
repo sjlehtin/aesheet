@@ -2,8 +2,14 @@ body { font-size: 12px; }
 tr.close-combat.header { font-weight: bold; }
 td.defense { color: blue; }
 
-div.skills { position : absolute;
-	     font-size : 10px;
+div.skills { position: absolute;
+	     font-size: 10px;
 	     right: 5px;
 	     top: 2em;
 	   }
+td.stats.name { font-weight: bold; }
+td.stats.base { text-align: right; 
+		padding-left: 5px }
+td.stats.eff { font-weight: bold; 
+	       text-align: right;
+	       padding-left: 5px }

@@ -1,5 +1,17 @@
 # Create your views here.
 
+TODO = """
+* stat modifications
+* ranged weapons
+* effects
+* logging in
+* access controls
+* rest of the skills
+* rest of the edges
+* magic item location (only one to each location)
+
+"""
+
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
@@ -225,6 +237,17 @@ class WeaponWrap(object):
 class SheetView(object):
     def __init__(self, sheet):
         self.sheet = sheet
+
+    def stats(self):
+        ll = []
+        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos",
+                   "mov", "dex", "imm"]:
+            ll.append({'name' : st,
+                       'base' : getattr(self.sheet, st),
+                       'eff' : getattr(self.sheet, "eff_" + st),
+                       })
+        return ll
+
 
     def weapons(self):
         if not self.sheet.weapons.exists():
