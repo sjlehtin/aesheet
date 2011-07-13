@@ -1,6 +1,7 @@
 # Django settings for aesheet project.
 
 import os
+import loginreqd
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -13,12 +14,20 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/var/aesheet/aesheet.sqlite3',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3', # Add
+                                                # 'postgresql_psycopg2',
+                                                # 'postgresql', 'mysql',
+                                                # 'sqlite3' or 'oracle'.
+        'NAME': '/var/aesheet/aesheet.sqlite3', # Or path to database
+                                                # file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for
+                                         # localhost. Not used with
+                                         # sqlite3.
+        'PORT': '',                      # Set to empty string for
+                                         # default. Not used with
+                                         # sqlite3.
     }
 }
 
@@ -96,6 +105,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'loginreqd.RequireLoginMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -108,10 +118,20 @@ ROOT_URLCONF = 'aesheet.urls'
 import sys
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Put strings here, like "/home/html/django_templates" or
+    # "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     sys.path[0] + "/templates/"
+)
+
+LOGIN_REQUIRED_URLS = (
+    r'/(.*)$',
+)
+
+LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+    r'/accounts/login/.*$',
+    r'/accounts/logout/.*$'
 )
 
 DAJAXICE_MEDIA_PREFIX="dajaxice"

@@ -26,13 +26,16 @@ urlpatterns = patterns('',
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheet.views.sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet.views.sheet_detail'),
-
-
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    url(r'^accounts/logout/$', 'views.logout'),
+
+    url(r'^accounts/profile/$', 'views.profile'),
 
     url(r'^%s/' % settings.DAJAXICE_MEDIA_PREFIX, include('dajaxice.urls')),
 )
