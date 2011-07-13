@@ -34,62 +34,62 @@ class Character(models.Model):
     unnatural_aging = models.IntegerField(default=0)
     height = models.IntegerField(default=175)
     weigth = models.IntegerField(default=75)
-    times_wounded  =  models.IntegerField(validators=[validate_nonnegative], 
+    times_wounded  =  models.IntegerField(validators=[validate_nonnegative],
                                           default=0)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
     deity = models.CharField(max_length=256, default="Kord")
-    adventures = models.IntegerField(validators=[validate_nonnegative], 
+    adventures = models.IntegerField(validators=[validate_nonnegative],
                                      default=0)
-    gained_sp = models.IntegerField(validators=[validate_nonnegative], 
+    gained_sp = models.IntegerField(validators=[validate_nonnegative],
                                      default=0)
 
-    xp_used_ingame = models.IntegerField(validators=[validate_nonnegative], 
+    xp_used_ingame = models.IntegerField(validators=[validate_nonnegative],
                                          default=0)
-    bought_stamina = models.IntegerField(validators=[validate_nonnegative], 
+    bought_stamina = models.IntegerField(validators=[validate_nonnegative],
                                          default=0)
-    bought_mana = models.IntegerField(validators=[validate_nonnegative], 
+    bought_mana = models.IntegerField(validators=[validate_nonnegative],
                                       default=0)
-    edges_bougth = models.IntegerField(validators=[validate_nonnegative], 
+    edges_bougth = models.IntegerField(validators=[validate_nonnegative],
                                        default=0)
-    total_xp = models.IntegerField(validators=[validate_nonnegative], 
+    total_xp = models.IntegerField(validators=[validate_nonnegative],
                                    default=0)
 
     # The abilities the character was rolled with.
-    start_fit = models.IntegerField(validators=[validate_nonnegative], 
+    start_fit = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_ref = models.IntegerField(validators=[validate_nonnegative], 
+    start_ref = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_lrn = models.IntegerField(validators=[validate_nonnegative], 
+    start_lrn = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_int = models.IntegerField(validators=[validate_nonnegative], 
+    start_int = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_psy = models.IntegerField(validators=[validate_nonnegative], 
+    start_psy = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_wil = models.IntegerField(validators=[validate_nonnegative], 
+    start_wil = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_cha = models.IntegerField(validators=[validate_nonnegative], 
+    start_cha = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
-    start_pos = models.IntegerField(validators=[validate_nonnegative], 
+    start_pos = models.IntegerField(validators=[validate_nonnegative],
                                     default=43)
 
     # Current ability scores, i.e., start ability plus increases with
     # XP.
-    cur_fit = models.IntegerField(validators=[validate_nonnegative], 
+    cur_fit = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_ref = models.IntegerField(validators=[validate_nonnegative], 
+    cur_ref = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_lrn = models.IntegerField(validators=[validate_nonnegative], 
+    cur_lrn = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_int = models.IntegerField(validators=[validate_nonnegative], 
+    cur_int = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_psy = models.IntegerField(validators=[validate_nonnegative], 
+    cur_psy = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_wil = models.IntegerField(validators=[validate_nonnegative], 
+    cur_wil = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_cha = models.IntegerField(validators=[validate_nonnegative], 
+    cur_cha = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
-    cur_pos = models.IntegerField(validators=[validate_nonnegative], 
+    cur_pos = models.IntegerField(validators=[validate_nonnegative],
                                   default=43)
 
     # Permanent modifiers to ability scores.
@@ -104,10 +104,10 @@ class Character(models.Model):
 
     base_mod_mov = models.IntegerField(default=0)
     base_mod_dex = models.IntegerField(default=0)
-    base_mod_imm = models.IntegerField(default=0)    
+    base_mod_imm = models.IntegerField(default=0)
 
-    free_edges = models.IntegerField(default=2)    
-    gained_edges = models.IntegerField(default=0)    
+    free_edges = models.IntegerField(default=2)
+    gained_edges = models.IntegerField(default=0)
 
     def cur_mov(self):
         return (self.cur_ref + self.cur_fit)/2
@@ -155,7 +155,7 @@ class Character(models.Model):
     def xp_used_stats(self):
         xp_used_stats = 0
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
-            xp_used_stats += (getattr(self, "cur_" + st) - 
+            xp_used_stats += (getattr(self, "cur_" + st) -
                               getattr(self, "start_" + st))
         xp_used_stats += self.bought_stamina
         xp_used_stats += self.bought_mana
@@ -178,7 +178,7 @@ class Edge(models.Model):
 
     def __unicode__(self):
         return "%s" % (self.name)
-    
+
 SKILL_TYPES = [
     "Physical",
     "Combat",
@@ -199,7 +199,7 @@ class Skill(models.Model):
     can_be_defaulted = models.BooleanField(default=True)
     is_specialization = models.BooleanField(default=False)
 
-    required_skills = models.ManyToManyField('self', symmetrical=False, 
+    required_skills = models.ManyToManyField('self', symmetrical=False,
                                              blank=True, null=True)
     required_edges = models.ManyToManyField(Edge, blank=True, null=True)
 
@@ -238,11 +238,11 @@ class CharacterSkill(models.Model):
     level = models.IntegerField(default=0)
 
     def clean(self):
-        # A skill with a with a key (character, skill) should be unique.
-        if CharacterSkill.objects.filter(skill=self.skill, 
+        # A skill with a key (character, skill) should be unique.
+        if CharacterSkill.objects.filter(skill=self.skill,
                                          character=self.character):
-            raise ValidationError("Character `%s' already has skill `%s'." %
-                                  (self.character, self.skill))
+            raise ValidationError("Skill `%s' already obtained." %
+                                  (self.skill))
         # Verify that skill level is supported by the skill.
         try:
             cost = self.skill.cost(self.level)
@@ -323,9 +323,9 @@ class WeaponQuality(models.Model):
     defense_leth = models.IntegerField(default=0)
 
     durability = models.IntegerField(default=0)
-    dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
+    dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4,
                                         default=1)
-    weight_multiplier = models.DecimalField(max_digits=6, decimal_places=4, 
+    weight_multiplier = models.DecimalField(max_digits=6, decimal_places=4,
                                             default=1)
     versus_missile_modifier = models.IntegerField(default=0)
     versus_area_save_modifier = models.IntegerField(default=0)
@@ -360,7 +360,7 @@ class WeaponDamage(object):
         return self.num_dice * self.dice + self.extra_damage
 
     def __unicode__(self):
-        return "%sd%s%+d/%d" % (self.num_dice, self.dice, 
+        return "%sd%s%+d/%d" % (self.num_dice, self.dice,
                                 self.extra_damage, self.leth)
 
 class WeaponTemplate(models.Model):
@@ -388,7 +388,7 @@ class WeaponTemplate(models.Model):
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
 
-    base_skill = models.ForeignKey(Skill, 
+    base_skill = models.ForeignKey(Skill,
                                    related_name="base_skill_for_weapons")
     skill = models.ForeignKey(Skill, blank=True, null=True,
                               related_name="primary_for_weapons")
@@ -408,7 +408,7 @@ class Effect(StatModifier):
 
     def __unicode__(self):
         return "%s" % (self.name)
-    
+
 class WeaponSpecialQuality(models.Model):
     description = models.TextField(blank=True)
     short_description = models.CharField(max_length=256)
@@ -447,7 +447,7 @@ class Weapon(models.Model):
     def damage(self):
         # XXX modifiers for size of weapon.
         return WeaponDamage(
-            self.base.num_dice, self.base.dice, 
+            self.base.num_dice, self.base.dice,
             extra_damage=self.base.extra_damage + self.quality.damage,
             leth=self.base.leth + self.quality.leth,
             plus_leth=self.base.plus_leth + self.quality.plus_leth)
@@ -516,7 +516,7 @@ class ArmorTemplate(models.Model):
     mod_climb = models.IntegerField(default=0)
     mod_tumble = models.IntegerField(default=0)
 
-    weight = models.DecimalField(max_digits=4, decimal_places=1, 
+    weight = models.DecimalField(max_digits=4, decimal_places=1,
                                  default=1.0)
     # 0 no armor, 1 light, 2 medium, 3 heavy
     encumbrance_class = models.IntegerField(default=0)
@@ -528,7 +528,7 @@ class ArmorQuality(models.Model):
     name = models.CharField(max_length=256, unique=True)
     short_name = models.CharField(max_length=5, blank=True)
 
-    dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1, 
+    dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                         default=1.0)
 
     armor_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
@@ -538,7 +538,7 @@ class ArmorQuality(models.Model):
     armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
-    mod_fit_multiplier = models.DecimalField(max_digits=4, decimal_places=1, 
+    mod_fit_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                              default=1.0)
     mod_fit = models.IntegerField(default=0)
     mod_ref = models.IntegerField(default=0)
@@ -548,7 +548,7 @@ class ArmorQuality(models.Model):
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
 
-    mod_weight_multiplier = models.DecimalField(max_digits=4, decimal_places=1, 
+    mod_weight_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                                 default=1.0)
     mod_encumbrance_class = models.IntegerField(default=0)
 
@@ -584,9 +584,9 @@ class Sheet(models.Model):
     character = models.ForeignKey(Character)
     description = models.TextField()
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
-    
+
     weapons = models.ManyToManyField(Weapon, blank=True)
-    
+
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
     armor = models.ManyToManyField(Armor, blank=True)
@@ -607,7 +607,7 @@ class Sheet(models.Model):
         PRI : 30,
         SEC : 45
         }
-    
+
 
     def roa(self, weapon, use_type=FULL):
         roa = weapon.roa()
@@ -630,7 +630,7 @@ class Sheet(models.Model):
             pass
 
         roa *= (1 + cs.level * 0.10)
-        
+
         # XXX maximum is 5.0 with ranged.
         roa = min(roa, 2.5)
 
@@ -661,7 +661,7 @@ class Sheet(models.Model):
         for ii in range(1, self.max_defenses(roa) + 1):
             inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
         return inits
-    
+
     def weapon_skill_checks(self, weapon, use_type=FULL):
         roa = self.roa(weapon, use_type=use_type)
         roa = float(roa)
@@ -676,18 +676,18 @@ class Sheet(models.Model):
             return 0
         # XXX skill level/unskilled
         # XXX CCV bonus (penalty for unskilled)
-        checks = [check_mod_from_action_index(act) 
+        checks = [check_mod_from_action_index(act)
                            # cap number of actions.
-                           for act in filter(lambda act: act < roa * 2, 
+                           for act in filter(lambda act: act < roa * 2,
                                              self.actions)]
         # XXX intuition counters cc-penalties, fitness counters ranged
         # weapon penalties.
         mov = self.eff_mov()
-        return [int(round(xx)) + mov for xx in checks]    
+        return [int(round(xx)) + mov for xx in checks]
 
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
-        
+
         # XXX fit under 45.
         dmg.add_damage(self.eff_fit() / self.fit_modifiers_for_damage[use_type])
         return dmg
