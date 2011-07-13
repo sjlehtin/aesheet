@@ -1,8 +1,7 @@
 # Create your views here.
 
 TODO = """
-* stat modifications
-* ranged weapons
++ ranged weapons
 * effects
 * logging in
 * access controls
@@ -346,21 +345,25 @@ def sheet_detail(request, sheet_id):
                               c,
                               context_instance=RequestContext(request))
 
-def add_character(request):
-    form = AddCharacter()
+def edit_character(request, char_id=None):
+
+    character = None
+    if char_id:
+        character = get_object_or_404(Character, pk=char_id)
+    form = EditCharacter(instance=character)
 
     forms = {}
     if request.method == "POST":
-        form = AddCharacter(request.POST)
-
-        form.full_clean()
-        form.save()
-        return HttpResponseRedirect('/characters/')
+        form = EditCharacter(request.POST, instance=character)
+        if form.is_valid():
+            form.full_clean()
+            form.save()
+            return HttpResponseRedirect('/characters/')
 
     c = {}
+    c.update({ 'char_form' : form,
+               'char' : character })
     c.update(forms)
-    c.update({ 'add_char_form' : form,
-               })
-    return render_to_response('sheet/add_char.html',
+    return render_to_response('sheet/edit_char.html',
                               c,
                               context_instance=RequestContext(request))

@@ -17,7 +17,11 @@ urlpatterns = patterns('',
     # List of all created characters.
     url(r'^characters/$', 'sheet.views.characters_index'),
     url(r'^characters/(?P<char_id>\d+)/$', 'sheet.views.character_detail'),
-    url(r'^characters/add_char/$', 'sheet.views.add_character'),
+    url(r'^characters/add_char/$', 'sheet.views.edit_character'),
+    url(r'^characters/edit_char/$',
+        'sheet.views.edit_character'),
+    url(r'^characters/edit_char/(?P<char_id>\d+)/$',
+        'sheet.views.edit_character'),
 
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheet.views.sheets_index'),
@@ -29,6 +33,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    
+
     url(r'^%s/' % settings.DAJAXICE_MEDIA_PREFIX, include('dajaxice.urls')),
 )

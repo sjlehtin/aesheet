@@ -107,7 +107,6 @@ class Character(models.Model):
     base_mod_imm = models.IntegerField(default=0)
 
     free_edges = models.IntegerField(default=2)
-    gained_edges = models.IntegerField(default=0)
 
     def cur_mov(self):
         return (self.cur_ref + self.cur_fit)/2

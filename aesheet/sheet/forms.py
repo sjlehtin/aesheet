@@ -2,7 +2,7 @@ from django import forms
 from django.forms import widgets
 from sheet.models import *
 
-class AddCharacter(forms.ModelForm):
+class EditCharacter(forms.ModelForm):
 
     class Meta:
         model = Character

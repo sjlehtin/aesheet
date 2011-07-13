@@ -1,0 +1,21 @@
+{% extends "sheet/base_generic.html" %}
+
+{% block title %} Add or edit character {% endblock %}
+
+{% block content %}
+
+<form action="/characters/edit_char/{% if char %}{{char.id}}/{% endif %}"
+      method="post" 
+      id="char_form">
+{% csrf_token %}
+{{ char_form.as_p }}
+<input type="submit"  
+       {% if char %}
+         value="Update" 
+       {% else %}
+         value="Add" 
+       {% endif %}
+       />
+</form>
+
+{% endblock %}

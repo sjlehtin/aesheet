@@ -1,9 +1,17 @@
+{% extends "sheet/base_generic.html" %}
+
+{% block title %} Character list {% endblock %}
+
+{% block content %}
+
 {% if all_characters %}
     <ul>
     {% for char in all_characters %}
-        <li><a href="/characters/{{ char.id }}/">{{ char }}</a></li>
+        <li><a href="/characters/edit_char/{{ char.id }}/">{{ char }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No characters.</p>
 {% endif %}
+
+{% endblock %}
