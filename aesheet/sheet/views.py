@@ -80,6 +80,23 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
         # removal forms are forgotten and not updated on failures.
 
+    elif form_id == "StatModify":
+        form = StatModify(request.POST)
+        if form.is_valid():
+            stat = form.cleaned_data['stat']
+            func = form.cleaned_data['function']
+            if func == "add":
+                amount = 1
+            else:
+                amount = -1
+            stat = "cur_" + stat
+            char = sheet.character
+            setattr(char, stat,
+                    getattr(char, stat) + amount)
+            char.full_clean()
+            char.save()
+            return (True, forms)
+
     elif form_id == "AddWeapon":
         form = AddWeapon(request.POST, sheet=sheet, form_id=form_id)
         if form.is_valid():
@@ -245,6 +262,10 @@ class SheetView(object):
             ll.append({'name' : st,
                        'base' : getattr(self.sheet, st),
                        'eff' : getattr(self.sheet, "eff_" + st),
+                       'add_form' : StatModify(initial={ 'stat' : st,
+                                                         'function' : "add" }),
+                       'dec_form' : StatModify(initial={ 'stat' : st,
+                                                         'function' : "dec" }),
                        })
         return ll
 

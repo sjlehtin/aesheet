@@ -45,7 +45,7 @@ class AddArmor(AddForm):
 
 class AddHelm(AddForm):
     def get_choices(self):
-        return [(armor.id, unicode(armor)) for armor in 
+        return [(armor.id, unicode(armor)) for armor in
                 filter(lambda xx: xx.base.is_helm, Armor.objects.all())]
 
 class AddSpellEffect(AddForm):
@@ -77,3 +77,7 @@ class RemoveGeneric(SheetForm):
 
     item_type = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     item = forms.IntegerField(widget=widgets.HiddenInput)
+
+class StatModify(SheetForm):
+    stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
+    function = forms.CharField(max_length=64, widget=widgets.HiddenInput)

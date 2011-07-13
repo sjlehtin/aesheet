@@ -29,6 +29,24 @@
   <tr><td class="stats name">{{ stat.name|upper }}</td>
       <td class="stats base">{{ stat.base }}</td>
       <td class="stats eff">{{ stat.eff }}</td>
+       <td class="edit_control">
+           <div class="edit_control">
+              <form action="/sheets/{{char.id}}/" method="post">
+                {% csrf_token %}
+                {{ stat.add_form }}
+              <input type="submit" value="Add" />
+              </form>
+           </div>
+       </td> 
+       <td class="edit_control">
+           <div class="edit_control">
+              <form action="/sheets/{{char.id}}/" method="post">
+                {% csrf_token %}
+                {{ stat.dec_form }}
+              <input type="submit" value="Dec" />
+              </form>
+           </div>
+       </td> 
   </tr>
 {% endfor %}
 </table>
@@ -68,7 +86,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
         {% endfor %}
         <td class="defense damage">{{ item.full.defense_damage }}</td>
         <td>{{ item.durability }}</td>
-       <td>
+       <td class="edit_control">
            <div class="edit_control">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
