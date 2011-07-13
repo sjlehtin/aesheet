@@ -8,7 +8,8 @@
 <button class="edit_control">Printable</button>
 
 <script>
-    $("button").click(function () {
+    $("button.edit_control").click(function () {
+      $(".auth_bar").hide("slow");
       $(".edit_control").hide("slow");
     });    
 </script>
