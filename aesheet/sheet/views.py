@@ -6,20 +6,21 @@ from django.template import RequestContext
 from sheet.models import *
 from sheet.forms import *
 from django.core.exceptions import ValidationError
+import django.forms.util
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
-    return render_to_response('sheet/characters_index.html', 
+    return render_to_response('sheet/characters_index.html',
                               { 'all_characters' : all_characters })
 
 def character_detail(request, char_id):
     character = get_object_or_404(Character, pk=char_id)
-    return render_to_response('sheet/sheet_detail.html', 
+    return render_to_response('sheet/sheet_detail.html',
                               { 'char' : character })
 
 def sheets_index(request):
     all_sheets = Sheet.objects.all()
-    return render_to_response('sheet/sheets_index.html', 
+    return render_to_response('sheet/sheets_index.html',
                               { 'all_sheets' : all_sheets })
 
 def process_sheet_change_request(request, sheet):
@@ -39,7 +40,7 @@ def process_sheet_change_request(request, sheet):
         if not item_type:
             raise ValidationError("No item_type")
         form = RemoveGeneric(request.POST)
-        if form.is_valid():            
+        if form.is_valid():
             item = form.cleaned_data['item']
             print "Removing %s" % item_type
             if item_type == "Weapon":
@@ -109,6 +110,7 @@ def process_sheet_change_request(request, sheet):
 
     elif form_id == "AddSkill":
         form = AddSkill(request.POST, sheet=sheet, form_id=form_id)
+        forms['add_skill_form'] = form
         if form.is_valid():
             skill = form.cleaned_data['item']
             skill = get_object_or_404(Skill, pk=skill)
@@ -116,7 +118,15 @@ def process_sheet_change_request(request, sheet):
             cs.character = sheet.character
             cs.skill = skill
             cs.level = form.cleaned_data['level']
-            cs.full_clean()
+            try:
+                cs.full_clean()
+            except ValidationError as e:
+                el = form._errors.setdefault('__all__',
+                                             django.forms.util.ErrorList())
+                el.append('\n'.join(['\n'.join(x)
+                                   for x in e.message_dict.values()]))
+
+                return (False, forms)
             cs.save()
             return (True, forms)
 
@@ -160,7 +170,7 @@ class RemoveWrap(object):
 class WeaponWrap(object):
     class Stats:
         rendered_attack_inits = 4
-        rendered_defense_inits = 9
+        rendered_defense_inits = 3
         def __init__(self, item, sheet, use_type):
             self.use_type = use_type
             self.sheet = sheet
@@ -170,7 +180,7 @@ class WeaponWrap(object):
             return self.sheet.roa(self.item, use_type=self.use_type)
 
         def skill_checks(self):
-            checks = self.sheet.weapon_skill_checks(self.item, 
+            checks = self.sheet.weapon_skill_checks(self.item,
                                                     use_type=self.use_type)
             if len(checks) < len(self.sheet.actions):
                 checks.extend([''] * (len(self.sheet.actions) - len(checks)))
@@ -180,14 +190,14 @@ class WeaponWrap(object):
             inits = self.sheet.initiatives(self.item, use_type=self.use_type)
             if len(inits) < self.rendered_attack_inits:
                 inits.extend([''] * (self.rendered_attack_inits - len(inits)))
-            return inits
+            return inits[0:self.rendered_attack_inits]
 
         def defense_initiatives(self):
-            inits = self.sheet.defense_initiatives(self.item, 
+            inits = self.sheet.defense_initiatives(self.item,
                                                    use_type=self.use_type)
             if len(inits) < self.rendered_defense_inits:
                 inits.extend([''] * (self.rendered_defense_inits - len(inits)))
-            return inits
+            return inits[0:self.rendered_defense_inits]
 
         def damage(self):
             return self.sheet.damage(self.item, use_type=self.use_type)
@@ -270,12 +280,11 @@ def sheet_detail(request, sheet_id):
     if request.method == "POST":
         (should_change, forms) = process_sheet_change_request(request, sheet)
         # XXX more complex forms need to be passed back to
-        # render_to_response, below.    
+        # render_to_response, below.
         if should_change:
             return HttpResponseRedirect('/sheets/%s/' % sheet.id)
 
     c = {}
-    c.update(forms)
     c.update({ 'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,
           'add_spell_effect_form' : add_spell_form,
@@ -284,7 +293,8 @@ def sheet_detail(request, sheet_id):
           'add_helm_form' : add_helm_form,
           'add_armor_form' : add_armor_form,
           })
-    return render_to_response('sheet/sheet_detail.html', 
+    c.update(forms)
+    return render_to_response('sheet/sheet_detail.html',
                               c,
                               context_instance=RequestContext(request))
 
@@ -303,6 +313,6 @@ def add_character(request):
     c.update(forms)
     c.update({ 'add_char_form' : form,
                })
-    return render_to_response('sheet/add_char.html', 
+    return render_to_response('sheet/add_char.html',
                               c,
                               context_instance=RequestContext(request))

@@ -5,11 +5,11 @@
 {% block content %}
 
 
-<button class="edit_form">Printable</button>
+<button class="edit_control">Printable</button>
 
 <script>
     $("button").click(function () {
-      $(".edit_form").hide("slow");
+      $(".edit_control").hide("slow");
     });    
 </script>
 
@@ -155,7 +155,10 @@ eff
 </tr>
 </table>
 
-XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
+<div class="xp">
+XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + 
+{{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
+</div>
 
 <h3>Close combat</h3>
 {% if char.weapons %}
@@ -167,7 +170,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
          <td>{{ act }}</td>
       {% endfor %}
       <td colspan="5">Attack</td>
-      <td colspan="10">Defenses</td>
+      <td colspan="4">Defenses</td>
        </tr>
 
     {% for item in char.weapons %}
@@ -187,7 +190,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
         <td class="defense damage">{{ item.full.defense_damage }}</td>
         <td>{{ item.durability }}</td>
        <td>
-           <div class="edit_form">
+           <div class="edit_control">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ item.remove_form }}
@@ -230,7 +233,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <p>No weapons.</p>
 {% endif %}
 
-<div id="add_weapon" class="edit_form">
+<div id="add_weapon" class="edit_control">
 <label for="add_weapon_form"><strong>Add a weapon</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_weapon_form">{% csrf_token %}
@@ -246,7 +249,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <ul>
     {% for item in char.spell_effects %}
         <li>{{ item.item }} 
-           <div class="edit_form">
+           <div class="edit_control">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ item.remove_form }}
@@ -260,7 +263,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <p>No spell effects.</p>
 {% endif %}
 
-<div id="add_spell_effect" class="edit_form">
+<div id="add_spell_effect" class="edit_control">
 <label for="add_spell_effect_form"><strong>Add a spell effect</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_spell_effect_form">{% csrf_token %}
@@ -279,7 +282,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
         <tr><td>{{ skill.skill }}</td><td>{{ skill.level }}</td>
             <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td>
             <td>
-              <div class="edit_form">
+              <div class="edit_control">
                  <form action="/sheets/{{char.id}}/" method="post">
                    {% csrf_token %}
                    {{ skill.remove_form }}
@@ -294,7 +297,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <p>No skills.</p>
 {% endif %}
 
-<div id="add_skill" class="edit_form">
+<div id="add_skill" class="edit_control">
 <label for="add_skill_form"><strong>Add a skill</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_skill_form">{% csrf_token %}
@@ -312,7 +315,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
     {% for edge in char.edges %}
         <tr><td>{{ edge.edge }}</td>
             <td>
-              <div class="edit_form">
+              <div class="edit_control">
                  <form action="/sheets/{{char.id}}/" method="post">
                    {% csrf_token %}
                    {{ edge.remove_form }}
@@ -327,7 +330,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <p>No edges.</p>
 {% endif %}
 
-<div id="add_edge" class="edit_form">
+<div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add an edge</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_edge_form">{% csrf_token %}
@@ -344,7 +347,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
     {% for helm in char.helm %}
         <tr><td>{{ helm.item }}</td>
             <td>
-              <div class="edit_form">
+              <div class="edit_control">
                  <form action="/sheets/{{char.id}}/" method="post">
                    {% csrf_token %}
                    {{ helm.remove_form }}
@@ -359,7 +362,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <p>No helmet.</p>
 {% endif %}
 
-<div id="add_edge" class="edit_form">
+<div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add a helmet</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_helmet_form">{% csrf_token %}
@@ -376,7 +379,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
     {% for armor in char.armor %}
         <tr><td>{{ armor.item }}</td>
             <td>
-              <div class="edit_form">
+              <div class="edit_control">
                  <form action="/sheets/{{char.id}}/" method="post">
                    {% csrf_token %}
                    {{ armor.remove_form }}
@@ -391,7 +394,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + {{ char.xp_used_ingame
 <p>No armor.</p>
 {% endif %}
 
-<div id="add_edge" class="edit_form">
+<div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add armor</strong></label>
 <form action="/sheets/{{char.id}}/" method="post" 
       id="add_armor_form">{% csrf_token %}
