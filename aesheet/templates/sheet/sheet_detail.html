@@ -23,6 +23,11 @@
 {{ char.description }}
 </p>
 
+<div class="edit_control">
+  <a href="/characters/edit_char/{{char.character.id}}/">
+    Edit basic character</a>
+</div>
+
 <div class="stats">
 <table class="stats">
 {% for stat in char.stats %}
