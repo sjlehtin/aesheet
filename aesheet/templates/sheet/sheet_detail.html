@@ -23,30 +23,35 @@
 {{ char.description }}
 </p>
 
-<div class="stats"
+<div class="stats">
 <table class="stats">
 {% for stat in char.stats %}
   <tr><td class="stats name">{{ stat.name|upper }}</td>
       <td class="stats base">{{ stat.base }}</td>
       <td class="stats eff">{{ stat.eff }}</td>
-       <td class="edit_control">
+      {% if stat.add_form %}
+      <td class="edit_control">
            <div class="edit_control">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ stat.add_form }}
-              <input type="submit" value="Add" />
+              <input type="submit" value="+" />
               </form>
            </div>
-       </td> 
-       <td class="edit_control">
+      </td> 
+      <td class="edit_control">
            <div class="edit_control">
               <form action="/sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ stat.dec_form }}
-              <input type="submit" value="Dec" />
+              <input type="submit" value="-" />
               </form>
            </div>
-       </td> 
+      </td> 
+      {% else %}
+      <td class="edit_control"/>
+      <td class="edit_control"/>
+      {% endif %}
   </tr>
 {% endfor %}
 </table>

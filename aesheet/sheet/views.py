@@ -259,14 +259,18 @@ class SheetView(object):
         ll = []
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos",
                    "mov", "dex", "imm"]:
-            ll.append({'name' : st,
-                       'base' : getattr(self.sheet, st),
-                       'eff' : getattr(self.sheet, "eff_" + st),
-                       'add_form' : StatModify(initial={ 'stat' : st,
-                                                         'function' : "add" }),
-                       'dec_form' : StatModify(initial={ 'stat' : st,
-                                                         'function' : "dec" }),
-                       })
+            stat = {'name' : st,
+                    'base' : getattr(self.sheet, st),
+                    'eff' : getattr(self.sheet, "eff_" + st),
+                    }
+            if st not in ["mov", "dex", "imm"]:
+                stat.update({
+                        'add_form' : StatModify(initial={ 'stat' : st,
+                                                          'function' : "add" }),
+                        'dec_form' : StatModify(initial={ 'stat' : st,
+                                                          'function' : "dec" }),
+                        })
+            ll.append(stat)
         return ll
 
 
