@@ -1,14 +1,29 @@
 # Create your views here.
 
 TODO = """
-* deployment to semeai.org
++ deployment to semeai.org
+** postgresql backups
+** saner bzr backups (branch all branches to make sure repositories remain
+   valid)
 * ranged weapons
+** ranged weapon ammo special handling
 + logging in
 ** access controls
+*** marking sheet as only visible to self
+*** marking characters as only visible to self
 ** password change
 * rest of the skills
 * rest of the edges
 * magic item location (only one to each location)
+* change log for sheet
+* editing sheet description
+* nicer fast edit of basic stats
+* stamina
+** recovery
+* mana
+** recovery
+* body
+** recovery
 
 """
 
