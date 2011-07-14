@@ -399,9 +399,22 @@ class WeaponTemplate(models.Model):
     def __unicode__(self):
         return "%s" % (self.name)
 
+EFFECT_TYPES = [
+    "enhancement",
+    "luck",
+    "circumstance",
+    ]
+EFFECT_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
+
 class Effect(StatModifier):
     name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
+    type = models.CharField(max_length=256,
+                            choices=EFFECT_TYPES,
+                            default="enhancement",
+                            help_text="Effect type.  With the expection of "
+                            "circumstance bonus, only highest effect of "
+                            "a single type will take effect.")
     class Meta:
         abstract = True
 
@@ -424,7 +437,6 @@ class ArmorSpecialQuality(models.Model):
 
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
-
     def __unicode__(self):
         return "%s" % (self.short_description)
 
