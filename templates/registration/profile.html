@@ -3,4 +3,27 @@
 
 {% block content %}
 
+<h2>Characters</h2>
+{% if user.characters.all %}
+<ul>
+  {% for sheet in user.characters.all %}
+  <li><a href="{{ ROOT_URL }}characters/{{ sheet.id }}/">{{ sheet }}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+    <p>No characters.</p>
+{% endif %}
+
+<h2>Sheets</h2>
+{% if user.sheets.all %}
+<ul>
+  {% for sheet in user.sheets.all %}
+  <li><a href="{{ ROOT_URL }}sheets/{{ sheet.id }}/">{{ sheet }}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+    <p>No sheets.</p>
+{% endif %}
+
+
 {% endblock %}

@@ -1,5 +1,7 @@
 from django.db import models
 
+import django.contrib.auth as auth
+
 from functools import wraps
 
 import math
@@ -25,6 +27,7 @@ SIZE_CHOICES = (
 
 class Character(models.Model):
     name = models.CharField(max_length=256)
+    owner = models.ForeignKey(auth.models.User, related_name="characters")
     occupation = models.CharField(max_length=256)
     # XXX race can be used to fill in basic edges and stats later for,
     # e.g., GM usage.
@@ -593,6 +596,7 @@ class SpellEffect(Effect):
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
+    owner = models.ForeignKey(auth.models.User, related_name="sheets")
     description = models.TextField()
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
