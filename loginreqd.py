@@ -34,10 +34,8 @@ class RequireLoginMiddleware(object):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # No need to process URLs if user already logged in
-        print "REQD user: %s" % request.user
         if request.user.is_authenticated():
             return None
-        print "REQD test"
         # An exception match should immediately return None
         for url in self.exceptions:
             if url.match(request.path): return None
