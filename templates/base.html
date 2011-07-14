@@ -3,9 +3,10 @@
 <head>
     <link rel="stylesheet" type="text/css" 
           href="{{ ROOT_URL}}static/style.css" />
+    {% if False %}
     {% load dajaxice_templatetags %}
-
     {% dajaxice_js_import %}
+    {% endif %}
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <title>{% block title %}AE Sheet{% endblock %}</title>
 </head>
