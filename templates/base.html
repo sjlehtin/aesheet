@@ -14,8 +14,9 @@
 <body>
 <div class="auth_bar">
   {% if user.is_authenticated %}
-  Currently logged in: <a href="/accounts/profile"> {{ user }} </a>
-  <a href="/accounts/logout">Logout</a>
+  Currently logged in: <a href="{{ ROOT_URL }}accounts/profile"> 
+                          {{ user }} </a>
+  <a href="{{ ROOT_URL }}accounts/logout">Logout</a>
   {% endif %}
 </div>
 

@@ -21,8 +21,11 @@ f = open(os.path.join(os.path.dirname(__file__), "auth"), "r")
 auth_details = f.read()
 (user, password) = auth_details.strip().split()
 
-ROOT_URL = '/ae/sheet/'
-LOGIN_URL = ROOT_URL + 'accounts/login/'
+ROOT_URL = os.environ.get('ROOT_URL')
+if not ROOT_URL:
+    ROOT_URL = "/"
+LOGIN_URL = ROOT_URL + "accounts/login/"
+LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
 DATABASES = {
     'default': {
