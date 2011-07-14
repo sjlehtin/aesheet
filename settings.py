@@ -2,6 +2,7 @@
 
 import os
 import loginreqd
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -19,6 +20,9 @@ if DEBUG:
 f = open(os.path.join(os.path.dirname(__file__), "auth"), "r")
 auth_details = f.read()
 (user, password) = auth_details.strip().split()
+
+ROOT_URL = '/ae/sheet/'
+LOGIN_URL = ROOT_URL + 'accounts/login/'
 
 DATABASES = {
     'default': {
@@ -113,6 +117,10 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.eggs.Loader',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS += (
+    "context_processors.variables",
+    )
+
 MIDDLEWARE_CLASSES = (
     'loginreqd.RequireLoginMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -131,7 +139,7 @@ TEMPLATE_DIRS = (
     # "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    sys.path[0] + "/templates/"
+    os.path.join(os.path.dirname(__file__), "templates")
 )
 
 LOGIN_REQUIRED_URLS = (
@@ -139,8 +147,8 @@ LOGIN_REQUIRED_URLS = (
 )
 
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
-    r'/accounts/login/.*$',
-    r'/accounts/logout/.*$'
+    ROOT_URL + r'accounts/login/.*$',
+    ROOT_URL + r'accounts/logout/.*$'
 )
 
 DAJAXICE_MEDIA_PREFIX="dajaxice"

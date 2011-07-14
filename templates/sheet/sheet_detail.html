@@ -4,7 +4,6 @@
 
 {% block content %}
 
-
 <button class="edit_control">Printable</button>
 
 <script>
@@ -25,7 +24,7 @@
 </p>
 
 <div class="edit_control">
-  <a href="/characters/edit_char/{{char.character.id}}/">
+  <a href="{{ ROOT_URL }}characters/edit_char/{{char.character.id}}/">
     Edit basic character</a>
 </div>
 
@@ -38,7 +37,7 @@
       {% if stat.add_form %}
       <td class="edit_control">
            <div class="edit_control">
-              <form action="/sheets/{{char.id}}/" method="post">
+              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ stat.add_form }}
               <input type="submit" value="+" />
@@ -47,7 +46,7 @@
       </td> 
       <td class="edit_control">
            <div class="edit_control">
-              <form action="/sheets/{{char.id}}/" method="post">
+              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ stat.dec_form }}
               <input type="submit" value="-" />
@@ -99,7 +98,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
         <td>{{ item.durability }}</td>
        <td class="edit_control">
            <div class="edit_control">
-              <form action="/sheets/{{char.id}}/" method="post">
+              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ item.remove_form }}
               <input type="submit" value="Remove" />
@@ -143,7 +142,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div id="add_weapon" class="edit_control">
 <label for="add_weapon_form"><strong>Add a weapon</strong></label>
-<form action="/sheets/{{char.id}}/" method="post" 
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_weapon_form">{% csrf_token %}
 <table>
 {{ add_weapon_form.as_table }}
@@ -158,7 +157,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
     {% for item in char.spell_effects %}
         <li>{{ item.item }} 
            <div class="edit_control">
-              <form action="/sheets/{{char.id}}/" method="post">
+              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
                 {% csrf_token %}
                 {{ item.remove_form }}
               <input type="submit" value="Remove" />
@@ -173,7 +172,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div id="add_spell_effect" class="edit_control">
 <label for="add_spell_effect_form"><strong>Add a spell effect</strong></label>
-<form action="/sheets/{{char.id}}/" method="post" 
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_spell_effect_form">{% csrf_token %}
 <table>
 {{ add_spell_effect_form.as_table }}
@@ -191,7 +190,8 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
             <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td>
             <td>
               <div class="edit_control">
-                 <form action="/sheets/{{char.id}}/" method="post">
+                 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+                       method="post">
                    {% csrf_token %}
                    {{ skill.remove_form }}
                  <input type="submit" value="Remove" />
@@ -207,7 +207,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div id="add_skill" class="edit_control">
 <label for="add_skill_form"><strong>Add a skill</strong></label>
-<form action="/sheets/{{char.id}}/" method="post" 
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_skill_form">{% csrf_token %}
 <table>
 {{ add_skill_form.as_table }}
@@ -224,7 +224,8 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
         <tr><td>{{ edge.edge }}</td>
             <td>
               <div class="edit_control">
-                 <form action="/sheets/{{char.id}}/" method="post">
+                 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+                       method="post">
                    {% csrf_token %}
                    {{ edge.remove_form }}
                  <input type="submit" value="Remove" />
@@ -240,7 +241,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add an edge</strong></label>
-<form action="/sheets/{{char.id}}/" method="post" 
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_edge_form">{% csrf_token %}
 <table>
 {{ add_edge_form.as_table }}
@@ -256,7 +257,8 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
         <tr><td>{{ helm.item }}</td>
             <td>
               <div class="edit_control">
-                 <form action="/sheets/{{char.id}}/" method="post">
+                 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+                       method="post">
                    {% csrf_token %}
                    {{ helm.remove_form }}
                  <input type="submit" value="Remove" />
@@ -272,7 +274,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add a helmet</strong></label>
-<form action="/sheets/{{char.id}}/" method="post" 
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_helmet_form">{% csrf_token %}
 <table>
 {{ add_helm_form.as_table }}
@@ -288,7 +290,8 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
         <tr><td>{{ armor.item }}</td>
             <td>
               <div class="edit_control">
-                 <form action="/sheets/{{char.id}}/" method="post">
+                 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+                       method="post">
                    {% csrf_token %}
                    {{ armor.remove_form }}
                  <input type="submit" value="Remove" />
@@ -304,7 +307,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add armor</strong></label>
-<form action="/sheets/{{char.id}}/" method="post" 
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_armor_form">{% csrf_token %}
 <table>
 {{ add_armor_form.as_table }}

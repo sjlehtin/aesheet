@@ -7,7 +7,8 @@
 {% if all_characters %}
     <ul>
     {% for char in all_characters %}
-        <li><a href="/characters/edit_char/{{ char.id }}/">{{ char }}</a></li>
+        <li><a href="{{ ROOT_URL}}characters/edit_char/{{ char.id }}/">
+             {{ char }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

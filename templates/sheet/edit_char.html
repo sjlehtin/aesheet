@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<form action="/characters/edit_char/{% if char %}{{char.id}}/{% endif %}"
+<form action="{{ ROOT_URL }}characters/edit_char/{% if char %}{{char.id}}/{% endif %}"
       method="post" 
       id="char_form">
 {% csrf_token %}

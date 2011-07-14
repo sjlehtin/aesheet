@@ -19,21 +19,25 @@ from sheet.models import *
 from sheet.forms import *
 from django.core.exceptions import ValidationError
 import django.forms.util
+from django.conf import settings
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
     return render_to_response('sheet/characters_index.html',
-                              { 'all_characters' : all_characters })
+                              { 'all_characters' : all_characters },
+                              context_instance=RequestContext(request))
 
 def character_detail(request, char_id):
     character = get_object_or_404(Character, pk=char_id)
     return render_to_response('sheet/sheet_detail.html',
-                              { 'char' : character })
+                              { 'char' : character },
+                              context_instance=RequestContext(request))
 
 def sheets_index(request):
     all_sheets = Sheet.objects.all()
     return render_to_response('sheet/sheets_index.html',
-                              { 'all_sheets' : all_sheets })
+                              { 'all_sheets' : all_sheets },
+                              context_instance=RequestContext(request))
 
 def process_sheet_change_request(request, sheet):
     assert request.method == "POST"
@@ -330,7 +334,8 @@ def sheet_detail(request, sheet_id):
         # XXX more complex forms need to be passed back to
         # render_to_response, below.
         if should_change:
-            return HttpResponseRedirect('/sheets/%s/' % sheet.id)
+            return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
+                                        sheet.id)
 
     c = {}
     c.update({ 'char' : SheetView(sheet),
@@ -359,7 +364,7 @@ def edit_character(request, char_id=None):
         if form.is_valid():
             form.full_clean()
             form.save()
-            return HttpResponseRedirect('/characters/')
+            return HttpResponseRedirect(settings.ROOT_URL + 'characters/')
 
     c = {}
     c.update({ 'char_form' : form,
