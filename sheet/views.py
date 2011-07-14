@@ -47,7 +47,7 @@ def process_sheet_change_request(request, sheet):
     forms = {}
 
     f = SheetForm(request.POST)
-    print "Form id: %s" % form_id
+
     if not f.is_valid():
         return
 
