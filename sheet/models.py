@@ -192,7 +192,7 @@ SKILL_TYPES = [
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
 class Skill(models.Model):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=256, unique=True, db_index=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     can_be_defaulted = models.BooleanField(default=True)
