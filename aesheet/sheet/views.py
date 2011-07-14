@@ -1,10 +1,11 @@
 # Create your views here.
 
 TODO = """
-+ ranged weapons
-* effects
-* logging in
-* access controls
+* deployment to semeai.org
+* ranged weapons
++ logging in
+** access controls
+** password change
 * rest of the skills
 * rest of the edges
 * magic item location (only one to each location)
