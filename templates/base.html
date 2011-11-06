@@ -12,7 +12,7 @@
 </head>
 
 <body>
-<div class="auth_bar">
+<div id="authbar">
   {% if user.is_authenticated %}
   Currently logged in: <a href="{{ ROOT_URL }}accounts/profile"> 
                           {{ user }} </a>
@@ -20,16 +20,15 @@
   {% endif %}
 </div>
 
-<!--
     <div id="sidebar">
         {% block sidebar %}
         <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/blog/">Blog</a></li>
+            <li><a href="{% url sheet.views.sheets_index %}">Sheets</a></li>
+            <li><a href="{% url sheet.views.characters_index %}">Characters</a></li>
+            <li><a href="{% url sheet.views.import_data %}">Import data</a></li>
         </ul>
         {% endblock %}
     </div>
--->
 
     <div id="content">
         {% block content %}{% endblock %}

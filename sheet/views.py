@@ -363,8 +363,7 @@ def sheet_detail(request, sheet_id):
           })
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',
-                              c,
-                              context_instance=RequestContext(request))
+                              RequestContext(request, c))
 
 def edit_character(request, char_id=None):
 
@@ -386,5 +385,8 @@ def edit_character(request, char_id=None):
                'char' : character })
     c.update(forms)
     return render_to_response('sheet/edit_char.html',
-                              c,
-                              context_instance=RequestContext(request))
+                              RequestContext(request, c))
+
+def import_data(request):
+    return render_to_response('sheet/import_data.html',
+                              RequestContext(request))
