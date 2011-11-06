@@ -25,9 +25,13 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
+def get_sjl():
+    return auth.models.User.objects.get(username='sjl')
+
 class Character(models.Model):
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(auth.models.User, related_name="characters")
+    owner = models.ForeignKey(auth.models.User, related_name="characters",
+                              default=get_sjl)
     occupation = models.CharField(max_length=256)
     # XXX race can be used to fill in basic edges and stats later for,
     # e.g., GM usage.
@@ -596,7 +600,8 @@ class SpellEffect(Effect):
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
-    owner = models.ForeignKey(auth.models.User, related_name="sheets")
+    owner = models.ForeignKey(auth.models.User, related_name="sheets",
+                              default=get_sjl)
     description = models.TextField()
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
