@@ -1,9 +1,10 @@
-body { height : 100%; }
-html { height : 100%; }
+body { height : 100%; min-height : 100%; }
+html { height : 100%; min-height : 100%; }
 tr.close-combat.header { font-weight: bold; }
 td.defense { color: blue; }
-#sidebar { float : left; width : 8em; min-height: 100% }
-#content { min-height: 100% }
+#sidebar { float : left; width : 8em; min-height: 100%; 
+	   background: rgb(204,212,138); }
+#content { min-height: 100%; background: rgb(198,214,249); float : left; }
 #authbar { text-align : right; width: 100%; }
 div.skills { position: absolute;
 	     font-size: 80%;
