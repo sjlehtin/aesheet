@@ -411,7 +411,7 @@ EFFECT_TYPES = [
     "luck",
     "circumstance",
     ]
-EFFECT_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
+EFFECT_TYPES = zip(EFFECT_TYPES, EFFECT_TYPES)
 
 class Effect(StatModifier):
     name = models.CharField(max_length=256, unique=True)
