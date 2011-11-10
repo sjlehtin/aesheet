@@ -7,6 +7,11 @@ class EditCharacter(forms.ModelForm):
     class Meta:
         model = Character
 
+class EditSheet(forms.ModelForm):
+
+    class Meta:
+        model = Sheet
+
 class SheetForm(forms.Form):
     def __init__(self, *args, **kwargs):
         if kwargs.has_key('form_id'):
@@ -15,6 +20,16 @@ class SheetForm(forms.Form):
         self.fields['form_id'].initial = self.__class__.__name__
 
     form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
+
+
+class ImportForm(forms.Form):
+    choices = ('ArmorTemplate', 'ArmorEffect',
+               'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
+               'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
+               'WeaponSpecialQuality', 'Skill', 'Edge',
+               'EdgeLevel')
+    type = forms.ChoiceField(choices=zip(choices,choices))
+    import_data = forms.CharField(widget=forms.Textarea)
 
 class AddForm(SheetForm):
     sheet = None

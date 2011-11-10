@@ -4,10 +4,14 @@
 
 {% block content %}
 
+<p>
+<a href="{% url add_char %}">Add a new character</a>
+</p>
+
 {% if all_characters %}
     <ul>
     {% for char in all_characters %}
-        <li><a href="{{ ROOT_URL}}characters/edit_char/{{ char.id }}/">
+        <li><a href="{% url sheet.views.edit_character char.id %}">
              {{ char }}</a></li>
     {% endfor %}
     </ul>

@@ -3,6 +3,9 @@
 {% block title %} Sheet {% endblock %}
 
 {% block content %}
+<p>
+<a href="{% url sheet.views.edit_sheet %}">Add a new sheet</a>
+</p>
 
 {% if all_sheets %}
     <ul>

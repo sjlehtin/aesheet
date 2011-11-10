@@ -4,6 +4,12 @@
 
 {% block content %}
 
-XXX Importos datas
+{{ field_doc|safe }}
+
+<form action="" method="post">
+  {% csrf_token %}
+  {{ import_form }}
+<input type="submit" value="Import" />
+</form>
 
 {% endblock %}

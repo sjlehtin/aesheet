@@ -4,17 +4,11 @@
 
 {% block content %}
 
-<form action="
-{% if char %}
-{% url edit_char char.id %}
-{% else %}
-{% url add_char %}
-{% endif %}
-"
+<form action="" 
       method="post" 
-      id="char_form">
+      id="sheet_form">
 {% csrf_token %}
-{{ char_form.as_p }}
+{{ sheet_form.as_p }}
 <input type="submit"  
        {% if char %}
          value="Update" 

@@ -35,6 +35,13 @@ from sheet.forms import *
 from django.core.exceptions import ValidationError
 import django.forms.util
 from django.conf import settings
+from django.core.urlresolvers import reverse
+import django.db.models
+import sheet.models
+import csv
+import StringIO
+from django.db.models.fields import FieldDoesNotExist
+from pprint import pprint
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
@@ -333,7 +340,7 @@ class SheetView(object):
         return getattr(self.sheet, v)
 
 
-def sheet_detail(request, sheet_id):
+def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
     add_weapon_form = AddWeapon(sheet=sheet)
@@ -387,6 +394,98 @@ def edit_character(request, char_id=None):
     return render_to_response('sheet/edit_char.html',
                               RequestContext(request, c))
 
+def edit_sheet(request, sheet_id=None):
+
+    sheet = None
+    if sheet_id:
+        sheet = get_object_or_404(Sheet, pk=sheet_id)
+    form = EditSheet(instance=sheet)
+
+    if request.method == "POST":
+        form = EditSheet(request.POST, instance=sheet)
+        if form.is_valid():
+            form.full_clean()
+            form.save()
+            return HttpResponseRedirect(settings.ROOT_URL + 'sheets/')
+
+    return render_to_response('sheet/edit_sheet.html',
+                              RequestContext(request, { 'sheet_form' : form,
+                                                        'sheet' : sheet }))
+
+def import_text(modelcls, data):
+    reader = csv.reader(StringIO.StringIO(data))
+    header = reader.next()
+
+    header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
+
+    for row in reader:
+        mdl = None
+        # XXX row[<index of name in header>]
+        # if 'name' in header:
+        #     mdl = modelcls.objects.get(name='name'])
+        fields = {}
+        for (hh, index) in zip(header, range(len(header))):
+            fields[hh] = row[index]
+        if 'name' in fields:
+            try:
+                mdl = modelcls.objects.get(name=fields['name'])
+            except modelcls.DoesNotExist:
+                pass
+        pprint(fields)
+        if not mdl:
+            mdl = modelcls()
+        for (fieldname, value) in fields.items():
+            print "%s: %s" % (fieldname, value)
+            try:
+                field = modelcls._meta.get_field(fieldname)
+            except FieldDoesNotExist, e:
+                raise ValueError, str(e)
+            # If the field is a reference to another object, try to find
+            # the matching instance.
+            if isinstance(field, django.db.models.ForeignKey):
+                try:
+                    value = field.related.parent_model.objects.get(name=value)
+                except field.related.parent_model.DoesNotExist:
+                    raise ValueError, "No matching %s with name %s." % (
+                        field.related.parent_model._meta.object_name, value)
+            else:
+                if not value: # XXX
+                    value = 0
+                value = modelcls._meta.get_field(fieldname).to_python(value)
+            print "%s: %s (%s)" % (fieldname, value, type(value))
+            setattr(mdl, fieldname, value)
+        print mdl
+        mdl.full_clean()
+        mdl.save()
+
 def import_data(request):
+    if request.method == 'POST':
+        form = ImportForm(request.POST)
+        if form.is_valid():
+            type = form.cleaned_data['type']
+            import_data = form.cleaned_data['import_data']
+            try:
+                import_text(getattr(sheet.models, type), import_data)
+                return HttpResponseRedirect(reverse('sheet.views.import_data'))
+            except (ValueError, ValidationError), e:
+                el = form._errors.setdefault('__all__',
+                                             django.forms.util.ErrorList())
+                el.append(str(e))
+    else:
+        form = ImportForm()
+    docdict = {}
+    for choice in ImportForm.choices:
+        cls = getattr(sheet.models, choice)
+        ll = []
+        docdict[cls._meta.object_name] = ll
+        for field in cls._meta.fields:
+            if field.name != 'id':
+                ll.append(field.name)
+    doc = ("<dl>" +
+           '\n'.join(["<dt>%s</dt>\n<dd>%s</dd>" % (cls, ', '.join(values))
+                     for (cls, values) in docdict.items()])
+           + "</dl>")
     return render_to_response('sheet/import_data.html',
-                              RequestContext(request))
+                              RequestContext(request,
+                                             { 'field_doc' : doc,
+                                               'import_form' : form }))
