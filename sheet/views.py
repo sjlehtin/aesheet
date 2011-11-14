@@ -412,17 +412,19 @@ def edit_sheet(request, sheet_id=None):
                               RequestContext(request, { 'sheet_form' : form,
                                                         'sheet' : sheet }))
 
-def import_text(modelcls, data):
+def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
+    data_type = reader.next()
+    if len(data_type) != 1:
+        raise TypeError, "CSV is in invalid format, first row is the data type"
+    modelcls = getattr(sheet.models, data_type[0])
+
     header = reader.next()
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
 
     for row in reader:
         mdl = None
-        # XXX row[<index of name in header>]
-        # if 'name' in header:
-        #     mdl = modelcls.objects.get(name='name'])
         fields = {}
         for (hh, index) in zip(header, range(len(header))):
             fields[hh] = row[index]
@@ -462,10 +464,9 @@ def import_data(request):
     if request.method == 'POST':
         form = ImportForm(request.POST)
         if form.is_valid():
-            type = form.cleaned_data['type']
             import_data = form.cleaned_data['import_data']
             try:
-                import_text(getattr(sheet.models, type), import_data)
+                import_text(import_data)
                 return HttpResponseRedirect(reverse('sheet.views.import_data'))
             except (ValueError, ValidationError), e:
                 el = form._errors.setdefault('__all__',
@@ -474,7 +475,11 @@ def import_data(request):
     else:
         form = ImportForm()
     docdict = {}
-    for choice in ImportForm.choices:
+    for choice in ['ArmorTemplate', 'ArmorEffect',
+                   'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
+                   'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
+                   'WeaponSpecialQuality', 'Skill', 'Edge',
+                   'EdgeLevel']:
         cls = getattr(sheet.models, choice)
         ll = []
         docdict[cls._meta.object_name] = ll

@@ -23,12 +23,6 @@ class SheetForm(forms.Form):
 
 
 class ImportForm(forms.Form):
-    choices = ('ArmorTemplate', 'ArmorEffect',
-               'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
-               'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
-               'WeaponSpecialQuality', 'Skill', 'Edge',
-               'EdgeLevel')
-    type = forms.ChoiceField(choices=zip(choices,choices))
     import_data = forms.CharField(widget=forms.Textarea)
 
 class AddForm(SheetForm):

@@ -1,3 +1,4 @@
+ArmorQuality
 "name","short_name","dp_multiplier","armor_s","armor_b","armor_r","armor_dr","armor_p","mod_fit_multiplier","mod_fit","mod_ref","mod_psy","mod_sensory","mod_stealth","mod_conceal","mod_climb","mod_weight_multiplier","mod_encumbrance_class"
 "L1","L1",1.5,-0.5,-0.5,-0.5,-1,-0.5,,1,1,1,1,5,,5,0.8,-1
 "L2","L2",2,-1,-1,-1,-2,-1,,2,2,2,2,10,,10,0.8,-1
