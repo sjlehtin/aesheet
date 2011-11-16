@@ -12,7 +12,13 @@ Second row is the header, which indicates the type of the data in the
 column it is in, such as "name" or "cc_skill_level".
 </p>
 
-{{ field_doc|safe }}
+<dl>
+{% for item in types %}
+<dt>{{ item.name}}</dt>
+<dd>{{ item.fields|join:", " }}</dd>
+{% endfor %}
+</dl>
+
 
 <form action="" method="post">
   {% csrf_token %}

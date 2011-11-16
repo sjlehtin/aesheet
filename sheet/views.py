@@ -474,23 +474,20 @@ def import_data(request):
                 el.append(str(e))
     else:
         form = ImportForm()
-    docdict = {}
+    types = []
     for choice in ['ArmorTemplate', 'ArmorEffect',
                    'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
                    'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
                    'WeaponSpecialQuality', 'Skill', 'Edge',
                    'EdgeLevel']:
         cls = getattr(sheet.models, choice)
-        ll = []
-        docdict[cls._meta.object_name] = ll
-        for field in cls._meta.fields:
-            if field.name != 'id':
-                ll.append(field.name)
-    doc = ("<dl>" +
-           '\n'.join(["<dt>%s</dt>\n<dd>%s</dd>" % (cls, ', '.join(values))
-                     for (cls, values) in docdict.items()])
-           + "</dl>")
+        item = {}
+        item['name'] = cls._meta.object_name
+        item['fields'] = [field.name
+                          for field in cls._meta.fields if field.name != 'id']
+        types.append(item)
+
     return render_to_response('sheet/import_data.html',
                               RequestContext(request,
-                                             { 'field_doc' : doc,
+                                             { 'types' : types,
                                                'import_form' : form }))
