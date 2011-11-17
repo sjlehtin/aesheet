@@ -458,9 +458,11 @@ class Effect(StatModifier):
         return "%s" % (self.name)
 
 class WeaponSpecialQuality(ExportedModel):
-    name = models.CharField(max_length=32, primary_key=True)
+    name = models.CharField(max_length=32, primary_key=True,
+                            help_text="This uniquely identifies this "
+                            "special quality and may also serve as a short "
+                            "description of the quality in the sheet.")
     description = models.TextField(blank=True)
-    short_description = models.CharField(max_length=16)
 
     @classmethod
     def dont_export(cls):
@@ -473,9 +475,11 @@ class WeaponSpecialQuality(ExportedModel):
         return "%s" % (self.short_description)
 
 class ArmorSpecialQuality(ExportedModel):
-    name = models.CharField(max_length=32, primary_key=True)
+    name = models.CharField(max_length=32, primary_key=True,
+                            help_text="This uniquely identifies this "
+                            "special quality and may also serve as a short "
+                            "description of the quality in the sheet.")
     description = models.TextField(blank=True)
-    short_description = models.CharField(max_length=16)
 
     @classmethod
     def dont_export(cls):
