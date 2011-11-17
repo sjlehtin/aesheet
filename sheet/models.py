@@ -252,7 +252,8 @@ class Skill(ExportedModel):
     @classmethod
     def dont_export(cls):
         return ['characterskill', 'primary_for_weapons',
-                'secondary_for_weapons', 'base_skill_for_weapons']
+                'secondary_for_weapons', 'base_skill_for_weapons',
+                'skill']
 
     def __unicode__(self):
         return "%s" % (self.name)
@@ -424,6 +425,10 @@ class WeaponTemplate(ExportedModel):
                                related_name="secondary_for_weapons")
     is_lance = models.BooleanField(default=False)
     is_shield = models.BooleanField(default=False)
+
+    @classmethod
+    def dont_export(self):
+        return ['weapon']
 
     def __unicode__(self):
         return "%s" % (self.name)
