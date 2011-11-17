@@ -194,7 +194,7 @@ class Character(models.Model):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
 class Edge(ExportedModel):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
@@ -395,7 +395,7 @@ class WeaponDamage(object):
                                 self.extra_damage, self.leth)
 
 class WeaponTemplate(ExportedModel):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=64, blank=True)
