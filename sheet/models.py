@@ -472,7 +472,7 @@ class WeaponSpecialQuality(ExportedModel):
     # name "effects".
 
     def __unicode__(self):
-        return "%s" % (self.short_description)
+        return "%s" % (self.name)
 
 class ArmorSpecialQuality(ExportedModel):
     name = models.CharField(max_length=32, primary_key=True,
@@ -488,7 +488,7 @@ class ArmorSpecialQuality(ExportedModel):
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
     def __unicode__(self):
-        return "%s" % (self.short_description)
+        return "%s" % (self.name)
 
 class Weapon(ExportedModel):
     # XXX name from template (appended with quality or something to that
