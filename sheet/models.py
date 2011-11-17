@@ -443,7 +443,7 @@ EFFECT_TYPES = [
 EFFECT_TYPES = zip(EFFECT_TYPES, EFFECT_TYPES)
 
 class Effect(StatModifier):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(primary_key=True, max_length=256)
     description = models.TextField(blank=True)
     type = models.CharField(max_length=256,
                             choices=EFFECT_TYPES,
@@ -516,7 +516,7 @@ class Weapon(ExportedModel):
         return "%s %s" % (quality, self.base, )
 
 class ArmorTemplate(ExportedModel):
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
@@ -584,7 +584,7 @@ class ArmorTemplate(ExportedModel):
         return "%s" % (self.name)
 
 class ArmorQuality(ExportedModel):
-    name = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
 
     dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
