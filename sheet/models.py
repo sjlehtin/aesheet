@@ -36,8 +36,10 @@ class ExportedModel(models.Model):
 
     @classmethod
     def get_exported_fields(cls):
-        return filter(lambda xx: xx not in cls.dont_export(),
-                      cls._meta.get_all_field_names())
+        names = [field.name for field in cls._meta.fields]
+        names.extend(list(set(cls._meta.get_all_field_names()
+                              ).difference(set(names))))
+        return filter(lambda xx: xx not in cls.dont_export(), names)
 
     class Meta:
         abstract = True
