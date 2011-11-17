@@ -215,7 +215,7 @@ SKILL_TYPES = [
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
 class Skill(ExportedModel):
-    name = models.CharField(max_length=256, unique=True, db_index=True)
+    name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     can_be_defaulted = models.BooleanField(default=True)
@@ -458,8 +458,9 @@ class Effect(StatModifier):
         return "%s" % (self.name)
 
 class WeaponSpecialQuality(ExportedModel):
+    name = models.CharField(max_length=32, primary_key=True)
     description = models.TextField(blank=True)
-    short_description = models.CharField(max_length=256)
+    short_description = models.CharField(max_length=16)
 
     @classmethod
     def dont_export(cls):
@@ -472,8 +473,9 @@ class WeaponSpecialQuality(ExportedModel):
         return "%s" % (self.short_description)
 
 class ArmorSpecialQuality(ExportedModel):
+    name = models.CharField(max_length=32, primary_key=True)
     description = models.TextField(blank=True)
-    short_description = models.CharField(max_length=256)
+    short_description = models.CharField(max_length=16)
 
     @classmethod
     def dont_export(cls):
