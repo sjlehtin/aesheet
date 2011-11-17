@@ -448,6 +448,8 @@ def import_text(data):
                     modelcls._meta.get_field_by_name(fieldname)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
+            print "field:", fieldname, type(field), value
+
             # If the field is a reference to another object, try to find
             # the matching instance.
             if isinstance(field, django.db.models.ForeignKey):
@@ -456,20 +458,25 @@ def import_text(data):
                 except field.related.parent_model.DoesNotExist:
                     raise ValueError, "No matching %s with name %s." % (
                         field.related.parent_model._meta.object_name, value)
-            elif isinstance(field, django.db.models.Manager):
-                for name in value.split(','):
-                    obj = field.model.objects.get(name='name')
-                    field.add(obj)
-                    # Completely handled with this.
-                    continue
             else:
+                print "field:", fieldname, value
                 if not value:
                     if field.has_default():
                         value = field.default
                     elif not field.empty_strings_allowed:
                         continue # Try to get away without setting the value.
-                print "field:", fieldname, value
-                value = field.to_python(value)
+                if isinstance(field,
+                              django.db.models.fields.related.ManyToManyField):
+                    if not value:
+                        continue
+                    ll = []
+                    for name in value.split('|'):
+                        print "finding:", name
+                        obj = field.rel.to.objects.get(name=name)
+                        ll.append(obj)
+                    value = ll
+                else:
+                    value = field.to_python(value)
                 print "field:", fieldname, type(value), value
 
             setattr(mdl, fieldname, value)
@@ -532,7 +539,11 @@ def export_data(request, type):
             except AttributeError:
                 return ""
             if isinstance(value, django.db.models.Manager):
-                value = ",".join([str(val.pk) for val in value.all()])
+                def get_descr(mdl):
+                    if hasattr(mdl, 'name'):
+                        return mdl.name
+                    return str(val.pk)
+                value = "|".join([get_descr(val) for val in value.all()])
             return value
         w.writerow([get_field_value(field) for field in fields])
     response = HttpResponse(f.getvalue(), mimetype="text/csv")
