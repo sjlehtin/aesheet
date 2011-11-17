@@ -249,6 +249,11 @@ class Skill(ExportedModel):
             raise ValueError("Skill doesn't support level %s" % level)
         return cost_at_this_level + self.cost(level - 1)
 
+    @classmethod
+    def dont_export(cls):
+        return ['characterskill', 'primary_for_weapons',
+                'secondary_for_weapons', 'base_skill_for_weapons']
+
     def __unicode__(self):
         return "%s" % (self.name)
 
