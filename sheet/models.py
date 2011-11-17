@@ -28,6 +28,20 @@ SIZE_CHOICES = (
 def get_sjl():
     return auth.models.User.objects.get(username='sjl')
 
+class ExportedModel(models.Model):
+
+    @classmethod
+    def dont_export(self):
+        return []
+
+    @classmethod
+    def get_exported_fields(cls):
+        return filter(lambda xx: xx not in cls.dont_export(),
+                      cls._meta.get_all_field_names())
+
+    class Meta:
+        abstract = True
+
 class Character(models.Model):
     name = models.CharField(max_length=256)
     owner = models.ForeignKey(auth.models.User, related_name="characters",
@@ -177,7 +191,7 @@ class Character(models.Model):
     def __unicode__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
-class Edge(models.Model):
+class Edge(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -198,7 +212,7 @@ SKILL_TYPES = [
     ]
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
-class Skill(models.Model):
+class Skill(ExportedModel):
     name = models.CharField(max_length=256, unique=True, db_index=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -280,7 +294,6 @@ class StatModifier(models.Model):
     cc_skill_levels = models.IntegerField(default=0)
 
     fit = models.IntegerField(default=0)
-    fit = models.IntegerField(default=0)
     ref = models.IntegerField(default=0)
     lrn = models.IntegerField(default=0)
     int = models.IntegerField(default=0)
@@ -301,12 +314,16 @@ class StatModifier(models.Model):
     class Meta:
         abstract = True
 
-class EdgeLevel(StatModifier):
+class EdgeLevel(ExportedModel, StatModifier):
     edge = models.ForeignKey(Edge)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
     # XXX race requirement?
+    @classmethod
+    def dont_export(cls):
+        return ['characteredge']
+
     def __unicode__(self):
         return "%s %s (%s)" % (self.edge, self.level, self.cost)
 
@@ -369,7 +386,7 @@ class WeaponDamage(object):
         return "%sd%s%+d/%d" % (self.num_dice, self.dice,
                                 self.extra_damage, self.leth)
 
-class WeaponTemplate(models.Model):
+class WeaponTemplate(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
     short_name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
@@ -419,7 +436,7 @@ class Effect(StatModifier):
     type = models.CharField(max_length=256,
                             choices=EFFECT_TYPES,
                             default="enhancement",
-                            help_text="Effect type.  With the expection of "
+                            help_text="Effect type.  With the exception of "
                             "circumstance bonus, only highest effect of "
                             "a single type will take effect.")
     class Meta:
@@ -428,9 +445,13 @@ class Effect(StatModifier):
     def __unicode__(self):
         return "%s" % (self.name)
 
-class WeaponSpecialQuality(models.Model):
+class WeaponSpecialQuality(ExportedModel):
     description = models.TextField(blank=True)
     short_description = models.CharField(max_length=256)
+
+    @classmethod
+    def dont_export(cls):
+        return ['weapon']
 
     # Effects come with the foreign key in WeaponEffect() class to the
     # name "effects".
@@ -438,16 +459,20 @@ class WeaponSpecialQuality(models.Model):
     def __unicode__(self):
         return "%s" % (self.short_description)
 
-class ArmorSpecialQuality(models.Model):
+class ArmorSpecialQuality(ExportedModel):
     description = models.TextField(blank=True)
     short_description = models.CharField(max_length=256)
+
+    @classmethod
+    def dont_export(cls):
+        return ['armor']
 
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
     def __unicode__(self):
         return "%s" % (self.short_description)
 
-class Weapon(models.Model):
+class Weapon(ExportedModel):
     # XXX name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
@@ -478,7 +503,7 @@ class Weapon(models.Model):
             quality = self.quality
         return "%s %s" % (quality, self.base, )
 
-class ArmorTemplate(models.Model):
+class ArmorTemplate(ExportedModel):
     name = models.CharField(max_length=256)
     description = models.TextField(blank=True)
     armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
@@ -539,10 +564,14 @@ class ArmorTemplate(models.Model):
     # 0 no armor, 1 light, 2 medium, 3 heavy
     encumbrance_class = models.IntegerField(default=0)
 
+    @classmethod
+    def dont_export(cls):
+        return ['armor']
+
     def __unicode__(self):
         return "%s" % (self.name)
 
-class ArmorQuality(models.Model):
+class ArmorQuality(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
     short_name = models.CharField(max_length=5, blank=True)
 
@@ -570,10 +599,14 @@ class ArmorQuality(models.Model):
                                                 default=1.0)
     mod_encumbrance_class = models.IntegerField(default=0)
 
+    @classmethod
+    def dont_export(cls):
+        return ['armor']
+
     def __unicode__(self):
         return self.name
 
-class Armor(models.Model):
+class Armor(ExportedModel):
     # XXX name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
@@ -584,18 +617,30 @@ class Armor(models.Model):
     quality = models.ForeignKey(ArmorQuality)
     special_qualities = models.ManyToManyField(ArmorSpecialQuality, blank=True)
 
+    @classmethod
+    def dont_export(cls):
+        return ['sheet', 'helm_for']
+
     def __unicode__(self):
         if self.name:
             return self.name
         return "%s %s" % (self.base.name, self.quality)
 
-class WeaponEffect(Effect):
+class WeaponEffect(ExportedModel, Effect):
     weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
 
-class ArmorEffect(Effect):
+    @classmethod
+    def dont_export(cls):
+        return ['weapon']
+
+class ArmorEffect(ExportedModel, Effect):
     armor = models.ForeignKey(ArmorSpecialQuality, related_name="effects")
 
-class SpellEffect(Effect):
+    @classmethod
+    def dont_export(cls):
+        return ['armor']
+
+class SpellEffect(ExportedModel, Effect):
     pass
 
 class Sheet(models.Model):

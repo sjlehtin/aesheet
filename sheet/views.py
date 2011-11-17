@@ -42,6 +42,7 @@ import csv
 import StringIO
 from django.db.models.fields import FieldDoesNotExist
 from pprint import pprint
+import logging
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
@@ -433,9 +434,9 @@ def import_text(data):
         for (hh, index) in zip(header, range(len(header))):
             fields[hh] = row[index]
         try:
-            if 'id' in fields:
+            if 'id' in fields and fields['id']:
                 mdl = modelcls.objects.get(id=fields['id'])
-            elif 'name' in fields:
+            elif 'name' in fields and fields['name']:
                 mdl = modelcls.objects.get(name=fields['name'])
         except modelcls.DoesNotExist:
             pass
@@ -443,7 +444,8 @@ def import_text(data):
             mdl = modelcls()
         for (fieldname, value) in fields.items():
             try:
-                field = modelcls._meta.get_field(fieldname)
+                (field, _, direct, m2m) = \
+                    modelcls._meta.get_field_by_name(fieldname)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
             # If the field is a reference to another object, try to find
@@ -454,8 +456,22 @@ def import_text(data):
                 except field.related.parent_model.DoesNotExist:
                     raise ValueError, "No matching %s with name %s." % (
                         field.related.parent_model._meta.object_name, value)
+            elif isinstance(field, django.db.models.Manager):
+                for name in value.split(','):
+                    obj = field.model.objects.get(name='name')
+                    field.add(obj)
+                    # Completely handled with this.
+                    continue
             else:
-                value = modelcls._meta.get_field(fieldname).to_python(value)
+                if not value:
+                    if field.has_default():
+                        value = field.default
+                    elif not field.empty_strings_allowed:
+                        continue # Try to get away without setting the value.
+                print "field:", fieldname, value
+                value = field.to_python(value)
+                print "field:", fieldname, type(value), value
+
             setattr(mdl, fieldname, value)
         mdl.full_clean()
         mdl.save()
@@ -472,9 +488,14 @@ def import_data(request):
                 import_text(import_data)
                 return HttpResponseRedirect(reverse('sheet.views.import_data'))
             except (TypeError, ValueError, ValidationError), e:
+                logging.exception("failed.")
+                print "got error:", e
                 el = form._errors.setdefault('__all__',
                                              django.forms.util.ErrorList())
                 el.append(str(e))
+            except Exception, e:
+                logging.exception("failed.")
+                raise e
     else:
         form = ImportForm()
     types = []
@@ -486,15 +507,13 @@ def import_data(request):
         cls = getattr(sheet.models, choice)
         item = {}
         item['name'] = cls._meta.object_name
-        item['fields'] = [field.name
-                          for field in cls._meta.fields]
+        item['fields'] = cls.get_exported_fields()
         types.append(item)
 
     return render_to_response('sheet/import_data.html',
                               RequestContext(request,
                                              { 'types' : types,
                                                'import_form' : form }))
-
 def export_data(request, type):
     try:
         cls = getattr(sheet.models, type)
@@ -504,9 +523,18 @@ def export_data(request, type):
     f = StringIO.StringIO()
     w = csv.writer(f)
     w.writerow([type])
-    w.writerow([field.name for field in cls._meta.fields])
+    fields = cls.get_exported_fields()
+    w.writerow(fields)
     for obj in results:
-         w.writerow([getattr(obj, field.name) for field in cls._meta.fields])
+        def get_field_value(field):
+            try:
+                value = getattr(obj, field)
+            except AttributeError:
+                return ""
+            if isinstance(value, django.db.models.Manager):
+                value = ",".join([str(val.pk) for val in value.all()])
+            return value
+        w.writerow([get_field_value(field) for field in fields])
     response = HttpResponse(f.getvalue(), mimetype="text/csv")
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
