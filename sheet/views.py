@@ -476,7 +476,18 @@ def import_text(data):
                         ll.append(obj)
                     value = ll
                 else:
-                    value = field.to_python(value)
+                    # XXX Something a little more intelligent would
+                    # probably be nice, for other types of data.
+                    if value == "FALSE":
+                        value = False
+                    elif value == "TRUE":
+                        value = True
+                    try:
+                        value = field.to_python(value)
+                    except Exception, e:
+                        raise type(e), ("Failed to import field \"%s\", "
+                                        "value \"%s\" (%s)" % (fieldname, value,
+                                                               str(e)))
                 print "field:", fieldname, type(value), value
 
             setattr(mdl, fieldname, value)
