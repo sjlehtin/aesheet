@@ -4,12 +4,21 @@
 
 {% block content %}
 
+<div style="max-width: 35em;">
 <p>
 First row, first cell, is the data type, e.g. "ArmorTemplate".
 </p>
 <p>
 Second row is the header, which indicates the type of the data in the
 column it is in, such as "name" or "cc_skill_level".
+</p>
+<p>
+Columns pointing to other objects (tables) and which can have multiple
+objects, such as 'required_edges' or 'required_skills' for Skill, need
+to point to the other object with the 'name' attribute.  Multiple items
+should be separated with the 'pipe' ('|') sign.  This allows usage of
+comma in the names.  If this is not necessary, the behaviour can be
+changed.
 </p>
 
 <dl>
@@ -23,8 +32,11 @@ column it is in, such as "name" or "cc_skill_level".
 
 <form action="" method="post" enctype="multipart/form-data">
   {% csrf_token %}
-  {{ import_form }}
+Choose either import method:
+<table>
+  {{ import_form.as_table }}
+</table>
 <input type="submit" value="Import" />
 </form>
-
+</div>
 {% endblock %}
