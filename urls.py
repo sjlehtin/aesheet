@@ -31,6 +31,7 @@ urlpatterns = patterns('',
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet.views.sheet_detail'),
 
     url(r'^sheets/import/$', 'sheet.views.import_data'),
+    url(r'^sheets/export/(?P<type>\w+)/$', 'sheet.views.export_data'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

@@ -23,7 +23,17 @@ class SheetForm(forms.Form):
 
 
 class ImportForm(forms.Form):
-    import_data = forms.CharField(widget=forms.Textarea)
+    import_data = forms.CharField(widget=forms.Textarea, required=False)
+    file = forms.FileField(required=False)
+    def clean(self):
+        cd = self.cleaned_data
+        if not cd['file'] and not cd['import_data']:
+            raise forms.ValidationError("Specify the data or the file to "
+                                        "be uploaded")
+        if cd['file'] and cd['import_data']:
+            raise forms.ValidationError("Specify either the data or the "
+                                        "file to be uploaded, not both")
+        return cd
 
 class AddForm(SheetForm):
     sheet = None

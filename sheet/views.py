@@ -28,7 +28,7 @@ TODO = """
 """
 
 from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from sheet.models import *
 from sheet.forms import *
@@ -415,9 +415,13 @@ def edit_sheet(request, sheet_id=None):
 def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
     data_type = reader.next()
-    if len(data_type) != 1:
+    if not len(data_type) or not data_type[0]:
         raise TypeError, "CSV is in invalid format, first row is the data type"
-    modelcls = getattr(sheet.models, data_type[0])
+    data_type = data_type[0]
+    try:
+        modelcls = getattr(sheet.models, data_type)
+    except AttributeError, e:
+        raise TypeError, "Invalid data type %s" % data_type
 
     header = reader.next()
 
@@ -428,16 +432,16 @@ def import_text(data):
         fields = {}
         for (hh, index) in zip(header, range(len(header))):
             fields[hh] = row[index]
-        if 'name' in fields:
-            try:
+        try:
+            if 'id' in fields:
+                mdl = modelcls.objects.get(id=fields['id'])
+            elif 'name' in fields:
                 mdl = modelcls.objects.get(name=fields['name'])
-            except modelcls.DoesNotExist:
-                pass
-        pprint(fields)
+        except modelcls.DoesNotExist:
+            pass
         if not mdl:
             mdl = modelcls()
         for (fieldname, value) in fields.items():
-            print "%s: %s" % (fieldname, value)
             try:
                 field = modelcls._meta.get_field(fieldname)
             except FieldDoesNotExist, e:
@@ -451,24 +455,23 @@ def import_text(data):
                     raise ValueError, "No matching %s with name %s." % (
                         field.related.parent_model._meta.object_name, value)
             else:
-                if not value: # XXX
-                    value = 0
                 value = modelcls._meta.get_field(fieldname).to_python(value)
-            print "%s: %s (%s)" % (fieldname, value, type(value))
             setattr(mdl, fieldname, value)
-        print mdl
         mdl.full_clean()
         mdl.save()
 
 def import_data(request):
     if request.method == 'POST':
-        form = ImportForm(request.POST)
+        form = ImportForm(request.POST, request.FILES)
         if form.is_valid():
             import_data = form.cleaned_data['import_data']
+            if 'file' in request.FILES:
+                file = request.FILES['file']
+                import_data = file.read()
             try:
                 import_text(import_data)
                 return HttpResponseRedirect(reverse('sheet.views.import_data'))
-            except (ValueError, ValidationError), e:
+            except (TypeError, ValueError, ValidationError), e:
                 el = form._errors.setdefault('__all__',
                                              django.forms.util.ErrorList())
                 el.append(str(e))
@@ -484,10 +487,26 @@ def import_data(request):
         item = {}
         item['name'] = cls._meta.object_name
         item['fields'] = [field.name
-                          for field in cls._meta.fields if field.name != 'id']
+                          for field in cls._meta.fields]
         types.append(item)
 
     return render_to_response('sheet/import_data.html',
                               RequestContext(request,
                                              { 'types' : types,
                                                'import_form' : form }))
+
+def export_data(request, type):
+    try:
+        cls = getattr(sheet.models, type)
+    except AttributeError, e:
+        raise Http404, "%s is not a supported type." % type
+    results = cls.objects.all()
+    f = StringIO.StringIO()
+    w = csv.writer(f)
+    w.writerow([type])
+    w.writerow([field.name for field in cls._meta.fields])
+    for obj in results:
+         w.writerow([getattr(obj, field.name) for field in cls._meta.fields])
+    response = HttpResponse(f.getvalue(), mimetype="text/csv")
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
+    return response
