@@ -501,6 +501,10 @@ class Weapon(ExportedModel):
     quality = models.ForeignKey(WeaponQuality)
     special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
 
+    @classmethod
+    def dont_export(cls):
+        return ['sheet']
+
     def roa(self):
         # XXX modifiers for size of weapon.
         return float(self.base.roa + self.quality.roa)
@@ -519,7 +523,7 @@ class Weapon(ExportedModel):
         quality = ""
         if self.quality.name != "Normal":
             quality = self.quality
-        return "%s %s" % (quality, self.base, )
+        return "%s %s" % (quality, self.base)
 
 class ArmorTemplate(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
@@ -668,7 +672,9 @@ class ArmorEffect(ExportedModel, Effect):
         return ['armor']
 
 class SpellEffect(ExportedModel, Effect):
-    pass
+    @classmethod
+    def dont_export(cls):
+        return ['sheet']
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
