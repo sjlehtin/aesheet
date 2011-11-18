@@ -200,7 +200,7 @@ class Edge(ExportedModel):
 
     @classmethod
     def dont_export(self):
-        return ['edgelevel']
+        return ['skill', 'edgelevel']
 
     def __unicode__(self):
         return "%s" % (self.name)
