@@ -198,6 +198,10 @@ class Edge(ExportedModel):
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
+    @classmethod
+    def dont_export(self):
+        return ['edgelevel']
+
     def __unicode__(self):
         return "%s" % (self.name)
 
