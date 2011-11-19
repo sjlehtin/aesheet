@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import widgets
 from sheet.models import *
+import unittest
 
 class EditCharacter(forms.ModelForm):
 
@@ -21,6 +22,11 @@ class SheetForm(forms.Form):
 
     form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
 
+
+class SheetFormTestCase(unittest.TestCase):
+    def test_create_form(self):
+        f = SheetForm()
+        self.assertTrue(f)
 
 class ImportForm(forms.Form):
     import_data = forms.CharField(widget=forms.Textarea, required=False)
