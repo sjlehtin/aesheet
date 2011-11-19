@@ -14,6 +14,8 @@ TODO = """
 ** password change
 * rest of the skills
 * rest of the edges
+* wondrous items
+* inventory
 * magic item location (only one to each location)
 * change log for sheet
 * editing sheet description
@@ -400,14 +402,14 @@ def edit_sheet(request, sheet_id=None):
     sheet = None
     if sheet_id:
         sheet = get_object_or_404(Sheet, pk=sheet_id)
-    form = EditSheet(instance=sheet)
-
     if request.method == "POST":
         form = EditSheet(request.POST, instance=sheet)
         if form.is_valid():
             form.full_clean()
             form.save()
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/')
+    else:
+        form = EditSheet(instance=sheet)
 
     return render_to_response('sheet/edit_sheet.html',
                               RequestContext(request, { 'sheet_form' : form,
@@ -494,7 +496,7 @@ def import_text(data):
         mdl.full_clean()
         mdl.save()
 
-def import_data(request):
+def import_data(request, success=False):
     if request.method == 'POST':
         form = ImportForm(request.POST, request.FILES)
         if form.is_valid():
@@ -504,10 +506,10 @@ def import_data(request):
                 import_data = file.read()
             try:
                 import_text(import_data)
-                return HttpResponseRedirect(reverse('sheet.views.import_data'))
+                return HttpResponseRedirect(
+                    reverse('import-success'))
             except (TypeError, ValueError, ValidationError), e:
                 logging.exception("failed.")
-                print "got error:", e
                 el = form._errors.setdefault('__all__',
                                              django.forms.util.ErrorList())
                 el.append(str(e))
@@ -528,9 +530,13 @@ def import_data(request):
         item['fields'] = cls.get_exported_fields()
         types.append(item)
 
+    message = ""
+    if success:
+        message = "Import successful."
     return render_to_response('sheet/import_data.html',
                               RequestContext(request,
-                                             { 'types' : types,
+                                             { 'message' : message,
+                                               'types' : types,
                                                'import_form' : form }))
 def export_data(request, type):
     try:

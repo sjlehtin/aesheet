@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} Add or edit character {% endblock %}
+{% block title %} Add or edit sheet {% endblock %}
 
 {% block content %}
 
@@ -9,13 +9,8 @@
       id="sheet_form">
 {% csrf_token %}
 {{ sheet_form.as_p }}
-<input type="submit"  
-       {% if char %}
-         value="Update" 
-       {% else %}
-         value="Add" 
-       {% endif %}
-       />
+<input type="submit"  {% if sheet %} value="Update" {% else %} value="Add" 
+       {% endif %} />
 </form>
 
 {% endblock %}

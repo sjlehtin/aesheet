@@ -30,7 +30,9 @@ urlpatterns = patterns('',
     url(r'^sheets/$', 'sheet.views.sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet.views.sheet_detail'),
 
-    url(r'^sheets/import/$', 'sheet.views.import_data'),
+    url(r'^sheets/import/$', 'sheet.views.import_data', name='import'),
+    url(r'^sheets/import/success/$', 'sheet.views.import_data',
+        name='import-success', kwargs={'success' : True }),
     url(r'^sheets/export/(?P<type>\w+)/$', 'sheet.views.export_data'),
 
     # Uncomment the admin/doc line below to enable admin documentation:

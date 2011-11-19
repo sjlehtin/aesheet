@@ -3,6 +3,19 @@
 {% block title %} Import data {% endblock %}
 
 {% block content %}
+{% if message %}
+<p><strong>{{message}}</strong></p>
+{% endif %}
+
+<form action="{% url import %}" method="post" 
+      enctype="multipart/form-data">
+  {% csrf_token %}
+Choose either import method:
+<table>
+  {{ import_form.as_table }}
+</table>
+<input type="submit" value="Import" />
+</form>
 
 <div style="max-width: 35em;">
 <p>
@@ -31,15 +44,6 @@ changed.
 <dd><a href="{% url sheet.views.export_data item.name %}">Download</a></dd>
 {% endfor %}
 </dl>
-
-
-<form action="" method="post" enctype="multipart/form-data">
-  {% csrf_token %}
-Choose either import method:
-<table>
-  {{ import_form.as_table }}
-</table>
-<input type="submit" value="Import" />
-</form>
 </div>
+
 {% endblock %}
