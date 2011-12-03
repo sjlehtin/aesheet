@@ -62,24 +62,25 @@ class AddForm(SheetForm):
 
 class AddWeapon(AddForm):
     def get_choices(self):
-        return [(wpn.id, unicode(wpn)) for wpn in Weapon.objects.all()]
+        return [(wpn.name, unicode(wpn)) for wpn in Weapon.objects.all()]
 
 class AddArmor(AddForm):
     def get_choices(self):
-        return [(wpn.id, unicode(wpn)) for wpn in Armor.objects.all()]
+        return [(item.name, unicode(item)) for item in Armor.objects.all()]
 
 class AddHelm(AddForm):
     def get_choices(self):
-        return [(armor.id, unicode(armor)) for armor in
+        return [(armor.name, unicode(armor)) for armor in
                 filter(lambda xx: xx.base.is_helm, Armor.objects.all())]
 
 class AddSpellEffect(AddForm):
     def get_choices(self):
-        return [(item.id, unicode(item)) for item in SpellEffect.objects.all()]
+        return [(item.name, unicode(item))
+                for item in SpellEffect.objects.all()]
 
 class AddSkill(AddForm):
     def get_choices(self):
-        return [(item.id, unicode(item)) for item in Skill.objects.all()]
+        return [(item.name, unicode(item)) for item in Skill.objects.all()]
 
     # XXX Ajax update based on the chosen skill.
     choices = range(0,8)
@@ -88,7 +89,7 @@ class AddSkill(AddForm):
 
 class AddEdge(AddForm):
     def get_choices(self):
-        return [(item.id, unicode(item)) for item in EdgeLevel.objects.all()]
+        return [(item.name, unicode(item)) for item in EdgeLevel.objects.all()]
 
 class RemoveGeneric(SheetForm):
     def __init__(self, *args, **kwargs):
