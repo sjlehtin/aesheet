@@ -218,13 +218,33 @@ SKILL_TYPES = [
     ]
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
+STAT_TYPES = [
+    "FIT",
+    "REF",
+    "LRN",
+    "INT",
+    "PSY",
+    "WIL",
+    "CHA",
+    "POS",
+    "DEX",
+    "MOV",
+    ]
+STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
+
 class Skill(ExportedModel):
+    class Meta:
+        ordering = ['name']
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     can_be_defaulted = models.BooleanField(default=True)
     is_specialization = models.BooleanField(default=False)
 
+    # XXX Should be any of these? See Construction.  Add another
+    # attribute for another required skill?
+    #
+    # TODO: Fix construction skill.
     required_skills = models.ManyToManyField('self', symmetrical=False,
                                              blank=True, null=True)
     required_edges = models.ManyToManyField(Edge, blank=True, null=True)
@@ -235,6 +255,8 @@ class Skill(ExportedModel):
     skill_cost_3 = models.IntegerField(blank=True, null=True)
 
     type = models.CharField(max_length=64, choices=SKILL_TYPES)
+
+    stat = models.CharField(max_length=64, choices=STAT_TYPES)
 
     def cost(self, level):
         if level == 0:
