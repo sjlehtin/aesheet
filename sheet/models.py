@@ -444,6 +444,9 @@ class WeaponTemplate(ExportedModel):
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
 
+    weight = models.DecimalField(max_digits=4, decimal_places=1,
+                                 default=1.0)
+
     base_skill = models.ForeignKey(Skill,
                                    related_name="base_skill_for_weapons")
     skill = models.ForeignKey(Skill, blank=True, null=True,
