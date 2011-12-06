@@ -225,6 +225,7 @@ STAT_TYPES = [
     "POS",
     "DEX",
     "MOV",
+    "IMM",
     ]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
