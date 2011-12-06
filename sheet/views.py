@@ -455,11 +455,15 @@ def import_text(data):
             # If the field is a reference to another object, try to find
             # the matching instance.
             if isinstance(field, django.db.models.ForeignKey):
-                try:
-                    value = field.related.parent_model.objects.get(name=value)
-                except field.related.parent_model.DoesNotExist:
-                    raise ValueError, "No matching %s with name %s." % (
-                        field.related.parent_model._meta.object_name, value)
+                if value:
+                    try:
+                        value = \
+                            field.related.parent_model.objects.get(name=value)
+                    except field.related.parent_model.DoesNotExist:
+                        raise ValueError, "No matching %s with name %s." % (
+                            field.related.parent_model._meta.object_name, value)
+                else:
+                    value = None
             else:
                 print "field:", fieldname, value
                 if not value:
