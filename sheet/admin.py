@@ -17,7 +17,14 @@ admin.site.register(CharacterSkill)
 admin.site.register(Edge)
 admin.site.register(EdgeLevel)
 admin.site.register(Sheet)
-admin.site.register(Skill)
+
+class SkillAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'notes', 'can_be_defaulted',
+                    'is_specialization',
+                    'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
+                    'skill_cost_3', 'stat', 'type')
+
+admin.site.register(Skill, SkillAdmin)
 admin.site.register(SpellEffect)
 admin.site.register(WeaponEffect)
 admin.site.register(WeaponSpecialQuality)
