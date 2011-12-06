@@ -368,8 +368,8 @@ class CharacterEdge(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.character, self.edge)
 
-class WeaponQuality(models.Model):
-    name = models.CharField(max_length=256, unique=True)
+class WeaponQuality(ExportedModel):
+    name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ccv = models.IntegerField(default=0)
@@ -386,6 +386,8 @@ class WeaponQuality(models.Model):
                                             default=1)
     versus_missile_modifier = models.IntegerField(default=0)
     versus_area_save_modifier = models.IntegerField(default=0)
+
+    notes = models.CharField(max_length=256, blank=True)
 
     class Meta:
         ordering = ["roa", "ccv"]

@@ -522,7 +522,7 @@ def import_data(request, success=False):
     for choice in ['ArmorTemplate', 'ArmorEffect',
                    'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
                    'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
-                   'WeaponSpecialQuality', 'Skill', 'Edge',
+                   'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
                    'EdgeLevel']:
         cls = getattr(sheet.models, choice)
         item = {}
