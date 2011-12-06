@@ -415,6 +415,40 @@ def edit_sheet(request, sheet_id=None):
                               RequestContext(request, { 'sheet_form' : form,
                                                         'sheet' : sheet }))
 
+def get_data_rows(results, fields):
+    """
+    Return queryset data columns in order given with the fields
+    parameters, one row at a time.
+    """
+    for obj in results:
+        def get_field_value(field):
+            try:
+                value = getattr(obj, field)
+            except AttributeError:
+                return ""
+            if isinstance(value, django.db.models.Manager):
+                def get_descr(mdl):
+                    if hasattr(mdl, 'name'):
+                        return mdl.name
+                    return str(val.pk)
+                value = "|".join([get_descr(val) for val in value.all()])
+            return value
+        yield [get_field_value(field) for field in fields]
+
+def browse(request, type):
+    try:
+        cls = getattr(sheet.models, type)
+    except AttributeError, e:
+        raise Http404, "%s is not a supported type." % type
+    results = cls.objects.all()
+    fields = cls.get_exported_fields()
+    rows = get_data_rows(results, fields)
+    fields = [" ".join(ff.split('_')) for ff in fields]
+    return render_to_response('sheet/browse.html',
+                              RequestContext(request, { 'type' : type,
+                                                        'header' : fields,
+                                                        'rows' : rows }))
+
 def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
     data_type = reader.next()
@@ -542,6 +576,7 @@ def import_data(request, success=False):
                                              { 'message' : message,
                                                'types' : types,
                                                'import_form' : form }))
+
 def export_data(request, type):
     try:
         cls = getattr(sheet.models, type)
@@ -553,20 +588,8 @@ def export_data(request, type):
     w.writerow([type])
     fields = cls.get_exported_fields()
     w.writerow(fields)
-    for obj in results:
-        def get_field_value(field):
-            try:
-                value = getattr(obj, field)
-            except AttributeError:
-                return ""
-            if isinstance(value, django.db.models.Manager):
-                def get_descr(mdl):
-                    if hasattr(mdl, 'name'):
-                        return mdl.name
-                    return str(val.pk)
-                value = "|".join([get_descr(val) for val in value.all()])
-            return value
-        w.writerow([get_field_value(field) for field in fields])
+    for row in get_data_rows(results, fields):
+        w.writerow(row)
     response = HttpResponse(f.getvalue(), mimetype="text/csv")
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response

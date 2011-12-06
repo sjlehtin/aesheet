@@ -39,7 +39,7 @@ changed.
 
 <dl>
 {% for item in types %}
-<dt>{{ item.name}}</dt>
+<dt><a href="{% url sheet.views.browse item.name %}">{{ item.name}}</a></dt>
 <dd>{{ item.fields|join:", " }}</dd>
 <dd><a href="{% url sheet.views.export_data item.name %}">Download</a></dd>
 {% endfor %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %} {{ type }} {% endblock %}
+
+{% block content %}
+<h1>Data for {{type}}</h1>
+<table style="font-size:80%;">
+<tr>
+{% for hdr in header %}
+<th>
+  {{ hdr }}
+</th>
+{% endfor %}
+</tr>
+{% for row in rows %}
+<tr>
+{% for cell in row %}
+<td style="text-align:center;">
+  {{ cell }}
+</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
