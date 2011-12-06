@@ -386,6 +386,10 @@ class WeaponQuality(ExportedModel):
 
     notes = models.CharField(max_length=256, blank=True)
 
+    @classmethod
+    def dont_export(cls):
+        return ['weapon']
+
     class Meta:
         ordering = ["roa", "ccv"]
 
@@ -420,6 +424,8 @@ class WeaponDamage(object):
                                 self.extra_damage, self.leth)
 
 class WeaponTemplate(ExportedModel):
+    class Meta:
+        ordering = ['name']
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
@@ -480,6 +486,7 @@ class Effect(StatModifier):
                             "circumstance bonus, only highest effect of "
                             "a single type will take effect.")
     class Meta:
+        ordering = ['name']
         abstract = True
 
     def __unicode__(self):
@@ -528,6 +535,9 @@ class Weapon(ExportedModel):
     base = models.ForeignKey(WeaponTemplate)
     quality = models.ForeignKey(WeaponQuality)
     special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+
+    class Meta:
+        ordering = ['name']
 
     @classmethod
     def dont_export(cls):
