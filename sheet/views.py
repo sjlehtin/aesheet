@@ -77,12 +77,10 @@ def process_sheet_change_request(request, sheet):
     forms = {}
 
     if form_id == "RemoveGeneric":
-        item_type = request.POST.get('item_type')
-        if not item_type:
-            raise ValidationError("No item_type")
-        form = RemoveGeneric(request.POST)
+        form = RemoveGeneric(request.POST, prefix='remove')
         if form.is_valid():
             item = form.cleaned_data['item']
+            item_type = form.cleaned_data['item_type']
             print "Removing %s" % item_type
             if item_type == "Weapon":
                 item = get_object_or_404(Weapon, pk=item)
@@ -213,13 +211,15 @@ class RemoveWrap(object):
         self.item = item
         self.type = type
 
+    @property
     def remove_form(self):
         if self.type:
             type = self.type
         else:
             type = self.item.__class__.__name__
         return RemoveGeneric(item=self.item,
-                             item_type=type)
+                             item_type=type,
+                             prefix='remove')
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to

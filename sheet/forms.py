@@ -107,7 +107,7 @@ class RemoveGeneric(SheetForm):
             self.fields['item_type'].initial = item_type
 
     item_type = forms.CharField(max_length=64, widget=widgets.HiddenInput)
-    item = forms.IntegerField(widget=widgets.HiddenInput)
+    item = forms.CharField(max_length=128, widget=widgets.HiddenInput)
 
 class StatModify(SheetForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)

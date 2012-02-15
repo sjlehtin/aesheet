@@ -45,14 +45,14 @@ class WeaponAdd(TestCase):
         self.assertEquals(response.context['char'].armor()[0].name,
                           'Plate mail L5')
 
-    def test_add_effect(self):
+    def test_add_remove_effect(self):
         c = Client()
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
         req_data = { 'add-spell-effect-form_id' : 'AddSpellEffect',
                      'add-spell-effect-item' : 'Bull\'s strength L5' }
         response = c.get(det_url)
-        print response.content
+
         self.assertContains(response, "No spell effects.")
         response = c.post(det_url, req_data)
         self.assertRedirects(response, det_url)
@@ -60,3 +60,12 @@ class WeaponAdd(TestCase):
         self.assertNotContains(response, "No spell effects.")
         self.assertEquals(response.context['char'].spell_effects()[0].name,
                           'Bull\'s strength L5')
+
+
+        req_data = { 'remove-form_id' : 'RemoveGeneric',
+                     'remove-item_type' : 'SpellEffect',
+                     'remove-item' : 'Bull\'s strength L5' }
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertContains(response, "No spell effects.")
