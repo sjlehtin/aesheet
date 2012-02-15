@@ -21,6 +21,12 @@ PRODUCTION = True if os.environ.get('PRODUCTION') else False
 LOGIN_URL = ROOT_URL + "accounts/login/"
 LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
+import socket
+
+DBHOST = '127.0.0.1'
+if socket.getfqdn() != 'semeai.org':
+    DBHOST = '192.168.0.1'
+
 if PRODUCTION:
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
     DB_NAME = 'sheet'
@@ -39,7 +45,7 @@ DATABASES = {
         'NAME': DB_NAME, # Or path to database file if using sqlite3.
         'USER': USER,                      # Not used with sqlite3.
         'PASSWORD': PASSWORD,     # Not used with sqlite3.
-        'HOST': '127.0.0.1',                  # Set to empty string for
+        'HOST': DBHOST,                  # Set to empty string for
                                          # localhost. Not used with
                                          # sqlite3.
         'PORT': '',                      # Set to empty string for
