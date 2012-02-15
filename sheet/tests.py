@@ -10,7 +10,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 
 class WeaponAdd(TestCase):
-    fixtures = ["user", "char", "sheet", "wpns", "armor"]
+    fixtures = ["user", "char", "sheet", "wpns", "armor", "spell"]
     def test_adding_weapon(self):
         c = Client()
         c.login(username="admin", password="admin")
@@ -51,3 +51,19 @@ class WeaponAdd(TestCase):
         self.assertNotContains(response, "No armor.")
         self.assertEquals(response.context['char'].armor()[0].name,
                           'Plate mail L5')
+
+    def test_add_effect(self):
+        c = Client()
+        c.login(username="admin", password="admin")
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        req_data = { 'add-spell-effect-form_id' : 'AddSpellEffect',
+                     'add-spell-effect-item' : 'Bull\'s strength L5' }
+        response = c.get(det_url)
+        print response.content
+        self.assertContains(response, "No spell effects.")
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertNotContains(response, "No spell effects.")
+        self.assertEquals(response.context['char'].spell_effects()[0].name,
+                          'Bull\'s strength L5')
