@@ -31,7 +31,7 @@ class WeaponAdd(TestCase):
         self.assertRedirects(response, det_url)
         response = c.get(det_url)
         self.assertNotContains(response, "No helmet.")
-        self.assertEquals(response.context['char'].helm()[0].name,
+        self.assertEquals(response.context['char'].helm().name,
                           'Basinet wfa L5')
 
         req_data = { 'add-armor-form_id' : 'AddArmor',
@@ -42,7 +42,7 @@ class WeaponAdd(TestCase):
         self.assertRedirects(response, det_url)
         response = c.get(det_url)
         self.assertNotContains(response, "No armor.")
-        self.assertEquals(response.context['char'].armor()[0].name,
+        self.assertEquals(response.context['char'].armor().name,
                           'Plate mail L5')
 
     def test_add_remove_effect(self):
@@ -60,7 +60,6 @@ class WeaponAdd(TestCase):
         self.assertNotContains(response, "No spell effects.")
         self.assertEquals(response.context['char'].spell_effects()[0].name,
                           'Bull\'s strength L5')
-
 
         req_data = { 'remove-form_id' : 'RemoveGeneric',
                      'remove-item_type' : 'SpellEffect',

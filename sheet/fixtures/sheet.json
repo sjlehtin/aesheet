@@ -4,10 +4,10 @@
     "model": "sheet.sheet", 
     "fields": {
       "description": "Dungeon-crawl gear.", 
-      "armor": [], 
+      "armor": null, 
       "character": 1, 
       "weapons": [], 
-      "helm": [], 
+      "helm": null, 
       "spell_effects": [], 
       "owner": 2, 
       "size": "M"
@@ -18,10 +18,10 @@
     "model": "sheet.sheet", 
     "fields": {
       "description": "puppa", 
-      "armor": [], 
+      "armor": null, 
       "character": 2, 
       "weapons": [], 
-      "helm": [], 
+      "helm": null, 
       "spell_effects": [], 
       "owner": 1, 
       "size": "M"

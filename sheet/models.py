@@ -706,6 +706,15 @@ class Armor(ExportedModel):
             return self.name
         return "%s %s" % (self.base.name, self.quality)
 
+    def __getattr__(self, v):
+        # pass through all attribute references not handled by us to
+        # base character.
+        if v.startswith("armor"):
+            typ = v.split('_')[-1]
+            return getattr(self.base, v) + getattr(self.quality, "armor_" + typ)
+
+        raise AttributeError, "no attr %s" % v
+
 class WeaponEffect(ExportedModel, Effect):
     weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
 
@@ -735,8 +744,9 @@ class Sheet(models.Model):
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
-    armor = models.ManyToManyField(Armor, blank=True)
-    helm = models.ManyToManyField(Armor, blank=True, related_name='helm_for')
+    armor = models.ForeignKey(Armor, blank=True, null=True)
+    helm = models.ForeignKey(Armor, blank=True, null=True,
+                             related_name='helm_for')
 
     (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
 
@@ -953,7 +963,7 @@ class Sheet(models.Model):
         # pass through all attribute references not handled by us to
         # base character.
         if v.startswith("_"):
-            raise AttributeError()
+            raise AttributeError, "no attr %s" % v
         return getattr(self.character, v)
 
     def __unicode__(self):

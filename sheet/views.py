@@ -141,7 +141,7 @@ def process_sheet_change_request(request, sheet):
         if form.is_valid():
             armor = form.cleaned_data['item']
             armor = get_object_or_404(Armor, name=armor)
-            sheet.armor.add(armor)
+            sheet.armor = armor
             sheet.full_clean()
             sheet.save()
             return (True, forms)
@@ -152,7 +152,7 @@ def process_sheet_change_request(request, sheet):
         if form.is_valid():
             helm = form.cleaned_data['item']
             helm = get_object_or_404(Armor, name=helm)
-            sheet.helm.add(helm)
+            sheet.helm = helm
             sheet.full_clean()
             sheet.save()
             return (True, forms)
@@ -334,14 +334,14 @@ class SheetView(object):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
     def armor(self):
-        if not self.sheet.armor.exists():
-            return []
-        return [RemoveWrap(xx) for xx in self.sheet.armor.all()]
+        if not self.sheet.armor:
+            return
+        return RemoveWrap(self.sheet.armor, type="Armor")
 
     def helm(self):
-        if not self.helm:
-            return []
-        return [RemoveWrap(xx, type="Helm") for xx in self.sheet.helm.all()]
+        if not self.sheet.helm:
+            return
+        return RemoveWrap(self.sheet.helm, type="Helm")
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
