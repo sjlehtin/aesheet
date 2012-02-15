@@ -13,3 +13,7 @@ def render_armor_leth_red(armor, loc_desc):
                                      "armor_%s_%s" % (loc_desc, dmg_type))))
 
     return "<td>" + "</td><td>".join(descr) + "</td>"
+
+@register.simple_tag
+def sum_sp_cost(skills):
+    return sum((skill.skill.cost(skill.level) for skill in skills))

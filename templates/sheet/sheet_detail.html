@@ -231,6 +231,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
         </tr>
     {% endfor %}
 </table>
+<div> {% sum_sp_cost char.skills %} / {{ char.gained_sp }} </div>
 {% else %}
 <p>No skills.</p>
 {% endif %}
