@@ -1,12 +1,9 @@
 from django.db import models
-
 import django.contrib.auth as auth
-
+import math
+import logging
 from functools import wraps
 
-import math
-
-# Create your models here.
 from django.core.exceptions import ValidationError
 
 def validate_nonnegative(value):
@@ -126,6 +123,16 @@ class Character(models.Model):
     base_mod_imm = models.IntegerField(default=0)
 
     free_edges = models.IntegerField(default=2)
+
+    def has_skill(self, skill):
+        if not skill:
+            return True
+        print skill
+        qs = self.skills.filter(skill__skill=skill)
+        if not qs.count():
+            return False
+        assert qs.count() <= 1
+        return True
 
     def cur_mov(self):
         return (self.cur_ref + self.cur_fit)/2
@@ -543,6 +550,10 @@ class Weapon(ExportedModel):
     def dont_export(cls):
         return ['sheet']
 
+    @property
+    def ccv(self):
+        return self.base.ccv + self.quality.ccv
+
     def roa(self):
         # XXX modifiers for size of weapon.
         return float(self.base.roa + self.quality.roa)
@@ -746,7 +757,7 @@ class Sheet(models.Model):
 
     def roa(self, weapon, use_type=FULL):
         roa = weapon.roa()
-        cs = self.character.skills.get(skill=weapon.base.base_skill)
+        cs = self.character.skills.filter(skill__name="Weapon combat")
         if use_type == self.PRI:
             roa -= 0.25
         elif use_type == self.SEC:
@@ -754,17 +765,18 @@ class Sheet(models.Model):
 
         try:
             if use_type in [self.FULL, self.SPECIAL]:
-                spec = Skill.objects.get(name="Single-weapon style")
-                spec = self.character.skills.get(skill=spec)
+                spec = self.character.skills.get(
+                    skill__name="Single-weapon style")
                 roa += spec.level * 0.05
             else:
-                spec = Skill.objects.get(name="Two-weapon style")
-                spec = self.character.skills.get(skill=spec)
+                spec = self.character.skills.get(
+                    skill__name="Two-weapon style")
                 roa += spec.level * 0.05
         except CharacterSkill.DoesNotExist as e:
-            pass
+            logging.warning("Got error on skill lookup: %s" % `e`)
 
-        roa *= (1 + cs.level * 0.10)
+        if cs:
+            roa *= (1 + cs[0].level * 0.10)
 
         # XXX maximum is 5.0 with ranged.
         roa = min(roa, 2.5)
@@ -797,6 +809,15 @@ class Sheet(models.Model):
             inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
         return inits
 
+    def skilled(self, weapon, use_type=FULL):
+        if not self.character.has_skill(weapon.base.base_skill):
+            return False
+        elif not self.character.has_skill(weapon.base.skill):
+            return False
+        elif not self.character.has_skill(weapon.base.skill2):
+            return False
+        return True
+
     def weapon_skill_checks(self, weapon, use_type=FULL):
         roa = self.roa(weapon, use_type=use_type)
         roa = float(roa)
@@ -809,15 +830,28 @@ class Sheet(models.Model):
             if act < 0.5 * roa:
                 return roa / act
             return 0
-        # XXX skill level/unskilled
+
+        modifiers = 0
+
+        # skill level/unskilled.
+
+        cs = self.character.skills.filter(skill__name="Weapon combat")
+        if cs.count() > 0:
+            modifiers += cs[0].level * 5
+
         # XXX CCV bonus (penalty for unskilled)
+        if not self.skilled(weapon):
+            modifiers += weapon.base.ccv_unskilled_modifier
+        else:
+            modifiers += weapon.ccv
+
         checks = [check_mod_from_action_index(act)
                            # cap number of actions.
                            for act in filter(lambda act: act < roa * 2,
                                              self.actions)]
         # XXX intuition counters cc-penalties, fitness counters ranged
         # weapon penalties.
-        mov = self.eff_mov()
+        mov = self.eff_mov() + modifiers
         return [int(round(xx)) + mov for xx in checks]
 
     def damage(self, weapon, use_type=FULL):
