@@ -1,0 +1,133 @@
+[
+  {
+    "pk": "Greatsword, 2h", 
+    "model": "sheet.weapontemplate", 
+    "fields": {
+      "weight": "3.6", 
+      "durability": 7, 
+      "roa": "0.85", 
+      "skill": "Greatweapon", 
+      "dice": 6, 
+      "skill2": null, 
+      "ccv_unskilled_modifier": -10, 
+      "type": "S", 
+      "description": "", 
+      "short_name": "Greatsword, 2h", 
+      "extra_damage": 0, 
+      "dp": 18, 
+      "draw_initiative": -7, 
+      "notes": "", 
+      "ccv": 15, 
+      "num_dice": 2, 
+      "plus_leth": 0, 
+      "is_lance": false, 
+      "leth": 5, 
+      "base_skill": "Sword", 
+      "is_shield": false, 
+      "defense_leth": 6
+    }
+  }, 
+  {
+    "pk": "Short sword", 
+    "model": "sheet.weapontemplate", 
+    "fields": {
+      "weight": "1", 
+      "durability": 7, 
+      "roa": "1.1", 
+      "skill": null, 
+      "dice": 6, 
+      "skill2": null, 
+      "ccv_unskilled_modifier": -10, 
+      "type": "S", 
+      "description": "", 
+      "short_name": "Gladius", 
+      "extra_damage": 1, 
+      "dp": 5, 
+      "draw_initiative": -3, 
+      "notes": "", 
+      "ccv": 10, 
+      "num_dice": 1, 
+      "plus_leth": 0, 
+      "is_lance": false, 
+      "leth": 5, 
+      "base_skill": "Sword", 
+      "is_shield": false, 
+      "defense_leth": 5
+    }
+  }, 
+  {
+    "pk": "Whip", 
+    "model": "sheet.weapontemplate", 
+    "fields": {
+      "weight": "1", 
+      "durability": 4, 
+      "roa": "1.05", 
+      "skill": null, 
+      "dice": 4, 
+      "skill2": null, 
+      "ccv_unskilled_modifier": -10, 
+      "type": "S", 
+      "description": "", 
+      "short_name": "Whip", 
+      "extra_damage": 0, 
+      "dp": 2, 
+      "draw_initiative": -2, 
+      "notes": "+10 on disarm, k.down", 
+      "ccv": 5, 
+      "num_dice": 1, 
+      "plus_leth": 0, 
+      "is_lance": false, 
+      "leth": 1, 
+      "base_skill": "Flail", 
+      "is_shield": false, 
+      "defense_leth": 1
+    }
+  },
+  {
+    "pk": "normal", 
+    "model": "sheet.weaponquality", 
+    "fields": {
+      "versus_missile_modifier": 0, 
+      "dp_multiplier": "1", 
+      "short_name": "", 
+      "durability": 0, 
+      "roa": "0", 
+      "notes": "", 
+      "ccv": 0, 
+      "damage": 0, 
+      "weight_multiplier": "1", 
+      "plus_leth": 0, 
+      "versus_area_save_modifier": 0, 
+      "leth": 0, 
+      "defense_leth": 0
+    }
+  }, 
+  {
+    "pk": "L1", 
+    "model": "sheet.weaponquality", 
+    "fields": {
+      "versus_missile_modifier": 0, 
+      "dp_multiplier": "2", 
+      "short_name": "", 
+      "durability": 1, 
+      "roa": "0.01", 
+      "notes": "Glows in the dark", 
+      "ccv": 5, 
+      "damage": 1, 
+      "weight_multiplier": "0.8", 
+      "plus_leth": 0, 
+      "versus_area_save_modifier": 0, 
+      "leth": 1, 
+      "defense_leth": 1
+    }
+  }, 
+  {
+    "pk": 1,
+    "model" : "sheet.weapon",
+    "fields" : {
+        "name" : "Greatsword L1",
+	"base" : "Greatsword",
+	"quality" : "L1"
+    }
+  }
+]

@@ -45,6 +45,7 @@ import StringIO
 from django.db.models.fields import FieldDoesNotExist
 from pprint import pprint
 import logging
+import pdb
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
@@ -66,15 +67,14 @@ def sheets_index(request):
 
 def process_sheet_change_request(request, sheet):
     assert request.method == "POST"
-    form_id = request.POST.get('form_id')
+
+    form = AddWeaponFromTemplate(request.POST, prefix='wpn-from-template')
+    form_ids = filter(lambda xx: xx[0].find('form_id') >= 0,
+                      request.POST.items())
+    form_id = form_ids[0][1]
     if not form_id:
         raise ValidationError("No form id")
     forms = {}
-
-    f = SheetForm(request.POST)
-
-    if not f.is_valid():
-        return
 
     if form_id == "RemoveGeneric":
         item_type = request.POST.get('item_type')
@@ -110,7 +110,7 @@ def process_sheet_change_request(request, sheet):
         # removal forms are forgotten and not updated on failures.
 
     elif form_id == "StatModify":
-        form = StatModify(request.POST)
+        form = StatModify(request.POST, prefix="stat-modify")
         if form.is_valid():
             stat = form.cleaned_data['stat']
             func = form.cleaned_data['function']
@@ -127,17 +127,19 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
 
     elif form_id == "AddWeapon":
-        form = AddWeapon(request.POST, sheet=sheet, form_id=form_id)
+        form = AddWeapon(request.POST, sheet=sheet, form_id=form_id,
+                         prefix="add-weapon")
         if form.is_valid():
             weapon = form.cleaned_data['item']
-            weapon = get_object_or_404(Weapon, pk=weapon)
+            weapon = get_object_or_404(Weapon, name=weapon)
             sheet.weapons.add(weapon)
             sheet.full_clean()
             sheet.save()
             return (True, forms)
 
     elif form_id == "AddArmor":
-        form = AddArmor(request.POST, sheet=sheet, form_id=form_id)
+        form = AddArmor(request.POST, sheet=sheet, form_id=form_id,
+                         prefix="add-armor")
         if form.is_valid():
             armor = form.cleaned_data['item']
             armor = get_object_or_404(Armor, pk=armor)
@@ -147,7 +149,8 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
 
     elif form_id == "AddHelm":
-        form = AddHelm(request.POST, sheet=sheet, form_id=form_id)
+        form = AddHelm(request.POST, sheet=sheet, form_id=form_id,
+                       prefix="add-helm")
         if form.is_valid():
             helm = form.cleaned_data['item']
             helm = get_object_or_404(Armor, pk=helm)
@@ -157,7 +160,8 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
 
     elif form_id == "AddSpellEffect":
-        form = AddSpellEffect(request.POST, sheet=sheet, form_id=form_id)
+        form = AddSpellEffect(request.POST, sheet=sheet, form_id=form_id,
+                              prefix="add-spell-effect")
         if form.is_valid():
             spell = form.cleaned_data['item']
             spell = get_object_or_404(SpellEffect, pk=spell)
@@ -167,7 +171,8 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
 
     elif form_id == "AddSkill":
-        form = AddSkill(request.POST, sheet=sheet, form_id=form_id)
+        form = AddSkill(request.POST, sheet=sheet, form_id=form_id,
+                        prefix="add-skill")
         forms['add_skill_form'] = form
         if form.is_valid():
             skill = form.cleaned_data['item']
@@ -189,7 +194,8 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
 
     elif form_id == "AddEdge":
-        form = AddEdge(request.POST, sheet=sheet, form_id=form_id)
+        form = AddEdge(request.POST, sheet=sheet, form_id=form_id,
+                       prefix="add-edge")
         if form.is_valid():
             edge = form.cleaned_data['item']
             edge = get_object_or_404(EdgeLevel, pk=edge)
@@ -295,9 +301,11 @@ class SheetView(object):
             if st not in ["mov", "dex", "imm"]:
                 stat.update({
                         'add_form' : StatModify(initial={ 'stat' : st,
-                                                          'function' : "add" }),
+                                                          'function' : "add" },
+                                                prefix='stat-modify'),
                         'dec_form' : StatModify(initial={ 'stat' : st,
-                                                          'function' : "dec" }),
+                                                          'function' : "dec" },
+                                                prefix='stat-modify'),
                         })
             ll.append(stat)
         return ll
@@ -346,12 +354,12 @@ class SheetView(object):
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
-    add_weapon_form = AddWeapon(sheet=sheet)
-    add_spell_form = AddSpellEffect(sheet=sheet)
-    add_skill_form = AddSkill(sheet=sheet)
-    add_edge_form = AddEdge(sheet=sheet)
-    add_helm_form = AddHelm(sheet=sheet)
-    add_armor_form = AddArmor(sheet=sheet)
+    add_weapon_form = AddWeapon(sheet=sheet, prefix="add-weapon")
+    add_spell_form = AddSpellEffect(sheet=sheet, prefix="add-spell-effect")
+    add_skill_form = AddSkill(sheet=sheet, prefix="add-skill")
+    add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
+    add_helm_form = AddHelm(sheet=sheet, prefix="add-helm")
+    add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
 
     forms = {}
     if request.method == "POST":

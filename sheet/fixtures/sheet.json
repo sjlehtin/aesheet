@@ -1,0 +1,30 @@
+[
+  {
+    "pk": 1, 
+    "model": "sheet.sheet", 
+    "fields": {
+      "description": "Dungeon-crawl gear.", 
+      "armor": [], 
+      "character": 1, 
+      "weapons": [], 
+      "helm": [], 
+      "spell_effects": [], 
+      "owner": 2, 
+      "size": "M"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "sheet.sheet", 
+    "fields": {
+      "description": "puppa", 
+      "armor": [], 
+      "character": 2, 
+      "weapons": [], 
+      "helm": [], 
+      "spell_effects": [], 
+      "owner": 1, 
+      "size": "M"
+    }
+  }
+]

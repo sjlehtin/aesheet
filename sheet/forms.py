@@ -64,6 +64,11 @@ class AddWeapon(AddForm):
     def get_choices(self):
         return [(wpn.name, unicode(wpn)) for wpn in Weapon.objects.all()]
 
+class AddWeaponFromTemplate(forms.Form):
+    WeaponTemplate.objects.all()
+    template = forms.CharField()
+    quality = forms.CharField()
+
 class AddArmor(AddForm):
     def get_choices(self):
         return [(item.name, unicode(item)) for item in Armor.objects.all()]
