@@ -102,7 +102,7 @@ class RemoveGeneric(SheetForm):
         item_type = kwargs.pop('item_type', "")
         super(RemoveGeneric, self).__init__(*args, **kwargs)
         if item:
-            self.fields['item'].initial = item.id
+            self.fields['item'].initial = item.pk
         if item_type:
             self.fields['item_type'].initial = item_type
 
