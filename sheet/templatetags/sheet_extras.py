@@ -12,4 +12,4 @@ def render_armor_leth_red(armor, loc_desc):
         descr.append(unicode(getattr(armor,
                                      "armor_%s_%s" % (loc_desc, dmg_type))))
 
-    return " / ".join(descr)
+    return "<td>" + "</td><td>".join(descr) + "</td>"

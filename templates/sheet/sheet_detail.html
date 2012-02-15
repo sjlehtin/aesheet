@@ -73,12 +73,21 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <div class="armor">
   <table>
-    <tr>{% render_armor_leth_red char.helm "h" %}</tr>
-    <tr>{% render_armor_leth_red char.armor "t" %}</tr>
-    <tr>{% render_armor_leth_red char.armor "ra" %}</tr>
-    <tr>{% render_armor_leth_red char.armor "rl" %}</tr>
-    <tr>{% render_armor_leth_red char.armor "la" %}</tr>
-    <tr>{% render_armor_leth_red char.armor "ll" %}</tr>
+    <thead>
+      <tr><th></th><th></th><th>P</th><th>S</th><th>B</th><th>R</th></tr>
+    </thead>
+    <tr><td>8</td><td>Head</td>
+      {% render_armor_leth_red char.helm "h" %}</tr>
+    <tr><td>5-7</td><td>Torso</td>
+      {% render_armor_leth_red char.armor "t" %}</tr>
+    <tr><td>4</td><td>Right arm</td>
+      {% render_armor_leth_red char.armor "ra" %}</tr>
+    <tr><td>3</td><td>Right leg</td>
+      {% render_armor_leth_red char.armor "rl" %}</tr>
+    <tr><td>2</td><td>Left arm</td>
+      {% render_armor_leth_red char.armor "la" %}</tr>
+    <tr><td>1</td><td>Left leg</td>
+      {% render_armor_leth_red char.armor "ll" %}</tr>
   </table>
 </div>
 
@@ -273,6 +282,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <h3>Helmet</h3>
 {% if char.helm %}
+{% with char.helm as helm %}
 <table>
   <tr><td>{{ helm.item }}</td>
     <td>
@@ -287,6 +297,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
     </td>
   </tr>
 </table>
+{% endwith %}
 {% else %}
 <p>No helmet.</p>
 {% endif %}
@@ -304,6 +315,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 
 <h3>Armor</h3>
 {% if char.armor %}
+{% with char.armor as armor %}
 <table>
   <tr><td>{{ armor.item }}</td>
     <td>
@@ -318,6 +330,7 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
     </td>
   </tr>
 </table>
+{% endwith %}
 {% else %}
 <p>No armor.</p>
 {% endif %}
@@ -333,108 +346,8 @@ XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} +
 </form>
 </div>
 
+<script src="{{ STATIC_URL}}jquery-combobox.js"></script>
 <script>
-(function( $ ) {
-		$.widget( "ui.combobox", {
-			_create: function() {
-				var self = this,
-					select = this.element.hide(),
-					selected = select.children( ":selected" ),
-					value = selected.val() ? selected.text() : "";
-				var input = this.input = $( "<input>" )
-					.insertAfter( select )
-					.val( value )
-					.autocomplete({
-						delay: 0,
-						minLength: 0,
-						source: function( request, response ) {
-							var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
-							response( select.children( "option" ).map(function() {
-								var text = $( this ).text();
-								if ( this.value && ( !request.term || matcher.test(text) ) )
-									return {
-										label: text.replace(
-											new RegExp(
-												"(?![^&;]+;)(?!<[^<>]*)(" +
-												$.ui.autocomplete.escapeRegex(request.term) +
-												")(?![^<>]*>)(?![^&;]+;)", "gi"
-											), "<strong>$1</strong>" ),
-										value: text,
-										option: this
-									};
-							}) );
-						},
-						select: function( event, ui ) {
-							ui.item.option.selected = true;
-							self._trigger( "selected", event, {
-								item: ui.item.option
-							});
-						},
-						change: function( event, ui ) {
-							if ( !ui.item ) {
-								var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( $(this).val() ) + "$", "i" ),
-									valid = false;
-								select.children( "option" ).each(function() {
-									if ( $( this ).text().match( matcher ) ) {
-										this.selected = valid = true;
-										return false;
-									}
-								});
-								if ( !valid ) {
-									// remove invalid value, as it didn't match anything
-									$( this ).val( "" );
-									select.val( "" );
-									input.data( "autocomplete" ).term = "";
-									return false;
-								}
-							}
-						}
-					})
-					.addClass( "ui-widget ui-widget-content ui-corner-left" );
-
-				input.data( "autocomplete" )._renderItem = function( ul, item ) {
-					return $( "<li></li>" )
-						.data( "item.autocomplete", item )
-						.append( "<a>" + item.label + "</a>" )
-						.appendTo( ul );
-				};
-
-				this.button = $( "<button type='button'>&nbsp;</button>" )
-					.attr( "tabIndex", -1 )
-					.attr( "title", "Show All Items" )
-					.insertAfter( input )
-					.button({
-						icons: {
-							primary: "ui-icon-triangle-1-s"
-						},
-						text: false
-					})
-					.removeClass( "ui-corner-all" )
-					.addClass( "ui-corner-right ui-button-icon" )
-					.click(function() {
-						// close if already visible
-						if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
-							input.autocomplete( "close" );
-							return;
-						}
-
-						// work around a bug (likely same cause as #5265)
-						$( this ).blur();
-
-						// pass empty string as value to search for, displaying all results
-						input.autocomplete( "search", "" );
-						input.focus();
-					});
-			},
-
-			destroy: function() {
-				this.input.remove();
-				this.button.remove();
-				this.element.show();
-				$.Widget.prototype.destroy.call( this );
-			}
-		});
-	})( jQuery );
     $(document).ready(function () {
     $("#add_skill select").combobox();
     });
