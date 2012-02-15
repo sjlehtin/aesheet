@@ -142,7 +142,7 @@ def process_sheet_change_request(request, sheet):
                          prefix="add-armor")
         if form.is_valid():
             armor = form.cleaned_data['item']
-            armor = get_object_or_404(Armor, pk=armor)
+            armor = get_object_or_404(Armor, name=armor)
             sheet.armor.add(armor)
             sheet.full_clean()
             sheet.save()
@@ -153,7 +153,7 @@ def process_sheet_change_request(request, sheet):
                        prefix="add-helm")
         if form.is_valid():
             helm = form.cleaned_data['item']
-            helm = get_object_or_404(Armor, pk=helm)
+            helm = get_object_or_404(Armor, name=helm)
             sheet.helm.add(helm)
             sheet.full_clean()
             sheet.save()
