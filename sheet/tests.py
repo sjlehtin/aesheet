@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 
-class WeaponAdd(TestCase):
+class ItemHandling(TestCase):
     fixtures = ["user", "char", "sheet", "wpns", "armor", "spell"]
     def test_adding_weapon(self):
         c = Client()
@@ -68,3 +68,22 @@ class WeaponAdd(TestCase):
         self.assertRedirects(response, det_url)
         response = c.get(det_url)
         self.assertContains(response, "No spell effects.")
+
+class SkillHandling(TestCase):
+    fixtures = ["user", "char", "sheet", "basic_skills"]
+    def test_adding_skill(self):
+        c = Client()
+        c.login(username="admin", password="admin")
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        req_data = { 'add-skill-skill' : 'Weapon combat',
+                     'add-skill-level' : '5'}
+        response = c.get(det_url)
+        self.assertContains(response, "No skills.")
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertNotContains(response, "No skills.")
+        self.assertEquals(response.context['char'].skills()[0].skill.name,
+                          'Weapon combat')
+        self.assertEquals(response.context['char'].skills()[0].level,
+                          5)

@@ -121,23 +121,6 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
         # removal forms are forgotten and not updated on failures.
 
-    elif form_id == "StatModify":
-        form = StatModify(request.POST, prefix="stat-modify")
-        if form.is_valid():
-            stat = form.cleaned_data['stat']
-            func = form.cleaned_data['function']
-            if func == "add":
-                amount = 1
-            else:
-                amount = -1
-            stat = "cur_" + stat
-            char = sheet.character
-            setattr(char, stat,
-                    getattr(char, stat) + amount)
-            char.full_clean()
-            char.save()
-            return (True, forms)
-
     elif form_id == "AddWeapon":
         form = AddWeapon(request.POST, sheet=sheet, form_id=form_id,
                          prefix="add-weapon")
@@ -180,29 +163,6 @@ def process_sheet_change_request(request, sheet):
             sheet.spell_effects.add(spell)
             sheet.full_clean()
             sheet.save()
-            return (True, forms)
-
-    elif form_id == "AddSkill":
-        form = AddSkill(request.POST, sheet=sheet, form_id=form_id,
-                        prefix="add-skill")
-        forms['add_skill_form'] = form
-        if form.is_valid():
-            skill = form.cleaned_data['item']
-            skill = get_object_or_404(Skill, pk=skill)
-            cs = CharacterSkill()
-            cs.character = sheet.character
-            cs.skill = skill
-            cs.level = form.cleaned_data['level']
-            try:
-                cs.full_clean()
-            except ValidationError as e:
-                el = form._errors.setdefault('__all__',
-                                             django.forms.util.ErrorList())
-                el.append('\n'.join(['\n'.join(x)
-                                   for x in e.message_dict.values()]))
-
-                return (False, forms)
-            cs.save()
             return (True, forms)
 
     elif form_id == "AddEdge":
@@ -314,10 +274,12 @@ class SheetView(object):
                     }
             if st not in ["mov", "dex", "imm"]:
                 stat.update({
-                        'add_form' : StatModify(initial={ 'stat' : st,
+                        'add_form' : StatModify(instance=self.sheet.character,
+                                                initial={ 'stat' : "cur_" + st,
                                                           'function' : "add" },
                                                 prefix='stat-modify'),
-                        'dec_form' : StatModify(initial={ 'stat' : st,
+                        'dec_form' : StatModify(instance=self.sheet.character,
+                                                initial={ 'stat' : "cur_" + st,
                                                           'function' : "dec" },
                                                 prefix='stat-modify'),
                         })
@@ -364,29 +326,42 @@ class SheetView(object):
             raise AttributeError()
         return getattr(self.sheet, v)
 
-
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
     add_weapon_form = AddWeapon(sheet=sheet, prefix="add-weapon")
     add_spell_form = AddSpellEffect(sheet=sheet, prefix="add-spell-effect")
-    add_skill_form = AddSkill(sheet=sheet, prefix="add-skill")
     add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
     add_helm_form = AddHelm(sheet=sheet, prefix="add-helm")
     add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
 
     forms = {}
     if request.method == "POST":
-        (should_change, forms) = process_sheet_change_request(request, sheet)
+        should_change = False
+        stat_form = StatModify(request.POST, instance=sheet.character,
+                          prefix="stat-modify")
+        if stat_form.is_valid():
+            stat_form.save()
+            should_change = True
+
+        add_skill_form = AddSkill(request.POST, instance=sheet.character,
+                                  prefix="add-skill")
+        if add_skill_form.is_valid():
+            add_skill_form.save()
+            should_change = True
+
+        if not should_change:
+            (should_change, forms) = process_sheet_change_request(request,
+                                                                  sheet)
         # XXX more complex forms need to be passed back to
         # render_to_response, below.
         if should_change:
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
+    else:
+        add_skill_form = AddSkill(instance=sheet.character, prefix="add-skill")
 
-    c = {}
-    c.update({
-            'char' : SheetView(sheet),
+    c = { 'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,
           'add_spell_effect_form' : add_spell_form,
           'add_skill_form' : add_skill_form,
@@ -394,7 +369,7 @@ def sheet_detail(request, sheet_id=None):
           'add_helm_form' : add_helm_form,
           'add_armor_form' : add_armor_form,
           'TODO' : TODO,
-          })
+          }
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',
                               RequestContext(request, c))

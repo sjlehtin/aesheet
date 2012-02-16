@@ -16,4 +16,4 @@ def render_armor_leth_red(armor, loc_desc):
 
 @register.simple_tag
 def sum_sp_cost(skills):
-    return sum((skill.skill.cost(skill.level) for skill in skills))
+    return sum((skill.cost() for skill in skills))

@@ -83,14 +83,47 @@ class AddSpellEffect(AddForm):
         return [(item.name, unicode(item))
                 for item in SpellEffect.objects.all()]
 
-class AddSkill(AddForm):
-    def get_choices(self):
-        return [(item.name, unicode(item)) for item in Skill.objects.all()]
-
-    # XXX Ajax update based on the chosen skill.
+class AddSkill(forms.ModelForm):
+    skill = forms.ChoiceField(choices=())
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
+
+    def __init__(self, *args, **kwargs):
+        super(AddSkill, self).__init__(*args, **kwargs)
+        self.fields['skill'].choices = [(item.name, unicode(item))
+                                         for item in Skill.objects.all()]
+
+    def clean_skill(self):
+        skill = self.cleaned_data['skill']
+        # Raises objectnotfound error if skill not found.
+        sk = Skill.objects.get(name=skill)
+        return sk
+
+    def clean(self):
+        super(AddSkill, self).clean()
+        skill = self.cleaned_data.get('skill')
+        level = self.cleaned_data.get('level')
+        if skill and level:
+            # verify skill and level go together.
+            cs = CharacterSkill()
+            cs.character = self.instance
+            cs.skill = skill
+            cs.level = level
+            cs.full_clean()
+        return self.cleaned_data
+
+    class Meta:
+        model = Character
+        fields = ()
+
+    def save(self, commit=True):
+        cs = CharacterSkill()
+        cs.character = self.instance
+        cs.skill = self.cleaned_data.get('skill')
+        cs.level = self.cleaned_data.get('level')
+        cs.save()
+        return self.instance
 
 class AddEdge(AddForm):
     def get_choices(self):
@@ -109,6 +142,24 @@ class RemoveGeneric(SheetForm):
     item_type = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     item = forms.CharField(max_length=128, widget=widgets.HiddenInput)
 
-class StatModify(SheetForm):
+class StatModify(forms.ModelForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
+
+    class Meta:
+        model = Character
+        fields = ()
+
+    def save(self, commit=True):
+        char = self.instance
+
+        stat = self.cleaned_data['stat']
+        orig = getattr(char, stat)
+        if self.cleaned_data['function'] == "add":
+            setattr(char, stat, orig + 1)
+        else:
+            setattr(char, stat, orig - 1)
+
+        if commit:
+            char.save()
+        return char

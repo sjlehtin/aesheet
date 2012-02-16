@@ -1,0 +1,56 @@
+[
+  {
+    "pk": "Abyssal", 
+    "model": "sheet.skill", 
+    "fields": {
+      "stat": "LRN", 
+      "description": "", 
+      "is_specialization": false, 
+      "notes": "", 
+      "skill_cost_3": 3, 
+      "required_edges": [], 
+      "skill_cost_0": 3, 
+      "skill_cost_1": 1, 
+      "skill_cost_2": 2, 
+      "can_be_defaulted": true, 
+      "type": "Language", 
+      "required_skills": []
+    }
+  }, 
+  {
+    "pk": "Acting / Bluff", 
+    "model": "sheet.skill", 
+    "fields": {
+      "stat": "CHA", 
+      "description": "", 
+      "is_specialization": false, 
+      "notes": "", 
+      "skill_cost_3": 4, 
+      "required_edges": [], 
+      "skill_cost_0": 2, 
+      "skill_cost_1": 2, 
+      "skill_cost_2": 3, 
+      "can_be_defaulted": true, 
+      "type": "Social", 
+      "required_skills": []
+    }
+  }, 
+  {
+    "pk": "Weapon combat", 
+    "model": "sheet.skill", 
+    "fields": {
+      "stat": "MOV", 
+      "description": "", 
+      "is_specialization": false, 
+      "notes": "", 
+      "skill_cost_3": 5, 
+      "required_edges": [], 
+      "skill_cost_0": 2, 
+      "skill_cost_1": 2, 
+      "skill_cost_2": 3, 
+      "can_be_defaulted": true, 
+      "type": "Physical", 
+      "required_skills": []
+    }
+  }
+]
