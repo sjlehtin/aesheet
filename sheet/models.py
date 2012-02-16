@@ -924,7 +924,8 @@ class Sheet(models.Model):
 
     @property
     def eff_imm(self):
-        return int(round((self.eff_fit + self.eff_psy)/2)) + self.mod_imm
+        "IMM is not increased by an enhancement to FIT."
+        return int(round((self.fit + self.eff_psy)/2)) + self.mod_imm
 
     def mod_stat(self, stat):
         # XXX allow different types of effects stack.
