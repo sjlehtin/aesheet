@@ -801,14 +801,19 @@ class Sheet(models.Model):
     def max_defenses(self, roa):
         return min(int(math.floor(roa * 4)), 9)
 
+    @property
+    def base_initiative(self):
+        return self.eff_ref() / 10.0 + self.eff_int() / 20.0 + \
+            self.eff_psy() / 20.0
+
     def initiatives(self, weapon, use_type=FULL):
         bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
         roa = self.roa(weapon, use_type=use_type)
         bi = -5 / roa
         inits = []
         for ii in range(1, self.max_attacks(roa) + 1):
-            inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
-        return inits
+            inits.append(bi_multipliers[ii - 1] * bi)
+        return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
 
     def defense_initiatives(self, weapon, use_type=FULL):
         bi_multipliers = [0, 3, 6, 0, 3, 6, 0, 3, 6]
@@ -816,8 +821,8 @@ class Sheet(models.Model):
         bi = -5 / roa
         inits = []
         for ii in range(1, self.max_defenses(roa) + 1):
-            inits.append(int(math.ceil(bi_multipliers[ii - 1] * bi)))
-        return inits
+            inits.append(bi_multipliers[ii - 1] * bi)
+        return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
 
     def skilled(self, weapon, use_type=FULL):
         if not self.character.has_skill(weapon.base.base_skill):
