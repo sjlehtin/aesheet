@@ -2,9 +2,9 @@
 
 TODO = """
 + deployment to semeai.org
-** postgresql backups
-** saner bzr backups (branch all branches to make sure repositories remain
-   valid)
+++ postgresql backups
+++ saner bzr backups (branch all branches to make sure repositories remain
+   valid) (now in git)
 * ranged weapons
 ** ranged weapon ammo special handling
 + logging in
@@ -12,12 +12,13 @@ TODO = """
 *** marking sheet as only visible to self
 *** marking characters as only visible to self
 ** password change
-* rest of the skills
++ rest of the skills
 * rest of the edges
+* initiatives
 * wondrous items
-* inventory
-* magic item location (only one to each location)
-* change log for sheet
+* inventory ?
+* magic item location (only one item to each location)
+* change log for sheet (stat modifications etc)
 * editing sheet description
 * nicer fast edit of basic stats
 * stamina
@@ -26,7 +27,20 @@ TODO = """
 ** recovery
 * body
 ** recovery
-
+* code simplification
+* code to GitHub?
+* reordering skills
+* stats for skill checks
+* character mugshot upload
+* senses
+* charge damage
+* print.css (basically, the whole printable button special handling is
+  unnecessary).
+* movement chart
+* save bonuses
+* encumbrance breakdown
+* spell skill checks
+* sheet styling
 """
 
 from django.shortcuts import render_to_response, get_object_or_404
@@ -371,13 +385,15 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = {}
-    c.update({ 'char' : SheetView(sheet),
+    c.update({
+            'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,
           'add_spell_effect_form' : add_spell_form,
           'add_skill_form' : add_skill_form,
           'add_edge_form' : add_edge_form,
           'add_helm_form' : add_helm_form,
           'add_armor_form' : add_armor_form,
+          'TODO' : TODO,
           })
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',
