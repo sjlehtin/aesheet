@@ -31,6 +31,7 @@ if PRODUCTION:
     # XXX something is wrong with one of the migrations (the grand
     # primary key change), may want to investigate it at some point.
     SOUTH_TESTS_MIGRATE = False
+
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
     DB_NAME = 'sheet'
     f = open(os.path.join(os.path.dirname(__file__), "auth"), "r")
