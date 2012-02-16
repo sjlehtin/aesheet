@@ -553,6 +553,13 @@ class Weapon(ExportedModel):
             leth=self.base.leth + self.quality.leth,
             plus_leth=self.base.plus_leth + self.quality.plus_leth)
 
+    def defense_damage(self):
+        # XXX modifiers for size of weapon.
+        return WeaponDamage(
+            self.base.num_dice, self.base.dice,
+            extra_damage=self.base.extra_damage + self.quality.damage,
+            leth=self.base.defense_leth + self.quality.leth)
+
     def __unicode__(self):
         if self.name:
             return self.name
@@ -867,7 +874,13 @@ class Sheet(models.Model):
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
-        return weapon.damage()
+        dmg = weapon.defense_damage()
+        dmg.add_damage(self.eff_fit / self.fit_modifiers_for_damage[use_type])
+        dmg.add_leth(self.eff_fit /
+                     self.fit_modifiers_for_lethality[use_type])
+
+        return dmg
+
 
     @property
     def eff_fit(self):
