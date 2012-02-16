@@ -7,16 +7,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
-        # Changing field 'WeaponQuality.name'
-        db.alter_column('sheet_weaponquality', 'name', self.gf('django.db.models.fields.CharField')(max_length=256, primary_key=True))
 
         # Deleting field 'WeaponQuality.id'
         db.delete_column('sheet_weaponquality', 'id')
 
+        # Changing field 'WeaponQuality.name'
+        db.alter_column('sheet_weaponquality', 'name', self.gf('django.db.models.fields.CharField')(max_length=256, primary_key=True))
+
 
     def backwards(self, orm):
-        
+
         # User chose to not deal with backwards NULL issues for 'WeaponQuality.id'
         raise RuntimeError("Cannot reverse this migration. 'WeaponQuality.id' and its values cannot be restored.")
 
