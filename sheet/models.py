@@ -107,48 +107,62 @@ class Character(models.Model):
         assert qs.count() <= 1
         return True
 
+    @property
     def cur_mov(self):
         return int(round((self.cur_ref + self.cur_fit)/2))
 
+    @property
     def cur_dex(self):
         return int(round((self.cur_ref + self.cur_int)/2))
 
+    @property
     def cur_imm(self):
         return int(round((self.cur_fit + self.cur_psy)/2))
 
     # Base stats before circumstance modifiers.
+    @property
     def fit(self):
         return self.cur_fit + self.base_mod_fit
 
+    @property
     def ref(self):
         return self.cur_ref + self.base_mod_ref
 
+    @property
     def lrn(self):
         return self.cur_lrn + self.base_mod_lrn
 
+    @property
     def int(self):
         return self.cur_int + self.base_mod_int
 
+    @property
     def psy(self):
         return self.cur_psy + self.base_mod_psy
 
+    @property
     def wil(self):
         return self.cur_wil + self.base_mod_wil
 
+    @property
     def cha(self):
         return self.cur_cha + self.base_mod_cha
 
+    @property
     def pos(self):
         return self.cur_pos + self.base_mod_pos
 
+    @property
     def mov(self):
-        return self.cur_mov() + self.base_mod_mov
+        return self.cur_mov + self.base_mod_mov
 
+    @property
     def dex(self):
-        return self.cur_dex() + self.base_mod_dex
+        return self.cur_dex + self.base_mod_dex
 
+    @property
     def imm(self):
-        return self.cur_imm() + self.base_mod_imm
+        return self.cur_imm + self.base_mod_imm
 
     def xp_used_stats(self):
         xp_used_stats = 0
@@ -776,8 +790,8 @@ class Sheet(models.Model):
 
     @property
     def base_initiative(self):
-        return self.eff_ref() / 10.0 + self.eff_int() / 20.0 + \
-            self.eff_psy() / 20.0
+        return self.eff_ref / 10.0 + self.eff_int / 20.0 + \
+            self.eff_psy / 20.0
 
     def initiatives(self, weapon, use_type=FULL):
         bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
@@ -839,15 +853,15 @@ class Sheet(models.Model):
                                              self.actions)]
         # XXX intuition counters cc-penalties, fitness counters ranged
         # weapon penalties.
-        mov = self.eff_mov() + modifiers
+        mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
 
         # XXX fit under 45.
-        dmg.add_damage(self.eff_fit() / self.fit_modifiers_for_damage[use_type])
-        dmg.add_leth(self.eff_fit() /
+        dmg.add_damage(self.eff_fit / self.fit_modifiers_for_damage[use_type])
+        dmg.add_leth(self.eff_fit /
                      self.fit_modifiers_for_lethality[use_type])
 
         return dmg
@@ -855,38 +869,49 @@ class Sheet(models.Model):
     def defense_damage(self, weapon, use_type=FULL):
         return weapon.damage()
 
+    @property
     def eff_fit(self):
-        return self.fit() + self.mod_fit()
+        return self.fit + self.mod_fit
 
+    @property
     def eff_ref(self):
-        return self.ref() + self.mod_ref()
+        return self.ref + self.mod_ref
 
+    @property
     def eff_lrn(self):
-        return self.lrn() + self.mod_lrn()
+        return self.lrn + self.mod_lrn
 
+    @property
     def eff_int(self):
-        return self.int() + self.mod_int()
+        return self.int + self.mod_int
 
+    @property
     def eff_psy(self):
-        return self.psy() + self.mod_psy()
+        return self.psy + self.mod_psy
 
+    @property
     def eff_wil(self):
-        return self.wil() + self.mod_wil()
+        return self.wil + self.mod_wil
 
+    @property
     def eff_cha(self):
-        return self.cha() + self.mod_cha()
+        return self.cha + self.mod_cha
 
+    @property
     def eff_pos(self):
-        return self.pos() + self.mod_pos()
+        return self.pos + self.mod_pos
 
+    @property
     def eff_mov(self):
-        return int(round((self.eff_fit() + self.eff_ref())/2)) + self.mod_mov()
+        return int(round((self.eff_fit + self.eff_ref)/2)) + self.mod_mov
 
+    @property
     def eff_dex(self):
-        return int(round((self.eff_ref() + self.eff_int())/2)) + self.mod_dex()
+        return int(round((self.eff_ref + self.eff_int)/2)) + self.mod_dex
 
+    @property
     def eff_imm(self):
-        return int(round((self.eff_fit() + self.eff_psy())/2)) + self.mod_imm()
+        return int(round((self.eff_fit + self.eff_psy)/2)) + self.mod_imm
 
     def mod_stat(self, stat):
         # XXX allow different types of effects stack.
@@ -906,36 +931,47 @@ class Sheet(models.Model):
             return func(*args, **kwds)
         return _pass_name
 
+    @property
     @pass_func_name
     def mod_fit(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_ref(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_lrn(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_int(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_psy(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_wil(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_cha(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_pos(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_mov(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_dex(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
+    @property
     @pass_func_name
     def mod_imm(self, _func_name=None):
         return self.mod_stat(_func_name[4:])
