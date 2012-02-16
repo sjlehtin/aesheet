@@ -8,11 +8,11 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Deleting field 'WeaponQuality.id'
-        db.delete_column('sheet_weaponquality', 'id')
-
         # Changing field 'WeaponQuality.name'
         db.alter_column('sheet_weaponquality', 'name', self.gf('django.db.models.fields.CharField')(max_length=256, primary_key=True))
+
+        # Deleting field 'WeaponQuality.id'
+        db.delete_column('sheet_weaponquality', 'id')
 
 
     def backwards(self, orm):
