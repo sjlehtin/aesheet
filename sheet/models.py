@@ -1,3 +1,4 @@
+from __future__ import division
 from django.db import models
 import django.contrib.auth as auth
 import math
@@ -867,13 +868,16 @@ class Sheet(models.Model):
         # XXX intuition counters cc-penalties, fitness counters ranged
         # weapon penalties.
         mov = self.eff_mov() + modifiers
-        return [int(round(xx)) + mov for xx in checks]
+        return [int(round(xx) + mov) for xx in checks]
 
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
 
         # XXX fit under 45.
         dmg.add_damage(self.eff_fit() / self.fit_modifiers_for_damage[use_type])
+        dmg.add_leth(self.eff_fit() /
+                     self.fit_modifiers_for_lethality[use_type])
+
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
