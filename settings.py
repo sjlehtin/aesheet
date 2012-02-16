@@ -166,8 +166,6 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
     ROOT_URL + r'accounts/logout/.*$'
 )
 
-DAJAXICE_MEDIA_PREFIX="dajaxice"
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',

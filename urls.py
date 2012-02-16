@@ -4,9 +4,6 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from dajaxice.core import dajaxice_autodiscover
-dajaxice_autodiscover()
-
 from django.conf import settings
 
 urlpatterns = patterns(
@@ -27,6 +24,4 @@ urlpatterns = patterns(
     url(r'^accounts/logout/$', 'views.logout'),
 
     url(r'^accounts/profile/$', 'views.profile'),
-
-    url(r'^%s/' % settings.DAJAXICE_MEDIA_PREFIX, include('dajaxice.urls')),
 )
