@@ -8,6 +8,11 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
+        #XXX
+        # SQL to fix the issue:
+        # ALTER TABLE sheet_weapon DROP COLUMN quality_id
+        # ALTER TABLE sheet_weapon ADD COLUMN quality_id VARCHAR(256) NOT NULL
+
         # Deleting field 'WeaponQuality.id'
         db.delete_column('sheet_weaponquality', 'id')
 
