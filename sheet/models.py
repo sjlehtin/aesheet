@@ -108,13 +108,13 @@ class Character(models.Model):
         return True
 
     def cur_mov(self):
-        return (self.cur_ref + self.cur_fit)/2
+        return int(round((self.cur_ref + self.cur_fit)/2))
 
     def cur_dex(self):
-        return (self.cur_ref + self.cur_int)/2
+        return int(round((self.cur_ref + self.cur_int)/2))
 
     def cur_imm(self):
-        return (self.cur_fit + self.cur_psy)/2
+        return int(round((self.cur_fit + self.cur_psy)/2))
 
     # Base stats before circumstance modifiers.
     def fit(self):
@@ -880,13 +880,13 @@ class Sheet(models.Model):
         return self.pos() + self.mod_pos()
 
     def eff_mov(self):
-        return (self.eff_fit() + self.eff_ref())/2 + self.mod_mov()
+        return int(round((self.eff_fit() + self.eff_ref())/2)) + self.mod_mov()
 
     def eff_dex(self):
-        return (self.eff_ref() + self.eff_int())/2 + self.mod_mov()
+        return int(round((self.eff_ref() + self.eff_int())/2)) + self.mod_dex()
 
     def eff_imm(self):
-        return (self.eff_fit() + self.eff_psy())/2 + self.mod_mov()
+        return int(round((self.eff_fit() + self.eff_psy())/2)) + self.mod_imm()
 
     def mod_stat(self, stat):
         # XXX allow different types of effects stack.
