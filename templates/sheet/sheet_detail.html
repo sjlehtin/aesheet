@@ -29,11 +29,11 @@
 
 <div class="edit_control">
   <p>
-    <a href="/characters/edit_char/{{char.character.id}}/">
+    <a href="{% url sheet.views.edit_character char.character.id %}">
       Edit basic character</a>
   </p>
   <p>
-    <a href="/sheets/edit_sheet/{{char.id}}/">
+    <a href="{% url sheet.views.edit_sheet char.id %}">
       Edit basic sheet</a>
   </p>
 </div>

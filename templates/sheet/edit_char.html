@@ -6,9 +6,9 @@
 
 <form action="
 {% if char %}
-{% url edit_char char.id %}
+{% url sheet.views.edit_character char.id %}
 {% else %}
-{% url add_char %}
+{% url sheet.views.edit_character %}
 {% endif %}
 "
       method="post" 
