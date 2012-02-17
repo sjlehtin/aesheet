@@ -1,5 +1,13 @@
 [
   {
+    "pk": "Toughness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge."
+    }
+  }, 
+  {
     "pk": "Acting Ability", 
     "model": "sheet.edge", 
     "fields": {
@@ -345,14 +353,6 @@
   }, 
   {
     "pk": "Superior Endurance", 
-    "model": "sheet.edge", 
-    "fields": {
-      "notes": "", 
-      "description": ""
-    }
-  }, 
-  {
-    "pk": "Toughness", 
     "model": "sheet.edge", 
     "fields": {
       "notes": "", 
@@ -928,7 +928,7 @@
     }
   }, 
   {
-    "pk": 1, 
+    "pk": 3, 
     "model": "sheet.edgelevel", 
     "fields": {
       "requires_hero": false, 
@@ -937,7 +937,7 @@
       "wil": 0, 
       "pos": 0, 
       "saves_vs_fire": 0, 
-      "cost": "2.0", 
+      "cost": "6.0", 
       "cha": 0, 
       "fit": 0, 
       "imm": 0, 
@@ -949,8 +949,8 @@
       "psy": 0, 
       "saves_vs_lightning": 0, 
       "dex": 0, 
-      "level": 1, 
-      "notes": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge.", 
+      "level": 3, 
+      "notes": "", 
       "saves_vs_all": 0, 
       "edge": "Toughness"
     }
@@ -978,13 +978,13 @@
       "saves_vs_lightning": 0, 
       "dex": 0, 
       "level": 2, 
-      "notes": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge.", 
+      "notes": "", 
       "saves_vs_all": 0, 
       "edge": "Toughness"
     }
   }, 
   {
-    "pk": 3, 
+    "pk": 1, 
     "model": "sheet.edgelevel", 
     "fields": {
       "requires_hero": false, 
@@ -993,7 +993,7 @@
       "wil": 0, 
       "pos": 0, 
       "saves_vs_fire": 0, 
-      "cost": "6.0", 
+      "cost": "2.0", 
       "cha": 0, 
       "fit": 0, 
       "imm": 0, 
@@ -1005,8 +1005,8 @@
       "psy": 0, 
       "saves_vs_lightning": 0, 
       "dex": 0, 
-      "level": 3, 
-      "notes": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge.", 
+      "level": 1, 
+      "notes": "", 
       "saves_vs_all": 0, 
       "edge": "Toughness"
     }
