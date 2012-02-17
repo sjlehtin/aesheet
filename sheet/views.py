@@ -310,21 +310,27 @@ def sheet_detail(request, sheet_id=None):
     add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
 
     forms = {}
+
+    if request.method == "POST":
+        data = request.POST
+    else:
+        data = None
+
+    forms['_stat_modify'] = StatModify(request.POST,
+                                       instance=sheet.character,
+                                       prefix="stat-modify")
+    forms['add_skill_form'] = AddSkill(request.POST,
+                                       instance=sheet.character,
+                                       prefix="add-skill")
+    forms['add_spell_effect_form'] = AddSpellEffect(
+        request.POST,
+        instance=sheet,
+        prefix="add-spell-effect")
+    forms['add_helm_form'] = AddHelm(request.POST,
+                                     instance=sheet, prefix="add-helm")
+
     if request.method == "POST":
         should_change = False
-
-        forms['_stat_modify'] = StatModify(request.POST,
-                                           instance=sheet.character,
-                                           prefix="stat-modify")
-        forms['add_skill_form'] = AddSkill(request.POST,
-                                           instance=sheet.character,
-                                           prefix="add-skill")
-        forms['add_spell_effect_form'] = AddSpellEffect(
-            request.POST,
-            instance=sheet,
-            prefix="add-spell-effect")
-        forms['add_helm_form'] = AddHelm(request.POST,
-                                         instance=sheet, prefix="add-helm")
 
         for ff in forms.values():
             if ff.is_valid():
@@ -339,18 +345,10 @@ def sheet_detail(request, sheet_id=None):
         if should_change:
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
-    else:
-        add_skill_form = AddSkill(instance=sheet.character, prefix="add-skill")
-        add_spell_form = AddSpellEffect(instance=sheet,
-                                        prefix="add-spell-effect")
-        add_helm_form = AddHelm(instance=sheet, prefix="add-helm")
 
     c = { 'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,
-          'add_spell_effect_form' : add_spell_form,
-          'add_skill_form' : add_skill_form,
           'add_edge_form' : add_edge_form,
-          'add_helm_form' : add_helm_form,
           'add_armor_form' : add_armor_form,
           'TODO' : TODO,
           }
