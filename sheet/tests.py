@@ -10,7 +10,7 @@ class ItemHandling(TestCase):
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
         req_data = { 'add-weapon-form_id' : 'AddWeapon',
-                     'add-weapon-item' : 'Greatsword L1' }
+                     'add-weapon-weapon' : 'Greatsword L1' }
         response = c.get(det_url)
         self.assertContains(response, "No weapons.")
         response = c.post(det_url, req_data)

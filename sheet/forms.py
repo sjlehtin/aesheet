@@ -61,9 +61,28 @@ class AddForm(SheetForm):
         pass
     item = forms.ChoiceField(choices=())
 
-class AddWeapon(AddForm):
-    def get_choices(self):
-        return [(wpn.name, unicode(wpn)) for wpn in Weapon.objects.all()]
+class AddWeapon(forms.ModelForm):
+    weapon = forms.ChoiceField(choices=())
+    def __init__(self, *args, **kwargs):
+        super(AddWeapon, self).__init__(*args, **kwargs)
+        self.fields['weapon'].choices = [(wpn.name, unicode(wpn))
+                                         for wpn in Weapon.objects.all()]
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
+    def clean_weapon(self):
+        weapon = self.cleaned_data['weapon']
+        # Raises objectnotfound error if item not found.
+        wpn = Weapon.objects.get(name=weapon)
+        return wpn
+
+    def save(self):
+        self.instance.weapons.add(self.cleaned_data['weapon'])
+        self.instance.full_clean()
+        self.instance.save()
+        return self.instance
 
 class AddWeaponFromTemplate(forms.Form):
     WeaponTemplate.objects.all()

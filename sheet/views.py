@@ -265,17 +265,6 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
         # removal forms are forgotten and not updated on failures.
 
-    elif form_id == "AddWeapon":
-        form = AddWeapon(request.POST, sheet=sheet, form_id=form_id,
-                         prefix="add-weapon")
-        if form.is_valid():
-            weapon = form.cleaned_data['item']
-            weapon = get_object_or_404(Weapon, name=weapon)
-            sheet.weapons.add(weapon)
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
     elif form_id == "AddArmor":
         form = AddArmor(request.POST, sheet=sheet, form_id=form_id,
                          prefix="add-armor")
@@ -305,7 +294,6 @@ def process_sheet_change_request(request, sheet):
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
-    add_weapon_form = AddWeapon(sheet=sheet, prefix="add-weapon")
     add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
     add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
 
@@ -316,18 +304,20 @@ def sheet_detail(request, sheet_id=None):
     else:
         data = None
 
-    forms['_stat_modify'] = StatModify(request.POST,
+    forms['_stat_modify'] = StatModify(data,
                                        instance=sheet.character,
                                        prefix="stat-modify")
-    forms['add_skill_form'] = AddSkill(request.POST,
+    forms['add_skill_form'] = AddSkill(data,
                                        instance=sheet.character,
                                        prefix="add-skill")
     forms['add_spell_effect_form'] = AddSpellEffect(
-        request.POST,
+        data,
         instance=sheet,
         prefix="add-spell-effect")
-    forms['add_helm_form'] = AddHelm(request.POST,
-                                     instance=sheet, prefix="add-helm")
+    forms['add_helm_form'] = AddHelm(data, instance=sheet,
+                                     prefix="add-helm")
+    forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
+                                         prefix="add-weapon")
 
     if request.method == "POST":
         should_change = False
@@ -347,7 +337,6 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = { 'char' : SheetView(sheet),
-          'add_weapon_form' : add_weapon_form,
           'add_edge_form' : add_edge_form,
           'add_armor_form' : add_armor_form,
           'TODO' : TODO,
