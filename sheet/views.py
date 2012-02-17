@@ -315,7 +315,6 @@ def sheet_detail(request, sheet_id=None):
                               RequestContext(request, c))
 
 def edit_character(request, char_id=None):
-
     character = None
     if char_id:
         character = get_object_or_404(Character, pk=char_id)
