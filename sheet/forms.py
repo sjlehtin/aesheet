@@ -82,9 +82,30 @@ class AddWeaponFromTemplate(forms.Form):
     template = forms.CharField()
     quality = forms.CharField()
 
-class AddArmor(AddForm):
-    def get_choices(self):
-        return [(item.name, unicode(item)) for item in Armor.objects.all()]
+class AddArmor(forms.ModelForm):
+    armor = forms.ChoiceField(choices=())
+    def __init__(self, *args, **kwargs):
+        super(AddArmor, self).__init__(*args, **kwargs)
+        self.fields['armor'].choices =  [
+            (armor.name, unicode(armor))
+            for armor in filter(lambda xx: not xx.base.is_helm,
+                                Armor.objects.all())]
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
+    def clean_armor(self):
+        armor = self.cleaned_data['armor']
+        # Raises objectnotfound error if item not found.
+        armor = Armor.objects.get(name=armor)
+        return armor
+
+    def save(self):
+        self.instance.armor = self.cleaned_data['armor']
+        self.instance.full_clean()
+        self.instance.save()
+        return self.instance
 
 class AddHelm(forms.ModelForm):
     helm = forms.ChoiceField(choices=())

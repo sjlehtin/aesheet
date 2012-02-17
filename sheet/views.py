@@ -265,17 +265,6 @@ def process_sheet_change_request(request, sheet):
             return (True, forms)
         # removal forms are forgotten and not updated on failures.
 
-    elif form_id == "AddArmor":
-        form = AddArmor(request.POST, sheet=sheet, form_id=form_id,
-                         prefix="add-armor")
-        if form.is_valid():
-            armor = form.cleaned_data['item']
-            armor = get_object_or_404(Armor, name=armor)
-            sheet.armor = armor
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
     elif form_id == "AddEdge":
         form = AddEdge(request.POST, sheet=sheet, form_id=form_id,
                        prefix="add-edge")
@@ -295,7 +284,6 @@ def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
     add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
-    add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
 
     forms = {}
 
@@ -316,6 +304,8 @@ def sheet_detail(request, sheet_id=None):
         prefix="add-spell-effect")
     forms['add_helm_form'] = AddHelm(data, instance=sheet,
                                      prefix="add-helm")
+    forms['add_armor_form'] = AddArmor(data, instance=sheet,
+                                       prefix="add-armor")
     forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
                                          prefix="add-weapon")
 
@@ -338,7 +328,6 @@ def sheet_detail(request, sheet_id=None):
 
     c = { 'char' : SheetView(sheet),
           'add_edge_form' : add_edge_form,
-          'add_armor_form' : add_armor_form,
           'TODO' : TODO,
           }
     c.update(forms)

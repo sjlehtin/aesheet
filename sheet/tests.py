@@ -15,8 +15,7 @@ class ItemHandling(TestCase):
         c = Client()
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = { 'add-weapon-form_id' : 'AddWeapon',
-                     'add-weapon-weapon' : 'Greatsword L1' }
+        req_data = { 'add-weapon-weapon' : 'Greatsword L1' }
         response = c.get(det_url)
         self.assertContains(response, "No weapons.")
         response = c.post(det_url, req_data)
@@ -62,8 +61,7 @@ class ItemHandling(TestCase):
         self.assertContains(response, "No helmet.")
 
         # Add armor.
-        req_data = { 'add-armor-form_id' : 'AddArmor',
-                     'add-armor-item' : 'Plate mail L5' }
+        req_data = { 'add-armor-armor' : 'Plate mail L5' }
         response = c.get(det_url)
         self.assertContains(response, "No armor.")
         response = c.post(det_url, req_data)
@@ -86,8 +84,7 @@ class ItemHandling(TestCase):
         c = Client()
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = { 'add-spell-effect-form_id' : 'AddSpellEffect',
-                     'add-spell-effect-effect' : 'Bull\'s strength L5' }
+        req_data = { 'add-spell-effect-effect' : 'Bull\'s strength L5' }
         response = c.get(det_url)
 
         self.assertContains(response, "No spell effects.")
