@@ -11,7 +11,7 @@ urlpatterns = patterns(
     url(r'^characters/edit_char/(?P<char_id>\d+)/$',
         'edit_character', name="edit_char"),
 
-    url(r'^sheets/edit_sheet/$', 'edit_sheet'),
+    url(r'^sheets/edit_sheet/(?P<sheet_id>\d+)?/?$', 'edit_sheet'),
 
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheets_index'),
