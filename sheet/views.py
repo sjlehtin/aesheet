@@ -287,17 +287,6 @@ def process_sheet_change_request(request, sheet):
             sheet.save()
             return (True, forms)
 
-    elif form_id == "AddHelm":
-        form = AddHelm(request.POST, sheet=sheet, form_id=form_id,
-                       prefix="add-helm")
-        if form.is_valid():
-            helm = form.cleaned_data['item']
-            helm = get_object_or_404(Armor, name=helm)
-            sheet.helm = helm
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
     elif form_id == "AddEdge":
         form = AddEdge(request.POST, sheet=sheet, form_id=form_id,
                        prefix="add-edge")
