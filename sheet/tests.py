@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+import pdb
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "sheet", "wpns", "armor", "spell"]
@@ -50,7 +51,7 @@ class ItemHandling(TestCase):
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
         req_data = { 'add-spell-effect-form_id' : 'AddSpellEffect',
-                     'add-spell-effect-item' : 'Bull\'s strength L5' }
+                     'add-spell-effect-effect' : 'Bull\'s strength L5' }
         response = c.get(det_url)
 
         self.assertContains(response, "No spell effects.")

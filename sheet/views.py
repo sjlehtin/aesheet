@@ -79,107 +79,6 @@ def sheets_index(request):
                               { 'all_sheets' : all_sheets },
                               context_instance=RequestContext(request))
 
-def process_sheet_change_request(request, sheet):
-    assert request.method == "POST"
-
-    form = AddWeaponFromTemplate(request.POST, prefix='wpn-from-template')
-    form_ids = filter(lambda xx: xx[0].find('form_id') >= 0,
-                      request.POST.items())
-    form_id = form_ids[0][1]
-    if not form_id:
-        raise ValidationError("No form id")
-    forms = {}
-
-    if form_id == "RemoveGeneric":
-        form = RemoveGeneric(request.POST, prefix='remove')
-        if form.is_valid():
-            item = form.cleaned_data['item']
-            item_type = form.cleaned_data['item_type']
-            print "Removing %s" % item_type
-            if item_type == "Weapon":
-                item = get_object_or_404(Weapon, pk=item)
-                sheet.weapons.remove(item)
-            elif item_type == "Armor":
-                item = get_object_or_404(Armor, pk=item)
-                sheet.armor.remove(item)
-            elif item_type == "Helm":
-                item = get_object_or_404(Armor, pk=item)
-                sheet.helm.remove(item)
-            elif item_type == "SpellEffect":
-                item = get_object_or_404(SpellEffect, pk=item)
-                sheet.spell_effects.remove(item)
-            elif item_type == "CharacterSkill":
-                item = get_object_or_404(CharacterSkill, pk=item)
-                item.delete()
-            elif item_type == "CharacterEdge":
-                item = get_object_or_404(CharacterEdge, pk=item)
-                item.delete()
-            else:
-                raise ValidationError("Invalid item type")
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-        # removal forms are forgotten and not updated on failures.
-
-    elif form_id == "AddWeapon":
-        form = AddWeapon(request.POST, sheet=sheet, form_id=form_id,
-                         prefix="add-weapon")
-        if form.is_valid():
-            weapon = form.cleaned_data['item']
-            weapon = get_object_or_404(Weapon, name=weapon)
-            sheet.weapons.add(weapon)
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
-    elif form_id == "AddArmor":
-        form = AddArmor(request.POST, sheet=sheet, form_id=form_id,
-                         prefix="add-armor")
-        if form.is_valid():
-            armor = form.cleaned_data['item']
-            armor = get_object_or_404(Armor, name=armor)
-            sheet.armor = armor
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
-    elif form_id == "AddHelm":
-        form = AddHelm(request.POST, sheet=sheet, form_id=form_id,
-                       prefix="add-helm")
-        if form.is_valid():
-            helm = form.cleaned_data['item']
-            helm = get_object_or_404(Armor, name=helm)
-            sheet.helm = helm
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
-    elif form_id == "AddSpellEffect":
-        form = AddSpellEffect(request.POST, sheet=sheet, form_id=form_id,
-                              prefix="add-spell-effect")
-        if form.is_valid():
-            spell = form.cleaned_data['item']
-            spell = get_object_or_404(SpellEffect, pk=spell)
-            sheet.spell_effects.add(spell)
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-
-    elif form_id == "AddEdge":
-        form = AddEdge(request.POST, sheet=sheet, form_id=form_id,
-                       prefix="add-edge")
-        if form.is_valid():
-            edge = form.cleaned_data['item']
-            edge = get_object_or_404(EdgeLevel, pk=edge)
-            cs = CharacterEdge()
-            cs.character = sheet.character
-            cs.edge = edge
-            cs.full_clean()
-            cs.save()
-            return (True, forms)
-
-    return (False, forms)
-
 class RemoveWrap(object):
     def __init__(self, item, type=None):
         self.item = item
@@ -326,11 +225,100 @@ class SheetView(object):
             raise AttributeError()
         return getattr(self.sheet, v)
 
+def process_sheet_change_request(request, sheet):
+    assert request.method == "POST"
+
+    form = AddWeaponFromTemplate(request.POST, prefix='wpn-from-template')
+    form_ids = filter(lambda xx: xx[0].find('form_id') >= 0,
+                      request.POST.items())
+    form_id = form_ids[0][1]
+    if not form_id:
+        raise ValidationError("No form id")
+    forms = {}
+
+    if form_id == "RemoveGeneric":
+        form = RemoveGeneric(request.POST, prefix='remove')
+        if form.is_valid():
+            item = form.cleaned_data['item']
+            item_type = form.cleaned_data['item_type']
+            print "Removing %s" % item_type
+            if item_type == "Weapon":
+                item = get_object_or_404(Weapon, pk=item)
+                sheet.weapons.remove(item)
+            elif item_type == "Armor":
+                item = get_object_or_404(Armor, pk=item)
+                sheet.armor.remove(item)
+            elif item_type == "Helm":
+                item = get_object_or_404(Armor, pk=item)
+                sheet.helm.remove(item)
+            elif item_type == "SpellEffect":
+                item = get_object_or_404(SpellEffect, pk=item)
+                sheet.spell_effects.remove(item)
+            elif item_type == "CharacterSkill":
+                item = get_object_or_404(CharacterSkill, pk=item)
+                item.delete()
+            elif item_type == "CharacterEdge":
+                item = get_object_or_404(CharacterEdge, pk=item)
+                item.delete()
+            else:
+                raise ValidationError("Invalid item type")
+            sheet.full_clean()
+            sheet.save()
+            return (True, forms)
+        # removal forms are forgotten and not updated on failures.
+
+    elif form_id == "AddWeapon":
+        form = AddWeapon(request.POST, sheet=sheet, form_id=form_id,
+                         prefix="add-weapon")
+        if form.is_valid():
+            weapon = form.cleaned_data['item']
+            weapon = get_object_or_404(Weapon, name=weapon)
+            sheet.weapons.add(weapon)
+            sheet.full_clean()
+            sheet.save()
+            return (True, forms)
+
+    elif form_id == "AddArmor":
+        form = AddArmor(request.POST, sheet=sheet, form_id=form_id,
+                         prefix="add-armor")
+        if form.is_valid():
+            armor = form.cleaned_data['item']
+            armor = get_object_or_404(Armor, name=armor)
+            sheet.armor = armor
+            sheet.full_clean()
+            sheet.save()
+            return (True, forms)
+
+    elif form_id == "AddHelm":
+        form = AddHelm(request.POST, sheet=sheet, form_id=form_id,
+                       prefix="add-helm")
+        if form.is_valid():
+            helm = form.cleaned_data['item']
+            helm = get_object_or_404(Armor, name=helm)
+            sheet.helm = helm
+            sheet.full_clean()
+            sheet.save()
+            return (True, forms)
+
+    elif form_id == "AddEdge":
+        form = AddEdge(request.POST, sheet=sheet, form_id=form_id,
+                       prefix="add-edge")
+        if form.is_valid():
+            edge = form.cleaned_data['item']
+            edge = get_object_or_404(EdgeLevel, pk=edge)
+            cs = CharacterEdge()
+            cs.character = sheet.character
+            cs.edge = edge
+            cs.full_clean()
+            cs.save()
+            return (True, forms)
+
+    return (False, forms)
+
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
 
     add_weapon_form = AddWeapon(sheet=sheet, prefix="add-weapon")
-    add_spell_form = AddSpellEffect(sheet=sheet, prefix="add-spell-effect")
     add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
     add_helm_form = AddHelm(sheet=sheet, prefix="add-helm")
     add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
@@ -338,17 +326,22 @@ def sheet_detail(request, sheet_id=None):
     forms = {}
     if request.method == "POST":
         should_change = False
-        stat_form = StatModify(request.POST, instance=sheet.character,
-                          prefix="stat-modify")
-        if stat_form.is_valid():
-            stat_form.save()
-            should_change = True
 
-        add_skill_form = AddSkill(request.POST, instance=sheet.character,
-                                  prefix="add-skill")
-        if add_skill_form.is_valid():
-            add_skill_form.save()
-            should_change = True
+        forms['_stat_modify'] = StatModify(request.POST,
+                                           instance=sheet.character,
+                                           prefix="stat-modify")
+        forms['add_skill_form'] = AddSkill(request.POST,
+                                           instance=sheet.character,
+                                           prefix="add-skill")
+        forms['add_spell_effect_form'] = AddSpellEffect(
+            request.POST,
+            instance=sheet,
+            prefix="add-spell-effect")
+
+        for ff in forms.values():
+            if ff.is_valid():
+                ff.save()
+                should_change = True
 
         if not should_change:
             (should_change, forms) = process_sheet_change_request(request,
@@ -360,6 +353,8 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
     else:
         add_skill_form = AddSkill(instance=sheet.character, prefix="add-skill")
+        add_spell_form = AddSpellEffect(instance=sheet,
+                                        prefix="add-spell-effect")
 
     c = { 'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,

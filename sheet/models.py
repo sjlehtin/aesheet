@@ -208,7 +208,7 @@ SKILL_TYPES = [
     ]
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
-STAT_TYPES = [
+BASE_STATS = [
     "FIT",
     "REF",
     "LRN",
@@ -217,6 +217,8 @@ STAT_TYPES = [
     "WIL",
     "CHA",
     "POS",
+    ]
+STAT_TYPES = BASE_STATS + [
     "DEX",
     "MOV",
     "IMM",

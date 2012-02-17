@@ -79,10 +79,28 @@ class AddHelm(AddForm):
         return [(armor.name, unicode(armor)) for armor in
                 filter(lambda xx: xx.base.is_helm, Armor.objects.all())]
 
-class AddSpellEffect(AddForm):
-    def get_choices(self):
-        return [(item.name, unicode(item))
-                for item in SpellEffect.objects.all()]
+class AddSpellEffect(forms.ModelForm):
+    effect = forms.ChoiceField(choices=())
+    def __init__(self, *args, **kwargs):
+        super(AddSpellEffect, self).__init__(*args, **kwargs)
+        self.fields['effect'].choices = [(item.name, unicode(item))
+                                         for item in SpellEffect.objects.all()]
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
+    def clean_effect(self):
+        effect = self.cleaned_data['effect']
+        # Raises objectnotfound error if skill not found.
+        eff = SpellEffect.objects.get(name=effect)
+        return eff
+
+    def save(self):
+        self.instance.spell_effects.add(self.cleaned_data['effect'])
+        self.instance.full_clean()
+        self.instance.save()
+        return self.instance
 
 class AddSkill(forms.ModelForm):
     skill = forms.ChoiceField(choices=())
