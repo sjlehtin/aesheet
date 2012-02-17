@@ -197,9 +197,43 @@ class AddSkill(forms.ModelForm):
         cs.save()
         return self.instance
 
-class AddEdge(AddForm):
-    def get_choices(self):
-        return [(item.pk, unicode(item)) for item in EdgeLevel.objects.all()]
+class AddEdge(forms.ModelForm):
+    edge = forms.ChoiceField(choices=())
+    choices = range(0,8)
+    choices = zip(choices, choices)
+
+    def __init__(self, *args, **kwargs):
+        super(AddEdge, self).__init__(*args, **kwargs)
+        self.fields['edge'].choices = [(item.pk, unicode(item))
+                                       for item in EdgeLevel.objects.all()]
+
+    def clean_edge(self):
+        edge = self.cleaned_data['edge']
+        # Raises objectnotfound error if edge not found.
+        edge = EdgeLevel.objects.get(pk=edge)
+        return edge
+
+    def clean(self):
+        super(AddEdge, self).clean()
+        edge = self.cleaned_data.get('edge')
+        if edge:
+            # verify edge and level go together.
+            cs = CharacterEdge()
+            cs.character = self.instance
+            cs.edge = edge
+            cs.full_clean()
+        return self.cleaned_data
+
+    class Meta:
+        model = Character
+        fields = ()
+
+    def save(self, commit=True):
+        cs = CharacterEdge()
+        cs.character = self.instance
+        cs.edge = self.cleaned_data.get('edge')
+        cs.save()
+        return self.instance
 
 class RemoveGeneric(SheetForm):
     def __init__(self, *args, **kwargs):

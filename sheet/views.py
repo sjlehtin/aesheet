@@ -228,62 +228,40 @@ class SheetView(object):
 def process_sheet_change_request(request, sheet):
     assert request.method == "POST"
 
-    form = AddWeaponFromTemplate(request.POST, prefix='wpn-from-template')
-    form_ids = filter(lambda xx: xx[0].find('form_id') >= 0,
-                      request.POST.items())
-    form_id = form_ids[0][1]
-    if not form_id:
-        raise ValidationError("No form id")
     forms = {}
 
-    if form_id == "RemoveGeneric":
-        form = RemoveGeneric(request.POST, prefix='remove')
-        if form.is_valid():
-            item = form.cleaned_data['item']
-            item_type = form.cleaned_data['item_type']
-            print "Removing %s" % item_type
-            if item_type == "Weapon":
-                item = get_object_or_404(Weapon, pk=item)
-                sheet.weapons.remove(item)
-            elif item_type == "Armor":
-                sheet.armor = None
-            elif item_type == "Helm":
-                sheet.helm = None
-            elif item_type == "SpellEffect":
-                item = get_object_or_404(SpellEffect, pk=item)
-                sheet.spell_effects.remove(item)
-            elif item_type == "CharacterSkill":
-                item = get_object_or_404(CharacterSkill, pk=item)
-                item.delete()
-            elif item_type == "CharacterEdge":
-                item = get_object_or_404(CharacterEdge, pk=item)
-                item.delete()
-            else:
-                raise ValidationError("Invalid item type")
-            sheet.full_clean()
-            sheet.save()
-            return (True, forms)
-        # removal forms are forgotten and not updated on failures.
-
-    elif form_id == "AddEdge":
-        form = AddEdge(request.POST, sheet=sheet, form_id=form_id,
-                       prefix="add-edge")
-        if form.is_valid():
-            edge = form.cleaned_data['item']
-            edge = get_object_or_404(EdgeLevel, pk=edge)
-            cs = CharacterEdge()
-            cs.character = sheet.character
-            cs.edge = edge
-            cs.full_clean()
-            cs.save()
-            return (True, forms)
+    form = RemoveGeneric(request.POST, prefix='remove')
+    if form.is_valid():
+        item = form.cleaned_data['item']
+        item_type = form.cleaned_data['item_type']
+        print "Removing %s" % item_type
+        if item_type == "Weapon":
+            item = get_object_or_404(Weapon, pk=item)
+            sheet.weapons.remove(item)
+        elif item_type == "Armor":
+            sheet.armor = None
+        elif item_type == "Helm":
+            sheet.helm = None
+        elif item_type == "SpellEffect":
+            item = get_object_or_404(SpellEffect, pk=item)
+            sheet.spell_effects.remove(item)
+        elif item_type == "CharacterSkill":
+            item = get_object_or_404(CharacterSkill, pk=item)
+            item.delete()
+        elif item_type == "CharacterEdge":
+            item = get_object_or_404(CharacterEdge, pk=item)
+            item.delete()
+        else:
+            raise ValidationError("Invalid item type")
+        sheet.full_clean()
+        sheet.save()
+        return (True, forms)
+    # removal forms are forgotten and not updated on failures.
 
     return (False, forms)
 
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
-
-    add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
 
     forms = {}
 
@@ -298,6 +276,9 @@ def sheet_detail(request, sheet_id=None):
     forms['add_skill_form'] = AddSkill(data,
                                        instance=sheet.character,
                                        prefix="add-skill")
+    forms['add_edge_form'] = AddEdge(data,
+                                     instance=sheet.character,
+                                     prefix="add-edge")
     forms['add_spell_effect_form'] = AddSpellEffect(
         data,
         instance=sheet,
@@ -327,7 +308,6 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = { 'char' : SheetView(sheet),
-          'add_edge_form' : add_edge_form,
           'TODO' : TODO,
           }
     c.update(forms)

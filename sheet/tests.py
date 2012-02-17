@@ -103,8 +103,8 @@ class ItemHandling(TestCase):
         response = c.get(det_url)
         self.assertContains(response, "No spell effects.")
 
-class SkillHandling(TestCase):
-    fixtures = ["user", "char", "sheet", "basic_skills"]
+class EdgeAndSkillHandling(TestCase):
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills"]
     def test_adding_skill(self):
         c = Client()
         c.login(username="admin", password="admin")
@@ -121,3 +121,29 @@ class SkillHandling(TestCase):
                           'Weapon combat')
         self.assertEquals(response.context['char'].skills()[0].level,
                           5)
+
+
+    def test_add_remove_edge(self):
+        c = Client()
+        c.login(username="admin", password="admin")
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        req_data = { 'add-edge-edge' : '2'}
+        response = c.get(det_url)
+        self.assertContains(response, "No edges.")
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertNotContains(response, "No edges.")
+        ce = response.context['char'].edges()[0]
+        self.assertEquals(ce.edge.edge.name, 'Toughness')
+        self.assertEquals(ce.edge.level, 2)
+
+        # Remove edge.
+        req_data = { 'remove-form_id' : 'RemoveGeneric',
+                     'remove-item_type' : 'CharacterEdge',
+                     'remove-item' : ce.pk }
+        response = c.post(det_url, req_data)
+
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertContains(response, "No edges.")

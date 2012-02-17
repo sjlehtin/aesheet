@@ -1,0 +1,1014 @@
+[
+  {
+    "pk": "Acting Ability", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Acute Hearing", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Acute Smell and Taste", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Acute Touch", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Acute Vision", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Ambidexterity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Animal Friendship", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Artistic Ability", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Athletic Ability", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Attractive Appearance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Bilingual Background", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Childhood Education", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Chosen of Gods", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Cold Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Double-Jointed", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": "Escape bonds."
+    }
+  }, 
+  {
+    "pk": "Empathy", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": "Slight possibility to detect lies."
+    }
+  }, 
+  {
+    "pk": "Enhanced Immunity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Enhanced Mana", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Enahnced Stamina", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Eye-Hand Coordination", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Fast Healing", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Fast Mana Recovery", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Fearlessness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Heat Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Improved Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Internal Compass", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": "Sense direction of north. "
+    }
+  }, 
+  {
+    "pk": "Language Ability", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Light Sleeper", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Magical Aptitude", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Spell Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Magic Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Mental Powers", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Musical Ability", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Night Vision", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Investigation", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Peripheral Vision", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Photographic Memory", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Poison Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Presence", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Sensuality", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Specialist Training", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Stealthy", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Superior Balance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Superior Endurance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Toughness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Addiction", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Blindness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Cancer", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Cardiovascular Disease", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Cerebrovascular Disease", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Code Of Honor", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Clumsiness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Cold Sensitivity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Color Blind", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Cowardice", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Daily Meditation", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Deafness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Deep Sleeper", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Dementia", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Focus", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Holy Symbol", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Fragility", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Heat Sensitivity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Humble Lifestyle", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Illiteracy", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Limited Armor", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Limited Weaponry", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Lowered Dexterity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Lowered Immunity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Lowered Mana", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Lowered Stamina", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Missing Foot", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Missing Leg", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Missing Hand", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Missing Arm", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Night Blindness", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Overweight", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Quirky Habit", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Phobia", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Poor Hearing", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Poor Smell and Taste", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Poor Vision", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Short-Winded", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Slow Healing", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Slow Mana Recovery", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Traumatic Flashbacks", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Tunnel Vision", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Unattractive Appearance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Uncontrollable Empathy", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Uncouth", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Unmistakable Feature", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Depthsense", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Enhanced Carrying Capacity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Increased Land Speed", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Extended Lifespan", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Hardened Skin", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Reduced Land Speed", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Natural Climber", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Natural Jumper", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Natural Swimmer", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Spell Immunity", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Small Size", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Poor Daylight Vision", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Reduce Lifespan", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Restricted Use Of Magic Items", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Blood Clotting", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Pain Resistance", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Foresight", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Multitasking", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Immortality", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Large Size", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Multiattack", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Distributed Lifeforce", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Regeneration", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Huge Size", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": "Lucky", 
+    "model": "sheet.edge", 
+    "fields": {
+      "notes": "", 
+      "description": ""
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "sheet.edgelevel", 
+    "fields": {
+      "requires_hero": false, 
+      "int": 0, 
+      "cc_skill_levels": 0, 
+      "wil": 0, 
+      "pos": 0, 
+      "saves_vs_fire": 0, 
+      "cost": "2.0", 
+      "cha": 0, 
+      "fit": 0, 
+      "imm": 0, 
+      "saves_vs_cold": 0, 
+      "ref": 0, 
+      "saves_vs_poison": 0, 
+      "mov": 0, 
+      "lrn": 0, 
+      "psy": 0, 
+      "saves_vs_lightning": 0, 
+      "dex": 0, 
+      "level": 1, 
+      "notes": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge.", 
+      "saves_vs_all": 0, 
+      "edge": "Toughness"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "sheet.edgelevel", 
+    "fields": {
+      "requires_hero": false, 
+      "int": 0, 
+      "cc_skill_levels": 0, 
+      "wil": 0, 
+      "pos": 0, 
+      "saves_vs_fire": 0, 
+      "cost": "4.0", 
+      "cha": 0, 
+      "fit": 0, 
+      "imm": 0, 
+      "saves_vs_cold": 0, 
+      "ref": 0, 
+      "saves_vs_poison": 0, 
+      "mov": 0, 
+      "lrn": 0, 
+      "psy": 0, 
+      "saves_vs_lightning": 0, 
+      "dex": 0, 
+      "level": 2, 
+      "notes": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge.", 
+      "saves_vs_all": 0, 
+      "edge": "Toughness"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "sheet.edgelevel", 
+    "fields": {
+      "requires_hero": false, 
+      "int": 0, 
+      "cc_skill_levels": 0, 
+      "wil": 0, 
+      "pos": 0, 
+      "saves_vs_fire": 0, 
+      "cost": "6.0", 
+      "cha": 0, 
+      "fit": 0, 
+      "imm": 0, 
+      "saves_vs_cold": 0, 
+      "ref": 0, 
+      "saves_vs_poison": 0, 
+      "mov": 0, 
+      "lrn": 0, 
+      "psy": 0, 
+      "saves_vs_lightning": 0, 
+      "dex": 0, 
+      "level": 3, 
+      "notes": "Size Category)+2 to BODY per level of edge (+1 for small, +2 for medium, +3 for large). Lethal wounds are treated as one point lighter per level of edge.", 
+      "saves_vs_all": 0, 
+      "edge": "Toughness"
+    }
+  }
+]
