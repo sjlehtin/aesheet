@@ -2,6 +2,12 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 import pdb
+from sheet.forms import SheetForm
+
+class SheetFormTestCase(TestCase):
+    def test_create_form(self):
+        f = SheetForm()
+        self.assertTrue(f)
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "sheet", "wpns", "armor", "spell"]
