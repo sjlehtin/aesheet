@@ -35,25 +35,6 @@ class ImportForm(forms.Form):
                                         "file to be uploaded, not both")
         return cd
 
-class AddForm(SheetForm):
-    sheet = None
-    """
-    The sheet object.  Can be used by subclasses.
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.sheet = kwargs.pop('sheet')
-        super(AddForm, self).__init__(*args, **kwargs)
-        self.fields['item'].choices = self.get_choices()
-
-    def get_choices(self):
-        """
-        Override this.  Return a choices iterable for adding various
-        things for the sheet.
-        """
-        pass
-    item = forms.ChoiceField(choices=())
-
 class AddWeapon(forms.ModelForm):
     weapon = forms.ChoiceField(choices=())
     def __init__(self, *args, **kwargs):
