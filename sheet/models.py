@@ -20,7 +20,11 @@ SIZE_CHOICES = (
     )
 
 class ExportedModel(models.Model):
-
+    """
+    Base class for all exported models.  Allows specifying fields that
+    won't be exported, like integer id's that wouldn't really help a
+    user trying to input data into the system.
+    """
     @classmethod
     def dont_export(self):
         return []
@@ -36,6 +40,11 @@ class ExportedModel(models.Model):
         abstract = True
 
 class Character(models.Model):
+    """
+    Model for the character "under" the sheet.  Modifications to the
+    basic character will immediately affect all sheets based on the
+    character.
+    """
     name = models.CharField(max_length=256)
     owner = models.ForeignKey(auth.models.User, related_name="characters")
     occupation = models.CharField(max_length=256)
@@ -184,6 +193,10 @@ class Character(models.Model):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
 class Edge(ExportedModel):
+    """
+    A base model for edges.  Here is information that would otherwise
+    repeat through all the edge levels.
+    """
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
