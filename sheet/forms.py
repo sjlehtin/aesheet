@@ -2,6 +2,7 @@ from django import forms
 from django.forms import widgets
 from sheet.models import *
 import unittest
+import sheet.models
 
 class EditCharacter(forms.ModelForm):
 
@@ -149,6 +150,12 @@ class StatModify(forms.ModelForm):
     class Meta:
         model = Character
         fields = ()
+
+    def clean_stat(self):
+        if self.cleaned_data['stat'] not in ["cur_" + xx.lower()
+                                             for xx in sheet.models.BASE_STATS]:
+            raise ValidationError, "Invalid stat type."
+        return self.cleaned_data['stat'].lower()
 
     def save(self, commit=True):
         char = self.instance
