@@ -199,7 +199,7 @@ class AddSkill(forms.ModelForm):
 
 class AddEdge(AddForm):
     def get_choices(self):
-        return [(item.name, unicode(item)) for item in EdgeLevel.objects.all()]
+        return [(item.pk, unicode(item)) for item in EdgeLevel.objects.all()]
 
 class RemoveGeneric(SheetForm):
     def __init__(self, *args, **kwargs):
