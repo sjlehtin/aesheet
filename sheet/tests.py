@@ -11,7 +11,7 @@ class SheetFormTestCase(TestCase):
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "sheet", "wpns", "armor", "spell"]
-    def test_adding_weapon(self):
+    def test_add_remove_weapon(self):
         c = Client()
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
@@ -25,6 +25,17 @@ class ItemHandling(TestCase):
         self.assertNotContains(response, "No weapons.")
         self.assertEquals(response.context['char'].weapons()[0].name,
                           'Greatsword L1')
+
+        # Remove weapon.
+        req_data = { 'remove-form_id' : 'RemoveGeneric',
+                     'remove-item_type' : 'Weapon',
+                     'remove-item' : '1',
+                     }
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertContains(response, "No weapons.")
+
 
     def test_add_remove_armor(self):
         c = Client()
