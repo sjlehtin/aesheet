@@ -74,10 +74,30 @@ class AddArmor(AddForm):
     def get_choices(self):
         return [(item.name, unicode(item)) for item in Armor.objects.all()]
 
-class AddHelm(AddForm):
-    def get_choices(self):
-        return [(armor.name, unicode(armor)) for armor in
-                filter(lambda xx: xx.base.is_helm, Armor.objects.all())]
+class AddHelm(forms.ModelForm):
+    helm = forms.ChoiceField(choices=())
+    def __init__(self, *args, **kwargs):
+        super(AddHelm, self).__init__(*args, **kwargs)
+        self.fields['helm'].choices =  [
+            (armor.name, unicode(armor))
+            for armor in filter(lambda xx: xx.base.is_helm,
+                                Armor.objects.all())]
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
+    def clean_helm(self):
+        helm = self.cleaned_data['helm']
+        # Raises objectnotfound error if item not found.
+        helm = Armor.objects.get(name=helm)
+        return helm
+
+    def save(self):
+        self.instance.helm = self.cleaned_data['helm']
+        self.instance.full_clean()
+        self.instance.save()
+        return self.instance
 
 class AddSpellEffect(forms.ModelForm):
     effect = forms.ChoiceField(choices=())
@@ -159,7 +179,8 @@ class RemoveGeneric(SheetForm):
             self.fields['item_type'].initial = item_type
 
     item_type = forms.CharField(max_length=64, widget=widgets.HiddenInput)
-    item = forms.CharField(max_length=128, widget=widgets.HiddenInput)
+    item = forms.CharField(max_length=128, widget=widgets.HiddenInput,
+                           required=False)
 
 class StatModify(forms.ModelForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)

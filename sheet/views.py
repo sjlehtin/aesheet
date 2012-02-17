@@ -246,11 +246,9 @@ def process_sheet_change_request(request, sheet):
                 item = get_object_or_404(Weapon, pk=item)
                 sheet.weapons.remove(item)
             elif item_type == "Armor":
-                item = get_object_or_404(Armor, pk=item)
-                sheet.armor.remove(item)
+                sheet.armor = None
             elif item_type == "Helm":
-                item = get_object_or_404(Armor, pk=item)
-                sheet.helm.remove(item)
+                sheet.helm = None
             elif item_type == "SpellEffect":
                 item = get_object_or_404(SpellEffect, pk=item)
                 sheet.spell_effects.remove(item)
@@ -320,7 +318,6 @@ def sheet_detail(request, sheet_id=None):
 
     add_weapon_form = AddWeapon(sheet=sheet, prefix="add-weapon")
     add_edge_form = AddEdge(sheet=sheet, prefix="add-edge")
-    add_helm_form = AddHelm(sheet=sheet, prefix="add-helm")
     add_armor_form = AddArmor(sheet=sheet, prefix="add-armor")
 
     forms = {}
@@ -337,6 +334,8 @@ def sheet_detail(request, sheet_id=None):
             request.POST,
             instance=sheet,
             prefix="add-spell-effect")
+        forms['add_helm_form'] = AddHelm(request.POST,
+                                         instance=sheet, prefix="add-helm")
 
         for ff in forms.values():
             if ff.is_valid():
@@ -355,6 +354,7 @@ def sheet_detail(request, sheet_id=None):
         add_skill_form = AddSkill(instance=sheet.character, prefix="add-skill")
         add_spell_form = AddSpellEffect(instance=sheet,
                                         prefix="add-spell-effect")
+        add_helm_form = AddHelm(instance=sheet, prefix="add-helm")
 
     c = { 'char' : SheetView(sheet),
           'add_weapon_form' : add_weapon_form,

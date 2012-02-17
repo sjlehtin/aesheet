@@ -20,12 +20,13 @@ class ItemHandling(TestCase):
         self.assertEquals(response.context['char'].weapons()[0].name,
                           'Greatsword L1')
 
-    def test_adding_armor(self):
+    def test_add_remove_armor(self):
         c = Client()
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = { 'add-helm-form_id' : 'AddHelm',
-                     'add-helm-item' : 'Basinet wfa L5' }
+
+        # Add helmet.
+        req_data = { 'add-helm-helm' : 'Basinet wfa L5' }
         response = c.get(det_url)
         self.assertContains(response, "No helmet.")
         response = c.post(det_url, req_data)
@@ -34,7 +35,16 @@ class ItemHandling(TestCase):
         self.assertNotContains(response, "No helmet.")
         self.assertEquals(response.context['char'].helm().name,
                           'Basinet wfa L5')
+        # Remove helmet.
+        req_data = { 'remove-form_id' : 'RemoveGeneric',
+                     'remove-item_type' : 'Helm',
+                     }
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertContains(response, "No helmet.")
 
+        # Add armor.
         req_data = { 'add-armor-form_id' : 'AddArmor',
                      'add-armor-item' : 'Plate mail L5' }
         response = c.get(det_url)
@@ -45,6 +55,15 @@ class ItemHandling(TestCase):
         self.assertNotContains(response, "No armor.")
         self.assertEquals(response.context['char'].armor().name,
                           'Plate mail L5')
+
+        # Remove armor.
+        req_data = { 'remove-form_id' : 'RemoveGeneric',
+                     'remove-item_type' : 'Armor',
+                     }
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertContains(response, "No armor.")
 
     def test_add_remove_effect(self):
         c = Client()
