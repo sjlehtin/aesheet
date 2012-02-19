@@ -122,7 +122,27 @@ class EdgeAndSkillHandling(TestCase):
         self.assertEquals(response.context['char'].skills()[0].level,
                           5)
 
-    def test_required_skills(self):
+    def test_required_skills_present(self):
+        c = Client()
+        c.login(username="admin", password="admin")
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        req_data = { 'add-skill-skill' : 'Weapon combat',
+                     'add-skill-level' : '5'}
+        response = c.get(det_url)
+        self.assertContains(response, "No skills.")
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertNotContains(response, "No skills.")
+        req_data = { 'add-skill-skill' : 'Sword',
+                     'add-skill-level' : '1'}
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertNotContains(response, "Required skill Weapon "
+                               "combat missing.")
+
+    def test_required_skills_missing(self):
         c = Client()
         c.login(username="admin", password="admin")
         det_url = reverse('sheet.views.sheet_detail', args=[1])
@@ -134,6 +154,7 @@ class EdgeAndSkillHandling(TestCase):
         self.assertRedirects(response, det_url)
         response = c.get(det_url)
         self.assertNotContains(response, "No skills.")
+        #print response.content
         self.assertContains(response, "Unarmed combat missing.")
         self.assertEquals(response.context['char'].skills()[0].skill.name,
                           'Martial arts expertise')
@@ -142,9 +163,12 @@ class EdgeAndSkillHandling(TestCase):
         req_data = { 'add-skill-skill' : 'Unarmed combat',
                      'add-skill-level' : '4'}
         response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
         self.assertNotContains(response, "Unarmed combat missing.")
-        sk = response.context['char'].skills.filter(skill_name='Unarmed combat')
-        self.assertTrue(sk.exists())
+        sk = filter(lambda xx: xx.skill.name == 'Unarmed combat',
+                    response.context['char'].skills())
+        self.assertTrue(sk)
 
     def test_add_remove_edge(self):
         c = Client()
