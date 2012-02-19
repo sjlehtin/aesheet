@@ -292,6 +292,7 @@ class Skill(ExportedModel):
     def __unicode__(self):
         return "%s" % (self.name)
 
+import pprint
 class CharacterSkill(models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
@@ -315,11 +316,14 @@ class CharacterSkill(models.Model):
 
     def comments(self):
         comments = []
-        diff = set(self.skill.required_skills.all()).difference(
-            [cs.skill for cs in self.character.skills.all()])
-        diff = [unicode(xx) for xx in diff]
-        if len(diff) > 0:
-            comments.append("Required skill %s missing." % ','.join(diff))
+        if self.skill.required_skills.exists():
+            missing = self.skill.required_skills.exclude(
+                name__in=[xx.skill.name for xx in self.character.skills.all()])
+
+            if missing.exists():
+                comments.append("Required skill %s missing." %
+                                ','.join((xx.name for xx in missing)))
+                print comments
         return "\n".join(comments)
 
     def __unicode__(self):
