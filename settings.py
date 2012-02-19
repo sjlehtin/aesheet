@@ -143,6 +143,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+
+    'profiling.ProfileMiddleware',
+    'profiling.MemoryProfileMiddleware',
 )
 
 ROOT_URLCONF = 'aesheet.urls'
@@ -178,7 +181,8 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'south',
-    'sheet'
+    'sheet',
+    'profiling'
 )
 
 # A sample logging configuration. The only tangible logging
