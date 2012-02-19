@@ -13,6 +13,8 @@ TODO = """
 *** marking characters as only visible to self
 ** password change
 + rest of the skills
+* specializations with skill level 0 should be recognized (for
+  specializations with only one level especially)
 * rest of the edges
 * initiatives
 * wondrous items
