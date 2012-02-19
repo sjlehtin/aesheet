@@ -122,6 +122,29 @@ class EdgeAndSkillHandling(TestCase):
         self.assertEquals(response.context['char'].skills()[0].level,
                           5)
 
+    def test_required_skills(self):
+        c = Client()
+        c.login(username="admin", password="admin")
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        req_data = { 'add-skill-skill' : 'Martial arts expertise',
+                     'add-skill-level' : '4'}
+        response = c.get(det_url)
+        self.assertContains(response, "No skills.")
+        response = c.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = c.get(det_url)
+        self.assertNotContains(response, "No skills.")
+        self.assertContains(response, "Unarmed combat missing.")
+        self.assertEquals(response.context['char'].skills()[0].skill.name,
+                          'Martial arts expertise')
+        self.assertEquals(response.context['char'].skills()[0].level,
+                          4)
+        req_data = { 'add-skill-skill' : 'Unarmed combat',
+                     'add-skill-level' : '4'}
+        response = c.post(det_url, req_data)
+        self.assertNotContains(response, "Unarmed combat missing.")
+        sk = response.context['char'].skills.filter(skill_name='Unarmed combat')
+        self.assertTrue(sk.exists())
 
     def test_add_remove_edge(self):
         c = Client()
