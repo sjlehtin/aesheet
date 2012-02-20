@@ -322,7 +322,10 @@ class CharacterSkill(models.Model):
         # SELECT DISTINCT s.to_skill_id FROM sheet_skill_required_skills
         # s, sheet_skill s2, sheet_characterskill cs, sheet_character c
         # WHERE c.name = 'Martel' and s2.name = s.from_skill_id and
-        # cs.character_id = c.id and cs.skill_id = s2.name
+        # cs.character_id = c.id and cs.skill_id = s2.name EXCEPT
+        # (SELECT cs2.skill_id FROM sheet_characterskill cs2,
+        # sheet_character c2 WHERE cs2.character_id = c2.id and c2.name
+        # = 'Martel');
 
         if self.skill.required_skills.exists():
             missing = self.skill.required_skills.exclude(
