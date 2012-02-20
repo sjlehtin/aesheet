@@ -251,6 +251,7 @@ class Skill(ExportedModel):
     # attribute for another required skill?
     #
     # TODO: Fix construction skill.
+
     required_skills = models.ManyToManyField('self', symmetrical=False,
                                              blank=True, null=True)
     required_edges = models.ManyToManyField(Edge, blank=True, null=True)
@@ -316,6 +317,13 @@ class CharacterSkill(models.Model):
 
     def comments(self):
         comments = []
+        # XXX a query to get all requirements for skills for a character.
+
+        # SELECT DISTINCT s.to_skill_id FROM sheet_skill_required_skills
+        # s, sheet_skill s2, sheet_characterskill cs, sheet_character c
+        # WHERE c.name = 'Martel' and s2.name = s.from_skill_id and
+        # cs.character_id = c.id and cs.skill_id = s2.name
+
         if self.skill.required_skills.exists():
             missing = self.skill.required_skills.exclude(
                 name__in=[xx.skill.name for xx in self.character.skills.all()])
