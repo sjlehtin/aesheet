@@ -59,6 +59,8 @@ class Character(models.Model):
     times_wounded  =  models.PositiveIntegerField(default=0)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
+    hero = models.BooleanField(default=False)
+
     deity = models.CharField(max_length=256, default="Kord")
     adventures = models.PositiveIntegerField(default=0)
     gained_sp = models.PositiveIntegerField(default=0)
@@ -173,6 +175,7 @@ class Character(models.Model):
     def imm(self):
         return self.cur_imm + self.base_mod_imm
 
+    @property
     def xp_used_stats(self):
         xp_used_stats = 0
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
@@ -183,12 +186,20 @@ class Character(models.Model):
         xp_used_stats *= 5
         return xp_used_stats
 
+    @property
     def xp_used_edges(self):
         return 25 * self.edges_bought
         # sum([ee.edge.cost for ee in self.edges.all()])
 
+    @property
+    def xp_used_hero(self):
+        if self.hero:
+            return 100
+        return 0
+
     def xp_used(self):
-        return self.xp_used_edges() + self.xp_used_ingame + self.xp_used_stats()
+        return self.xp_used_edges + self.xp_used_ingame + \
+            self.xp_used_stats + self.xp_used_hero
 
     def __unicode__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
@@ -320,13 +331,29 @@ class CharacterSkill(models.Model):
         comments = []
         # XXX a query to get all requirements for skills for a character.
 
-        # SELECT DISTINCT s.to_skill_id FROM sheet_skill_required_skills
-        # s, sheet_skill s2, sheet_characterskill cs, sheet_character c
-        # WHERE c.name = 'Martel' and s2.name = s.from_skill_id and
-        # cs.character_id = c.id and cs.skill_id = s2.name EXCEPT
-        # (SELECT cs2.skill_id FROM sheet_characterskill cs2,
-        # sheet_character c2 WHERE cs2.character_id = c2.id and c2.name
-        # = 'Martel');
+         #SELECT DISTINCT s.to_skill_id
+         #FROM sheet_skill_required_skills s, sheet_skill s2,
+         #     sheet_characterskill cs, sheet_character c
+         #WHERE c.name = 'Martel' and
+         #s2.name = s.from_skill_id and
+         #cs.character_id = c.id and cs.skill_id = s2.name
+         #EXCEPT
+         #SELECT cs2.skill_id
+         #FROM sheet_characterskill cs2,
+         #sheet_character c2
+         #WHERE cs2.character_id = c2.id and c2.name = 'Martel';
+         #
+         #SELECT DISTINCT s.from_skill_id as skill_id
+         #FROM sheet_skill_required_skills s, sheet_skill s2,
+         #     sheet_characterskill cs, sheet_character c
+         #WHERE c.name = 'Martel' and
+         #s2.name = s.from_skill_id and
+         #cs.character_id = c.id and cs.skill_id = s2.name
+         #EXCEPT
+         #SELECT cs2.skill_id
+         #FROM sheet_characterskill cs2,
+         #sheet_character c2
+         #WHERE cs2.character_id = c2.id and c2.name = 'Martel'
 
         if self.skill.required_skills.exists():
             missing = self.skill.required_skills.exclude(

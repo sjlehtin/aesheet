@@ -73,7 +73,11 @@
 </div>
 
 <div class="xp">
-XP: {{ char.xp_used_stats }} + {{ char.xp_used_edges }} + 
+XP: {{ char.xp_used_stats }} + 
+{% if char.hero %}
+{{ char.xp_used_hero }} + 
+{% endif %}
+{{ char.xp_used_edges }} + 
 {{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
 </div>
 
