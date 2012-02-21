@@ -66,7 +66,7 @@ class Character(models.Model):
     xp_used_ingame = models.PositiveIntegerField(default=0)
     bought_stamina = models.PositiveIntegerField(default=0)
     bought_mana = models.PositiveIntegerField(default=0)
-    edges_bougth = models.PositiveIntegerField(default=0)
+    edges_bought = models.PositiveIntegerField(default=0)
     total_xp = models.PositiveIntegerField(default=0)
 
     # The abilities the character was rolled with.
@@ -184,7 +184,8 @@ class Character(models.Model):
         return xp_used_stats
 
     def xp_used_edges(self):
-        return 25 * sum([ee.edge.cost for ee in self.edges.all()])
+        return 25 * self.edges_bought
+        # sum([ee.edge.cost for ee in self.edges.all()])
 
     def xp_used(self):
         return self.xp_used_edges() + self.xp_used_ingame + self.xp_used_stats()
