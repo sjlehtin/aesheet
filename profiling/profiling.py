@@ -7,6 +7,9 @@ import hotshot.stats
 import cProfile
 from django.conf import settings
 from cStringIO import StringIO
+from django.db import connection
+
+import pprint
 
 class ProfileMiddleware(object):
     """
@@ -28,7 +31,8 @@ class ProfileMiddleware(object):
             elif r.has_key('cprof'):
                 self.tmpfile = tempfile.NamedTemporaryFile()
                 self.prof = cProfile.Profile()
-
+	    connection.queries = []
+		
     def process_view(self, request, callback, callback_args, callback_kwargs):
         r = request.GET
         if settings.DEBUG and (r.has_key('prof') or r.has_key('cprof')):
@@ -55,7 +59,11 @@ class ProfileMiddleware(object):
 
             if request.GET.has_key('out'):
                 shutil.copy(self.tmpfile.name, os.path.join('/tmp', request.GET['out']))
-            if response and response.content and stats_str:
-                response.content = "<pre>" + stats_str + "</pre>"
+
+	    if response and response.content and stats_str:
+		response.content = "<pre>" + stats_str + "</pre>"
+		response.content += '\n%d SQL Queries in %.3f seconds :\n' %(
+		    len(connection.queries), sum([ float(i.get('time', 0)) for i in connection.queries ]))
+		response.content += pprint.pformat(connection.queries)
 
         return response
