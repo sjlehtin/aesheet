@@ -989,68 +989,71 @@ class Sheet(models.Model):
         "IMM is not increased by an enhancement to FIT."
         return int(round((self.fit + self.eff_psy)/2)) + self.mod_imm
 
-    def mod_stat(self, stat):
+    def _mod_stat(self, stat):
         # XXX allow different types of effects stack.
         # Exclude effects which don't have an effect on stat.
         kwargs = { stat : 0}
         effects = self.spell_effects.exclude(**kwargs)
-        if effects:
+        if effects.count():
             eff = max(effects, key=lambda xx: getattr(xx, stat))
             return getattr(eff, stat)
         return 0
 
-    def pass_func_name(func):
-        "Name of decorated function will be passed as keyword arg _func_name"
+    def _stat_wrapper(func):
+        """
+        Wraps a stat function.  The stat function is a dummy after
+        wrapped, only the name matters.
+        """
         @wraps(func)
         def _pass_name(*args, **kwds):
-            kwds['_func_name'] = func.func_name
-            return func(*args, **kwds)
+            o = args[0]
+            return o._mod_stat(func.func_name[4:])
         return _pass_name
 
     @property
-    @pass_func_name
-    def mod_fit(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_fit(self):
+        pass
     @property
-    @pass_func_name
-    def mod_ref(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_ref(self):
+        pass
     @property
-    @pass_func_name
-    def mod_lrn(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_lrn(self):
+        pass
     @property
-    @pass_func_name
-    def mod_int(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_int(self):
+        pass
     @property
-    @pass_func_name
-    def mod_psy(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_psy(self):
+        pass
     @property
-    @pass_func_name
-    def mod_wil(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_wil(self):
+        pass
     @property
-    @pass_func_name
-    def mod_cha(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_cha(self):
+        pass
     @property
-    @pass_func_name
-    def mod_pos(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_pos(self):
+        pass
     @property
-    @pass_func_name
-    def mod_mov(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_mov(self):
+        pass
     @property
-    @pass_func_name
-    def mod_dex(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_dex(self):
+        pass
     @property
-    @pass_func_name
-    def mod_imm(self, _func_name=None):
-        return self.mod_stat(_func_name[4:])
+    @_stat_wrapper
+    def mod_imm(self):
+        pass
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
