@@ -368,6 +368,10 @@ class CharacterSkill(models.Model):
     def __unicode__(self):
         return "%s: %s %s" % (self.character, self.skill, self.level)
 
+
+    class Meta:
+        ordering = ('skill__name', ) # XXX before explicit ordering.
+
 class StatModifier(models.Model):
     # `notes' will be added to the effects list, which describes all the
     # noteworthy resistances and immunities of the character not
