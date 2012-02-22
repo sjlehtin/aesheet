@@ -223,9 +223,10 @@ XP: {{ char.xp_used_stats }} +
 
 <div class="skills">
 <h3>Skills</h3>
-{% if char.skills %}
+{% with skills=char.skills %}
+{% if skills %}
 <table>
-    {% for skill in char.skills %}
+    {% for skill in skills %}
         <tr><td>{{ skill.skill }}</td><td>{{ skill.level }}</td>
             <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td>
             <td>
@@ -241,10 +242,11 @@ XP: {{ char.xp_used_stats }} +
         </tr>
     {% endfor %}
 </table>
-<div> {% sum_sp_cost char.skills %} / {{ char.gained_sp }} </div>
+<div> {% sum_sp_cost skills %} / {{ char.gained_sp }} </div>
 {% else %}
 <p>No skills.</p>
 {% endif %}
+{% endwith %}
 
 <div id="add_skill" class="edit_control">
 <label for="add_skill_form"><strong>Add a skill</strong></label>
@@ -259,9 +261,10 @@ XP: {{ char.xp_used_stats }} +
 </div>
 
 <h3>Edges</h3>
-{% if char.edges %}
+{% with edges=char.edges %}
+{% if edges %}
 <table>
-    {% for edge in char.edges %}
+    {% for edge in edges %}
         <tr><td>{{ edge.edge }}</td>
             <td>
               <div class="edit_control">
@@ -279,6 +282,7 @@ XP: {{ char.xp_used_stats }} +
 {% else %}
 <p>No edges.</p>
 {% endif %}
+{% endwith %}
 
 <div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add an edge</strong></label>
@@ -313,8 +317,8 @@ XP: {{ char.xp_used_stats }} +
 <p>No helmet.</p>
 {% endif %}
 
-<div id="add_edge" class="edit_control">
-<label for="add_edge_form"><strong>Add a helmet</strong></label>
+<div id="add_helmet" class="edit_control">
+<label for="add_helmet_form"><strong>Add a helmet</strong></label>
 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_helmet_form">{% csrf_token %}
 <table>
@@ -346,8 +350,8 @@ XP: {{ char.xp_used_stats }} +
 <p>No armor.</p>
 {% endif %}
 
-<div id="add_edge" class="edit_control">
-<label for="add_edge_form"><strong>Add armor</strong></label>
+<div id="add_armor" class="edit_control">
+<label for="add_armor_form"><strong>Add armor</strong></label>
 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
       id="add_armor_form">{% csrf_token %}
 <table>
