@@ -357,6 +357,8 @@ XP: {{ char.xp_used_stats }} +
 </form>
 </div>
 
+<div>Missing skills: {{ char.missing_skills}}</div>
+
 <script src="{{ STATIC_URL}}jquery-combobox.js"></script>
 <script>
     $(document).ready(function () {

@@ -188,6 +188,8 @@ class Character(models.Model):
 
     @property
     def xp_used_edges(self):
+        # XXX this should be changed in the future to just count the
+        # cost from the actual edges obtained by the character.
         return 25 * self.edges_bought
         # sum([ee.edge.cost for ee in self.edges.all()])
 
@@ -203,6 +205,29 @@ class Character(models.Model):
 
     def __unicode__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
+
+    def missing_skills(self):
+
+        from django.db import connection, transaction
+        cursor = connection.cursor()
+
+        # # Get all skill the character has prerequisites for.
+        cursor.execute(
+            # First get all the skills that are required for the
+            # characters skills.
+            """SELECT cs.skill_id, rs.to_skill_id FROM
+               sheet_skill_required_skills rs, sheet_characterskill cs WHERE
+               cs.character_id = %s and cs.skill_id = rs.from_skill_id
+
+               EXCEPT
+            """
+            # Then take out all skills the character has the skills for.
+            """
+               SELECT rs.from_skill_id, cs.skill_id FROM
+               sheet_skill_required_skills rs, sheet_characterskill cs WHERE
+               cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
+            [self.id, self.id])
+        return cursor.fetchall()
 
 class Edge(ExportedModel):
     """
@@ -329,40 +354,15 @@ class CharacterSkill(models.Model):
 
     def comments(self):
         comments = []
-        # XXX a query to get all requirements for skills for a character.
 
-         #SELECT DISTINCT s.to_skill_id
-         #FROM sheet_skill_required_skills s, sheet_skill s2,
-         #     sheet_characterskill cs, sheet_character c
-         #WHERE c.name = 'Martel' and
-         #s2.name = s.from_skill_id and
-         #cs.character_id = c.id and cs.skill_id = s2.name
-         #EXCEPT
-         #SELECT cs2.skill_id
-         #FROM sheet_characterskill cs2,
-         #sheet_character c2
-         #WHERE cs2.character_id = c2.id and c2.name = 'Martel';
-         #
-         #SELECT DISTINCT s.from_skill_id as skill_id
-         #FROM sheet_skill_required_skills s, sheet_skill s2,
-         #     sheet_characterskill cs, sheet_character c
-         #WHERE c.name = 'Martel' and
-         #s2.name = s.from_skill_id and
-         #cs.character_id = c.id and cs.skill_id = s2.name
-         #EXCEPT
-         #SELECT cs2.skill_id
-         #FROM sheet_characterskill cs2,
-         #sheet_character c2
-         #WHERE cs2.character_id = c2.id and c2.name = 'Martel'
-
-        if self.skill.required_skills.exists():
-            missing = self.skill.required_skills.exclude(
-                name__in=[xx.skill.name for xx in self.character.skills.all()])
-
-            if missing.exists():
-                comments.append("Required skill %s missing." %
-                                ','.join((xx.name for xx in missing)))
-                print comments
+        #if self.skill.required_skills.exists():
+        #    missing = self.skill.required_skills.exclude(
+        #        name__in=[xx.skill.name for xx in self.character.skills.all()])
+        #
+        #    if missing.exists():
+        #        comments.append("Required skill %s missing." %
+        #                        ','.join((xx.name for xx in missing)))
+        #        print comments
         return "\n".join(comments)
 
     def __unicode__(self):
