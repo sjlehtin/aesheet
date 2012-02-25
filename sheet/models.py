@@ -766,6 +766,9 @@ class Armor(ExportedModel):
         # base character.
         if v.startswith("armor"):
             typ = v.split('_')[-1]
+            if typ == 'dp':
+                return int(round(getattr(self.base, v) *
+                                 self.quality.dp_multiplier))
             return getattr(self.base, v) + getattr(self.quality, "armor_" + typ)
 
         raise AttributeError, "no attr %s" % v
@@ -989,6 +992,7 @@ class Sheet(models.Model):
         return int(round((self.fit + self.eff_psy)/2)) + self.mod_imm
 
     def _mod_stat(self, stat):
+        # XXX Armor effects on stats.
         # XXX allow different types of effects stack.
         # Exclude effects which don't have an effect on stat.
         kwargs = { stat : 0}

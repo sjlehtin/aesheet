@@ -84,20 +84,22 @@ XP: {{ char.xp_used_stats }} +
 <div class="armor">
   <table>
     <thead>
-      <tr><th></th><th></th><th>P</th><th>S</th><th>B</th><th>R</th></tr>
+      <tr><th></th><th></th><th>P</th><th>S</th><th>B</th><th>R</th>
+	<th>DR</th><th>DP</th></tr>
     </thead>
     <tr><td>8</td><td>Head</td>
-      {% render_armor_leth_red char.helm "h" %}</tr>
+      {% render_armor char.helm "h" %}
+      </tr>
     <tr><td>5-7</td><td>Torso</td>
-      {% render_armor_leth_red char.armor "t" %}</tr>
+      {% render_armor char.armor "t" %}</tr>
     <tr><td>4</td><td>Right arm</td>
-      {% render_armor_leth_red char.armor "ra" %}</tr>
+      {% render_armor char.armor "ra" %}</tr>
     <tr><td>3</td><td>Right leg</td>
-      {% render_armor_leth_red char.armor "rl" %}</tr>
+      {% render_armor char.armor "rl" %}</tr>
     <tr><td>2</td><td>Left arm</td>
-      {% render_armor_leth_red char.armor "la" %}</tr>
+      {% render_armor char.armor "la" %}</tr>
     <tr><td>1</td><td>Left leg</td>
-      {% render_armor_leth_red char.armor "ll" %}</tr>
+      {% render_armor char.armor "ll" %}</tr>
   </table>
 </div>
 
