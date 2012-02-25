@@ -719,7 +719,6 @@ class ArmorQuality(ExportedModel):
     armor_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
     mod_fit_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                              default=1.0)
