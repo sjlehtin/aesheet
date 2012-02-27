@@ -206,6 +206,7 @@ class Character(models.Model):
     def __unicode__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
+    @property
     def missing_skills(self):
 
         from django.db import connection, transaction
@@ -227,7 +228,7 @@ class Character(models.Model):
                sheet_skill_required_skills rs, sheet_characterskill cs WHERE
                cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
             [self.id, self.id])
-        return cursor.fetchall()
+        return dict(cursor.fetchall())
 
 class Edge(ExportedModel):
     """

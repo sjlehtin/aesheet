@@ -69,12 +69,6 @@ def characters_index(request):
                               { 'all_characters' : all_characters },
                               context_instance=RequestContext(request))
 
-def character_detail(request, char_id):
-    character = get_object_or_404(Character, pk=char_id)
-    return render_to_response('sheet/sheet_detail.html',
-                              { 'char' : character },
-                              context_instance=RequestContext(request))
-
 def sheets_index(request):
     all_sheets = Sheet.objects.all()
     return render_to_response('sheet/sheets_index.html',

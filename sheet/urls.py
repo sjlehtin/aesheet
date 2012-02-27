@@ -4,7 +4,7 @@ urlpatterns = patterns(
     'sheet.views',
 
     url(r'^characters/$', 'characters_index'),
-    url(r'^characters/(?P<char_id>\d+)/$', 'character_detail'),
+    url(r'^characters/(?P<char_id>\d+)/$', 'edit_character'),
     url(r'^characters/add_char/$', 'edit_character',
         name="add_char"),
 
