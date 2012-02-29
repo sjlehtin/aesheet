@@ -60,6 +60,27 @@
 {% endfor %}
 </table>
 
+<table class="derived">
+{% with b=char.body sta=char.stamina mana=char.mana %}
+{# XXX Temporary stamina and body #}
+  <tr class="body">
+    <td>B</td><td>{{ b.base}}</td>
+    <td>{{ b.mod|default:""}}</td>
+    <td>{{ b.recovery_rate|default:"" }}</td>
+  </tr>
+  <tr class="stamina">
+    <td>S</td><td>{{ sta.base}}</td>
+    <td>{{ sta.mod|default:""}}</td>
+    <td>{{sta.recovery_rate|default:"" }}</td>
+  </tr>
+  <tr class="mana">
+    <td>M</td><td>{{ mana.base}}</td>
+    <td>{{ mana.mod|default:""}}</td>
+    <td>{{mana.recovery_rate|default:"" }}</td>
+  </tr>
+{% endwith %}
+</table>
+
 </div>
 
 <div class="xp">

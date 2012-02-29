@@ -177,6 +177,28 @@ class Character(models.Model):
         return self.cur_imm + self.base_mod_imm
 
     @property
+    def body(self):
+        """
+        Return amount of body as a dict,
+        ('base', 'bonus', 'recovery_rate').
+        """
+        return { 'base': 15, 'mod': 0, 'recovery_rate' : "1/3d" }
+
+    @property
+    def stamina(self):
+        """
+        Return amount of stamina as a dict (see "body").
+        """
+        return { 'base': 15, 'mod': 0, 'recovery_rate' : 0 }
+
+    @property
+    def mana(self):
+        """
+        Return amount of mana as a dict (see "body").
+        """
+        return { 'base': 15, 'mod': 0, 'recovery_rate' : 0 }
+
+    @property
     def xp_used_stats(self):
         xp_used_stats = 0
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
