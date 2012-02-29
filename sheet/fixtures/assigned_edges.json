@@ -1,0 +1,10 @@
+[  
+    {
+	"pk": 1, 
+	"model": "sheet.characteredge", 
+	"fields": {
+	    "edge": 2, 
+	    "character": 1
+	}
+    }
+]

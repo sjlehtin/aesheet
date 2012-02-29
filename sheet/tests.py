@@ -3,6 +3,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 import pdb
 from sheet.forms import SheetForm
+from sheet.models import Sheet
 
 class SheetFormTestCase(TestCase):
     def test_create_form(self):
@@ -191,6 +192,17 @@ class EdgeAndSkillHandling(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertContains(response, "No edges.")
+
+class ModelBasics(TestCase):
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills",
+                "assigned_edges"]
+
+    def test_basic_stats(self):
+        ss = Sheet.objects.get(pk=1)
+        self.assertEqual(ss.character.edge_level('Toughness'), 2)
+        sta = ss.stamina
+        body = ss.body
+        mana = ss.mana
 
 class Views(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills"]

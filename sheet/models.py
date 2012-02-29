@@ -20,6 +20,9 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
+def roundup(dec):
+    return int(math.ceil(dec))
+
 class ExportedModel(models.Model):
     """
     Base class for all exported models.  Allows specifying fields that
@@ -121,15 +124,15 @@ class Character(models.Model):
 
     @property
     def cur_mov(self):
-        return int(round((self.cur_ref + self.cur_fit)/2))
+        return roundup((self.cur_ref + self.cur_fit)/2.0)
 
     @property
     def cur_dex(self):
-        return int(round((self.cur_ref + self.cur_int)/2))
+        return roundup((self.cur_ref + self.cur_int)/2.0)
 
     @property
     def cur_imm(self):
-        return int(round((self.cur_fit + self.cur_psy)/2))
+        return roundup((self.cur_fit + self.cur_psy)/2.0)
 
     # Base stats before circumstance modifiers.
     @property
@@ -175,28 +178,6 @@ class Character(models.Model):
     @property
     def imm(self):
         return self.cur_imm + self.base_mod_imm
-
-    @property
-    def body(self):
-        """
-        Return amount of body as a dict,
-        ('base', 'bonus', 'recovery_rate').
-        """
-        return { 'base': 15, 'mod': 0, 'recovery_rate' : "1/3d" }
-
-    @property
-    def stamina(self):
-        """
-        Return amount of stamina as a dict (see "body").
-        """
-        return { 'base': 15, 'mod': 0, 'recovery_rate' : 0 }
-
-    @property
-    def mana(self):
-        """
-        Return amount of mana as a dict (see "body").
-        """
-        return { 'base': 15, 'mod': 0, 'recovery_rate' : 0 }
 
     @property
     def xp_used_stats(self):
@@ -252,6 +233,14 @@ class Character(models.Model):
                cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
             [self.id, self.id])
         return dict(cursor.fetchall())
+
+    def edge_level(self, edge_name):
+        try:
+            edge = self.edges.get(edge__edge=edge_name)
+            level = edge.edge.level
+        except self.edges.model.DoesNotExist, e:
+            level = 0
+        return level
 
 class Edge(ExportedModel):
     """
@@ -1084,10 +1073,66 @@ class Sheet(models.Model):
     def mod_imm(self):
         pass
 
+    @property
+    def body(self):
+        """
+        Return amount of body as a dict, {'base', 'bonus',
+        'recovery_rate'}.  The recovery_rate indicates the amount the
+        body recovered when not resting.
+        """
+        from_toughness = self.edge_level('Toughness')
+
+        return { 'base': roundup(self.fit / 4.0) ,
+                 'mod': from_toughness,
+                 'recovery_rate' : "",
+                 }
+
+    def _format_recovery(self, level, extra_recovery):
+        rate = ""
+        if level:
+            # XXX Higher levels.
+            rate = "%d" % pow(2, (level - 1))
+        if extra_recovery:
+            if rate:
+                rate = "%s%+d" % (rate, extra_recovery)
+            else:
+                rate = "%d" % extra_recovery
+        return rate
+
+    @property
+    def stamina(self):
+        """
+        Return amount of stamina as a dict (see "body").
+        """
+
+        # Stamina recovery modifier = ROUNDDOWN((IMM-45)/15;0)
+        lvl = self.edge_level('Fast healing')
+        extra_recovery = ((self.eff_imm - 45) // 15)
+        rate = self._format_recovery(lvl, extra_recovery)
+        return { 'base': (roundup((self.ref + self.wil) / 4.0) +
+                          self.bought_stamina),
+                 'mod': 0,
+                 'recovery_rate' : rate }
+
+    @property
+    def mana(self):
+        """
+        Return amount of mana as a dict (see "body").
+        """
+        # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
+        lvl = self.edge_level('Fast mana recovery')
+        extra_recovery = 2 * ((self.eff_cha - 45) // 15)
+        rate = self._format_recovery(lvl, extra_recovery)
+        return { 'base': (roundup((self.psy + self.wil) / 4.0) +
+                          self.bought_mana),
+                 'mod': 0,
+                 'recovery_rate' : rate }
+
+
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
         # base character.
-        if v.startswith("_"):
+        if v in ["body", "stamina", "mana"] or v.startswith("_"):
             raise AttributeError, "no attr %s" % v
         return getattr(self.character, v)
 
