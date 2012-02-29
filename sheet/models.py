@@ -4,6 +4,7 @@ import django.contrib.auth as auth
 import math
 import logging
 from functools import wraps
+import pprint
 
 from django.core.exceptions import ValidationError
 
@@ -331,7 +332,6 @@ class Skill(ExportedModel):
     def __unicode__(self):
         return "%s" % (self.name)
 
-import pprint
 class CharacterSkill(models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
@@ -422,7 +422,7 @@ class CharacterEdge(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.character, self.edge)
 
-class WeaponQuality(ExportedModel):
+class BaseWeaponQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
@@ -431,24 +431,27 @@ class WeaponQuality(ExportedModel):
     damage = models.IntegerField(default=0)
     leth = models.IntegerField(default=0)
     plus_leth = models.IntegerField(default=0)
-    defense_leth = models.IntegerField(default=0)
 
     durability = models.IntegerField(default=0)
     dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4,
                                         default=1)
     weight_multiplier = models.DecimalField(max_digits=6, decimal_places=4,
                                             default=1)
+    notes = models.CharField(max_length=256, blank=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["roa", "ccv"]
+
+class WeaponQuality(BaseWeaponQuality):
+    defense_leth = models.IntegerField(default=0)
+
     versus_missile_modifier = models.IntegerField(default=0)
     versus_area_save_modifier = models.IntegerField(default=0)
-
-    notes = models.CharField(max_length=256, blank=True)
 
     @classmethod
     def dont_export(cls):
         return ['weapon']
-
-    class Meta:
-        ordering = ["roa", "ccv"]
 
     def __unicode__(self):
         return self.name
