@@ -23,6 +23,9 @@ SIZE_CHOICES = (
 def roundup(dec):
     return int(math.ceil(dec))
 
+def rounddown(dec):
+    return int(math.floor(dec))
+
 class ExportedModel(models.Model):
     """
     Base class for all exported models.  Allows specifying fields that
@@ -122,18 +125,6 @@ class Character(models.Model):
         assert qs.count() <= 1
         return True
 
-    @property
-    def cur_mov(self):
-        return roundup((self.cur_ref + self.cur_fit)/2.0)
-
-    @property
-    def cur_dex(self):
-        return roundup((self.cur_ref + self.cur_int)/2.0)
-
-    @property
-    def cur_imm(self):
-        return roundup((self.cur_fit + self.cur_psy)/2.0)
-
     # Base stats before circumstance modifiers.
     @property
     def fit(self):
@@ -169,15 +160,15 @@ class Character(models.Model):
 
     @property
     def mov(self):
-        return self.cur_mov + self.base_mod_mov
+        return roundup((self.ref + self.fit)/2.0) + self.base_mod_mov
 
     @property
     def dex(self):
-        return self.cur_dex + self.base_mod_dex
+        return roundup((self.ref + self.int)/2.0) + self.base_mod_dex
 
     @property
     def imm(self):
-        return self.cur_imm + self.base_mod_imm
+        return roundup((self.fit + self.psy)/2.0) + self.base_mod_imm
 
     @property
     def xp_used_stats(self):
@@ -624,6 +615,9 @@ class Weapon(ExportedModel):
 
     def damage(self):
         # XXX modifiers for size of weapon.
+        #
+        # XXX respect the maximum damage allowed by the weapon (from
+        # damage dice and magical bonuses) to cap bonuses from FIT.
         return WeaponDamage(
             self.base.num_dice, self.base.dice,
             extra_damage=self.base.extra_damage + self.quality.damage,
@@ -945,18 +939,22 @@ class Sheet(models.Model):
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
 
+        # XXX Martial arts expertise.
+        #
         # XXX fit under 45.
-        dmg.add_damage(self.eff_fit / self.fit_modifiers_for_damage[use_type])
-        dmg.add_leth(self.eff_fit /
-                     self.fit_modifiers_for_lethality[use_type])
+        dmg.add_damage(rounddown(self.eff_fit /
+                                 self.fit_modifiers_for_damage[use_type]))
+        dmg.add_leth(rounddown(self.eff_fit /
+                               self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
-        dmg.add_damage(self.eff_fit / self.fit_modifiers_for_damage[use_type])
-        dmg.add_leth(self.eff_fit /
-                     self.fit_modifiers_for_lethality[use_type])
+        dmg.add_damage(rounddown(self.eff_fit /
+                                 self.fit_modifiers_for_damage[use_type]))
+        dmg.add_leth(rounddown(self.eff_fit /
+                               self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
 
@@ -995,16 +993,16 @@ class Sheet(models.Model):
 
     @property
     def eff_mov(self):
-        return int(round((self.eff_fit + self.eff_ref)/2)) + self.mod_mov
+        return roundup((self.eff_fit + self.eff_ref)/2.0) + self.mod_mov
 
     @property
     def eff_dex(self):
-        return int(round((self.eff_ref + self.eff_int)/2)) + self.mod_dex
+        return roundup((self.eff_ref + self.eff_int)/2.0) + self.mod_dex
 
     @property
     def eff_imm(self):
         "IMM is not increased by an enhancement to FIT."
-        return int(round((self.fit + self.eff_psy)/2)) + self.mod_imm
+        return roundup((self.fit + self.eff_psy)/2) + self.mod_imm
 
     def _mod_stat(self, stat):
         # XXX Armor effects on stats.
@@ -1080,7 +1078,12 @@ class Sheet(models.Model):
         'recovery_rate'}.  The recovery_rate indicates the amount the
         body recovered when not resting.
         """
-        from_toughness = self.edge_level('Toughness')
+
+        sizes = {"M" : 0,
+                 "S" : -1,
+                 "L" : 1 }
+        from_toughness =  (2 + sizes[self.size]) * \
+            self.character.edge_level('Toughness')
 
         return { 'base': roundup(self.fit / 4.0) ,
                  'mod': from_toughness,
@@ -1097,6 +1100,8 @@ class Sheet(models.Model):
                 rate = "%s%+d" % (rate, extra_recovery)
             else:
                 rate = "%d" % extra_recovery
+        if rate:
+            rate += "/8h"
         return rate
 
     @property
@@ -1106,8 +1111,8 @@ class Sheet(models.Model):
         """
 
         # Stamina recovery modifier = ROUNDDOWN((IMM-45)/15;0)
-        lvl = self.edge_level('Fast healing')
-        extra_recovery = ((self.eff_imm - 45) // 15)
+        lvl = self.character.edge_level('Fast healing')
+        extra_recovery = rounddown((self.eff_imm - 45) / 15)
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.ref + self.wil) / 4.0) +
                           self.bought_stamina),
@@ -1120,8 +1125,8 @@ class Sheet(models.Model):
         Return amount of mana as a dict (see "body").
         """
         # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
-        lvl = self.edge_level('Fast mana recovery')
-        extra_recovery = 2 * ((self.eff_cha - 45) // 15)
+        lvl = self.character.edge_level('Fast mana recovery')
+        extra_recovery = rounddown(2 * ((self.eff_cha - 45) // 15))
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.psy + self.wil) / 4.0) +
                           self.bought_mana),
