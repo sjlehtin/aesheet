@@ -12,6 +12,8 @@ urlpatterns = patterns(
 
     url(r'^sheets/edit_sheet/(?P<sheet_id>\d+)?/?$', 'edit_sheet'),
 
+    url(r'^sheets/add_spell_effect/$', 'edit_spell_effect'),
+
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet_detail'),

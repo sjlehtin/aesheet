@@ -3,24 +3,15 @@ from django.forms import widgets
 from sheet.models import *
 import sheet.models
 
-class EditCharacter(forms.ModelForm):
+class CharacterForm(forms.ModelForm):
 
     class Meta:
         model = Character
 
-class EditSheet(forms.ModelForm):
+class SheetForm(forms.ModelForm):
 
     class Meta:
         model = Sheet
-
-class SheetForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        if kwargs.has_key('form_id'):
-            form_id = kwargs.pop('form_id')
-        super(SheetForm, self).__init__(*args, **kwargs)
-        self.fields['form_id'].initial = self.__class__.__name__
-
-    form_id = forms.CharField(max_length=64, widget=widgets.HiddenInput)
 
 class ImportForm(forms.Form):
     import_data = forms.CharField(widget=forms.Textarea, required=False)
@@ -216,7 +207,7 @@ class AddEdge(forms.ModelForm):
         cs.save()
         return self.instance
 
-class RemoveGeneric(SheetForm):
+class RemoveGeneric(forms.Form):
     def __init__(self, *args, **kwargs):
         item = kwargs.pop('item', None)
         item_type = kwargs.pop('item_type', "")
@@ -257,3 +248,7 @@ class StatModify(forms.ModelForm):
         if commit:
             char.save()
         return char
+
+class SpellEffectForm(forms.ModelForm):
+    class Meta:
+        model = SpellEffect

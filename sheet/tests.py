@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 import pdb
 from sheet.forms import SheetForm
 from sheet.models import Sheet
+import sheet.views
 
 class SheetFormTestCase(TestCase):
     def test_create_form(self):
@@ -214,3 +215,32 @@ class Views(TestCase):
     def testViewCharacter(self):
         response = self.client.get("/characters/2/")
         self.assertContains(response, "Priest")
+
+    def testNewSpellEffect(self):
+        det_url = reverse(sheet.views.edit_spell_effect)
+        response = self.client.get(det_url)
+        self.assertContains(response, "Fit")
+
+        response = self.client.post(det_url, { 'fit' : 40,
+                                               'name' : 'MyEffect',
+                                               'type' : 'enhancement',
+                                               'cc_skill_levels' : 0,
+                                               'ref' : 0,
+                                               'lrn' : 0,
+                                               'int' : 0,
+                                               'psy' : 0,
+                                               'wil' : 0,
+                                               'cha' : 0,
+                                               'pos' : 0,
+                                               'mov' : 0,
+                                               'dex' : 0,
+                                               'imm' : 0,
+                                               'saves_vs_fire' : 0,
+                                               'saves_vs_cold' : 0,
+                                               'saves_vs_lightning' : 0,
+                                               'saves_vs_poison' : 0,
+                                               'saves_vs_all' : 0,
+                                               })
+        self.assertRedirects(response, reverse(sheet.views.sheets_index))
+        eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
+        self.assertEqual(eff.fit, 40)

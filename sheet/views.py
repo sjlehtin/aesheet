@@ -313,13 +313,12 @@ def edit_character(request, char_id=None):
     character = None
     if char_id:
         character = get_object_or_404(Character, pk=char_id)
-    form = EditCharacter(instance=character)
+    form = CharacterForm(instance=character)
 
     forms = {}
     if request.method == "POST":
-        form = EditCharacter(request.POST, instance=character)
+        form = CharacterForm(request.POST, instance=character)
         if form.is_valid():
-            form.full_clean()
             form.save()
             return HttpResponseRedirect(settings.ROOT_URL + 'characters/')
 
@@ -330,19 +329,34 @@ def edit_character(request, char_id=None):
     return render_to_response('sheet/edit_char.html',
                               RequestContext(request, c))
 
-def edit_sheet(request, sheet_id=None):
+def edit_spell_effect(request, eff_id=None):
+    effect = None
+    if eff_id:
+        effect = get_object_or_404(SpellEffect, pk=eff_id)
+    data = None
+    if request.method == "POST":
+        data = request.POST
+    form = SpellEffectForm(data, instance=effect)
 
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(sheets_index))
+
+    return render_to_response('sheet/gen_edit.html',
+                              RequestContext(request, { 'form' : form }))
+
+def edit_sheet(request, sheet_id=None):
     sheet = None
     if sheet_id:
         sheet = get_object_or_404(Sheet, pk=sheet_id)
     if request.method == "POST":
-        form = EditSheet(request.POST, instance=sheet)
+        form = SheetForm(request.POST, instance=sheet)
         if form.is_valid():
-            form.full_clean()
             form.save()
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/')
     else:
-        form = EditSheet(instance=sheet)
+        form = SheetForm(instance=sheet)
 
     return render_to_response('sheet/edit_sheet.html',
                               RequestContext(request, { 'sheet_form' : form,
