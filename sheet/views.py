@@ -23,20 +23,19 @@ TODO = """
 * change log for sheet (stat modifications etc)
 * editing sheet description
 * nicer fast edit of basic stats
-* stamina
++ stamina
 ** recovery
-* mana
++ mana
 ** recovery
-* body
++ body
 ** recovery
 * code simplification
-* code to GitHub?
 * reordering skills
 * stats for skill checks
 * character mugshot upload
 * senses
 * charge damage
-* print.css (basically, the whole printable button special handling is
++ print.css (basically, the whole printable button special handling is
   unnecessary).
 * movement chart
 * save bonuses
