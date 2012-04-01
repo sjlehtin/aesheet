@@ -252,10 +252,10 @@ class Edge(ExportedModel):
 SKILL_TYPES = [
     "Physical",
     "Combat",
-    "Trade",
-    "Education",
     "Specialty",
+    "Education",
     "Social",
+    "Mystical",
     "Mage",
     "Priest",
     "Language"
