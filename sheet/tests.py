@@ -244,3 +244,30 @@ class Views(TestCase):
         self.assertRedirects(response, reverse(sheet.views.sheets_index))
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
+
+class Importing(TestCase):
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills"]
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="admin", password="admin")
+
+    def testAddNewSkillWithRequiredSkills(self):
+        det_url = reverse(sheet.views.import_data)
+        response = self.client.post(det_url, { 'import_data' :
+                                                   """Skill
+name,description,notes,can_be_defaulted,is_specialization,skill_cost_0,\
+skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+Throw,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat""",
+                                               })
+        self.assertRedirects(response, reverse(sheet.views.import_data))
+        response = self.client.get(reverse(sheet.views.browse,
+                                           args=["Skill"]))
+        self.assertContains(response, "Unarmed combat")
+        hdr = response.context['header']
+        name_index = hdr.index("name")
+        required_skills_index = hdr.index("required skills")
+        for rr in response.context['rows']:
+            if rr[name_index] == "Throw":
+                self.assertEqual(rr[required_skills_index], "Unarmed combat")
+                break

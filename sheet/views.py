@@ -410,6 +410,7 @@ def import_text(data):
     header = reader.next()
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
+    m2m_values = {}
 
     for row in reader:
         mdl = None
@@ -462,6 +463,9 @@ def import_text(data):
                         obj = field.rel.to.objects.get(name=name)
                         ll.append(obj)
                     value = ll
+                    m2m_values[fieldname] = value
+                    # These need to be added only after the object is saved.
+                    continue
                 else:
                     # XXX Something a little more intelligent would
                     # probably be nice, for other types of data.
@@ -480,8 +484,15 @@ def import_text(data):
             setattr(mdl, fieldname, value)
         mdl.full_clean()
         mdl.save()
+        for kk, vv in m2m_values.items():
+            setattr(mdl, kk, vv)
+        mdl.full_clean()
+        mdl.save()
 
 def import_data(request, success=False):
+    """
+    XXX Create tests and refactor.
+    """
     if request.method == 'POST':
         form = ImportForm(request.POST, request.FILES)
         if form.is_valid():
