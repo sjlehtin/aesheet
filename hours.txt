@@ -23,4 +23,6 @@ thu 16.2.2012 5h
 sat 18.2.2012 4h
 mon 20.2.2012 1h
 wed 29.2.2012 4h
+thu 1.3.2012 3h
 sun 1.4.2012 1h	Fixing a bug.
+wed 13.6.2012 1h Researching adding missile weapons.
