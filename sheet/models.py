@@ -1141,11 +1141,16 @@ class Sheet(models.Model):
         # XXX allow different types of effects stack.
         # Exclude effects which don't have an effect on stat.
         kwargs = { stat : 0}
+        mod = 0
         effects = self.spell_effects.exclude(**kwargs)
         if effects:
             eff = max(effects, key=lambda xx: getattr(xx, stat))
-            return getattr(eff, stat)
-        return 0
+            mod += getattr(eff, stat)
+        # XXX edge bonuses should be calculated in to the base stat.
+        kwargs = { "edge__" + stat : 0}
+        for ee in self.edges.exclude(**kwargs):
+            mod += getattr(ee.edge, stat)
+        return mod
 
     def _stat_wrapper(func):
         """
