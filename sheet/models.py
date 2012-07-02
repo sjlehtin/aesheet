@@ -328,8 +328,13 @@ class Skill(ExportedModel):
 
     @classmethod
     def dont_export(cls):
-        return ['characterskill', 'primary_for_weapons',
-                'secondary_for_weapons', 'base_skill_for_weapons',
+        return ['characterskill',
+                'primary_for_rangedweapontemplate',
+                'secondary_for_rangedweapontemplate',
+                'base_skill_for_rangedweapontemplate',
+                'primary_for_weapontemplate',
+                'secondary_for_weapontemplate',
+                'base_skill_for_weapontemplate',
                 'skill']
 
     def __unicode__(self):
