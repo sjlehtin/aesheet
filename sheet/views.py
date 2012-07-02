@@ -410,6 +410,43 @@ def edit_spell_effect(request, eff_id=None):
     return render_to_response('sheet/gen_edit.html',
                               RequestContext(request, { 'form' : form }))
 
+def edit_edge(request, edge_id=None):
+    if edge_id:
+        effect = get_object_or_404(Edge, pk=edge_id)
+    else:
+        effect = None
+
+    data = None
+    if request.method == "POST":
+        data = request.POST
+    form = EdgeForm(data, instance=effect)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(sheets_index))
+
+    return render_to_response('sheet/gen_edit.html',
+                              RequestContext(request, { 'form' : form }))
+
+def edit_edge_level(request, el_id=None):
+    if el_id:
+        el = get_object_or_404(EdgeLevel, pk=el_id)
+    else:
+        el = None
+    data = None
+    if request.method == "POST":
+        data = request.POST
+    form = EdgeLevelForm(data, instance=el)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(sheets_index))
+
+    return render_to_response('sheet/gen_edit.html',
+                              RequestContext(request, { 'form' : form }))
+
 def edit_sheet(request, sheet_id=None):
     sheet = None
     if sheet_id:

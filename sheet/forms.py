@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import widgets
+from django.forms.models import modelform_factory
 from sheet.models import *
 import sheet.models
 
@@ -257,6 +258,8 @@ class StatModify(forms.ModelForm):
             char.save()
         return char
 
-class SpellEffectForm(forms.ModelForm):
-    class Meta:
-        model = SpellEffect
+SpellEffectForm = modelform_factory(SpellEffect)
+EdgeForm = modelform_factory(Edge)
+EdgeLevelForm = modelform_factory(EdgeLevel)
+WeaponForm = modelform_factory(Weapon)
+RangedWeaponForm = modelform_factory(RangedWeapon)

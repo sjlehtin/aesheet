@@ -13,6 +13,8 @@ urlpatterns = patterns(
     url(r'^sheets/edit_sheet/(?P<sheet_id>\d+)?/?$', 'edit_sheet'),
 
     url(r'^sheets/add_spell_effect/$', 'edit_spell_effect'),
+    url(r'^sheets/add_edge/$', 'edit_edge'),
+    url(r'^sheets/add_edge_level/$', 'edit_edge_level'),
 
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheets_index'),
