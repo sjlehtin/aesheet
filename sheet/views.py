@@ -307,7 +307,7 @@ def process_sheet_change_request(request, sheet):
         if item_type == "Weapon":
             item = get_object_or_404(Weapon, pk=item)
             sheet.weapons.remove(item)
-        if item_type == "RangedWeapon":
+        elif item_type == "RangedWeapon":
             item = get_object_or_404(RangedWeapon, pk=item)
             sheet.ranged_weapons.remove(item)
         elif item_type == "Armor":
