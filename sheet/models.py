@@ -1142,7 +1142,7 @@ class Sheet(models.Model):
         # Exclude effects which don't have an effect on stat.
         kwargs = { stat : 0}
         effects = self.spell_effects.exclude(**kwargs)
-        if effects.count():
+        if effects:
             eff = max(effects, key=lambda xx: getattr(xx, stat))
             return getattr(eff, stat)
         return 0
