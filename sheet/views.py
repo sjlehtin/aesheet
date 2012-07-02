@@ -21,7 +21,7 @@ TODO = """
 * inventory ?
 * magic item location (only one item to each location)
 * change log for sheet (stat modifications etc)
-* editing sheet description
++ editing sheet description
 * nicer fast edit of basic stats
 + stamina
 ** recovery
@@ -61,6 +61,10 @@ from django.db.models.fields import FieldDoesNotExist
 from pprint import pprint
 import logging
 import pdb
+import sys
+from collections import namedtuple
+
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
@@ -100,7 +104,7 @@ class RemoveWrap(object):
         return unicode(self.item)
 
 class WeaponWrap(object):
-    class Stats:
+    class Stats(object):
         rendered_attack_inits = 4
         rendered_defense_inits = 3
         def __init__(self, item, sheet, use_type):
@@ -154,6 +158,52 @@ class WeaponWrap(object):
             raise AttributeError()
         return getattr(self.item, v)
 
+Action = namedtuple('Action', ['action', 'check'])
+
+class RangedWeaponWrap(object):
+    def __init__(self, item, sheet):
+        self.sheet = sheet
+        self.item = item
+
+    def rof(self):
+        return self.sheet.rof(self.item)
+
+    def skill_checks(self):
+        ll = None
+        try:
+            ll = [Action._make(xx) for xx in map(
+                    None,
+                    self.sheet.ranged_actions,
+                    self.sheet.ranged_skill_checks(self.item))]
+            logging.info("Checks: %s" % ll)
+        except:
+            logging.exception("Got exception")
+        return ll
+
+    def ranges(self):
+        try:
+            ll = self.sheet.ranged_ranges(self.item)
+        except e:
+            logging.exception("Got exception %s" % e)
+        return ll
+
+    def initiatives(self):
+        return self.sheet.initiatives(self.item)
+
+    def damage(self):
+        return self.sheet.damage(self.item)
+
+    def __getattr__(self, v):
+        # pass through all attribute references not handled by us to
+        # base character.
+        if v.startswith("_"):
+            raise AttributeError()
+        return getattr(self.item, v)
+
+    def __unicode__(self):
+        return unicode(self.item)
+
+
 class SheetView(object):
     def __init__(self, sheet):
         self.sheet = sheet
@@ -182,10 +232,17 @@ class SheetView(object):
 
 
     def weapons(self):
-        if not self.sheet.weapons.exists():
-            return []
         return [WeaponWrap(RemoveWrap(xx), self.sheet)
                 for xx in self.sheet.weapons.all()]
+
+    def ranged_weapons(self):
+        try:
+            ll = [RangedWeaponWrap(RemoveWrap(xx), self.sheet)
+                  for xx in self.sheet.ranged_weapons.all()]
+            logging.info("list: %s" % ll)
+        except:
+            logging.exception("Got exception")
+        return ll
 
     def spell_effects(self):
         if not self.sheet.spell_effects.exists():
@@ -233,6 +290,9 @@ def process_sheet_change_request(request, sheet):
         if item_type == "Weapon":
             item = get_object_or_404(Weapon, pk=item)
             sheet.weapons.remove(item)
+        if item_type == "RangedWeapon":
+            item = get_object_or_404(RangedWeapon, pk=item)
+            sheet.ranged_weapons.remove(item)
         elif item_type == "Armor":
             sheet.armor = None
         elif item_type == "Helm":
@@ -284,6 +344,10 @@ def sheet_detail(request, sheet_id=None):
                                        prefix="add-armor")
     forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
                                          prefix="add-weapon")
+    forms['add_ranged_weapon_form'] = \
+        AddRangedWeapon(data,
+                        instance=sheet,
+                        prefix="add-ranged-weapon")
 
     if request.method == "POST":
         should_change = False

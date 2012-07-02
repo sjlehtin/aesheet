@@ -5,6 +5,7 @@ import math
 import logging
 from functools import wraps
 import pprint
+from collections import namedtuple
 
 from django.core.exceptions import ValidationError
 
@@ -485,8 +486,9 @@ class WeaponDamage(object):
         return "%sd%s%+d/%d" % (self.num_dice, self.dice,
                                 self.extra_damage, self.leth)
 
-class WeaponTemplate(ExportedModel):
+class BaseWeaponTemplate(ExportedModel):
     class Meta:
+        abstract = True
         ordering = ['name']
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=64)
@@ -516,11 +518,11 @@ class WeaponTemplate(ExportedModel):
                                  default=1.0)
 
     base_skill = models.ForeignKey(Skill,
-                                   related_name="base_skill_for_weapons")
+                                   related_name="base_skill_for_%(class)s")
     skill = models.ForeignKey(Skill, blank=True, null=True,
-                              related_name="primary_for_weapons")
+                              related_name="primary_for_%(class)s")
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
-                               related_name="secondary_for_weapons")
+                               related_name="secondary_for_%(class)s")
     is_lance = models.BooleanField(default=False)
     is_shield = models.BooleanField(default=False)
 
@@ -530,6 +532,28 @@ class WeaponTemplate(ExportedModel):
 
     def __unicode__(self):
         return "%s" % (self.name)
+
+class WeaponTemplate(BaseWeaponTemplate):
+    pass
+
+class RangedWeaponTemplate(BaseWeaponTemplate):
+    # XXX no ccv
+    # XXX no defenses
+    target_initiative = models.IntegerField(default=-2)
+    # XXX special max leth due to dura (durability for this purpose is
+    # max leth+1, max leth due to high fit is thus max leth + 2)
+
+    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0.1)
+    range_pb = models.IntegerField(blank=True, null=True)
+    range_xs = models.IntegerField()
+    range_vs = models.IntegerField()
+    range_vs = models.IntegerField()
+    range_s = models.IntegerField()
+    range_m = models.IntegerField()
+    range_l = models.IntegerField()
+    range_xl = models.IntegerField()
+    range_e = models.IntegerField()
 
 EFFECT_TYPES = [
     "enhancement",
@@ -632,6 +656,59 @@ class Weapon(ExportedModel):
         if self.quality.name != "Normal":
             quality = self.quality
         return "%s %s" % (quality, self.base)
+
+Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
+
+class RangedWeapon(ExportedModel):
+# XXX name from template (appended with quality or something to that
+    # effect) will be used if this is not set (= is blank).  If this is
+    # set, the name given here should be unique.  Add a validator to
+    # verify this.
+    name = models.CharField(max_length=256, blank=True)
+    description = models.TextField(blank=True)
+    base = models.ForeignKey(RangedWeaponTemplate)
+    quality = models.ForeignKey(WeaponQuality)
+    ammo_quality = models.ForeignKey(WeaponQuality,
+                                     related_name="rangedweaponammo_set")
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+
+    class Meta:
+        ordering = ['name']
+
+    @classmethod
+    def dont_export(cls):
+        return ['sheet']
+
+    def roa(self):
+        # XXX modifiers for size of weapon.
+        return float(self.base.roa + self.quality.roa)
+
+    @property
+    def to_hit(self):
+        # XXX
+        return self.quality.ccv
+
+    def damage(self):
+        # XXX modifiers for size of weapon.
+        #
+        # XXX respect the maximum damage allowed by the weapon (from
+        # damage dice and magical bonuses) to cap bonuses from FIT.
+        return WeaponDamage(
+            self.base.num_dice, self.base.dice,
+            extra_damage=self.base.extra_damage + self.quality.damage,
+            leth=self.base.leth + self.quality.leth,
+            plus_leth=self.base.plus_leth + self.quality.plus_leth)
+
+    def __unicode__(self):
+        if self.name:
+            return self.name
+        quality = ""
+        if self.quality.name != "Normal":
+            quality = self.quality
+        return "%s %s" % (quality, self.base)
+
+    def ranges(self, sheet):
+        return Range._make([None, 2, 4, 8, 15, 25, 38, 50])
 
 class ArmorTemplate(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
@@ -802,6 +879,7 @@ class Sheet(models.Model):
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
     weapons = models.ManyToManyField(Weapon, blank=True)
+    ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
@@ -854,7 +932,20 @@ class Sheet(models.Model):
 
         return roa
 
+    def rof(self, weapon):
+        roa = weapon.roa()
+        cs = self.character.skills.filter(skill=weapon.base.base_skill)
+
+        if cs:
+            roa *= (1 + cs[0].level * 0.10)
+
+        # XXX maximum is 5.0 with ranged.
+        roa = min(roa, 2.5)
+
+        return roa
+
     actions = [xx/2.0 for xx in range(1, 10, 1)]
+    ranged_actions = [0.5, 1, 2, 3, 4, 5]
 
     def max_attacks(self, roa):
         return min(int(math.floor(roa * 2)), 9)
@@ -900,7 +991,7 @@ class Sheet(models.Model):
         def check_mod_from_action_index(act):
             act = float(act)
             if 1/act >= 1/roa + 1:
-                return 5        # XXX 10 with ranged.
+                return 5 # cc.
             if act > roa:
                 return - act/roa * 20 + 10
             if act < 0.5 * roa:
@@ -930,6 +1021,49 @@ class Sheet(models.Model):
         mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
+
+    def ranged_skill_checks(self, weapon):
+        rof = self.rof(weapon)
+        roa = float(rof)
+        def check_mod_from_action_index(act):
+            act = float(act)
+            if 1/act >= 1/roa + 1:
+                return 10 # ranged.
+            if act > roa:
+                return - act/roa * 20 + 10
+            if act < 0.5 * roa:
+                return roa / act
+            return 0
+
+        modifiers = 0
+
+        # skill level/unskilled.
+        cs = self.character.skills.filter(skill=weapon.base.base_skill)
+        if cs.count() > 0:
+            base_skill = self.eff_dex + cs[0].level * 5
+        else:
+            base_skill = roundup(self.eff_dex / 2.0)
+
+        logging.info("ROF %s" % roa)
+        checks = [check_mod_from_action_index(act)
+                  # cap number of actions.
+                  for act in filter(lambda act: act < roa * 2,
+                                    self.ranged_actions)]
+        logging.info("checks: %s" % checks)
+        def counter_penalty(xx):
+            # Fitness counters ranged weapon penalties.
+            xx = xx + rounddown((self.eff_fit - 45)/3.0)
+            if xx > 0:
+                return 0
+            return xx
+        checks = map(counter_penalty, checks)
+        base_skill = base_skill + weapon.to_hit
+        return [int(round(xx) + base_skill) for xx in checks]
+
+
+    def ranged_ranges(self, weapon):
+        return weapon.ranges(self)
+
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
 
@@ -951,7 +1085,6 @@ class Sheet(models.Model):
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
-
 
     @property
     def eff_fit(self):

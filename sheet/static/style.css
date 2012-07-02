@@ -1,6 +1,7 @@
 body { height : 100%; min-height : 100%; }
 html { height : 100%; min-height : 100%; }
-tr.close-combat.header { font-weight: bold; }
+table td { vertical-align: top }
+th.combat { font-weight: bold; }
 td.defense { color: blue; }
 #sidebar { float : left; width : 8em; min-height: 100%; 
 	   background: rgb(204,212,138); }

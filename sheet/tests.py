@@ -3,7 +3,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 import pdb
 from sheet.forms import SheetForm
-from sheet.models import Sheet
+from sheet.models import Sheet, Weapon
 import sheet.views
 
 class SheetFormTestCase(TestCase):
@@ -20,7 +20,8 @@ class ItemHandling(TestCase):
 
     def test_add_remove_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = { 'add-weapon-weapon' : 'Greatsword L1' }
+        req_data = { 'add-weapon-weapon' :
+                     Weapon.objects.get(name="Greatsword L1").pk }
         response = self.client.get(det_url)
         self.assertContains(response, "No weapons.")
         response = self.client.post(det_url, req_data)

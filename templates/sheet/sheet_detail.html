@@ -116,15 +116,15 @@ XP: {{ char.xp_used_stats }} +
 
 <h3>Close combat</h3>
 {% if char.weapons %}
-<table>
-      <tr class="close-combat header">
-      <td />
-      <td>ROA</td>
+<table class="close combat">
+      <tr >
+      <th />
+      <th>ROA</th>
       {% for act in char.actions %}
-         <td>{{ act }}</td>
+         <th>{{ act }}</th>
       {% endfor %}
-      <td colspan="5">Attack</td>
-      <td colspan="4">Defenses</td>
+      <th colspan="5">Attack</th>
+      <th colspan="4">Defenses</th>
        </tr>
 
     {% for item in char.weapons %}
@@ -200,6 +200,70 @@ XP: {{ char.xp_used_stats }} +
 <table>
 {{ add_weapon_form.as_table }}
 </table>
+<input type="submit" value="Add" />
+</form>
+</div>
+
+<h3>Ranged combat</h3>
+{% if char.ranged_weapons %}
+<table>
+  <tr class="ranged combat header">
+    <th />
+    <th>ROF</th>
+    {% for act in char.ranged_actions %}
+    <th>{{ act }}</th>
+    {% endfor %}
+    <th colspan="5">Attack</th>
+    <th>S/M/L/XL/E</th>
+  </tr>
+
+  {% for item in char.ranged_weapons %}
+  <tr>
+    <td class="weapon name" rowspan="3">{{ item.item }}
+      {% comment %}
+      {% if not item.skilled %}
+      <div class="unskilled">unskilled</div>
+      {% endif %}
+      {% endcomment %}
+    </td>
+    <td>{{ item.rof }}</td>
+    {% for act in item.skill_checks %}
+    <td>{{ act.check|default:"" }}</td>
+    {% endfor %}
+    {% for init in item.initiatives %}
+    <td>{{ init }}</td>
+    {% endfor %}
+
+    <td>{{ item.damage }}</td>
+    <td>{{ item.durability }}</td>
+    <td>
+    {% with rr=item.ranges %}
+    {{ rr.s }} /  {{ rr.m }} / {{ rr.l }} / {{ rr.xl }} / {{ rr.e }}
+    {% endwith %}
+    </td>
+    <td class="edit_control">
+      <div class="edit_control">
+        <form action="" method="post">
+          {% csrf_token %}
+          {{ item.remove_form }}
+          <input type="submit" value="Remove" />
+        </form>
+      </div>
+    </td> 
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No ranged weapons.</p>
+{% endif %}
+<div id="add_ranged_weapon" class="edit_control">
+<label for="add_weapon_form"><strong>Add a ranged weapon</strong></label>
+<form action="" method="post" 
+      id="add_ranged_weapon_form">
+  {% csrf_token %}
+<ul>
+{{ add_ranged_weapon_form.as_ul }}
+</ul>
 <input type="submit" value="Add" />
 </form>
 </div>
