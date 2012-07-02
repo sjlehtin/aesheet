@@ -1,6 +1,9 @@
 # Create your views here.
 
 TODO = """
++ = done
+* = not done
+
 + deployment to semeai.org
 ++ postgresql backups
 ++ saner bzr backups (branch all branches to make sure repositories remain
@@ -361,6 +364,9 @@ def sheet_detail(request, sheet_id=None):
                                        prefix="add-armor")
     forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
                                          prefix="add-weapon")
+    forms['new_weapon_form'] = WeaponForm(data, prefix="new-weapon")
+    forms['new_ranged_weapon_form'] = \
+        RangedWeaponForm(data, prefix="new-ranged-weapon")
     forms['add_ranged_weapon_form'] = \
         AddRangedWeapon(data,
                         instance=sheet,
@@ -369,10 +375,14 @@ def sheet_detail(request, sheet_id=None):
     if request.method == "POST":
         should_change = False
 
-        for ff in forms.values():
-            if ff.is_valid():
-                ff.save()
+        for kk, ff in forms.items():
+            if ff.is_valid() and ff.has_changed():
+                oo = ff.save()
                 should_change = True
+                if kk == 'new_weapon_form':
+                    sheet.weapons.add(oo)
+                elif kk == 'new_ranged_weapon_form':
+                    sheet.ranged_weapons.add(oo)
 
         if not should_change:
             (should_change, forms) = process_sheet_change_request(request,
@@ -455,6 +465,24 @@ def edit_edge_level(request, el_id=None):
     if request.method == "POST":
         data = request.POST
     form = EdgeLevelForm(data, instance=el)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(sheets_index))
+
+    return render_to_response('sheet/gen_edit.html',
+                              RequestContext(request, { 'form' : form }))
+
+def edit_ranged_weapon_template(request, wpn_id=None):
+    if wpn_id:
+        wpn = get_object_or_404(RangeWeaponTemplate, pk=wpn_id)
+    else:
+        wpn = None
+    data = None
+    if request.method == "POST":
+        data = request.POST
+    form = RangedWeaponTemplateForm(data, instance=wpn)
 
     if request.method == "POST":
         if form.is_valid():

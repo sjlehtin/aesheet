@@ -196,9 +196,17 @@ XP: {{ char.xp_used_stats }} +
 <div id="add_weapon" class="edit_control">
 <label for="add_weapon_form"><strong>Add a weapon</strong></label>
 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
-      id="add_weapon_form">{% csrf_token %}
+      >{% csrf_token %}
 <table>
 {{ add_weapon_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+or create a new weapon
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+      id="add_weapon_form">{% csrf_token %}
+<table>
+{{ new_weapon_form.as_table }}
 </table>
 <input type="submit" value="Add" />
 </form>
@@ -219,7 +227,7 @@ XP: {{ char.xp_used_stats }} +
 
   {% for item in char.ranged_weapons %}
   <tr>
-    <td class="weapon name" rowspan="3">{{ item.item }}
+    <td class="weapon name">{{ item.item }}
       {% comment %}
       {% if not item.skilled %}
       <div class="unskilled">unskilled</div>
@@ -266,6 +274,16 @@ XP: {{ char.xp_used_stats }} +
 </ul>
 <input type="submit" value="Add" />
 </form>
+or create a new weapon
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+      id="add_weapon_form">{% csrf_token %}
+<table>
+{{ new_ranged_weapon_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+<a href="{% url sheet.views.edit_ranged_weapon_template %}">
+  Create new ranged weapon template</a>
 </div>
 
 <h3>Spell effects</h3>
