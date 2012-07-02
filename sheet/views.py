@@ -42,6 +42,23 @@ TODO = """
 * encumbrance breakdown
 * spell skill checks
 * sheet styling
+
+
+NOTES on creating Jan:
+
+* you should be able to leave current stats empty on character creation,
+  in which case the stats would be filled in from the initial stats.
+
+* Adding weapons from templates.
+* Skill points!
+* Specialty levels (treat zero as one)!
+
+Minor:
+
+* adding missing skills (helps in just allowing inserting primary skills
+  and autofilling rest)
+* modifying skill level with +/- (at least add to skill level)
+
 """
 
 from django.shortcuts import render_to_response, get_object_or_404
