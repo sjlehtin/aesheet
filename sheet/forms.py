@@ -264,3 +264,15 @@ EdgeLevelForm = modelform_factory(EdgeLevel)
 WeaponForm = modelform_factory(Weapon)
 RangedWeaponForm = modelform_factory(RangedWeapon)
 RangedWeaponTemplateForm = modelform_factory(RangedWeaponTemplate)
+ArmorTemplateForm = modelform_factory(ArmorTemplate)
+class ArmorForm(forms.ModelForm):
+    base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(
+            is_helm=False))
+    class Meta:
+        model = Armor
+
+class HelmForm(forms.ModelForm):
+    base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(
+            is_helm=True))
+    class Meta:
+        model = Armor

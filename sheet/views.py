@@ -367,6 +367,8 @@ def sheet_detail(request, sheet_id=None):
     forms['new_weapon_form'] = WeaponForm(data, prefix="new-weapon")
     forms['new_ranged_weapon_form'] = \
         RangedWeaponForm(data, prefix="new-ranged-weapon")
+    forms['new_armor_form'] = ArmorForm(data, prefix="new-armor")
+    forms['new_helm_form'] = HelmForm(data, prefix="new-helm")
     forms['add_ranged_weapon_form'] = \
         AddRangedWeapon(data,
                         instance=sheet,
@@ -383,6 +385,12 @@ def sheet_detail(request, sheet_id=None):
                     sheet.weapons.add(oo)
                 elif kk == 'new_ranged_weapon_form':
                     sheet.ranged_weapons.add(oo)
+                elif kk == 'new_armor_form':
+                    sheet.armor = oo
+                    sheet.save()
+                elif kk == 'new_helm_form':
+                    sheet.helm = oo
+                    sheet.save()
 
         if not should_change:
             (should_change, forms) = process_sheet_change_request(request,
@@ -483,6 +491,24 @@ def edit_ranged_weapon_template(request, wpn_id=None):
     if request.method == "POST":
         data = request.POST
     form = RangedWeaponTemplateForm(data, instance=wpn)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(sheets_index))
+
+    return render_to_response('sheet/gen_edit.html',
+                              RequestContext(request, { 'form' : form }))
+
+def edit_armor_template(request, armor_id=None):
+    if armor_id:
+        armor = get_object_or_404(ArmorTemplate, pk=armor_id)
+    else:
+        armor = None
+    data = None
+    if request.method == "POST":
+        data = request.POST
+    form = ArmorTemplateForm(data, instance=armor)
 
     if request.method == "POST":
         if form.is_valid():

@@ -380,8 +380,6 @@ or create a new weapon
 <p>No edges.</p>
 {% endif %}
 {% endwith %}
-<a href="{% url sheet.views.edit_edge %}">Create new edge</a>
-<a href="{% url sheet.views.edit_edge_level %}">Create new edge level</a>
 
 <div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add an edge</strong></label>
@@ -392,6 +390,8 @@ or create a new weapon
 </table>
 <input type="submit" value="Add" />
 </form>
+<a href="{% url sheet.views.edit_edge %}">Create new edge</a>
+<a href="{% url sheet.views.edit_edge_level %}">Create new edge level</a>
 </div>
 
 <h3>Helmet</h3>
@@ -422,6 +422,14 @@ or create a new weapon
       id="add_helmet_form">{% csrf_token %}
 <table>
 {{ add_helm_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+or create a new helm
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+      id="add_helmet_form">{% csrf_token %}
+<table>
+{{ new_helm_form.as_table }}
 </table>
 <input type="submit" value="Add" />
 </form>
@@ -458,6 +466,15 @@ or create a new weapon
 </table>
 <input type="submit" value="Add" />
 </form>
+or create a new armor
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+      id="add_armor_form">{% csrf_token %}
+<table>
+{{ new_armor_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+<a href="{% url sheet.views.edit_armor_template %}">Create new armor template</a>
 </div>
 
 <div>Missing skills: {{ char.missing_skills}}</div>
