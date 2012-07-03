@@ -497,12 +497,11 @@ class BaseWeaponTemplate(ExportedModel):
         abstract = True
         ordering = ['name']
     name = models.CharField(max_length=256, primary_key=True)
-    short_name = models.CharField(max_length=64)
+    short_name = models.CharField(
+        max_length=64,
+        help_text="This is used when the name must be fit to a small space")
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=64, blank=True)
-
-    ccv = models.IntegerField(default=10)
-    ccv_unskilled_modifier = models.IntegerField(default=-10)
 
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
 
@@ -513,7 +512,6 @@ class BaseWeaponTemplate(ExportedModel):
     extra_damage = models.IntegerField(default=0)
     leth = models.IntegerField(default=5)
     plus_leth = models.IntegerField(default=0)
-    defense_leth = models.IntegerField(default=5)
 
     type = models.CharField(max_length=5, default="S")
 
@@ -523,14 +521,13 @@ class BaseWeaponTemplate(ExportedModel):
     weight = models.DecimalField(max_digits=4, decimal_places=1,
                                  default=1.0)
 
+    # XXX Melee weapons currently always assume "Weapon Combat"
     base_skill = models.ForeignKey(Skill,
                                    related_name="base_skill_for_%(class)s")
     skill = models.ForeignKey(Skill, blank=True, null=True,
                               related_name="primary_for_%(class)s")
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
                                related_name="secondary_for_%(class)s")
-    is_lance = models.BooleanField(default=False)
-    is_shield = models.BooleanField(default=False)
 
     @classmethod
     def dont_export(self):
@@ -540,7 +537,13 @@ class BaseWeaponTemplate(ExportedModel):
         return "%s" % (self.name)
 
 class WeaponTemplate(BaseWeaponTemplate):
-    pass
+    ccv = models.IntegerField(default=10)
+    ccv_unskilled_modifier = models.IntegerField(default=-10)
+
+    defense_leth = models.IntegerField(default=5)
+
+    is_lance = models.BooleanField(default=False)
+    is_shield = models.BooleanField(default=False)
 
 class RangedWeaponTemplate(BaseWeaponTemplate):
     # XXX no ccv
