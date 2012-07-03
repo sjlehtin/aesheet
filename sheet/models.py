@@ -678,9 +678,10 @@ class RangedWeapon(ExportedModel):
     description = models.TextField(blank=True)
     base = models.ForeignKey(RangedWeaponTemplate)
     quality = models.ForeignKey(WeaponQuality)
-    ammo_quality = models.ForeignKey(WeaponQuality,
+    ammo_quality = models.ForeignKey(WeaponQuality, blank=True, null=True,
                                      related_name="rangedweaponammo_set")
-    special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality,
+                                               blank=True)
 
     class Meta:
         ordering = ['name']
