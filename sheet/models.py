@@ -554,7 +554,6 @@ class RangedWeaponTemplate(BaseWeaponTemplate):
     range_pb = models.IntegerField(blank=True, null=True)
     range_xs = models.IntegerField()
     range_vs = models.IntegerField()
-    range_vs = models.IntegerField()
     range_s = models.IntegerField()
     range_m = models.IntegerField()
     range_l = models.IntegerField()
@@ -714,7 +713,10 @@ class RangedWeapon(ExportedModel):
         return "%s %s" % (quality, self.base)
 
     def ranges(self, sheet):
-        return Range._make([None, 2, 4, 8, 15, 25, 38, 50])
+        return Range._make([self.base.range_pb, self.base.range_xs,
+                            self.base.range_vs, self.base.range_s,
+                            self.base.range_m, self.base.range_l,
+                            self.base.range_xl, self.base.range_e])
 
 class ArmorTemplate(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
