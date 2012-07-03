@@ -546,8 +546,6 @@ class WeaponTemplate(BaseWeaponTemplate):
     is_shield = models.BooleanField(default=False)
 
 class RangedWeaponTemplate(BaseWeaponTemplate):
-    # XXX no ccv
-    # XXX no defenses
     target_initiative = models.IntegerField(default=-2)
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
@@ -562,6 +560,10 @@ class RangedWeaponTemplate(BaseWeaponTemplate):
     range_l = models.IntegerField()
     range_xl = models.IntegerField()
     range_e = models.IntegerField()
+
+    @classmethod
+    def dont_export(self):
+        return ['rangedweapon']
 
 EFFECT_TYPES = [
     "enhancement",

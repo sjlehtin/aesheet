@@ -691,7 +691,7 @@ def import_data(request, success=False):
                    'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
                    'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
                    'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
-                   'EdgeLevel']:
+                   'EdgeLevel', 'RangedWeaponTemplate', 'RangedWeapon']:
         cls = getattr(sheet.models, choice)
         item = {}
         item['name'] = cls._meta.object_name
