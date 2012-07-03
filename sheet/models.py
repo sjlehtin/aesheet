@@ -1078,18 +1078,18 @@ class Sheet(models.Model):
         # XXX Martial arts expertise.
         #
         # XXX fit under 45.
-        dmg.add_damage(rounddown(self.eff_fit /
+        dmg.add_damage(rounddown((self.eff_fit - 45) /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self.eff_fit /
+        dmg.add_leth(rounddown((self.eff_fit - 45) /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
-        dmg.add_damage(rounddown(self.eff_fit /
+        dmg.add_damage(rounddown((self.eff_fit - 45) /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self.eff_fit /
+        dmg.add_leth(rounddown((self.eff_fit - 45) /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
