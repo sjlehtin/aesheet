@@ -203,6 +203,15 @@ class Character(models.Model):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
     @property
+    def initial_sp(self):
+        return roundup(self.start_lrn/3.0) + roundup(self.start_int/5.0) + \
+            roundup(self.start_psy/10.0)
+
+    @property
+    def age_sp(self):
+        return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
+
+    @property
     def missing_skills(self):
 
         from django.db import connection, transaction

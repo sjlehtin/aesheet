@@ -339,7 +339,8 @@ or create a new weapon
         </tr>
     {% endfor %}
 </table>
-<div> {% sum_sp_cost skills %} / {{ char.gained_sp }} </div>
+<div> {% sum_sp_cost skills %} / {{ char.initial_sp }} + {{ char.gained_sp }} </div>
+<div>Age SP: {{ char.age_sp }} </div>
 {% else %}
 <p>No skills.</p>
 {% endif %}
