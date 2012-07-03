@@ -488,8 +488,9 @@ class WeaponDamage(object):
         return self.num_dice * self.dice + self.extra_damage
 
     def __unicode__(self):
-        return "%sd%s%+d/%d" % (self.num_dice, self.dice,
-                                self.extra_damage, self.leth)
+        return "%sd%s%s/%d" % (
+            self.num_dice, self.dice,
+            "%+d" % self.extra_damage if self.extra_damage else "", self.leth)
 
 class BaseWeaponTemplate(ExportedModel):
     class Meta:
