@@ -114,7 +114,6 @@ class AddSkill(forms.ModelForm):
         level = self.cleaned_data.get('level')
         if not skill:
             raise forms.ValidationError, "Skill is required"
-        print "foo!", level, skill, skill.is_specialization
         if level == 0 and skill.is_specialization:
             level = 1
         self.cleaned_data['level'] = level
