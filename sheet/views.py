@@ -728,6 +728,7 @@ def export_data(request, type):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
 
+import os.path
 import subprocess
 def version_history(request):
     def logiter(output):
@@ -739,7 +740,8 @@ def version_history(request):
             acc += ll
         yield acc
     proc = subprocess.Popen(['git', 'log'], stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT,
+                            cwd=os.path.dirname(__file__))
     return render_to_response('sheet/changelog.html',
                               RequestContext(request,
                                              { 'log' : logiter(proc.stdout) }))
