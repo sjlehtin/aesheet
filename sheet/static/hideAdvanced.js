@@ -16,7 +16,8 @@
 
 	_create: function() {
 	    var that = this;
-	    this._button = $('<button input="button">' + 
+	    this._button = $('<button input="button" ' +
+			     'class="show-hide-advanced">' + 
 			     this.options.showAdvancedText + 
 			     '</button>').button();
 	    this._button.click(function () {
