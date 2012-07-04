@@ -180,8 +180,8 @@ TEMPLATE_DIRS = (
 )
 
 LOGIN_REQUIRED_URLS = (
-    r'/(.*)/sheets/(.*)$',
-    r'/(.*)/characters/(.*)$',
+    r'(.*)/sheets/(.*)$',
+    r'(.*)/characters/(.*)$',
 )
 
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
