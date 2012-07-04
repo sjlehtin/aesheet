@@ -84,6 +84,8 @@ import pdb
 import sys
 from collections import namedtuple
 
+logger = logging.getLogger(__name__)
+
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 def characters_index(request):
@@ -304,7 +306,7 @@ def process_sheet_change_request(request, sheet):
     if form.is_valid():
         item = form.cleaned_data['item']
         item_type = form.cleaned_data['item_type']
-        print "Removing %s" % item_type
+        logger.info("Removing %s" % item_type)
         if item_type == "Weapon":
             item = get_object_or_404(Weapon, pk=item)
             sheet.weapons.remove(item)
@@ -583,7 +585,6 @@ def import_text(data):
     header = reader.next()
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
-    m2m_values = {}
 
     for row in reader:
         mdl = None
@@ -599,13 +600,13 @@ def import_text(data):
             pass
         if not mdl:
             mdl = modelcls()
+        m2m_values = {}
         for (fieldname, value) in fields.items():
             try:
                 (field, _, direct, m2m) = \
                     modelcls._meta.get_field_by_name(fieldname)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
-            print "field:", fieldname, type(field), value
 
             # If the field is a reference to another object, try to find
             # the matching instance.
@@ -620,7 +621,6 @@ def import_text(data):
                 else:
                     value = None
             else:
-                print "field:", fieldname, value
                 if not value:
                     if field.has_default():
                         value = field.default
@@ -628,11 +628,12 @@ def import_text(data):
                         continue # Try to get away without setting the value.
                 if isinstance(field,
                               django.db.models.fields.related.ManyToManyField):
+                    # Make sure the field will at least be cleared.
+                    m2m_values[fieldname] = []
                     if not value:
                         continue
                     ll = []
                     for name in value.split('|'):
-                        print "finding:", name
                         obj = field.rel.to.objects.get(name=name)
                         ll.append(obj)
                     value = ll
@@ -652,12 +653,12 @@ def import_text(data):
                         raise type(e), ("Failed to import field \"%s\", "
                                         "value \"%s\" (%s)" % (fieldname, value,
                                                                str(e)))
-                print "field:", fieldname, type(value), value
-
             setattr(mdl, fieldname, value)
         mdl.full_clean()
         mdl.save()
         for kk, vv in m2m_values.items():
+            logger.info("Setting m2m values for %s(%s) %s to %s" %
+                        (mdl, mdl.__class__.__name__, kk, vv))
             setattr(mdl, kk, vv)
         mdl.full_clean()
         mdl.save()
