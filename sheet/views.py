@@ -300,8 +300,6 @@ class SheetView(object):
 def process_sheet_change_request(request, sheet):
     assert request.method == "POST"
 
-    forms = {}
-
     form = RemoveGeneric(request.POST, prefix='remove')
     if form.is_valid():
         item = form.cleaned_data['item']
@@ -330,10 +328,10 @@ def process_sheet_change_request(request, sheet):
             raise ValidationError("Invalid item type")
         sheet.full_clean()
         sheet.save()
-        return (True, forms)
+        return True
     # removal forms are forgotten and not updated on failures.
 
-    return (False, forms)
+    return False
 
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet, pk=sheet_id)
@@ -377,8 +375,11 @@ def sheet_detail(request, sheet_id=None):
     if request.method == "POST":
         should_change = False
 
+
         for kk, ff in forms.items():
-            if ff.is_valid() and ff.has_changed():
+            logging.info("handling %s" % kk)
+            if ff.is_valid():
+                logging.info("saved %s" % kk)
                 oo = ff.save()
                 should_change = True
                 if kk == 'new_weapon_form':
@@ -393,8 +394,8 @@ def sheet_detail(request, sheet_id=None):
                     sheet.save()
 
         if not should_change:
-            (should_change, forms) = process_sheet_change_request(request,
-                                                                  sheet)
+            should_change = process_sheet_change_request(request,
+                                                         sheet)
         # XXX more complex forms need to be passed back to
         # render_to_response, below.
         if should_change:
