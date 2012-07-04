@@ -86,8 +86,6 @@ from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(stream=sys.stderr, level=logging.INFO)
-
 def characters_index(request):
     all_characters = Character.objects.all().order_by('name')
     return render_to_response('sheet/characters_index.html',
