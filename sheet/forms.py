@@ -86,21 +86,11 @@ class AddHelm(forms.ModelForm):
         return self.instance
 
 class AddSpellEffect(forms.ModelForm):
-    effect = forms.ChoiceField(choices=())
-    def __init__(self, *args, **kwargs):
-        super(AddSpellEffect, self).__init__(*args, **kwargs)
-        self.fields['effect'].choices = [(item.name, unicode(item))
-                                         for item in SpellEffect.objects.all()]
+    effect = forms.ModelChoiceField(queryset=SpellEffect.objects.all())
 
     class Meta:
         model = Sheet
         fields = ()
-
-    def clean_effect(self):
-        effect = self.cleaned_data['effect']
-        # Raises objectnotfound error if skill not found.
-        eff = SpellEffect.objects.get(name=effect)
-        return eff
 
     def save(self):
         self.instance.spell_effects.add(self.cleaned_data['effect'])
@@ -150,31 +140,9 @@ class AddSkill(forms.ModelForm):
         return self.instance
 
 class AddEdge(forms.ModelForm):
-    edge = forms.ChoiceField(choices=())
+    edge = forms.ModelChoiceField(queryset=EdgeLevel.objects.all())
     choices = range(0,8)
     choices = zip(choices, choices)
-
-    def __init__(self, *args, **kwargs):
-        super(AddEdge, self).__init__(*args, **kwargs)
-        self.fields['edge'].choices = [(item.pk, unicode(item))
-                                       for item in EdgeLevel.objects.all()]
-
-    def clean_edge(self):
-        edge = self.cleaned_data['edge']
-        # Raises objectnotfound error if edge not found.
-        edge = EdgeLevel.objects.get(pk=edge)
-        return edge
-
-    def clean(self):
-        super(AddEdge, self).clean()
-        edge = self.cleaned_data.get('edge')
-        if edge:
-            # verify edge and level go together.
-            cs = CharacterEdge()
-            cs.character = self.instance
-            cs.edge = edge
-            cs.full_clean()
-        return self.cleaned_data
 
     class Meta:
         model = Character
