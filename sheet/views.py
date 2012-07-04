@@ -8,7 +8,7 @@ TODO = """
 ++ postgresql backups
 ++ saner bzr backups (branch all branches to make sure repositories remain
    valid) (now in git)
-* ranged weapons
++ ranged weapons
 ** ranged weapon ammo special handling
 + logging in
 ** access controls
@@ -52,9 +52,9 @@ NOTES on creating Jan:
 * you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
 
-* Adding weapons from templates.
-* Skill points!
-* Specialty levels (treat zero as one)!
++ Adding weapons from templates.
++ Skill points!
++ Specialty levels (treat zero as one)!
 
 Minor:
 
