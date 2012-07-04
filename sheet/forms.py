@@ -28,22 +28,11 @@ class ImportForm(forms.Form):
         return cd
 
 class AddWeapon(forms.ModelForm):
-    weapon_cls = Weapon
-    weapon = forms.ChoiceField(choices=())
-    def __init__(self, *args, **kwargs):
-        super(AddWeapon, self).__init__(*args, **kwargs)
-        self.fields['weapon'].choices = [
-            (wpn.pk, unicode(wpn)) for wpn in self.weapon_cls.objects.all()]
+    weapon = forms.ModelChoiceField(queryset=Weapon.objects.all())
 
     class Meta:
         model = Sheet
         fields = ()
-
-    def clean_weapon(self):
-        weapon = self.cleaned_data['weapon']
-        # Raises objectnotfound error if item not found.
-        wpn = self.weapon_cls.objects.get(id=weapon)
-        return wpn
 
     def save(self):
         self.instance.weapons.add(self.cleaned_data['weapon'])
@@ -51,8 +40,13 @@ class AddWeapon(forms.ModelForm):
         self.instance.save()
         return self.instance
 
-class AddRangedWeapon(AddWeapon):
-    weapon_cls = RangedWeapon
+class AddRangedWeapon(forms.ModelForm):
+    weapon = forms.ModelChoiceField(queryset=RangedWeapon.objects.all())
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
     def save(self):
         self.instance.ranged_weapons.add(self.cleaned_data['weapon'])
         self.instance.full_clean()
