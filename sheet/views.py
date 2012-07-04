@@ -659,7 +659,9 @@ def import_text(data):
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
                         (mdl, mdl.__class__.__name__, kk, vv))
-            setattr(mdl, kk, vv)
+            rel = getattr(mdl, kk)
+            rel.clear()
+            rel.add(*vv)
         mdl.full_clean()
         mdl.save()
 
