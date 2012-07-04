@@ -37,10 +37,20 @@ if PRODUCTION:
     f = open(os.path.join(os.path.dirname(__file__), "auth"), "r")
     auth_details = f.read()
     (USER, PASSWORD) = auth_details.strip().split()
+    DEBUG_TOOLBAR_ENABLED = False
 else:
     DB_ENGINE = 'django.db.backends.sqlite3'
     DB_NAME = os.path.join(os.path.dirname(__file__), 'db/sheet.db')
     (USER, PASSWORD) = "", ""
+    DEBUG_TOOLBAR_ENABLED = True
+
+val = os.getenv('DEBUG_TOOLBAR')
+if val is not None:
+    if val in ["1", "yes"]:
+        val = True
+    else:
+        val = False
+    DEBUG_TOOLBAR_ENABLED = val
 
 DATABASES = {
     'default': {
@@ -148,6 +158,10 @@ MIDDLEWARE_CLASSES = (
     'profiling.MemoryProfileMiddleware',
 )
 
+if DEBUG_TOOLBAR_ENABLED:
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    INTERNAL_IPS = ("127.0.0.1",)
+
 ROOT_URLCONF = 'aesheet.urls'
 
 import sys
@@ -161,8 +175,8 @@ TEMPLATE_DIRS = (
 )
 
 LOGIN_REQUIRED_URLS = (
-    r'/sheets/(.*)$',
-    r'/characters/(.*)$',
+    r'/(.*)/sheets/(.*)$',
+    r'/(.*)/characters/(.*)$',
 )
 
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
@@ -183,8 +197,11 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'south',
     'sheet',
-    'profiling'
+    'profiling',
 )
+
+if DEBUG_TOOLBAR_ENABLED:
+    INSTALLED_APPS += ('debug_toolbar',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
