@@ -64,23 +64,12 @@ class AddWeaponFromTemplate(forms.Form):
     quality = forms.CharField()
 
 class AddArmor(forms.ModelForm):
-    armor = forms.ChoiceField(choices=())
-    def __init__(self, *args, **kwargs):
-        super(AddArmor, self).__init__(*args, **kwargs)
-        self.fields['armor'].choices =  [
-            (armor.name, unicode(armor))
-            for armor in filter(lambda xx: not xx.base.is_helm,
-                                Armor.objects.all())]
+    armor = forms.ModelChoiceField(queryset=Armor.objects.filter(
+            base__is_helm=False))
 
     class Meta:
         model = Sheet
         fields = ()
-
-    def clean_armor(self):
-        armor = self.cleaned_data['armor']
-        # Raises objectnotfound error if item not found.
-        armor = Armor.objects.get(name=armor)
-        return armor
 
     def save(self):
         self.instance.armor = self.cleaned_data['armor']
@@ -89,23 +78,12 @@ class AddArmor(forms.ModelForm):
         return self.instance
 
 class AddHelm(forms.ModelForm):
-    helm = forms.ChoiceField(choices=())
-    def __init__(self, *args, **kwargs):
-        super(AddHelm, self).__init__(*args, **kwargs)
-        self.fields['helm'].choices =  [
-            (armor.name, unicode(armor))
-            for armor in filter(lambda xx: xx.base.is_helm,
-                                Armor.objects.all())]
+    helm = forms.ModelChoiceField(queryset=Armor.objects.filter(
+            base__is_helm=True))
 
     class Meta:
         model = Sheet
         fields = ()
-
-    def clean_helm(self):
-        helm = self.cleaned_data['helm']
-        # Raises objectnotfound error if item not found.
-        helm = Armor.objects.get(name=helm)
-        return helm
 
     def save(self):
         self.instance.helm = self.cleaned_data['helm']
