@@ -52,6 +52,11 @@ if val is not None:
         val = False
     DEBUG_TOOLBAR_ENABLED = val
 
+try:
+    import debug_toolbar
+except ImportError:
+    DEBUG_TOOLBAR_ENABLED = False
+
 DATABASES = {
     'default': {
         'ENGINE': DB_ENGINE, # Add 'postgresql_psycopg2', 'postgresql',
