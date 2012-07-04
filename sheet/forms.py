@@ -109,38 +109,37 @@ class AddSpellEffect(forms.ModelForm):
         return self.instance
 
 class AddSkill(forms.ModelForm):
-    skill = forms.ChoiceField(choices=())
+    skill = forms.ModelChoiceField(queryset=Skill.objects.all())
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
 
-    def __init__(self, *args, **kwargs):
-        super(AddSkill, self).__init__(*args, **kwargs)
-        self.fields['skill'].choices = [(item.name, unicode(item))
-                                         for item in Skill.objects.all()]
-
-    def clean_skill(self):
-        skill = self.cleaned_data['skill']
-        # Raises objectnotfound error if skill not found.
-        sk = Skill.objects.get(name=skill)
-        return sk
+    def clean_level(self):
+        level = self.cleaned_data.get('level')
+        if level is not None:
+            return int(level)
 
     def clean(self):
-        super(AddSkill, self).clean()
         skill = self.cleaned_data.get('skill')
         level = self.cleaned_data.get('level')
-        if skill and level:
-            # verify skill and level go together.
-            cs = CharacterSkill()
-            cs.character = self.instance
-            cs.skill = skill
-            cs.level = level
-            cs.full_clean()
+        if not skill:
+            raise forms.ValidationError, "Skill is required"
+        print "foo!", level, skill, skill.is_specialization
+        if level == 0 and skill.is_specialization:
+            level = 1
+        self.cleaned_data['level'] = level
+        # verify skill and level go together.
+        cs = CharacterSkill()
+        cs.character = self.instance
+        cs.skill = skill
+        cs.level = level
+        cs.full_clean()
+
         return self.cleaned_data
 
     class Meta:
         model = Character
-        fields = ()
+        fields = ('skill',)
 
     def save(self, commit=True):
         cs = CharacterSkill()
