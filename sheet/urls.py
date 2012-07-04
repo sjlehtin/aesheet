@@ -27,4 +27,5 @@ urlpatterns = patterns(
         name='import-success', kwargs={'success' : True }),
     url(r'^sheets/export/(?P<type>\w+)/$', 'export_data'),
     url(r'^sheets/browse/(?P<type>\w+)/$', 'browse'),
+    url(r'^sheets/ChangeLog$', 'version_history'),
 )

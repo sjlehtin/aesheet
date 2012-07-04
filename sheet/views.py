@@ -727,3 +727,19 @@ def export_data(request, type):
     response = HttpResponse(f.getvalue(), mimetype="text/csv")
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
+
+import subprocess
+def version_history(request):
+    def logiter(output):
+        acc = ""
+        for ll in output:
+            if ll.startswith("commit ") and acc:
+                yield acc
+                acc = ""
+            acc += ll
+        yield acc
+    proc = subprocess.Popen(['git', 'log'], stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+    return render_to_response('sheet/changelog.html',
+                              RequestContext(request,
+                                             { 'log' : logiter(proc.stdout) }))

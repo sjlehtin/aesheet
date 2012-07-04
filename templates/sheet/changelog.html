@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load sheet_extras %}
+
+{% block title %} ChangeLog {% endblock %}
+
+{% block content %}
+<ul class="changelog">
+{% for entry in log %}
+<li class="{% cycle 'row1' 'row2' %}">{{ entry }}</li>
+{% endfor %}
+</ul>
+{% endblock %}

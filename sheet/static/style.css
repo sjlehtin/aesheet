@@ -21,6 +21,21 @@ td.stats.eff { font-weight: bold;
 div.stats { position: relative; }
 div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 
+ul {
+    padding: 0;
+}
+
+ul li {
+    list-style-type: none; 
+}
+
+ul.changelog li { white-space: pre-wrap; 
+		  padding: 0.25em;
+		}
+
+ul.changelog li.row2 {
+    background-color: lightgrey;
+    }
 @media print {
     #sidebar,#authbar,.edit_control { display: none; }
     body { font-size: 8pt; } 
