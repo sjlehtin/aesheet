@@ -950,7 +950,6 @@ class Sheet(models.Model):
         if cs:
             roa *= (1 + cs[0].level * 0.10)
 
-        # XXX maximum is 5.0 with ranged.
         roa = min(roa, 2.5)
 
         return roa
@@ -962,8 +961,7 @@ class Sheet(models.Model):
         if cs:
             roa *= (1 + cs[0].level * 0.10)
 
-        # XXX maximum is 5.0 with ranged.
-        roa = min(roa, 2.5)
+        roa = min(roa, 5.0)
 
         return roa
 
