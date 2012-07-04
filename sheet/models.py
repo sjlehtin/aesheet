@@ -1037,8 +1037,14 @@ class Sheet(models.Model):
                            # cap number of actions.
                            for act in filter(lambda act: act < roa * 2,
                                              self.actions)]
-        # XXX intuition counters cc-penalties, fitness counters ranged
-        # weapon penalties.
+        def counter_penalty(xx):
+            # Intuition counters ranged weapon penalties.
+            xx = xx + rounddown((self.eff_int - 45)/3.0)
+            if xx > 0:
+                return 0
+            return xx
+
+        checks = map(counter_penalty, checks)
         mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
@@ -1077,6 +1083,7 @@ class Sheet(models.Model):
             if xx > 0:
                 return 0
             return xx
+
         checks = map(counter_penalty, checks)
         base_skill = base_skill + weapon.to_hit
         return [int(round(xx) + base_skill) for xx in checks]
