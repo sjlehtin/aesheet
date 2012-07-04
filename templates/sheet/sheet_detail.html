@@ -202,14 +202,16 @@ XP: {{ char.xp_used_stats }} +
 </table>
 <input type="submit" value="Add" />
 </form>
-or create a new weapon
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
-      id="add_weapon_form">{% csrf_token %}
-<table>
-{{ new_weapon_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
+or
+<div class="advanced" data-advanced-text="Create a new weapon">
+  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+	id="add_weapon_form">{% csrf_token %}
+    <table>
+      {{ new_weapon_form.as_table }}
+    </table>
+    <input type="submit" value="Add" />
+  </form>
+</div>
 </div>
 
 <h3>Ranged combat</h3>
@@ -274,13 +276,15 @@ or create a new weapon
 </ul>
 <input type="submit" value="Add" />
 </form>
-or create a new weapon
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
-      id="add_weapon_form">{% csrf_token %}
-<table>
-{{ new_ranged_weapon_form.as_table }}
-</table>
-<input type="submit" value="Add" />
+or
+<div class="advanced" data-advanced-text="Create a new weapon">
+  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post"
+	id="add_weapon_form">{% csrf_token %}
+    <table>
+      {{ new_ranged_weapon_form.as_table }}
+    </table>
+    <input type="submit" value="Add" />
+</div>
 </form>
 <a href="{% url sheet.views.edit_ranged_weapon_template %}">
   Create new ranged weapon template</a>
@@ -426,14 +430,16 @@ or create a new weapon
 </table>
 <input type="submit" value="Add" />
 </form>
-or create a new helm
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
-      id="add_helmet_form">{% csrf_token %}
-<table>
-{{ new_helm_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
+or
+<div class="advanced" data-advanced-text="Create a new helm">
+  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+	id="add_helmet_form">{% csrf_token %}
+    <table>
+      {{ new_helm_form.as_table }}
+    </table>
+    <input type="submit" value="Add" />
+  </form>
+</div>
 </div>
 
 <h3>Armor</h3>
@@ -467,23 +473,31 @@ or create a new helm
 </table>
 <input type="submit" value="Add" />
 </form>
-or create a new armor
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
-      id="add_armor_form">{% csrf_token %}
-<table>
-{{ new_armor_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
+or
+<div class="advanced" data-advanced-text="Create a new armor">
+  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+	id="add_armor_form">{% csrf_token %}
+    <table>
+      {{ new_armor_form.as_table }}
+    </table>
+    <input type="submit" value="Add" />
+  </form>
+</div>
 <a href="{% url sheet.views.edit_armor_template %}">Create new armor template</a>
 </div>
 
 <div>Missing skills: {{ char.missing_skills}}</div>
 
-<script src="{{ STATIC_URL}}jquery-combobox.js"></script>
+<script src="{{ STATIC_URL }}jquery-combobox.js"></script>
+<script src="{{ STATIC_URL }}hideAdvanced.js"></script>
 <script>
     $(document).ready(function () {
     $("#add_skill select").combobox();
+    $(".advanced").each(function () { 
+	$(this).hideAdvanced({ showAdvancedText: 
+			       $(this).attr('data-advanced-text')});
+    });
+    $("button.ui-button").css('display', 'block');
     });
 </script>
 
