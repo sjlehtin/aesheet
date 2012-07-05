@@ -31,3 +31,4 @@ mon 2.7.2012 1h Missile weapons.
 mon 2.7.2012 4h Creating Jan's sheet and fixing bugs and adding features found along the way.
 tue 3.7.2012 1h Ranged weapon import/export, skill points.
 tue 3.7.2012 3h Form cleanup, bug fixing.
+wed 4.7.2012 4h Bug fixes and some usability improvements.
