@@ -6,7 +6,7 @@ import logging
 from functools import wraps
 import pprint
 from collections import namedtuple
-
+from django.db.models import Sum
 from django.core.exceptions import ValidationError
 
 SIZE_CHOICES = (
@@ -126,48 +126,80 @@ class Character(models.Model):
         assert qs.count() <= 1
         return True
 
+    def _mod_stat(self, stat):
+        # Exclude effects which don't have an effect on stat.
+        kwargs = { stat : 0}
+        mod = 0
+        # Edge bonuses should be calculated in to the base stat.
+        kwargs = { "edge__" + stat : 0}
+        for ee in self.edges.exclude(**kwargs):
+            mod += getattr(ee.edge, stat)
+        return mod
+
+    def _stat_wrapper(func):
+        """
+        Wraps a stat function.  The stat function is a dummy after
+        wrapped, only the name matters.
+        """
+        @wraps(func)
+        def _pass_name(*args, **kwds):
+            o = args[0]
+            return o._mod_stat(func.func_name) + func(o)
+        return _pass_name
+
     # Base stats before circumstance modifiers.
     @property
+    @_stat_wrapper
     def fit(self):
         return self.cur_fit + self.base_mod_fit
 
     @property
+    @_stat_wrapper
     def ref(self):
         return self.cur_ref + self.base_mod_ref
 
     @property
+    @_stat_wrapper
     def lrn(self):
         return self.cur_lrn + self.base_mod_lrn
 
     @property
+    @_stat_wrapper
     def int(self):
         return self.cur_int + self.base_mod_int
 
     @property
+    @_stat_wrapper
     def psy(self):
         return self.cur_psy + self.base_mod_psy
 
     @property
+    @_stat_wrapper
     def wil(self):
         return self.cur_wil + self.base_mod_wil
 
     @property
+    @_stat_wrapper
     def cha(self):
         return self.cur_cha + self.base_mod_cha
 
     @property
+    @_stat_wrapper
     def pos(self):
         return self.cur_pos + self.base_mod_pos
 
     @property
+    @_stat_wrapper
     def mov(self):
         return roundup((self.ref + self.fit)/2.0) + self.base_mod_mov
 
     @property
+    @_stat_wrapper
     def dex(self):
         return roundup((self.ref + self.int)/2.0) + self.base_mod_dex
 
     @property
+    @_stat_wrapper
     def imm(self):
         return roundup((self.fit + self.psy)/2.0) + self.base_mod_imm
 
@@ -876,6 +908,10 @@ class Armor(ExportedModel):
 
         raise AttributeError, "no attr %s" % v
 
+    @property
+    def weight(self):
+        return self.base.weight * self.quality.mod_weight_multiplier
+
 class WeaponEffect(ExportedModel, Effect):
     weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
 
@@ -910,6 +946,9 @@ class Sheet(models.Model):
     helm = models.ForeignKey(Armor, blank=True, null=True,
                              related_name='helm_for')
 
+    extra_weight_carried = models.IntegerField(
+        default=0,
+        help_text="Extra encumbrance the character is carrying")
     (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
 
     fit_modifiers_for_damage = {
@@ -1293,6 +1332,21 @@ class Sheet(models.Model):
                  'mod': 0,
                  'recovery_rate' : rate }
 
+    @property
+    def weight_carried(self):
+        weight = 0
+        if self.armor:
+            weight += self.armor.weight
+        if self.helm:
+            weight += self.helm.weight
+        aggr = self.ranged_weapons.all().aggregate(Sum('base__weight'))
+        if aggr['base__weight__sum']:
+            weight += int(aggr['base__weight__sum'])
+        aggr = self.weapons.all().aggregate(Sum('base__weight'))
+        if aggr['base__weight__sum']:
+            weight += int(aggr['base__weight__sum'])
+        # XXX ammo weight.
+        return weight + self.extra_weight_carried
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
