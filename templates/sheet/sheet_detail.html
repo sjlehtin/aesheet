@@ -495,7 +495,9 @@ or
     $("#add_skill select").combobox();
     $(".advanced").each(function () { 
 	$(this).hideAdvanced({ showAdvancedText: 
-			       $(this).attr('data-advanced-text')});
+			       $(this).attr('data-advanced-text'),
+			       startOpen: $(this).find('.errorlist').length > 0
+			     });
     });
     $("button.show-hide-advanced").css('display', 'block');
     });

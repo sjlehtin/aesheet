@@ -1,7 +1,8 @@
 (function( $ ) {
     $.widget( "sheet.hideAdvanced", {
 	options: {
-	    showAdvancedText: 'Show advanced'
+	    showAdvancedText: 'Show advanced',
+	    startOpen: false
 	},
 
 	toggle: function () {
@@ -25,6 +26,9 @@
 	    });
 	    this.element.before(this._button);
 	    this.toggle();
+	    if (this.options.startOpen) {
+		this.toggle();
+	    }
 	}
     });
 })( jQuery );
