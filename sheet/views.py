@@ -2,54 +2,54 @@
 
 TODO = """
 + = done
-* = not done
+- = not done
 
 + deployment to semeai.org
 ++ postgresql backups
 ++ saner bzr backups (branch all branches to make sure repositories remain
    valid) (now in git)
 + ranged weapons
-** ranged weapon ammo special handling
+-- ranged weapon ammo special handling
 + logging in
-** access controls
-*** marking sheet as only visible to self
-*** marking characters as only visible to self
-** password change
+-- access controls
+--- marking sheet as only visible to self
+--- marking characters as only visible to self
+-- password change
 + rest of the skills
-* specializations with skill level 0 should be recognized (for
++ specializations with skill level 0 should be recognized (for
   specializations with only one level especially)
-* rest of the edges
-* initiatives
-* wondrous items
-* inventory ?
-* magic item location (only one item to each location)
-* change log for sheet (stat modifications etc)
+- rest of the edges
+- initiatives
+- wondrous items
+- inventory ?
+- magic item location (only one item to each location)
+- change log for sheet (stat modifications etc)
 + editing sheet description
-* nicer fast edit of basic stats
+- nicer fast edit of basic stats
 + stamina
-** recovery
+-- recovery
 + mana
-** recovery
+-- recovery
 + body
-** recovery
-* code simplification
-* reordering skills
-* stats for skill checks
-* character mugshot upload
-* senses
-* charge damage
+-- recovery
+- code simplification
+- reordering skills
+- stats for skill checks
+- character mugshot upload
+- senses
+- charge damage
 + print.css (basically, the whole printable button special handling is
   unnecessary).
-* movement chart
-* save bonuses
-* encumbrance breakdown
-* spell skill checks
-* sheet styling
+- movement chart
+- save bonuses
+- encumbrance breakdown
+- spell skill checks
+- sheet styling
 
 
 NOTES on creating Jan:
 
-* you should be able to leave current stats empty on character creation,
+- you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
 
 + Adding weapons from templates.
@@ -58,9 +58,9 @@ NOTES on creating Jan:
 
 Minor:
 
-* adding missing skills (helps in just allowing inserting primary skills
+- adding missing skills (helps in just allowing inserting primary skills
   and autofilling rest)
-* modifying skill level with +/- (at least add to skill level)
+- modifying skill level with +/- (at least add to skill level)
 
 """
 
