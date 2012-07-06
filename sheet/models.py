@@ -948,6 +948,16 @@ class Armor(ExportedModel):
     def weight(self):
         return self.base.weight * self.quality.mod_weight_multiplier
 
+    @property
+    def mod_fit(self):
+        return min(self.base.mod_fit + self.quality.mod_fit, 0)
+    @property
+    def mod_ref(self):
+        return min(self.base.mod_ref + self.quality.mod_ref, 0)
+    @property
+    def mod_psy(self):
+        return min(self.base.mod_psy + self.quality.mod_psy, 0)
+
 class WeaponEffect(ExportedModel, Effect):
     weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
 
@@ -1280,12 +1290,22 @@ class Sheet(models.Model):
     @property
     @_stat_wrapper
     def mod_fit(self):
-        return self._penalties_for_weight_carried()
+        base = 0
+        if self.armor:
+            base += self.armor.mod_fit
+        if self.helm:
+            base += self.helm.mod_fit
+        return base + self._penalties_for_weight_carried()
 
     @property
     @_stat_wrapper
     def mod_ref(self):
-        return self._penalties_for_weight_carried()
+        base = 0
+        if self.armor:
+            base += self.armor.mod_ref
+        if self.helm:
+            base += self.helm.mod_ref
+        return base + self._penalties_for_weight_carried()
 
     @property
     @_stat_wrapper
@@ -1298,7 +1318,13 @@ class Sheet(models.Model):
     @property
     @_stat_wrapper
     def mod_psy(self):
-        pass
+        base = 0
+        if self.armor:
+            base += self.armor.mod_psy
+        if self.helm:
+            base += self.helm.mod_psy
+        return base
+
     @property
     @_stat_wrapper
     def mod_wil(self):
