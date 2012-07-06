@@ -1215,24 +1215,42 @@ class Sheet(models.Model):
         return mod
 
     def _stat_wrapper(func):
-        """
-        Wraps a stat function.  The stat function is a dummy after
-        wrapped, only the name matters.
-        """
         @wraps(func)
         def _pass_name(*args, **kwds):
             o = args[0]
-            return o._mod_stat(func.func_name[4:])
+            base = 0
+            extra = func(o)
+            if extra:
+                base += extra
+            return base + o._mod_stat(func.func_name[4:])
         return _pass_name
+
+    def _penalties_for_weight_carried(self):
+        ratio = float(self.weight_carried)/self.cur_fit
+        if ratio <= 0.25:
+            return 0
+        elif ratio <= 0.5:
+            return -5
+        elif ratio <= 1:
+            return -10
+        elif ratio <= 1.5:
+            return -15
+        elif ratio <= 2:
+            return -20
+        elif ratio <= 3:
+            return -30
+        return -99 # Unable to carry this load.
 
     @property
     @_stat_wrapper
     def mod_fit(self):
-        pass
+        return self._penalties_for_weight_carried()
+
     @property
     @_stat_wrapper
     def mod_ref(self):
-        pass
+        return self._penalties_for_weight_carried()
+
     @property
     @_stat_wrapper
     def mod_lrn(self):
