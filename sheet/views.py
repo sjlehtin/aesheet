@@ -46,6 +46,8 @@ TODO = """
 - spell skill checks
 - sheet styling
 
+- immunity calculation (currently affected if, e.g., helm gives a
+  negative modifer to PSY)
 
 NOTES on creating Jan:
 
