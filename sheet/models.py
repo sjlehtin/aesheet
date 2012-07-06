@@ -134,74 +134,110 @@ class Character(models.Model):
         kwargs = { "edge__" + stat : 0}
         for ee in self.edges.exclude(**kwargs):
             mod += getattr(ee.edge, stat)
+        mod += getattr(self, 'base_mod_' + stat)
         return mod
 
+    # XXX the following code exactly the same as in Sheet. Use a Mixin
+    # instead?
     def _stat_wrapper(func):
-        """
-        Wraps a stat function.  The stat function is a dummy after
-        wrapped, only the name matters.
-        """
         @wraps(func)
         def _pass_name(*args, **kwds):
             o = args[0]
-            return o._mod_stat(func.func_name) + func(o)
+            base = 0
+            extra = func(o)
+            if extra:
+                base += extra
+            return base + o._mod_stat(func.func_name[4:])
         return _pass_name
+    @property
+    @_stat_wrapper
+    def mod_fit(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_ref(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_lrn(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_int(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_psy(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_wil(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_cha(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_pos(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_mov(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_dex(self):
+        pass
+    @property
+    @_stat_wrapper
+    def mod_imm(self):
+        pass
 
     # Base stats before circumstance modifiers.
     @property
-    @_stat_wrapper
     def fit(self):
-        return self.cur_fit + self.base_mod_fit
+        return self.cur_fit + self.mod_fit
 
     @property
-    @_stat_wrapper
     def ref(self):
-        return self.cur_ref + self.base_mod_ref
+        return self.cur_ref + self.mod_ref
 
     @property
-    @_stat_wrapper
     def lrn(self):
-        return self.cur_lrn + self.base_mod_lrn
+        return self.cur_lrn + self.mod_lrn
 
     @property
-    @_stat_wrapper
     def int(self):
-        return self.cur_int + self.base_mod_int
+        return self.cur_int + self.mod_int
 
     @property
-    @_stat_wrapper
     def psy(self):
-        return self.cur_psy + self.base_mod_psy
+        return self.cur_psy + self.mod_psy
 
     @property
-    @_stat_wrapper
     def wil(self):
-        return self.cur_wil + self.base_mod_wil
+        return self.cur_wil + self.mod_wil
 
     @property
-    @_stat_wrapper
     def cha(self):
-        return self.cur_cha + self.base_mod_cha
+        return self.cur_cha + self.mod_cha
 
     @property
-    @_stat_wrapper
     def pos(self):
-        return self.cur_pos + self.base_mod_pos
+        return self.cur_pos + self.mod_pos
 
     @property
-    @_stat_wrapper
     def mov(self):
-        return roundup((self.ref + self.fit)/2.0) + self.base_mod_mov
+        return roundup((self.ref + self.fit)/2.0) + self.mod_mov
 
     @property
-    @_stat_wrapper
     def dex(self):
-        return roundup((self.ref + self.int)/2.0) + self.base_mod_dex
+        return roundup((self.ref + self.int)/2.0) + self.mod_dex
 
     @property
-    @_stat_wrapper
     def imm(self):
-        return roundup((self.fit + self.psy)/2.0) + self.base_mod_imm
+        return roundup((self.fit + self.psy)/2.0) + self.mod_imm
 
     @property
     def xp_used_stats(self):
@@ -1187,20 +1223,24 @@ class Sheet(models.Model):
 
     @property
     def eff_mov(self):
-        return roundup((self.eff_fit + self.eff_ref)/2.0) + self.mod_mov
+        return roundup((self.eff_fit + self.eff_ref)/2.0) + \
+            self.character.mod_mov + self.mod_mov
 
     @property
     def eff_dex(self):
-        return roundup((self.eff_ref + self.eff_int)/2.0) + self.mod_dex
+        return roundup((self.eff_ref + self.eff_int)/2.0) + \
+            self.character.mod_dex + self.mod_dex
 
     @property
     def eff_imm(self):
         "IMM is not increased by an enhancement to FIT."
-        return roundup((self.fit + self.eff_psy)/2) + self.mod_imm
+        return roundup((self.fit + self.eff_psy)/2) + \
+            self.character.mod_imm + self.mod_imm
 
     def _mod_stat(self, stat):
         # XXX Armor effects on stats.
         # XXX allow different types of effects stack.
+
         # Exclude effects which don't have an effect on stat.
         kwargs = { stat : 0}
         mod = 0
@@ -1208,10 +1248,6 @@ class Sheet(models.Model):
         if effects:
             eff = max(effects, key=lambda xx: getattr(xx, stat))
             mod += getattr(eff, stat)
-        # XXX edge bonuses should be calculated in to the base stat.
-        kwargs = { "edge__" + stat : 0}
-        for ee in self.edges.exclude(**kwargs):
-            mod += getattr(ee.edge, stat)
         return mod
 
     def _stat_wrapper(func):
