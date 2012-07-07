@@ -3,7 +3,7 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 import pdb
 from sheet.forms import SheetForm
-from sheet.models import Sheet, Weapon, Armor
+from sheet.models import Sheet, Weapon, WeaponTemplate, Armor
 import sheet.views
 
 class SheetFormTestCase(TestCase):
@@ -12,7 +12,7 @@ class SheetFormTestCase(TestCase):
         self.assertTrue(f)
 
 class ItemHandling(TestCase):
-    fixtures = ["user", "char", "sheet", "wpns", "armor", "spell"]
+    fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell"]
 
     def setUp(self):
         self.client = Client()
@@ -20,16 +20,24 @@ class ItemHandling(TestCase):
 
     def test_add_remove_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = { 'add-weapon-weapon' :
-                     Weapon.objects.get(name="Greatsword L1").pk }
         response = self.client.get(det_url)
         self.assertContains(response, "No weapons.")
+        req_data = { 'add-weapon-weapon' :
+                     Weapon.objects.get(name="Greatsword L1").pk }
         response = self.client.post(det_url, req_data)
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertNotContains(response, "No weapons.")
-        self.assertEquals(response.context['char'].weapons()[0].name,
-                          'Greatsword L1')
+        wpn = response.context['char'].weapons()[0]
+        self.assertEquals(wpn.name, 'Greatsword L1')
+
+        tmpl = WeaponTemplate.objects.get(name='Greatsword, 2h')
+
+        self.assertEquals(tmpl.name, 'Greatsword, 2h')
+        self.assertEquals(wpn.base.name, 'Greatsword, 2h')
+
+        checks = wpn.full.skill_checks()
+        self.assertTrue(checks)
 
         # Remove weapon.
         req_data = { 'remove-form_id' : 'RemoveGeneric',

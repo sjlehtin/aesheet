@@ -126,7 +126,7 @@
     "model" : "sheet.weapon",
     "fields" : {
         "name" : "Greatsword L1",
-	"base" : "Greatsword",
+	"base" : "Greatsword, 2h",
 	"quality" : "L1"
     }
   }
