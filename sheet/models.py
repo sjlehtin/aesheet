@@ -157,8 +157,6 @@ class Character(models.Model):
         mod += getattr(self, 'base_mod_' + stat)
         return mod
 
-    # XXX the following code exactly the same as in Sheet. Use a Mixin
-    # instead?
     def _stat_wrapper(func):
         @wraps(func)
         def _pass_name(*args, **kwds):
@@ -555,7 +553,7 @@ class WeaponQuality(BaseWeaponQuality):
 
     @classmethod
     def dont_export(cls):
-        return ['weapon']
+        return ['weapon', 'rangedweapon', 'rangedweaponammo_set']
 
     def __unicode__(self):
         return self.name
@@ -690,7 +688,7 @@ class WeaponSpecialQuality(ExportedModel):
 
     @classmethod
     def dont_export(cls):
-        return ['weapon']
+        return ['weapon', 'rangedweapon']
 
     # Effects come with the foreign key in WeaponEffect() class to the
     # name "effects".
