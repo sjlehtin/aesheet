@@ -119,9 +119,16 @@ class Character(models.Model):
     def get_skill(self, skill):
         if not skill:
             return None
-        for ss in self.skills:
-            if skill == ss.skill:
-                return ss
+
+        if isinstance(skill, basestring):
+            for ss in self.skills:
+                if skill == ss.skill.name:
+                    return ss
+        else:
+            for ss in self.skills:
+                if skill == ss.skill:
+                    return ss
+
         return None
 
     def has_skill(self, skill):
@@ -134,12 +141,7 @@ class Character(models.Model):
         Return level of the skill, specified by the skill's name, or None
         if the character doesn't possess the specified skill.
         """
-        try:
-            skill = Skill.objects.get(name=skill)
-        except Skill.DoesNotExist, e:
-            return None
-
-        if get_skill(skill):
+        if self.get_skill(skill):
             return ss.level
         return None
 
@@ -1030,21 +1032,22 @@ class Sheet(models.Model):
 
     def roa(self, weapon, use_type=FULL):
         roa = weapon.roa()
-        cs = self.character.skills.filter(skill__name="Weapon combat")
         if use_type == self.PRI:
             roa -= 0.25
         elif use_type == self.SEC:
             roa -= 0.5
 
         if use_type in [self.FULL, self.SPECIAL]:
-            spec = self.character.get_skill("Single-weapon style")
+            spec_level = self.character.skill_level("Single-weapon style")
         else:
-            spec = self.character.get_skill("Two-weapon style")
+            spec_level = self.character.skill_level("Two-weapon style")
 
-        if spec:
-            roa += spec.level * 0.05
-        if cs:
-            roa *= (1 + cs[0].level * 0.10)
+        if spec_level:
+            roa += spec_level * 0.05
+
+        level = self.character.skill_level("Weapon combat")
+        if level:
+            roa *= (1 + level * 0.10)
 
         roa = min(roa, 2.5)
 
@@ -1052,10 +1055,9 @@ class Sheet(models.Model):
 
     def rof(self, weapon):
         roa = weapon.roa()
-        cs = self.character.skills.filter(skill=weapon.base.base_skill)
-
-        if cs:
-            roa *= (1 + cs[0].level * 0.10)
+        level = self.character.skill_level(weapon.base.base_skill)
+        if level:
+            roa *= (1 + level * 0.10)
 
         roa = min(roa, 5.0)
 
@@ -1119,9 +1121,9 @@ class Sheet(models.Model):
 
         # skill level/unskilled.
 
-        cs = self.character.skills.filter(skill__name="Weapon combat")
-        if cs.count() > 0:
-            modifiers += cs[0].level * 5
+        level = self.character.skill_level("Weapon combat")
+        if level:
+            modifiers += level * 5
 
         # XXX CCV bonus (penalty for unskilled)
         if not self.skilled(weapon):

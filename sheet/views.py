@@ -341,9 +341,12 @@ def sheet_detail(request, sheet_id=None):
                                               'sheet__armor__quality'
                                               'sheet__helm')
                               .prefetch_related('spell_effects',
-                                                'weapons',
-                                                'ranged_weapons',
+                                                'weapons__base',
+                                                'weapons__quality',
+                                                'ranged_weapons__base',
+                                                'ranged_weapons__quality',
                                                 'character__skills',
+                                                'character__skills__skill',
                                                 'character__edges'),
                               pk=sheet_id)
 
