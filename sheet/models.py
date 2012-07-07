@@ -121,18 +121,18 @@ class Character(models.Model):
             return None
 
         if isinstance(skill, basestring):
-            for ss in self.skills:
+            for ss in self.skills.all():
                 if skill == ss.skill.name:
                     return ss
         else:
-            for ss in self.skills:
+            for ss in self.skills.all():
                 if skill == ss.skill:
                     return ss
 
         return None
 
     def has_skill(self, skill):
-        if get_skill(skill):
+        if self.get_skill(skill):
             return True
         return False
 
@@ -141,8 +141,9 @@ class Character(models.Model):
         Return level of the skill, specified by the skill's name, or None
         if the character doesn't possess the specified skill.
         """
-        if self.get_skill(skill):
-            return ss.level
+        skill = self.get_skill(skill)
+        if skill:
+            return skill.level
         return None
 
     def _mod_stat(self, stat):
