@@ -336,7 +336,16 @@ def process_sheet_change_request(request, sheet):
     return False
 
 def sheet_detail(request, sheet_id=None):
-    sheet = get_object_or_404(Sheet, pk=sheet_id)
+    sheet = get_object_or_404(Sheet.objects.select_related()
+                              .select_related('sheet__armor__base',
+                                              'sheet__armor__quality'
+                                              'sheet__helm')
+                              .prefetch_related('spell_effects',
+                                                'weapons',
+                                                'ranged_weapons',
+                                                'character__skills',
+                                                'character__edges'),
+                              pk=sheet_id)
 
     forms = {}
 
@@ -376,7 +385,6 @@ def sheet_detail(request, sheet_id=None):
 
     if request.method == "POST":
         should_change = False
-
 
         for kk, ff in forms.items():
             logging.info("handling %s" % kk)

@@ -116,24 +116,41 @@ class Character(models.Model):
 
     free_edges = models.IntegerField(default=2)
 
-    def has_skill(self, skill):
+    def get_skill(self, skill):
         if not skill:
+            return None
+        for ss in self.skills:
+            if skill == ss.skill:
+                return ss
+        return None
+
+    def has_skill(self, skill):
+        if get_skill(skill):
             return True
-        print skill
-        qs = self.skills.filter(skill__skill=skill)
-        if not qs.count():
-            return False
-        assert qs.count() <= 1
-        return True
+        return False
+
+    def skill_level(self, skill):
+        """
+        Return level of the skill, specified by the skill's name, or None
+        if the character doesn't possess the specified skill.
+        """
+        try:
+            skill = Skill.objects.get(name=skill)
+        except Skill.DoesNotExist, e:
+            return None
+
+        if get_skill(skill):
+            return ss.level
+        return None
 
     def _mod_stat(self, stat):
         # Exclude effects which don't have an effect on stat.
-        kwargs = { stat : 0}
         mod = 0
-        # Edge bonuses should be calculated in to the base stat.
-        kwargs = { "edge__" + stat : 0}
-        for ee in self.edges.exclude(**kwargs):
-            mod += getattr(ee.edge, stat)
+
+        edges = self.edges.all() # prefetched.
+        if edges:
+            mod += sum([getattr(ee.edge, stat) for ee in edges])
+
         mod += getattr(self, 'base_mod_' + stat)
         return mod
 
@@ -453,7 +470,6 @@ class CharacterSkill(models.Model):
 
     def __unicode__(self):
         return "%s: %s %s" % (self.character, self.skill, self.level)
-
 
     class Meta:
         ordering = ('skill__name', ) # XXX before explicit ordering.
@@ -1020,18 +1036,13 @@ class Sheet(models.Model):
         elif use_type == self.SEC:
             roa -= 0.5
 
-        try:
-            if use_type in [self.FULL, self.SPECIAL]:
-                spec = self.character.skills.get(
-                    skill__name="Single-weapon style")
-                roa += spec.level * 0.05
-            else:
-                spec = self.character.skills.get(
-                    skill__name="Two-weapon style")
-                roa += spec.level * 0.05
-        except CharacterSkill.DoesNotExist as e:
-            logging.warning("Got error on skill lookup: %s" % `e`)
+        if use_type in [self.FULL, self.SPECIAL]:
+            spec = self.character.get_skill("Single-weapon style")
+        else:
+            spec = self.character.get_skill("Two-weapon style")
 
+        if spec:
+            roa += spec.level * 0.05
         if cs:
             roa *= (1 + cs[0].level * 0.10)
 
@@ -1251,13 +1262,12 @@ class Sheet(models.Model):
         # XXX Armor effects on stats.
         # XXX allow different types of effects stack.
 
-        # Exclude effects which don't have an effect on stat.
-        kwargs = { stat : 0}
         mod = 0
-        effects = self.spell_effects.exclude(**kwargs)
-        if effects:
-            eff = max(effects, key=lambda xx: getattr(xx, stat))
-            mod += getattr(eff, stat)
+        # Prefetch for all spell effects done.
+        effs = self.spell_effects.all()
+        if effs:
+            mod += max([getattr(ee, stat) for ee in effs])
+
         return mod
 
     def _stat_wrapper(func):
@@ -1419,13 +1429,14 @@ class Sheet(models.Model):
             weight += self.armor.weight
         if self.helm:
             weight += self.helm.weight
-        aggr = self.ranged_weapons.all().aggregate(Sum('base__weight'))
-        if aggr['base__weight__sum']:
-            weight += int(aggr['base__weight__sum'])
-        aggr = self.weapons.all().aggregate(Sum('base__weight'))
-        if aggr['base__weight__sum']:
-            weight += int(aggr['base__weight__sum'])
-        # XXX ammo weight.
+
+        wpns = self.ranged_weapons.all()
+        if wpns:
+            weight += sum([ww.base.weight for ww in wpns])
+        wpns = self.weapons.all()
+        if wpns:
+            weight += sum([ww.base.weight for ww in wpns])
+
         return weight + self.extra_weight_carried
 
     def __getattr__(self, v):
