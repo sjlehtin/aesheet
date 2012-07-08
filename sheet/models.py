@@ -475,6 +475,12 @@ class CharacterSkill(models.Model):
         #        print comments
         return "\n".join(comments)
 
+
+    def check(self, sheet):
+        # XXX edge modifiers
+        # XXX armor modifiers
+        return self.level * 5 + getattr(sheet, "eff_" + self.skill.stat.lower())
+
     def __unicode__(self):
         return "%s: %s %s" % (self.character, self.skill, self.level)
 

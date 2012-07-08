@@ -37,6 +37,9 @@ ul.changelog li { white-space: pre-wrap;
     background-color: #f0f0ff;
     }
 
+.skills .check { font-weight: bold; }
+.specialization td:first-child { padding-left: 1em; 
+				 font-style: italic; }
 table.data { font-size: 80%; }
 .data td:not(:first-child) { text-align: center; }
 

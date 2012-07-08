@@ -107,6 +107,20 @@ def sheets_index(request):
                               { 'all_sheets' : all_sheets },
                               context_instance=RequestContext(request))
 
+class GenWrapper(object):
+    def __init__(self, item, type=None):
+        self.item = item
+
+    def __getattr__(self, v):
+        # pass through all attribute references not handled by us to
+        # base character.
+        if v.startswith("_"):
+            raise AttributeError()
+        return getattr(self.item, v)
+
+    def __unicode__(self):
+        return unicode(self.item)
+
 class RemoveWrap(object):
     def __init__(self, item, type=None):
         self.item = item
@@ -190,8 +204,9 @@ class WeaponWrap(object):
 
 Action = namedtuple('Action', ['action', 'check'])
 
-class RangedWeaponWrap(object):
+class RangedWeaponWrap(RemoveWrap):
     def __init__(self, item, sheet):
+        super(RangedWeaponWrap, self).__init__(item)
         self.sheet = sheet
         self.item = item
 
@@ -223,16 +238,13 @@ class RangedWeaponWrap(object):
     def damage(self):
         return self.sheet.damage(self.item, use_type=Sheet.PRI)
 
-    def __getattr__(self, v):
-        # pass through all attribute references not handled by us to
-        # base character.
-        if v.startswith("_"):
-            raise AttributeError()
-        return getattr(self.item, v)
+class SkillWrap(RemoveWrap):
+    def __init__(self, item, sheet):
+        super(SkillWrap, self).__init__(item)
+        self.sheet = sheet
 
-    def __unicode__(self):
-        return unicode(self.item)
-
+    def check(self):
+        return self.item.check(self.sheet)
 
 class SheetView(object):
     def __init__(self, sheet):
@@ -267,7 +279,7 @@ class SheetView(object):
 
     def ranged_weapons(self):
         try:
-            ll = [RangedWeaponWrap(RemoveWrap(xx), self.sheet)
+            ll = [RangedWeaponWrap(xx, self.sheet)
                   for xx in self.sheet.ranged_weapons.all()]
             logging.info("list: %s" % ll)
         except:
@@ -275,19 +287,12 @@ class SheetView(object):
         return ll
 
     def spell_effects(self):
-        if not self.sheet.spell_effects.exists():
-            return []
-
         return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
 
     def skills(self):
-        if not self.sheet.skills.exists():
-            return []
-        return [RemoveWrap(xx) for xx in self.sheet.skills.all()]
+        return [SkillWrap(xx, self.sheet) for xx in self.sheet.skills.all()]
 
     def edges(self):
-        if not self.sheet.edges.exists():
-            return []
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
     def armor(self):

@@ -335,21 +335,26 @@ or
 {% with skills=char.skills %}
 {% if skills %}
 <table>
-    {% for skill in skills %}
-        <tr><td>{{ skill.skill }}</td><td>{{ skill.level }}</td>
-            <td>{{ skill.cost }}</td><td>{{ skill.comments }}</td>
-            <td>
-              <div class="edit_control">
-                 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
-                       method="post">
-                   {% csrf_token %}
-                   {{ skill.remove_form }}
-                 <input type="submit" value="Remove" />
-                 </form>
-              </div>
-            </td>
-        </tr>
-    {% endfor %}
+  {% for skill in skills %}
+  <tr {% if skill.skill.is_specialization %}
+      class="specialization"{% endif %}>
+    <td>{{ skill.skill }}</td><td>{{ skill.level }}</td>
+    <td>{{ skill.cost }}</td><td class="check">
+      {% if not skill.skill.is_specialization %}
+      {{ skill.check }}{% endif %}</td>
+    <td>{{ skill.comments }}</td>
+    <td>
+      <div class="edit_control">
+        <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+              method="post">
+          {% csrf_token %}
+          {{ skill.remove_form }}
+          <input type="submit" value="Remove" />
+        </form>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
 </table>
 <div> {% sum_sp_cost skills %} / {{ char.initial_sp }} + {{ char.gained_sp }} </div>
 <div>Age SP: {{ char.age_sp }} </div>
