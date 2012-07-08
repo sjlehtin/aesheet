@@ -140,6 +140,8 @@ XP: {{ char.xp_used_stats }} +
 	<div class="unskilled">unskilled</div>
 	{% endif %}
 	{% endcomment %}
+	<div class="charge damage"><label>Charge:</label>
+	  {{ item.special.damage }}</div>
       </td>
         <td>{{ item.full.roa }}</td>
         {% for act in item.full.skill_checks %}

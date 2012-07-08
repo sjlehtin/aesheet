@@ -166,6 +166,7 @@ class WeaponWrap(object):
     def __init__(self, item, sheet):
         self.item = item
         self.sheet = sheet
+        self.special = self.Stats(self.item, self.sheet, use_type=sheet.SPECIAL)
         self.full = self.Stats(self.item, self.sheet, use_type=sheet.FULL)
         self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
         self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
@@ -213,7 +214,7 @@ class RangedWeaponWrap(object):
         return self.sheet.initiatives(self.item)
 
     def damage(self):
-        return self.sheet.damage(self.item)
+        return self.sheet.damage(self.item, use_type=Sheet.PRI)
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
