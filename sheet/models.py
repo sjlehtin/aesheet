@@ -382,6 +382,8 @@ STAT_TYPES = BASE_STATS + [
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
 class Skill(ExportedModel):
+    """
+    """
     class Meta:
         ordering = ['name']
     name = models.CharField(max_length=256, primary_key=True)
@@ -517,6 +519,10 @@ class StatModifier(models.Model):
         abstract = True
 
 class EdgeLevel(ExportedModel, StatModifier):
+    """
+    This stores the actual modifiers for a specific edge at a certain
+    level, like Eye-Hand Coordination 2.
+    """
     edge = models.ForeignKey(Edge)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
@@ -558,6 +564,8 @@ class BaseWeaponQuality(ExportedModel):
         ordering = ["roa", "ccv"]
 
 class WeaponQuality(BaseWeaponQuality):
+    """
+    """
     defense_leth = models.IntegerField(default=0)
 
     versus_missile_modifier = models.IntegerField(default=0)
@@ -643,6 +651,8 @@ class BaseWeaponTemplate(ExportedModel):
         return "%s" % (self.name)
 
 class WeaponTemplate(BaseWeaponTemplate):
+    """
+    """
     ccv = models.IntegerField(default=10)
     ccv_unskilled_modifier = models.IntegerField(default=-10)
 
@@ -652,6 +662,8 @@ class WeaponTemplate(BaseWeaponTemplate):
     is_shield = models.BooleanField(default=False)
 
 class RangedWeaponTemplate(BaseWeaponTemplate):
+    """
+    """
     target_initiative = models.IntegerField(default=-2)
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
@@ -695,6 +707,8 @@ class Effect(StatModifier):
         return "%s" % (self.name)
 
 class WeaponSpecialQuality(ExportedModel):
+    """
+    """
     name = models.CharField(max_length=32, primary_key=True)
     description = models.TextField(blank=True)
 
@@ -709,6 +723,8 @@ class WeaponSpecialQuality(ExportedModel):
         return "%s" % (self.name)
 
 class ArmorSpecialQuality(ExportedModel):
+    """
+    """
     name = models.CharField(max_length=32, primary_key=True)
     description = models.TextField(blank=True)
 
@@ -722,6 +738,8 @@ class ArmorSpecialQuality(ExportedModel):
         return "%s" % (self.name)
 
 class Weapon(ExportedModel):
+    """
+    """
     # XXX name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
@@ -776,7 +794,9 @@ class Weapon(ExportedModel):
 Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
 class RangedWeapon(ExportedModel):
-# XXX name from template (appended with quality or something to that
+    """
+    """
+    # XXX name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
     # verify this.
@@ -831,6 +851,8 @@ class RangedWeapon(ExportedModel):
                             self.base.range_xl, self.base.range_e])
 
 class ArmorTemplate(ExportedModel):
+    """
+    """
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
@@ -908,6 +930,8 @@ class ArmorTemplate(ExportedModel):
         return "%s" % (self.name)
 
 class ArmorQuality(ExportedModel):
+    """
+    """
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
 
@@ -942,6 +966,8 @@ class ArmorQuality(ExportedModel):
         return self.name
 
 class Armor(ExportedModel):
+    """
+    """
     # XXX name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
@@ -988,6 +1014,8 @@ class Armor(ExportedModel):
         return min(self.base.mod_psy + self.quality.mod_psy, 0)
 
 class WeaponEffect(ExportedModel, Effect):
+    """
+    """
     weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
 
     @classmethod
@@ -995,6 +1023,8 @@ class WeaponEffect(ExportedModel, Effect):
         return ['weapon']
 
 class ArmorEffect(ExportedModel, Effect):
+    """
+    """
     armor = models.ForeignKey(ArmorSpecialQuality, related_name="effects")
 
     @classmethod
@@ -1002,6 +1032,8 @@ class ArmorEffect(ExportedModel, Effect):
         return ['armor']
 
 class SpellEffect(ExportedModel, Effect):
+    """
+    """
     @classmethod
     def dont_export(cls):
         return ['sheet']

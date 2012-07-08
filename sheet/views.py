@@ -726,6 +726,7 @@ def import_data(request, success=False):
         cls = getattr(sheet.models, choice)
         item = {}
         item['name'] = cls._meta.object_name
+        item['doc'] = cls.__doc__
         item['fields'] = cls.get_exported_fields()
         types.append(item)
 
