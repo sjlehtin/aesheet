@@ -438,7 +438,7 @@ class Skill(ExportedModel):
                 'primary_for_weapontemplate',
                 'secondary_for_weapontemplate',
                 'base_skill_for_weapontemplate',
-                'skill']
+                'skill', 'edgeskillbonus']
 
     def __unicode__(self):
         return "%s" % (self.name)
@@ -479,9 +479,18 @@ class CharacterSkill(models.Model):
 
 
     def check(self, sheet):
-        # XXX edge modifiers
+        mod = 0
+        # edge modifiers.  Avoids database hit.  Will not scale with a
+        # very large number of edges giving bonuses to skills, so watch
+        # out for that.
+        for sk in self.skill.edgeskillbonus_set.all():
+            for ee in self.character.edges.all():
+                if ee.edge == sk.edge_level:
+                    mod += sk.bonus
+                    break
         # XXX armor modifiers
-        return self.level * 5 + getattr(sheet, "eff_" + self.skill.stat.lower())
+        return mod + self.level * 5 + \
+            getattr(sheet, "eff_" + self.skill.stat.lower())
 
     def __unicode__(self):
         return "%s: %s %s" % (self.character, self.skill, self.level)
@@ -528,12 +537,28 @@ class EdgeLevel(ExportedModel, StatModifier):
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
     # XXX race requirement?
+    skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus')
+
     @classmethod
     def dont_export(cls):
-        return ['characteredge']
+        return ['characteredge', 'edgeskillbonus', 'skill_bonuses']
 
     def __unicode__(self):
         return "%s %s (%s)" % (self.edge, self.level, self.cost)
+
+class EdgeSkillBonus(ExportedModel):
+    """
+    Skill bonuses from edges, e.g., +15 to Surgery from Acute Touch, is
+    achieved with adding these.  Get the `id' (an integer value) of an
+    existing EdgeLevel (like Acute Touch 1) and the skill and assign a
+    bonus (or penalty, if negative).
+    """
+    edge_level = models.ForeignKey(EdgeLevel)
+    skill = models.ForeignKey(Skill)
+    bonus = models.IntegerField(default=15)
+
+    def __unicode__(self):
+        return "%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
 class CharacterEdge(models.Model):
     character = models.ForeignKey(Character, related_name='edges')

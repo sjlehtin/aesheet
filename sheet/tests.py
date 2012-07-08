@@ -3,7 +3,9 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 import pdb
 from sheet.forms import SheetForm
-from sheet.models import Sheet, Weapon, WeaponTemplate, Armor
+from sheet.models import Sheet, Weapon, WeaponTemplate, Armor, CharacterSkill
+from sheet.models import Skill, CharacterEdge, EdgeLevel
+from sheet.models import roundup
 import sheet.views
 
 class SheetFormTestCase(TestCase):
@@ -204,6 +206,26 @@ class EdgeAndSkillHandling(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertContains(response, "No edges.")
+
+    def test_edge_skill_mod(self):
+        sheet = Sheet.objects.get(pk=1)
+        cs = CharacterSkill()
+        cs.character = sheet.character
+        skill = Skill.objects.get(name="Surgery")
+        cs.skill = skill
+        cs.level = 0
+        cs.save()
+
+        ce = CharacterEdge()
+        ce.character = sheet.character
+        edge = EdgeLevel.objects.get(edge__name="Acute Touch", level=1)
+        ce.edge = edge
+        ce.save()
+
+        sheet = Sheet.objects.get(pk=1)
+        # Verify Acute Touch has an effect.
+        self.assertEqual(sheet.eff_dex + 15,
+                         sheet.skills.get(skill__name="Surgery").check(sheet))
 
 class ModelBasics(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",

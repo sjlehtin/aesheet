@@ -110,5 +110,23 @@
         "Unarmed combat"
       ]
     }
-  }
+  },   
+  {
+    "pk": "Surgery", 
+    "model": "sheet.skill", 
+    "fields": {
+      "stat": "DEX", 
+      "description": "", 
+      "is_specialization": false, 
+      "notes": "", 
+      "skill_cost_3": 5, 
+      "required_edges": [], 
+      "skill_cost_0": 4, 
+      "skill_cost_1": 3, 
+      "skill_cost_2": 4, 
+      "can_be_defaulted": false, 
+      "type": "Specialty", 
+      "required_skills": []
+    }
+  } 
 ]

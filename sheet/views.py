@@ -353,14 +353,17 @@ def sheet_detail(request, sheet_id=None):
                               .select_related('sheet__armor__base',
                                               'sheet__armor__quality'
                                               'sheet__helm')
-                              .prefetch_related('spell_effects',
-                                                'weapons__base',
-                                                'weapons__quality',
-                                                'ranged_weapons__base',
-                                                'ranged_weapons__quality',
-                                                'character__skills',
-                                                'character__skills__skill',
-                                                'character__edges'),
+                              .prefetch_related(
+            'spell_effects',
+            'weapons__base',
+            'weapons__quality',
+            'ranged_weapons__base',
+            'ranged_weapons__quality',
+            'character__skills',
+            'character__skills__skill',
+            'character__skills__skill__edgeskillbonus_set',
+            'character__edges',
+            'character__edges__edge__edgeskillbonus_set'),
                               pk=sheet_id)
 
     forms = {}
@@ -503,6 +506,24 @@ def edit_edge_level(request, el_id=None):
     if request.method == "POST":
         data = request.POST
     form = EdgeLevelForm(data, instance=el)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(sheets_index))
+
+    return render_to_response('sheet/gen_edit.html',
+                              RequestContext(request, { 'form' : form }))
+
+def edit_edge_skill_bonus(request, esb_id=None):
+    if esb_id:
+        esb = get_object_or_404(EdgeSkillBonus, pk=esb_id)
+    else:
+        esb = None
+    data = None
+    if request.method == "POST":
+        data = request.POST
+    form = EdgeSkillBonusForm(data, instance=esb)
 
     if request.method == "POST":
         if form.is_valid():
@@ -724,7 +745,8 @@ def import_data(request, success=False):
                    'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
                    'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
                    'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
-                   'EdgeLevel', 'RangedWeaponTemplate', 'RangedWeapon']:
+                   'EdgeLevel', 'EdgeSkillBonus',
+                   'RangedWeaponTemplate', 'RangedWeapon']:
         cls = getattr(sheet.models, choice)
         item = {}
         item['name'] = cls._meta.object_name

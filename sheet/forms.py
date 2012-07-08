@@ -203,7 +203,8 @@ class StatModify(forms.ModelForm):
 
 SpellEffectForm = modelform_factory(SpellEffect)
 EdgeForm = modelform_factory(Edge)
-EdgeLevelForm = modelform_factory(EdgeLevel)
+EdgeLevelForm = modelform_factory(EdgeLevel, exclude=('skill_bonuses',))
+EdgeSkillBonusForm = modelform_factory(EdgeSkillBonus)
 WeaponForm = modelform_factory(Weapon)
 RangedWeaponForm = modelform_factory(RangedWeapon)
 RangedWeaponTemplateForm = modelform_factory(RangedWeaponTemplate)

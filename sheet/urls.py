@@ -15,6 +15,7 @@ urlpatterns = patterns(
     url(r'^sheets/add_spell_effect/$', 'edit_spell_effect'),
     url(r'^sheets/add_edge/$', 'edit_edge'),
     url(r'^sheets/add_edge_level/$', 'edit_edge_level'),
+    url(r'^sheets/add_edge_skill_bonus/$', 'edit_edge_skill_bonus'),
     url(r'^sheets/add_ranged_weapon_template/$', 'edit_ranged_weapon_template'),
     url(r'^sheets/add_armor_template/$', 'edit_armor_template'),
 
