@@ -367,6 +367,16 @@ or
 <input type="submit" value="Add" />
 </form>
 </div>
+<div id="add_lang" class="edit_control">
+<label for="add_lang_form"><strong>Add a language skill</strong></label>
+<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+      id="add_lang_form">{% csrf_token %}
+<table>
+{{ add_lang_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+</div>
 </div>
 
 <h3>Edges</h3>
@@ -500,6 +510,7 @@ or
 <script>
     $(document).ready(function () {
     $("#add_skill select").combobox();
+    $("#add_lang select").combobox();
     $(".advanced").each(function () { 
 	$(this).hideAdvanced({ showAdvancedText: 
 			       $(this).attr('data-advanced-text'),

@@ -99,7 +99,8 @@ class AddSpellEffect(forms.ModelForm):
         return self.instance
 
 class AddSkill(forms.ModelForm):
-    skill = forms.ModelChoiceField(queryset=Skill.objects.all())
+    skill = forms.ModelChoiceField(
+        queryset=Skill.objects.exclude(type="Language"))
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
@@ -137,6 +138,10 @@ class AddSkill(forms.ModelForm):
         cs.level = self.cleaned_data.get('level')
         cs.save()
         return self.instance
+
+class AddLanguage(AddSkill):
+    skill = forms.ModelChoiceField(
+        queryset=Skill.objects.filter(type="Language"))
 
 class AddEdge(forms.ModelForm):
     edge = forms.ModelChoiceField(queryset=EdgeLevel.objects.all())
