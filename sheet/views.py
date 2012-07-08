@@ -10,6 +10,7 @@ TODO = """
    valid) (now in git)
 + ranged weapons
 -- ranged weapon ammo special handling
+-- xl and e range dependent on user FIT
 + logging in
 -- access controls
 --- marking sheet as only visible to self
@@ -48,6 +49,12 @@ TODO = """
 
 - immunity calculation (currently affected if, e.g., helm gives a
   negative modifer to PSY)
+
+- weapon maximum damage based on durability.
+- martial arts expertise.
+
+- short description of spell effect (+50 FIT etc)
+- suspended weight
 
 NOTES on creating Jan:
 
