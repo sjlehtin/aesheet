@@ -148,11 +148,11 @@ XP: {{ char.xp_used_stats }} +
            <td>{{ act }}</td>
         {% endfor %}
         {% for init in item.full.initiatives %}
-           <td>{{ init }}</td>
+           <td>{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.full.damage }}</td>
         {% for init in item.full.defense_initiatives %}
-           <td class="defense initiative">{{ init }}</td>
+           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td class="defense damage">{{ item.full.defense_damage }}</td>
         <td>{{ item.durability }}</td>
@@ -172,11 +172,11 @@ XP: {{ char.xp_used_stats }} +
            <td>{{ act }}</td>
         {% endfor %}
         {% for init in item.pri.initiatives %}
-           <td>{{ init }}</td>
+           <td>{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.pri.damage }}</td>
         {% for init in item.pri.defense_initiatives %}
-           <td class="defense initiative">{{ init }}</td>
+           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td class="defense damage">{{ item.pri.defense_damage }}</td>
         </tr>
@@ -186,11 +186,11 @@ XP: {{ char.xp_used_stats }} +
            <td>{{ act }}</td>
         {% endfor %}
         {% for init in item.sec.initiatives %}
-           <td class="attack initiative">{{ init }}</td>
+           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.sec.damage }}</td>
         {% for init in item.sec.defense_initiatives %}
-           <td class="defense initiative">{{ init }}</td>
+           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td class="defense damage">{{ item.sec.defense_damage }}</td>
         </tr>
@@ -248,7 +248,7 @@ or
     <td>{{ act.check|default:"" }}</td>
     {% endfor %}
     {% for init in item.initiatives %}
-    <td>{{ init }}</td>
+    <td>{{ init|stringformat:"+d" }}</td>
     {% endfor %}
 
     <td>{{ item.damage }}</td>
