@@ -32,3 +32,6 @@ mon 2.7.2012 4h Creating Jan's sheet and fixing bugs and adding features found a
 tue 3.7.2012 1h Ranged weapon import/export, skill points.
 tue 3.7.2012 3h Form cleanup, bug fixing.
 wed 4.7.2012 4h Bug fixes and some usability improvements.
+thu 5.7.2012 1.5h Edge ability modifiers, tweaking.
+Fri 6.7.2012 1h Encumbrance penalties.
+sat 7.7.2012 4h Query optimization to allow use of django-debug-toolbar.

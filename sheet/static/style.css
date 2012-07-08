@@ -4,8 +4,8 @@ table td { vertical-align: top }
 th.combat { font-weight: bold; }
 td.defense { color: blue; }
 #sidebar { float : left; width : 8em; min-height: 100%; 
-	   background: rgb(204,212,138); }
-#content { min-height: 100%; background: rgb(198,214,249); overflow: auto; }
+	   background: #defdde; }
+#content { min-height: 100%; overflow: auto; }
 #authbar { text-align : right; width: 100%; }
 div.skills { position: absolute;
 	     font-size: 80%;
@@ -33,9 +33,13 @@ ul.changelog li { white-space: pre-wrap;
 		  padding: 0.25em;
 		}
 
-ul.changelog li.row2 {
-    background-color: lightgrey;
+.row2 {
+    background-color: #f0f0ff;
     }
+
+table.data { font-size: 80%; }
+.data td:not(:first-child) { text-align: center; }
+
 @media print {
     #sidebar,#authbar,.edit_control { display: none; }
     body { font-size: 8pt; } 
