@@ -42,6 +42,12 @@ class ExportedModel(models.Model):
         names = [field.name for field in cls._meta.fields]
         names.extend(list(set(cls._meta.get_all_field_names()
                               ).difference(set(names))))
+        if "edge" in names:
+            names.remove("edge")
+            names.insert(0, "edge")
+        if "name" in names:
+            names.remove("name")
+            names.insert(0, "name")
         return filter(lambda xx: xx not in cls.dont_export(), names)
 
     class Meta:
