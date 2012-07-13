@@ -9,6 +9,7 @@ from collections import namedtuple
 from django.db.models import Sum
 from django.core.exceptions import ValidationError
 
+logger = logging.getLogger(__name__)
 SIZE_CHOICES = (
     ('F', 'Fine'),
     ('D', 'Diminutive'),
@@ -138,6 +139,8 @@ class Character(models.Model):
         return None
 
     def has_skill(self, skill):
+        if skill is None:
+            return True
         if self.get_skill(skill):
             return True
         return False
@@ -1165,10 +1168,16 @@ class Sheet(models.Model):
 
     def skilled(self, weapon, use_type=FULL):
         if not self.character.has_skill(weapon.base.base_skill):
+            logger.debug("not skilled with %s" %
+                         unicode(weapon.base.base_skill))
             return False
         elif not self.character.has_skill(weapon.base.skill):
+            logger.debug("not skilled with %s" %
+                         unicode(weapon.base.skill))
             return False
         elif not self.character.has_skill(weapon.base.skill2):
+            logger.debug("not skilled with %s" %
+                         unicode(weapon.base.skill2))
             return False
         return True
 
@@ -1192,12 +1201,16 @@ class Sheet(models.Model):
         level = self.character.skill_level("Weapon combat")
         if level:
             modifiers += level * 5
+        logger.debug("Skill level: %d" % level)
 
         # XXX CCV bonus (penalty for unskilled)
         if not self.skilled(weapon):
+            logger.debug("not skilled with %s" % unicode(weapon))
             modifiers += weapon.base.ccv_unskilled_modifier
-        else:
-            modifiers += weapon.ccv
+
+        modifiers += weapon.ccv
+
+        logger.debug("total modifiers: %d" % modifiers)
 
         checks = [check_mod_from_action_index(act)
                            # cap number of actions.
