@@ -37,6 +37,7 @@ ul.changelog li { white-space: pre-wrap;
     background-color: #f0f0ff;
     }
 
+.unskilled { color: red;  font-style: italic; }
 .skills .check { font-weight: bold; }
 .specialization td:first-child { padding-left: 1em; 
 				 font-style: italic; }

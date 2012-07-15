@@ -133,14 +133,17 @@ XP: {{ char.xp_used_stats }} +
       <th colspan="4">Defenses</th>
        </tr>
 
+{% comment %}
+      * Add a note about already applied penalties and bonuses
+        * wrong hand penalty for SEC
+{% endcomment %}
+
     {% for item in char.weapons %}
       <tr>
       <td class="weapon name" rowspan="3">{{ item.item }}
-	{% comment %}
 	{% if not item.skilled %}
 	<div class="unskilled">unskilled</div>
 	{% endif %}
-	{% endcomment %}
 	<div class="charge damage"><label>Charge:</label>
 	  {{ item.special.damage }}</div>
       </td>
@@ -238,11 +241,9 @@ or
   {% for item in char.ranged_weapons %}
   <tr>
     <td class="weapon name">{{ item.item }}
-      {% comment %}
       {% if not item.skilled %}
       <div class="unskilled">unskilled</div>
       {% endif %}
-      {% endcomment %}
     </td>
     <td>{{ item.rof }}</td>
     {% for act in item.skill_checks %}
