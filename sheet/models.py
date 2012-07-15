@@ -1480,11 +1480,11 @@ class Sheet(models.Model):
         sizes = {"M" : 0,
                  "S" : -1,
                  "L" : 1 }
-        from_toughness =  (2 + sizes[self.size]) * \
-            self.character.edge_level('Toughness')
+        toughness = self.character.edge_level('Toughness')
+        body = roundup(self.fit / 4.0) + (1 + sizes[self.size]) * toughness
 
-        return { 'base': roundup(self.fit / 4.0) ,
-                 'mod': from_toughness,
+        return { 'base': body,
+                 'mod': toughness,
                  'recovery_rate' : "",
                  }
 
