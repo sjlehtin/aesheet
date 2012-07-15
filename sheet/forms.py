@@ -4,16 +4,6 @@ from django.forms.models import modelform_factory
 from sheet.models import *
 import sheet.models
 
-class CharacterForm(forms.ModelForm):
-
-    class Meta:
-        model = Character
-
-class SheetForm(forms.ModelForm):
-
-    class Meta:
-        model = Sheet
-
 class ImportForm(forms.Form):
     import_data = forms.CharField(widget=forms.Textarea, required=False)
     file = forms.FileField(required=False)
@@ -201,6 +191,8 @@ class StatModify(forms.ModelForm):
             char.save()
         return char
 
+SheetForm = modelform_factory(Sheet)
+CharacterForm = modelform_factory(Character)
 SpellEffectForm = modelform_factory(SpellEffect)
 EdgeForm = modelform_factory(Edge)
 EdgeLevelForm = modelform_factory(EdgeLevel, exclude=('skill_bonuses',))
