@@ -1227,6 +1227,15 @@ class Sheet(models.Model):
 
         modifiers += weapon.ccv
 
+        if use_type == self.SEC:
+            if weapon.base.is_shield:
+                logger.debug("Shield, not applying wrong hand penalty.")
+            else:
+                wrong_hand_mod = min(-25 + self.edge_level("Ambidexterity") * 5,
+                                      0)
+                logger.debug("Wrong hand modifiers: %d" % wrong_hand_mod)
+                modifiers += wrong_hand_mod
+
         logger.debug("total modifiers: %d" % modifiers)
 
         checks = [check_mod_from_action_index(act)
