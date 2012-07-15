@@ -123,20 +123,39 @@ class Character(models.Model):
 
     free_edges = models.IntegerField(default=2)
 
-    def get_skill(self, skill):
-        if not skill:
+    def get_ability(self, abilities, ability, accessor):
+        """
+        Optimized for prefetched many-to-many fields.
+        """
+        if not ability:
             return None
 
-        if isinstance(skill, basestring):
-            for ss in self.skills.all():
-                if skill == ss.skill.name:
-                    return ss
+        if isinstance(ability, basestring):
+            for aa in abilities.all():
+                if ability == accessor(aa).name:
+                    return aa
         else:
-            for ss in self.skills.all():
-                if skill == ss.skill:
-                    return ss
+            for aa in abilities.all():
+                if ability == accessor(aa):
+                    return aa
 
         return None
+
+    def get_edge(self, edge):
+        ce = self.get_ability(self.edges, edge,
+                              accessor=lambda xx: xx.edge.edge)
+        if ce:
+            return ce.edge
+        else:
+            return None
+
+    def get_skill(self, skill):
+        cs = self.get_ability(self.skills, skill,
+                              accessor=lambda xx: xx.skill)
+        if cs:
+            return cs
+        else:
+            return None
 
     def has_skill(self, skill):
         if skill is None:
@@ -154,6 +173,12 @@ class Character(models.Model):
         if skill:
             return skill.level
         return None
+
+    def edge_level(self, edge_name):
+        ee = self.get_edge(edge_name)
+        if not ee:
+            return 0
+        return ee.level
 
     def _mod_stat(self, stat):
         # Exclude effects which don't have an effect on stat.
@@ -329,14 +354,6 @@ class Character(models.Model):
                cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
             [self.id, self.id])
         return dict(cursor.fetchall())
-
-    def edge_level(self, edge_name):
-        try:
-            edge = self.edges.get(edge__edge=edge_name)
-            level = edge.edge.level
-        except self.edges.model.DoesNotExist, e:
-            level = 0
-        return level
 
 class Edge(ExportedModel):
     """

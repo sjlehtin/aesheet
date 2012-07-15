@@ -197,6 +197,9 @@ class EdgeAndSkillHandling(TestCase):
         self.assertEquals(ce.edge.edge.name, 'Toughness')
         self.assertEquals(ce.edge.level, 2)
 
+        self.assertEqual(response.context['char'].character
+                         .edge_level("Toughness"), 2)
+
         # Remove edge.
         req_data = { 'remove-form_id' : 'RemoveGeneric',
                      'remove-item_type' : 'CharacterEdge',
