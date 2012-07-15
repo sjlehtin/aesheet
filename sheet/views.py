@@ -146,7 +146,11 @@ class RemoveWrap(object):
     def __unicode__(self):
         return unicode(self.item)
 
-class WeaponWrap(object):
+class SkilledMixin(object):
+    def skilled(self):
+        return self.sheet.skilled(self.item)
+
+class WeaponWrap(RemoveWrap, SkilledMixin):
     class Stats(object):
         rendered_attack_inits = 4
         rendered_defense_inits = 3
@@ -185,6 +189,7 @@ class WeaponWrap(object):
             return self.sheet.defense_damage(self.item, use_type=self.use_type)
 
     def __init__(self, item, sheet):
+        super(WeaponWrap, self).__init__(item)
         self.item = item
         self.sheet = sheet
         self.special = self.Stats(self.item, self.sheet, use_type=sheet.SPECIAL)
@@ -192,19 +197,9 @@ class WeaponWrap(object):
         self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
         self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
 
-    def __unicode__(self):
-        return unicode(self.item)
-
-    def __getattr__(self, v):
-        # pass through all attribute references not handled by us to
-        # base character.
-        if v.startswith("_"):
-            raise AttributeError()
-        return getattr(self.item, v)
-
 Action = namedtuple('Action', ['action', 'check'])
 
-class RangedWeaponWrap(RemoveWrap):
+class RangedWeaponWrap(RemoveWrap, SkilledMixin):
     def __init__(self, item, sheet):
         super(RangedWeaponWrap, self).__init__(item)
         self.sheet = sheet
@@ -274,7 +269,7 @@ class SheetView(object):
 
 
     def weapons(self):
-        return [WeaponWrap(RemoveWrap(xx), self.sheet)
+        return [WeaponWrap(xx, self.sheet)
                 for xx in self.sheet.weapons.all()]
 
     def ranged_weapons(self):
