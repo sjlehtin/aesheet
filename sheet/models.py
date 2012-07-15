@@ -1183,7 +1183,7 @@ class Sheet(models.Model):
             inits.append(bi_multipliers[ii - 1] * bi)
         return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
 
-    def skilled(self, weapon, use_type=FULL):
+    def skilled(self, weapon):
         if not self.character.has_skill(weapon.base.base_skill):
             logger.debug("not skilled with %s" %
                          unicode(weapon.base.base_skill))
