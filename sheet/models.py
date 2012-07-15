@@ -1201,9 +1201,9 @@ class Sheet(models.Model):
         level = self.character.skill_level("Weapon combat")
         if level:
             modifiers += level * 5
-        logger.debug("Skill level: %d" % level)
+        logger.debug("Skill level: %s" % level)
 
-        # XXX CCV bonus (penalty for unskilled)
+        # CCV bonus (penalty for unskilled)
         if not self.skilled(weapon):
             logger.debug("not skilled with %s" % unicode(weapon))
             modifiers += weapon.base.ccv_unskilled_modifier
