@@ -28,6 +28,8 @@
 
 <div class="stats">
 
+{% url sheet.views.sheet_detail char.id as act %}
+
 <table class="base">
 {% for stat in char.stats %}
   <tr><td class="stats name">{{ stat.name|upper }}</td>
@@ -36,7 +38,7 @@
       {% if stat.add_form %}
       <td class="edit_control">
            <div class="edit_control">
-              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
+              <form action="{{ act }}" method="post">
                 {% csrf_token %}
                 {{ stat.add_form }}
               <input type="submit" value="+" />
@@ -45,7 +47,7 @@
       </td> 
       <td class="edit_control">
            <div class="edit_control">
-              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
+              <form action="{{ act }}" method="post">
                 {% csrf_token %}
                 {{ stat.dec_form }}
               <input type="submit" value="-" />
@@ -162,7 +164,7 @@ XP: {{ char.xp_used_stats }} +
         <td>{{ item.durability }}</td>
        <td class="edit_control">
            <div class="edit_control">
-              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
+              <form action="{{ act }}" method="post">
                 {% csrf_token %}
                 {{ item.remove_form }}
               <input type="submit" value="Remove" />
@@ -206,7 +208,7 @@ XP: {{ char.xp_used_stats }} +
 
 <div id="add_weapon" class="edit_control">
 <label for="add_weapon_form"><strong>Add a weapon</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       >{% csrf_token %}
 <table>
 {{ add_weapon_form.as_table }}
@@ -215,7 +217,7 @@ XP: {{ char.xp_used_stats }} +
 </form>
 or
 <div class="advanced" data-advanced-text="Create a new weapon">
-  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+  <form action="{{ act }}" method="post" 
 	id="add_weapon_form">{% csrf_token %}
     <table>
       {{ new_weapon_form.as_table }}
@@ -287,7 +289,7 @@ or
 </form>
 or
 <div class="advanced" data-advanced-text="Create a new weapon">
-  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post"
+  <form action="{{ act }}" method="post"
 	id="add_weapon_form">{% csrf_token %}
     <table>
       {{ new_ranged_weapon_form.as_table }}
@@ -305,7 +307,7 @@ or
     {% for item in char.spell_effects %}
         <li>{{ item.item }} 
            <div class="edit_control">
-              <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post">
+              <form action="{{ act }}" method="post">
                 {% csrf_token %}
                 {{ item.remove_form }}
               <input type="submit" value="Remove" />
@@ -320,7 +322,7 @@ or
 
 <div id="add_spell_effect" class="edit_control">
 <label for="add_spell_effect_form"><strong>Add a spell effect</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       id="add_spell_effect_form">{% csrf_token %}
 <table>
 {{ add_spell_effect_form.as_table }}
@@ -346,7 +348,7 @@ or
     <td>{{ skill.comments }}</td>
     <td>
       <div class="edit_control">
-        <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+        <form action="{{ act }}" 
               method="post">
           {% csrf_token %}
           {{ skill.remove_form }}
@@ -366,7 +368,7 @@ or
 
 <div id="add_skill" class="edit_control">
 <label for="add_skill_form"><strong>Add a skill</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       id="add_skill_form">{% csrf_token %}
 <table>
 {{ add_skill_form.as_table }}
@@ -376,7 +378,7 @@ or
 </div>
 <div id="add_lang" class="edit_control">
 <label for="add_lang_form"><strong>Add a language skill</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       id="add_lang_form">{% csrf_token %}
 <table>
 {{ add_lang_form.as_table }}
@@ -394,7 +396,7 @@ or
         <tr><td>{{ edge.edge }}</td>
             <td>
               <div class="edit_control">
-                 <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+                 <form action="{{ act }}" 
                        method="post">
                    {% csrf_token %}
                    {{ edge.remove_form }}
@@ -418,7 +420,7 @@ or
 
 <div id="add_edge" class="edit_control">
 <label for="add_edge_form"><strong>Add an edge</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       id="add_edge_form">{% csrf_token %}
 <table>
 {{ add_edge_form.as_table }}
@@ -438,7 +440,7 @@ or
   <tr><td>{{ helm.item }}</td>
     <td>
       <div class="edit_control">
-        <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+        <form action="{{ act }}" 
               method="post">
           {% csrf_token %}
           {{ helm.remove_form }}
@@ -455,7 +457,7 @@ or
 
 <div id="add_helmet" class="edit_control">
 <label for="add_helmet_form"><strong>Add a helmet</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       id="add_helmet_form">{% csrf_token %}
 <table>
 {{ add_helm_form.as_table }}
@@ -464,7 +466,7 @@ or
 </form>
 or
 <div class="advanced" data-advanced-text="Create a new helm">
-  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+  <form action="{{ act }}" method="post" 
 	id="add_helmet_form">{% csrf_token %}
     <table>
       {{ new_helm_form.as_table }}
@@ -481,7 +483,7 @@ or
   <tr><td>{{ armor.item }}</td>
     <td>
       <div class="edit_control">
-        <form action="{{ ROOT_URL }}sheets/{{char.id}}/" 
+        <form action="{{ act }}" 
               method="post">
           {% csrf_token %}
           {{ armor.remove_form }}
@@ -498,7 +500,7 @@ or
 
 <div id="add_armor" class="edit_control">
 <label for="add_armor_form"><strong>Add armor</strong></label>
-<form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+<form action="{{ act }}" method="post" 
       id="add_armor_form">{% csrf_token %}
 <table>
 {{ add_armor_form.as_table }}
@@ -507,7 +509,7 @@ or
 </form>
 or
 <div class="advanced" data-advanced-text="Create a new armor">
-  <form action="{{ ROOT_URL }}sheets/{{char.id}}/" method="post" 
+  <form action="{{ act }}" method="post" 
 	id="add_armor_form">{% csrf_token %}
     <table>
       {{ new_armor_form.as_table }}
