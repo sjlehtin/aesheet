@@ -215,16 +215,16 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
                     None,
                     self.sheet.ranged_actions,
                     self.sheet.ranged_skill_checks(self.item))]
-            logging.info("Checks: %s" % ll)
+            logger.info("Checks: %s" % ll)
         except:
-            logging.exception("Got exception")
+            logger.exception("Got exception")
         return ll
 
     def ranges(self):
         try:
             ll = self.sheet.ranged_ranges(self.item)
         except e:
-            logging.exception("Got exception %s" % e)
+            logger.exception("Got exception %s" % e)
         return ll
 
     def initiatives(self):
@@ -267,7 +267,6 @@ class SheetView(object):
             ll.append(stat)
         return ll
 
-
     def weapons(self):
         return [WeaponWrap(xx, self.sheet)
                 for xx in self.sheet.weapons.all()]
@@ -276,9 +275,8 @@ class SheetView(object):
         try:
             ll = [RangedWeaponWrap(xx, self.sheet)
                   for xx in self.sheet.ranged_weapons.all()]
-            logging.info("list: %s" % ll)
         except:
-            logging.exception("Got exception")
+            logger.exception("Got exception")
         return ll
 
     def spell_effects(self):
@@ -404,9 +402,9 @@ def sheet_detail(request, sheet_id=None):
         should_change = False
 
         for kk, ff in forms.items():
-            logging.info("handling %s" % kk)
+            logger.info("handling %s" % kk)
             if ff.is_valid():
-                logging.info("saved %s" % kk)
+                logger.info("saved %s" % kk)
                 oo = ff.save()
                 should_change = True
                 if kk == 'new_weapon_form':
@@ -726,12 +724,12 @@ def import_data(request, success=False):
                 return HttpResponseRedirect(
                     reverse('import-success'))
             except (TypeError, ValueError, ValidationError), e:
-                logging.exception("failed.")
+                logger.exception("failed.")
                 el = form._errors.setdefault('__all__',
                                              django.forms.util.ErrorList())
                 el.append(str(e))
             except Exception, e:
-                logging.exception("failed.")
+                logger.exception("failed.")
                 raise e
     else:
         form = ImportForm()
