@@ -69,7 +69,7 @@ Minor:
 
 - adding missing skills (helps in just allowing inserting primary skills
   and autofilling rest)
-- modifying skill level with +/- (at least add to skill level)
++ modifying skill level with +/- (at least add to skill level)
 
 """
 
