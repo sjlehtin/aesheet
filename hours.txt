@@ -33,5 +33,8 @@ tue 3.7.2012 1h Ranged weapon import/export, skill points.
 tue 3.7.2012 3h Form cleanup, bug fixing.
 wed 4.7.2012 4h Bug fixes and some usability improvements.
 thu 5.7.2012 1.5h Edge ability modifiers, tweaking.
-Fri 6.7.2012 1h Encumbrance penalties.
+fri 6.7.2012 1h Encumbrance penalties.
 sat 7.7.2012 4h Query optimization to allow use of django-debug-toolbar.
+sun 8.7.2012 6h Skill checks, import/export.
+fri 13.7.2012 0.5h Bug fix to weapon skill lookups.
+sun 15.7.2012 1h Skill and edge tweaking.
