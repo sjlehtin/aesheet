@@ -38,3 +38,4 @@ sat 7.7.2012 4h Query optimization to allow use of django-debug-toolbar.
 sun 8.7.2012 6h Skill checks, import/export.
 fri 13.7.2012 0.5h Bug fix to weapon skill lookups.
 sun 15.7.2012 1h Skill and edge tweaking.
+mon 16.7.2012 3h Skill level quickedit.
