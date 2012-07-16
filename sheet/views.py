@@ -238,6 +238,16 @@ class SkillWrap(RemoveWrap):
         super(SkillWrap, self).__init__(item)
         self.sheet = sheet
 
+    def add_level_form(self):
+        return CharacterSkillLevelModifyForm(instance=self.item,
+                                             initial={ 'function': 'add' },
+                                             prefix="skill-level-modify")
+
+    def dec_level_form(self):
+        return CharacterSkillLevelModifyForm(instance=self.item,
+                                             initial={ 'function': 'dec' },
+                                             prefix="skill-level-modify")
+
     def check(self):
         return self.item.check(self.sheet)
 
@@ -369,6 +379,9 @@ def sheet_detail(request, sheet_id=None):
     forms['_stat_modify'] = StatModify(data,
                                        instance=sheet.character,
                                        prefix="stat-modify")
+    forms['_skill_modify'] = CharacterSkillLevelModifyForm(
+        data,
+        prefix="skill-level-modify")
     forms['add_skill_form'] = AddSkill(data,
                                        instance=sheet.character,
                                        prefix="add-skill")

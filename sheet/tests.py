@@ -118,7 +118,8 @@ class ItemHandling(TestCase):
         self.assertContains(response, "No spell effects.")
 
 class EdgeAndSkillHandling(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills"]
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills",
+                "test_skills"]
 
     def setUp(self):
         self.client = Client()
@@ -229,6 +230,49 @@ class EdgeAndSkillHandling(TestCase):
         # Verify Acute Touch has an effect.
         self.assertEqual(sheet.eff_dex + 15,
                          sheet.skills.get(skill__name="Surgery").check(sheet))
+
+    def test_increase_skill_level(self):
+        cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
+                                        character__name="Yukaghir")
+        self.assertEqual(cs.level, 4)
+        det_url = reverse('sheet.views.sheet_detail', args=[2])
+        req_data = { 'skill-level-modify-skill_id' : cs.pk,
+                     'skill-level-modify-function' : 'add' }
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
+                                        character__name="Yukaghir")
+        self.assertEqual(cs.level, 5)
+
+    def test_decrease_skill_level(self):
+        cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
+                                        character__name="Yukaghir")
+        self.assertEqual(cs.level, 4)
+        det_url = reverse('sheet.views.sheet_detail', args=[2])
+        req_data = { 'skill-level-modify-skill_id' : cs.pk,
+                     'skill-level-modify-function' : 'dec' }
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
+                                        character__name="Yukaghir")
+        self.assertEqual(cs.level, 3)
+
+    def test_decreasing_skill_level_for_specializations(self):
+        """
+        Skill level should not decrease if the lower skill levels do not have
+        a cost (like Sword: -/2/-/-).
+        """
+        cs = CharacterSkill.objects.get(skill__name="Sword",
+                                        character__name="Yukaghir")
+        self.assertEqual(cs.level, 1)
+        det_url = reverse('sheet.views.sheet_detail', args=[2])
+        req_data = { 'skill-level-modify-skill_id' : cs.pk,
+                     'skill-level-modify-function' : 'dec' }
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url) # XXX
+        cs = CharacterSkill.objects.get(skill__name="Sword",
+                                        character__name="Yukaghir")
+        self.assertEqual(cs.level, 1)
 
 class ModelBasics(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",

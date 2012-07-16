@@ -4,6 +4,8 @@ from django.forms.models import modelform_factory
 from sheet.models import *
 import sheet.models
 
+logger = logging.getLogger(__name__)
+
 class ImportForm(forms.Form):
     import_data = forms.CharField(widget=forms.Textarea, required=False)
     file = forms.FileField(required=False)
@@ -105,8 +107,18 @@ class AddSkill(forms.ModelForm):
         level = self.cleaned_data.get('level')
         if not skill:
             raise forms.ValidationError, "Skill is required"
-        if level == 0 and skill.is_specialization:
-            level = 1
+        if skill.is_specialization:
+            if level == 0:
+                if not skill.skill_cost_0:
+                    level = 1
+            if level == 1:
+                if not skill.skill_cost_1:
+                    level = 2
+            if level == 2:
+                if not skill.skill_cost_2:
+                    level = 3
+            if level == 3:
+                assert(skill.skill_cost_3)
         self.cleaned_data['level'] = level
         # verify skill and level go together.
         cs = CharacterSkill()
@@ -191,6 +203,63 @@ class StatModify(forms.ModelForm):
             char.save()
         return char
 
+class CharacterSkillLevelModifyForm(forms.Form):
+    function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
+    skill_id = forms.IntegerField(widget=widgets.HiddenInput)
+
+    def __init__(self, *args, **kwargs):
+        inst = kwargs.pop('instance', None)
+        super(CharacterSkillLevelModifyForm, self).__init__(*args, **kwargs)
+        if inst:
+            self.fields['skill_id'].initial = inst.pk
+
+    def clean_skill_id(self):
+        self.instance = CharacterSkill.objects.get(
+            pk=self.cleaned_data['skill_id'])
+        logger.debug("Skill id: %s", self.cleaned_data['skill_id'])
+        logger.debug("Got skill instance %s", self.instance)
+        return self.cleaned_data['skill_id']
+
+    def clean(self):
+        """
+        Keep skill level in defined bounds.  Two level specializations
+        '-/2/3/-' should work; the level should not decrease below 1 or
+        increase above 2.
+        """
+        if not self.cleaned_data.get('skill_id'):
+            raise forms.ValidationError, "Skill id is required."
+        if self.cleaned_data.get('function') == 'add':
+            level_modify = 1
+        else:
+            level_modify = -1
+        new_level = self.instance.level + level_modify
+        if new_level < 0:
+            new_level = 0
+        elif new_level == 0:
+            if not self.instance.skill.skill_cost_0:
+                new_level = self.instance.level
+        elif new_level == 1:
+            if not self.instance.skill.skill_cost_1:
+                new_level = self.instance.level
+        elif new_level == 2:
+            if not self.instance.skill.skill_cost_2:
+                new_level = self.instance.level
+        elif new_level > 9:
+            new_level = self.instance.level
+
+        if new_level >= 3:
+            if not self.instance.skill.skill_cost_3:
+                new_level = self.instance.level
+
+        self.new_level = new_level
+        return self.cleaned_data
+
+    def save(self, commit=True):
+        if self.new_level != self.instance.level:
+            self.instance.level = self.new_level
+            return self.instance.save()
+        return self.instance
+
 SheetForm = modelform_factory(Sheet)
 CharacterForm = modelform_factory(Character)
 SpellEffectForm = modelform_factory(SpellEffect)
@@ -201,6 +270,7 @@ WeaponForm = modelform_factory(Weapon)
 RangedWeaponForm = modelform_factory(RangedWeapon)
 RangedWeaponTemplateForm = modelform_factory(RangedWeaponTemplate)
 ArmorTemplateForm = modelform_factory(ArmorTemplate)
+
 class ArmorForm(forms.ModelForm):
     base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(
             is_helm=False))

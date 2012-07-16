@@ -341,7 +341,28 @@ or
   {% for skill in skills %}
   <tr {% if skill.skill.is_specialization %}
       class="specialization"{% endif %}>
-    <td>{{ skill.skill }}</td><td>{{ skill.level }}</td>
+    <td>{{ skill.skill }}</td>
+    <td>
+      <div class="edit_control">
+        <form action="{{ act }}" 
+              method="post">
+          {% csrf_token %}
+          {{ skill.dec_level_form }}
+          <input type="submit" value="-" />
+        </form>
+      </div>
+    </td>
+    <td>{{ skill.level }}</td>
+    <td>
+      <div class="edit_control">
+        <form action="{{ act }}" 
+              method="post">
+          {% csrf_token %}
+          {{ skill.add_level_form }}
+          <input type="submit" value="+" />
+        </form>
+      </div>
+    </td>
     <td>{{ skill.cost }}</td><td class="check">
       {% if not skill.skill.is_specialization %}
       {{ skill.check }}{% endif %}</td>
