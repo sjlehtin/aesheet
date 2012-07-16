@@ -345,7 +345,6 @@ or
     <td>{{ skill.cost }}</td><td class="check">
       {% if not skill.skill.is_specialization %}
       {{ skill.check }}{% endif %}</td>
-    <td>{{ skill.comments }}</td>
     <td>
       <div class="edit_control">
         <form action="{{ act }}" 
@@ -356,6 +355,7 @@ or
         </form>
       </div>
     </td>
+    <td>{{ skill.comments }}</td>
   </tr>
   {% endfor %}
 </table>
