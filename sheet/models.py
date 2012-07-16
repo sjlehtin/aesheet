@@ -10,6 +10,7 @@ from django.db.models import Sum
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
+
 SIZE_CHOICES = (
     ('F', 'Fine'),
     ('D', 'Diminutive'),
