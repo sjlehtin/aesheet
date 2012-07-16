@@ -1364,8 +1364,8 @@ class Sheet(models.Model):
 
     @property
     def eff_imm(self):
-        "IMM is not increased by an enhancement to FIT."
-        return roundup((self.fit + self.eff_psy)/2) + \
+        "IMM is calculated from base PSY and FIT."
+        return roundup((self.fit + self.psy)/2) + \
             self.character.mod_imm + self.mod_imm
 
     def _mod_stat(self, stat):

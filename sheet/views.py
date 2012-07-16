@@ -47,7 +47,7 @@ TODO = """
 - spell skill checks
 - sheet styling
 
-- immunity calculation (currently affected if, e.g., helm gives a
++ immunity calculation (currently affected if, e.g., helm gives a
   negative modifer to PSY)
 
 - weapon maximum damage based on durability.
