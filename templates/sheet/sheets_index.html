@@ -4,13 +4,13 @@
 
 {% block content %}
 <p>
-<a href="{% url sheet.views.edit_sheet %}">Add a new sheet</a>
+<a href="{% url add_sheet %}">Add a new sheet</a>
 </p>
 
 {% if all_sheets %}
     <ul>
     {% for sheet in all_sheets %}
-        <li><a href="{{ ROOT_URL }}sheets/{{ sheet.id }}/">{{ sheet }}</a></li>
+        <li><a href="{% url sheet.views.sheet_detail sheet.id %}">{{ sheet }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

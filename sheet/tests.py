@@ -293,11 +293,11 @@ class Views(TestCase):
         self.client.login(username="admin", password="admin")
 
     def testViewCharacter(self):
-        response = self.client.get("/characters/2/")
+        response = self.client.get("/characters/edit_char/2/")
         self.assertContains(response, "Priest")
 
     def testNewSpellEffect(self):
-        det_url = reverse(sheet.views.edit_spell_effect)
+        det_url = reverse('add_spell_effect')
         response = self.client.get(det_url)
         self.assertContains(response, "Fit")
 

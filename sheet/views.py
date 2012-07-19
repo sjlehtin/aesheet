@@ -81,7 +81,7 @@ from sheet.forms import *
 from django.core.exceptions import ValidationError
 import django.forms.util
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 import django.db.models
 import sheet.models
 import csv
@@ -447,149 +447,48 @@ def sheet_detail(request, sheet_id=None):
     return render_to_response('sheet/sheet_detail.html',
                               RequestContext(request, c))
 
-def edit_character(request, char_id=None):
-    character = None
-    if char_id:
-        character = get_object_or_404(Character, pk=char_id)
-    form = CharacterForm(instance=character)
+from django.views.generic import UpdateView, CreateView
+from django.views.generic.edit import ModelFormMixin
 
-    forms = {}
-    if request.method == "POST":
-        form = CharacterForm(request.POST, instance=character)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(settings.ROOT_URL + 'characters/')
+class EditCharacterView(UpdateView):
+    model = Character
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(characters_index)
 
-    c = {}
-    c.update({ 'char_form' : form,
-               'char' : character })
-    c.update(forms)
-    return render_to_response('sheet/edit_char.html',
-                              RequestContext(request, c))
+class AddCharacterView(CreateView):
+    model = Character
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(characters_index)
 
-def edit_spell_effect(request, eff_id=None):
-    effect = None
-    if eff_id:
-        effect = get_object_or_404(SpellEffect, pk=eff_id)
-    data = None
-    if request.method == "POST":
-        data = request.POST
-    form = SpellEffectForm(data, instance=effect)
+class AddSpellEffectView(CreateView):
+    model = SpellEffect
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(sheets_index)
 
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse(sheets_index))
+class AddEdgeView(AddSpellEffectView):
+    model = Edge
 
-    return render_to_response('sheet/gen_edit.html',
-                              RequestContext(request, { 'form' : form }))
+class EditSheetView(UpdateView):
+    model = Sheet
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(sheets_index)
 
-def edit_edge(request, edge_id=None):
-    if edge_id:
-        effect = get_object_or_404(Edge, pk=edge_id)
-    else:
-        effect = None
+class AddSheetView(CreateView):
+    model = Sheet
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(sheets_index)
 
-    data = None
-    if request.method == "POST":
-        data = request.POST
-    form = EdgeForm(data, instance=effect)
+class AddEdgeLevelView(AddSpellEffectView):
+    model = EdgeLevel
 
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse(sheets_index))
+class AddEdgeSkillBonusView(AddSpellEffectView):
+    model = EdgeSkillBonus
 
-    return render_to_response('sheet/gen_edit.html',
-                              RequestContext(request, { 'form' : form }))
+class AddRangedWeaponTemplateView(AddSpellEffectView):
+    model = RangedWeaponTemplate
 
-def edit_edge_level(request, el_id=None):
-    if el_id:
-        el = get_object_or_404(EdgeLevel, pk=el_id)
-    else:
-        el = None
-    data = None
-    if request.method == "POST":
-        data = request.POST
-    form = EdgeLevelForm(data, instance=el)
-
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse(sheets_index))
-
-    return render_to_response('sheet/gen_edit.html',
-                              RequestContext(request, { 'form' : form }))
-
-def edit_edge_skill_bonus(request, esb_id=None):
-    if esb_id:
-        esb = get_object_or_404(EdgeSkillBonus, pk=esb_id)
-    else:
-        esb = None
-    data = None
-    if request.method == "POST":
-        data = request.POST
-    form = EdgeSkillBonusForm(data, instance=esb)
-
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse(sheets_index))
-
-    return render_to_response('sheet/gen_edit.html',
-                              RequestContext(request, { 'form' : form }))
-
-def edit_ranged_weapon_template(request, wpn_id=None):
-    if wpn_id:
-        wpn = get_object_or_404(RangeWeaponTemplate, pk=wpn_id)
-    else:
-        wpn = None
-    data = None
-    if request.method == "POST":
-        data = request.POST
-    form = RangedWeaponTemplateForm(data, instance=wpn)
-
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse(sheets_index))
-
-    return render_to_response('sheet/gen_edit.html',
-                              RequestContext(request, { 'form' : form }))
-
-def edit_armor_template(request, armor_id=None):
-    if armor_id:
-        armor = get_object_or_404(ArmorTemplate, pk=armor_id)
-    else:
-        armor = None
-    data = None
-    if request.method == "POST":
-        data = request.POST
-    form = ArmorTemplateForm(data, instance=armor)
-
-    if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse(sheets_index))
-
-    return render_to_response('sheet/gen_edit.html',
-                              RequestContext(request, { 'form' : form }))
-
-def edit_sheet(request, sheet_id=None):
-    sheet = None
-    if sheet_id:
-        sheet = get_object_or_404(Sheet, pk=sheet_id)
-    if request.method == "POST":
-        form = SheetForm(request.POST, instance=sheet)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(settings.ROOT_URL + 'sheets/')
-    else:
-        form = SheetForm(instance=sheet)
-
-    return render_to_response('sheet/edit_sheet.html',
-                              RequestContext(request, { 'sheet_form' : form,
-                                                        'sheet' : sheet }))
+class AddArmorTemplateView(AddSpellEffectView):
+    model = ArmorTemplate
 
 def get_data_rows(results, fields):
     """

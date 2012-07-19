@@ -11,7 +11,7 @@
 {% if all_characters %}
     <ul>
     {% for char in all_characters %}
-        <li><a href="{% url sheet.views.edit_character char.id %}">
+        <li><a href="{% url edit_character char.id %}">
              {{ char }}</a></li>
     {% endfor %}
     </ul>

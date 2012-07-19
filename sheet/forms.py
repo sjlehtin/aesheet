@@ -260,16 +260,8 @@ class CharacterSkillLevelModifyForm(forms.Form):
             return self.instance.save()
         return self.instance
 
-SheetForm = modelform_factory(Sheet)
-CharacterForm = modelform_factory(Character)
-SpellEffectForm = modelform_factory(SpellEffect)
-EdgeForm = modelform_factory(Edge)
-EdgeLevelForm = modelform_factory(EdgeLevel, exclude=('skill_bonuses',))
-EdgeSkillBonusForm = modelform_factory(EdgeSkillBonus)
 WeaponForm = modelform_factory(Weapon)
 RangedWeaponForm = modelform_factory(RangedWeapon)
-RangedWeaponTemplateForm = modelform_factory(RangedWeaponTemplate)
-ArmorTemplateForm = modelform_factory(ArmorTemplate)
 
 class ArmorForm(forms.ModelForm):
     base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(
