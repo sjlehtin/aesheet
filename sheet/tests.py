@@ -287,7 +287,7 @@ class Logging(WebTest):
         entry = CharacterLogEntry.objects.latest()
         self.assertEqual(entry.user.username, "admin")
         self.assertEqual(entry.character.pk, 2)
-        self.assertEqual(entry.stat, "cur_fit")
+        self.assertEqual(entry.field, "cur_fit")
         self.assertEqual(entry.amount, 1)
         former_id = entry.id
 
