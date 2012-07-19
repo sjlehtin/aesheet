@@ -49,7 +49,8 @@
       "race": "Human", 
       "base_mod_fit": 0, 
       "start_psy": 42, 
-      "start_cha": 35
+      "start_cha": 35,
+      "last_update_at": "2012-07-18T12:58:17.048085"
     }
   }, 
   {
@@ -102,7 +103,8 @@
       "race": "Human", 
       "base_mod_fit": -1, 
       "start_psy": 58, 
-      "start_cha": 34
+      "start_cha": 34,
+      "last_update_at": "2012-07-18T12:58:17.048085"
     }
   }
 ]

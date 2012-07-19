@@ -10,8 +10,9 @@
       "helm": null, 
       "spell_effects": [], 
       "owner": 2, 
-      "size": "M"
-    }
+      "size": "M",
+      "last_update_at": "2012-07-18T12:58:17.048085"
+      }
   }, 
   {
     "pk": 2, 
@@ -24,7 +25,8 @@
       "helm": null, 
       "spell_effects": [], 
       "owner": 1, 
-      "size": "M"
+      "size": "M",
+      "last_update_at": "2012-07-18T12:58:17.048085"
     }
   }
 ]

@@ -2,16 +2,12 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 import pdb
-from sheet.forms import SheetForm
-from sheet.models import Sheet, Weapon, WeaponTemplate, Armor, CharacterSkill
-from sheet.models import Skill, CharacterEdge, EdgeLevel
+from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
+from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
+from sheet.models import CharacterLogEntry
 from sheet.models import roundup
 import sheet.views
-
-class SheetFormTestCase(TestCase):
-    def test_create_form(self):
-        f = SheetForm()
-        self.assertTrue(f)
+from django_webtest import WebTest
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell"]
@@ -273,6 +269,71 @@ class EdgeAndSkillHandling(TestCase):
         cs = CharacterSkill.objects.get(skill__name="Sword",
                                         character__name="Yukaghir")
         self.assertEqual(cs.level, 1)
+
+class Logging(WebTest):
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills",
+                "assigned_edges"]
+
+    def setUp(self):
+        self.client = Client()
+        self.client.login(username="admin", password="admin")
+
+    def test_logging_stat_changes(self):
+        det_url = reverse('sheet.views.sheet_detail', args=[2])
+        req_data = { 'stat-modify-function' : 'add',
+                     'stat-modify-stat' : 'cur_fit' }
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        entry = CharacterLogEntry.objects.latest()
+        self.assertEqual(entry.user.username, "admin")
+        self.assertEqual(entry.character.pk, 2)
+        self.assertEqual(entry.stat, "cur_fit")
+        self.assertEqual(entry.amount, 1)
+        former_id = entry.id
+
+        # If a stat is increased multiple times and perhaps
+        # decreased within the time limit, there should be only a single
+        # log entry per user.
+
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+
+        entry = CharacterLogEntry.objects.latest()
+        self.assertEqual(entry.amount, 2)
+        self.assertEqual(former_id, entry.id)
+
+        req_data = { 'stat-modify-function' : 'dec',
+                     'stat-modify-stat' : 'cur_fit' }
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+
+        entry = CharacterLogEntry.objects.latest()
+        self.assertEqual(entry.amount, 1)
+        self.assertEqual(former_id, entry.id)
+
+        # If a stat is increased and then decreased within the time
+        # limit, there shouldn't be a log entry.
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        self.assertEqual(CharacterLogEntry.objects.count(), 0)
+
+    def test_logging_base_char_edit(self):
+        old_ch = Character.objects.get(pk=2)
+
+        det_url = reverse('edit_character', args=[2])
+        form = self.app.get(det_url, user='admin').form
+
+        form['cur_fit'].value = int(form['cur_fit'].value) + 5
+        response = form.submit()
+        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        new_ch = Character.objects.get(pk=2)
+        self.assertEqual(old_ch.cur_fit + 5, new_ch.cur_fit)
+
+        self.assertEqual(CharacterLogEntry.objects.latest().amount, 5)
+
+        form['deity'].value = "Tharizdun"
+        response = form.submit()
+
 
 class ModelBasics(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",

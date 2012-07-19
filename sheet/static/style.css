@@ -7,7 +7,7 @@ td.defense { color: blue; }
 	   background: #defdde; }
 #content { min-height: 100%; overflow: auto; }
 #authbar { text-align : right; width: 100%; }
-div.skills { position: absolute;
+#right-pane { position: absolute;
 	     font-size: 80%;
 	     right: 5px;
 	     top: 2em;

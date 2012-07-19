@@ -203,6 +203,7 @@ INSTALLED_APPS = (
     'south',
     'sheet',
     'profiling',
+    'django.contrib.humanize',
 )
 
 if DEBUG_TOOLBAR_ENABLED:

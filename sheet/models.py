@@ -124,6 +124,11 @@ class Character(models.Model):
 
     free_edges = models.IntegerField(default=2)
 
+    last_update_at = models.DateTimeField(auto_now=True, blank=True)
+
+    class Meta:
+        ordering = ['last_update_at']
+
     def get_ability(self, abilities, ability, accessor):
         """
         Optimized for prefetched many-to-many fields.
@@ -1102,6 +1107,12 @@ class Sheet(models.Model):
     extra_weight_carried = models.IntegerField(
         default=0,
         help_text="Extra encumbrance the character is carrying")
+
+    last_update_at = models.DateTimeField(auto_now=True, blank=True)
+
+    class Meta:
+        ordering = ['last_update_at']
+
     (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
 
     fit_modifiers_for_damage = {
@@ -1558,3 +1569,36 @@ class Sheet(models.Model):
 
     def __unicode__(self):
         return "sheet for %s: %s" % (self.character.name, self.description)
+
+
+class CharacterLogEntry(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True, blank=True)
+    user = models.ForeignKey(auth.models.User)
+    character = models.ForeignKey(Character)
+
+    entry = models.TextField(blank=True,
+                             help_text="Additional information about this "
+                             "entry, input by the user.")
+
+    field = models.CharField(max_length=64, blank=True)
+    amount = models.PositiveIntegerField(default=0)
+
+    skill = models.ForeignKey(Skill, blank=True, null=True)
+    level = models.PositiveIntegerField(default=0)
+
+    edge = models.ForeignKey(EdgeLevel, blank=True, null=True)
+
+    removed = models.BooleanField(default=False,
+                                  help_text="Setting this means that the edge "
+                                  "or skill was removed instead of added.")
+
+    class Meta:
+        ordering = ["-timestamp"]
+        get_latest_by = "timestamp"
+
+    def __unicode__(self):
+        if self.field:
+            if self.amount:
+                return u"Added %d to %s." % (self.amount, self.field)
+            else:
+                return u"Changed %s." % (self.field)

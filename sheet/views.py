@@ -24,7 +24,9 @@ TODO = """
 - wondrous items
 - inventory ?
 - magic item location (only one item to each location)
-- change log for sheet (stat modifications etc)
++ change log for sheet (stat modifications etc)
+-- skills
+-- edges
 + editing sheet description
 - nicer fast edit of basic stats
 + stamina
@@ -38,7 +40,7 @@ TODO = """
 - stats for skill checks
 - character mugshot upload
 - senses
-- charge damage
++ charge damage
 + print.css (basically, the whole printable button special handling is
   unnecessary).
 - movement chart
@@ -378,6 +380,7 @@ def sheet_detail(request, sheet_id=None):
 
     forms['_stat_modify'] = StatModify(data,
                                        instance=sheet.character,
+                                       request=request,
                                        prefix="stat-modify")
     forms['_skill_modify'] = CharacterSkillLevelModifyForm(
         data,
@@ -451,9 +454,15 @@ from django.views.generic import UpdateView, CreateView
 from django.views.generic.edit import ModelFormMixin
 
 class EditCharacterView(UpdateView):
+    form_class = CharacterForm
     model = Character
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(characters_index)
+
+    def get_form_kwargs(self):
+        dd = super(EditCharacterView, self).get_form_kwargs()
+        dd['request'] = self.request
+        return dd
 
 class AddCharacterView(CreateView):
     model = Character

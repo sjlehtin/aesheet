@@ -3,6 +3,7 @@ from django.forms import widgets
 from django.forms.models import modelform_factory
 from sheet.models import *
 import sheet.models
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +176,36 @@ class RemoveGeneric(forms.Form):
     item = forms.CharField(max_length=128, widget=widgets.HiddenInput,
                            required=False)
 
-class StatModify(forms.ModelForm):
+class RequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RequestForm, self).__init__(*args, **kwargs)
+
+def add_log_entry(character, request, field, change):
+    logger.debug("%s: changed %s by %s.", character, field, change)
+
+    # 15 minutes past.
+    since = datetime.datetime.now() - datetime.timedelta(minutes=15)
+
+    try:
+        entry = CharacterLogEntry.objects.filter(
+            user=request.user,
+            character=character,
+            field=field,
+            timestamp__gte=since).latest()
+    except CharacterLogEntry.DoesNotExist:
+        entry = CharacterLogEntry()
+        entry.character = character
+        entry.user = request.user
+        entry.field = field
+
+    entry.amount += change
+    entry.save()
+
+    if entry.amount == 0 and change != 0:
+        entry.delete()
+
+class StatModify(RequestForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
 
@@ -194,13 +224,14 @@ class StatModify(forms.ModelForm):
 
         stat = self.cleaned_data['stat']
         orig = getattr(char, stat)
-        if self.cleaned_data['function'] == "add":
-            setattr(char, stat, orig + 1)
-        else:
-            setattr(char, stat, orig - 1)
+        change = 1 if self.cleaned_data['function'] == "add" else -1
+        setattr(char, stat, orig + change)
 
         if commit:
             char.save()
+
+            add_log_entry(self.instance, self.request, stat, change)
+
         return char
 
 class CharacterSkillLevelModifyForm(forms.Form):
@@ -274,3 +305,25 @@ class HelmForm(forms.ModelForm):
             is_helm=True))
     class Meta:
         model = Armor
+
+class CharacterForm(RequestForm):
+    class Meta:
+        model = Character
+
+    def save(self, commit=True):
+        if commit:
+            if self.changed_data:
+                old_obj = Character.objects.get(pk=self.instance.pk)
+                for ff in self.changed_data:
+                    old_value = getattr(old_obj, ff)
+                    if self.cleaned_data[ff] != old_value:
+                        logger.debug("New value: %s, initial value: %s",
+                                     self.cleaned_data[ff],
+                                     old_value)
+                        if isinstance(old_value, int):
+                            add_log_entry(self.instance, self.request, ff,
+                                          self.cleaned_data[ff] - old_value)
+                        else:
+                            add_log_entry(self.instance, self.request, ff, 0)
+
+        return super(CharacterForm, self).save(commit=commit)
