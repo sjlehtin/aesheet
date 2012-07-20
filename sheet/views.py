@@ -239,6 +239,7 @@ class SkillWrap(RemoveWrap):
     def __init__(self, item, sheet):
         super(SkillWrap, self).__init__(item)
         self.sheet = sheet
+        self.children = []
 
     def add_level_form(self):
         return CharacterSkillLevelModifyForm(instance=self.item,
@@ -295,7 +296,34 @@ class SheetView(object):
         return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
 
     def skills(self):
-        return [SkillWrap(xx, self.sheet) for xx in self.sheet.skills.all()]
+        ll = [SkillWrap(xx, self.sheet) for xx in self.sheet.skills.all()]
+        dd = dict()
+        dd.update([(sk.skill.name, sk) for sk in ll])
+
+        class Node(object):
+            def __init__(self):
+                self.children = []
+        root = Node()
+
+        for sk in ll:
+            # Assign as child of first required skill.
+            reqd = sk.skill.required_skills.all()
+            if len(reqd) and reqd[0].name in dd:
+                dd[reqd[0].name].children.append(sk)
+            else:
+                root.children.append(sk)
+        logger.debug("Original skill list length: %d", len(ll))
+        def depthfirst(node, indent):
+            yield node, indent
+            for cc in node.children:
+                for nn in depthfirst(cc, indent + 1):
+                    yield nn
+        ll = []
+        for nn, indent in depthfirst(root, 0):
+            nn.indent = indent
+            ll.append(nn)
+        logger.debug("New skill list length: %d", len(ll))
+        return ll[1:] # Skip root node.
 
     def edges(self):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
@@ -367,6 +395,7 @@ def sheet_detail(request, sheet_id=None):
             'character__skills',
             'character__skills__skill',
             'character__skills__skill__edgeskillbonus_set',
+            'character__skills__skill__required_skills',
             'character__edges',
             'character__edges__edge__edgeskillbonus_set'),
                               pk=sheet_id)

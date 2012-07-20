@@ -39,8 +39,13 @@ ul.changelog li { white-space: pre-wrap;
 
 .unskilled { color: red;  font-style: italic; }
 .skills .check { font-weight: bold; }
-.specialization td:first-child { padding-left: 1em; 
-				 font-style: italic; }
+.specialization td:first-child { font-style: italic; }
+.indent1 td:first-child { padding-left: 1em; }
+.indent2 td:first-child { padding-left: 2em; }
+.indent3 td:first-child { padding-left: 3em; }
+.indent4 td:first-child { padding-left: 4em; }
+.indent5 td:first-child { padding-left: 5em; }
+
 table.data { font-size: 80%; }
 .data td:not(:first-child) { text-align: center; }
 

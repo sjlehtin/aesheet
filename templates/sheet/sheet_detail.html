@@ -341,8 +341,12 @@ or
     {% if skills %}
     <table>
       {% for skill in skills %}
-      <tr {% if skill.skill.is_specialization %}
-	  class="specialization"{% endif %}>
+      <tr class="{% spaceless %}
+		 indent{{skill.indent}}
+		 {% if skill.skill.is_specialization %}
+		 specialization
+		 {% endif %}
+		 {% endspaceless %}">
 	<td>{{ skill.skill }}</td>
 	<td>
 	  <div class="edit_control">
