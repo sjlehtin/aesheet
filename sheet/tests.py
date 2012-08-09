@@ -321,15 +321,43 @@ class Logging(WebTest):
         old_ch = Character.objects.get(pk=2)
 
         det_url = reverse('edit_character', args=[2])
-        form = self.app.get(det_url, user='admin').form
 
+        form = self.app.get(det_url, user='admin').form
+        form['cur_fit'].value = int(form['cur_fit'].value) - 2
+        response = form.submit()
+        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        new_ch = Character.objects.get(pk=2)
+        self.assertEqual(old_ch.cur_fit - 2, new_ch.cur_fit)
+
+        self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
+
+        form = self.app.get(det_url, user='admin').form
         form['cur_fit'].value = int(form['cur_fit'].value) + 5
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
-        self.assertEqual(old_ch.cur_fit + 5, new_ch.cur_fit)
+        self.assertEqual(old_ch.cur_fit + 3, new_ch.cur_fit)
 
-        self.assertEqual(CharacterLogEntry.objects.latest().amount, 5)
+        self.assertEqual(CharacterLogEntry.objects.latest().amount, 3)
+
+        form = self.app.get(det_url, user='admin').form
+        form['cur_fit'].value = int(form['cur_fit'].value) - 2
+        response = form.submit()
+        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        new_ch = Character.objects.get(pk=2)
+        self.assertEqual(old_ch.cur_fit + 1, new_ch.cur_fit)
+
+        self.assertEqual(CharacterLogEntry.objects.latest().amount, 1)
+
+
+        form = self.app.get(det_url, user='admin').form
+        form['free_edges'].value = 0
+        response = form.submit()
+        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        new_ch = Character.objects.get(pk=2)
+        self.assertEqual(new_ch.free_edges, 0)
+
+        self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
 
         form['deity'].value = "Tharizdun"
         response = form.submit()

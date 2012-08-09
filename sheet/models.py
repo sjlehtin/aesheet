@@ -1581,7 +1581,7 @@ class CharacterLogEntry(models.Model):
                              "entry, input by the user.")
 
     field = models.CharField(max_length=64, blank=True)
-    amount = models.PositiveIntegerField(default=0)
+    amount = models.IntegerField(default=0)
 
     skill = models.ForeignKey(Skill, blank=True, null=True)
     level = models.PositiveIntegerField(default=0)
