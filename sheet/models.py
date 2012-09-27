@@ -1576,6 +1576,12 @@ class CharacterLogEntry(models.Model):
     user = models.ForeignKey(auth.models.User)
     character = models.ForeignKey(Character)
 
+    STAT, SKILL, EDGE = range(0, 3)
+    entry_type = models.PositiveIntegerField(choices=((STAT, ("stat")),
+                                                      (SKILL, ("skill")),
+                                                      (EDGE, ("edge"))),
+                                             default=STAT)
+
     entry = models.TextField(blank=True,
                              help_text="Additional information about this "
                              "entry, input by the user.")
@@ -1584,9 +1590,10 @@ class CharacterLogEntry(models.Model):
     amount = models.IntegerField(default=0)
 
     skill = models.ForeignKey(Skill, blank=True, null=True)
-    level = models.PositiveIntegerField(default=0)
+    skill_level = models.PositiveIntegerField(default=0)
 
     edge = models.ForeignKey(EdgeLevel, blank=True, null=True)
+    edge_level = models.IntegerField(default=0)
 
     removed = models.BooleanField(default=False,
                                   help_text="Setting this means that the edge "
@@ -1597,8 +1604,10 @@ class CharacterLogEntry(models.Model):
         get_latest_by = "timestamp"
 
     def __unicode__(self):
-        if self.field:
+        if self.entry_type == self.STAT:
             if self.amount:
                 return u"Added %d to %s." % (self.amount, self.field)
             else:
                 return u"Changed %s." % (self.field)
+        elif self.entry_type == self.SKILL:
+            return u"Added skill %s %d." % (self.skill, self.skill_level)
