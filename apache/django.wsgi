@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import os.path
 import sys
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
