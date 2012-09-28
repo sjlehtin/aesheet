@@ -41,3 +41,4 @@ sun 15.7.2012 1h Skill and edge tweaking.
 mon 16.7.2012 3h Skill level quickedit.
 wed 18.7.2012 2h Character log.
 thu 19.7.2012 4h Character log.
+thu 27.8.2012 3h XP etc.
