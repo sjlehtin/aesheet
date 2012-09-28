@@ -91,7 +91,13 @@ class AddSpellEffect(forms.ModelForm):
         self.instance.save()
         return self.instance
 
-class AddSkill(forms.ModelForm):
+class RequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RequestForm, self).__init__(*args, **kwargs)
+
+class AddSkill(RequestForm):
+    # XXX Change this to use CharacterSkill as the model.
     skill = forms.ModelChoiceField(
         queryset=Skill.objects.exclude(type="Language"))
     choices = range(0,8)
@@ -176,12 +182,7 @@ class RemoveGeneric(forms.Form):
     item = forms.CharField(max_length=128, widget=widgets.HiddenInput,
                            required=False)
 
-class RequestForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RequestForm, self).__init__(*args, **kwargs)
-
-def add_log_entry(character, request, field, change):
+def log_stat_change(character, request, field, change):
     logger.debug("%s: changed %s by %s.", character, field, change)
 
     # 15 minutes past.
@@ -230,7 +231,7 @@ class StatModify(RequestForm):
         if commit:
             char.save()
 
-            add_log_entry(self.instance, self.request, stat, change)
+            log_stat_change(self.instance, self.request, stat, change)
 
         return char
 
@@ -321,9 +322,25 @@ class CharacterForm(RequestForm):
                                      self.cleaned_data[ff],
                                      old_value)
                         if isinstance(old_value, int):
-                            add_log_entry(self.instance, self.request, ff,
-                                          self.cleaned_data[ff] - old_value)
+                            log_stat_change(self.instance, self.request, ff,
+                                            self.cleaned_data[ff] - old_value)
                         else:
-                            add_log_entry(self.instance, self.request, ff, 0)
+                            log_stat_change(self.instance, self.request, ff, 0)
 
         return super(CharacterForm, self).save(commit=commit)
+
+class AddXPForm(RequestForm):
+    add_xp = forms.IntegerField()
+    class Meta:
+        model = Character
+        fields = ()
+
+    def save(self, commit=True):
+        if commit and self.cleaned_data['add_xp']:
+
+            log_stat_change(self.instance, self.request, 'total_xp',
+                            self.cleaned_data['add_xp'])
+            self.instance.total_xp += self.cleaned_data['add_xp']
+            self.instance.save()
+
+        return super(AddXPForm, self).save(commit=commit)

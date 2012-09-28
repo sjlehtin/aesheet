@@ -1,13 +1,13 @@
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
-import pdb
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
-from sheet.models import roundup
+from sheet.forms import AddSkill, AddXPForm
 import sheet.views
 from django_webtest import WebTest
+import django.contrib.auth as auth
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell"]
@@ -270,6 +270,13 @@ class EdgeAndSkillHandling(TestCase):
                                         character__name="Yukaghir")
         self.assertEqual(cs.level, 1)
 
+def get_fake_request(username):
+    class FakeReq(object):
+        pass
+    req = FakeReq()
+    req.user = auth.models.User.objects.get(username=username)
+    return req
+
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "assigned_edges"]
@@ -278,7 +285,7 @@ class Logging(WebTest):
         self.client = Client()
         self.client.login(username="admin", password="admin")
 
-    def test_logging_stat_changes(self):
+    def test_stat_changes(self):
         det_url = reverse('sheet.views.sheet_detail', args=[2])
         req_data = { 'stat-modify-function' : 'add',
                      'stat-modify-stat' : 'cur_fit' }
@@ -317,7 +324,7 @@ class Logging(WebTest):
         self.assertRedirects(response, det_url)
         self.assertEqual(CharacterLogEntry.objects.count(), 0)
 
-    def test_logging_base_char_edit(self):
+    def test_base_char_edit(self):
         old_ch = Character.objects.get(pk=2)
 
         det_url = reverse('edit_character', args=[2])
@@ -361,6 +368,22 @@ class Logging(WebTest):
 
         form['deity'].value = "Tharizdun"
         response = form.submit()
+
+class AddXpTestCase(TestCase):
+    fixtures = ["user", "char"]
+
+    def test_added_xp(self):
+
+        ch = Character.objects.get(pk=1)
+        form = AddXPForm({'add_xp': '15'},
+                         request=get_fake_request(
+                         username='admin'),
+                         instance=ch)
+        self.assertTrue(form.is_valid())
+        form.save()
+        entry = CharacterLogEntry.objects.latest()
+        self.assertEqual(entry.amount, 15)
+        self.assertEqual(entry.field, "total_xp")
 
 
 class ModelBasics(TestCase):

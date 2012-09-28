@@ -37,7 +37,7 @@ TODO = """
 -- recovery
 - code simplification
 - reordering skills
-- stats for skill checks
++ stats for skill checks
 - character mugshot upload
 - senses
 + charge damage
@@ -416,6 +416,7 @@ def sheet_detail(request, sheet_id=None):
         prefix="skill-level-modify")
     forms['add_skill_form'] = AddSkill(data,
                                        instance=sheet.character,
+                                       request=request,
                                        prefix="add-skill")
     forms['add_lang_form'] = AddLanguage(data,
                                          instance=sheet.character,
@@ -442,6 +443,11 @@ def sheet_detail(request, sheet_id=None):
         AddRangedWeapon(data,
                         instance=sheet,
                         prefix="add-ranged-weapon")
+    forms['add_xp_form'] = \
+        AddXPForm(data,
+                  request=request,
+                  instance=sheet.character,
+                  prefix="add-xp")
 
     if request.method == "POST":
         should_change = False

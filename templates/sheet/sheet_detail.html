@@ -93,6 +93,14 @@ XP: {{ char.xp_used_stats }} +
 {% endif %}
 {{ char.xp_used_edges }} + 
 {{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
+
+<div>
+    <form action="{{ act }}" method="post">
+        {% csrf_token %}
+        {{ add_xp_form }}
+        <input type="submit" value="Add XP" />
+    </form>
+</div>
 </div>
 
 <div class="armor">
