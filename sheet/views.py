@@ -587,7 +587,7 @@ def import_text(data):
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
 
-    for row in reader:
+    for line, row in enumerate(reader):
         mdl = None
         fields = {}
         for (hh, index) in zip(header, range(len(header))):
@@ -664,8 +664,13 @@ def import_text(data):
                                         "value \"%s\" (%s)" % (fieldname, value,
                                                                str(e)))
             setattr(mdl, fieldname, value)
-        mdl.full_clean()
-        mdl.save()
+        try:
+            mdl.full_clean()
+            mdl.save()
+        except Exception, e:
+            raise type(e), ("Line %d: Failed to import field \"%s\", "
+                            "value \"%s\" (%s)" % (line, fieldname, value,
+                            str(e)))
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
                         (mdl, mdl.__class__.__name__, kk, vv))
