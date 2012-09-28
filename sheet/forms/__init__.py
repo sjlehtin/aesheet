@@ -360,6 +360,15 @@ class AddSkillForm(RequestForm):
         cs.skill = self.cleaned_data.get('skill')
         cs.level = self.cleaned_data.get('level')
         cs.save()
+
+        entry = CharacterLogEntry()
+        entry.character = cs.character
+        entry.user = self.request.user
+        entry.entry_type = entry.SKILL
+        entry.skill = cs.skill
+        entry.skill_level = cs.level
+        entry.save()
+
         return self.instance
 
 

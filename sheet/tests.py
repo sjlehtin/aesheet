@@ -1526,6 +1526,39 @@ class LoggingTestCase(WebTest):
         self.assertRedirects(response, det_url)
 
 
+    def test_added_skill(self):
+
+        ch = Character.objects.get(pk=2)
+        req = { 'skill' : "Acting / Bluff", 'level' : 2 }
+        form = AddSkill(req, request=get_fake_request(username='admin'),
+                        instance=ch)
+        self.assertTrue(form.is_valid())
+        form.save()
+        ch = Character.objects.get(pk=2)
+        sk = ch.skills.filter(skill="Acting / Bluff")[0]
+        self.assertEqual(sk.level, 2)
+
+        entry = CharacterLogEntry.objects.latest()
+        self.assertEqual(entry.entry_type, CharacterLogEntry.SKILL)
+        self.assertEqual(entry.skill.pk, "Acting / Bluff")
+        self.assertEqual(entry.skill_level, 2)
+        self.assertTrue(unicode(entry))
+
+    def test_removed_skill(self):
+        pass
+
+    def test_change_skill_level(self):
+        pass
+
+    def test_added_edge(self):
+        pass
+
+    def test_removed_edge(self):
+        pass
+
+    def test_change_edge_level(self):
+        pass
+
 class AddXpTestCase(TestCase):
     def setUp(self):
         self.request_factory = django.test.RequestFactory()
