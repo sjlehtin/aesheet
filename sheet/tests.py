@@ -463,3 +463,12 @@ Throw,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat""",
             if rr[name_index] == "Throw":
                 self.assertEqual(rr[required_skills_index], "Unarmed combat")
                 break
+
+    def test_import_export(self):
+        response = self.client.get(reverse(sheet.views.export_data,
+                                   args=["Skill"]))
+        self.assertIn("attachment", response.get('Content-Disposition'))
+        self.assertContains(response, "Skill")
+        response = self.client.post(reverse(sheet.views.import_data),
+                                    { "import_data": response.content })
+        self.assertRedirects(response, reverse(sheet.views.import_data))

@@ -464,7 +464,8 @@ class Skill(ExportedModel):
                 'primary_for_weapontemplate',
                 'secondary_for_weapontemplate',
                 'base_skill_for_weapontemplate',
-                'skill', 'edgeskillbonus']
+                'skill', 'edgeskillbonus', 'characterlogentry',
+                'edgelevel']
 
     def __unicode__(self):
         return "%s" % (self.name)
@@ -567,7 +568,8 @@ class EdgeLevel(ExportedModel, StatModifier):
 
     @classmethod
     def dont_export(cls):
-        return ['characteredge', 'edgeskillbonus', 'skill_bonuses']
+        return ['characteredge', 'edgeskillbonus', 'skill_bonuses',
+                'characterlogentry']
 
     def __unicode__(self):
         return "%s %s (%s)" % (self.edge, self.level, self.cost)
