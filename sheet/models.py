@@ -1156,6 +1156,11 @@ class Sheet(models.Model):
     def rof(self, weapon):
         roa = weapon.roa()
         level = self.character.skill_level(weapon.base.base_skill)
+        spec_level = self.character.skill_level("Rapid archery")
+
+        if spec_level:
+            roa += spec_level * 0.05
+
         if level:
             roa *= (1 + level * 0.10)
 
