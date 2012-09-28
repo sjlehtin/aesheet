@@ -45,7 +45,7 @@
               <input type="submit" value="+" />
               </form>
            </div>
-      </td> 
+      </td>
       <td class="edit_control">
            <div class="edit_control">
               <form action="{{ act }}" method="post">
@@ -54,10 +54,12 @@
               <input type="submit" value="-" />
               </form>
            </div>
-      </td> 
+      </td>
+          <td class="stats change">({{ stat.change|stringformat:"+d" }})</td>
       {% else %}
       <td class="edit_control"/>
       <td class="edit_control"/>
+          <td />
       {% endif %}
   </tr>
 {% endfor %}

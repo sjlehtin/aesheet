@@ -276,6 +276,8 @@ class SheetView(object):
                                                 initial={ 'stat' : "cur_" + st,
                                                           'function' : "dec" },
                                                 prefix='stat-modify'),
+                        'change': getattr(self.sheet, "cur_" + st) -
+                                  getattr(self.sheet, "start_" + st),
                         })
             ll.append(stat)
         return ll
