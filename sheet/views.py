@@ -603,6 +603,15 @@ def import_text(data):
             mdl = modelcls()
         m2m_values = {}
         for (fieldname, value) in fields.items():
+            logger.debug(("importing field %s for %s.") % (fieldname,
+                                                modelcls._meta.object_name))
+
+            if fieldname not in modelcls.get_exported_fields():
+                logger.info(("ignoring field %s for %s, not in "
+                             "exported fields.") % (fieldname,
+                                                    modelcls.__class__
+                                                    .__name__))
+                continue
             try:
                 (field, _, direct, m2m) = \
                     modelcls._meta.get_field_by_name(fieldname)

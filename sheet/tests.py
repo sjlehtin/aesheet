@@ -469,6 +469,16 @@ Throw,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat""",
                                    args=["Skill"]))
         self.assertIn("attachment", response.get('Content-Disposition'))
         self.assertContains(response, "Skill")
+        def mangle(data):
+            for index, ll in enumerate(data.splitlines()):
+                if index >= 2:
+                    yield ll + "," + "\n"
+                elif index == 1:
+                    yield ll + ",edgelevel" + "\n"
+                else:
+                    yield ll + "\n"
+
         response = self.client.post(reverse(sheet.views.import_data),
-                                    { "import_data": response.content })
+                                    { "import_data":
+                                      ''.join(mangle(response.content)) })
         self.assertRedirects(response, reverse(sheet.views.import_data))
