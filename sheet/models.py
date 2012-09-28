@@ -29,6 +29,8 @@ EXPORTABLE_MODELS = ['ArmorTemplate', 'ArmorEffect',
                      'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
                      'EdgeLevel', 'EdgeSkillBonus',
                      'RangedWeaponTemplate', 'RangedWeapon']
+EXPORTABLE_MODELS.sort()
+
 def roundup(dec):
     return int(math.ceil(dec))
 
