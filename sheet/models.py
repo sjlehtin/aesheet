@@ -23,6 +23,12 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
+EXPORTABLE_MODELS = ['ArmorTemplate', 'ArmorEffect',
+                     'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
+                     'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
+                     'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
+                     'EdgeLevel', 'EdgeSkillBonus',
+                     'RangedWeaponTemplate', 'RangedWeapon']
 def roundup(dec):
     return int(math.ceil(dec))
 

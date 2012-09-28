@@ -5,10 +5,12 @@ from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkill, AddXPForm
-import sheet.views
+import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
 
+import logging
+logger = logging.getLogger(__name__)
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell"]
 
@@ -465,20 +467,22 @@ Throw,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat""",
                 break
 
     def test_import_export(self):
-        response = self.client.get(reverse(sheet.views.export_data,
-                                   args=["Skill"]))
-        self.assertIn("attachment", response.get('Content-Disposition'))
-        self.assertContains(response, "Skill")
-        def mangle(data):
-            for index, ll in enumerate(data.splitlines()):
-                if index >= 2:
-                    yield ll + "," + "\n"
-                elif index == 1:
-                    yield ll + ",edgelevel" + "\n"
-                else:
-                    yield ll + "\n"
+        for data_type in sheet.models.EXPORTABLE_MODELS:
+            logger.info("Import test for %s", data_type)
+            response = self.client.get(reverse(sheet.views.export_data,
+                                       args=[data_type]))
+            self.assertIn("attachment", response.get('Content-Disposition'))
+            self.assertContains(response, data_type)
+            def mangle(data):
+                for index, ll in enumerate(data.splitlines()):
+                    if index >= 2:
+                        yield ll + "," + "\n"
+                    elif index == 1:
+                        yield ll + ",edgelevel" + "\n"
+                    else:
+                        yield ll + "\n"
 
-        response = self.client.post(reverse(sheet.views.import_data),
-                                    { "import_data":
-                                      ''.join(mangle(response.content)) })
-        self.assertRedirects(response, reverse(sheet.views.import_data))
+            response = self.client.post(reverse(sheet.views.import_data),
+                                        { "import_data":
+                                          ''.join(mangle(response.content)) })
+            self.assertRedirects(response, reverse(sheet.views.import_data))

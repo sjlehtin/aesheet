@@ -624,7 +624,7 @@ def import_text(data):
                 if value:
                     try:
                         value = \
-                            field.related.parent_model.objects.get(name=value)
+                            field.related.parent_model.objects.get(pk=value)
                     except field.related.parent_model.DoesNotExist:
                         raise ValueError, "No matching %s with name %s." % (
                             field.related.parent_model._meta.object_name, value)
@@ -706,12 +706,7 @@ def import_data(request, success=False):
     else:
         form = ImportForm()
     types = []
-    for choice in ['ArmorTemplate', 'ArmorEffect',
-                   'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
-                   'SpellEffect', 'WeaponTemplate', 'Weapon', 'WeaponEffect',
-                   'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
-                   'EdgeLevel', 'EdgeSkillBonus',
-                   'RangedWeaponTemplate', 'RangedWeapon']:
+    for choice in sheet.models.EXPORTABLE_MODELS:
         cls = getattr(sheet.models, choice)
         item = {}
         item['name'] = cls._meta.object_name
