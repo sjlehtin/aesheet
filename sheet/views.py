@@ -106,10 +106,7 @@ import sheet.models
 import csv
 import StringIO
 from django.db.models.fields import FieldDoesNotExist
-from pprint import pprint
 import logging
-import pdb
-import sys
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
