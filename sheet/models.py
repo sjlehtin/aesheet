@@ -345,6 +345,13 @@ class Character(models.Model):
     def age_sp(self):
         return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
 
+    def optimized_age_sp(self):
+        diff = self.age_sp + 0.00001 - (self.lrn/15.0 + self.int/25.0 +
+                                        self.psy/50.0)
+        lrn = rounddown(diff * 15)
+        int = roundup((diff - lrn/15.0)*25)
+        return {"lrn": lrn, "int": int, "psy": 0}
+
     @property
     def missing_skills(self):
 

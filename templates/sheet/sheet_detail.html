@@ -398,6 +398,9 @@ or
     </table>
     <div> {% sum_sp_cost skills %} / {{ char.initial_sp }} + {{ char.gained_sp }} </div>
     <div>Age SP: {{ char.age_sp }} </div>
+        {% with char.optimized_age_sp as opt %}
+        <div>Munch munch: +{{  opt.lrn }} LRN, + {{ opt.int }} INT</div>
+        {% endwith %}
     {% else %}
     <p>No skills.</p>
     {% endif %}
