@@ -9,7 +9,7 @@ TODO = """
 ++ saner bzr backups (branch all branches to make sure repositories remain
    valid) (now in git)
 + ranged weapons
--- ranged weapon ammo special handling
+++ ranged weapon ammo special handling
 -- xl and e range dependent on user FIT
 + logging in
 -- access controls
@@ -397,6 +397,8 @@ def process_sheet_change_request(request, sheet):
 
     return False
 
+Notes = namedtuple("Notes", ["positive", "negative"])
+
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
                               .select_related('sheet__armor__base',
@@ -417,6 +419,16 @@ def sheet_detail(request, sheet_id=None):
                               pk=sheet_id)
 
     forms = {}
+
+    positive = CharacterEdge.objects.filter(character=sheet.character,
+                                            edge__cost__gt=0
+    ).values_list('edge__edge__name',
+                  'edge__notes')
+    negative = CharacterEdge.objects.filter(character=sheet.character,
+                                            edge__cost__lte=0
+                                        ).values_list('edge__edge__name',
+                                                      'edge__notes')
+    notes = Notes(positive=positive, negative=negative)
 
     if request.method == "POST":
         data = request.POST
@@ -494,8 +506,9 @@ def sheet_detail(request, sheet_id=None):
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
 
-    c = { 'char' : SheetView(sheet),
-          'TODO' : TODO,
+    c = { 'char': SheetView(sheet),
+          'TODO': TODO,
+          'notes': notes,
           }
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',

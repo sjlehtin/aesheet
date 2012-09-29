@@ -129,10 +129,23 @@ XP: {{ char.xp_used_stats }} +
 </div>
 
 <div>
-  <ul>
+    <ul>
     <li>Weight carried: {{ char.weight_carried }} kg </li>
-  </ul>
+    </ul>
 </div>
+
+<h3>Notes</h3>
+<ul class="note positive">
+    {% for note in notes.positive %}
+        <li>{{ note|join:": " }}</li>
+    {% endfor %}
+</ul>
+<ul class="note negative">
+    {% for note in notes.negative %}
+        <li>{{ note|join:": " }}</li>
+    {% endfor %}
+</ul>
+
 <h3>Close combat</h3>
 {% if char.weapons %}
 <table class="close combat">
@@ -572,7 +585,7 @@ or
 <a href="{% url add_armor_template %}">Create new armor template</a>
 </div>
 
-<div>Missing skills: {{ char.missing_skills}}</div>
+<div>Missing skills: {{ char.missing_skills }}</div>
 
 <script src="{{ STATIC_URL }}jquery-combobox.js"></script>
 <script src="{{ STATIC_URL }}hideAdvanced.js"></script>

@@ -21,6 +21,8 @@ td.stats.eff { font-weight: bold;
 .stats.change { color: #a9a9a9; font-size: 80%;}
 div.stats { position: relative; }
 div.stats table.derived { position: absolute; left: 12em; top: 50%; }
+.note.positive { color: blue; }
+.note.negative { color: red; }
 
 ul {
     padding: 0;

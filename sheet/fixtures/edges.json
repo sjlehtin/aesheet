@@ -1133,5 +1133,61 @@
             "saves_vs_all": 0,
             "edge": "Specialist Training"
         }
+    },
+    {
+        "pk": 8,
+        "model": "sheet.edgelevel",
+        "fields": {
+            "requires_hero": false,
+            "int": 0,
+            "cc_skill_levels": 0,
+            "wil": 0,
+            "pos": 0,
+            "saves_vs_fire": 0,
+            "cost": "-1.0",
+            "cha": 0,
+            "fit": 0,
+            "imm": 0,
+            "saves_vs_cold": 0,
+            "ref": 0,
+            "saves_vs_poison": 0,
+            "mov": 0,
+            "lrn": 0,
+            "psy": 0,
+            "saves_vs_lightning": 0,
+            "dex": 0,
+            "level": 1,
+            "notes": "Reduced tolerance to cold. Effective +1L/+2D vs. cold attacks.",
+            "saves_vs_all": 0,
+            "edge": "Cold Sensitivity"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "sheet.edgelevel",
+        "fields": {
+            "requires_hero": false,
+            "int": 0,
+            "cc_skill_levels": 0,
+            "wil": 0,
+            "pos": 0,
+            "saves_vs_fire": 0,
+            "cost": "2.0",
+            "cha": 0,
+            "fit": 0,
+            "imm": 0,
+            "saves_vs_cold": 0,
+            "ref": 0,
+            "saves_vs_poison": 0,
+            "mov": 0,
+            "lrn": 0,
+            "psy": 0,
+            "saves_vs_lightning": 0,
+            "dex": 0,
+            "level": 1,
+            "notes": "Recover AC penalty due to tiring 12 points per hour of rest or 6 points per hour of light activity.",
+            "saves_vs_all": 0,
+            "edge": "Superior Endurance"
+        }
     }
 ]

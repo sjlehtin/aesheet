@@ -8,9 +8,10 @@ from sheet.forms import AddSkill, AddXPForm
 import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
-
 import logging
+
 logger = logging.getLogger(__name__)
+
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell"]
 
@@ -258,6 +259,24 @@ class EdgeAndSkillHandling(TestCase):
         sheet = Sheet.objects.get(pk=2)
         self.assertEqual(sheet.edge_sp, 10)
         self.assertEqual(original + 10, sheet.character.total_sp)
+
+    def test_flaw_notes(self):
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[2]))
+        self.assertNotContains(response, "Reduced tolerance to cold.")
+
+        sheet = Sheet.objects.get(pk=2)
+        self.add_edge(sheet.character, "Cold Sensitivity", 1)
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[2]))
+        self.assertContains(response, "Reduced tolerance to cold.")
+
+    def test_edge_notes(self):
+        sheet = Sheet.objects.get(pk=2)
+        self.add_edge(sheet.character, "Superior Endurance", 1)
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[2]))
+        self.assertContains(response, "Recover AC penalty")
 
     def test_increase_skill_level(self):
         cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
