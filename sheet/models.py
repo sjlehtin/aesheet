@@ -345,6 +345,11 @@ class Character(models.Model):
     def age_sp(self):
         return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
 
+    @property
+    def total_sp(self):
+        # XXX: SP from edges.
+        return self.initial_sp + self.gained_sp
+
     def optimized_age_sp(self):
         diff = self.age_sp + 0.00001 - (self.lrn/15.0 + self.int/25.0 +
                                         self.psy/50.0)
