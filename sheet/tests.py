@@ -19,6 +19,22 @@ class ItemHandling(TestCase):
         self.client = Client()
         self.client.login(username="admin", password="admin")
 
+    def add_weapon_and_verify(self, weapon_template, quality, weapon):
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        req_data = {'add-weapon2-weapon_template': weapon_template,
+                    'add-weapon2-weapon_quality': quality}
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+        response = self.client.get(det_url)
+        self.assertNotContains(response, "No weapons.")
+        self.assertIn(weapon, [wpn.name
+                               for wpn in response.context['char'].weapons()])
+
+    def test_add_weapon_new_style(self):
+        self.add_weapon_and_verify("Greatsword, 2h", "L1", "Greatsword L1")
+        self.add_weapon_and_verify("Whip", "L1", "Whip L1")
+        self.add_weapon_and_verify("Whip", "normal", "Whip")
+
     def test_add_remove_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
         response = self.client.get(det_url)

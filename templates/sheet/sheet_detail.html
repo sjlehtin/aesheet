@@ -231,6 +231,15 @@ XP: {{ char.xp_used_stats }} +
 {% endif %}
 
 <div id="add_weapon" class="edit_control">
+    <label for="add_weapon_form_new"><strong>Add a weapon</strong></label>
+    <form action="{{ act }}" method="post"
+            >{% csrf_token %}
+        <ul>
+            {{ add_weapon_form_new.as_ul}}
+        </ul>
+        <input type="submit" value="Add" />
+        </form>
+    or
 <label for="add_weapon_form"><strong>Add a weapon</strong></label>
 <form action="{{ act }}" method="post" 
       >{% csrf_token %}

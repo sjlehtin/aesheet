@@ -465,6 +465,8 @@ def sheet_detail(request, sheet_id=None):
                                        prefix="add-armor")
     forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
                                          prefix="add-weapon")
+    forms['add_weapon_form_new'] = AddWeaponNew(data, instance=sheet,
+                                                prefix="add-weapon2")
     forms['new_weapon_form'] = WeaponForm(data, prefix="new-weapon")
     forms['new_ranged_weapon_form'] = \
         RangedWeaponForm(data, prefix="new-ranged-weapon")

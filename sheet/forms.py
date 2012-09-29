@@ -29,8 +29,49 @@ class AddWeapon(forms.ModelForm):
 
     def save(self):
         self.instance.weapons.add(self.cleaned_data['weapon'])
-        self.instance.full_clean()
-        self.instance.save()
+        return self.instance
+
+class AddWeaponNew(forms.ModelForm):
+    weapon_template = forms.ModelChoiceField(
+                              queryset=WeaponTemplate.objects.all())
+    weapon_quality = forms.ModelChoiceField(
+        queryset=WeaponQuality.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        initial = kwargs.setdefault('initial', {})
+        if 'weapon_quality' not in initial:
+            quality = WeaponQuality.objects.filter(name="normal")
+            if quality:
+                initial['weapon_quality'] = quality[0]
+        super(AddWeaponNew, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
+    def clean(self):
+        base = self.cleaned_data.get('weapon_template')
+        quality = self.cleaned_data.get('weapon_quality')
+        if not base or not quality:
+            raise forms.ValidationError("Weapon template and quality "
+                                        "are required.")
+        wpn = Weapon.objects.filter(base=base, quality=quality)
+        if wpn:
+            wpn = wpn[0]
+        else:
+            wpn = Weapon(base=base, quality=quality)
+            if quality.name == "normal":
+                wpn.name = base.name
+            else:
+                wpn.name = "%s %s" % (base.name, quality.name)
+        self.cleaned_data['weapon'] = wpn
+        return self.cleaned_data
+
+    def save(self):
+        weapon = self.cleaned_data['weapon']
+        if not weapon.pk:
+            weapon.save()
+        self.instance.weapons.add(weapon)
         return self.instance
 
 class AddRangedWeapon(forms.ModelForm):
