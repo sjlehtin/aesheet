@@ -397,7 +397,7 @@ or
       {% endfor %}
     </table>
     <div>
-        SP: {{ char.initial_sp }} + {{ char.gained_sp }} =
+        SP: {{ char.initial_sp }} + {{ char.edge_sp }} + {{ char.gained_sp }} =
         {{ char.total_sp }} / {% sum_sp_cost skills %}
     </div>
     <div>Age SP: {{ char.age_sp }} </div>

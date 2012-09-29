@@ -1049,5 +1049,89 @@
       "saves_vs_all": 0, 
       "edge": "Toughness"
     }
-  }
+  },
+    {
+        "pk": 5,
+        "model": "sheet.edgelevel",
+        "fields": {
+            "requires_hero": false,
+            "int": 0,
+            "cc_skill_levels": 0,
+            "wil": 0,
+            "pos": 0,
+            "saves_vs_fire": 0,
+            "cost": "2.0",
+            "cha": 0,
+            "fit": 0,
+            "imm": 0,
+            "saves_vs_cold": 0,
+            "ref": 0,
+            "saves_vs_poison": 0,
+            "mov": 0,
+            "lrn": 0,
+            "psy": 0,
+            "saves_vs_lightning": 0,
+            "dex": 0,
+            "level": 1,
+            "notes": "",
+            "saves_vs_all": 0,
+            "edge": "Childhood Education"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "sheet.edgelevel",
+        "fields": {
+            "requires_hero": false,
+            "int": 0,
+            "cc_skill_levels": 0,
+            "wil": 0,
+            "pos": 0,
+            "saves_vs_fire": 0,
+            "cost": "2.0",
+            "cha": 0,
+            "fit": 0,
+            "imm": 0,
+            "saves_vs_cold": 0,
+            "ref": 0,
+            "saves_vs_poison": 0,
+            "mov": 0,
+            "lrn": 0,
+            "psy": 0,
+            "saves_vs_lightning": 0,
+            "dex": 0,
+            "level": 1,
+            "notes": "",
+            "saves_vs_all": 0,
+            "edge": "Specialist Training"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "sheet.edgelevel",
+        "fields": {
+            "requires_hero": false,
+            "int": 0,
+            "cc_skill_levels": 0,
+            "wil": 0,
+            "pos": 0,
+            "saves_vs_fire": 0,
+            "cost": "3.0",
+            "cha": 0,
+            "fit": 0,
+            "imm": 0,
+            "saves_vs_cold": 0,
+            "ref": 0,
+            "saves_vs_poison": 0,
+            "mov": 0,
+            "lrn": 0,
+            "psy": 0,
+            "saves_vs_lightning": 0,
+            "dex": 0,
+            "level": 2,
+            "notes": "",
+            "saves_vs_all": 0,
+            "edge": "Specialist Training"
+        }
+    }
 ]

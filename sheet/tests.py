@@ -209,25 +209,55 @@ class EdgeAndSkillHandling(TestCase):
         response = self.client.get(det_url)
         self.assertContains(response, "No edges.")
 
-    def test_edge_skill_mod(self):
-        sheet = Sheet.objects.get(pk=1)
-        cs = CharacterSkill()
-        cs.character = sheet.character
-        skill = Skill.objects.get(name="Surgery")
-        cs.skill = skill
-        cs.level = 0
-        cs.save()
-
+    def add_edge(self, character, edge_name, level=1):
         ce = CharacterEdge()
-        ce.character = sheet.character
-        edge = EdgeLevel.objects.get(edge__name="Acute Touch", level=1)
+        ce.character = character
+        edge = EdgeLevel.objects.get(edge__name=edge_name, level=level)
         ce.edge = edge
         ce.save()
+
+    def add_skill(self, character, skill_name, level):
+        cs = CharacterSkill()
+        cs.character = character
+        skill = Skill.objects.get(name=skill_name)
+        cs.skill = skill
+        cs.level = level
+        cs.save()
+
+    def test_acute_touch_edge_skill_mod(self):
+        sheet = Sheet.objects.get(pk=1)
+
+        self.add_skill(sheet.character, "Surgery", 0)
+        self.add_edge(sheet.character, "Acute Touch")
 
         sheet = Sheet.objects.get(pk=1)
         # Verify Acute Touch has an effect.
         self.assertEqual(sheet.eff_dex + 15,
                          sheet.skills.get(skill__name="Surgery").check(sheet))
+
+    def test_childhood_eduction_skill_mod(self):
+        sheet = Sheet.objects.get(pk=2)
+        original = sheet.character.total_sp
+        self.add_edge(sheet.character, "Childhood Education", 1)
+        sheet = Sheet.objects.get(pk=2)
+        self.assertEqual(sheet.edge_sp, 8)
+        self.assertEqual(original + 8, sheet.character.total_sp)
+
+    def test_specialist_training1_skill_mod(self):
+        sheet = Sheet.objects.get(pk=2)
+        original = sheet.character.total_sp
+        self.add_edge(sheet.character, "Specialist Training", 1)
+        sheet = Sheet.objects.get(pk=2)
+        self.assertEqual(sheet.edge_sp, 6)
+        self.assertEqual(original + 6, sheet.character.total_sp)
+
+    def test_specialist_training2_skill_mod(self):
+        sheet = Sheet.objects.get(pk=2)
+        original = sheet.character.total_sp
+        self.add_edge(sheet.character, "Specialist Training", 2)
+        sheet = Sheet.objects.get(pk=2)
+        self.assertEqual(sheet.edge_sp, 10)
+        self.assertEqual(original + 10, sheet.character.total_sp)
 
     def test_increase_skill_level(self):
         cs = CharacterSkill.objects.get(skill__name="Unarmed combat",

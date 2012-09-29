@@ -346,9 +346,20 @@ class Character(models.Model):
         return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
 
     @property
+    def edge_sp(self):
+        extra_sp = 0
+        if self.edge_level("Childhood Education"):
+            extra_sp += 8
+        specialist_training_level = self.edge_level("Specialist Training")
+        if specialist_training_level == 1:
+            extra_sp += 6
+        elif specialist_training_level == 2:
+            extra_sp += 10
+        return extra_sp
+
+    @property
     def total_sp(self):
-        # XXX: SP from edges.
-        return self.initial_sp + self.gained_sp
+        return self.initial_sp + self.edge_sp + self.gained_sp
 
     def optimized_age_sp(self):
         diff = self.age_sp + 0.00001 - (self.lrn/15.0 + self.int/25.0 +
