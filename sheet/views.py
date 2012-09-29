@@ -399,6 +399,15 @@ def process_sheet_change_request(request, sheet):
 
 Notes = namedtuple("Notes", ["positive", "negative"])
 
+def get_notes(character, filter_kwargs):
+    args = { 'character': character }
+    args.update(filter_kwargs)
+    positive = CharacterEdge.objects.filter(**args).exclude(
+                  edge__notes=u'').values_list('edge__edge__name',
+                                               'edge__notes')
+    return positive
+
+
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
                               .select_related('sheet__armor__base',
@@ -420,14 +429,8 @@ def sheet_detail(request, sheet_id=None):
 
     forms = {}
 
-    positive = CharacterEdge.objects.filter(character=sheet.character,
-                                            edge__cost__gt=0
-    ).values_list('edge__edge__name',
-                  'edge__notes')
-    negative = CharacterEdge.objects.filter(character=sheet.character,
-                                            edge__cost__lte=0
-                                        ).values_list('edge__edge__name',
-                                                      'edge__notes')
+    positive = get_notes(sheet.character, { 'edge__cost__gt': 0 })
+    negative = get_notes(sheet.character, { 'edge__cost__lte': 0 })
     notes = Notes(positive=positive, negative=negative)
 
     if request.method == "POST":
