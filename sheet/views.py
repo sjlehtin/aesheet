@@ -58,12 +58,23 @@ TODO = """
 - short description of spell effect (+50 FIT etc)
 - suspended weight
 
+- when adding skills with imported CSV, the order of the rows matter.  Skills
+  that are prereqs for other skills must appear first in the list.  This could
+  be improved.
+
+- Basic skill checks:  Adding skills without any points (or reduced amount of
+  points) allocated.  For example, Climbing B -> show skill check at half
+  ability.
+
+- Inserting None as skill cost to the sheet should work to allow resetting
+  skill costs from CSV import.
+
 NOTES on creating Jan:
 
 - you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
 
-+ Adding weapons from templates.
+- Adding weapons from templates.
 + Skill points!
 + Specialty levels (treat zero as one)!
 
@@ -73,6 +84,12 @@ Minor:
   and autofilling rest)
 + modifying skill level with +/- (at least add to skill level)
 
+"""
+
+BUGS = """
+- Adding skills with multiple prereqs doesn't work.
+- Better error messages on importing completely invalid CSV (heading line or
+  data type broken)
 """
 
 from django.shortcuts import render_to_response, get_object_or_404
