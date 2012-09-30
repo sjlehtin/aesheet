@@ -313,17 +313,7 @@ or
 <input type="submit" value="Add" />
 </form>
 or
-<div class="advanced" data-advanced-text="Create a new weapon">
-  <form action="{{ act }}" method="post"
-	id="add_weapon_form">{% csrf_token %}
-    <table>
-      {{ new_ranged_weapon_form.as_table }}
-    </table>
-    <input type="submit" value="Add" />
-</div>
-</form>
-<a href="{% url add_ranged_weapon_template %}">
-  Create new ranged weapon template</a>
+    <a href="{% url add_ranged_weapon %}">Create a new ranged weapon</a>
 </div>
 
 <h3>Spell effects</h3>
@@ -577,13 +567,6 @@ or
     $(document).ready(function () {
     $("#add_skill select").combobox();
     $("#add_lang select").combobox();
-    $(".advanced").each(function () { 
-	$(this).hideAdvanced({ showAdvancedText: 
-			       $(this).attr('data-advanced-text'),
-			       startOpen: $(this).find('.errorlist').length > 0
-			     });
-    });
-    $("button.show-hide-advanced").css('display', 'block');
     });
 </script>
 

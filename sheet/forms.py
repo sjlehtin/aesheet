@@ -333,7 +333,6 @@ class CharacterSkillLevelModifyForm(forms.Form):
             return self.instance.save()
         return self.instance
 
-WeaponForm = modelform_factory(Weapon)
 RangedWeaponForm = modelform_factory(RangedWeapon)
 
 class ArmorForm(forms.ModelForm):

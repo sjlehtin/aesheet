@@ -4,8 +4,14 @@
 
 {% block content %}
 {{ block.super }}
+    <a href="{% url add_weapon %}">Create a new weapon </a>
     <a href="{% url add_weapon_template %}">Create a new weapon template </a>
     <a href="{% url add_weapon_quality %}">Create a new weapon quality </a>
     <a href="{% url add_weapon_special_quality %}">Create a new weapon special
         quality </a>
+    <a href="{% url add_ranged_weapon %}">Create a new ranged_weapon </a>
+    <a href="{% url add_ranged_weapon_template %}">Create a new ranged weapon
+        template
+    </a>
+
 {% endblock %}

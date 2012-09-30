@@ -520,25 +520,20 @@ def sheet_detail(request, sheet_id=None):
 
 from django.views.generic import UpdateView, CreateView
 
-class AddWeaponTemplateView(CreateView):
-    model = WeaponTemplate
-    template_name = 'sheet/add_weapon.html'
-    success_url = reverse_lazy(sheets_index)
 
 class AddWeaponView(CreateView):
     model = Weapon
     template_name = 'sheet/add_weapon.html'
     success_url = reverse_lazy(sheets_index)
 
-class AddWeaponQualityView(CreateView):
-    model = WeaponQuality
-    template_name = 'sheet/gen_edit.html'
-    success_url = reverse_lazy(sheets_index)
+class AddWeaponTemplateView(AddWeaponView):
+    model = WeaponTemplate
 
-class AddWeaponSpecialQualityView(CreateView):
+class AddWeaponQualityView(AddWeaponView):
+    model = WeaponQuality
+
+class AddWeaponSpecialQualityView(AddWeaponView):
     model = WeaponSpecialQuality
-    template_name = 'sheet/gen_edit.html'
-    success_url = reverse_lazy(sheets_index)
 
 class EditCharacterView(UpdateView):
     form_class = CharacterForm
@@ -580,7 +575,10 @@ class AddEdgeLevelView(AddSpellEffectView):
 class AddEdgeSkillBonusView(AddSpellEffectView):
     model = EdgeSkillBonus
 
-class AddRangedWeaponTemplateView(AddSpellEffectView):
+class AddRangedWeaponView(AddWeaponView):
+    model = RangedWeapon
+
+class AddRangedWeaponTemplateView(AddRangedWeaponView):
     model = RangedWeaponTemplate
 
 class AddArmorView(AddSpellEffectView):
