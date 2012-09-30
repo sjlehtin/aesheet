@@ -24,6 +24,7 @@ div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 .note.positive { color: blue; }
 .note.negative { color: red; }
 
+a { padding-right: 1em;}
 ul {
     padding: 0;
 }
