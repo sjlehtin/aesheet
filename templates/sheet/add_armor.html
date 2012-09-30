@@ -1,0 +1,11 @@
+{% extends "sheet/gen_edit.html" %}
+
+{% block title %} Add an armor {% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <a href="{% url add_armor_template %}">Create a new armor template </a>
+    <a href="{% url add_armor_quality %}">Create a new armor quality </a>
+    <a href="{% url add_armor_special_quality %}">Create a new armor special
+        quality </a>
+{% endblock %}

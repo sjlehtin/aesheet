@@ -470,7 +470,6 @@ def sheet_detail(request, sheet_id=None):
                                          prefix="add-weapon")
     forms['new_ranged_weapon_form'] = \
         RangedWeaponForm(data, prefix="new-ranged-weapon")
-    forms['new_armor_form'] = ArmorForm(data, prefix="new-armor")
     forms['new_helm_form'] = HelmForm(data, prefix="new-helm")
     forms['add_ranged_weapon_form'] = \
         AddRangedWeapon(data,
@@ -584,8 +583,18 @@ class AddEdgeSkillBonusView(AddSpellEffectView):
 class AddRangedWeaponTemplateView(AddSpellEffectView):
     model = RangedWeaponTemplate
 
+class AddArmorView(AddSpellEffectView):
+    model = Armor
+    template_name = 'sheet/add_armor.html'
+
 class AddArmorTemplateView(AddSpellEffectView):
     model = ArmorTemplate
+
+class AddArmorQualityView(AddSpellEffectView):
+    model = ArmorQuality
+
+class AddArmorSpecialQualityView(AddSpellEffectView):
+    model = ArmorSpecialQuality
 
 def get_data_rows(results, fields):
     """

@@ -40,7 +40,8 @@ def class_from_name(name):
 
 for name in ["add_sheet", "add_edge", "add_edge_level", "add_edge_skill_bonus",
              "add_spell_effect",
-             "add_armor_template",
+             "add_armor", "add_armor_template", "add_armor_quality",
+             "add_armor_special_quality",
              "add_weapon", "add_weapon_template","add_weapon_quality",
              "add_ranged_weapon_template",
              "add_weapon_special_quality", ]:

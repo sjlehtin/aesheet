@@ -531,15 +531,7 @@ or
 <input type="submit" value="Add" />
 </form>
 or
-<div class="advanced" data-advanced-text="Create a new helm">
-  <form action="{{ act }}" method="post" 
-	id="add_helmet_form">{% csrf_token %}
-    <table>
-      {{ new_helm_form.as_table }}
-    </table>
-    <input type="submit" value="Add" />
-  </form>
-</div>
+    <a href="{% url add_armor %}">Create a new helm</a>
 </div>
 
 <h3>Armor</h3>
@@ -574,16 +566,7 @@ or
 <input type="submit" value="Add" />
 </form>
 or
-<div class="advanced" data-advanced-text="Create a new armor">
-  <form action="{{ act }}" method="post" 
-	id="add_armor_form">{% csrf_token %}
-    <table>
-      {{ new_armor_form.as_table }}
-    </table>
-    <input type="submit" value="Add" />
-  </form>
-</div>
-<a href="{% url add_armor_template %}">Create new armor template</a>
+<a href="{% url add_armor %}">Create a new armor</a>
 </div>
 
 <div>Missing skills: {{ char.missing_skills }}</div>
