@@ -431,8 +431,6 @@ def sheet_detail(request, sheet_id=None):
             'ranged_weapons__quality',
             'character__skills',
             'character__skills__skill',
-            'character__skills__skill__edgeskillbonus_set',
-            'character__skills__skill__required_skills',
             'character__edges',
             'character__edges__edge__edgeskillbonus_set'),
                               pk=sheet_id)
