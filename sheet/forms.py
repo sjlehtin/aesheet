@@ -1,9 +1,9 @@
 from django import forms
 from django.forms import widgets
-from django.forms.models import modelform_factory
 from sheet.models import *
 import sheet.models
 import datetime
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -32,49 +32,78 @@ class AddExistingWeapon(forms.ModelForm):
         return self.instance
 
 class AddWeapon(forms.ModelForm):
-    weapon_template = forms.ModelChoiceField(
-                              queryset=WeaponTemplate.objects.all())
-    weapon_quality = forms.ModelChoiceField(
-        queryset=WeaponQuality.objects.all())
+    item_class = Weapon
+    item_manager = Weapon.objects
+    template_manager = WeaponTemplate.objects
+    quality_manager = WeaponQuality.objects
+
+    def add_item(self, item):
+        self.instance.weapons.add(item)
+
+    item_template = forms.ModelChoiceField(
+                              queryset=template_manager.all())
+    item_quality = forms.ModelChoiceField(
+        queryset=quality_manager.all())
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.setdefault('initial', {})
-        if 'weapon_quality' not in initial:
-            quality = WeaponQuality.objects.filter(name="normal")
+        if 'item_quality' not in initial:
+            quality = self.quality_manager.filter(name="normal")
             if quality:
-                initial['weapon_quality'] = quality[0]
+                initial['item_quality'] = quality[0]
         super(AddWeapon, self).__init__(*args, **kwargs)
+        def pretty_name(name):
+            return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
+                                                  name))).lower().capitalize()
+        item_name = pretty_name(self.item_class.__name__)
+        self.fields['item_template'] = forms.ModelChoiceField(
+                                    queryset=self.template_manager.all(),
+                                    label=item_name + " template")
+        self.fields['item_quality'] = forms.ModelChoiceField(
+                                    queryset=self.quality_manager.all(),
+                                    label=item_name + " quality")
 
     class Meta:
         model = Sheet
         fields = ()
 
     def clean(self):
-        base = self.cleaned_data.get('weapon_template')
-        quality = self.cleaned_data.get('weapon_quality')
+        base = self.cleaned_data.get('item_template')
+        quality = self.cleaned_data.get('item_quality')
         if not base or not quality:
-            raise forms.ValidationError("Weapon template and quality "
+            raise forms.ValidationError("Both template and quality "
                                         "are required.")
-        wpn = Weapon.objects.filter(base=base, quality=quality)
-        if wpn:
-            wpn = wpn[0]
+        item = self.item_manager.filter(base=base, quality=quality)
+        if item:
+            item = item[0]
         else:
-            wpn = Weapon(base=base, quality=quality)
+            item = self.item_class(base=base, quality=quality)
             if quality.name == "normal":
-                wpn.name = base.name
+                item.name = base.name
             else:
-                wpn.name = "%s %s" % (base.name, quality.name)
-        self.cleaned_data['weapon'] = wpn
+                item.name = "%s %s" % (base.name, quality.name)
+        self.cleaned_data['item'] = item
         return self.cleaned_data
 
+
     def save(self):
-        weapon = self.cleaned_data['weapon']
-        if not weapon.pk:
-            weapon.save()
-        self.instance.weapons.add(weapon)
+        item = self.cleaned_data['item']
+        if not item.pk:
+            item.save()
+        self.add_item(item)
         return self.instance
 
-class AddRangedWeapon(forms.ModelForm):
+
+class AddRangedWeapon(AddWeapon):
+    item_class = RangedWeapon
+    item_manager = RangedWeapon.objects
+    template_manager = RangedWeaponTemplate.objects
+    quality_manager = WeaponQuality.objects
+
+    def add_item(self, item):
+        self.instance.ranged_weapons.add(item)
+
+class AddExistingRangedWeapon(forms.ModelForm):
     weapon = forms.ModelChoiceField(queryset=RangedWeapon.objects.all())
 
     class Meta:
@@ -332,8 +361,6 @@ class CharacterSkillLevelModifyForm(forms.Form):
             self.instance.level = self.new_level
             return self.instance.save()
         return self.instance
-
-RangedWeaponForm = modelform_factory(RangedWeapon)
 
 class ArmorForm(forms.ModelForm):
     base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(

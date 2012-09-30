@@ -468,13 +468,14 @@ def sheet_detail(request, sheet_id=None):
                                                 prefix="add-existing-weapon")
     forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
                                          prefix="add-weapon")
-    forms['new_ranged_weapon_form'] = \
-        RangedWeaponForm(data, prefix="new-ranged-weapon")
     forms['new_helm_form'] = HelmForm(data, prefix="new-helm")
-    forms['add_ranged_weapon_form'] = \
-        AddRangedWeapon(data,
+    forms['add_ranged_weapon_form'] = AddRangedWeapon(
+                                            data, instance=sheet,
+                                            prefix="add-ranged-weapon")
+    forms['add_existing_ranged_weapon_form'] = \
+        AddExistingRangedWeapon(data,
                         instance=sheet,
-                        prefix="add-ranged-weapon")
+                        prefix="add-existing-ranged-weapon")
     forms['add_xp_form'] = \
         AddXPForm(data,
                   request=request,

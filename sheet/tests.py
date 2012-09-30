@@ -13,27 +13,52 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ItemHandling(TestCase):
-    fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell"]
+    fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell",
+                "ranged_weapons"]
 
     def setUp(self):
         self.client = Client()
         self.client.login(username="admin", password="admin")
 
-    def add_weapon_and_verify(self, weapon_template, quality, weapon):
+    def add_weapon_and_verify(self, weapon_template, quality, weapon,
+                              prefix="add-weapon", accessor=None):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = {'add-weapon-weapon_template': weapon_template,
-                    'add-weapon-weapon_quality': quality}
+        req_data = {'%s-item_template' % prefix: weapon_template,
+                    '%s-item_quality' % prefix: quality}
         response = self.client.post(det_url, req_data)
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
-        self.assertNotContains(response, "No weapons.")
-        self.assertIn(weapon, [wpn.name
-                               for wpn in response.context['char'].weapons()])
+        def get_weapons(char):
+            return [wpn.name for wpn in char.weapons()]
+        if not accessor:
+            accessor = get_weapons
+        self.assertIn(weapon, accessor(response.context['char']))
+        return response
 
-    def test_add_weapon_new_style(self):
-        self.add_weapon_and_verify("Greatsword, 2h", "L1", "Greatsword L1")
+    def add_ranged_weapon_and_verify(self, weapon_template, quality, weapon):
+        def get_ranged_weapons(char):
+            return [wpn.name for wpn in char.ranged_weapons()]
+        return self.add_weapon_and_verify(weapon_template, quality, weapon,
+                                          prefix="add-ranged-weapon",
+                                          accessor=get_ranged_weapons)
+
+    def test_add_weapon(self):
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        self.assertContains(self.client.get(det_url), "No weapons")
+        response = self.add_weapon_and_verify("Greatsword, 2h", "L1",
+                                              "Greatsword L1")
+        self.assertNotContains(response, "No weapons.")
         self.add_weapon_and_verify("Whip", "L1", "Whip L1")
         self.add_weapon_and_verify("Whip", "normal", "Whip")
+
+    def test_add_ranged_weapon(self):
+        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        self.assertContains(self.client.get(det_url), "No ranged weapons")
+        response = self.add_ranged_weapon_and_verify("Javelin", "L1",
+                                                     "Javelin L1")
+        self.assertNotContains(response, "No ranged weapons.")
+        self.add_ranged_weapon_and_verify("Longbow w/ broadhead", "L1",
+                                          "Longbow w/ broadhead L1")
 
     def test_add_remove_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])

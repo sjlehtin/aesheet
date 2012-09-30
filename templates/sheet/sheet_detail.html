@@ -231,8 +231,8 @@ XP: {{ char.xp_used_stats }} +
 {% endif %}
 
 <div id="add_weapon" class="edit_control">
-    <label for="add_weapon_form_new"><strong>Add a weapon</strong></label>
-    <form action="{{ act }}" method="post"
+    <label for="add_weapon_form"><strong>Add a weapon</strong></label>
+    <form id="add_weapon_form" action="{{ act }}" method="post"
             >{% csrf_token %}
         <ul>
             {{ add_weapon_form.as_ul}}
@@ -240,8 +240,9 @@ XP: {{ char.xp_used_stats }} +
         <input type="submit" value="Add" />
         </form>
     or
-<label for="add_weapon_form"><strong>Add an existing weapon</strong></label>
-<form action="{{ act }}" method="post" 
+<label for="add_existing_weapon_form"><strong>Add an existing
+    weapon</strong></label>
+<form id="add_existing_weapon_form" action="{{ act }}" method="post"
       >{% csrf_token %}
 <ul>
 {{ add_existing_weapon_form.as_ul }}
@@ -302,13 +303,24 @@ or
 {% else %}
 <p>No ranged weapons.</p>
 {% endif %}
-<div id="add_ranged_weapon" class="edit_control">
-<label for="add_weapon_form"><strong>Add a ranged weapon</strong></label>
-<form action="" method="post" 
+<div id="add_ranged_weapon_form" class="edit_control">
+    <label for="add_ranged_weapon_form">Add a
+        ranged weapon</label>
+    <form id="add_ranged_weapon_form" action="{{ act }}" method="post"
+            >{% csrf_token %}
+        <ul>
+            {{ add_ranged_weapon_form.as_ul}}
+        </ul>
+        <input type="submit" value="Add" />
+    </form>
+
+    <label for="add_existing_ranged_weapon_form">Add an existing
+        ranged weapon</label>
+<form id="add_existing_ranged_weapon_form" action="" method="post"
       id="add_ranged_weapon_form">
   {% csrf_token %}
 <ul>
-{{ add_ranged_weapon_form.as_ul }}
+{{ add_existing_ranged_weapon_form.as_ul }}
 </ul>
 <input type="submit" value="Add" />
 </form>
