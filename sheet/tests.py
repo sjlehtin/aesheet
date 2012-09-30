@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ItemHandling(TestCase):
-    fixtures = ["user", "char", "skills", "sheet", "wpns", "armor", "spell",
+    fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
                 "ranged_weapons"]
 
     def setUp(self):
