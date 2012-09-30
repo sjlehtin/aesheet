@@ -17,28 +17,9 @@ urlpatterns = patterns(
         EditCharacterView.as_view(),
         name='edit_character'),
 
-    url(r'^characters/add_sheet/$', AddSheetView.as_view(),
-        name="add_sheet"),
     url(r'^characters/edit_sheet/(?P<pk>\d+)/$',
         EditSheetView.as_view(),
         name='edit_sheet'),
-
-    url(r'^sheets/add_spell_effect/$', AddSpellEffectView.as_view(),
-        name='add_spell_effect'),
-
-    url(r'^sheets/add_edge/$', AddEdgeView.as_view(), name='add_edge'),
-
-    url(r'^sheets/add_edge_level/$',
-        AddEdgeLevelView.as_view(),
-        name='add_edge_level'),
-    url(r'^sheets/add_edge_skill_bonus/$',
-        AddEdgeSkillBonusView.as_view(),
-        name='add_edge_skill_bonus'),
-    url(r'^sheets/add_ranged_weapon_template/$',
-        AddRangedWeaponTemplateView.as_view(),
-        name='add_ranged_weapon_template'),
-    url(r'^sheets/add_armor_template/$',
-        AddArmorTemplateView.as_view(), name='add_armor_template'),
 
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheets_index'),
@@ -57,7 +38,11 @@ def class_from_name(name):
     components = [cc.capitalize() for cc in components]
     return getattr(sheet.views, ''.join(components) + "View")
 
-for name in ["add_weapon", "add_weapon_template","add_weapon_quality",
+for name in ["add_sheet", "add_edge", "add_edge_level", "add_edge_skill_bonus",
+             "add_spell_effect",
+             "add_armor_template",
+             "add_weapon", "add_weapon_template","add_weapon_quality",
+             "add_ranged_weapon_template",
              "add_weapon_special_quality", ]:
     urlpatterns += patterns('sheet.views',
                             url("^sheets/%s/" % name,
