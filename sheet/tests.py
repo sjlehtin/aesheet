@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
-from sheet.forms import AddSkill, AddXPForm
+from sheet.forms import AddSkillForm, AddXPForm
 import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth

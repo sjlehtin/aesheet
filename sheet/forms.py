@@ -31,7 +31,7 @@ class AddExistingWeapon(forms.ModelForm):
         self.instance.weapons.add(self.cleaned_data['weapon'])
         return self.instance
 
-class AddWeapon(forms.ModelForm):
+class AddWeaponForm(forms.ModelForm):
     item_class = Weapon
     item_manager = Weapon.objects
     template_manager = WeaponTemplate.objects
@@ -51,7 +51,7 @@ class AddWeapon(forms.ModelForm):
             quality = self.quality_manager.filter(name="normal")
             if quality:
                 initial['item_quality'] = quality[0]
-        super(AddWeapon, self).__init__(*args, **kwargs)
+        super(AddWeaponForm, self).__init__(*args, **kwargs)
         def pretty_name(name):
             return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
                                                   name))).lower().capitalize()
@@ -94,7 +94,7 @@ class AddWeapon(forms.ModelForm):
         return self.instance
 
 
-class AddRangedWeapon(AddWeapon):
+class AddRangedWeaponForm(AddWeaponForm):
     item_class = RangedWeapon
     item_manager = RangedWeapon.objects
     template_manager = RangedWeaponTemplate.objects
@@ -103,7 +103,7 @@ class AddRangedWeapon(AddWeapon):
     def add_item(self, item):
         self.instance.ranged_weapons.add(item)
 
-class AddExistingRangedWeapon(forms.ModelForm):
+class AddExistingRangedWeaponForm(forms.ModelForm):
     weapon = forms.ModelChoiceField(queryset=RangedWeapon.objects.all())
 
     class Meta:
@@ -116,11 +116,11 @@ class AddExistingRangedWeapon(forms.ModelForm):
         self.instance.save()
         return self.instance
 
-class AddWeaponFromTemplate(forms.Form):
+class AddWeaponFromTemplateForm(forms.Form):
     template = forms.CharField()
     quality = forms.CharField()
 
-class AddArmor(forms.ModelForm):
+class AddArmorForm(forms.ModelForm):
     armor = forms.ModelChoiceField(queryset=Armor.objects.filter(
             base__is_helm=False))
 
@@ -134,7 +134,7 @@ class AddArmor(forms.ModelForm):
         self.instance.save()
         return self.instance
 
-class AddHelm(forms.ModelForm):
+class AddHelmForm(forms.ModelForm):
     helm = forms.ModelChoiceField(queryset=Armor.objects.filter(
             base__is_helm=True))
 
@@ -148,7 +148,7 @@ class AddHelm(forms.ModelForm):
         self.instance.save()
         return self.instance
 
-class AddSpellEffect(forms.ModelForm):
+class AddSpellEffectForm(forms.ModelForm):
     effect = forms.ModelChoiceField(queryset=SpellEffect.objects.all())
 
     class Meta:
@@ -166,7 +166,7 @@ class RequestForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super(RequestForm, self).__init__(*args, **kwargs)
 
-class AddSkill(RequestForm):
+class AddSkillForm(RequestForm):
     # XXX Change this to use CharacterSkill as the model.
     skill = forms.ModelChoiceField(
         queryset=Skill.objects.exclude(type="Language"))
@@ -218,11 +218,11 @@ class AddSkill(RequestForm):
         cs.save()
         return self.instance
 
-class AddLanguage(AddSkill):
+class AddLanguageForm(AddSkillForm):
     skill = forms.ModelChoiceField(
         queryset=Skill.objects.filter(type="Language"))
 
-class AddEdge(forms.ModelForm):
+class AddEdgeForm(forms.ModelForm):
     edge = forms.ModelChoiceField(queryset=EdgeLevel.objects.all())
     choices = range(0,8)
     choices = zip(choices, choices)
@@ -238,11 +238,11 @@ class AddEdge(forms.ModelForm):
         cs.save()
         return self.instance
 
-class RemoveGeneric(forms.Form):
+class RemoveGenericForm(forms.Form):
     def __init__(self, *args, **kwargs):
         item = kwargs.pop('item', None)
         item_type = kwargs.pop('item_type', "")
-        super(RemoveGeneric, self).__init__(*args, **kwargs)
+        super(RemoveGenericForm, self).__init__(*args, **kwargs)
         if item:
             self.fields['item'].initial = item.pk
         if item_type:
@@ -276,7 +276,7 @@ def log_stat_change(character, request, field, change):
     if entry.amount == 0 and change != 0:
         entry.delete()
 
-class StatModify(RequestForm):
+class StatModifyForm(RequestForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
 

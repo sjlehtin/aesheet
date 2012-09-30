@@ -148,7 +148,7 @@ class RemoveWrap(object):
             type = self.type
         else:
             type = self.item.__class__.__name__
-        return RemoveGeneric(item=self.item,
+        return RemoveGenericForm(item=self.item,
                              item_type=type,
                              prefix='remove')
 
@@ -282,11 +282,11 @@ class SheetView(object):
                     }
             if st not in ["mov", "dex", "imm"]:
                 stat.update({
-                        'add_form' : StatModify(instance=self.sheet.character,
+                        'add_form' : StatModifyForm(instance=self.sheet.character,
                                                 initial={ 'stat' : "cur_" + st,
                                                           'function' : "add" },
                                                 prefix='stat-modify'),
-                        'dec_form' : StatModify(instance=self.sheet.character,
+                        'dec_form' : StatModifyForm(instance=self.sheet.character,
                                                 initial={ 'stat' : "cur_" + st,
                                                           'function' : "dec" },
                                                 prefix='stat-modify'),
@@ -364,7 +364,7 @@ class SheetView(object):
 def process_sheet_change_request(request, sheet):
     assert request.method == "POST"
 
-    form = RemoveGeneric(request.POST, prefix='remove')
+    form = RemoveGenericForm(request.POST, prefix='remove')
     if form.is_valid():
         item = form.cleaned_data['item']
         item_type = form.cleaned_data['item_type']
@@ -438,42 +438,42 @@ def sheet_detail(request, sheet_id=None):
     else:
         data = None
 
-    forms['_stat_modify'] = StatModify(data,
+    forms['_stat_modify'] = StatModifyForm(data,
                                        instance=sheet.character,
                                        request=request,
                                        prefix="stat-modify")
     forms['_skill_modify'] = CharacterSkillLevelModifyForm(
         data,
         prefix="skill-level-modify")
-    forms['add_skill_form'] = AddSkill(data,
+    forms['add_skill_form'] = AddSkillForm(data,
                                        instance=sheet.character,
                                        request=request,
                                        prefix="add-skill")
-    forms['add_lang_form'] = AddLanguage(data,
+    forms['add_lang_form'] = AddLanguageForm(data,
                                          instance=sheet.character,
                                          prefix="add-language")
-    forms['add_edge_form'] = AddEdge(data,
+    forms['add_edge_form'] = AddEdgeForm(data,
                                      instance=sheet.character,
                                      prefix="add-edge")
-    forms['add_spell_effect_form'] = AddSpellEffect(
+    forms['add_spell_effect_form'] = AddSpellEffectForm(
         data,
         instance=sheet,
         prefix="add-spell-effect")
-    forms['add_helm_form'] = AddHelm(data, instance=sheet,
+    forms['add_helm_form'] = AddHelmForm(data, instance=sheet,
                                      prefix="add-helm")
-    forms['add_armor_form'] = AddArmor(data, instance=sheet,
+    forms['add_armor_form'] = AddArmorForm(data, instance=sheet,
                                        prefix="add-armor")
     forms['add_existing_weapon_form'] = AddExistingWeapon(
                                                 data, instance=sheet,
                                                 prefix="add-existing-weapon")
-    forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
+    forms['add_weapon_form'] = AddWeaponForm(data, instance=sheet,
                                          prefix="add-weapon")
     forms['new_helm_form'] = HelmForm(data, prefix="new-helm")
-    forms['add_ranged_weapon_form'] = AddRangedWeapon(
+    forms['add_ranged_weapon_form'] = AddRangedWeaponForm(
                                             data, instance=sheet,
                                             prefix="add-ranged-weapon")
     forms['add_existing_ranged_weapon_form'] = \
-        AddExistingRangedWeapon(data,
+        AddExistingRangedWeaponForm(data,
                         instance=sheet,
                         prefix="add-existing-ranged-weapon")
     forms['add_xp_form'] = \
