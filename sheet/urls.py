@@ -1,8 +1,9 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, url
 from sheet.views import (AddSpellEffectView, AddEdgeView, EditCharacterView,
                          AddCharacterView, AddSheetView, EditSheetView,
                          AddEdgeLevelView, AddRangedWeaponTemplateView,
                          AddArmorTemplateView, AddEdgeSkillBonusView)
+import sheet.views
 
 urlpatterns = patterns(
     'sheet.views',
@@ -50,3 +51,15 @@ urlpatterns = patterns(
     url(r'^sheets/browse/(?P<type>\w+)/$', 'browse'),
     url(r'^sheets/ChangeLog$', 'version_history'),
 )
+
+def class_from_name(name):
+    components = name.split('_')
+    components = [cc.capitalize() for cc in components]
+    return getattr(sheet.views, ''.join(components) + "View")
+
+for name in ["add_weapon", "add_weapon_template","add_weapon_quality",
+             "add_weapon_special_quality", ]:
+    urlpatterns += patterns('sheet.views',
+                            url("^sheets/%s/" % name,
+                                class_from_name(name).as_view(),
+                                name=name))

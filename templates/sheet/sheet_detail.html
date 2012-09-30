@@ -235,29 +235,21 @@ XP: {{ char.xp_used_stats }} +
     <form action="{{ act }}" method="post"
             >{% csrf_token %}
         <ul>
-            {{ add_weapon_form_new.as_ul}}
+            {{ add_weapon_form.as_ul}}
         </ul>
         <input type="submit" value="Add" />
         </form>
     or
-<label for="add_weapon_form"><strong>Add a weapon</strong></label>
+<label for="add_weapon_form"><strong>Add an existing weapon</strong></label>
 <form action="{{ act }}" method="post" 
       >{% csrf_token %}
-<table>
-{{ add_weapon_form.as_table }}
-</table>
+<ul>
+{{ add_existing_weapon_form.as_ul }}
+</ul>
 <input type="submit" value="Add" />
 </form>
 or
-<div class="advanced" data-advanced-text="Create a new weapon">
-  <form action="{{ act }}" method="post" 
-	id="add_weapon_form">{% csrf_token %}
-    <table>
-      {{ new_weapon_form.as_table }}
-    </table>
-    <input type="submit" value="Add" />
-  </form>
-</div>
+    <a href="{% url add_weapon %}">Create a new weapon</a>
 </div>
 
 <h3>Ranged combat</h3>

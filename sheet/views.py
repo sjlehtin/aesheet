@@ -463,11 +463,11 @@ def sheet_detail(request, sheet_id=None):
                                      prefix="add-helm")
     forms['add_armor_form'] = AddArmor(data, instance=sheet,
                                        prefix="add-armor")
+    forms['add_existing_weapon_form'] = AddExistingWeapon(
+                                                data, instance=sheet,
+                                                prefix="add-existing-weapon")
     forms['add_weapon_form'] = AddWeapon(data, instance=sheet,
                                          prefix="add-weapon")
-    forms['add_weapon_form_new'] = AddWeaponNew(data, instance=sheet,
-                                                prefix="add-weapon2")
-    forms['new_weapon_form'] = WeaponForm(data, prefix="new-weapon")
     forms['new_ranged_weapon_form'] = \
         RangedWeaponForm(data, prefix="new-ranged-weapon")
     forms['new_armor_form'] = ArmorForm(data, prefix="new-armor")
@@ -520,7 +520,26 @@ def sheet_detail(request, sheet_id=None):
                               RequestContext(request, c))
 
 from django.views.generic import UpdateView, CreateView
-from django.views.generic.edit import ModelFormMixin
+
+class AddWeaponTemplateView(CreateView):
+    model = WeaponTemplate
+    template_name = 'sheet/add_weapon.html'
+    success_url = reverse_lazy(sheets_index)
+
+class AddWeaponView(CreateView):
+    model = Weapon
+    template_name = 'sheet/add_weapon.html'
+    success_url = reverse_lazy(sheets_index)
+
+class AddWeaponQualityView(CreateView):
+    model = WeaponQuality
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(sheets_index)
+
+class AddWeaponSpecialQualityView(CreateView):
+    model = WeaponSpecialQuality
+    template_name = 'sheet/gen_edit.html'
+    success_url = reverse_lazy(sheets_index)
 
 class EditCharacterView(UpdateView):
     form_class = CharacterForm

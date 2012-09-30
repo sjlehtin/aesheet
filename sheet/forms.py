@@ -20,7 +20,7 @@ class ImportForm(forms.Form):
                                         "file to be uploaded, not both")
         return cd
 
-class AddWeapon(forms.ModelForm):
+class AddExistingWeapon(forms.ModelForm):
     weapon = forms.ModelChoiceField(queryset=Weapon.objects.all())
 
     class Meta:
@@ -31,7 +31,7 @@ class AddWeapon(forms.ModelForm):
         self.instance.weapons.add(self.cleaned_data['weapon'])
         return self.instance
 
-class AddWeaponNew(forms.ModelForm):
+class AddWeapon(forms.ModelForm):
     weapon_template = forms.ModelChoiceField(
                               queryset=WeaponTemplate.objects.all())
     weapon_quality = forms.ModelChoiceField(
@@ -43,7 +43,7 @@ class AddWeaponNew(forms.ModelForm):
             quality = WeaponQuality.objects.filter(name="normal")
             if quality:
                 initial['weapon_quality'] = quality[0]
-        super(AddWeaponNew, self).__init__(*args, **kwargs)
+        super(AddWeapon, self).__init__(*args, **kwargs)
 
     class Meta:
         model = Sheet

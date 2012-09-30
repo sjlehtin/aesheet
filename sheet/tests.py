@@ -21,8 +21,8 @@ class ItemHandling(TestCase):
 
     def add_weapon_and_verify(self, weapon_template, quality, weapon):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
-        req_data = {'add-weapon2-weapon_template': weapon_template,
-                    'add-weapon2-weapon_quality': quality}
+        req_data = {'add-weapon-weapon_template': weapon_template,
+                    'add-weapon-weapon_quality': quality}
         response = self.client.post(det_url, req_data)
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
@@ -39,7 +39,7 @@ class ItemHandling(TestCase):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
         response = self.client.get(det_url)
         self.assertContains(response, "No weapons.")
-        req_data = { 'add-weapon-weapon' :
+        req_data = { 'add-existing-weapon-weapon' :
                      Weapon.objects.get(name="Greatsword L1").pk }
         response = self.client.post(det_url, req_data)
         self.assertRedirects(response, det_url)
