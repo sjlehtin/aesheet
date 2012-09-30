@@ -316,8 +316,7 @@ or
 
     <label for="add_existing_ranged_weapon_form">Add an existing
         ranged weapon</label>
-<form id="add_existing_ranged_weapon_form" action="" method="post"
-      id="add_ranged_weapon_form">
+<form id="add_existing_ranged_weapon_form" action="" method="post">
   {% csrf_token %}
 <ul>
 {{ add_existing_ranged_weapon_form.as_ul }}
@@ -524,11 +523,21 @@ or
 {% endif %}
 
 <div id="add_helmet" class="edit_control">
-<label for="add_helmet_form"><strong>Add a helmet</strong></label>
+    <label for="add_helmet_form">Add a helmet</label>
+    <form action="{{ act }}" method="post"
+          id="add_helmet_form">{% csrf_token %}
+        <table>
+            {{ add_helm_form.as_table }}
+        </table>
+        <input type="submit" value="Add" />
+    </form>
+    or
+<label for="add_existing_helm_form">Add an existing
+    helmet</label>
 <form action="{{ act }}" method="post" 
-      id="add_helmet_form">{% csrf_token %}
+      id="add_existing_helm_form">{% csrf_token %}
 <table>
-{{ add_helm_form.as_table }}
+{{ add_existing_helm_form.as_table }}
 </table>
 <input type="submit" value="Add" />
 </form>
@@ -559,11 +568,20 @@ or
 {% endif %}
 
 <div id="add_armor" class="edit_control">
-<label for="add_armor_form"><strong>Add armor</strong></label>
+    <label for="add_armor_form">Add armor</label>
+    <form action="{{ act }}" method="post"
+          id="add_armor_form">{% csrf_token %}
+        <table>
+            {{ add_armor_form.as_table }}
+        </table>
+        <input type="submit" value="Add" />
+    </form>
+or
+    <label for="add_existing_armor_form">Add existing armor</label>
 <form action="{{ act }}" method="post" 
-      id="add_armor_form">{% csrf_token %}
+      id="add_existing_armor_form">{% csrf_token %}
 <table>
-{{ add_armor_form.as_table }}
+{{ add_existing_armor_form.as_table }}
 </table>
 <input type="submit" value="Add" />
 </form>
