@@ -16,4 +16,7 @@ def render_armor(armor, loc_desc):
 
 @register.simple_tag
 def sum_sp_cost(skills):
-    return sum((skill.cost() for skill in skills))
+    try:
+        return sum((skill.cost() for skill in skills))
+    except TypeError:
+        return "NaN"

@@ -483,7 +483,7 @@ class Skill(ExportedModel):
             cost_at_this_level = self.skill_cost_3
 
         if cost_at_this_level == None:
-            raise ValueError("Skill doesn't support level %s" % level)
+            raise ValueError("Skill does not support level %s" % level)
         return cost_at_this_level + self.cost(level - 1)
 
     @classmethod
@@ -509,7 +509,8 @@ class CharacterSkill(models.Model):
     def clean(self):
         # A skill with a key (character, skill) should be unique.
         if CharacterSkill.objects.filter(skill=self.skill,
-                                         character=self.character):
+                                         character=self.character).exclude(
+                                                                  pk=self.pk):
             raise ValidationError("Skill `%s' already obtained." %
                                   (self.skill))
         # Verify that skill level is supported by the skill.
@@ -520,7 +521,10 @@ class CharacterSkill(models.Model):
                                   (self.skill, self.level, e))
 
     def cost(self):
-        return self.skill.cost(self.level)
+        try:
+            return self.skill.cost(self.level)
+        except ValueError, e:
+            return "invalid skill level"
 
     def comments(self):
         comments = []
