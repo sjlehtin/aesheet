@@ -939,6 +939,9 @@ class ArmorTemplate(ExportedModel):
     """
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
+
+    is_helm = models.BooleanField(default=False)
+
     armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_h_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
@@ -981,8 +984,6 @@ class ArmorTemplate(ExportedModel):
     armor_ra_f = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_ra_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-
-    is_helm = models.BooleanField(default=False)
 
     mod_fit = models.IntegerField(default=0)
     mod_ref = models.IntegerField(default=0)
