@@ -232,16 +232,15 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
                     self.sheet.ranged_actions,
                     self.sheet.ranged_skill_checks(self.item))]
             logger.info("Checks: %s" % ll)
-        except:
+        except Exception, e:
             logger.exception("Got exception")
         return ll
 
     def ranges(self):
         try:
-            ll = self.sheet.ranged_ranges(self.item)
-        except e:
+            return self.sheet.ranged_ranges(self.item)
+        except Exception, e:
             logger.exception("Got exception %s" % e)
-        return ll
 
     def initiatives(self):
         return self.sheet.initiatives(self.item)
@@ -307,11 +306,10 @@ class SheetView(object):
     @property
     def ranged_weapons(self):
         try:
-            ll = [RangedWeaponWrap(xx, self.sheet)
+            return [RangedWeaponWrap(xx, self.sheet)
                   for xx in self.sheet.ranged_weapons.all()]
         except:
             logger.exception("Got exception")
-        return ll
 
     @property
     def spell_effects(self):
