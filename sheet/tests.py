@@ -622,40 +622,24 @@ class TechLevelTestCase(TestCase):
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
+    def verify_character(self, sheet_id, frp_skills,
+                         twok_skills, threek_skills):
+        response = self.client.get(reverse(sheet.views.sheet_detail,
+                                           args=[sheet_id]))
+        add_skill = response.context['add_skill_form']
+        self.assertEqual(add_skill.fields['skill'].queryset.filter(
+            name="Active priest").exists(), frp_skills)
+        self.assertEqual(add_skill.fields['skill'].queryset.filter(
+            name="Electronics").exists(), twok_skills)
+        self.assertEqual(add_skill.fields['skill'].queryset.filter(
+            name="Machine empathy").exists(), threek_skills)
+
     def test_frp_tech_level(self):
         # Martel (FRP)
-        response = self.client.get(reverse(sheet.views.sheet_detail, args=[1]))
-        add_skill = response.context['add_skill_form']
-        self.assertTrue(add_skill.fields['skill'].queryset.filter(
-            name="Active priest").exists())
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Genemods / Implant medicine").exists())
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Electronics").exists())
+        self.verify_character(1, True, False, False)
         # Asa (MR)
-        response = self.client.get(reverse(sheet.views.sheet_detail, args=[3]))
-        add_skill = response.context['add_skill_form']
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Active priest").exists())
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Genemods / Implant medicine").exists())
-        self.assertTrue(add_skill.fields['skill'].queryset.filter(
-            name="Electronics").exists())
+        self.verify_character(3, False, True, False)
         # Atlas (3K)
-        response = self.client.get(reverse(sheet.views.sheet_detail, args=[4]))
-        add_skill = response.context['add_skill_form']
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Active priest").exists())
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Genemods / Implant medicine").exists())
-        self.assertTrue(add_skill.fields['skill'].queryset.filter(
-            name="Electronics").exists())
+        self.verify_character(4, False, True, True)
         # Jan (GZ)
-        response = self.client.get(reverse(sheet.views.sheet_detail, args=[5]))
-        add_skill = response.context['add_skill_form']
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Active priest").exists())
-        self.assertFalse(add_skill.fields['skill'].queryset.filter(
-            name="Genemods / Implant medicine").exists())
-        self.assertTrue(add_skill.fields['skill'].queryset.filter(
-            name="Machine empathy").exists())
+        self.verify_character(5, False, False, True)
