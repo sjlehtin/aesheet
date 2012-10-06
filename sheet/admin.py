@@ -3,7 +3,8 @@ from sheet.models import *
 from django.contrib import admin
 
 class WeaponTemplateAdmin(admin.ModelAdmin):
-    list_display = ('name', 'ccv', 'draw_initiative', 'roa', 'num_dice',
+    list_display = ('name', 'tech_level', 'ccv', 'draw_initiative', 'roa',
+                    'num_dice',
                     'dice', 'extra_damage', 'leth', 'plus_leth',
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
                     'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
@@ -17,9 +18,12 @@ admin.site.register(CharacterSkill)
 admin.site.register(Edge)
 admin.site.register(EdgeLevel)
 admin.site.register(Sheet)
+admin.site.register(TechLevel)
+admin.site.register(Campaign)
 
 class SkillAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'notes', 'can_be_defaulted',
+    list_display = ('name', 'tech_level','description', 'notes',
+                    'can_be_defaulted',
                     'is_specialization',
                     'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
                     'skill_cost_3', 'stat', 'type')

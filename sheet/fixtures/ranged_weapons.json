@@ -15,6 +15,7 @@
         "pk": "Javelin", 
         "model": "sheet.rangedweapontemplate", 
         "fields": {
+            "tech_level":1,
             "range_m": 15, 
             "range_l": 25, 
             "weight": "1", 
@@ -48,6 +49,7 @@
         "pk": "Longbow w/ broadhead", 
         "model": "sheet.rangedweapontemplate", 
         "fields": {
+            "tech_level":1,
             "range_m": 45, 
             "range_l": 80, 
             "weight": "1", 
@@ -81,6 +83,7 @@
         "pk": "Longbow w/ flight", 
         "model": "sheet.rangedweapontemplate", 
         "fields": {
+            "tech_level":1,
             "range_m": 60, 
             "range_l": 110, 
             "weight": "1.5", 
@@ -114,6 +117,7 @@
         "pk": "Throwing axe", 
         "model": "sheet.rangedweapontemplate", 
         "fields": {
+            "tech_level":1,
             "range_m": 10, 
             "range_l": 15, 
             "weight": "1", 
@@ -147,6 +151,7 @@
         "pk": "Throwing dagger", 
         "model": "sheet.rangedweapontemplate", 
         "fields": {
+            "tech_level":1,
             "range_m": 10, 
             "range_l": 15, 
             "weight": "0.5", 

@@ -1,3662 +1,3895 @@
 [
-  {
-    "pk": "Abyssal", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
+    {
+        "pk":"Abyssal",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Acting / Bluff",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"CHA",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Social",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Active mage",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":4,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Active priest",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":2,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Agriculture",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":1,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Alchemy",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Amedi",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Ancient Baklunish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Animal training",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"CHA",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Social",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Appraising",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Aquan",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Armorer",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Metalworking"
+            ]
+        }
+    },
+    {
+        "pk":"Astrology / Mathematics",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Aura manipulation",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Auran",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Balance",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Ballista",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Basic siege"
+            ]
+        }
+    },
+    {
+        "pk":"Basic siege",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Basic siege"
+            ]
+        }
+    },
+    {
+        "pk":"Basic tool use",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Beastman",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Biology / Zoology / Xenobiology",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Blind-fighting",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Blowgun",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Missile weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Bow",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Missile weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Bribery",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"POS",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Social",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Carpentry",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Basic tool use"
+            ]
+        }
+    },
+    {
+        "pk":"Catapult",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Basic siege"
+            ]
+        }
+    },
+    {
+        "pk":"Celestial",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Charioteering",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Climbing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Club / Axe",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Cold Tongue",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Common",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Concealment",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Construction",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Carpentry"
+            ]
+        }
+    },
+    {
+        "pk":"Cooking",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":2,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":1,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Crossbow",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Missile weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Cryptography",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Dakon",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Dart / Javelin / Tspear",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Throwing weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Death tongue",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Derrosh",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Disabling devices",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[
+                "Thief"
+            ]
+        }
+    },
+    {
+        "pk":"Disabling traps",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[
+                "Thief"
+            ]
+        }
+    },
+    {
+        "pk":"Disarm",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Disguise",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Scout"
+            ]
+        }
+    },
+    {
+        "pk":"Divination(m)",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":6,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Divination(p)",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Draconic",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Drow",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Druidic",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Dwarvish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Elemental",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Elements",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":7,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":3,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Elvish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Endurance / run",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Engineer / Architecture / Mining",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Etlani",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Feral",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Fine arts",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"First aid",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Fishing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Flail",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Flan",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Gem-cutting",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[
+                "Basic tool use"
+            ]
+        }
+    },
+    {
+        "pk":"Giant",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Gnoll",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Gnomish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Goblinoid",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Grapple",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Greatweapon",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Halfling",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Healing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Herbalism",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"History",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Ignan",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Illusion",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":6,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Infernal",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Influence",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Instant defense",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":3,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Instinctive fire",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":2,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":1,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Throwing weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Instrument",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Music"
+            ]
+        }
+    },
+    {
+        "pk":"Interrogation",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"CHA",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Social",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Item crafting",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"Requires magic skill.",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Jump",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Kech",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Keolandish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Knife",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Knockdown",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Leatherworking",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":1,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Basic tool use"
+            ]
+        }
+    },
+    {
+        "pk":"Lendorian",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Lendorian Elven",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Leraran Suloise",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Lip reading",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[
+                "Scout"
+            ]
+        }
+    },
+    {
+        "pk":"Lock-picking",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[
+                "Thief"
+            ]
+        }
+    },
+    {
+        "pk":"Longbow",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Bow"
+            ]
+        }
+    },
+    {
+        "pk":"Low Baklunish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Martial arts expertise",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Meditation",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Mental fortitude",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Metalworking",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Basic tool use"
+            ]
+        }
+    },
+    {
+        "pk":"Metamagic",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":6,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Mimicry",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Social",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Mind Influence",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Missile weapons",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Mounted archery",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":3,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Riding"
+            ]
+        }
+    },
+    {
+        "pk":"Mounted combat",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Riding"
+            ]
+        }
+    },
+    {
+        "pk":"Music",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Nature",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":7,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":3,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Nyrondese",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Occultism",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Ogrish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Old Oeridian",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Olman",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"One-handed use",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Orcish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Ordai",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Orienteering / Navigation",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Persuasion",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"CHA",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Social",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Physical fortitude",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"IMM",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Pole arm",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Potion brewing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[
+                "Item crafting"
+            ]
+        }
+    },
+    {
+        "pk":"Protection",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Ralat",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Rapid Archery",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Bow"
+            ]
+        }
+    },
+    {
+        "pk":"Rasol",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Baklunish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Carceri",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Celestial",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Draconic",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Druidic",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Dwarvish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Elvish",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Flan",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Infernal",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Suloise",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Touv",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Read/write Vaati",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Religion",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Religious",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Rhopan",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Riding",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Riding flying mount",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Ring",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[
+                "Item crafting"
+            ]
+        }
+    },
+    {
+        "pk":"Rod / staff / wand",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[
+                "Item crafting"
+            ]
+        }
+    },
+    {
+        "pk":"Sailing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Scout",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Search",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Sewing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Shield",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Sign language",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":4,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Education",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Single-weapon style",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Skiing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Sleight of hand",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Thief"
+            ]
+        }
+    },
+    {
+        "pk":"Sling",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Missile weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Special interest",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Spell penetration(m)",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Spell penetration(p)",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Spellcraft",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Staff / Spear / Lance",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Stealth",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Stun",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Suloise",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Summoning(m)",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":6,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Summoning(p)",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":2,
+            "skill_cost_2":2,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Surgery",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":4,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Survival",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Swimming",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Sword",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Sylvan",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Tailing / Shadowing",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Scout"
+            ]
+        }
+    },
+    {
+        "pk":"Tclub / Taxe",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Throwing weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Temporal",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Mage",
+            "required_skills":[
+                "Active mage"
+            ]
+        }
+    },
+    {
+        "pk":"Terran",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Thief",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Throw",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Unarmed combat"
+            ]
+        }
+    },
+    {
+        "pk":"Throwing weapons",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Missile weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Tknife / Tdagger",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":1,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Combat",
+            "required_skills":[
+                "Throwing weapons"
+            ]
+        }
+    },
+    {
+        "pk":"Tlaman",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Touv",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Tracking",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"INT",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Scout"
+            ]
+        }
+    },
+    {
+        "pk":"Trapmaking",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Specialty",
+            "required_skills":[
+                "Disabling devices"
+            ]
+        }
+    },
+    {
+        "pk":"Tumbling",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Two-weapon style",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[
+                "Weapon combat"
+            ]
+        }
+    },
+    {
+        "pk":"Ulagha",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Unarmed combat",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":1,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Undercommon",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Velondi",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Vocal",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":4,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Specialty",
+            "required_skills":[
+                "Music"
+            ]
+        }
+    },
+    {
+        "pk":"Warfare",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"WIL",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":8,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":3,
+            "skill_cost_2":4,
+            "can_be_defaulted":false,
+            "type":"Priest",
+            "required_skills":[
+                "Active priest"
+            ]
+        }
+    },
+    {
+        "pk":"Weapon combat",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"MOV",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":5,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":2,
+            "skill_cost_2":3,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Weapons and armour",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[
+                "Item crafting"
+            ]
+        }
+    },
+    {
+        "pk":"Wondrous item",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":true,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":0,
+            "skill_cost_1":2,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Mystical",
+            "required_skills":[
+                "Item crafting"
+            ]
+        }
+    },
+    {
+        "pk":"Xolasa",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":1,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":3,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Language",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Electronics",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":4,
+            "stat":"LRN",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":false,
+            "type":"Trades",
+            "required_skills":[]
+        }
+    },
+    {
+        "pk":"Machine empathy",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":5,
+            "stat":"PSY",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":3,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Trades",
+            "required_skills":["Meditation"]
+        }
     }
-  }, 
-  {
-    "pk": "Acting / Bluff", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "CHA", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Social", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Active mage", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 4, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Active priest", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Agriculture", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 1, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Alchemy", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Amedi", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Ancient Baklunish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Animal training", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "CHA", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Social", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Appraising", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Aquan", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Armorer", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Metalworking"
-      ]
-    }
-  }, 
-  {
-    "pk": "Astrology / Mathematics", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Aura manipulation", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Auran", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Balance", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Ballista", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Basic siege"
-      ]
-    }
-  }, 
-  {
-    "pk": "Basic siege", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Basic siege"
-      ]
-    }
-  }, 
-  {
-    "pk": "Basic tool use", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Beastman", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Biology / Zoology / Xenobiology", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Blind-fighting", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Blowgun", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Missile weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Bow", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Missile weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Bribery", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "POS", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Social", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Carpentry", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Basic tool use"
-      ]
-    }
-  }, 
-  {
-    "pk": "Catapult", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Basic siege"
-      ]
-    }
-  }, 
-  {
-    "pk": "Celestial", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Charioteering", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Climbing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Club / Axe", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Cold Tongue", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Common", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Concealment", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Construction", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Carpentry"
-      ]
-    }
-  }, 
-  {
-    "pk": "Cooking", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 2, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 1, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Crossbow", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Missile weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Cryptography", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Dakon", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Dart / Javelin / Tspear", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Throwing weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Death tongue", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Derrosh", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Disabling devices", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Thief"
-      ]
-    }
-  }, 
-  {
-    "pk": "Disabling traps", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Thief"
-      ]
-    }
-  }, 
-  {
-    "pk": "Disarm", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Disguise", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Scout"
-      ]
-    }
-  }, 
-  {
-    "pk": "Divination(m)", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 6, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Divination(p)", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Draconic", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Drow", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Druidic", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Dwarvish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Elemental", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Elements", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 7, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Elvish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Endurance / run", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Engineer / Architecture / Mining", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Etlani", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Feral", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Fine arts", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "First aid", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Fishing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Flail", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Flan", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Gem-cutting", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Basic tool use"
-      ]
-    }
-  }, 
-  {
-    "pk": "Giant", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Gnoll", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Gnomish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Goblinoid", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Grapple", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Greatweapon", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Halfling", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Healing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Herbalism", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "History", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Ignan", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Illusion", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 6, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Infernal", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Influence", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Instant defense", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Instinctive fire", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 2, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 1, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Throwing weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Instrument", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Music"
-      ]
-    }
-  }, 
-  {
-    "pk": "Interrogation", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "CHA", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Social", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Item crafting", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "Requires magic skill.", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Jump", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Kech", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Keolandish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Knife", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Knockdown", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Leatherworking", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 1, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Basic tool use"
-      ]
-    }
-  }, 
-  {
-    "pk": "Lendorian", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Lendorian Elven", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Leraran Suloise", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Lip reading", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Scout"
-      ]
-    }
-  }, 
-  {
-    "pk": "Lock-picking", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Thief"
-      ]
-    }
-  }, 
-  {
-    "pk": "Longbow", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Bow"
-      ]
-    }
-  }, 
-  {
-    "pk": "Low Baklunish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Martial arts expertise", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Meditation", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Mental fortitude", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Metalworking", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Basic tool use"
-      ]
-    }
-  }, 
-  {
-    "pk": "Metamagic", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 6, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Mimicry", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Social", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Mind Influence", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Missile weapons", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Mounted archery", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Riding"
-      ]
-    }
-  }, 
-  {
-    "pk": "Mounted combat", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Riding"
-      ]
-    }
-  }, 
-  {
-    "pk": "Music", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Nature", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 7, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Nyrondese", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Occultism", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Ogrish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Old Oeridian", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Olman", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "One-handed use", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Orcish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Ordai", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Orienteering / Navigation", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Persuasion", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "CHA", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Social", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Physical fortitude", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "IMM", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Pole arm", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Potion brewing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": [
-        "Item crafting"
-      ]
-    }
-  }, 
-  {
-    "pk": "Protection", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Ralat", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Rapid Archery", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Bow"
-      ]
-    }
-  }, 
-  {
-    "pk": "Rasol", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Baklunish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Carceri", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Celestial", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Draconic", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Druidic", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Dwarvish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Elvish", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Flan", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Infernal", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Suloise", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Touv", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Read/write Vaati", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Religion", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Religious", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Rhopan", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Riding", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Riding flying mount", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Ring", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": [
-        "Item crafting"
-      ]
-    }
-  }, 
-  {
-    "pk": "Rod / staff / wand", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": [
-        "Item crafting"
-      ]
-    }
-  }, 
-  {
-    "pk": "Sailing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Scout", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Search", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Sewing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Shield", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Sign language", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 4, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Education", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Single-weapon style", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Skiing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Sleight of hand", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Thief"
-      ]
-    }
-  }, 
-  {
-    "pk": "Sling", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Missile weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Special interest", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Spell penetration(m)", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Spell penetration(p)", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Spellcraft", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Staff / Spear / Lance", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Stealth", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Stun", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Suloise", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Summoning(m)", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 6, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Summoning(p)", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Surgery", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 4, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Survival", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Swimming", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Sword", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Sylvan", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Tailing / Shadowing", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Scout"
-      ]
-    }
-  }, 
-  {
-    "pk": "Tclub / Taxe", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Throwing weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Temporal", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "PSY", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Mage", 
-      "required_skills": [
-        "Active mage"
-      ]
-    }
-  }, 
-  {
-    "pk": "Terran", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Thief", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": null, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Throw", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Unarmed combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Throwing weapons", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Missile weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Tknife / Tdagger", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "DEX", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": true, 
-      "type": "Combat", 
-      "required_skills": [
-        "Throwing weapons"
-      ]
-    }
-  }, 
-  {
-    "pk": "Tlaman", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Touv", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Tracking", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "INT", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Scout"
-      ]
-    }
-  }, 
-  {
-    "pk": "Trapmaking", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": false, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Disabling devices"
-      ]
-    }
-  }, 
-  {
-    "pk": "Tumbling", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Two-weapon style", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": [
-        "Weapon combat"
-      ]
-    }
-  }, 
-  {
-    "pk": "Ulagha", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Unarmed combat", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": 1, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Undercommon", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Velondi", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Vocal", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 4, 
-      "required_edges": [], 
-      "skill_cost_0": null, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Specialty", 
-      "required_skills": [
-        "Music"
-      ]
-    }
-  }, 
-  {
-    "pk": "Warfare", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "WIL", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 8, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 3, 
-      "skill_cost_2": 4, 
-      "can_be_defaulted": false, 
-      "type": "Priest", 
-      "required_skills": [
-        "Active priest"
-      ]
-    }
-  }, 
-  {
-    "pk": "Weapon combat", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "MOV", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 5, 
-      "required_edges": [], 
-      "skill_cost_0": 2, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": 3, 
-      "can_be_defaulted": true, 
-      "type": "Physical", 
-      "required_skills": []
-    }
-  }, 
-  {
-    "pk": "Weapons and armour", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": [
-        "Item crafting"
-      ]
-    }
-  }, 
-  {
-    "pk": "Wondrous item", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": true, 
-      "notes": "", 
-      "skill_cost_3": null, 
-      "required_edges": [], 
-      "skill_cost_0": 0, 
-      "skill_cost_1": 2, 
-      "skill_cost_2": null, 
-      "can_be_defaulted": false, 
-      "type": "Mystical", 
-      "required_skills": [
-        "Item crafting"
-      ]
-    }
-  }, 
-  {
-    "pk": "Xolasa", 
-    "model": "sheet.skill", 
-    "fields": {
-      "stat": "LRN", 
-      "description": "", 
-      "is_specialization": false, 
-      "notes": "", 
-      "skill_cost_3": 3, 
-      "required_edges": [], 
-      "skill_cost_0": 3, 
-      "skill_cost_1": 1, 
-      "skill_cost_2": 2, 
-      "can_be_defaulted": true, 
-      "type": "Language", 
-      "required_skills": []
-    }
-  }
 ]

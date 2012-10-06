@@ -63,6 +63,18 @@ class ExportedModel(models.Model):
     class Meta:
         abstract = True
 
+class TechLevel(models.Model):
+    name = models.CharField(max_length=10, unique=True)
+    def __unicode__(self):
+        return self.name
+
+class Campaign(models.Model):
+    name = models.CharField(max_length=10, unique=True)
+    tech_levels = models.ManyToManyField(TechLevel)
+
+    def __unicode__(self):
+        return self.name
+
 class Character(models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
@@ -72,6 +84,8 @@ class Character(models.Model):
     name = models.CharField(max_length=256)
     owner = models.ForeignKey(auth.models.User, related_name="characters")
     occupation = models.CharField(max_length=256)
+    campaign = models.ForeignKey(Campaign)
+
     # XXX race can be used to fill in basic edges and stats later for,
     # e.g., GM usage.
     race = models.CharField(max_length=256)
@@ -449,6 +463,8 @@ class Skill(ExportedModel):
     can_be_defaulted = models.BooleanField(default=True)
     is_specialization = models.BooleanField(default=False)
 
+    tech_level = models.ForeignKey(TechLevel)
+
     # XXX Should be any of these? See Construction.  Add another
     # attribute for another required skill?
     #
@@ -633,6 +649,8 @@ class CharacterEdge(models.Model):
 class BaseWeaponQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
+
+    tech_level = models.ForeignKey(TechLevel)
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ccv = models.IntegerField(default=0)
 
@@ -704,6 +722,8 @@ class BaseWeaponTemplate(ExportedModel):
         help_text="This is used when the name must be fit to a small space")
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=64, blank=True)
+
+    tech_level = models.ForeignKey(TechLevel)
 
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
 
@@ -944,6 +964,8 @@ class ArmorTemplate(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
 
+    tech_level = models.ForeignKey(TechLevel)
+
     is_helm = models.BooleanField(default=False)
 
     armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
@@ -1023,6 +1045,8 @@ class ArmorQuality(ExportedModel):
     """
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
+
+    tech_level = models.ForeignKey(TechLevel)
 
     dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                         default=1.0)

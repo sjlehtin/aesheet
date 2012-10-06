@@ -3,7 +3,8 @@
     "pk": "Greatsword, 2h", 
     "model": "sheet.weapontemplate", 
     "fields": {
-      "weight": "3.6", 
+      "tech_level":1,
+            "weight": "3.6", 
       "durability": 7, 
       "roa": "0.85", 
       "skill": "Greatweapon", 
@@ -31,7 +32,8 @@
     "pk": "Short sword", 
     "model": "sheet.weapontemplate", 
     "fields": {
-      "weight": "1", 
+      "tech_level":1,
+            "weight": "1", 
       "durability": 7, 
       "roa": "1.1", 
       "skill": null, 
@@ -59,7 +61,8 @@
     "pk": "Whip", 
     "model": "sheet.weapontemplate", 
     "fields": {
-      "weight": "1", 
+      "tech_level":1,
+            "weight": "1", 
       "durability": 4, 
       "roa": "1.05", 
       "skill": null, 
@@ -87,6 +90,7 @@
     "pk": "normal", 
     "model": "sheet.weaponquality", 
     "fields": {
+        "tech_level":1,
       "versus_missile_modifier": 0, 
       "dp_multiplier": "1", 
       "short_name": "", 
@@ -106,6 +110,7 @@
     "pk": "L1", 
     "model": "sheet.weaponquality", 
     "fields": {
+        "tech_level": 1,
       "versus_missile_modifier": 0, 
       "dp_multiplier": "2", 
       "short_name": "", 

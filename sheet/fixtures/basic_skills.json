@@ -3,7 +3,8 @@
     "pk": "Abyssal", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "LRN", 
+      "tech_level":1,
+            "stat": "LRN", 
       "description": "", 
       "is_specialization": false, 
       "notes": "", 
@@ -21,7 +22,8 @@
     "pk": "Acting / Bluff", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "CHA", 
+      "tech_level":1,
+            "stat": "CHA", 
       "description": "", 
       "is_specialization": false, 
       "notes": "", 
@@ -39,7 +41,8 @@
     "pk": "Weapon combat", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "MOV", 
+      "tech_level":1,
+            "stat": "MOV", 
       "description": "", 
       "is_specialization": false, 
       "notes": "", 
@@ -57,7 +60,8 @@
     "pk": "Sword", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "MOV", 
+      "tech_level":1,
+            "stat": "MOV", 
       "description": "", 
       "is_specialization": true, 
       "notes": "", 
@@ -77,7 +81,8 @@
     "pk": "Unarmed combat", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "MOV", 
+      "tech_level":1,
+            "stat": "MOV", 
       "description": "", 
       "is_specialization": false, 
       "notes": "", 
@@ -95,7 +100,8 @@
     "pk": "Martial arts expertise", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "MOV", 
+      "tech_level":1,
+            "stat": "MOV", 
       "description": "", 
       "is_specialization": true, 
       "notes": "", 
@@ -115,7 +121,8 @@
     "pk": "Surgery", 
     "model": "sheet.skill", 
     "fields": {
-      "stat": "DEX", 
+      "tech_level":1,
+            "stat": "DEX", 
       "description": "", 
       "is_specialization": false, 
       "notes": "", 

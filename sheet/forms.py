@@ -181,8 +181,14 @@ class RequestForm(forms.ModelForm):
 
 class AddSkillForm(RequestForm):
     # XXX Change this to use CharacterSkill as the model.
-    skill = forms.ModelChoiceField(
-        queryset=Skill.objects.exclude(type="Language"))
+    def __init__(self, *args, **kwargs):
+        super(AddSkillForm, self).__init__(*args, **kwargs)
+        queryset = Skill.objects.exclude(type="Language")
+        if self.instance.campaign:
+            queryset = queryset.filter(
+               tech_level__in=self.instance.campaign.tech_levels.all())
+        self.fields['skill'] = forms.ModelChoiceField(queryset=queryset)
+
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
@@ -221,7 +227,7 @@ class AddSkillForm(RequestForm):
 
     class Meta:
         model = Character
-        fields = ('skill',)
+        fields = ()
 
     def save(self, commit=True):
         cs = CharacterSkill()

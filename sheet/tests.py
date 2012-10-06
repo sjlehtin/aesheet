@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
-                "ranged_weapons"]
+                "ranged_weapons", "campaign"]
 
     def setUp(self):
         self.client = Client()
@@ -187,7 +187,7 @@ class ItemHandling(TestCase):
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "test_skills"]
+                "test_skills", "campaign"]
 
     def setUp(self):
         self.client.login(username="admin", password="admin")
@@ -411,11 +411,10 @@ def get_fake_request(username):
 
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "assigned_edges"]
+                "assigned_edges", "campaign"]
 
     def setUp(self):
-        self.client = Client()
-        self.client.login(username="admin", password="admin")
+        self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def test_stat_changes(self):
         det_url = reverse('sheet.views.sheet_detail', args=[2])
@@ -460,7 +459,6 @@ class Logging(WebTest):
         old_ch = Character.objects.get(pk=2)
 
         det_url = reverse('edit_character', args=[2])
-
         form = self.app.get(det_url, user='admin').form
         form['cur_fit'].value = int(form['cur_fit'].value) - 2
         response = form.submit()
@@ -530,11 +528,10 @@ class ModelBasics(TestCase):
         mana = ss.mana
 
 class Views(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills"]
+    fixtures = ["campaign", "user", "char", "sheet", "edges", "basic_skills"]
 
     def setUp(self):
-        self.client = Client()
-        self.client.login(username="admin", password="admin")
+        self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def testViewCharacter(self):
         response = self.client.get("/characters/edit_char/2/")
@@ -565,24 +562,25 @@ class Views(TestCase):
                                                'saves_vs_poison' : 0,
                                                'saves_vs_all' : 0,
                                                })
-        self.assertRedirects(response, reverse(sheet.views.sheets_index))
+        self.assertRedirects(response,
+                             reverse(sheet.views.sheets_index))
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
 
 class Importing(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills"]
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaign"]
 
     def setUp(self):
-        self.client = Client()
-        self.client.login(username="admin", password="admin")
+        self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def testAddNewSkillWithRequiredSkills(self):
         det_url = reverse(sheet.views.import_data)
         response = self.client.post(det_url, { 'import_data' :
-                                                   """Skill
-name,description,notes,can_be_defaulted,is_specialization,skill_cost_0,\
-skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
-Throw,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat""",
+        "Skill\n"
+        "name,tech_level,description,notes,can_be_defaulted,"
+        "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
+        "skill_cost_3,type,stat,required_edges,required_skills\n"
+        "Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat",
                                                })
         self.assertRedirects(response, reverse(sheet.views.import_data))
         response = self.client.get(reverse(sheet.views.browse,
@@ -616,3 +614,48 @@ Throw,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat""",
                                         { "import_data":
                                           ''.join(mangle(response.content)) })
             self.assertRedirects(response, reverse(sheet.views.import_data))
+
+class TechLevelTestCase(TestCase):
+    fixtures = ["user", "char", "sheet", "weapons", "skills", "edges",
+                "campaign"]
+
+    def setUp(self):
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+
+    def test_frp_tech_level(self):
+        # Martel (FRP)
+        response = self.client.get(reverse(sheet.views.sheet_detail, args=[1]))
+        add_skill = response.context['add_skill_form']
+        self.assertTrue(add_skill.fields['skill'].queryset.filter(
+            name="Active priest").exists())
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Genemods / Implant medicine").exists())
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Electronics").exists())
+        # Asa (MR)
+        response = self.client.get(reverse(sheet.views.sheet_detail, args=[3]))
+        add_skill = response.context['add_skill_form']
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Active priest").exists())
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Genemods / Implant medicine").exists())
+        self.assertTrue(add_skill.fields['skill'].queryset.filter(
+            name="Electronics").exists())
+        # Atlas (3K)
+        response = self.client.get(reverse(sheet.views.sheet_detail, args=[4]))
+        add_skill = response.context['add_skill_form']
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Active priest").exists())
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Genemods / Implant medicine").exists())
+        self.assertTrue(add_skill.fields['skill'].queryset.filter(
+            name="Electronics").exists())
+        # Jan (GZ)
+        response = self.client.get(reverse(sheet.views.sheet_detail, args=[5]))
+        add_skill = response.context['add_skill_form']
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Active priest").exists())
+        self.assertFalse(add_skill.fields['skill'].queryset.filter(
+            name="Genemods / Implant medicine").exists())
+        self.assertTrue(add_skill.fields['skill'].queryset.filter(
+            name="Machine empathy").exists())

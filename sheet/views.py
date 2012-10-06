@@ -684,9 +684,15 @@ def import_text(data):
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
 
+            if fieldname == "tech_level":
+                try:
+                    value = TechLevel.objects.get(name=value)
+                except TechLevel.DoesNotExist:
+                    raise ValueError, "No matching TechLevel with name %s." % (
+                                                value)
             # If the field is a reference to another object, try to find
             # the matching instance.
-            if isinstance(field, django.db.models.ForeignKey):
+            elif isinstance(field, django.db.models.ForeignKey):
                 if value:
                     try:
                         value = \

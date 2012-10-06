@@ -3,7 +3,8 @@
     "pk": "Plate mail", 
     "model": "sheet.armortemplate", 
     "fields": {
-      "encumbrance_class": 2, 
+      "tech_level":1,
+            "encumbrance_class": 2, 
       "armor_h_p": "0", 
       "mod_vision": 0, 
       "armor_h_r": "0", 
@@ -67,7 +68,8 @@
     "pk": "Basinet wfa", 
     "model": "sheet.armortemplate", 
     "fields": {
-      "encumbrance_class": 1, 
+      "tech_level":1,
+            "encumbrance_class": 1, 
       "armor_h_p": "-2.5", 
       "mod_vision": 0, 
       "armor_h_r": "-2.5", 
@@ -131,7 +133,8 @@
     "pk": "L1", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 5, 
+      "tech_level":1,
+            "mod_climb": 5, 
       "mod_encumbrance_class": -1, 
       "short_name": "L1", 
       "mod_fit": 1, 
@@ -154,7 +157,8 @@
     "pk": "L2", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 10, 
+      "tech_level":1,
+            "mod_climb": 10, 
       "mod_encumbrance_class": -1, 
       "short_name": "L2", 
       "mod_fit": 2, 
@@ -177,7 +181,8 @@
     "pk": "L3", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 15, 
+      "tech_level":1,
+            "mod_climb": 15, 
       "mod_encumbrance_class": -1, 
       "short_name": "L3", 
       "mod_fit": 3, 
@@ -200,7 +205,8 @@
     "pk": "L4", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 20, 
+      "tech_level":1,
+            "mod_climb": 20, 
       "mod_encumbrance_class": -1, 
       "short_name": "L4", 
       "mod_fit": 4, 
@@ -223,7 +229,8 @@
     "pk": "L5", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 25, 
+      "tech_level":1,
+            "mod_climb": 25, 
       "mod_encumbrance_class": -1, 
       "short_name": "L5", 
       "mod_fit": 5, 
@@ -246,7 +253,8 @@
     "pk": "L6", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 30, 
+      "tech_level":1,
+            "mod_climb": 30, 
       "mod_encumbrance_class": -1, 
       "short_name": "L6", 
       "mod_fit": 6, 
@@ -269,7 +277,8 @@
     "pk": "L7", 
     "model": "sheet.armorquality", 
     "fields": {
-      "mod_climb": 35, 
+      "tech_level":1,
+            "mod_climb": 35, 
       "mod_encumbrance_class": -1, 
       "short_name": "L7", 
       "mod_fit": 7, 
