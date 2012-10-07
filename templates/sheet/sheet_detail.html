@@ -109,8 +109,14 @@ XP: {{ char.xp_used_stats }} +
   {{ char.helm }} + {{ char.armor }}
   <table>
     <thead>
-      <tr><th></th><th></th><th>P</th><th>S</th><th>B</th><th>R</th>
-	<th>DR</th><th>DP</th><th>PL</th></tr>
+      <tr><th></th><th></th>
+          <th title="Protection against piercing damage">P</th>
+          <th title="Protection against slashing damage">S</th>
+          <th title="Protection against bludgeoning damage">B</th>
+          <th title="Protection against burn damage">R</th>
+	<th title="Damage reduction">DR</th><th title="Damage points">DP</th><th
+                  title="Protection
+	level">PL</th></tr>
     </thead>
     <tr><td>8</td><td>Head</td>
         {% render_armor char.helm "h" %}
