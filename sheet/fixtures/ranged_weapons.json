@@ -10,7 +10,7 @@
             "quality": "L1",
             "description": ""
         }
-    }, 
+    },
     {
         "pk": "Javelin", 
         "model": "sheet.rangedweapontemplate", 
