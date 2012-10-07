@@ -568,6 +568,7 @@ class AddEdgeView(AddSpellEffectView):
     model = Edge
 
 class EditSheetView(UpdateView):
+    form_class = EditSheetForm
     model = Sheet
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)

@@ -4,6 +4,7 @@ from sheet.models import *
 import sheet.models
 import datetime
 import re
+from django.forms.models import modelform_factory
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,9 @@ class ImportForm(forms.Form):
             raise forms.ValidationError("Specify either the data or the "
                                         "file to be uploaded, not both")
         return cd
+
+EditSheetForm =  modelform_factory(Sheet, exclude=(
+    'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects'))
 
 class AddWeaponForm(forms.ModelForm):
     item_class = Weapon
