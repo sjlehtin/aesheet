@@ -45,3 +45,5 @@ thu 27.9.2012 3h XP etc.
 fri 28.9.2012 3h Bug fixing and creating tests for import/export.
 sat 29.9.2012 3h Childhood education, specialist training.  Edge and flaw notes.
 sun 30.9.2012 8h Items from template and quality.
+sat 6.10.2012 6h Campaign selection.
+sun 7.10.2012 5h Campaign selection and updated fields for weapons (bypass) and armor (protection level).
