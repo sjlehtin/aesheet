@@ -1011,6 +1011,11 @@ class ArmorTemplate(ExportedModel):
     armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_ra_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
+    armor_h_pl = models.IntegerField(default=0)
+    armor_t_pl = models.IntegerField(default=0)
+    armor_l_pl = models.IntegerField(default=0)
+    armor_a_pl = models.IntegerField(default=0)
+
     mod_fit = models.IntegerField(default=0)
     mod_ref = models.IntegerField(default=0)
     mod_psy = models.IntegerField(default=0)
@@ -1029,9 +1034,6 @@ class ArmorTemplate(ExportedModel):
                                  default=1.0)
     # 0 no armor, 1 light, 2 medium, 3 heavy
     encumbrance_class = models.IntegerField(default=0)
-
-    # XXX
-    protection_level = models.IntegerField(default=1)
 
     @classmethod
     def dont_export(cls):
@@ -1108,7 +1110,8 @@ class Armor(ExportedModel):
             if typ == 'dp':
                 return int(round(getattr(self.base, v) *
                                  self.quality.dp_multiplier))
-            return getattr(self.base, v) + getattr(self.quality, "armor_" + typ)
+            return getattr(self.base, v) + getattr(self.quality,
+                                                   "armor_" + typ, 0)
 
         raise AttributeError, "no attr %s" % v
 

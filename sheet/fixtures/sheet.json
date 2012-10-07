@@ -19,10 +19,10 @@
         "model":"sheet.sheet",
         "fields":{
             "description":"puppa",
-            "armor":null,
+            "armor":1,
             "character":2,
             "weapons":[2],
-            "helm":null,
+            "helm":2,
             "spell_effects":[],
             "owner":1,
             "size":"M",

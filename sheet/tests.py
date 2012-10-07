@@ -192,6 +192,12 @@ class ItemHandling(TestCase):
         self.assertEqual(weapon.name, "Voulge")
         self.assertTrue(unicode(weapon.full.damage()).endswith("+1"))
 
+    def test_armor_protection_level(self):
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[2]))
+        self.assertEqual(response.context['char'].armor.armor_t_pl, 3)
+        self.assertEqual(response.context['char'].helm.armor_h_pl, 2)
+
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "test_skills", "campaigns"]

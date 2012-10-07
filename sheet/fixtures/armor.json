@@ -35,7 +35,6 @@
       "mod_smell": 0, 
       "armor_la_b": "-3", 
       "description": "", 
-      "protection_level": 3, 
       "weight": "20.5", 
       "armor_la_r": "-2", 
       "armor_la_s": "-4", 
@@ -55,7 +54,11 @@
       "armor_rl_dp": "11", 
       "armor_t_p": "-3", 
       "armor_t_r": "-3", 
-      "armor_t_s": "-5"
+      "armor_t_s": "-5",
+        "armor_h_pl": "0",
+        "armor_t_pl": "3",
+        "armor_l_pl": "3",
+        "armor_a_pl": "3"
     }
   }, 
   {
@@ -94,7 +97,6 @@
       "mod_smell": -10, 
       "armor_la_b": "0", 
       "description": "",
-      "protection_level": 2, 
       "weight": "4", 
       "armor_la_r": "0", 
       "armor_la_s": "0", 
@@ -114,7 +116,11 @@
       "armor_rl_dp": "0", 
       "armor_t_p": "0", 
       "armor_t_r": "0", 
-      "armor_t_s": "0"
+      "armor_t_s": "0",
+        "armor_h_pl": "2",
+        "armor_t_pl": "0",
+        "armor_l_pl": "0",
+        "armor_a_pl": "0"
     }
   }, 
   {
