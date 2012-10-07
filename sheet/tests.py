@@ -91,7 +91,7 @@ class ItemHandling(TestCase):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
         response = self.client.get(det_url)
         self.assertContains(response, "No weapons.")
-        req_data = { 'add-existing-weapon-weapon' :
+        req_data = { 'add-existing-weapon-item' :
                      Weapon.objects.get(name="Greatsword L1").pk }
         response = self.client.post(det_url, req_data)
         self.assertRedirects(response, det_url)
@@ -124,7 +124,7 @@ class ItemHandling(TestCase):
 
         hh = Armor.objects.get(name='Basinet wfa L5')
         # Add helmet.
-        req_data = { 'add-existing-helm-helm' : hh.pk }
+        req_data = { 'add-existing-helm-item' : hh.pk }
         response = self.client.get(det_url)
         self.assertContains(response, "No helmet.")
         response = self.client.post(det_url, req_data)
@@ -144,7 +144,7 @@ class ItemHandling(TestCase):
 
         # Add armor.
         aa = Armor.objects.get(name='Plate mail L5')
-        req_data = { 'add-existing-armor-armor' : aa.pk }
+        req_data = { 'add-existing-armor-item' : aa.pk }
         response = self.client.get(det_url)
         self.assertContains(response, "No armor.")
         response = self.client.post(det_url, req_data)
@@ -615,8 +615,8 @@ class Importing(TestCase):
             self.assertRedirects(response, reverse(sheet.views.import_data))
 
 class TechLevelTestCase(TestCase):
-    fixtures = ["user", "char", "sheet", "armor", "weapons", "skills", "edges",
-                "campaign"]
+    fixtures = ["user", "char", "sheet", "armor", "ranged_weapons",
+                "weapons", "skills", "edges", "campaign"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -650,6 +650,20 @@ class TechLevelTestCase(TestCase):
             name="Basinet wfa").exists(), onek_items)
         self.assertEqual(add_helm.fields['item_quality'].queryset.filter(
             name="L1").exists(), frp_items)
+
+        add_existing_weapon = response.context['add_existing_weapon_form']
+        self.assertEqual(add_existing_weapon.fields['item'].queryset
+                         .filter(name="Greatsword L1").exists(), frp_items)
+        add_existing_ranged_weapon = response.context[
+                                     'add_existing_ranged_weapon_form']
+        self.assertEqual(add_existing_ranged_weapon.fields['item'].queryset
+                         .filter(name="Javelin L1").exists(), frp_items)
+        add_existing_helm = response.context['add_existing_helm_form']
+        self.assertEqual(add_existing_helm.fields['item'].queryset
+                         .filter(name="Basinet wfa L5").exists(), frp_items)
+        add_existing_armor = response.context['add_existing_armor_form']
+        self.assertEqual(add_existing_armor.fields['item'].queryset
+                         .filter(name="Plate mail L5").exists(), frp_items)
 
     def test_frp_tech_level(self):
         # Martel (FRP)

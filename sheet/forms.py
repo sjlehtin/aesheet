@@ -24,6 +24,10 @@ class ImportForm(forms.Form):
 EditSheetForm =  modelform_factory(Sheet, exclude=(
     'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects'))
 
+def pretty_name(name):
+    return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
+                                          name))).lower().capitalize()
+
 class AddWeaponForm(forms.ModelForm):
     item_class = Weapon
     item_queryset = Weapon.objects.all()
@@ -53,9 +57,6 @@ class AddWeaponForm(forms.ModelForm):
                       tech_level__in=self.instance.campaign.tech_levels.all())
             quality_queryset = quality_queryset.filter(
                 tech_level__in=self.instance.campaign.tech_levels.all())
-        def pretty_name(name):
-            return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
-                                                  name))).lower().capitalize()
         item_name = pretty_name(self.item_class.__name__)
         self.fields['item_template'] = forms.ModelChoiceField(
                                     queryset=template_queryset,
@@ -124,52 +125,55 @@ class AddHelmForm(AddArmorForm):
         self.instance.save()
 
 class AddExistingWeaponForm(forms.ModelForm):
-    weapon = forms.ModelChoiceField(queryset=Weapon.objects.all())
+    item_queryset = Weapon.objects.all()
+
+    def __init__(self, *args, **kwargs):
+        super(AddExistingWeaponForm, self).__init__(*args, **kwargs)
+        item_queryset = self.item_queryset
+        if self.instance.character.campaign:
+            item_queryset = item_queryset.filter(
+             base__tech_level__in=self.instance.campaign.tech_levels.all()
+             ).filter(
+             quality__tech_level__in=self.instance.campaign.tech_levels.all())
+
+        self.fields['item'] = forms.ModelChoiceField(
+            queryset=item_queryset,
+            label=pretty_name(item_queryset.model.__name__))
 
     class Meta:
         model = Sheet
         fields = ()
 
+
+    def add_item(self, item):
+        self.instance.weapons.add(item)
+
     def save(self):
-        self.instance.weapons.add(self.cleaned_data['weapon'])
+        item = self.cleaned_data['item']
+        if not item.pk:
+            item.save()
+        self.add_item(item)
         return self.instance
 
-class AddExistingRangedWeaponForm(forms.ModelForm):
-    weapon = forms.ModelChoiceField(queryset=RangedWeapon.objects.all())
+class AddExistingRangedWeaponForm(AddExistingWeaponForm):
+    item_queryset = RangedWeapon.objects.all()
 
-    class Meta:
-        model = Sheet
-        fields = ()
+    def add_item(self, item):
+        self.instance.ranged_weapons.add(item)
 
-    def save(self):
-        self.instance.ranged_weapons.add(self.cleaned_data['weapon'])
-        return self.instance
+class AddExistingArmorForm(AddExistingWeaponForm):
+    item_queryset = Armor.objects.filter(base__is_helm=False)
 
-class AddExistingArmorForm(forms.ModelForm):
-    armor = forms.ModelChoiceField(queryset=Armor.objects.filter(
-            base__is_helm=False))
-
-    class Meta:
-        model = Sheet
-        fields = ()
-
-    def save(self):
-        self.instance.armor = self.cleaned_data['armor']
+    def add_item(self, item):
+        self.instance.armor = item
         self.instance.save()
-        return self.instance
 
-class AddExistingHelmForm(forms.ModelForm):
-    helm = forms.ModelChoiceField(queryset=Armor.objects.filter(
-            base__is_helm=True))
+class AddExistingHelmForm(AddExistingWeaponForm):
+    item_queryset = Armor.objects.filter(base__is_helm=True)
 
-    class Meta:
-        model = Sheet
-        fields = ()
-
-    def save(self):
-        self.instance.helm = self.cleaned_data['helm']
+    def add_item(self, item):
+        self.instance.helm = item
         self.instance.save()
-        return self.instance
 
 class AddSpellEffectForm(forms.ModelForm):
     effect = forms.ModelChoiceField(queryset=SpellEffect.objects.all())
