@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
-                "ranged_weapons", "campaign"]
+                "ranged_weapons", "campaigns"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -186,7 +186,7 @@ class ItemHandling(TestCase):
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "test_skills", "campaign"]
+                "test_skills", "campaigns"]
 
     def setUp(self):
         self.client.login(username="admin", password="admin")
@@ -410,7 +410,7 @@ def get_fake_request(username):
 
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "assigned_edges", "campaign"]
+                "assigned_edges", "campaigns"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -527,7 +527,7 @@ class ModelBasics(TestCase):
         mana = ss.mana
 
 class Views(TestCase):
-    fixtures = ["campaign", "user", "char", "sheet", "edges", "basic_skills"]
+    fixtures = ["campaigns", "user", "char", "sheet", "edges", "basic_skills"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -567,7 +567,7 @@ class Views(TestCase):
         self.assertEqual(eff.fit, 40)
 
 class Importing(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaign"]
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -616,7 +616,7 @@ class Importing(TestCase):
 
 class TechLevelTestCase(TestCase):
     fixtures = ["user", "char", "sheet", "armor", "ranged_weapons",
-                "weapons", "skills", "edges", "campaign"]
+                "weapons", "skills", "edges", "campaigns"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
