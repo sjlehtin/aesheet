@@ -17,8 +17,7 @@ class ItemHandling(TestCase):
                 "ranged_weapons", "campaign"]
 
     def setUp(self):
-        self.client = Client()
-        self.client.login(username="admin", password="admin")
+        self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def add_weapon_and_verify(self, weapon_template, quality, weapon,
                               prefix="add-weapon", accessor=None):
@@ -616,30 +615,48 @@ class Importing(TestCase):
             self.assertRedirects(response, reverse(sheet.views.import_data))
 
 class TechLevelTestCase(TestCase):
-    fixtures = ["user", "char", "sheet", "weapons", "skills", "edges",
+    fixtures = ["user", "char", "sheet", "armor", "weapons", "skills", "edges",
                 "campaign"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
-    def verify_character(self, sheet_id, frp_skills,
-                         twok_skills, threek_skills):
+    def verify_character(self, sheet_id, frp_items, onek_items,
+                         twok_items, threek_items):
         response = self.client.get(reverse(sheet.views.sheet_detail,
                                            args=[sheet_id]))
         add_skill = response.context['add_skill_form']
         self.assertEqual(add_skill.fields['skill'].queryset.filter(
-            name="Active priest").exists(), frp_skills)
+            name="Active priest").exists(), frp_items)
         self.assertEqual(add_skill.fields['skill'].queryset.filter(
-            name="Electronics").exists(), twok_skills)
+            name="Electronics").exists(), twok_items)
         self.assertEqual(add_skill.fields['skill'].queryset.filter(
-            name="Machine empathy").exists(), threek_skills)
+            name="Machine empathy").exists(), threek_items)
+
+        add_weapon = response.context['add_weapon_form']
+        self.assertEqual(add_weapon.fields['item_template'].queryset.filter(
+            name="Voulge, 2h").exists(), onek_items)
+        self.assertEqual(add_weapon.fields['item_quality'].queryset.filter(
+            name="L1").exists(), frp_items)
+
+        add_armor = response.context['add_armor_form']
+        self.assertEqual(add_armor.fields['item_template'].queryset.filter(
+            name="Plate mail").exists(), onek_items)
+        self.assertEqual(add_armor.fields['item_quality'].queryset.filter(
+            name="L1").exists(), frp_items)
+
+        add_helm = response.context['add_helm_form']
+        self.assertEqual(add_helm.fields['item_template'].queryset.filter(
+            name="Basinet wfa").exists(), onek_items)
+        self.assertEqual(add_helm.fields['item_quality'].queryset.filter(
+            name="L1").exists(), frp_items)
 
     def test_frp_tech_level(self):
         # Martel (FRP)
-        self.verify_character(1, True, False, False)
+        self.verify_character(1, True, True, False, False)
         # Asa (MR)
-        self.verify_character(3, False, True, False)
+        self.verify_character(3, False, False, True, False)
         # Atlas (3K)
-        self.verify_character(4, False, True, True)
+        self.verify_character(4, False, False, True, True)
         # Jan (GZ)
-        self.verify_character(5, False, False, True)
+        self.verify_character(5, False, True, False, True)

@@ -58,6 +58,35 @@
     }
   }, 
   {
+    "pk": "Voulge, 2h", 
+    "model": "sheet.weapontemplate", 
+    "fields": {
+      "tech_level":3,
+      "weight": "4", 
+      "durability": 5, 
+      "roa": "0.7", 
+      "skill": null, 
+      "dice": 4, 
+      "skill2": null, 
+      "ccv_unskilled_modifier": -10, 
+      "type": "S", 
+      "description": "", 
+      "short_name": "Voulge, 2h", 
+      "extra_damage": 0, 
+      "dp": 12, 
+      "draw_initiative": 0, 
+      "notes": "", 
+      "ccv": 15, 
+      "num_dice": 2, 
+      "plus_leth": 1, 
+      "is_lance": false, 
+      "leth": 5, 
+      "base_skill": "Pole arm", 
+      "is_shield": false, 
+      "defense_leth": 6
+    }
+  }, 
+  {
     "pk": "Whip", 
     "model": "sheet.weapontemplate", 
     "fields": {
@@ -110,7 +139,7 @@
     "pk": "L1", 
     "model": "sheet.weaponquality", 
     "fields": {
-        "tech_level": 1,
+        "tech_level": 2,
       "versus_missile_modifier": 0, 
       "dp_multiplier": "2", 
       "short_name": "", 

@@ -3,7 +3,7 @@
     "pk": "Plate mail", 
     "model": "sheet.armortemplate", 
     "fields": {
-      "tech_level":1,
+      "tech_level":3,
             "encumbrance_class": 2, 
       "armor_h_p": "0", 
       "mod_vision": 0, 
@@ -68,7 +68,7 @@
     "pk": "Basinet wfa", 
     "model": "sheet.armortemplate", 
     "fields": {
-      "tech_level":1,
+      "tech_level":3,
             "encumbrance_class": 1, 
       "armor_h_p": "-2.5", 
       "mod_vision": 0, 
@@ -133,7 +133,7 @@
     "pk": "L1", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 5, 
       "mod_encumbrance_class": -1, 
       "short_name": "L1", 
@@ -157,7 +157,7 @@
     "pk": "L2", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 10, 
       "mod_encumbrance_class": -1, 
       "short_name": "L2", 
@@ -181,7 +181,7 @@
     "pk": "L3", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 15, 
       "mod_encumbrance_class": -1, 
       "short_name": "L3", 
@@ -205,7 +205,7 @@
     "pk": "L4", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 20, 
       "mod_encumbrance_class": -1, 
       "short_name": "L4", 
@@ -229,7 +229,7 @@
     "pk": "L5", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 25, 
       "mod_encumbrance_class": -1, 
       "short_name": "L5", 
@@ -253,7 +253,7 @@
     "pk": "L6", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 30, 
       "mod_encumbrance_class": -1, 
       "short_name": "L6", 
@@ -277,7 +277,7 @@
     "pk": "L7", 
     "model": "sheet.armorquality", 
     "fields": {
-      "tech_level":1,
+      "tech_level":2,
             "mod_climb": 35, 
       "mod_encumbrance_class": -1, 
       "short_name": "L7", 

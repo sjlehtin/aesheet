@@ -20,17 +20,6 @@ class ImportForm(forms.Form):
                                         "file to be uploaded, not both")
         return cd
 
-class AddExistingWeaponForm(forms.ModelForm):
-    weapon = forms.ModelChoiceField(queryset=Weapon.objects.all())
-
-    class Meta:
-        model = Sheet
-        fields = ()
-
-    def save(self):
-        self.instance.weapons.add(self.cleaned_data['weapon'])
-        return self.instance
-
 class AddWeaponForm(forms.ModelForm):
     item_class = Weapon
     item_queryset = Weapon.objects.all()
@@ -47,20 +36,28 @@ class AddWeaponForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         initial = kwargs.setdefault('initial', {})
+        template_queryset = self.template_queryset
+        quality_queryset = self.quality_queryset
+        # XXX should be done after super() call.
         if 'item_quality' not in initial:
-            quality = self.quality_queryset.filter(name="normal")
+            quality = quality_queryset.filter(name="normal")
             if quality:
                 initial['item_quality'] = quality[0]
         super(AddWeaponForm, self).__init__(*args, **kwargs)
+        if self.instance.character.campaign:
+            template_queryset = template_queryset.filter(
+                      tech_level__in=self.instance.campaign.tech_levels.all())
+            quality_queryset = quality_queryset.filter(
+                tech_level__in=self.instance.campaign.tech_levels.all())
         def pretty_name(name):
             return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
                                                   name))).lower().capitalize()
         item_name = pretty_name(self.item_class.__name__)
         self.fields['item_template'] = forms.ModelChoiceField(
-                                    queryset=self.template_queryset,
+                                    queryset=template_queryset,
                                     label=item_name + " template")
         self.fields['item_quality'] = forms.ModelChoiceField(
-                                    queryset=self.quality_queryset,
+                                    queryset=quality_queryset,
                                     label=item_name + " quality")
 
     class Meta:
@@ -119,8 +116,19 @@ class AddHelmForm(AddArmorForm):
     template_queryset = ArmorTemplate.objects.filter(is_helm=True)
 
     def add_item(self, item):
-        self.instance.helm= item
+        self.instance.helm = item
         self.instance.save()
+
+class AddExistingWeaponForm(forms.ModelForm):
+    weapon = forms.ModelChoiceField(queryset=Weapon.objects.all())
+
+    class Meta:
+        model = Sheet
+        fields = ()
+
+    def save(self):
+        self.instance.weapons.add(self.cleaned_data['weapon'])
+        return self.instance
 
 class AddExistingRangedWeaponForm(forms.ModelForm):
     weapon = forms.ModelChoiceField(queryset=RangedWeapon.objects.all())
@@ -131,8 +139,6 @@ class AddExistingRangedWeaponForm(forms.ModelForm):
 
     def save(self):
         self.instance.ranged_weapons.add(self.cleaned_data['weapon'])
-        self.instance.full_clean()
-        self.instance.save()
         return self.instance
 
 class AddExistingArmorForm(forms.ModelForm):

@@ -39,7 +39,7 @@
         "model": "sheet.campaign",
         "fields": {
             "name": "AEFRP",
-            "tech_levels": [1, 2]
+            "tech_levels": [1, 2, 3]
         }
     },
     {
