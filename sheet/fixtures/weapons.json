@@ -163,5 +163,14 @@
 	"base" : "Greatsword, 2h",
 	"quality" : "L1"
     }
-  }
+  },
+    {
+        "pk": 2,
+        "model" : "sheet.weapon",
+        "fields" : {
+            "name" : "Voulge",
+            "base" : "Voulge, 2h",
+            "quality" : "normal"
+        }
+    }
 ]

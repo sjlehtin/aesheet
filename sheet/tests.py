@@ -184,6 +184,14 @@ class ItemHandling(TestCase):
         response = self.client.get(det_url)
         self.assertContains(response, "No spell effects.")
 
+    def test_plus_leth(self):
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                   args=[2]))
+        weapon = response.context['char'].weapons[0]
+
+        self.assertEqual(weapon.name, "Voulge")
+        self.assertTrue(unicode(weapon.full.damage()).endswith("+1"))
+
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "test_skills", "campaigns"]

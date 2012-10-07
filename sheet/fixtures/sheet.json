@@ -21,7 +21,7 @@
             "description":"puppa",
             "armor":null,
             "character":2,
-            "weapons":[],
+            "weapons":[2],
             "helm":null,
             "spell_effects":[],
             "owner":1,
