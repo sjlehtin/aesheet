@@ -1177,9 +1177,11 @@ class Sheet(models.Model):
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
-    armor = models.ForeignKey(Armor, blank=True, null=True)
+    armor = models.ForeignKey(Armor, blank=True, null=True,
+                              on_delete=models.SET_NULL)
     helm = models.ForeignKey(Armor, blank=True, null=True,
-                             related_name='helm_for')
+                             related_name='helm_for',
+                             on_delete=models.SET_NULL)
 
     extra_weight_carried = models.IntegerField(
         default=0,
