@@ -22,6 +22,7 @@
             "armor":1,
             "character":2,
             "weapons":[2],
+            "ranged_weapons":[1],
             "helm":2,
             "spell_effects":[],
             "owner":1,

@@ -658,6 +658,8 @@ class BaseWeaponQuality(ExportedModel):
     leth = models.IntegerField(default=0)
     plus_leth = models.IntegerField(default=0)
 
+    bypass = models.IntegerField(default=0)
+
     durability = models.IntegerField(default=0)
     dp_multiplier = models.DecimalField(max_digits=6, decimal_places=4,
                                         default=1)
@@ -742,6 +744,8 @@ class BaseWeaponTemplate(ExportedModel):
     plus_leth = models.IntegerField(default=0)
 
     type = models.CharField(max_length=5, default="S")
+
+    bypass = models.IntegerField(default=0)
 
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
@@ -875,6 +879,10 @@ class Weapon(ExportedModel):
     def ccv(self):
         return self.base.ccv + self.quality.ccv
 
+    @property
+    def bypass(self):
+        return self.base.bypass + self.quality.bypass
+
     def roa(self):
         # XXX modifiers for size of weapon.
         return float(self.base.roa + self.quality.roa)
@@ -938,6 +946,10 @@ class RangedWeapon(ExportedModel):
     def to_hit(self):
         # XXX
         return self.quality.ccv
+
+    @property
+    def bypass(self):
+        return self.base.bypass + self.quality.bypass
 
     def damage(self):
         # XXX modifiers for size of weapon.

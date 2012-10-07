@@ -83,7 +83,8 @@
       "leth": 5, 
       "base_skill": "Pole arm", 
       "is_shield": false, 
-      "defense_leth": 6
+      "defense_leth": 6,
+        "bypass": -3
     }
   }, 
   {

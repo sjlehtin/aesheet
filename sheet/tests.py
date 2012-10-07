@@ -184,13 +184,19 @@ class ItemHandling(TestCase):
         response = self.client.get(det_url)
         self.assertContains(response, "No spell effects.")
 
-    def test_plus_leth(self):
+    def test_weapon_properties(self):
         response = self.client.get(reverse('sheet.views.sheet_detail',
                                    args=[2]))
         weapon = response.context['char'].weapons[0]
 
         self.assertEqual(weapon.name, "Voulge")
         self.assertTrue(unicode(weapon.full.damage()).endswith("+1"))
+        self.assertEqual(weapon.bypass, -3)
+
+        weapon = response.context['char'].ranged_weapons[0]
+
+        self.assertEqual(weapon.name, "Javelin L1")
+        self.assertEqual(weapon.bypass, -2)
 
     def test_armor_protection_level(self):
         response = self.client.get(reverse('sheet.views.sheet_detail',

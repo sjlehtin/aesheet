@@ -184,6 +184,10 @@ XP: {{ char.xp_used_stats }} +
 	{% endif %}
 	<div class="charge damage"><label>Charge:</label>
 	  {{ item.special.damage }}</div>
+      {% if item.bypass %}
+          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
+      {% endif %}
+      <div></div>
       </td>
         <td>{{ item.full.roa }}</td>
         {% for act in item.full.skill_checks %}
@@ -283,6 +287,9 @@ or
     <td class="weapon name">{{ item.item }}
       {% if not item.skilled %}
       <div class="unskilled">unskilled</div>
+      {% endif %}
+      {% if item.bypass %}
+          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
       {% endif %}
     </td>
     <td>{{ item.rof }}</td>
