@@ -33,7 +33,7 @@
     "model": "sheet.weapontemplate", 
     "fields": {
       "tech_level":1,
-            "weight": "1", 
+            "weight": "1.0",
       "durability": 7, 
       "roa": "1.1", 
       "skill": null, 
