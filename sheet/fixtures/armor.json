@@ -57,8 +57,10 @@
       "armor_t_s": "-5",
         "armor_h_pl": "0",
         "armor_t_pl": "3",
-        "armor_l_pl": "3",
-        "armor_a_pl": "3"
+        "armor_ll_pl": "3",
+        "armor_la_pl": "3",
+        "armor_rl_pl": "3",
+        "armor_ra_pl": "3"
     }
   }, 
   {
@@ -119,8 +121,10 @@
       "armor_t_s": "0",
         "armor_h_pl": "2",
         "armor_t_pl": "0",
-        "armor_l_pl": "0",
-        "armor_a_pl": "0"
+        "armor_ll_pl": "0",
+        "armor_la_pl": "0",
+        "armor_rl_pl": "0",
+        "armor_ra_pl": "0"
     }
   }, 
   {

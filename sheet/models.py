@@ -1025,8 +1025,10 @@ class ArmorTemplate(ExportedModel):
 
     armor_h_pl = models.IntegerField(default=0)
     armor_t_pl = models.IntegerField(default=0)
-    armor_l_pl = models.IntegerField(default=0)
-    armor_a_pl = models.IntegerField(default=0)
+    armor_ll_pl = models.IntegerField(default=0)
+    armor_rl_pl = models.IntegerField(default=0)
+    armor_la_pl = models.IntegerField(default=0)
+    armor_ra_pl = models.IntegerField(default=0)
 
     mod_fit = models.IntegerField(default=0)
     mod_ref = models.IntegerField(default=0)

@@ -8,7 +8,7 @@ def render_armor(armor, loc_desc):
         return ''
 
     descr = []
-    for stat in ['p', 's', 'b', 'r', 'dr', 'dp']:
+    for stat in ['p', 's', 'b', 'r', 'dr', 'dp', 'pl']:
         descr.append(unicode(getattr(armor,
                                      "armor_%s_%s" % (loc_desc, stat))))
 

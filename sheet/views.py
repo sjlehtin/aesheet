@@ -71,7 +71,7 @@ TODO = """
 
 - Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
-  
+
 NOTES on creating Jan:
 
 - you should be able to leave current stats empty on character creation,
