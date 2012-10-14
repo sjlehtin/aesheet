@@ -194,10 +194,11 @@ class RequestForm(forms.ModelForm):
         super(RequestForm, self).__init__(*args, **kwargs)
 
 class AddSkillForm(RequestForm):
+    item_queryset = Skill.objects.exclude(type="Language")
     # XXX Change this to use CharacterSkill as the model.
     def __init__(self, *args, **kwargs):
         super(AddSkillForm, self).__init__(*args, **kwargs)
-        queryset = Skill.objects.exclude(type="Language")
+        queryset = self.item_queryset
         if self.instance.campaign:
             queryset = queryset.filter(
                tech_level__in=self.instance.campaign.tech_levels.all())
@@ -252,8 +253,7 @@ class AddSkillForm(RequestForm):
         return self.instance
 
 class AddLanguageForm(AddSkillForm):
-    skill = forms.ModelChoiceField(
-        queryset=Skill.objects.filter(type="Language"))
+    item_queryset = Skill.objects.filter(type="Language")
 
 class AddEdgeForm(forms.ModelForm):
     edge = forms.ModelChoiceField(queryset=EdgeLevel.objects.all())
