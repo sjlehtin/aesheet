@@ -348,7 +348,7 @@ class Character(models.Model):
             self.xp_used_stats + self.xp_used_hero
 
     def __unicode__(self):
-        return "%s: %s %s" % (self.name, self.race, self.occupation)
+        return u"%s: %s %s" % (self.name, self.race, self.occupation)
 
     @property
     def initial_sp(self):
@@ -420,7 +420,7 @@ class Edge(ExportedModel):
         return ['skill', 'edgelevel']
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 SKILL_TYPES = [
     "Physical",
@@ -515,7 +515,7 @@ class Skill(ExportedModel):
                 'edgelevel']
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 class CharacterSkill(models.Model):
     character = models.ForeignKey(Character, related_name='skills')
@@ -571,7 +571,7 @@ class CharacterSkill(models.Model):
             getattr(sheet, "eff_" + self.skill.stat.lower())
 
     def __unicode__(self):
-        return "%s: %s %s" % (self.character, self.skill, self.level)
+        return u"%s: %s %s" % (self.character, self.skill, self.level)
 
     class Meta:
         ordering = ('skill__name', ) # XXX before explicit ordering.
@@ -623,7 +623,7 @@ class EdgeLevel(ExportedModel, StatModifier):
                 'characterlogentry']
 
     def __unicode__(self):
-        return "%s %s (%s)" % (self.edge, self.level, self.cost)
+        return u"%s %s (%s)" % (self.edge, self.level, self.cost)
 
 class EdgeSkillBonus(ExportedModel):
     """
@@ -637,14 +637,14 @@ class EdgeSkillBonus(ExportedModel):
     bonus = models.IntegerField(default=15)
 
     def __unicode__(self):
-        return "%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
+        return u"%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
 class CharacterEdge(models.Model):
     character = models.ForeignKey(Character, related_name='edges')
     edge = models.ForeignKey(EdgeLevel)
 
     def __unicode__(self):
-        return "%s: %s" % (self.character, self.edge)
+        return u"%s: %s" % (self.character, self.edge)
 
 class BaseWeaponQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
@@ -715,7 +715,7 @@ class WeaponDamage(object):
         else:
             plus_leth_str = ""
 
-        return "%sd%s%s/%d%s" % (
+        return u"%sd%s%s/%d%s" % (
             self.num_dice, self.dice,
             "%+d" % self.extra_damage if self.extra_damage else "",
             self.leth, plus_leth_str)
@@ -766,7 +766,7 @@ class BaseWeaponTemplate(ExportedModel):
         return ['weapon']
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 class WeaponTemplate(BaseWeaponTemplate):
     """
@@ -822,7 +822,7 @@ class Effect(StatModifier):
         abstract = True
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 class WeaponSpecialQuality(ExportedModel):
     """
@@ -838,7 +838,7 @@ class WeaponSpecialQuality(ExportedModel):
     # name "effects".
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 class ArmorSpecialQuality(ExportedModel):
     """
@@ -853,7 +853,7 @@ class ArmorSpecialQuality(ExportedModel):
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 class Weapon(ExportedModel):
     """
@@ -911,7 +911,7 @@ class Weapon(ExportedModel):
         quality = ""
         if self.quality.name != "Normal":
             quality = self.quality
-        return "%s %s" % (quality, self.base)
+        return u"%s %s" % (quality, self.base)
 
 Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
@@ -968,7 +968,7 @@ class RangedWeapon(ExportedModel):
         quality = ""
         if self.quality.name != "Normal":
             quality = self.quality
-        return "%s %s" % (quality, self.base)
+        return u"%s %s" % (quality, self.base)
 
     def ranges(self, sheet):
         return Range._make([self.base.range_pb, self.base.range_xs,
@@ -1054,7 +1054,7 @@ class ArmorTemplate(ExportedModel):
         return ['armor']
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return u"%s" % (self.name)
 
 class ArmorQuality(ExportedModel):
     """
@@ -1114,7 +1114,7 @@ class Armor(ExportedModel):
     def __unicode__(self):
         if self.name:
             return self.name
-        return "%s %s" % (self.base.name, self.quality)
+        return u"%s %s" % (self.base.name, self.quality)
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -1654,7 +1654,7 @@ class Sheet(models.Model):
         return getattr(self.character, v)
 
     def __unicode__(self):
-        return "sheet for %s: %s" % (self.character.name, self.description)
+        return u"sheet for %s: %s" % (self.character.name, self.description)
 
 
 class CharacterLogEntry(models.Model):
