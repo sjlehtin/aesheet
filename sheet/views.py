@@ -720,7 +720,7 @@ def import_text(data):
                         continue
                     ll = []
                     for name in value.split('|'):
-                        obj = field.rel.to.objects.get(name=name)
+                        obj = field.rel.to.objects.get(name=name.strip())
                         ll.append(obj)
                     value = ll
                     m2m_values[fieldname] = value

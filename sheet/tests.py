@@ -613,6 +613,33 @@ class Importing(TestCase):
                 self.assertEqual(rr[required_skills_index], "Unarmed combat")
                 break
 
+        response = self.client.post(det_url, {
+            'import_data' :
+            "Skill\n"
+            "name,tech_level,description,notes,can_be_defaulted,"
+            "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
+            "skill_cost_3,type,stat,required_edges,required_skills\n"
+            "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
+            "Unarmed combat|Surgery",
+            })
+        self.assertRedirects(response, reverse(sheet.views.import_data))
+        sk = Skill.objects.get(name="Surgical strike")
+        self.assertTrue(sk.required_skills.filter(name="Unarmed combat"
+                                                  ).exists())
+        self.assertTrue(sk.required_skills.filter(name="Surgery").exists())
+
+        # Try it again.
+        response = self.client.post(det_url, {
+            'import_data' :
+                "Skill\n"
+                "name,tech_level,description,notes,can_be_defaulted,"
+                "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
+                "skill_cost_3,type,stat,required_edges,required_skills\n"
+                "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
+                "Unarmed combat | Surgery",
+            })
+        self.assertRedirects(response, reverse(sheet.views.import_data))
+
     def test_import_export(self):
         for data_type in sheet.models.EXPORTABLE_MODELS:
             logger.info("Import test for %s", data_type)
