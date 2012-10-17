@@ -720,7 +720,12 @@ def import_text(data):
                         continue
                     ll = []
                     for name in value.split('|'):
-                        obj = field.rel.to.objects.get(name=name.strip())
+                        name = name.strip()
+                        try:
+                            obj = field.rel.to.objects.get(name=name)
+                        except field.rel.to.DoesNotExist:
+                            raise ValueError, ("Requirement `%s' does not "
+                                               "exist." % name)
                         ll.append(obj)
                     value = ll
                     m2m_values[fieldname] = value
