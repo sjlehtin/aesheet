@@ -1,8 +1,7 @@
 body { height : 100%; min-height : 100%; }
 html { height : 100%; min-height : 100%; }
 table td { vertical-align: top }
-th.combat { font-weight: bold; }
-td.defense { color: blue; }
+
 #sidebar { float : left; width : 8em; min-height: 100%; 
 	   background: #defdde; }
 #content { min-height: 100%; overflow: auto; }
@@ -32,8 +31,8 @@ border-collapse:collapse;
 div.armor th {
 width: 20px;
 padding: 4px;
-border: 1px hidden white;'
-border-bottom: 1px dotted gray; 
+border: 1px gray;
+border-style: hidden hidden dotted hidden;
 margin: 0px;
 text-align: center;
 }
@@ -45,6 +44,33 @@ padding: 4px;
 border: 1px dotted gray;
 margin: 0px;
 }
+
+table.combat {
+border: 1px dotted gray;
+border-collapse:collapse;
+}
+
+table.combat th {
+font-weight: bold;
+text-align: center;
+padding: 4px;
+border: 1px gray;
+border-style: hidden hidden dotted hidden;
+margin: 0px;
+}
+
+table.combat td {
+text-align: center;
+padding: 4px;
+border: 1px dotted gray;
+margin: 0px;
+}
+
+div.charge { color: red; }
+
+td.tohit { font-weight: bold; }
+
+.defense { color: blue; }
 
 a { padding-right: 1em;}
 ul {

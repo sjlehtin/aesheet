@@ -167,7 +167,7 @@ XP: {{ char.xp_used_stats }} +
          <th>{{ act }}</th>
       {% endfor %}
       <th colspan="5">Attack</th>
-      <th colspan="4">Defenses</th>
+      <th colspan="4" class="defense">Defenses</th>
        </tr>
 
 {% comment %}
@@ -186,11 +186,11 @@ XP: {{ char.xp_used_stats }} +
       {% if item.bypass %}
           <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
       {% endif %}
-      <div></div>
+      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
       </td>
         <td>{{ item.full.roa }}</td>
         {% for act in item.full.skill_checks %}
-           <td>{{ act }}</td>
+           <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.full.initiatives %}
            <td>{{ init|stringformat:"+d" }}</td>
@@ -200,8 +200,7 @@ XP: {{ char.xp_used_stats }} +
            <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td class="defense damage">{{ item.full.defense_damage }}</td>
-        <td>{{ item.durability }}</td>
-       <td class="edit_control">
+       <td class="edit_control" rowsspan=3">
            <div class="edit_control">
               <form action="{{ act }}" method="post">
                 {% csrf_token %}
@@ -214,7 +213,7 @@ XP: {{ char.xp_used_stats }} +
         <tr>
         <td>{{ item.pri.roa }}</td>
         {% for act in item.pri.skill_checks %}
-           <td>{{ act }}</td>
+           <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.pri.initiatives %}
            <td>{{ init|stringformat:"+d" }}</td>
@@ -228,7 +227,7 @@ XP: {{ char.xp_used_stats }} +
         <tr>
         <td>{{ item.sec.roa }}</td>
         {% for act in item.sec.skill_checks %}
-           <td>{{ act }}</td>
+           <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.sec.initiatives %}
            <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
@@ -270,14 +269,14 @@ or
 
 <h3>Ranged combat</h3>
 {% if char.ranged_weapons %}
-<table>
-  <tr class="ranged combat header">
+<table class="ranged combat">
+  <tr>
     <th />
     <th>ROF</th>
     {% for act in char.ranged_actions %}
     <th>{{ act }}</th>
     {% endfor %}
-    <th colspan="5">Attack</th>
+    <th colspan="4">Attack</th>
     <th>S/M/L/XL/E</th>
   </tr>
 
@@ -290,17 +289,17 @@ or
       {% if item.bypass %}
           <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
       {% endif %}
+      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
     </td>
     <td>{{ item.rof }}</td>
     {% for act in item.skill_checks %}
-    <td>{{ act.check|default:"" }}</td>
+    <td class="tohit">{{ act.check|default:"" }}</td>
     {% endfor %}
     {% for init in item.initiatives %}
     <td>{{ init|stringformat:"+d" }}</td>
     {% endfor %}
 
     <td>{{ item.damage }}</td>
-    <td>{{ item.durability }}</td>
     <td>
     {% with rr=item.ranges %}
     {{ rr.s }} /  {{ rr.m }} / {{ rr.l }} / {{ rr.xl }} / {{ rr.e }}
