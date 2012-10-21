@@ -24,6 +24,28 @@ div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 .note.positive { color: blue; }
 .note.negative { color: red; }
 
+div.armor table { 
+border: 1px dotted gray;
+border-collapse:collapse;
+}
+
+div.armor th {
+width: 20px;
+padding: 4px;
+border: 1px hidden white;'
+border-bottom: 1px dotted gray; 
+margin: 0px;
+text-align: center;
+}
+
+div.armor td { 
+text-align: center;
+width: 20px;
+padding: 4px;
+border: 1px dotted gray;
+margin: 0px;
+}
+
 a { padding-right: 1em;}
 ul {
     padding: 0;
