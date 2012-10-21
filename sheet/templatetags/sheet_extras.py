@@ -1,4 +1,5 @@
 from django import template
+from sheet.models import rounddown
 
 register = template.Library()
 
@@ -9,8 +10,9 @@ def render_armor(armor, loc_desc):
 
     descr = []
     for stat in ['p', 's', 'b', 'r', 'dr', 'dp', 'pl']:
-        descr.append(unicode(getattr(armor,
-                                     "armor_%s_%s" % (loc_desc, stat))))
+        value = getattr(armor, "armor_%s_%s" % (loc_desc, stat))
+        value = "%s%s" % ("-" if value < 0 else "", rounddown(abs(value)))
+        descr.append(unicode(value))
 
     return "<td>" + "</td><td>".join(descr) + "</td>"
 
