@@ -32,10 +32,16 @@ EXPORTABLE_MODELS = ['ArmorTemplate', 'ArmorEffect',
 EXPORTABLE_MODELS.sort()
 
 def roundup(dec):
-    return int(math.ceil(dec))
+    if dec < 0:
+        return int(math.floor(dec))
+    else:
+        return int(math.ceil(dec))
 
 def rounddown(dec):
-    return int(math.floor(dec))
+    if dec < 0:
+        return int(math.ceil(dec))
+    else:
+        return int(math.floor(dec))
 
 class ExportedModel(models.Model):
     """
