@@ -621,7 +621,8 @@ class EdgeLevel(ExportedModel, StatModifier):
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
     # XXX race requirement?
-    skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus')
+    skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
+                                           blank=True, null=True)
 
     @classmethod
     def dont_export(cls):
