@@ -271,6 +271,11 @@ class AddEdgeForm(forms.ModelForm):
         cs.save()
         return self.instance
 
+class EditEdgeLevelForm(forms.ModelForm):
+    class Meta:
+        model = EdgeLevel
+        exclude = ('skill_bonuses',)
+
 class RemoveGenericForm(forms.Form):
     def __init__(self, *args, **kwargs):
         item = kwargs.pop('item', None)

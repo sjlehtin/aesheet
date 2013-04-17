@@ -582,6 +582,7 @@ class AddSheetView(CreateView):
     success_url = reverse_lazy(sheets_index)
 
 class AddEdgeLevelView(AddSpellEffectView):
+    form_class = EditEdgeLevelForm
     model = EdgeLevel
 
 class AddEdgeSkillBonusView(AddSpellEffectView):
