@@ -1402,24 +1402,26 @@ class Sheet(models.Model):
     def ranged_ranges(self, weapon):
         return weapon.ranges(self)
 
+    @property
+    def _cc_eff_fit(self):
+        return (self.eff_fit +
+                (self.character.skill_level("Martial arts expertise") or 0) * 5
+                - 45)
+
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
-
-        # XXX Martial arts expertise.
-        #
-        # XXX fit under 45.
-        dmg.add_damage(rounddown((self.eff_fit - 45) /
+        dmg.add_damage(rounddown(self._cc_eff_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown((self.eff_fit - 45) /
+        dmg.add_leth(rounddown(self._cc_eff_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
-        dmg.add_damage(rounddown((self.eff_fit - 45) /
+        dmg.add_damage(rounddown(self._cc_eff_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown((self.eff_fit - 45) /
+        dmg.add_leth(rounddown(self._cc_eff_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
