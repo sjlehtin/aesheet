@@ -4,30 +4,18 @@ TODO = """
 + = done
 - = not done
 
-+ deployment to semeai.org
-++ postgresql backups
-++ saner bzr backups (branch all branches to make sure repositories remain
-   valid) (now in git)
-+ ranged weapons
-++ ranged weapon ammo special handling
 -- xl and e range dependent on user FIT
-+ logging in
 -- access controls
 --- marking sheet as only visible to self
 --- marking characters as only visible to self
 -- password change
-+ rest of the skills
-+ specializations with skill level 0 should be recognized (for
-  specializations with only one level especially)
 - rest of the edges
-- initiatives
 - wondrous items
 - inventory ?
 - magic item location (only one item to each location)
 + change log for sheet (stat modifications etc)
 -- skills
 -- edges
-+ editing sheet description
 - nicer fast edit of basic stats
 + stamina
 -- recovery
@@ -37,23 +25,15 @@ TODO = """
 -- recovery
 - code simplification
 - reordering skills
-+ stats for skill checks
 - character mugshot upload
 - senses
-+ charge damage
-+ print.css (basically, the whole printable button special handling is
-  unnecessary).
 - movement chart
 - save bonuses
 - encumbrance breakdown
 - spell skill checks
 - sheet styling
 
-+ immunity calculation (currently affected if, e.g., helm gives a
-  negative modifer to PSY)
-
 - weapon maximum damage based on durability.
-- martial arts expertise.
 
 - short description of spell effect (+50 FIT etc)
 - suspended weight
@@ -76,10 +56,6 @@ NOTES on creating Jan:
 
 - you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
-
-- Adding weapons from templates.
-+ Skill points!
-+ Specialty levels (treat zero as one)!
 
 Minor:
 
