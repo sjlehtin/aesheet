@@ -10,6 +10,7 @@ table td { vertical-align: top }
 #top li { display: inline; border-right: 1px;}
 #authbar { text-align : right; }
 #content { min-height: 100%; overflow: auto; }
+#skill-pane { font-size: 80%; }
 #right-pane { position: absolute;
 	     font-size: 80%;
 	     right: 5px;
@@ -52,6 +53,7 @@ margin: 0px;
 table.combat {
 border: 1px dotted gray;
 border-collapse:collapse;
+font-size: 85%;
 }
 
 table.combat th {
