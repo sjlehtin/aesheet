@@ -23,7 +23,7 @@ urlpatterns = patterns(
 
     # Specific sheets for the characters.
     url(r'^sheets/$', 'sheets_index'),
-    url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet_detail'),
+    url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet_detail', name='sheet_detail'),
 
     url(r'^sheets/import/$', 'import_data', name='import'),
     url(r'^sheets/import/success/$', 'import_data',
