@@ -21,7 +21,7 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
-    url(r'^accounts/logout/$', 'views.logout'),
+    url(r'^accounts/logout/$', 'views.logout', name="logout"),
 
-    url(r'^accounts/profile/$', 'views.profile'),
+    url(r'^accounts/profile/$', 'views.profile', name="profile"),
 )
