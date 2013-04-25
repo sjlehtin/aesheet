@@ -5,22 +5,17 @@
           href="{{ STATIC_URL}}style.css" />
     <link rel="stylesheet" type="text/css" 
           href="{{ STATIC_URL}}css/ui-lightness/jquery-ui-1.8.16.custom.css" />
+    <link rel="stylesheet" type="text/css" 
+          href="{{ STATIC_URL}}css/960.css" />
     <script src="{{ STATIC_URL}}jquery.js"></script>
     <script src="{{ STATIC_URL}}jquery-ui-1.8.16.custom.min.js"></script>
     <title>{% block title %}AE Sheet{% endblock %}</title>
 </head>
 
 <body>
-<div id="authbar">
-  {% if user.is_authenticated %}
-  Currently logged in: <a href="{{ ROOT_URL }}accounts/profile"> 
-                          {{ user }} </a>
-  <a href="{{ ROOT_URL }}accounts/logout">Logout</a>
-  {% endif %}
-</div>
-
-    <div id="sidebar">
-        {% block sidebar %}
+  <div id="top" class="container_12">
+    <div id="navigation" class="grid_6">
+        {% block navigation %}
         <ul>
             <li><a href="{% url sheet.views.sheets_index %}">Sheets</a></li>
             <li><a href="{% url sheet.views.characters_index %}">
@@ -33,8 +28,24 @@
         {% endblock %}
     </div>
 
-    <div id="content">
-        {% block content %}{% endblock %}
+    <div id="authbar" class="grid_6">
+      {% if user.is_authenticated %}
+        <ul>
+	  <li>
+      Currently logged in: <a href="{% url profile %}"> 
+        {{ user }} </a>
+	  </li>
+	  <li>
+      <a href="{% url logout %}">Logout</a>
+      </li>
+      </ul>
+      {% endif %}
+      
     </div>
+  </div>
+
+  <div id="content" class="container_12">
+    {% block content %}{% endblock %}
+  </div>
 </body>
 </html>

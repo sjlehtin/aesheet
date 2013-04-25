@@ -2,10 +2,14 @@ body { height : 100%; min-height : 100%; }
 html { height : 100%; min-height : 100%; }
 table td { vertical-align: top }
 
+#top { background: #defdde; }
 #sidebar { float : left; width : 8em; min-height: 100%; 
 	   background: #defdde; }
+#navigation { background: #defdde;  }
+#top ul { list-style-type: none; }
+#top li { display: inline; border-right: 1px;}
+#authbar { text-align : right; }
 #content { min-height: 100%; overflow: auto; }
-#authbar { text-align : right; width: 100%; }
 #right-pane { position: absolute;
 	     font-size: 80%;
 	     right: 5px;
@@ -102,6 +106,6 @@ table.data { font-size: 80%; }
 .data td:not(:first-child) { text-align: center; }
 
 @media print {
-    #sidebar,#authbar,.edit_control { display: none; }
+    #top,#navigation,#sidebar,#authbar,.edit_control { display: none; }
     body { font-size: 8pt; } 
 }
