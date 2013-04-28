@@ -28,6 +28,33 @@ div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 .note.positive { color: blue; }
 .note.negative { color: red; }
 
+.skill_name { position: relative; }
+.remove-container {
+    position: relative;
+    /* The following makes a larger container encompassing the remove button
+       for the hover effect.  Padding for empty space, compensate text
+       position with left and compensate right margin change with
+       negative margin. */
+    padding-left: 0.8em;
+    left: -0.8em;
+    margin-right: -0.8em;
+}
+.remove-container .remove {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+}
+
+.remove input[value="Remove"] {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent url('delete-small.png') no-repeat center top;
+    text-indent: -1000em;
+}
+
 div.armor table { 
 border: 1px dotted gray;
 border-collapse:collapse;
@@ -59,7 +86,7 @@ font-size: 85%;
 table.combat th {
 font-weight: bold;
 text-align: center;
-padding: 4px;
+padding: 2px;
 border: 1px gray;
 border-style: hidden hidden dotted hidden;
 margin: 0px;
@@ -67,7 +94,7 @@ margin: 0px;
 
 table.combat td {
 text-align: center;
-padding: 4px;
+padding: 2px;
 border: 1px dotted gray;
 margin: 0px;
 }

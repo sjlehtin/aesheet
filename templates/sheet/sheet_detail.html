@@ -178,7 +178,9 @@ XP: {{ char.xp_used_stats }} +
 
     {% for item in char.weapons %}
       <tr>
-      <td class="weapon name" rowspan="3">{{ item.item }}
+      <td class="weapon name" rowspan="3">
+      <div class="remove-container">
+          {{ item.item }}
 	{% if not item.skilled %}
 	<div class="unskilled">unskilled</div>
 	{% endif %}
@@ -188,6 +190,14 @@ XP: {{ char.xp_used_stats }} +
           <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
       {% endif %}
       <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
+          <div class="remove edit_control">
+              <form action="{{ act }}" method="post">
+                {% csrf_token %}
+                {{ item.remove_form }}
+              <input type="submit" value="Remove" />
+              </form>
+           </div>
+      </div>
       </td>
         <td>{{ item.full.roa }}</td>
         {% for act in item.full.skill_checks %}
@@ -201,15 +211,6 @@ XP: {{ char.xp_used_stats }} +
            <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td class="defense damage">{{ item.full.defense_damage }}</td>
-       <td class="edit_control" rowsspan=3">
-           <div class="edit_control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ item.remove_form }}
-              <input type="submit" value="Remove" />
-              </form>
-           </div>
-       </td> 
        </tr>
         <tr>
         <td>{{ item.pri.roa }}</td>
@@ -283,7 +284,9 @@ or
 
   {% for item in char.ranged_weapons %}
   <tr>
-    <td class="weapon name">{{ item.item }}
+    <td class="weapon name">
+    <div class="remove-container">
+        {{ item.item }}
       {% if not item.skilled %}
       <div class="unskilled">unskilled</div>
       {% endif %}
@@ -291,6 +294,14 @@ or
           <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
       {% endif %}
       <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
+      <div class="remove edit_control">
+        <form action="" method="post">
+          {% csrf_token %}
+          {{ item.remove_form }}
+          <input type="submit" value="Remove" />
+        </form>
+      </div>
+    </div>
     </td>
     <td>{{ item.rof }}</td>
     {% for act in item.skill_checks %}
@@ -306,15 +317,6 @@ or
     {{ rr.s }} /  {{ rr.m }} / {{ rr.l }} / {{ rr.xl }} / {{ rr.e }}
     {% endwith %}
     </td>
-    <td class="edit_control">
-      <div class="edit_control">
-        <form action="" method="post">
-          {% csrf_token %}
-          {{ item.remove_form }}
-          <input type="submit" value="Remove" />
-        </form>
-      </div>
-    </td> 
   </tr>
   {% endfor %}
 </table>
@@ -531,100 +533,126 @@ TODO:
 </div>
 </div>
 
-<div id="skill-pane" class="grid_4">
-  <div class="skills">
-    <h3>Skills</h3>
-    {% with skills=char.skills %}
-    {% if skills %}
-    <table>
-      {% for skill in skills %}
-      <tr class="{% spaceless %}
-		 indent{{skill.indent}}
+    <div id="skill-pane" class="grid_4">
+        <div class="skills">
+            <h3>Skills</h3>
+            {% with skills=char.skills %}
+                {% if skills %}
+                    <table>
+                        {% for skill in skills %}
+                            <tr class="{% spaceless %}
+		 indent{{ skill.indent }}
 		 {% if skill.skill.is_specialization %}
 		 specialization
 		 {% endif %}
 		 {% endspaceless %}">
-	<td>{{ skill.skill }}</td>
-	<td>
-	  <div class="edit_control">
-            <form action="{{ act }}" 
-		  method="post">
-              {% csrf_token %}
-              {{ skill.dec_level_form }}
-              <input type="submit" value="-" />
-            </form>
-	  </div>
-	</td>
-	<td>{{ skill.level }}</td>
-	<td>
-	  <div class="edit_control">
-            <form action="{{ act }}" 
-		  method="post">
-              {% csrf_token %}
-              {{ skill.add_level_form }}
-              <input type="submit" value="+" />
-            </form>
-	  </div>
-	</td>
-	<td>{{ skill.cost }}</td><td class="check">
-	  {% if not skill.skill.is_specialization %}
-	  {{ skill.check }}{% endif %}</td>
-	<td>
-	  <div class="edit_control">
-            <form action="{{ act }}" 
-		  method="post">
-              {% csrf_token %}
-              {{ skill.remove_form }}
-              <input type="submit" value="Remove" />
-            </form>
-	  </div>
-	</td>
-	<td>{{ skill.comments }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-    <div>
-        SP: {{ char.initial_sp }} + {{ char.edge_sp }} + {{ char.gained_sp }} =
-        {{ char.total_sp }} / {% sum_sp_cost skills %}
-    </div>
-    <div>Age SP: {{ char.age_sp }} </div>
-        {% with char.optimized_age_sp as opt %}
-        <div>Munch munch: +{{  opt.lrn }} LRN, + {{ opt.int }} INT</div>
-        {% endwith %}
-    {% else %}
-    <p>No skills.</p>
-    {% endif %}
-    {% endwith %}
+                                <td class="skill_name">
+                                    <div class="remove-container">
+                                        <div class="remove edit_control">
+                                            <form action="{{ act }}"
+                                                  method="post">
+                                                {% csrf_token %}
+                                                {{ skill.remove_form }}
+                                                <input type="submit"
+                                                       value="Remove"/>
+                                            </form>
+                                        </div>
+                                        {{ skill.skill }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="edit_control">
+                                        <form action="{{ act }}"
+                                              method="post">
+                                            {% csrf_token %}
+                                            {{ skill.dec_level_form }}
+                                            <input type="submit" value="-"/>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td>{{ skill.level }}</td>
+                                <td>
+                                    <div class="edit_control">
+                                        <form action="{{ act }}"
+                                              method="post">
+                                            {% csrf_token %}
+                                            {{ skill.add_level_form }}
+                                            <input type="submit" value="+"/>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td>{{ skill.cost }}</td>
+                                <td class="check">
+                                    {% if not skill.skill.is_specialization %}
+                                        {{ skill.check }}{% endif %}</td>
+                                <td>{{ skill.comments }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <div>
+                        SP: {{ char.initial_sp }} + {{ char.edge_sp }}
+                        + {{ char.gained_sp }} =
+                        {{ char.total_sp }} / {% sum_sp_cost skills %}
+                    </div>
+                    <div>Age SP: {{ char.age_sp }} </div>
+                    {% with char.optimized_age_sp as opt %}
+                        <div>Munch munch: +{{ opt.lrn }} LRN, + {{ opt.int }}
+                            INT
+                        </div>
+                    {% endwith %}
+                {% else %}
+                    <p>No skills.</p>
+                {% endif %}
+            {% endwith %}
 
-    <div id="add_skill" class="edit_control">
-      <label for="add_skill_form"><strong>Add a skill</strong></label>
-      <form action="{{ act }}" method="post" 
-	    id="add_skill_form">{% csrf_token %}
-	<table>
-	  {{ add_skill_form.as_table }}
-	</table>
-	<input type="submit" value="Add" />
-      </form>
-    </div>
-    <div id="add_lang" class="edit_control">
-      <label for="add_lang_form"><strong>Add a language skill</strong></label>
-      <form action="{{ act }}" method="post" 
-	    id="add_lang_form">{% csrf_token %}
-	<table>
-	  {{ add_lang_form.as_table }}
-	</table>
-	<input type="submit" value="Add" />
-      </form>
-    </div>
-  </div>
+            <div id="add_skill" class="edit_control">
+                <label for="add_skill_form"><strong>Add a skill</strong></label>
 
-  <div id="log-entries">
-    <ul>
-    {% for entry in char.character.characterlogentry_set.all %}
-    <li>{{ entry.timestamp|naturaltime }}: {{ entry }}</li>
-    {% endfor %}
-    </ul>
-  </div>
-</div>
+                <form action="{{ act }}" method="post"
+                      id="add_skill_form">{% csrf_token %}
+                    <table>
+                        {{ add_skill_form.as_table }}
+                    </table>
+                    <input type="submit" value="Add"/>
+                </form>
+            </div>
+            <div id="add_lang" class="edit_control">
+                <label for="add_lang_form"><strong>Add a language skill</strong></label>
+
+                <form action="{{ act }}" method="post"
+                      id="add_lang_form">{% csrf_token %}
+                    <table>
+                        {{ add_lang_form.as_table }}
+                    </table>
+                    <input type="submit" value="Add"/>
+                </form>
+            </div>
+        </div>
+
+        <div id="log-entries">
+            <ul>
+                {% for entry in char.character.characterlogentry_set.all %}
+                    <li>{{ entry.timestamp|naturaltime }}: {{ entry }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$(document).ready(function () {
+
+    var findRemoves = function (e) { return $(e)
+            .find('.remove'); };
+    var hideRemoves = function (e) { findRemoves(e).hide(); };
+    var showRemoves = function (e) { findRemoves(e).show(); };
+
+    $('.remove-container').find('.remove').hide().css('opacity', '0.5').end()
+            .hover(function () { showRemoves(this); },
+                   function () { hideRemoves(this); });
+});
+</script>
 
 {% endblock %}
