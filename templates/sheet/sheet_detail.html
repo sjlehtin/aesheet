@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url from future %}
 {% load sheet_extras %}
 {% load humanize %}
 
@@ -19,18 +20,18 @@
 
 <div class="edit_control">
   <p>
-    <a href="{% url edit_character char.character.id %}">
+    <a href="{% url "edit_character" char.character.id %}">
       Edit base character</a>
   </p>
   <p>
-    <a href="{% url edit_sheet char.id %}">
+    <a href="{% url "edit_sheet" char.id %}">
       Edit base sheet</a>
   </p>
 </div>
 
 <div class="stats">
 
-{% url sheet.views.sheet_detail char.id as act %}
+{% url "sheet.views.sheet_detail" char.id as act %}
 
 <table class="base">
 {% for stat in char.stats %}
@@ -266,7 +267,7 @@ XP: {{ char.xp_used_stats }} +
 <input type="submit" value="Add" />
 </form>
 or
-    <a href="{% url add_weapon %}">Create a new weapon</a>
+    <a href="{% url "add_weapon" %}">Create a new weapon</a>
 </div>
 
 <h3>Ranged combat</h3>
@@ -344,7 +345,7 @@ or
 <input type="submit" value="Add" />
 </form>
 or
-    <a href="{% url add_ranged_weapon %}">Create a new ranged weapon</a>
+    <a href="{% url "add_ranged_weapon" %}">Create a new ranged weapon</a>
 </div>
 
 <h3>Spell effects</h3>
@@ -376,7 +377,7 @@ or
 <input type="submit" value="Add" />
 </form>
 
-<a href="{% url add_spell_effect %}">Create new spell effect</a>
+<a href="{% url "add_spell_effect" %}">Create new spell effect</a>
 </div>
 
 <h3>Edges</h3>
@@ -418,9 +419,9 @@ or
 </table>
 <input type="submit" value="Add" />
 </form>
-<a href="{% url add_edge %}">Create new edge</a>
-<a href="{% url add_edge_level %}">Create new edge level</a>
-<a href="{% url add_edge_skill_bonus %}">Create new skill bonus
+<a href="{% url "add_edge" %}">Create new edge</a>
+<a href="{% url "add_edge_level" %}">Create new edge level</a>
+<a href="{% url "add_edge_skill_bonus" %}">Create new skill bonus
   for edge level</a>
 </div>
 
@@ -466,7 +467,7 @@ or
 <input type="submit" value="Add" />
 </form>
 or
-    <a href="{% url add_armor %}">Create a new helm</a>
+    <a href="{% url "add_armor" %}">Create a new helm</a>
 </div>
 
 <h3>Armor</h3>
@@ -510,7 +511,7 @@ or
 <input type="submit" value="Add" />
 </form>
 or
-<a href="{% url add_armor %}">Create a new armor</a>
+<a href="{% url "add_armor" %}">Create a new armor</a>
 </div>
 
 <div>Missing skills: {{ char.missing_skills }}</div>

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load url from future %}
 
 {% block title %} Import data {% endblock %}
 
@@ -7,7 +8,7 @@
 <p><strong>{{message}}</strong></p>
 {% endif %}
 
-<form action="{% url import %}" method="post" 
+<form action="{% url "import" %}" method="post" 
       enctype="multipart/form-data">
   {% csrf_token %}
 Choose either import method:
@@ -39,10 +40,10 @@ changed.
 
 <dl>
 {% for item in types %}
-<dt><a href="{% url sheet.views.browse item.name %}">{{ item.name}}</a></dt>
+<dt><a href="{% url "sheet.views.browse" item.name %}">{{ item.name}}</a></dt>
 {% if item.doc %}<dd>{{ item.doc }}</dd>{% endif %}
 <dd><label>Fields:</label> <span style="font-style: italic; ">{{ item.fields|join:", " }}</span></dd>
-<dd><a href="{% url sheet.views.export_data item.name %}">Download</a></dd>
+<dd><a href="{% url "sheet.views.export_data" item.name %}">Download</a></dd>
 {% endfor %}
 </dl>
 </div>

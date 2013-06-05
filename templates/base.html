@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load url from future %}
 <html lang="en">
 <head>
     <link rel="stylesheet" type="text/css" 
@@ -17,12 +18,12 @@
     <div id="navigation" class="grid_6">
         {% block navigation %}
         <ul>
-            <li><a href="{% url sheet.views.sheets_index %}">Sheets</a></li>
-            <li><a href="{% url sheet.views.characters_index %}">
+            <li><a href="{% url "sheet.views.sheets_index" %}">Sheets</a></li>
+            <li><a href="{% url "sheet.views.characters_index" %}">
 		Characters</a></li>
-            <li><a href="{% url import %}">
+            <li><a href="{% url "import" %}">
 		Import/export data</a></li>
-            <li><a href="{% url sheet.views.version_history %}">
+            <li><a href="{% url "sheet.views.version_history" %}">
 		ChangeLog</a></li>
         </ul>
         {% endblock %}
@@ -32,11 +33,11 @@
       {% if user.is_authenticated %}
         <ul>
 	  <li>
-      Currently logged in: <a href="{% url profile %}"> 
+      Currently logged in: <a href="{% url "profile" %}"> 
         {{ user }} </a>
 	  </li>
 	  <li>
-      <a href="{% url logout %}">Logout</a>
+      <a href="{% url "logout" %}">Logout</a>
       </li>
       </ul>
       {% endif %}

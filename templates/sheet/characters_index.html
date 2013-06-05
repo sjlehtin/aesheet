@@ -1,17 +1,18 @@
 {% extends "base.html" %}
+{% load url from future %}
 
 {% block title %} Character list {% endblock %}
 
 {% block content %}
 
 <p>
-<a href="{% url add_char %}">Add a new character</a>
+<a href="{% url "add_char" %}">Add a new character</a>
 </p>
 
 {% if all_characters %}
     <ul>
     {% for char in all_characters %}
-        <li><a href="{% url edit_character char.id %}">
+        <li><a href="{% url "edit_character" char.id %}">
              {{ char }}</a></li>
     {% endfor %}
     </ul>
