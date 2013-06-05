@@ -1,7 +1,6 @@
 # Django settings for aesheet project.
 
 import os
-import loginreqd
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 DEBUG = True
