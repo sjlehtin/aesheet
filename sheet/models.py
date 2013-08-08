@@ -845,7 +845,7 @@ class WeaponSpecialQuality(ExportedModel):
     # name "effects".
 
     def __unicode__(self):
-        return u"%s" % (self.name)
+        return u"WSQ: %s" % (self.name)
 
 class ArmorSpecialQuality(ExportedModel):
     """
@@ -860,7 +860,7 @@ class ArmorSpecialQuality(ExportedModel):
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
     def __unicode__(self):
-        return u"%s" % (self.name)
+        return u"ASQ: %s" % (self.name)
 
 class Weapon(ExportedModel):
     """
@@ -1099,7 +1099,7 @@ class ArmorQuality(ExportedModel):
         return ['armor']
 
     def __unicode__(self):
-        return self.name
+        return u"AQ:" + self.name
 
 class Armor(ExportedModel):
     """
@@ -1153,20 +1153,62 @@ class Armor(ExportedModel):
 class WeaponEffect(ExportedModel, Effect):
     """
     """
-    weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects")
+    weapon = models.ForeignKey(WeaponSpecialQuality, related_name="effects",
+                               help_text="Must be present.  "
+                                         "The specified quality will receive "
+                                         "the effect.",
+                               verbose_name="Weapon special quality")
 
     @classmethod
     def dont_export(cls):
         return ['weapon']
+
+    def __unicode__(self):
+        return u"WE:" + self.name
 
 class ArmorEffect(ExportedModel, Effect):
     """
     """
     armor = models.ForeignKey(ArmorSpecialQuality, related_name="effects")
 
+    # Extra protection provided by the special quality.
+    armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_t_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ll_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_la_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_rl_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+
     @classmethod
     def dont_export(cls):
         return ['armor']
+
+    def __unicode__(self):
+        return u"AE:" + self.name
 
 class SpellEffect(ExportedModel, Effect):
     """
@@ -1174,6 +1216,21 @@ class SpellEffect(ExportedModel, Effect):
     @classmethod
     def dont_export(cls):
         return ['sheet']
+
+class MiscellaneousItem(ExportedModel):
+    name = models.CharField(max_length=256, unique=True)
+
+    tech_level = models.ForeignKey(TechLevel)
+
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+
+    armor_qualities = models.ManyToManyField(ArmorSpecialQuality, blank=True)
+    weapon_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
@@ -1183,6 +1240,7 @@ class Sheet(models.Model):
 
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
+    miscellaneous_items = models.ManyToManyField(MiscellaneousItem, blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 

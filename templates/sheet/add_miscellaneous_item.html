@@ -1,0 +1,30 @@
+{% extends "sheet/gen_edit.html" %}
+{% load url from future %}
+
+{% block title %} Add a miscellaneous item {% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+    <p>
+    When adding a new effect for an item, the special quality needs to be
+        created first, then the effect which will be attached to the special
+        quality.
+    </p>
+    <p>
+    Example: Adding a ring of protection, you would first create the special
+    quality "Protection L2", then create the effect with the intended armor
+    which would be added to existing special quality "Protection L2".
+    </p>
+    <p>
+    This will probably be stream-lined a bit later.
+    </p>
+    <a href="{% url "add_weapon_special_quality" %}">Create a new weapon special
+        quality </a>
+    <a href="{% url "add_weapon_effect" %}">Create a new weapon effect </a>
+    <a href="{% url "add_armor_special_quality" %}">Create a new armor special
+        quality </a>
+    </a>
+    <a href="{% url "add_armor_effect" %}">Create a new armor effect </a>
+
+{% endblock %}

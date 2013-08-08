@@ -127,14 +127,17 @@ class AddHelmForm(AddArmorForm):
 class AddExistingWeaponForm(forms.ModelForm):
     item_queryset = Weapon.objects.all()
 
+    def _filter_tech_level(self, qs):
+        return qs.filter(
+             base__tech_level__in=self.instance.campaign.tech_levels.all()
+             ).filter(
+             quality__tech_level__in=self.instance.campaign.tech_levels.all())
+
     def __init__(self, *args, **kwargs):
         super(AddExistingWeaponForm, self).__init__(*args, **kwargs)
         item_queryset = self.item_queryset
         if self.instance.character.campaign:
-            item_queryset = item_queryset.filter(
-             base__tech_level__in=self.instance.campaign.tech_levels.all()
-             ).filter(
-             quality__tech_level__in=self.instance.campaign.tech_levels.all())
+            item_queryset = self._filter_tech_level(item_queryset)
 
         self.fields['item'] = forms.ModelChoiceField(
             queryset=item_queryset,
@@ -174,6 +177,18 @@ class AddExistingHelmForm(AddExistingWeaponForm):
     def add_item(self, item):
         self.instance.helm = item
         self.instance.save()
+
+
+class AddExistingMiscellaneousItemForm(AddExistingWeaponForm):
+    item_queryset = MiscellaneousItem.objects.all()
+
+    def _filter_tech_level(self, qs):
+        return qs.filter(
+             tech_level__in=self.instance.campaign.tech_levels.all())
+
+    def add_item(self, item):
+        self.instance.miscellaneous_items.add(item)
+
 
 class AddSpellEffectForm(forms.ModelForm):
     effect = forms.ModelChoiceField(queryset=SpellEffect.objects.all())

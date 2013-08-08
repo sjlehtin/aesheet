@@ -9,6 +9,7 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
                     'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
 admin.site.register(Armor)
+admin.site.register(ArmorEffect)
 admin.site.register(ArmorQuality)
 admin.site.register(ArmorTemplate)
 admin.site.register(ArmorSpecialQuality)
@@ -21,6 +22,7 @@ admin.site.register(EdgeSkillBonus)
 admin.site.register(Sheet)
 admin.site.register(TechLevel)
 admin.site.register(Campaign)
+admin.site.register(MiscellaneousItem)
 
 class SkillAdmin(admin.ModelAdmin):
     list_display = ('name', 'tech_level','description', 'notes',

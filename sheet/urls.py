@@ -44,7 +44,9 @@ for name in ["add_sheet", "add_edge", "add_edge_level", "add_edge_skill_bonus",
              "add_armor_special_quality",
              "add_weapon", "add_weapon_template","add_weapon_quality",
              "add_weapon_special_quality",
-             "add_ranged_weapon", "add_ranged_weapon_template", ]:
+             "add_armor_effect", "add_weapon_effect",
+             "add_ranged_weapon", "add_ranged_weapon_template",
+             "add_miscellaneous_item"]:
     urlpatterns += patterns('sheet.views',
                             url("^sheets/%s/" % name,
                                 class_from_name(name).as_view(),

@@ -246,6 +246,39 @@ class SkillWrap(RemoveWrap):
     def check(self):
         return self.item.check(self.sheet)
 
+class ArmorWrap(RemoveWrap):
+    def __init__(self, item, sheet, type):
+        super(ArmorWrap, self).__init__(item, type)
+        self.sheet = sheet
+
+    def __getattr__(self, v):
+        # pass through all attribute references not handled by us to
+        # base character.
+        if v.startswith("_"):
+            raise AttributeError()
+
+        if v.startswith("armor_"):
+            value = 0
+            # TODO: Rethink, this is approaching the ludicrous.
+            for misc_item in self.sheet.miscellaneous_items.all():
+                logger.debug("getting " + v)
+                for quality in misc_item.armor_qualities.all():
+                    for effect in quality.effects.all():
+                        effect_value = getattr(effect, v, 0)
+                        logger.debug("got {0}: {1}".format(v, effect_value))
+                        value += effect_value
+
+            original_value = 0
+            if self.item:
+                original_value = getattr(self.item, v)
+                value += original_value
+            logger.debug("Value for {value}: {current}, Orig: {original}".format(
+                value=v, current=value, original=original_value))
+            return value
+        else:
+            return getattr(self.item, v)
+
+
 class SheetView(object):
     def __init__(self, sheet):
         self.sheet = sheet
@@ -331,15 +364,15 @@ class SheetView(object):
 
     @property
     def armor(self):
-        if not self.sheet.armor:
-            return
-        return RemoveWrap(self.sheet.armor, type="Armor")
+        return ArmorWrap(self.sheet.armor, sheet=self.sheet, type="Armor")
 
     @property
     def helm(self):
-        if not self.sheet.helm:
-            return
-        return RemoveWrap(self.sheet.helm, type="Helm")
+        return ArmorWrap(self.sheet.helm, sheet=self.sheet, type="Helm")
+
+    @property
+    def miscellaneous_items(self):
+        return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -369,6 +402,9 @@ def process_sheet_change_request(request, sheet):
         elif item_type == "SpellEffect":
             item = get_object_or_404(SpellEffect, pk=item)
             sheet.spell_effects.remove(item)
+        elif item_type == "MiscellaneousItem":
+            item = get_object_or_404(MiscellaneousItem, pk=item)
+            sheet.miscellaneous_items.remove(item)
         elif item_type == "CharacterSkill":
             item = get_object_or_404(CharacterSkill, pk=item)
             item.delete()
@@ -452,6 +488,9 @@ def sheet_detail(request, sheet_id=None):
         data, instance=sheet, prefix="add-armor")
     forms['add_existing_weapon_form'] = AddExistingWeaponForm(
         data, instance=sheet, prefix="add-existing-weapon")
+    forms['add_existing_miscellaneous_item_form'] = (
+        AddExistingMiscellaneousItemForm(
+        data, instance=sheet, prefix="add-existing-weapon"))
     forms['add_weapon_form'] = AddWeaponForm(data, instance=sheet,
                                              prefix="add-weapon")
     forms['new_helm_form'] = HelmForm(data, prefix="new-helm")
@@ -521,6 +560,18 @@ class AddWeaponQualityView(AddWeaponView):
 
 class AddWeaponSpecialQualityView(AddWeaponView):
     model = WeaponSpecialQuality
+
+class AddMiscellaneousItemView(AddWeaponView):
+    model = MiscellaneousItem
+    template_name = 'sheet/add_miscellaneous_item.html'
+
+class AddWeaponEffectView(AddWeaponView):
+    model = WeaponEffect
+    template_name = 'sheet/gen_edit.html'
+
+class AddArmorEffectView(AddWeaponView):
+    model = ArmorEffect
+    template_name = 'sheet/gen_edit.html'
 
 class EditCharacterView(UpdateView):
     form_class = CharacterForm
