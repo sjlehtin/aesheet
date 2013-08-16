@@ -624,6 +624,7 @@ class AddArmorQualityView(AddSpellEffectView):
 
 class AddArmorSpecialQualityView(AddSpellEffectView):
     model = ArmorSpecialQuality
+    template_name = 'sheet/add_armor_special_quality.html'
 
 def get_data_rows(results, fields):
     """
