@@ -721,3 +721,18 @@ class TechLevelTestCase(TestCase):
         self.verify_character(4, False, False, True, True)
         # Jan (GZ)
         self.verify_character(5, False, True, False, True)
+
+class CreateURLTestCase(TestCase):
+    fixtures = ['user']
+
+    def setUp(self):
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+
+    def test_urls(self):
+        from sheet.urls import CREATE_NAMES
+        for name in CREATE_NAMES:
+            url = reverse(name)
+            logger.info("Trying {0}...".format(url))
+            response = self.client.get(url)
+            self.assertContains(response, "submit",
+                                msg_prefix="{0} has errors".format(name))
