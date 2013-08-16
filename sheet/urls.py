@@ -1,8 +1,6 @@
 from django.conf.urls import patterns, url
-from sheet.views import (AddSpellEffectView, AddEdgeView, EditCharacterView,
-                         AddCharacterView, AddSheetView, EditSheetView,
-                         AddEdgeLevelView, AddRangedWeaponTemplateView,
-                         AddArmorTemplateView, AddEdgeSkillBonusView)
+from sheet.views import (AddSpellEffectView, EditCharacterView,
+                         AddCharacterView, EditSheetView)
 import sheet.views
 
 urlpatterns = patterns(
@@ -38,15 +36,18 @@ def class_from_name(name):
     components = [cc.capitalize() for cc in components]
     return getattr(sheet.views, ''.join(components) + "View")
 
-for name in ["add_sheet", "add_edge", "add_edge_level", "add_edge_skill_bonus",
-             "add_spell_effect",
-             "add_armor", "add_armor_template", "add_armor_quality",
-             "add_armor_special_quality",
-             "add_weapon", "add_weapon_template","add_weapon_quality",
-             "add_weapon_special_quality",
-             "add_armor_effect", "add_weapon_effect",
-             "add_ranged_weapon", "add_ranged_weapon_template",
-             "add_miscellaneous_item"]:
+
+CREATE_NAMES = ["add_sheet", "add_edge", "add_edge_level",
+                "add_edge_skill_bonus", "add_spell_effect", "add_armor",
+                "add_armor_template",
+                "add_armor_quality", "add_armor_special_quality", "add_weapon",
+                "add_weapon_template", "add_weapon_quality",
+                "add_weapon_special_quality", "add_ranged_weapon",
+                "add_ranged_weapon_template", "add_miscellaneous_item"]
+
+CREATE_URLS = ["sheets/{0}/".format(name) for name in CREATE_NAMES]
+
+for name in CREATE_NAMES:
     urlpatterns += patterns('sheet.views',
                             url("^sheets/%s/" % name,
                                 class_from_name(name).as_view(),

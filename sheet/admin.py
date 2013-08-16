@@ -9,7 +9,6 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
                     'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
 admin.site.register(Armor)
-admin.site.register(ArmorEffect)
 admin.site.register(ArmorQuality)
 admin.site.register(ArmorTemplate)
 admin.site.register(ArmorSpecialQuality)
@@ -33,7 +32,6 @@ class SkillAdmin(admin.ModelAdmin):
 
 admin.site.register(Skill, SkillAdmin)
 admin.site.register(SpellEffect)
-admin.site.register(WeaponEffect)
 admin.site.register(WeaponSpecialQuality)
 admin.site.register(WeaponTemplate, WeaponTemplateAdmin)
 admin.site.register(Weapon)

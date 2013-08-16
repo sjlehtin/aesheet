@@ -8,305 +8,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'MiscellaneousItem'
-        db.create_table(u'sheet_miscellaneousitem', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=256)),
-            ('tech_level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sheet.TechLevel'])),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('notes', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal(u'sheet', ['MiscellaneousItem'])
 
-        # Adding M2M table for field armor_qualities on 'MiscellaneousItem'
-        m2m_table_name = db.shorten_name(u'sheet_miscellaneousitem_armor_qualities')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('miscellaneousitem', models.ForeignKey(orm[u'sheet.miscellaneousitem'], null=False)),
-            ('armorspecialquality', models.ForeignKey(orm[u'sheet.armorspecialquality'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['miscellaneousitem_id', 'armorspecialquality_id'])
-
-        # Adding M2M table for field weapon_qualities on 'MiscellaneousItem'
-        m2m_table_name = db.shorten_name(u'sheet_miscellaneousitem_weapon_qualities')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('miscellaneousitem', models.ForeignKey(orm[u'sheet.miscellaneousitem'], null=False)),
-            ('weaponspecialquality', models.ForeignKey(orm[u'sheet.weaponspecialquality'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['miscellaneousitem_id', 'weaponspecialquality_id'])
-
-        # Adding M2M table for field miscellaneous_items on 'Sheet'
-        m2m_table_name = db.shorten_name(u'sheet_sheet_miscellaneous_items')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('sheet', models.ForeignKey(orm[u'sheet.sheet'], null=False)),
-            ('miscellaneousitem', models.ForeignKey(orm[u'sheet.miscellaneousitem'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['sheet_id', 'miscellaneousitem_id'])
-
-        # Deleting field 'ArmorSpecialQuality.description'
-        db.delete_column(u'sheet_armorspecialquality', 'description')
-
-        # Adding field 'ArmorSpecialQuality.armor_h_p'
-        db.add_column(u'sheet_armorspecialquality', 'armor_h_p',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_h_s'
-        db.add_column(u'sheet_armorspecialquality', 'armor_h_s',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_h_b'
-        db.add_column(u'sheet_armorspecialquality', 'armor_h_b',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_h_r'
-        db.add_column(u'sheet_armorspecialquality', 'armor_h_r',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_h_dr'
-        db.add_column(u'sheet_armorspecialquality', 'armor_h_dr',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_t_p'
-        db.add_column(u'sheet_armorspecialquality', 'armor_t_p',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_t_s'
-        db.add_column(u'sheet_armorspecialquality', 'armor_t_s',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_t_b'
-        db.add_column(u'sheet_armorspecialquality', 'armor_t_b',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_t_r'
-        db.add_column(u'sheet_armorspecialquality', 'armor_t_r',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_t_dr'
-        db.add_column(u'sheet_armorspecialquality', 'armor_t_dr',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ll_p'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ll_p',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ll_s'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ll_s',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ll_b'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ll_b',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ll_r'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ll_r',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ll_dr'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ll_dr',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_la_p'
-        db.add_column(u'sheet_armorspecialquality', 'armor_la_p',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_la_s'
-        db.add_column(u'sheet_armorspecialquality', 'armor_la_s',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_la_b'
-        db.add_column(u'sheet_armorspecialquality', 'armor_la_b',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_la_r'
-        db.add_column(u'sheet_armorspecialquality', 'armor_la_r',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_la_dr'
-        db.add_column(u'sheet_armorspecialquality', 'armor_la_dr',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_rl_p'
-        db.add_column(u'sheet_armorspecialquality', 'armor_rl_p',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_rl_s'
-        db.add_column(u'sheet_armorspecialquality', 'armor_rl_s',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_rl_b'
-        db.add_column(u'sheet_armorspecialquality', 'armor_rl_b',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_rl_r'
-        db.add_column(u'sheet_armorspecialquality', 'armor_rl_r',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_rl_dr'
-        db.add_column(u'sheet_armorspecialquality', 'armor_rl_dr',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ra_p'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ra_p',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ra_s'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ra_s',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ra_b'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ra_b',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ra_r'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ra_r',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
-        # Adding field 'ArmorSpecialQuality.armor_ra_dr'
-        db.add_column(u'sheet_armorspecialquality', 'armor_ra_dr',
-                      self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=4, decimal_places=1),
-                      keep_default=False)
-
+        # Changing field 'SpellEffect.description'
+        db.alter_column(u'sheet_spelleffect', 'description', self.gf('django.db.models.fields.TextField')(null=True))
 
     def backwards(self, orm):
-        # Deleting model 'MiscellaneousItem'
-        db.delete_table(u'sheet_miscellaneousitem')
 
-        # Removing M2M table for field armor_qualities on 'MiscellaneousItem'
-        db.delete_table(db.shorten_name(u'sheet_miscellaneousitem_armor_qualities'))
-
-        # Removing M2M table for field weapon_qualities on 'MiscellaneousItem'
-        db.delete_table(db.shorten_name(u'sheet_miscellaneousitem_weapon_qualities'))
-
-        # Removing M2M table for field miscellaneous_items on 'Sheet'
-        db.delete_table(db.shorten_name(u'sheet_sheet_miscellaneous_items'))
-
-        # Adding field 'ArmorSpecialQuality.description'
-        db.add_column(u'sheet_armorspecialquality', 'description',
-                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
-                      keep_default=False)
-
-        # Deleting field 'ArmorSpecialQuality.armor_h_p'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_h_p')
-
-        # Deleting field 'ArmorSpecialQuality.armor_h_s'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_h_s')
-
-        # Deleting field 'ArmorSpecialQuality.armor_h_b'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_h_b')
-
-        # Deleting field 'ArmorSpecialQuality.armor_h_r'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_h_r')
-
-        # Deleting field 'ArmorSpecialQuality.armor_h_dr'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_h_dr')
-
-        # Deleting field 'ArmorSpecialQuality.armor_t_p'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_t_p')
-
-        # Deleting field 'ArmorSpecialQuality.armor_t_s'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_t_s')
-
-        # Deleting field 'ArmorSpecialQuality.armor_t_b'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_t_b')
-
-        # Deleting field 'ArmorSpecialQuality.armor_t_r'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_t_r')
-
-        # Deleting field 'ArmorSpecialQuality.armor_t_dr'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_t_dr')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ll_p'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ll_p')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ll_s'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ll_s')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ll_b'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ll_b')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ll_r'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ll_r')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ll_dr'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ll_dr')
-
-        # Deleting field 'ArmorSpecialQuality.armor_la_p'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_la_p')
-
-        # Deleting field 'ArmorSpecialQuality.armor_la_s'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_la_s')
-
-        # Deleting field 'ArmorSpecialQuality.armor_la_b'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_la_b')
-
-        # Deleting field 'ArmorSpecialQuality.armor_la_r'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_la_r')
-
-        # Deleting field 'ArmorSpecialQuality.armor_la_dr'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_la_dr')
-
-        # Deleting field 'ArmorSpecialQuality.armor_rl_p'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_rl_p')
-
-        # Deleting field 'ArmorSpecialQuality.armor_rl_s'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_rl_s')
-
-        # Deleting field 'ArmorSpecialQuality.armor_rl_b'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_rl_b')
-
-        # Deleting field 'ArmorSpecialQuality.armor_rl_r'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_rl_r')
-
-        # Deleting field 'ArmorSpecialQuality.armor_rl_dr'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_rl_dr')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ra_p'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ra_p')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ra_s'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ra_s')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ra_b'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ra_b')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ra_r'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ra_r')
-
-        # Deleting field 'ArmorSpecialQuality.armor_ra_dr'
-        db.delete_column(u'sheet_armorspecialquality', 'armor_ra_dr')
-
+        # Changing field 'SpellEffect.description'
+        db.alter_column(u'sheet_spelleffect', 'description', self.gf('django.db.models.fields.TextField')(default=''))
 
     models = {
         u'auth.group': {
@@ -353,31 +62,6 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'quality': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.ArmorQuality']"}),
             'special_qualities': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['sheet.ArmorSpecialQuality']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'sheet.armoreffect': {
-            'Meta': {'object_name': 'ArmorEffect'},
-            'armor': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'effects'", 'to': u"orm['sheet.ArmorSpecialQuality']"}),
-            'cc_skill_levels': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'cha': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'dex': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'fit': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'imm': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'int': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'lrn': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'mov': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'primary_key': 'True'}),
-            'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'pos': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'psy': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'ref': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_all': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_cold': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_fire': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_lightning': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_poison': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'type': ('django.db.models.fields.CharField', [], {'default': "'enhancement'", 'max_length': '256'}),
-            'wil': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         u'sheet.armorquality': {
             'Meta': {'object_name': 'ArmorQuality'},
@@ -606,7 +290,7 @@ class Migration(SchemaMigration):
             'level': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'lrn': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'mov': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'notes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'pos': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'psy': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'ref': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -716,7 +400,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'SpellEffect'},
             'cc_skill_levels': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'cha': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'dex': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'fit': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'imm': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -724,7 +408,7 @@ class Migration(SchemaMigration):
             'lrn': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'mov': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'primary_key': 'True'}),
-            'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'notes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'pos': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'psy': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'ref': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -749,31 +433,6 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'blank': 'True'}),
             'quality': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.WeaponQuality']"}),
             'special_qualities': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['sheet.WeaponSpecialQuality']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'sheet.weaponeffect': {
-            'Meta': {'object_name': 'WeaponEffect'},
-            'cc_skill_levels': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'cha': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'dex': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'fit': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'imm': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'int': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'lrn': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'mov': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'primary_key': 'True'}),
-            'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'pos': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'psy': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'ref': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_all': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_cold': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_fire': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_lightning': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'saves_vs_poison': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'type': ('django.db.models.fields.CharField', [], {'default': "'enhancement'", 'max_length': '256'}),
-            'weapon': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'effects'", 'to': u"orm['sheet.WeaponSpecialQuality']"}),
-            'wil': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         u'sheet.weaponquality': {
             'Meta': {'ordering': "['roa', 'ccv']", 'object_name': 'WeaponQuality'},

@@ -263,10 +263,9 @@ class ArmorWrap(RemoveWrap):
             for misc_item in self.sheet.miscellaneous_items.all():
                 logger.debug("getting " + v)
                 for quality in misc_item.armor_qualities.all():
-                    for effect in quality.effects.all():
-                        effect_value = getattr(effect, v, 0)
-                        logger.debug("got {0}: {1}".format(v, effect_value))
-                        value += effect_value
+                    effect_value = getattr(quality, v, 0)
+                    logger.debug("got {0}: {1}".format(v, effect_value))
+                    value += effect_value
 
             original_value = 0
             if self.item:
@@ -564,14 +563,6 @@ class AddWeaponSpecialQualityView(AddWeaponView):
 class AddMiscellaneousItemView(AddWeaponView):
     model = MiscellaneousItem
     template_name = 'sheet/add_miscellaneous_item.html'
-
-class AddWeaponEffectView(AddWeaponView):
-    model = WeaponEffect
-    template_name = 'sheet/gen_edit.html'
-
-class AddArmorEffectView(AddWeaponView):
-    model = ArmorEffect
-    template_name = 'sheet/gen_edit.html'
 
 class EditCharacterView(UpdateView):
     form_class = CharacterForm
