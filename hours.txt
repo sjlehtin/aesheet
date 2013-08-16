@@ -50,3 +50,4 @@ sun 7.10.2012 5h Campaign selection and updated fields for weapons (bypass) and 
 wed 17.4.2013 1h Fixing a bug caused by addition of skill bonuses.
 thu 25.4.2013 1h Layout testing.
 sun 27.4.2013 2.5h Layout fixing.
+thu 8.8.2013 4h Miscellaneous items.
