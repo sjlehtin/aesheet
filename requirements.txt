@@ -1,0 +1,6 @@
+Django
+South
+factory_boy
+django-debug-toolbar
+webtest
+django_webtest
