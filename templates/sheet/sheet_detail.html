@@ -462,7 +462,7 @@ or
 </div>
 
 <h3>Helmet</h3>
-{% if char.helm %}
+{% if char.helm.item %}
 {% with char.helm as helm %}
 <table>
   <tr><td>{{ helm.item }}</td>
@@ -507,7 +507,7 @@ or
 </div>
 
 <h3>Armor</h3>
-{% if char.armor %}
+{% if char.armor.item %}
 {% with char.armor as armor %}
 <table>
   <tr><td>{{ armor.item }}</td>
