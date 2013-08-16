@@ -22,9 +22,7 @@ LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
 import socket
 
-DBHOST = '127.0.0.1'
-if socket.getfqdn() != 'semeai.org':
-    DBHOST = '192.168.0.1'
+DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 
 if PRODUCTION:
     # XXX something is wrong with one of the migrations (the grand
