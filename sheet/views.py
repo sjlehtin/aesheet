@@ -52,6 +52,9 @@ TODO = """
 - Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
 
+- creating new objects should be ajaxiced and redirects should occur in a
+  sensible manner.
+
 NOTES on creating Jan:
 
 - you should be able to leave current stats empty on character creation,
