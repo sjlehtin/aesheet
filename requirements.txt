@@ -5,4 +5,4 @@ django-debug-toolbar
 webtest
 django_webtest
 psycopg2
-
+gunicorn
