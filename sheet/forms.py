@@ -22,7 +22,8 @@ class ImportForm(forms.Form):
         return cd
 
 EditSheetForm =  modelform_factory(Sheet, exclude=(
-    'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects'))
+    'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects',
+    'miscellaneous_items'))
 
 def pretty_name(name):
     return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
