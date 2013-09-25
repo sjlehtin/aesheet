@@ -599,6 +599,7 @@ class EditSheetView(UpdateView):
 
 class AddSheetView(CreateView):
     model = Sheet
+    form_class = EditSheetForm
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
