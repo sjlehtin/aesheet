@@ -331,9 +331,11 @@ class SheetView(object):
 
     @property
     def skills(self):
-        ll = [SkillWrap(xx, self.sheet) for xx in self.sheet.skills.all()]
-        dd = dict()
-        dd.update([(sk.skill.name, sk) for sk in ll])
+        ll = [SkillWrap(xx, self.sheet)
+              for xx in
+              self.sheet.skills.all()]
+        skills = dict()
+        skills.update([(sk.skill.name, sk) for sk in ll])
 
         class Node(object):
             def __init__(self):
@@ -343,8 +345,8 @@ class SheetView(object):
         for sk in ll:
             # Assign as child of first required skill.
             reqd = sk.skill.required_skills.all()
-            if len(reqd) and reqd[0].name in dd:
-                dd[reqd[0].name].children.append(sk)
+            if len(reqd) and reqd[0].name in skills:
+                skills[reqd[0].name].children.append(sk)
             else:
                 root.children.append(sk)
         logger.debug("Original skill list length: %d", len(ll))
@@ -437,17 +439,21 @@ def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
                               .select_related('sheet__armor__base',
                                               'sheet__armor__quality'
-                                              'sheet__helm')
+                                              'sheet__helm',)
                               .prefetch_related(
             'spell_effects',
             'weapons__base',
             'weapons__quality',
             'ranged_weapons__base',
             'ranged_weapons__quality',
+            'miscellaneous_items',
+            'character__campaign',
             'character__skills',
             'character__skills__skill',
+            'character__skills__skill__required_skills',
+            'character__skills__skill__edgeskillbonus_set',
             'character__edges',
-            'character__edges__edge__edgeskillbonus_set'),
+            'character__edges__edge__skill_bonuses'),
                               pk=sheet_id)
 
     forms = {}
