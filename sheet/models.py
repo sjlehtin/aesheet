@@ -632,6 +632,9 @@ class EdgeLevel(ExportedModel, StatModifier):
     def __unicode__(self):
         return u"%s %s (%s)" % (self.edge, self.level, self.cost)
 
+    class Meta:
+        ordering = ('edge', 'level')
+
 class EdgeSkillBonus(ExportedModel):
     """
     Skill bonuses from edges, e.g., +15 to Surgery from Acute Touch, is
