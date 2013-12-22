@@ -1,0 +1,110 @@
+{% if char.weapons %}
+<table class="close combat">
+      <tr >
+      <th />
+      <th>ROA</th>
+      {% for act in char.actions %}
+         <th>{{ act }}</th>
+      {% endfor %}
+      <th colspan="5">Attack</th>
+      <th colspan="4" class="defense">Defenses</th>
+       </tr>
+
+{% comment %}
+      * Add a note about already applied penalties and bonuses
+        * wrong hand penalty for SEC
+{% endcomment %}
+
+    {% for item in char.weapons %}
+      <tr>
+      <td class="weapon name" rowspan="3">
+      <div class="remove-container">
+          {{ item.item }}
+	{% if not item.skilled %}
+	<div class="unskilled">unskilled</div>
+	{% endif %}
+	<div class="charge damage"><label>Charge:</label>
+	  {{ item.special.damage }}</div>
+      {% if item.bypass %}
+          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
+      {% endif %}
+      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
+          <div class="remove edit-control">
+              <form action="{{ act }}" method="post">
+                {% csrf_token %}
+                {{ item.remove_form }}
+              <input type="submit" value="Remove" />
+              </form>
+           </div>
+      </div>
+      </td>
+        <td>{{ item.full.roa }}</td>
+        {% for act in item.full.skill_checks %}
+           <td class="tohit">{{ act }}</td>
+        {% endfor %}
+        {% for init in item.full.initiatives %}
+           <td>{{ init|stringformat:"+d" }}</td>
+        {% endfor %}
+        <td>{{ item.full.damage }}</td>
+        {% for init in item.full.defense_initiatives %}
+           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
+        {% endfor %}
+        <td class="defense damage">{{ item.full.defense_damage }}</td>
+       </tr>
+        <tr>
+        <td>{{ item.pri.roa }}</td>
+        {% for act in item.pri.skill_checks %}
+           <td class="tohit">{{ act }}</td>
+        {% endfor %}
+        {% for init in item.pri.initiatives %}
+           <td>{{ init|stringformat:"+d" }}</td>
+        {% endfor %}
+        <td>{{ item.pri.damage }}</td>
+        {% for init in item.pri.defense_initiatives %}
+           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
+        {% endfor %}
+        <td class="defense damage">{{ item.pri.defense_damage }}</td>
+        </tr>
+        <tr>
+        <td>{{ item.sec.roa }}</td>
+        {% for act in item.sec.skill_checks %}
+           <td class="tohit">{{ act }}</td>
+        {% endfor %}
+        {% for init in item.sec.initiatives %}
+           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
+        {% endfor %}
+        <td>{{ item.sec.damage }}</td>
+        {% for init in item.sec.defense_initiatives %}
+           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
+        {% endfor %}
+        <td class="defense damage">{{ item.sec.defense_damage }}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No weapons.</p>
+{% endif %}
+
+<div id="add_weapon" class="edit-control advanced"
+        data-advanced-text="Add melee weapons">
+    <label for="add_weapon_form"><strong>Add a weapon</strong></label>
+    <form id="add_weapon_form" action="{{ act }}" method="post"
+            >{% csrf_token %}
+        <ul>
+            {{ add_weapon_form.as_ul}}
+        </ul>
+        <input type="submit" value="Add" />
+        </form>
+    or
+<label for="add_existing_weapon_form"><strong>Add an existing
+    weapon</strong></label>
+<form id="add_existing_weapon_form" action="{{ act }}" method="post"
+      >{% csrf_token %}
+<ul>
+{{ add_existing_weapon_form.as_ul }}
+</ul>
+<input type="submit" value="Add" />
+</form>
+or
+    <a href="{% url "add_weapon" %}">Create a new weapon</a>
+</div>

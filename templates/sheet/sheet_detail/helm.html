@@ -1,0 +1,44 @@
+{% if char.helm.item %}
+{% with char.helm as helm %}
+<table>
+  <tr><td>{{ helm.item }}</td>
+    <td>
+      <div class="edit-control">
+        <form action="{{ act }}" 
+              method="post">
+          {% csrf_token %}
+          {{ helm.remove_form }}
+          <input type="submit" value="Remove" />
+        </form>
+      </div>
+    </td>
+  </tr>
+</table>
+{% endwith %}
+{% else %}
+<p>No helmet.</p>
+{% endif %}
+
+<div id="add_helmet" class="edit-control advanced"
+        data-advanced-text="Add helm">
+    <label for="add_helmet_form">Add a helmet</label>
+    <form action="{{ act }}" method="post"
+          id="add_helmet_form">{% csrf_token %}
+        <table>
+            {{ add_helm_form.as_table }}
+        </table>
+        <input type="submit" value="Add" />
+    </form>
+    or
+<label for="add_existing_helm_form">Add an existing
+    helmet</label>
+<form action="{{ act }}" method="post" 
+      id="add_existing_helm_form">{% csrf_token %}
+<table>
+{{ add_existing_helm_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+or
+    <a href="{% url "add_armor" %}">Create a new helm</a>
+</div>

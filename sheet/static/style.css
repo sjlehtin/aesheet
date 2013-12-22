@@ -135,6 +135,6 @@ table.data { font-size: 80%; }
 .data td:not(:first-child) { text-align: center; }
 
 @media print {
-    #top,#navigation,#sidebar,#authbar,.edit_control { display: none; }
+    #top,#navigation,#sidebar,#authbar,.edit-control { display: none; }
     body { font-size: 8pt; } 
 }

@@ -1,0 +1,31 @@
+{% if char.spell_effects %}
+<ul>
+    {% for item in char.spell_effects %}
+        <li>{{ item.item }} 
+           <div class="edit-control">
+              <form action="{{ act }}" method="post">
+                {% csrf_token %}
+                {{ item.remove_form }}
+              <input type="submit" value="Remove" />
+              </form>
+           </div>
+        </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No spell effects.</p>
+{% endif %}
+
+<div id="add_spell_effect" class="edit-control advanced"
+        data-advanced-text="Add ranged weapons">
+<label for="add_spell_effect_form"><strong>Add a spell effect</strong></label>
+<form action="{{ act }}" method="post" 
+      id="add_spell_effect_form">{% csrf_token %}
+<table>
+{{ add_spell_effect_form.as_table }}
+</table>
+<input type="submit" value="Add" />
+</form>
+
+<a href="{% url "add_spell_effect" %}">Create new spell effect</a>
+</div>
