@@ -20,14 +20,11 @@ PRODUCTION = True if os.environ.get('PRODUCTION') else False
 LOGIN_URL = ROOT_URL + "accounts/login/"
 LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
-import socket
+SOUTH_TESTS_MIGRATE = False
 
 DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 
 if PRODUCTION:
-    # XXX something is wrong with one of the migrations (the grand
-    # primary key change), may want to investigate it at some point.
-    SOUTH_TESTS_MIGRATE = False
 
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
     DB_NAME = 'sheet'
@@ -164,7 +161,7 @@ if DEBUG_TOOLBAR_ENABLED:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
     INTERNAL_IPS = ("127.0.0.1",)
 
-ROOT_URLCONF = 'aesheet.urls'
+ROOT_URLCONF = 'urls'
 
 import sys
 
