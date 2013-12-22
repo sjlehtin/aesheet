@@ -206,7 +206,7 @@ class ItemHandling(TestCase):
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "test_skills", "campaigns"]
+                "test_skills", "campaigns", "armor"]
 
     def setUp(self):
         self.client.login(username="admin", password="admin")
@@ -430,7 +430,7 @@ def get_fake_request(username):
 
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "assigned_edges", "campaigns"]
+                "assigned_edges", "armor", "campaigns"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -519,7 +519,7 @@ class Logging(WebTest):
         response = form.submit()
 
 class AddXpTestCase(TestCase):
-    fixtures = ["user", "char"]
+    fixtures = ["campaigns", "user", "char"]
 
     def test_added_xp(self):
 
@@ -537,7 +537,7 @@ class AddXpTestCase(TestCase):
 
 class ModelBasics(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "assigned_edges"]
+                "assigned_edges", "armor", "campaigns"]
 
     def test_basic_stats(self):
         ss = Sheet.objects.get(pk=1)
@@ -545,9 +545,12 @@ class ModelBasics(TestCase):
         sta = ss.stamina
         body = ss.body
         mana = ss.mana
+        # XXX the above just checks that accessing the values does not cause
+        # exceptions in the property handling.
 
 class Views(TestCase):
-    fixtures = ["campaigns", "user", "char", "sheet", "edges", "basic_skills"]
+    fixtures = ["campaigns", "user", "char", "sheet", "armor",
+                "edges", "basic_skills"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -587,7 +590,8 @@ class Views(TestCase):
         self.assertEqual(eff.fit, 40)
 
 class Importing(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns"]
+    fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns",
+                "armor"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -662,7 +666,7 @@ class Importing(TestCase):
             self.assertRedirects(response, reverse(sheet.views.import_data))
 
 class TechLevelTestCase(TestCase):
-    fixtures = ["user", "char", "sheet", "armor", "ranged_weapons",
+    fixtures = ["armor", "user", "char", "sheet", "ranged_weapons",
                 "weapons", "skills", "edges", "campaigns"]
 
     def setUp(self):
@@ -721,6 +725,7 @@ class TechLevelTestCase(TestCase):
         self.verify_character(4, False, False, True, True)
         # Jan (GZ)
         self.verify_character(5, False, True, False, True)
+
 
 class CreateURLTestCase(TestCase):
     fixtures = ['user']
