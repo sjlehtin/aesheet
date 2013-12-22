@@ -578,13 +578,13 @@ TODO:
                     <table>
                         {% for skill in skills %}
                             <tr class="{% spaceless %}
-		 indent{{ skill.indent }}
+		 remove-container indent{{ skill.indent }}
 		 {% if skill.skill.is_specialization %}
 		 specialization
 		 {% endif %}
 		 {% endspaceless %}">
                                 <td class="skill_name">
-                                    <div class="remove-container">
+                                    <div>
                                         <div class="remove edit_control">
                                             <form action="{{ act }}"
                                                   method="post">
