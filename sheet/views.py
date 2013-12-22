@@ -55,6 +55,11 @@ TODO = """
 - creating new objects should be ajaxiced and redirects should occur in a
   sensible manner.
 
+- hardened skin + toughness -> natural weapons durability.
+-- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
+- size field for weapons (huge cretin with Large bite)
+
+
 NOTES on creating Jan:
 
 - you should be able to leave current stats empty on character creation,
