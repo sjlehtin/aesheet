@@ -18,7 +18,7 @@
 {{ char.description }}
 </p>
 
-<div class="edit_control">
+<div class="edit-control">
   <p>
     <a href="{% url "edit_character" char.character.id %}">
       Edit base character</a>
@@ -39,8 +39,8 @@
       <td class="stats base">{{ stat.base }}</td>
       <td class="stats eff">{{ stat.eff }}</td>
       {% if stat.add_form %}
-      <td class="edit_control">
-           <div class="edit_control">
+      <td class="edit-control">
+           <div class="edit-control">
               <form action="{{ act }}" method="post">
                 {% csrf_token %}
                 {{ stat.add_form }}
@@ -48,8 +48,8 @@
               </form>
            </div>
       </td>
-      <td class="edit_control">
-           <div class="edit_control">
+      <td class="edit-control">
+           <div class="edit-control">
               <form action="{{ act }}" method="post">
                 {% csrf_token %}
                 {{ stat.dec_form }}
@@ -59,8 +59,8 @@
       </td>
           <td class="stats change">({{ stat.change|stringformat:"+d" }})</td>
       {% else %}
-      <td class="edit_control"/>
-      <td class="edit_control"/>
+      <td class="edit-control"/>
+      <td class="edit-control"/>
           <td />
       {% endif %}
   </tr>
@@ -98,7 +98,7 @@ XP: {{ char.xp_used_stats }} +
 {{ char.xp_used_edges }} + 
 {{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
 
-<div class="edit_control">
+<div class="edit-control">
     <form action="{{ act }}" method="post">
         {% csrf_token %}
         {{ add_xp_form }}
@@ -160,397 +160,25 @@ XP: {{ char.xp_used_stats }} +
 </ul>
 
 <h3>Close combat</h3>
-{% if char.weapons %}
-<table class="close combat">
-      <tr >
-      <th />
-      <th>ROA</th>
-      {% for act in char.actions %}
-         <th>{{ act }}</th>
-      {% endfor %}
-      <th colspan="5">Attack</th>
-      <th colspan="4" class="defense">Defenses</th>
-       </tr>
-
-{% comment %}
-      * Add a note about already applied penalties and bonuses
-        * wrong hand penalty for SEC
-{% endcomment %}
-
-    {% for item in char.weapons %}
-      <tr>
-      <td class="weapon name" rowspan="3">
-      <div class="remove-container">
-          {{ item.item }}
-	{% if not item.skilled %}
-	<div class="unskilled">unskilled</div>
-	{% endif %}
-	<div class="charge damage"><label>Charge:</label>
-	  {{ item.special.damage }}</div>
-      {% if item.bypass %}
-          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
-      {% endif %}
-      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
-          <div class="remove edit_control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ item.remove_form }}
-              <input type="submit" value="Remove" />
-              </form>
-           </div>
-      </div>
-      </td>
-        <td>{{ item.full.roa }}</td>
-        {% for act in item.full.skill_checks %}
-           <td class="tohit">{{ act }}</td>
-        {% endfor %}
-        {% for init in item.full.initiatives %}
-           <td>{{ init|stringformat:"+d" }}</td>
-        {% endfor %}
-        <td>{{ item.full.damage }}</td>
-        {% for init in item.full.defense_initiatives %}
-           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
-        {% endfor %}
-        <td class="defense damage">{{ item.full.defense_damage }}</td>
-       </tr>
-        <tr>
-        <td>{{ item.pri.roa }}</td>
-        {% for act in item.pri.skill_checks %}
-           <td class="tohit">{{ act }}</td>
-        {% endfor %}
-        {% for init in item.pri.initiatives %}
-           <td>{{ init|stringformat:"+d" }}</td>
-        {% endfor %}
-        <td>{{ item.pri.damage }}</td>
-        {% for init in item.pri.defense_initiatives %}
-           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
-        {% endfor %}
-        <td class="defense damage">{{ item.pri.defense_damage }}</td>
-        </tr>
-        <tr>
-        <td>{{ item.sec.roa }}</td>
-        {% for act in item.sec.skill_checks %}
-           <td class="tohit">{{ act }}</td>
-        {% endfor %}
-        {% for init in item.sec.initiatives %}
-           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
-        {% endfor %}
-        <td>{{ item.sec.damage }}</td>
-        {% for init in item.sec.defense_initiatives %}
-           <td class="defense initiative">{{ init|stringformat:"+d" }}</td>
-        {% endfor %}
-        <td class="defense damage">{{ item.sec.defense_damage }}</td>
-        </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>No weapons.</p>
-{% endif %}
-
-<div id="add_weapon" class="edit_control">
-    <label for="add_weapon_form"><strong>Add a weapon</strong></label>
-    <form id="add_weapon_form" action="{{ act }}" method="post"
-            >{% csrf_token %}
-        <ul>
-            {{ add_weapon_form.as_ul}}
-        </ul>
-        <input type="submit" value="Add" />
-        </form>
-    or
-<label for="add_existing_weapon_form"><strong>Add an existing
-    weapon</strong></label>
-<form id="add_existing_weapon_form" action="{{ act }}" method="post"
-      >{% csrf_token %}
-<ul>
-{{ add_existing_weapon_form.as_ul }}
-</ul>
-<input type="submit" value="Add" />
-</form>
-or
-    <a href="{% url "add_weapon" %}">Create a new weapon</a>
-</div>
+{% include "sheet/sheet_detail/melee_weapons.html" %}
 
 <h3>Ranged combat</h3>
-{% if char.ranged_weapons %}
-<table class="ranged combat">
-  <tr>
-    <th />
-    <th>ROF</th>
-    {% for act in char.ranged_actions %}
-    <th>{{ act }}</th>
-    {% endfor %}
-    <th colspan="4">Attack</th>
-    <th>S/M/L/XL/E</th>
-  </tr>
-
-  {% for item in char.ranged_weapons %}
-  <tr>
-    <td class="weapon name">
-    <div class="remove-container">
-        {{ item.item }}
-      {% if not item.skilled %}
-      <div class="unskilled">unskilled</div>
-      {% endif %}
-      {% if item.bypass %}
-          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
-      {% endif %}
-      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
-      <div class="remove edit_control">
-        <form action="" method="post">
-          {% csrf_token %}
-          {{ item.remove_form }}
-          <input type="submit" value="Remove" />
-        </form>
-      </div>
-    </div>
-    </td>
-    <td>{{ item.rof }}</td>
-    {% for act in item.skill_checks %}
-    <td class="tohit">{{ act.check|default:"" }}</td>
-    {% endfor %}
-    {% for init in item.initiatives %}
-    <td>{{ init|stringformat:"+d" }}</td>
-    {% endfor %}
-
-    <td>{{ item.damage }}</td>
-    <td>
-    {% with rr=item.ranges %}
-    {{ rr.s }} /  {{ rr.m }} / {{ rr.l }} / {{ rr.xl }} / {{ rr.e }}
-    {% endwith %}
-    </td>
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<p>No ranged weapons.</p>
-{% endif %}
-<div id="add_ranged_weapon_form" class="edit_control">
-    <label for="add_ranged_weapon_form">Add a
-        ranged weapon</label>
-    <form id="add_ranged_weapon_form" action="{{ act }}" method="post"
-            >{% csrf_token %}
-        <ul>
-            {{ add_ranged_weapon_form.as_ul}}
-        </ul>
-        <input type="submit" value="Add" />
-    </form>
-
-    <label for="add_existing_ranged_weapon_form">Add an existing
-        ranged weapon</label>
-<form id="add_existing_ranged_weapon_form" action="" method="post">
-  {% csrf_token %}
-<ul>
-{{ add_existing_ranged_weapon_form.as_ul }}
-</ul>
-<input type="submit" value="Add" />
-</form>
-or
-    <a href="{% url "add_ranged_weapon" %}">Create a new ranged weapon</a>
-</div>
+{% include "sheet/sheet_detail/ranged_weapons.html" %}
 
 <h3>Miscellaneous items</h3>
-{% if char.miscellaneous_items %}
-<table>
-    {% for item in char.miscellaneous_items %}
-        <tr><td>{{ item }}</td>
-            <td>
-              <div class="edit_control">
-                 <form action="{{ act }}"
-                       method="post">
-                   {% csrf_token %}
-                   {{ item.remove_form }}
-                 <input type="submit" value="Remove" />
-                 </form>
-              </div>
-            </td>
-        </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>No miscellaneous items.</p>
-{% endif %}
-
-<div id="add_miscellaneous_item" class="edit_control">
-<label for="add_existing_miscellaneous_item_form"><strong>Add an existing
-    miscellaneous item</strong></label>
-<form id="add_existing_miscellaneous_item_form" action="{{ act }}" method="post"
-      >{% csrf_token %}
-<ul>
-{{ add_existing_miscellaneous_item_form.as_ul }}
-</ul>
-<input type="submit" value="Add" />
-</form>
-or
-    <a href="{% url "add_miscellaneous_item" %}">Create a new miscellaneous item</a>
-</div>
+{% include "sheet/sheet_detail/miscellaneous_items.html" %}
 
 <h3>Spell effects</h3>
-{% if char.spell_effects %}
-<ul>
-    {% for item in char.spell_effects %}
-        <li>{{ item.item }} 
-           <div class="edit_control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ item.remove_form }}
-              <input type="submit" value="Remove" />
-              </form>
-           </div>
-        </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No spell effects.</p>
-{% endif %}
-
-<div id="add_spell_effect" class="edit_control">
-<label for="add_spell_effect_form"><strong>Add a spell effect</strong></label>
-<form action="{{ act }}" method="post" 
-      id="add_spell_effect_form">{% csrf_token %}
-<table>
-{{ add_spell_effect_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
-
-<a href="{% url "add_spell_effect" %}">Create new spell effect</a>
-</div>
+{% include "sheet/sheet_detail/spell_effects.html" %}
 
 <h3>Edges</h3>
-{% with edges=char.edges %}
-{% if edges %}
-<table>
-    {% for edge in edges %}
-        <tr><td>{{ edge.edge }}</td>
-            <td>
-              <div class="edit_control">
-                 <form action="{{ act }}" 
-                       method="post">
-                   {% csrf_token %}
-                   {{ edge.remove_form }}
-                 <input type="submit" value="Remove" />
-                 </form>
-              </div>
-            </td>
-	  <td>
-	    {% for sb in edge.edge.edgeskillbonus_set.all %} 
-	    {% if forloop.counter0 %},{% endif %}
-	      {{ sb.skill}}: {{ sb.bonus|stringformat:"+d" }}
-	    {% endfor %}
-	  </td>
-        </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>No edges.</p>
-{% endif %}
-{% endwith %}
+{% include "sheet/sheet_detail/edges.html" %}
 
-<div id="add_edge" class="edit_control">
-<label for="add_edge_form"><strong>Add an edge</strong></label>
-<form action="{{ act }}" method="post" 
-      id="add_edge_form">{% csrf_token %}
-<table>
-{{ add_edge_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
-<a href="{% url "add_edge" %}">Create new edge</a>
-<a href="{% url "add_edge_level" %}">Create new edge level</a>
-<a href="{% url "add_edge_skill_bonus" %}">Create new skill bonus
-  for edge level</a>
-</div>
-
-<h3>Helmet</h3>
-{% if char.helm.item %}
-{% with char.helm as helm %}
-<table>
-  <tr><td>{{ helm.item }}</td>
-    <td>
-      <div class="edit_control">
-        <form action="{{ act }}" 
-              method="post">
-          {% csrf_token %}
-          {{ helm.remove_form }}
-          <input type="submit" value="Remove" />
-        </form>
-      </div>
-    </td>
-  </tr>
-</table>
-{% endwith %}
-{% else %}
-<p>No helmet.</p>
-{% endif %}
-
-<div id="add_helmet" class="edit_control">
-    <label for="add_helmet_form">Add a helmet</label>
-    <form action="{{ act }}" method="post"
-          id="add_helmet_form">{% csrf_token %}
-        <table>
-            {{ add_helm_form.as_table }}
-        </table>
-        <input type="submit" value="Add" />
-    </form>
-    or
-<label for="add_existing_helm_form">Add an existing
-    helmet</label>
-<form action="{{ act }}" method="post" 
-      id="add_existing_helm_form">{% csrf_token %}
-<table>
-{{ add_existing_helm_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
-or
-    <a href="{% url "add_armor" %}">Create a new helm</a>
-</div>
+<h3>Helm</h3>
+{% include "sheet/sheet_detail/helm.html" %}
 
 <h3>Armor</h3>
-{% if char.armor.item %}
-{% with char.armor as armor %}
-<table>
-  <tr><td>{{ armor.item }}</td>
-    <td>
-      <div class="edit_control">
-        <form action="{{ act }}" 
-              method="post">
-          {% csrf_token %}
-          {{ armor.remove_form }}
-          <input type="submit" value="Remove" />
-        </form>
-      </div>
-    </td>
-  </tr>
-</table>
-{% endwith %}
-{% else %}
-<p>No armor.</p>
-{% endif %}
-
-<div id="add_armor" class="edit_control">
-    <label for="add_armor_form">Add armor</label>
-    <form action="{{ act }}" method="post"
-          id="add_armor_form">{% csrf_token %}
-        <table>
-            {{ add_armor_form.as_table }}
-        </table>
-        <input type="submit" value="Add" />
-    </form>
-or
-    <label for="add_existing_armor_form">Add existing armor</label>
-<form action="{{ act }}" method="post" 
-      id="add_existing_armor_form">{% csrf_token %}
-<table>
-{{ add_existing_armor_form.as_table }}
-</table>
-<input type="submit" value="Add" />
-</form>
-or
-<a href="{% url "add_armor" %}">Create a new armor</a>
-</div>
-
-<div>Missing skills: {{ char.missing_skills }}</div>
+{% include "sheet/sheet_detail/armor.html" %}
 
 <script src="{{ STATIC_URL }}jquery-combobox.js"></script>
 <script src="{{ STATIC_URL }}hideAdvanced.js"></script>
@@ -561,7 +189,7 @@ or
     });
 </script>
 
-<div class="edit_control">
+<div class="edit-control">
 <pre>
 TODO:
 -----
@@ -585,7 +213,7 @@ TODO:
 		 {% endspaceless %}">
                                 <td class="skill_name">
                                     <div>
-                                        <div class="remove edit_control">
+                                        <div class="remove edit-control">
                                             <form action="{{ act }}"
                                                   method="post">
                                                 {% csrf_token %}
@@ -598,7 +226,7 @@ TODO:
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="edit_control">
+                                    <div class="edit-control">
                                         <form action="{{ act }}"
                                               method="post">
                                             {% csrf_token %}
@@ -609,7 +237,7 @@ TODO:
                                 </td>
                                 <td>{{ skill.level }}</td>
                                 <td>
-                                    <div class="edit_control">
+                                    <div class="edit-control">
                                         <form action="{{ act }}"
                                               method="post">
                                             {% csrf_token %}
@@ -642,7 +270,7 @@ TODO:
                 {% endif %}
             {% endwith %}
 
-            <div id="add_skill" class="edit_control">
+            <div id="add_skill" class="edit-control">
                 <label for="add_skill_form"><strong>Add a skill</strong></label>
 
                 <form action="{{ act }}" method="post"
@@ -653,7 +281,7 @@ TODO:
                     <input type="submit" value="Add"/>
                 </form>
             </div>
-            <div id="add_lang" class="edit_control">
+            <div id="add_lang" class="edit-control">
                 <label for="add_lang_form"><strong>Add a language skill</strong></label>
 
                 <form action="{{ act }}" method="post"
@@ -665,6 +293,9 @@ TODO:
                 </form>
             </div>
         </div>
+
+        <div>Missing skills: {{ char.missing_skills }}</div>
+
 
         <div id="log-entries">
             <ul>
@@ -689,6 +320,8 @@ $(document).ready(function () {
     $('.remove-container').find('.remove').hide().css('opacity', '0.5').end()
             .hover(function () { showRemoves(this); },
                    function () { hideRemoves(this); });
+
+    $('.advanced').hideAdvanced({style: 'plain'});
 });
 </script>
 

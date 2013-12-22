@@ -1,0 +1,35 @@
+{% if char.miscellaneous_items %}
+<table>
+    {% for item in char.miscellaneous_items %}
+        <tr><td>{{ item }}</td>
+            <td>
+              <div class="edit-control">
+                 <form action="{{ act }}"
+                       method="post">
+                   {% csrf_token %}
+                   {{ item.remove_form }}
+                 <input type="submit" value="Remove" />
+                 </form>
+              </div>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No miscellaneous items.</p>
+{% endif %}
+
+<div id="add_miscellaneous_item" class="edit-control advanced"
+        data-advanced-text="Add ranged weapons">
+<label for="add_existing_miscellaneous_item_form"><strong>Add an existing
+    miscellaneous item</strong></label>
+<form id="add_existing_miscellaneous_item_form" action="{{ act }}" method="post"
+      >{% csrf_token %}
+<ul>
+{{ add_existing_miscellaneous_item_form.as_ul }}
+</ul>
+<input type="submit" value="Add" />
+</form>
+or
+    <a href="{% url "add_miscellaneous_item" %}">Create a new miscellaneous item</a>
+</div>
