@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 {% load url from future %}
+{% load static %}
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet"/>
+
+    <link rel="stylesheet" type="text/css"
           href="{{ STATIC_URL}}style.css" />
-    <link rel="stylesheet" type="text/css" 
+    <link rel="stylesheet" type="text/css"
           href="{{ STATIC_URL}}css/ui-lightness/jquery-ui-1.8.16.custom.css" />
-    <link rel="stylesheet" type="text/css" 
-          href="{{ STATIC_URL}}css/960.css" />
     <script src="{{ STATIC_URL}}jquery.js"></script>
     <script src="{{ STATIC_URL}}jquery-ui-1.8.16.custom.min.js"></script>
     <title>{% block title %}AE Sheet{% endblock %}</title>
 </head>
 
 <body>
-  <div id="top" class="container_12">
-    <div id="navigation" class="grid_6">
+  <div id="top" class="container">
+    <div id="navigation">
         {% block navigation %}
         <ul>
             <li><a href="{% url "sheet.views.sheets_index" %}">Sheets</a></li>
@@ -29,7 +32,7 @@
         {% endblock %}
     </div>
 
-    <div id="authbar" class="grid_6">
+    <div id="authbar">
       {% if user.is_authenticated %}
         <ul>
 	  <li>
@@ -45,10 +48,11 @@
     </div>
   </div>
 
-  <div id="content" class="container_12">
+  <div id="content" class="container">
     {% block content %}{% endblock %}
   </div>
   {% block script %}
   {% endblock %}
+  <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 </body>
 </html>

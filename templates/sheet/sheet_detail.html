@@ -6,8 +6,8 @@
 {% block title %} {{ char.name }}'s sheet {% endblock %}
 
 {% block content %}
-
-<div class="grid_8">
+    <div class="row">
+<div class="col-md-8">
 <h1>{{ char.name }}</h1>
 {{ char.race }}
 {{ char.occupation }}
@@ -59,9 +59,9 @@
       </td>
           <td class="stats change">({{ stat.change|stringformat:"+d" }})</td>
       {% else %}
-      <td class="edit-control"/>
-      <td class="edit-control"/>
-          <td />
+          <td class="edit-control"></td>
+          <td class="edit-control"></td>
+          <td></td>
       {% endif %}
   </tr>
 {% endfor %}
@@ -189,16 +189,9 @@ XP: {{ char.xp_used_stats }} +
     });
 </script>
 
-<div class="edit-control">
-<pre>
-TODO:
------
-{{ TODO }}
-</pre>
-</div>
 </div>
 
-    <div id="skill-pane" class="grid_4">
+    <div id="skill-pane" class="col-md-4">
         <div class="skills">
             <h3>Skills</h3>
             {% with skills=char.skills %}
@@ -305,7 +298,15 @@ TODO:
             </ul>
         </div>
     </div>
-
+</div>
+    <div class="row"><div class="no-print">
+<pre>
+TODO:
+-----
+{{ TODO }}
+</pre>
+</div>
+    </div>
 {% endblock %}
 
 {% block script %}
