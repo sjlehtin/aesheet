@@ -72,6 +72,8 @@ BUGS = """
 - Adding skills with multiple prereqs doesn't work.
 - Better error messages on importing completely invalid CSV (heading line or
   data type broken)
+- crossbows should not have FIT modifiers for damage
+- draw I missing
 """
 
 from django.shortcuts import render_to_response, get_object_or_404
