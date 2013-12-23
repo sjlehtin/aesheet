@@ -820,7 +820,7 @@ def import_data(request, success=False):
                 el.append(str(e))
             except Exception, e:
                 logger.exception("failed.")
-                raise e
+                raise
     else:
         form = ImportForm()
     types = []
