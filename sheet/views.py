@@ -4,13 +4,14 @@ TODO = """
 + = done
 - = not done
 
--- xl and e range dependent on user FIT
+-- xl and e range dependent on user FIT (SM)
 -- access controls
---- marking sheet as only visible to self
---- marking characters as only visible to self
--- password change
-- rest of the edges
-- wondrous items
+--- marking sheet as only visible to self (SM)
+--- marking characters as only visible to self (SM)
+    these should not show in the lists.
+-- password change (SM)
++ rest of the edges (if some are missing, can be added online)
++ wondrous items
 - inventory ?
 - magic item location (only one item to each location)
 + change log for sheet (stat modifications etc)
@@ -24,13 +25,13 @@ TODO = """
 + body
 -- recovery
 - code simplification
-- reordering skills
-- character mugshot upload
-- senses
-- movement chart
-- save bonuses
-- encumbrance breakdown
-- spell skill checks
++ reordering skills (with current ordering, not necessary).
+- character mugshot upload (SM)
+- senses (SM)
+- movement chart (SM)
+- save bonuses (M)
+- encumbrance breakdown (M)
+- spell skill checks (SM)
 - sheet styling
 
 - weapon maximum damage based on durability.
@@ -44,7 +45,9 @@ TODO = """
 
 - Basic skill checks:  Adding skills without any points (or reduced amount of
   points) allocated.  For example, Climbing B -> show skill check at half
-  ability.
+  ability.  This is a larger item than it sounds, as the current design assumes
+  whole skill levels.  Investigate if could be done as a skill level model
+  field.
 
 - Inserting None as skill cost to the sheet should work to allow resetting
   skill costs from CSV import.
@@ -70,6 +73,23 @@ Minor:
 - adding missing skills (helps in just allowing inserting primary skills
   and autofilling rest)
 + modifying skill level with +/- (at least add to skill level)
+
+Firearms:
+
+- burst fire
+- sweep fire
+- low/hi-recoil ammo
+
+Priority list by JW:
+
+- possibility to copy characters and sheets (mainly sheets), which will copy
+  also the underlying character.
+- character addition form layout for easier "intake" (group cur, starting
+  stats, show raises).
+- adding weapon inplace ("add row" functionality), instead of the large set of
+  controls.  Might already be sufficient with the condensed layout, verify with
+  JW.
+- sheets to campaign order.
 
 """
 
