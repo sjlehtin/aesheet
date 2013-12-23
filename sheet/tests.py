@@ -613,7 +613,7 @@ class Importing(TestCase):
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
-    def testAddNewSkillWithRequiredSkills(self):
+    def test_add_new_skill_with_required_skills(self):
         det_url = reverse(sheet.views.import_data)
         response = self.client.post(det_url, { 'import_data' :
         "Skill\n"
