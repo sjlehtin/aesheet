@@ -421,6 +421,23 @@ class EdgeAndSkillHandling(TestCase):
                                            args=[1]))
         self.assertContains(response, "invalid skill level")
 
+
+    def test_duplicated_skill_level(self):
+        form = AddSkillForm(
+            instance=Character.objects.get(pk=1),
+            data={ 'skill': Skill.objects.get(name="Sword"),
+                   'level': 1 })
+        self.assertTrue(form.is_valid(),
+                        "Adding a new skill should be ok")
+        form.save()
+        form = AddSkillForm(
+            instance=Character.objects.get(pk=1),
+            data={ 'skill': Skill.objects.get(name="Sword"),
+                   'level': 1 })
+        self.assertFalse(form.is_valid(),
+                        "Adding an existing skill should result in an error")
+        self.assertIn("__all__", form.errors)
+
 def get_fake_request(username):
     class FakeReq(object):
         pass
