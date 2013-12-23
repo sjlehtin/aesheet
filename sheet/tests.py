@@ -412,13 +412,13 @@ class EdgeAndSkillHandling(TestCase):
     def test_obsoleted_skill_level(self):
         # Add a skill with a known invalid level.
         cs = CharacterSkill()
-        cs.character = Character.objects.get(pk=2)
+        cs.character = Character.objects.get(pk=1)
         cs.skill = Skill.objects.get(pk="Sword")
         cs.level = 2
         cs.save()
 
         response = self.client.get(reverse('sheet.views.sheet_detail',
-                                           args=[2]))
+                                           args=[1]))
         self.assertContains(response, "invalid skill level")
 
 def get_fake_request(username):

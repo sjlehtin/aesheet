@@ -247,6 +247,13 @@ class AddSkillForm(RequestForm):
             if level == 3:
                 assert(skill.skill_cost_3)
         self.cleaned_data['level'] = level
+
+        try:
+            cost = skill.cost(level)
+        except ValueError as e:
+            raise ValidationError("Invalid level for skill %s: %s (%s)" %
+                                  (self.skill, self.level, e))
+
         # verify skill and level go together.
         cs = CharacterSkill()
         cs.character = self.instance

@@ -528,20 +528,6 @@ class CharacterSkill(models.Model):
     skill = models.ForeignKey(Skill)
     level = models.IntegerField(default=0)
 
-    def clean(self):
-        # A skill with a key (character, skill) should be unique.
-        if CharacterSkill.objects.filter(skill=self.skill,
-                                         character=self.character).exclude(
-                                                                  pk=self.pk):
-            raise ValidationError("Skill `%s' already obtained." %
-                                  (self.skill))
-        # Verify that skill level is supported by the skill.
-        try:
-            cost = self.skill.cost(self.level)
-        except ValueError as e:
-            raise ValidationError("Invalid level for skill %s: %s (%s)" %
-                                  (self.skill, self.level, e))
-
     def cost(self):
         try:
             return self.skill.cost(self.level)
@@ -580,7 +566,8 @@ class CharacterSkill(models.Model):
         return u"%s: %s %s" % (self.character, self.skill, self.level)
 
     class Meta:
-        ordering = ('skill__name', ) # XXX before explicit ordering.
+        ordering = ('skill__name', )
+        unique_together = ('character', 'skill')
 
 class StatModifier(models.Model):
     # `notes' will be added to the effects list, which describes all the
