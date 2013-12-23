@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
-                "ranged_weapons", "campaigns"]
+                "ranged_weapons", "campaigns", "firearms"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
@@ -35,11 +35,18 @@ class ItemHandling(TestCase):
         return response
 
     def add_ranged_weapon_and_verify(self, weapon_template, quality, weapon):
-        def get_ranged_weapons(char):
+        def get_weapons(char):
             return [wpn.name for wpn in char.ranged_weapons]
         return self.add_weapon_and_verify(weapon_template, quality, weapon,
                                           prefix="add-ranged-weapon",
-                                          accessor=get_ranged_weapons)
+                                          accessor=get_weapons)
+
+    def add_firearm_and_verify(self, weapon_template, quality, weapon):
+        def get_weapons(char):
+            return [wpn.name for wpn in char.firearms]
+        return self.add_weapon_and_verify(weapon_template, quality, weapon,
+                                          prefix="add-firearm",
+                                          accessor=get_weapons)
 
     def test_add_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
@@ -203,6 +210,19 @@ class ItemHandling(TestCase):
                                            args=[2]))
         self.assertEqual(response.context['char'].armor.armor_t_pl, 3)
         self.assertEqual(response.context['char'].helm.armor_h_pl, 2)
+
+    def test_add_firearm(self):
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[1]))
+        self.assertNotContains(response, "No firearms.")
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[3]))
+        self.assertContains(response, "No firearms.")
+
+        self.add_firearm_and_verify("Glock 19", "FMJ", "Glock 19 w/ FMJ")
+
+class FirearmTestCase(TestCase):
+    pass
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",

@@ -34,6 +34,7 @@ class AddWeaponForm(forms.ModelForm):
     item_queryset = Weapon.objects.all()
     template_queryset = WeaponTemplate.objects.all()
     quality_queryset = WeaponQuality.objects.all()
+    quality_field_name = 'quality'
 
     def add_item(self, item):
         self.instance.weapons.add(item)
@@ -50,7 +51,7 @@ class AddWeaponForm(forms.ModelForm):
         # XXX should be done after super() call.
         if 'item_quality' not in initial:
             quality = quality_queryset.filter(name="normal")
-            if quality:
+            if quality.exists():
                 initial['item_quality'] = quality[0]
         super(AddWeaponForm, self).__init__(*args, **kwargs)
         if self.instance.character.campaign:
@@ -76,11 +77,13 @@ class AddWeaponForm(forms.ModelForm):
         if not base or not quality:
             raise forms.ValidationError("Both template and quality "
                                         "are required.")
-        item = self.item_queryset.filter(base=base, quality=quality)
+        filter_kwargs = {'base': base}
+        filter_kwargs[self.quality_field_name] = quality
+        item = self.item_queryset.filter(**filter_kwargs)
         if item:
             item = item[0]
         else:
-            item = self.item_class(base=base, quality=quality)
+            item = self.item_class(**filter_kwargs)
             if quality.name == "normal":
                 item.name = base.name
             else:
@@ -116,7 +119,6 @@ class AddArmorForm(AddWeaponForm):
         self.instance.armor = item
         self.instance.save()
 
-
 class AddHelmForm(AddArmorForm):
     item_queryset = Armor.objects.filter(base__is_helm=True)
     template_queryset = ArmorTemplate.objects.filter(is_helm=True)
@@ -124,6 +126,23 @@ class AddHelmForm(AddArmorForm):
     def add_item(self, item):
         self.instance.helm = item
         self.instance.save()
+
+class AddFirearmForm(AddWeaponForm):
+    item_class = Firearm
+    item_queryset = Firearm.objects.all()
+    template_queryset = BaseFirearm.objects.all()
+    quality_queryset = Ammunition.objects.all()
+    quality_field_name = "ammo"
+
+    def add_item(self, item):
+        self.instance.firearm.add(item)
+
+    def available(self):
+        """
+        Returns True if the currently character has any firearms available
+        for the chosen tech level.
+        """
+        return self.fields['item_template'].queryset.exists()
 
 class AddExistingWeaponForm(forms.ModelForm):
     item_queryset = Weapon.objects.all()

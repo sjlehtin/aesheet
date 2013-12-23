@@ -536,6 +536,9 @@ def sheet_detail(request, sheet_id=None):
         AddExistingRangedWeaponForm(data,
                                     instance=sheet,
                                     prefix="add-existing-ranged-weapon")
+    forms['add_firearm_form'] = AddFirearmForm(
+        data, instance=sheet,
+        prefix="add-firearm")
     forms['add_xp_form'] = \
         AddXPForm(data,
                   request=request,

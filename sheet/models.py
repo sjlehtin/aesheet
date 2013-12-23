@@ -517,6 +517,9 @@ class Skill(ExportedModel):
                 'primary_for_weapontemplate',
                 'secondary_for_weapontemplate',
                 'base_skill_for_weapontemplate',
+                'primary_for_basefirearm',
+                'secondary_for_basefirearm',
+                'base_skill_for_basefirearm',
                 'skill', 'edgeskillbonus', 'characterlogentry',
                 'edgelevel']
 
@@ -717,7 +720,7 @@ class WeaponDamage(object):
             "%+d" % self.extra_damage if self.extra_damage else "",
             self.leth, plus_leth_str)
 
-class BaseWeaponTemplate(ExportedModel):
+class BaseArmament(ExportedModel):
     class Meta:
         abstract = True
         ordering = ['name']
@@ -733,14 +736,6 @@ class BaseWeaponTemplate(ExportedModel):
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
 
     roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
-
-    num_dice = models.IntegerField(default=1)
-    dice = models.IntegerField(default=6)
-    extra_damage = models.IntegerField(default=0)
-    leth = models.IntegerField(default=5)
-    plus_leth = models.IntegerField(default=0)
-
-    type = models.CharField(max_length=5, default="S")
 
     bypass = models.IntegerField(default=0)
 
@@ -758,16 +753,60 @@ class BaseWeaponTemplate(ExportedModel):
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
                                related_name="secondary_for_%(class)s")
 
-    @classmethod
-    def dont_export(self):
-        return ['weapon']
-
     def __unicode__(self):
         return u"%s" % (self.name)
+
+class BaseDamager(models.Model):
+    num_dice = models.IntegerField(default=1)
+    dice = models.IntegerField(default=6)
+    extra_damage = models.IntegerField(default=0)
+    leth = models.IntegerField(default=5)
+    plus_leth = models.IntegerField(default=0)
+    class Meta:
+        abstract = True
+
+class BaseWeaponTemplate(BaseArmament, BaseDamager):
+    class Meta:
+        abstract = True
+
+class RangedWeaponMixin(models.Model):
+    type = models.CharField(max_length=5, default="P")
+
+    target_initiative = models.IntegerField(default=-2)
+
+    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0.1)
+
+    range_pb = models.IntegerField(blank=True, null=True)
+    range_xs = models.IntegerField(blank=True, null=True)
+    range_vs = models.IntegerField(blank=True, null=True)
+    range_s = models.IntegerField()
+    range_m = models.IntegerField()
+    range_l = models.IntegerField()
+    range_xl = models.IntegerField(blank=True, null=True)
+    range_e = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+class BaseFirearm(BaseArmament, RangedWeaponMixin):
+    pass
+
+class Ammunition(BaseDamager):
+    name = models.CharField(max_length=10)
+    tech_level = models.ForeignKey(TechLevel)
+    # XXX low recoil -> rof + 0.2
+    # XXX high recoil -> rof - 0.2
+
+class Firearm(models.Model):
+    base = models.ForeignKey(BaseFirearm)
+    ammo = models.ForeignKey(Ammunition)
 
 class WeaponTemplate(BaseWeaponTemplate):
     """
     """
+    type = models.CharField(max_length=5, default="S")
+
     ccv = models.IntegerField(default=10)
     ccv_unskilled_modifier = models.IntegerField(default=-10)
 
@@ -776,23 +815,15 @@ class WeaponTemplate(BaseWeaponTemplate):
     is_lance = models.BooleanField(default=False)
     is_shield = models.BooleanField(default=False)
 
-class RangedWeaponTemplate(BaseWeaponTemplate):
+    @classmethod
+    def dont_export(self):
+        return ['weapon']
+
+class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     """
-    target_initiative = models.IntegerField(default=-2)
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
-
-    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
-                                      default=0.1)
-    range_pb = models.IntegerField(blank=True, null=True)
-    range_xs = models.IntegerField()
-    range_vs = models.IntegerField()
-    range_s = models.IntegerField()
-    range_m = models.IntegerField()
-    range_l = models.IntegerField()
-    range_xl = models.IntegerField()
-    range_e = models.IntegerField()
 
     @classmethod
     def dont_export(self):
