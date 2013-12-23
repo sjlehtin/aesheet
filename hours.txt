@@ -53,3 +53,4 @@ sun 27.4.2013 2.5h Layout fixing.
 thu 8.8.2013 4h Miscellaneous items.
 wed 25.9.2013 2h Performance fixes.
 sat 21.12.2013 1h Django-1.6 compatibility.
+sun 22.12.2013 3h Responsive layout, firearms.
