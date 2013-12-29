@@ -109,6 +109,7 @@ class AddRangedWeaponForm(AddWeaponForm):
     def add_item(self, item):
         self.instance.ranged_weapons.add(item)
 
+
 class AddArmorForm(AddWeaponForm):
     item_class = Armor
     item_queryset = Armor.objects.filter(base__is_helm=False)
@@ -119,6 +120,7 @@ class AddArmorForm(AddWeaponForm):
         self.instance.armor = item
         self.instance.save()
 
+
 class AddHelmForm(AddArmorForm):
     item_queryset = Armor.objects.filter(base__is_helm=True)
     template_queryset = ArmorTemplate.objects.filter(is_helm=True)
@@ -126,6 +128,7 @@ class AddHelmForm(AddArmorForm):
     def add_item(self, item):
         self.instance.helm = item
         self.instance.save()
+
 
 class AddFirearmForm(AddWeaponForm):
     item_class = Firearm
@@ -135,14 +138,8 @@ class AddFirearmForm(AddWeaponForm):
     quality_field_name = "ammo"
 
     def add_item(self, item):
-        self.instance.firearm.add(item)
+        self.instance.firearms.add(item)
 
-    def available(self):
-        """
-        Returns True if the currently character has any firearms available
-        for the chosen tech level.
-        """
-        return self.fields['item_template'].queryset.exists()
 
 class AddExistingWeaponForm(forms.ModelForm):
     item_queryset = Weapon.objects.all()

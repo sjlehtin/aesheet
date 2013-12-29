@@ -165,6 +165,11 @@ XP: {{ char.xp_used_stats }} +
 <h3>Ranged combat</h3>
 {% include "sheet/sheet_detail/ranged_weapons.html" %}
 
+{% if char.campaign.has_firearms %}
+<h3>Firearms</h3>
+{% include "sheet/sheet_detail/firearms.html" %}
+{% endif %}
+
 <h3>Miscellaneous items</h3>
 {% include "sheet/sheet_detail/miscellaneous_items.html" %}
 

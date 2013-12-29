@@ -1,0 +1,68 @@
+
+{% if char.firearms %}
+<table class="combat">
+  <tr>
+    <th></th>
+    <th>ROF</th>
+    {% for act in char.ranged_actions %}
+    <th>{{ act }}</th>
+    {% endfor %}
+    <th colspan="4">Attack</th>
+    <th>S/M/L</th>
+  </tr>
+
+  {% for item in char.ranged_weapons %}
+  <tr>
+    <td class="weapon name">
+    <div class="remove-container">
+        {{ item.item }}
+      {% if not item.skilled %}
+      <div class="unskilled">unskilled</div>
+      {% endif %}
+      {% if item.bypass %}
+          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
+      {% endif %}
+      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
+      <div class="remove edit-control">
+        <form action="" method="post">
+          {% csrf_token %}
+          {{ item.remove_form }}
+          <input type="submit" value="Remove" />
+        </form>
+      </div>
+    </div>
+    </td>
+    <td>{{ item.rof }}</td>
+    {% for act in item.skill_checks %}
+    <td class="tohit">{{ act.check|default:"" }}</td>
+    {% endfor %}
+    {% for init in item.initiatives %}
+    <td>{{ init|stringformat:"+d" }}</td>
+    {% endfor %}
+
+    <td>{{ item.damage }}</td>
+    <td>
+    {% with rr=item.ranges %}
+        {{ rr.s }} /  {{ rr.m }} / {{ rr.l }}
+    {% endwith %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No firearms.</p>
+{% endif %}
+<div id="add_firearm_form" class="edit-control advanced"
+        data-advanced-text="Add firearms">
+    <label for="add_firearm_form">Add firearm</label>
+    <form id="add_firearm_form" action="{{ act }}" method="post"
+            >{% csrf_token %}
+        <ul>
+            {{ add_firearm_form.as_ul}}
+        </ul>
+        <input type="submit" value="Add" />
+    </form>
+
+    <a href="{% url "add_firearm" %}">Create a new firearm</a>
+    <a href="{% url "add_ammunition" %}">Create new ammo</a>
+</div>

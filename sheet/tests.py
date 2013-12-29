@@ -214,7 +214,16 @@ class ItemHandling(TestCase):
     def test_add_firearm(self):
         response = self.client.get(reverse('sheet.views.sheet_detail',
                                            args=[1]))
-        self.assertNotContains(response, "No firearms.")
+        self.assertNotContains(response, "No firearms.",
+                               msg_prefix="FRP character sheets should not "
+                                          "contain firearms.")
+
+        sheet = Sheet.objects.get(pk=1)
+        self.assertFalse(sheet.character.campaign.has_firearms)
+
+        sheet = Sheet.objects.get(pk=3)
+        self.assertTrue(sheet.character.campaign.has_firearms)
+
         response = self.client.get(reverse('sheet.views.sheet_detail',
                                            args=[3]))
         self.assertContains(response, "No firearms.")
@@ -222,7 +231,26 @@ class ItemHandling(TestCase):
         self.add_firearm_and_verify("Glock 19", "FMJ", "Glock 19 w/ FMJ")
 
 class FirearmTestCase(TestCase):
-    pass
+    def test_ammo_validation(self):
+        """
+        Verify that chosen ammo for the weapon is validated to be suitable.
+        """
+
+    def test_single_fire_skill_checks(self):
+        pass
+
+    def test_burst_fire_skill_checks(self):
+        pass
+
+    def test_sweep_fire_skill_checks(self):
+        pass
+
+    def test_fit_counter_for_rof_penalties(self):
+        pass
+
+    def test_autofire_penalty_for_burst_fire(self):
+        pass
+
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
@@ -458,12 +486,14 @@ class EdgeAndSkillHandling(TestCase):
                         "Adding an existing skill should result in an error")
         self.assertIn("__all__", form.errors)
 
+
 def get_fake_request(username):
     class FakeReq(object):
         pass
     req = FakeReq()
     req.user = auth.models.User.objects.get(username=username)
     return req
+
 
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
@@ -753,7 +783,7 @@ class TechLevelTestCase(TestCase):
         self.assertEqual(add_existing_armor.fields['item'].queryset
                          .filter(name="Plate mail L5").exists(), frp_items)
 
-    def test_frp_tech_level(self):
+    def test_tech_levels(self):
         # Martel (FRP)
         self.verify_character(1, True, True, False, False)
         # Asa (MR)

@@ -78,6 +78,11 @@ class Campaign(models.Model):
     name = models.CharField(max_length=10, unique=True)
     tech_levels = models.ManyToManyField(TechLevel)
 
+    @property
+    def has_firearms(self):
+        return BaseFirearm.objects.filter(
+            tech_level__in=self.tech_levels.all()).exists()
+
     def __unicode__(self):
         return self.name
 
@@ -1231,6 +1236,8 @@ class Sheet(models.Model):
 
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
+    firearms = models.ManyToManyField(Firearm, blank=True)
+
     miscellaneous_items = models.ManyToManyField(MiscellaneousItem, blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
@@ -1404,6 +1411,42 @@ class Sheet(models.Model):
         mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
+
+    def firearm_skill_checks(self, weapon):
+        rof = self.rof(weapon)
+        roa = float(rof)
+        def check_mod_from_action_index(act):
+            act = float(act)
+            if 1/act >= 1/roa + 1:
+                return 10 # ranged.
+            if act > roa:
+                return - act/roa * 20 + 15
+            if act < 0.5 * roa:
+                return roa / act
+            return 0
+
+        modifiers = 0
+
+        # skill level/unskilled.
+        cs = self.character.skills.filter(skill=weapon.base.base_skill)
+        if cs.count() > 0:
+            base_skill = self.eff_dex + cs[0].level * 5
+        else:
+            base_skill = roundup(self.eff_dex / 2.0)
+
+        logging.info("ROF %s" % roa)
+        checks = [check_mod_from_action_index(act)
+                  # cap number of actions.
+                  for act in filter(lambda act: act < roa * 2,
+                                    self.ranged_actions)]
+        logging.info("checks: %s" % checks)
+        def counter_penalty(penalty):
+            # Fitness counters ranged weapon penalties.
+            return min(0, penalty + rounddown((self.eff_fit - 45)/3.0))
+
+        checks = map(counter_penalty, checks)
+        base_skill = base_skill + weapon.to_hit
+        return [int(round(xx) + base_skill) for xx in checks]
 
     def ranged_skill_checks(self, weapon):
         rof = self.rof(weapon)

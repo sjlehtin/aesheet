@@ -224,6 +224,7 @@ class WeaponWrap(RemoveWrap, SkilledMixin):
 
 Action = namedtuple('Action', ['action', 'check'])
 
+
 class RangedWeaponWrap(RemoveWrap, SkilledMixin):
     def __init__(self, item, sheet):
         super(RangedWeaponWrap, self).__init__(item)
@@ -234,15 +235,11 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
         return self.sheet.rof(self.item)
 
     def skill_checks(self):
-        ll = None
-        try:
-            ll = [Action._make(xx) for xx in map(
-                    None,
-                    self.sheet.ranged_actions,
-                    self.sheet.ranged_skill_checks(self.item))]
-            logger.info("Checks: %s" % ll)
-        except Exception, e:
-            logger.exception("Got exception")
+        ll = [Action._make(xx) for xx in map(
+                None,
+                self.sheet.ranged_actions,
+                self.sheet.ranged_skill_checks(self.item))]
+        logger.info("Checks: %s" % ll)
         return ll
 
     def ranges(self):
@@ -256,6 +253,34 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
 
     def damage(self):
         return self.sheet.damage(self.item, use_type=Sheet.PRI)
+
+
+class FirearmWrap(RemoveWrap, SkilledMixin):
+    def __init__(self, item, sheet):
+        super(FirearmWrap, self).__init__(item)
+        self.sheet = sheet
+        self.item = item
+
+    def rof(self):
+        return self.sheet.rof(self.item)
+
+    def skill_checks(self):
+        ll = [Action._make(xx) for xx in map(
+                None,
+                self.sheet.firearm_actions,
+                self.sheet.firearm_skill_checks(self.item))]
+        logger.info("Checks: %s" % ll)
+        return ll
+
+    def ranges(self):
+        return self.sheet.ranged_ranges(self.item)
+
+    def initiatives(self):
+        return self.sheet.initiatives(self.item)
+
+    def damage(self):
+        return self.sheet.damage(self.item)
+
 
 class SkillWrap(RemoveWrap):
     def __init__(self, item, sheet):
@@ -275,6 +300,7 @@ class SkillWrap(RemoveWrap):
 
     def check(self):
         return self.item.check(self.sheet)
+
 
 class ArmorWrap(RemoveWrap):
     def __init__(self, item, sheet, type):
@@ -346,11 +372,13 @@ class SheetView(object):
 
     @property
     def ranged_weapons(self):
-        try:
-            return [RangedWeaponWrap(xx, self.sheet)
-                  for xx in self.sheet.ranged_weapons.all()]
-        except:
-            logger.exception("Got exception")
+        return [RangedWeaponWrap(xx, self.sheet)
+              for xx in self.sheet.ranged_weapons.all()]
+
+    @property
+    def firearms(self):
+        return [FirearmWrap(xx, self.sheet)
+              for xx in self.sheet.firearms.all()]
 
     @property
     def spell_effects(self):
@@ -648,6 +676,12 @@ class AddEdgeSkillBonusView(AddSpellEffectView):
 
 class AddRangedWeaponView(AddWeaponView):
     model = RangedWeapon
+
+class AddFirearmView(AddWeaponView):
+    model = BaseFirearm
+
+class AddAmmunitionView(AddWeaponView):
+    model = Ammunition
 
 class AddRangedWeaponTemplateView(AddRangedWeaponView):
     model = RangedWeaponTemplate
