@@ -1,13 +1,14 @@
 #!/bin/bash
  
 NAME="devsheet_app"                                  # Name of the application
-DJANGODIR=/home/sjl/p/aesheet             # Django project directory
-SOCKFILE=/home/sjl/p/aesheet/run/dev-gunicorn.sock  # we will communicate using this unix socket
+DJANGODIR=/home/sjl/p/aesheet-dev             # Django project directory
+SOCKFILE=/home/sjl/p/aesheet-dev/run/gunicorn.sock  # we will communicate using this unix socket
 USER=www-data                                       # the user to run as
 GROUP=www-data                                      # the group to run as
 NUM_WORKERS=3                                     # how many worker processes should Gunicorn spawn
-DJANGO_SETTINGS_MODULE=aesheet.settings             # which settings file should Django use
+DJANGO_SETTINGS_MODULE=settings             # which settings file should Django use
 export ROOT_URL='/'
+export DB_NAME='devsheet'
 export PRODUCTION=1 
 PYTHONPATH=/home/sjl/p/:$PYTHONPATH
 #export SCRIPT_NAME='/ae/sheet'
