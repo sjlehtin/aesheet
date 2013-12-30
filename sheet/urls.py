@@ -32,6 +32,7 @@ urlpatterns = patterns(
     url(r'^sheets/export/(?P<type>\w+)/$', 'export_data'),
     url(r'^sheets/browse/(?P<type>\w+)/$', 'browse'),
     url(r'^sheets/ChangeLog$', 'version_history'),
+    url(r'^sheets/TODO$', sheet.views.TODOView.as_view(), name="todo"),
 )
 
 def class_from_name(name):
