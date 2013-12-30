@@ -895,7 +895,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
 
     @classmethod
     def dont_export(cls):
-        return ['armor']
+        return ['armor', 'miscellaneousitem']
 
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
