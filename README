@@ -1,0 +1,4 @@
+logs/
+devlogs/
+
+need to exist and be owned by www-data.
