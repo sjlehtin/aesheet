@@ -54,3 +54,5 @@ thu 8.8.2013 4h Miscellaneous items.
 wed 25.9.2013 2h Performance fixes.
 sat 21.12.2013 1h Django-1.6 compatibility.
 sun 22.12.2013 3h Responsive layout, firearms.
+sun 29.12.2013 2h Sheets and characters grouped by campaign.
+mon 30.12.2013 4h Dev server installation.

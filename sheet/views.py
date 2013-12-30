@@ -1,5 +1,3 @@
-# Create your views here.
-
 TODO = """
 + = done
 - = not done
@@ -62,6 +60,8 @@ TODO = """
 -- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
 - size field for weapons (huge cretin with Large bite)
 
+- free edges based on campaign (probably should think about race
+  in this context, for FRP at least)
 
 NOTES on creating Jan:
 
@@ -89,8 +89,7 @@ Priority list by JW:
 - adding weapon inplace ("add row" functionality), instead of the large set of
   controls.  Might already be sufficient with the condensed layout, verify with
   JW.
-- sheets to campaign order.
-
++ sheets to campaign order.
 """
 
 BUGS = """
@@ -115,21 +114,22 @@ import sheet.models
 import csv
 import StringIO
 from django.db.models.fields import FieldDoesNotExist
+import os.path
+import subprocess
+from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
 def characters_index(request):
-    all_characters = Character.objects.all().order_by('name')
     return render_to_response('sheet/characters_index.html',
-                              { 'all_characters' : all_characters },
+                              { 'campaigns': Character.get_by_campaign()},
                               context_instance=RequestContext(request))
 
 def sheets_index(request):
-    all_sheets = Sheet.objects.all()
     return render_to_response('sheet/sheets_index.html',
-                              { 'all_sheets' : all_sheets },
+                              { 'campaigns': Sheet.get_by_campaign()},
                               context_instance=RequestContext(request))
 
 class GenWrapper(object):
@@ -915,8 +915,7 @@ def export_data(request, type):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
 
-import os.path
-import subprocess
+
 def version_history(request):
     def logiter(output):
         acc = ""
@@ -932,3 +931,13 @@ def version_history(request):
     return render_to_response('sheet/changelog.html',
                               RequestContext(request,
                                              { 'log' : logiter(proc.stdout) }))
+
+
+class TODOView(TemplateView):
+    template_name = 'sheet/todo.html'
+
+    def get_context_data(self, **kwargs):
+        context = dict(**kwargs)
+        context['TODO'] = TODO
+        context['BUGS'] = BUGS
+        return context

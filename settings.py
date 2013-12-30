@@ -22,13 +22,21 @@ LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
 SOUTH_TESTS_MIGRATE = False
 
+BASEDIR = os.path.dirname(__file__)
 DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 
 if PRODUCTION:
 
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
-    DB_NAME = 'sheet'
-    f = open(os.path.join(os.path.dirname(__file__), "auth"), "r")
+    # Allow overriding database with a file and environment variable.
+    DB_NAME='sheet'
+    try:
+        with open(os.path.join(BASEDIR, "DATABASE")) as fp:
+            DB_NAME = fp.read().strip()
+    except IOError:
+        pass
+    DB_NAME = os.getenv("DB_NAME", DB_NAME)
+    f = open(os.path.join(BASEDIR, "auth"), "r")
     auth_details = f.read()
     (USER, PASSWORD) = auth_details.strip().split()
     DEBUG_TOOLBAR_ENABLED = False
@@ -143,6 +151,7 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS += (
     "context_processors.variables",
+    "django.core.context_processors.request",
     )
 
 MIDDLEWARE_CLASSES = (
@@ -152,7 +161,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-
     'profiling.ProfileMiddleware',
     'profiling.MemoryProfileMiddleware',
 )
@@ -174,8 +182,7 @@ TEMPLATE_DIRS = (
 )
 
 LOGIN_REQUIRED_URLS = (
-    r'(.*)/sheets/(.*)$',
-    r'(.*)/characters/(.*)$',
+    r'(.*)$',
 )
 
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
@@ -246,7 +253,14 @@ if os.getenv('LOG_TO_CONSOLE'):
             'sheet' : {
                 'handlers' : ['console'],
                 'level' : 'DEBUG'
-                }
-
-        }
+                },
+            'django.db' : {
+                'handlers' : ['console'],
+                'level' : 'DEBUG'
+            },
+            '' : {
+                'handlers' : ['console'],
+                'level' : 'DEBUG'
+            }
+        },
     }
