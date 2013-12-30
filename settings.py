@@ -22,13 +22,21 @@ LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
 SOUTH_TESTS_MIGRATE = False
 
+BASEDIR = os.path.dirname(__file__)
 DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 
 if PRODUCTION:
 
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
-    DB_NAME = 'sheet'
-    f = open(os.path.join(os.path.dirname(__file__), "auth"), "r")
+    # Allow overriding database with a file and environment variable.
+    DB_NAME='sheet'
+    try:
+        with open(os.path.join(BASEDIR, "DATABASE")) as fp:
+            DB_NAME = fp.read().strip()
+    except IOError:
+        pass
+    DB_NAME = os.getenv("DB_NAME", DB_NAME)
+    f = open(os.path.join(BASEDIR, "auth"), "r")
     auth_details = f.read()
     (USER, PASSWORD) = auth_details.strip().split()
     DEBUG_TOOLBAR_ENABLED = False
