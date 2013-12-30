@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.test.client import Client
 from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
@@ -8,6 +7,7 @@ from sheet.forms import AddSkillForm, AddXPForm
 import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
+import factories
 import logging
 
 logger = logging.getLogger(__name__)
@@ -742,9 +742,6 @@ class TechLevelTestCase(TestCase):
         self.verify_character(4, False, False, True, True)
         # Jan (GZ)
         self.verify_character(5, False, True, False, True)
-
-import factories
-import factory
 
 class SheetOrganization(TestCase):
     def setUp(self):
