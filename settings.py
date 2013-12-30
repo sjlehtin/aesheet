@@ -151,6 +151,7 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS += (
     "context_processors.variables",
+    "django.core.context_processors.request",
     )
 
 MIDDLEWARE_CLASSES = (
@@ -160,7 +161,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-
     'profiling.ProfileMiddleware',
     'profiling.MemoryProfileMiddleware',
 )

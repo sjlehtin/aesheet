@@ -16,9 +16,15 @@ def render_armor(armor, loc_desc):
 
     return "<td>" + "</td><td>".join(descr) + "</td>"
 
+
 @register.simple_tag
 def sum_sp_cost(skills):
     try:
         return sum((skill.cost() for skill in skills))
     except TypeError:
         return "NaN"
+
+
+@register.simple_tag
+def active(request, url):
+    return "active" if request.path.startswith(url) else ""
