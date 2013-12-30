@@ -1,5 +1,3 @@
-# Create your views here.
-
 TODO = """
 + = done
 - = not done
@@ -62,6 +60,8 @@ TODO = """
 -- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
 - size field for weapons (huge cretin with Large bite)
 
+- free edges based on campaign (probably should think about race
+  in this context, for FRP at least)
 
 NOTES on creating Jan:
 
@@ -89,8 +89,7 @@ Priority list by JW:
 - adding weapon inplace ("add row" functionality), instead of the large set of
   controls.  Might already be sufficient with the condensed layout, verify with
   JW.
-- sheets to campaign order.
-
++ sheets to campaign order.
 """
 
 BUGS = """
