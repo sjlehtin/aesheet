@@ -115,6 +115,9 @@ import sheet.models
 import csv
 import StringIO
 from django.db.models.fields import FieldDoesNotExist
+import os.path
+import subprocess
+from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
 
@@ -876,8 +879,7 @@ def export_data(request, type):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
 
-import os.path
-import subprocess
+
 def version_history(request):
     def logiter(output):
         acc = ""
@@ -893,3 +895,13 @@ def version_history(request):
     return render_to_response('sheet/changelog.html',
                               RequestContext(request,
                                              { 'log' : logiter(proc.stdout) }))
+
+
+class TODOView(TemplateView):
+    template_name = 'sheet/todo.html'
+
+    def get_context_data(self, **kwargs):
+        context = dict(**kwargs)
+        context['TODO'] = TODO
+        context['BUGS'] = BUGS
+        return context

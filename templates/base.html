@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load url from future %}
 {% load static %}
+{% load sheet_extras %}
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,34 +19,53 @@
 
 <body>
   <div id="top" class="container">
-    <div id="navigation">
-        {% block navigation %}
-        <ul>
-            <li><a href="{% url "sheet.views.sheets_index" %}">Sheets</a></li>
-            <li><a href="{% url "sheet.views.characters_index" %}">
-		Characters</a></li>
-            <li><a href="{% url "import" %}">
-		Import/export data</a></li>
-            <li><a href="{% url "sheet.views.version_history" %}">
-		ChangeLog</a></li>
-        </ul>
-        {% endblock %}
-    </div>
+      <nav class="navbar navbar-default" role="navigation">
 
-    <div id="authbar">
+              <div class="navbar-header">
+                  <button type="button" class="navbar-toggle" data-toggle="collapse"
+                          data-target="#collapsible-navbar">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="#">AE</a>
+              </div>
+
+          <div class="collapse navbar-collapse" id="collapsible-navbar">
+        <ul class="nav navbar-nav">
+        {% url "sheet.views.sheets_index" as sheets_url %}
+            {% url "sheet.views.characters_index" as chars_url%}
+            {% url "import" as import_url %}
+            {% url "sheet.views.version_history" as history_url %}
+            {% url "todo" as todo_url %}
+            <li class="{% active request sheets_url %}">
+                <a href="{{ sheets_url }}">Sheets</a></li>
+            <li class="{% active request chars_url %}">
+                <a href="{{ chars_url }}">Characters</a></li>
+            <li class="{% active request import_url %}">
+                <a href="{{ import_url }}">Import/export data</a></li>
+            <li class="{% active request history_url %}">
+                <a href="{{ history_url }}">ChangeLog</a></li>
+            <li class="{% active request todo_url %}">
+                <a href="{{ todo_url }}">TODO</a></li>
+        </ul>
+        {% block navigation %}
+        {% endblock %}
+
       {% if user.is_authenticated %}
-        <ul>
-	  <li>
-      Currently logged in: <a href="{% url "profile" %}"> 
-        {{ user }} </a>
+          <ul class="nav navbar-nav navbar-right">
+              {% url "profile" as profile_url %}
+	  <li class="{% active request profile_url %}">
+          <a href="{{ profile_url }}">{{ user }} </a>
 	  </li>
 	  <li>
       <a href="{% url "logout" %}">Logout</a>
       </li>
       </ul>
       {% endif %}
-      
-    </div>
+      </div>
+      </nav>
   </div>
 
   <div id="content" class="container">

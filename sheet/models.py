@@ -848,12 +848,9 @@ class WeaponSpecialQuality(ExportedModel, Effect):
     """
     """
 
-    #name = models.CharField(max_length=32, primary_key=True)
-    #description = models.TextField(blank=True)
-
     @classmethod
     def dont_export(cls):
-        return ['weapon', 'rangedweapon']
+        return ['weapon', 'rangedweapon', 'miscellaneousitem']
 
     def __unicode__(self):
         return u"WSQ: %s" % (self.name)

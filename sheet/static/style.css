@@ -2,15 +2,6 @@ body { height : 100%; min-height : 100%; }
 html { height : 100%; min-height : 100%; }
 table td { vertical-align: top }
 
-#top { background: #defdde; position: relative; }
-#top ul { list-style-type: none; margin: 0px; }
-#top li { display: inline; border-right: 1px;}
-#navigation { background: #defdde; display: inline-block; padding: 2px; }
-#authbar {
-    text-align : right; display: inline-block; float: right;
-    padding: 2px;
-}
-
 #content { min-height: 100%; overflow: auto; }
 #skill-pane { font-size: 80%; }
 #right-pane { position: absolute;
@@ -113,7 +104,7 @@ ul {
 }
 
 ul li {
-    list-style-type: none; 
+    list-style-type: none;
 }
 
 ul.changelog li { white-space: pre-wrap; 
