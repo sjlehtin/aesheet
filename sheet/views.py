@@ -121,15 +121,13 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 
 def characters_index(request):
-    all_characters = Character.objects.all().order_by('name')
     return render_to_response('sheet/characters_index.html',
-                              { 'all_characters' : all_characters },
+                              { 'campaigns': Character.get_by_campaign()},
                               context_instance=RequestContext(request))
 
 def sheets_index(request):
-    all_sheets = Sheet.objects.all()
     return render_to_response('sheet/sheets_index.html',
-                              { 'all_sheets' : all_sheets },
+                              { 'campaigns': Sheet.get_by_campaign()},
                               context_instance=RequestContext(request))
 
 class GenWrapper(object):

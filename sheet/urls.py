@@ -6,7 +6,7 @@ import sheet.views
 urlpatterns = patterns(
     'sheet.views',
 
-    url(r'^characters/$', 'characters_index'),
+    url(r'^characters/$', 'characters_index', name='characters_index'),
 
     url(r'^characters/add_char/$', AddCharacterView.as_view(),
         name="add_char"),
@@ -20,7 +20,7 @@ urlpatterns = patterns(
         name='edit_sheet'),
 
     # Specific sheets for the characters.
-    url(r'^sheets/$', 'sheets_index'),
+    url(r'^sheets/$', 'sheets_index', name='sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet_detail', name='sheet_detail'),
 
     url(r'^sheets/import/$', 'import_data', name='import'),

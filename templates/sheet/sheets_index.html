@@ -17,13 +17,17 @@
 <a href="{% url "add_sheet" %}">Add a new sheet</a>
 </p>
 
-{% if all_sheets %}
-    <ul>
-    {% for sheet in all_sheets %}
-        <li><a href="{% url "sheet.views.sheet_detail" sheet.id %}">{{ sheet }}</a></li>
+{% if campaigns %}
+    {% for campaign in campaigns %}
+        <h3 class="campaign">{{ campaign.name }}</h3>
+        <ul>
+            {% for sheet in campaign.objects %}
+                <li><a href="{% url "sheet.views.sheet_detail" sheet.id %}">{{ sheet }}</a></li>
+            {% endfor %}
+        </ul>
     {% endfor %}
-    </ul>
 {% else %}
     <p>No sheets.</p>
 {% endif %}
+
 {% endblock %}

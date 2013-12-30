@@ -743,6 +743,52 @@ class TechLevelTestCase(TestCase):
         # Jan (GZ)
         self.verify_character(5, False, True, False, True)
 
+import factories
+import factory
+
+class SheetOrganization(TestCase):
+    def setUp(self):
+        factories.SheetFactory(character__name="Martel",
+                               character__campaign__name="FRP")
+        factories.SheetFactory(character__name="Yukaghir",
+                               character__campaign__name="FRP")
+        factories.SheetFactory(character__name="Asa",
+                               character__campaign__name="MR")
+        factories.UserFactory(username='admin')
+        self.assertTrue(self.client.login(username='admin',
+                                          password='foobar'))
+
+    def test_sheet_organization(self):
+        campaigns = Sheet.get_by_campaign()
+        self.assertListEqual([u"FRP", u"MR"],
+                             [campaign.name for campaign in campaigns])
+        self.assertListEqual([u"Martel", u"Yukaghir", u"Asa"],
+                             [sheet.character.name for campaign in campaigns
+                              for sheet in campaign.objects])
+
+    def test_character_organization(self):
+        campaigns = Character.get_by_campaign()
+        self.assertListEqual(["FRP", "MR"],
+                             [campaign.name for campaign in campaigns])
+        self.assertListEqual(["Martel", "Yukaghir", "Asa"],
+                             [character.name for campaign in campaigns
+                              for character in campaign.objects])
+
+    def test_character_view(self):
+        response = self.client.get(reverse('characters_index'))
+        self.assertIsInstance(response.context['campaigns'][0],
+                              sheet.models.CampaignItem)
+        # Verify the headings are present.
+        self.assertContains(response, 'FRP')
+        self.assertContains(response, 'MR')
+
+    def test_sheet_view(self):
+        response = self.client.get(reverse('sheets_index'))
+        self.assertIsInstance(response.context['campaigns'][0],
+                              sheet.models.CampaignItem)
+        # Verify the headings are present.
+        self.assertContains(response, 'FRP')
+        self.assertContains(response, 'MR')
 
 class CreateURLTestCase(TestCase):
     fixtures = ['user']

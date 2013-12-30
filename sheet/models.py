@@ -69,10 +69,12 @@ class ExportedModel(models.Model):
     class Meta:
         abstract = True
 
+
 class TechLevel(models.Model):
     name = models.CharField(max_length=10, unique=True)
     def __unicode__(self):
         return self.name
+
 
 class Campaign(models.Model):
     name = models.CharField(max_length=10, unique=True)
@@ -80,6 +82,22 @@ class Campaign(models.Model):
 
     def __unicode__(self):
         return self.name
+
+from django.utils.datastructures import SortedDict
+
+class CampaignItem(object):
+    def __init__(self, campaign):
+        self.name = campaign.name
+        self.objects = []
+
+def get_by_campaign(model_class, accessor):
+    items = SortedDict()
+    objects = [(accessor(obj), obj) for obj in model_class.objects.all()]
+    objects.sort(key=lambda xx: xx[0].name)
+    for (campaign, obj) in objects:
+        item =  items.setdefault(campaign.name, CampaignItem(campaign))
+        item.objects.append(obj)
+    return items.values()
 
 class Character(models.Model):
     """
@@ -155,7 +173,7 @@ class Character(models.Model):
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
-        ordering = ['last_update_at']
+        ordering = ['name']
 
     def get_ability(self, abilities, ability, accessor):
         """
@@ -411,6 +429,11 @@ class Character(models.Model):
                cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
             [self.id, self.id])
         return dict(cursor.fetchall())
+
+    @classmethod
+    def get_by_campaign(cls):
+        return get_by_campaign(cls, lambda obj: obj.campaign)
+
 
 class Edge(ExportedModel):
     """
@@ -1667,6 +1690,10 @@ class Sheet(models.Model):
 
         return weight + self.extra_weight_carried
 
+    @classmethod
+    def get_by_campaign(cls):
+        return get_by_campaign(cls, lambda obj: obj.character.campaign)
+
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
         # base character.
@@ -1676,6 +1703,9 @@ class Sheet(models.Model):
 
     def __unicode__(self):
         return u"sheet for %s: %s" % (self.character.name, self.description)
+
+    class Meta:
+        ordering = ('character__name', )
 
 
 class CharacterLogEntry(models.Model):
