@@ -15,14 +15,15 @@ logger = logging.getLogger(__name__)
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
-                "ranged_weapons", "campaigns", "firearms"]
+                "ranged_weapons", "campaigns"]
 
     def setUp(self):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def add_weapon_and_verify(self, weapon_template, quality, weapon,
-                              prefix="add-weapon", accessor=None):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+                              prefix="add-weapon", accessor=None,
+                              sheet_id=1):
+        det_url = reverse('sheet.views.sheet_detail', args=[sheet_id])
         req_data = {'%s-item_template' % prefix: weapon_template,
                     '%s-item_quality' % prefix: quality}
         response = self.client.post(det_url, req_data)
@@ -44,10 +45,11 @@ class ItemHandling(TestCase):
 
     def add_firearm_and_verify(self, weapon_template, ammunition, weapon):
         def get_weapons(char):
-            return [wpn.name for wpn in char.firearms]
+            return [unicode(wpn) for wpn in char.firearms]
         return self.add_weapon_and_verify(weapon_template, ammunition, weapon,
                                           prefix="add-firearm",
-                                          accessor=get_weapons)
+                                          accessor=get_weapons,
+                                          sheet_id=3)
 
     def test_add_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
@@ -213,6 +215,11 @@ class ItemHandling(TestCase):
         self.assertEqual(response.context['char'].helm.armor_h_pl, 2)
 
     def test_add_firearm(self):
+        ammo = factories.AmmunitionFactory(label="9Pb",
+                                                type='FMJ')
+        factories.BaseFirearmFactory(name="Glock 19",
+                                     ammunition_types=('9Pb', '9Pb+'))
+
         response = self.client.get(reverse('sheet.views.sheet_detail',
                                            args=[1]))
         self.assertNotContains(response, "No firearms.",
@@ -229,15 +236,17 @@ class ItemHandling(TestCase):
                                            args=[3]))
         self.assertContains(response, "No firearms.")
 
-        factories.AmmunitionFactory(name='FMJ')
-        self.add_firearm_and_verify("Glock 19", "FMJ", "Glock 19 w/ FMJ")
+        self.add_firearm_and_verify("Glock 19", ammo.pk, "Glock 19 w/ 9Pb FMJ")
 
 
 class FirearmTestCase(TestCase):
     def setUp(self):
-        factories.CampaignFactory(name="MR", tech_levels=("all", "2k"))
+        factories.CampaignFactory(name="MR", tech_levels=("all", "2K"))
         self.sheet = factories.SheetFactory(character__campaign__name="MR")
-        self.ammo = factories.AmmunitionFactory(label="9x19", type='FMJ')
+        self.ammo = factories.AmmunitionFactory(label="9Pb",
+                                                type='FMJ')
+        self.unsuitable_ammo = factories.AmmunitionFactory(label="50BMG",
+                                                           type='FMJ')
         factories.BaseFirearmFactory(name="Glock 19",
                                      ammunition_types=('9Pb', '9Pb+'))
 
@@ -248,12 +257,17 @@ class FirearmTestCase(TestCase):
         self.assertTrue(form.is_valid())
         sheet = form.save()
         self.assertEqual(unicode(sheet.firearms.all()[0]),
-                         "Glock 19 w/ 9x19 FMJ")
+                         "Glock 19 w/ 9Pb FMJ")
 
     def test_ammo_validation(self):
         """
         Verify that chosen ammo for the weapon is validated to be suitable.
         """
+        form = forms.AddFirearmForm(instance=self.sheet,
+                                    data={'item_template': 'Glock 19',
+                                          'item_quality':
+                                              self.unsuitable_ammo.pk })
+        #self.assertFalse(form.is_valid())
 
     def test_single_fire_skill_checks(self):
         pass

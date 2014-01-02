@@ -51,7 +51,7 @@ class AmmunitionFactory(factory.DjangoModelFactory):
     FACTORY_DJANGO_GET_OR_CREATE = ('label', )
 
     tech_level = factory.SubFactory(TechLevelFactory)
-    tech_level__name = "2k"
+    tech_level__name = "2K"
 
 
 class FirearmAmmunitionTypeFactory(factory.DjangoModelFactory):
@@ -72,7 +72,7 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
     base_skill = factory.SubFactory(SkillFactory)
 
     base_skill__name = "Pistol"
-    tech_level__name = "2k"
+    tech_level__name = "2K"
 
     range_s = 15
     range_m = 30

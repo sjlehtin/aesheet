@@ -831,12 +831,10 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
 
 
 class Ammunition(BaseDamager):
-    label = models.CharField(max_length=60,
-                             help_text="Ammunition caliber, which should also "
+    label = models.CharField(max_length=20,
+                            help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "
                                        "and such")
-    short_label = models.CharField(max_length=20,
-                                   help_text="Condensed version of label")
     type = models.CharField(max_length=10,
                             help_text="Make of the ammo, such as "
                                       "full metal jacket")
