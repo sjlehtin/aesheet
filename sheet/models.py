@@ -827,7 +827,11 @@ class RangedWeaponMixin(models.Model):
 
 
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
-    pass
+    def get_ammunition_types(self):
+        """
+        Return the accepted ammunition types for the firearm.
+        """
+        return [ammo.short_label for ammo in self.ammunition_types.all()]
 
 
 class Ammunition(BaseDamager):

@@ -267,7 +267,7 @@ class FirearmTestCase(TestCase):
                                     data={'item_template': 'Glock 19',
                                           'item_quality':
                                               self.unsuitable_ammo.pk })
-        #self.assertFalse(form.is_valid())
+        self.assertFalse(form.is_valid())
 
     def test_single_fire_skill_checks(self):
         pass

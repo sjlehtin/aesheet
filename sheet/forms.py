@@ -146,6 +146,16 @@ class AddFirearmForm(AddWeaponForm):
     def add_item(self, item):
         self.instance.firearms.add(item)
 
+    def clean(self):
+        cleaned_data = super(AddFirearmForm, self).clean()
+        item = cleaned_data.get('item', None)
+        if item:
+            types = item.base.get_ammunition_types()
+            ammunition = item.ammo.label
+            if ammunition not in types:
+                raise ValidationError('Invalid ammo type')
+        return cleaned_data
+
 
 class AddExistingWeaponForm(forms.ModelForm):
     item_queryset = Weapon.objects.all()
