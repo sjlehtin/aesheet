@@ -12,8 +12,16 @@ class Migration(DataMigration):
         assigned to some campaign and all skills etc. need to be assigned to
         some tech level.
         """
-        (tl_all, _) = orm['sheet.TechLevel'].objects.get_or_create(name="all")
-        (frp, _) = orm['sheet.Campaign'].objects.get_or_create(name="FRP")
+        try:
+            tl_all = orm['sheet.TechLevel'].objects.get(name="all")
+        except orm['sheet.TechLevel'].DoesNotExist:
+            tl_all = orm['sheet.TechLevel'].objects.create(name="all")
+
+        try:
+            frp = orm['sheet.Campaign'].objects.get(name="FRP")
+        except orm['sheet.Campaign'].DoesNotExist:
+            frp = orm['sheet.Campaign'].objects.create(name="FRP")
+
         frp.tech_levels.add(tl_all)
 
     def backwards(self, orm):
