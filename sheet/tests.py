@@ -753,6 +753,7 @@ class Views(TestCase):
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
 
+
 class ImportExport(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns",
                 "armor"]

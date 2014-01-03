@@ -173,9 +173,11 @@ class RemoveWrap(object):
     def __unicode__(self):
         return unicode(self.item)
 
+
 class SkilledMixin(object):
     def skilled(self):
         return self.sheet.skilled(self.item)
+
 
 class WeaponWrap(RemoveWrap, SkilledMixin):
     class Stats(object):

@@ -104,6 +104,7 @@ class CampaignItem(object):
         self.name = campaign.name
         self.objects = []
 
+
 def get_by_campaign(model_class, accessor):
     items = SortedDict()
     objects = [(accessor(obj), obj) for obj in model_class.objects.all()]
@@ -112,6 +113,7 @@ def get_by_campaign(model_class, accessor):
         item =  items.setdefault(campaign.name, CampaignItem(campaign))
         item.objects.append(obj)
     return items.values()
+
 
 class Character(models.Model):
     """
@@ -495,6 +497,7 @@ STAT_TYPES = BASE_STATS + [
     ]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
+
 class Skill(ExportedModel):
     """
     """
@@ -640,6 +643,7 @@ class StatModifier(models.Model):
     class Meta:
         abstract = True
 
+
 class EdgeLevel(ExportedModel, StatModifier):
     """
     This stores the actual modifiers for a specific edge at a certain
@@ -663,6 +667,7 @@ class EdgeLevel(ExportedModel, StatModifier):
 
     class Meta:
         ordering = ('edge', 'level')
+
 
 class EdgeSkillBonus(ExportedModel):
     """
@@ -727,6 +732,7 @@ class WeaponQuality(BaseWeaponQuality):
 
     def __unicode__(self):
         return self.name
+
 
 class WeaponDamage(object):
     def __init__(self, num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
@@ -911,6 +917,7 @@ class WeaponTemplate(BaseWeaponTemplate):
     def dont_export(self):
         return ['weapon']
 
+
 class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     """
@@ -921,12 +928,14 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     def dont_export(self):
         return ['rangedweapon']
 
+
 EFFECT_TYPES = [
     "enhancement",
     "luck",
     "circumstance",
     ]
 EFFECT_TYPES = zip(EFFECT_TYPES, EFFECT_TYPES)
+
 
 class Effect(StatModifier):
     name = models.CharField(primary_key=True, max_length=256)
@@ -944,6 +953,7 @@ class Effect(StatModifier):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+
 class WeaponSpecialQuality(ExportedModel, Effect):
     """
     """
@@ -954,6 +964,7 @@ class WeaponSpecialQuality(ExportedModel, Effect):
 
     def __unicode__(self):
         return u"WSQ: %s" % (self.name)
+
 
 class ArmorSpecialQuality(ExportedModel, Effect):
     """
@@ -1001,6 +1012,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
     # name "effects".
     def __unicode__(self):
         return u"ASQ: %s" % (self.name)
+
 
 class Weapon(ExportedModel):
     """
@@ -1060,7 +1072,9 @@ class Weapon(ExportedModel):
             quality = self.quality
         return u"%s %s" % (quality, self.base)
 
+
 Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
+
 
 class RangedWeapon(ExportedModel):
     """
@@ -1122,6 +1136,7 @@ class RangedWeapon(ExportedModel):
                             self.base.range_vs, self.base.range_s,
                             self.base.range_m, self.base.range_l,
                             self.base.range_xl, self.base.range_e])
+
 
 class ArmorTemplate(ExportedModel):
     """
@@ -1203,6 +1218,7 @@ class ArmorTemplate(ExportedModel):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+
 class ArmorQuality(ExportedModel):
     """
     """
@@ -1240,6 +1256,7 @@ class ArmorQuality(ExportedModel):
 
     def __unicode__(self):
         return u"AQ:" + self.name
+
 
 class Armor(ExportedModel):
     """
@@ -1290,12 +1307,14 @@ class Armor(ExportedModel):
     def mod_psy(self):
         return min(self.base.mod_psy + self.quality.mod_psy, 0)
 
+
 class SpellEffect(ExportedModel, Effect):
     """
     """
     @classmethod
     def dont_export(cls):
         return ['sheet']
+
 
 class MiscellaneousItem(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
