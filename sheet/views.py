@@ -861,20 +861,34 @@ def import_data(request, success=False):
                                                'types' : types,
                                                'import_form' : form }))
 
+
+def csv_export(exported_type):
+    results = exported_type.objects.all()
+    f = StringIO.StringIO()
+    w = csv.writer(f)
+    w.writerow([exported_type.__name__])
+    fields = exported_type.get_exported_fields()
+    w.writerow(fields)
+
+    def to_utf8(data):
+        if isinstance(data, basestring):
+            return data.encode('utf-8')
+        else:
+            return data
+
+    for row in get_data_rows(results, fields):
+        w.writerow([to_utf8(col) for col in row])
+    return f.getvalue()
+
+
 def export_data(request, type):
     try:
         cls = getattr(sheet.models, type)
     except AttributeError, e:
         raise Http404, "%s is not a supported type." % type
-    results = cls.objects.all()
-    f = StringIO.StringIO()
-    w = csv.writer(f)
-    w.writerow([type])
-    fields = cls.get_exported_fields()
-    w.writerow(fields)
-    for row in get_data_rows(results, fields):
-        w.writerow(row)
-    response = HttpResponse(f.getvalue(), mimetype="text/csv")
+    csv_data = csv_export(cls)
+
+    response = HttpResponse(csv_data, mimetype="text/csv")
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
 
