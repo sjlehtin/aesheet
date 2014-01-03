@@ -65,8 +65,16 @@ class SkillFactory(factory.DjangoModelFactory):
     tech_level = factory.SubFactory(TechLevelFactory)
 
 
+class CharacterSkillFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.CharacterSkill
+
+    skill = factory.SubFactory(SkillFactory)
+    level = 0
+
+
 class BaseFirearmFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.BaseFirearm
+    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
 
     tech_level = factory.SubFactory(TechLevelFactory)
     base_skill = factory.SubFactory(SkillFactory)
@@ -89,3 +97,10 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
             for ammo_type in extracted:
                 FirearmAmmunitionTypeFactory(firearm=self,
                                              short_label=ammo_type)
+
+
+class FirearmFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Firearm
+
+    base = factory.SubFactory(BaseFirearmFactory)
+    ammo = factory.SubFactory(AmmunitionFactory)

@@ -4,10 +4,8 @@ import django.contrib.auth as auth
 import math
 import logging
 from functools import wraps
-import pprint
 from collections import namedtuple
-from django.db.models import Sum
-from django.core.exceptions import ValidationError
+import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -554,6 +552,7 @@ class Skill(ExportedModel):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+
 class CharacterSkill(models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
@@ -599,6 +598,7 @@ class CharacterSkill(models.Model):
     class Meta:
         ordering = ('skill__name', )
         unique_together = ('character', 'skill')
+
 
 class StatModifier(models.Model):
     # `notes' will be added to the effects list, which describes all the
@@ -759,7 +759,8 @@ class BaseArmament(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(
         max_length=64,
-        help_text="This is used when the name must be fit to a small space")
+        help_text="This is used when the name must be fit to a small space",
+        blank=True)
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=64, blank=True)
 
@@ -865,8 +866,17 @@ class FirearmAmmunitionType(models.Model):
 
 
 class Firearm(models.Model):
+    # modification, such as scopes could be added here.
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
+
+    def roa(self):
+        return self.base.roa
+
+    @property
+    def to_hit(self):
+        # XXX scopes etc
+        return 0
 
     def __unicode__(self):
         return u"{base} w/ {ammo}".format(base=self.base,
@@ -1291,6 +1301,9 @@ class MiscellaneousItem(ExportedModel):
         return self.name
 
 
+Action = namedtuple('Action', ['action', 'check'])
+
+
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
@@ -1361,8 +1374,9 @@ class Sheet(models.Model):
         return roa
 
     def rof(self, weapon):
-        roa = weapon.roa()
+        roa = float(weapon.roa())
         level = self.character.skill_level(weapon.base.base_skill)
+        # XXX firearms...
         spec_level = self.character.skill_level("Rapid archery")
 
         if spec_level:
@@ -1377,6 +1391,7 @@ class Sheet(models.Model):
 
     actions = [xx/2.0 for xx in range(1, 10, 1)]
     ranged_actions = [0.5, 1, 2, 3, 4, 5]
+    firearm_actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def max_attacks(self, roa):
         return min(int(math.floor(roa * 2)), 9)
@@ -1479,16 +1494,18 @@ class Sheet(models.Model):
         mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
-
-    def firearm_skill_checks(self, weapon):
-        rof = self.rof(weapon)
-        roa = float(rof)
+    def ranged_skill_checks(self, weapon, actions=ranged_actions,
+                            extra_action_modifier=10):
+        """
+        extra_action_modifier is used to derive the check for actions exceeding
+        the ROA.
+        """
+        roa = float(self.rof(weapon))
         def check_mod_from_action_index(act):
-            act = float(act)
             if 1/act >= 1/roa + 1:
                 return 10 # ranged.
             if act > roa:
-                return - act/roa * 20 + 15
+                return - act/roa * 20 + extra_action_modifier
             if act < 0.5 * roa:
                 return roa / act
             return 0
@@ -1500,57 +1517,30 @@ class Sheet(models.Model):
         if cs.count() > 0:
             base_skill = self.eff_dex + cs[0].level * 5
         else:
-            base_skill = roundup(self.eff_dex / 2.0)
+            base_skill = self.eff_dex / 2.0
 
         logging.info("ROF %s" % roa)
         checks = [check_mod_from_action_index(act)
                   # cap number of actions.
-                  for act in filter(lambda act: act < roa * 2,
-                                    self.ranged_actions)]
+                  for act in filter(lambda act: act < roa * 2, actions)]
         logging.info("checks: %s" % checks)
+
         def counter_penalty(penalty):
             return self._counter_penalty(penalty, self.eff_fit)
 
         checks = map(counter_penalty, checks)
         base_skill = base_skill + weapon.to_hit
-        return [int(round(xx) + base_skill) for xx in checks]
 
-    def ranged_skill_checks(self, weapon):
-        rof = self.rof(weapon)
-        roa = float(rof)
-        def check_mod_from_action_index(act):
-            act = float(act)
-            if 1/act >= 1/roa + 1:
-                return 10 # ranged.
-            if act > roa:
-                return - act/roa * 20 + 10
-            if act < 0.5 * roa:
-                return roa / act
-            return 0
+        checks = [int(round(xx + base_skill)) for xx in checks]
 
-        modifiers = 0
+        # Pad actions with Nones where an action is not available.
+        return [Action._make(xx)
+                for xx in itertools.izip_longest(actions, checks)]
 
-        # skill level/unskilled.
-        cs = self.character.skills.filter(skill=weapon.base.base_skill)
-        if cs.count() > 0:
-            base_skill = self.eff_dex + cs[0].level * 5
-        else:
-            base_skill = roundup(self.eff_dex / 2.0)
-
-        logging.info("ROF %s" % roa)
-        checks = [check_mod_from_action_index(act)
-                  # cap number of actions.
-                  for act in filter(lambda act: act < roa * 2,
-                                    self.ranged_actions)]
-        logging.info("checks: %s" % checks)
-        def counter_penalty(penalty):
-            # Fitness counters ranged weapon penalties.
-            return min(0, penalty + rounddown((self.eff_fit - 45)/3.0))
-
-        checks = map(counter_penalty, checks)
-        base_skill = base_skill + weapon.to_hit
-        return [int(round(xx) + base_skill) for xx in checks]
-
+    def firearm_skill_checks(self, weapon):
+        return self.ranged_skill_checks(weapon,
+                                        actions=self.firearm_actions,
+                                        extra_action_modifier=15)
 
     def ranged_ranges(self, weapon):
         return weapon.ranges(self)

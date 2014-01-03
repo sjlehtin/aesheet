@@ -16,6 +16,14 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'sheet', ['Firearm'])
 
+        # Adding model 'FirearmAmmunitionType'
+        db.create_table(u'sheet_firearmammunitiontype', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('firearm', self.gf('django.db.models.fields.related.ForeignKey')(related_name='ammunition_types', to=orm['sheet.BaseFirearm'])),
+            ('short_label', self.gf('django.db.models.fields.CharField')(max_length=20)),
+        ))
+        db.send_create_signal(u'sheet', ['FirearmAmmunitionType'])
+
         # Adding model 'Ammunition'
         db.create_table(u'sheet_ammunition', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -24,8 +32,10 @@ class Migration(SchemaMigration):
             ('extra_damage', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('leth', self.gf('django.db.models.fields.IntegerField')(default=5)),
             ('plus_leth', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=10)),
+            ('label', self.gf('django.db.models.fields.CharField')(max_length=20)),
+            ('type', self.gf('django.db.models.fields.CharField')(max_length=10)),
             ('tech_level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sheet.TechLevel'])),
+            ('rof_modifier', self.gf('django.db.models.fields.DecimalField')(default=0, max_digits=2, decimal_places=2)),
         ))
         db.send_create_signal(u'sheet', ['Ammunition'])
 
@@ -71,10 +81,28 @@ class Migration(SchemaMigration):
 
         # Changing field 'RangedWeaponTemplate.range_xs'
         db.alter_column(u'sheet_rangedweapontemplate', 'range_xs', self.gf('django.db.models.fields.IntegerField')(null=True))
+        # Adding unique constraint on 'CharacterSkill', fields ['character', 'skill']
+        db.create_unique(u'sheet_characterskill', ['character_id', 'skill_id'])
+
+        # Adding M2M table for field firearms on 'Sheet'
+        m2m_table_name = db.shorten_name(u'sheet_sheet_firearms')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('sheet', models.ForeignKey(orm[u'sheet.sheet'], null=False)),
+            ('firearm', models.ForeignKey(orm[u'sheet.firearm'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['sheet_id', 'firearm_id'])
+
 
     def backwards(self, orm):
+        # Removing unique constraint on 'CharacterSkill', fields ['character', 'skill']
+        db.delete_unique(u'sheet_characterskill', ['character_id', 'skill_id'])
+
         # Deleting model 'Firearm'
         db.delete_table(u'sheet_firearm')
+
+        # Deleting model 'FirearmAmmunitionType'
+        db.delete_table(u'sheet_firearmammunitiontype')
 
         # Deleting model 'Ammunition'
         db.delete_table(u'sheet_ammunition')
@@ -83,33 +111,20 @@ class Migration(SchemaMigration):
         db.delete_table(u'sheet_basefirearm')
 
 
-        # User chose to not deal with backwards NULL issues for 'RangedWeaponTemplate.range_e'
-        raise RuntimeError("Cannot reverse this migration. 'RangedWeaponTemplate.range_e' and its values cannot be restored.")
-        
-        # The following code is provided here to aid in writing a correct migration
         # Changing field 'RangedWeaponTemplate.range_e'
-        db.alter_column(u'sheet_rangedweapontemplate', 'range_e', self.gf('django.db.models.fields.IntegerField')())
+        db.alter_column(u'sheet_rangedweapontemplate', 'range_e', self.gf('django.db.models.fields.IntegerField')(default=0))
 
-        # User chose to not deal with backwards NULL issues for 'RangedWeaponTemplate.range_xl'
-        raise RuntimeError("Cannot reverse this migration. 'RangedWeaponTemplate.range_xl' and its values cannot be restored.")
-        
-        # The following code is provided here to aid in writing a correct migration
         # Changing field 'RangedWeaponTemplate.range_xl'
-        db.alter_column(u'sheet_rangedweapontemplate', 'range_xl', self.gf('django.db.models.fields.IntegerField')())
+        db.alter_column(u'sheet_rangedweapontemplate', 'range_xl', self.gf('django.db.models.fields.IntegerField')(default=0))
 
-        # User chose to not deal with backwards NULL issues for 'RangedWeaponTemplate.range_vs'
-        raise RuntimeError("Cannot reverse this migration. 'RangedWeaponTemplate.range_vs' and its values cannot be restored.")
-        
-        # The following code is provided here to aid in writing a correct migration
         # Changing field 'RangedWeaponTemplate.range_vs'
-        db.alter_column(u'sheet_rangedweapontemplate', 'range_vs', self.gf('django.db.models.fields.IntegerField')())
+        db.alter_column(u'sheet_rangedweapontemplate', 'range_vs', self.gf('django.db.models.fields.IntegerField')(default=0))
 
-        # User chose to not deal with backwards NULL issues for 'RangedWeaponTemplate.range_xs'
-        raise RuntimeError("Cannot reverse this migration. 'RangedWeaponTemplate.range_xs' and its values cannot be restored.")
-        
-        # The following code is provided here to aid in writing a correct migration
         # Changing field 'RangedWeaponTemplate.range_xs'
-        db.alter_column(u'sheet_rangedweapontemplate', 'range_xs', self.gf('django.db.models.fields.IntegerField')())
+        db.alter_column(u'sheet_rangedweapontemplate', 'range_xs', self.gf('django.db.models.fields.IntegerField')(default=0))
+        # Removing M2M table for field firearms on 'Sheet'
+        db.delete_table(db.shorten_name(u'sheet_sheet_firearms'))
+
 
     models = {
         u'auth.group': {
@@ -153,11 +168,13 @@ class Migration(SchemaMigration):
             'dice': ('django.db.models.fields.IntegerField', [], {'default': '6'}),
             'extra_damage': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '20'}),
             'leth': ('django.db.models.fields.IntegerField', [], {'default': '5'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'num_dice': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'plus_leth': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'tech_level': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.TechLevel']"})
+            'rof_modifier': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '2', 'decimal_places': '2'}),
+            'tech_level': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.TechLevel']"}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '10'})
         },
         u'sheet.armor': {
             'Meta': {'object_name': 'Armor'},
@@ -341,7 +358,7 @@ class Migration(SchemaMigration):
             'tech_levels': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['sheet.TechLevel']", 'symmetrical': 'False'})
         },
         u'sheet.character': {
-            'Meta': {'ordering': "['last_update_at']", 'object_name': 'Character'},
+            'Meta': {'ordering': "['name']", 'object_name': 'Character'},
             'adventures': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'age': ('django.db.models.fields.PositiveIntegerField', [], {'default': '20'}),
             'base_mod_cha': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -417,7 +434,7 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
         },
         u'sheet.characterskill': {
-            'Meta': {'ordering': "('skill__name',)", 'object_name': 'CharacterSkill'},
+            'Meta': {'ordering': "('skill__name',)", 'unique_together': "(('character', 'skill'),)", 'object_name': 'CharacterSkill'},
             'character': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'skills'", 'to': u"orm['sheet.Character']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'level': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -468,6 +485,12 @@ class Migration(SchemaMigration):
             'ammo': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.Ammunition']"}),
             'base': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.BaseFirearm']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+        },
+        u'sheet.firearmammunitiontype': {
+            'Meta': {'object_name': 'FirearmAmmunitionType'},
+            'firearm': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ammunition_types'", 'to': u"orm['sheet.BaseFirearm']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'short_label': ('django.db.models.fields.CharField', [], {'max_length': '20'})
         },
         u'sheet.miscellaneousitem': {
             'Meta': {'object_name': 'MiscellaneousItem'},
@@ -523,11 +546,12 @@ class Migration(SchemaMigration):
             'weight': ('django.db.models.fields.DecimalField', [], {'default': '1.0', 'max_digits': '4', 'decimal_places': '1'})
         },
         u'sheet.sheet': {
-            'Meta': {'ordering': "['last_update_at']", 'object_name': 'Sheet'},
+            'Meta': {'ordering': "('character__name',)", 'object_name': 'Sheet'},
             'armor': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.Armor']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'character': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.Character']"}),
             'description': ('django.db.models.fields.TextField', [], {}),
             'extra_weight_carried': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'firearms': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['sheet.Firearm']", 'symmetrical': 'False', 'blank': 'True'}),
             'helm': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'helm_for'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': u"orm['sheet.Armor']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_update_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),

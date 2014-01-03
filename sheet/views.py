@@ -119,6 +119,7 @@ import subprocess
 from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
+from itertools import izip_longest
 
 logger = logging.getLogger(__name__)
 
@@ -235,8 +236,7 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
         return self.sheet.rof(self.item)
 
     def skill_checks(self):
-        ll = [Action._make(xx) for xx in map(
-                None,
+        ll = [Action._make(xx) for xx in izip_longest(
                 self.sheet.ranged_actions,
                 self.sheet.ranged_skill_checks(self.item))]
         logger.info("Checks: %s" % ll)
@@ -265,12 +265,7 @@ class FirearmWrap(RemoveWrap, SkilledMixin):
         return self.sheet.rof(self.item)
 
     def skill_checks(self):
-        ll = [Action._make(xx) for xx in map(
-                None,
-                self.sheet.firearm_actions,
-                self.sheet.firearm_skill_checks(self.item))]
-        logger.info("Checks: %s" % ll)
-        return ll
+        return self.sheet.firearm_skill_checks(self.item)
 
     def ranges(self):
         return self.sheet.ranged_ranges(self.item)

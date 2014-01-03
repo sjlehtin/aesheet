@@ -248,6 +248,7 @@ class FirearmTestCase(TestCase):
         self.unsuitable_ammo = factories.AmmunitionFactory(label="50BMG",
                                                            type='FMJ')
         factories.BaseFirearmFactory(name="Glock 19",
+                                     roa=2.89,
                                      ammunition_types=('9Pb', '9Pb+'))
 
     def test_basic(self):
@@ -269,19 +270,70 @@ class FirearmTestCase(TestCase):
                                               self.unsuitable_ammo.pk })
         self.assertFalse(form.is_valid())
 
-    def test_single_fire_skill_checks(self):
-        pass
+    def test_single_fire_skill_checks_unskilled(
+            self, level=None,
+            expected=None,
+            expected_rof=None):
+        # default case for unskilled.
+        if expected is None:
+            expected = [(0.5, 32), (1, 24), (2, 22), (3, 16), (4, 9), (5, 2)]
+
+        firearm = factories.FirearmFactory(base__name="Glock 19",
+                                           ammo__label='9Pb',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        if level is not None:
+            cs = factories.CharacterSkillFactory(
+                character=self.sheet.character,
+                skill=factories.SkillFactory(name="Pistol"),
+                level=level)
+            self.assertEqual(cs.level, level)
+
+        if expected_rof is not None:
+            self.assertAlmostEqual(self.sheet.rof(firearm), expected_rof,
+                                   places=2)
+
+        for (cc, exp) in zip(self.sheet.firearm_skill_checks(firearm),
+                             expected):
+            self.assertEqual(cc.action, exp[0])
+            self.assertEqual(cc.check, exp[1])
+
+    def test_single_fire_skill_checks_level_0(self):
+        self.test_single_fire_skill_checks_unskilled(
+            level=0,
+            expected=[(0.5, 53), (1, 46), (2, 43), (3, 37), (4, 30), (5, 23)])
+
+    def test_single_fire_skill_checks_level_5(self):
+        self.test_single_fire_skill_checks_unskilled(
+            level=5,
+            expected=[(0.5, 78), (1, 72), (2, 70), (3, 68), (4, 68), (5, 60),
+                      (6, 55), (7, 51), (8, 46)],
+            expected_rof=4.33)
 
     def test_burst_fire_skill_checks(self):
         pass
 
-    def test_sweep_fire_skill_checks(self):
-        pass
-
-    def test_fit_counter_for_rof_penalties(self):
-        pass
-
     def test_autofire_penalty_for_burst_fire(self):
+        """
+        There should be -10 penalty for burst fire without the autofire skill.
+        """
+
+    def test_sweep_fire_skill_checks(self):
+        """
+        There should be -10 penalty for sweep fire with the autofire skill.
+        """
+
+    def test_autofire_penalty_for_sweep_fire(self):
+        """
+        There should be -20 penalty for sweep fire without the autofire skill.
+        """
+        pass
+
+    def test_fit_counter_for_rof_penalties_single_fire(self):
+        pass
+
+    def test_fit_counter_for_rof_penalties_burst_fire(self):
         pass
 
 
