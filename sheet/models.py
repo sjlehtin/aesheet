@@ -44,7 +44,7 @@ class ExportedModel(models.Model):
     user trying to input data into the system.
     """
     @classmethod
-    def dont_export(self):
+    def dont_export(cls):
         return []
 
     @classmethod
