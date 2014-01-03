@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
@@ -606,7 +608,7 @@ class Views(TestCase):
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
 
-class Importing(TestCase):
+class ImportExport(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns",
                 "armor"]
 
@@ -681,6 +683,19 @@ class Importing(TestCase):
                                         { "import_data":
                                           ''.join(mangle(response.content)) })
             self.assertRedirects(response, reverse(sheet.views.import_data))
+
+    def test_export_unicode(self):
+        unicode_word = u'βαλλίζω'
+        factories.SkillFactory(name="Ballet dancing",
+                               description=u"This is ballet dancing, from the "
+                                           u"greek root of '{uword}' (to "
+                                           u"dance, to jump about).".format(
+                                   uword=unicode_word
+                               ))
+        data = sheet.views.csv_export(sheet.models.Skill)
+        self.assertTrue(data.startswith('Skill'),
+                        msg="The data should start with the table name")
+        self.assertIn(unicode_word, data.decode('utf-8'))
 
 class TechLevelTestCase(TestCase):
     fixtures = ["armor", "user", "char", "sheet", "ranged_weapons",
