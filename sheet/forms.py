@@ -1,10 +1,10 @@
 from django import forms
 from django.forms import widgets
-from sheet.models import *
 import sheet.models
 import datetime
 import re
 from django.forms.models import modelform_factory
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -21,19 +21,22 @@ class ImportForm(forms.Form):
                                         "file to be uploaded, not both")
         return cd
 
-EditSheetForm =  modelform_factory(Sheet, exclude=(
+
+EditSheetForm =  modelform_factory(sheet.models.Sheet, exclude=(
     'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects',
     'miscellaneous_items'))
+
 
 def pretty_name(name):
     return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
                                           name))).lower().capitalize()
 
+
 class AddWeaponForm(forms.ModelForm):
-    item_class = Weapon
-    item_queryset = Weapon.objects.all()
-    template_queryset = WeaponTemplate.objects.all()
-    quality_queryset = WeaponQuality.objects.all()
+    item_class = sheet.models.Weapon
+    item_queryset = sheet.models.Weapon.objects.all()
+    template_queryset = sheet.models.WeaponTemplate.objects.all()
+    quality_queryset = sheet.models.WeaponQuality.objects.all()
     quality_field_name = 'quality'
 
     def add_item(self, item):
@@ -70,7 +73,7 @@ class AddWeaponForm(forms.ModelForm):
                                     label=item_name + " quality")
 
     class Meta:
-        model = Sheet
+        model = sheet.models.Sheet
         fields = ()
 
     def clean(self):
@@ -104,20 +107,20 @@ class AddWeaponForm(forms.ModelForm):
 
 
 class AddRangedWeaponForm(AddWeaponForm):
-    item_class = RangedWeapon
-    item_queryset = RangedWeapon.objects.all()
-    template_queryset = RangedWeaponTemplate.objects.all()
-    quality_queryset = WeaponQuality.objects.all()
+    item_class = sheet.models.RangedWeapon
+    item_queryset = sheet.models.RangedWeapon.objects.all()
+    template_queryset = sheet.models.RangedWeaponTemplate.objects.all()
+    quality_queryset = sheet.models.WeaponQuality.objects.all()
 
     def add_item(self, item):
         self.instance.ranged_weapons.add(item)
 
 
 class AddArmorForm(AddWeaponForm):
-    item_class = Armor
-    item_queryset = Armor.objects.filter(base__is_helm=False)
-    template_queryset = ArmorTemplate.objects.filter(is_helm=False)
-    quality_queryset = ArmorQuality.objects.all()
+    item_class = sheet.models.Armor
+    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)
+    template_queryset = sheet.models.ArmorTemplate.objects.filter(is_helm=False)
+    quality_queryset = sheet.models.ArmorQuality.objects.all()
 
     def add_item(self, item):
         self.instance.armor = item
@@ -125,8 +128,8 @@ class AddArmorForm(AddWeaponForm):
 
 
 class AddHelmForm(AddArmorForm):
-    item_queryset = Armor.objects.filter(base__is_helm=True)
-    template_queryset = ArmorTemplate.objects.filter(is_helm=True)
+    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=True)
+    template_queryset = sheet.models.ArmorTemplate.objects.filter(is_helm=True)
 
     def add_item(self, item):
         self.instance.helm = item
@@ -134,10 +137,10 @@ class AddHelmForm(AddArmorForm):
 
 
 class AddFirearmForm(AddWeaponForm):
-    item_class = Firearm
-    item_queryset = Firearm.objects.all()
-    template_queryset = BaseFirearm.objects.all()
-    quality_queryset = Ammunition.objects.all()
+    item_class = sheet.models.Firearm
+    item_queryset = sheet.models.Firearm.objects.all()
+    template_queryset = sheet.models.BaseFirearm.objects.all()
+    quality_queryset = sheet.models.Ammunition.objects.all()
     quality_field_name = "ammo"
 
     def get_default_quality(self):
@@ -158,7 +161,7 @@ class AddFirearmForm(AddWeaponForm):
 
 
 class AddExistingWeaponForm(forms.ModelForm):
-    item_queryset = Weapon.objects.all()
+    item_queryset = sheet.models.Weapon.objects.all()
 
     def _filter_tech_level(self, qs):
         return qs.filter(
@@ -177,7 +180,7 @@ class AddExistingWeaponForm(forms.ModelForm):
             label=pretty_name(item_queryset.model.__name__))
 
     class Meta:
-        model = Sheet
+        model = sheet.models.Sheet
         fields = ()
 
 
@@ -191,21 +194,24 @@ class AddExistingWeaponForm(forms.ModelForm):
         self.add_item(item)
         return self.instance
 
+
 class AddExistingRangedWeaponForm(AddExistingWeaponForm):
-    item_queryset = RangedWeapon.objects.all()
+    item_queryset = sheet.models.RangedWeapon.objects.all()
 
     def add_item(self, item):
         self.instance.ranged_weapons.add(item)
 
+
 class AddExistingArmorForm(AddExistingWeaponForm):
-    item_queryset = Armor.objects.filter(base__is_helm=False)
+    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)
 
     def add_item(self, item):
         self.instance.armor = item
         self.instance.save()
 
+
 class AddExistingHelmForm(AddExistingWeaponForm):
-    item_queryset = Armor.objects.filter(base__is_helm=True)
+    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=True)
 
     def add_item(self, item):
         self.instance.helm = item
@@ -213,7 +219,7 @@ class AddExistingHelmForm(AddExistingWeaponForm):
 
 
 class AddExistingMiscellaneousItemForm(AddExistingWeaponForm):
-    item_queryset = MiscellaneousItem.objects.all()
+    item_queryset = sheet.models.MiscellaneousItem.objects.all()
 
     def _filter_tech_level(self, qs):
         return qs.filter(
@@ -224,10 +230,11 @@ class AddExistingMiscellaneousItemForm(AddExistingWeaponForm):
 
 
 class AddSpellEffectForm(forms.ModelForm):
-    effect = forms.ModelChoiceField(queryset=SpellEffect.objects.all())
+    effect = forms.ModelChoiceField(
+        queryset=sheet.models.SpellEffect.objects.all())
 
     class Meta:
-        model = Sheet
+        model = sheet.models.Sheet
         fields = ()
 
     def save(self):
@@ -236,13 +243,15 @@ class AddSpellEffectForm(forms.ModelForm):
         self.instance.save()
         return self.instance
 
+
 class RequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(RequestForm, self).__init__(*args, **kwargs)
 
+
 class AddSkillForm(RequestForm):
-    item_queryset = Skill.objects.exclude(type="Language")
+    item_queryset = sheet.models.Skill.objects.exclude(type="Language")
     # XXX Change this to use CharacterSkill as the model.
     def __init__(self, *args, **kwargs):
         super(AddSkillForm, self).__init__(*args, **kwargs)
@@ -287,7 +296,7 @@ class AddSkillForm(RequestForm):
                                         (self.skill, self.level, e))
 
         # verify skill and level go together.
-        cs = CharacterSkill()
+        cs = sheet.models.CharacterSkill()
         cs.character = self.instance
         cs.skill = skill
         cs.level = level
@@ -296,40 +305,45 @@ class AddSkillForm(RequestForm):
         return self.cleaned_data
 
     class Meta:
-        model = Character
+        model = sheet.models.Character
         fields = ()
 
     def save(self, commit=True):
-        cs = CharacterSkill()
+        cs = sheet.models.CharacterSkill()
         cs.character = self.instance
         cs.skill = self.cleaned_data.get('skill')
         cs.level = self.cleaned_data.get('level')
         cs.save()
         return self.instance
 
+
 class AddLanguageForm(AddSkillForm):
-    item_queryset = Skill.objects.filter(type="Language")
+    item_queryset = sheet.models.Skill.objects.filter(type="Language")
+
 
 class AddEdgeForm(forms.ModelForm):
-    edge = forms.ModelChoiceField(queryset=EdgeLevel.objects.all())
+    edge = forms.ModelChoiceField(
+        queryset=sheet.models.EdgeLevel.objects.all())
     choices = range(0,8)
     choices = zip(choices, choices)
 
     class Meta:
-        model = Character
+        model = sheet.models.Character
         fields = ()
 
     def save(self, commit=True):
-        cs = CharacterEdge()
+        cs = sheet.models.CharacterEdge()
         cs.character = self.instance
         cs.edge = self.cleaned_data.get('edge')
         cs.save()
         return self.instance
 
+
 class EditEdgeLevelForm(forms.ModelForm):
     class Meta:
-        model = EdgeLevel
+        model = sheet.models.EdgeLevel
         exclude = ('skill_bonuses',)
+
 
 class RemoveGenericForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -345,6 +359,7 @@ class RemoveGenericForm(forms.Form):
     item = forms.CharField(max_length=128, widget=widgets.HiddenInput,
                            required=False)
 
+
 def log_stat_change(character, request, field, change):
     logger.debug("%s: changed %s by %s.", character, field, change)
 
@@ -352,13 +367,13 @@ def log_stat_change(character, request, field, change):
     since = datetime.datetime.now() - datetime.timedelta(minutes=15)
 
     try:
-        entry = CharacterLogEntry.objects.filter(
+        entry = sheet.models.CharacterLogEntry.objects.filter(
             user=request.user,
             character=character,
             field=field,
             timestamp__gte=since).latest()
-    except CharacterLogEntry.DoesNotExist:
-        entry = CharacterLogEntry()
+    except sheet.models.CharacterLogEntry.DoesNotExist:
+        entry = sheet.models.CharacterLogEntry()
         entry.character = character
         entry.user = request.user
         entry.field = field
@@ -369,12 +384,13 @@ def log_stat_change(character, request, field, change):
     if entry.amount == 0 and change != 0:
         entry.delete()
 
+
 class StatModifyForm(RequestForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
 
     class Meta:
-        model = Character
+        model = sheet.models.Character
         fields = ()
 
     def clean_stat(self):
@@ -398,6 +414,7 @@ class StatModifyForm(RequestForm):
 
         return char
 
+
 class CharacterSkillLevelModifyForm(forms.Form):
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     skill_id = forms.IntegerField(widget=widgets.HiddenInput)
@@ -409,7 +426,7 @@ class CharacterSkillLevelModifyForm(forms.Form):
             self.fields['skill_id'].initial = inst.pk
 
     def clean_skill_id(self):
-        self.instance = CharacterSkill.objects.get(
+        self.instance = sheet.models.CharacterSkill.objects.get(
             pk=self.cleaned_data['skill_id'])
         logger.debug("Skill id: %s", self.cleaned_data['skill_id'])
         logger.debug("Got skill instance %s", self.instance)
@@ -455,26 +472,30 @@ class CharacterSkillLevelModifyForm(forms.Form):
             return self.instance.save()
         return self.instance
 
+
 class ArmorForm(forms.ModelForm):
-    base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(
-            is_helm=False))
+    base = forms.ModelChoiceField(
+        queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=False))
     class Meta:
-        model = Armor
+        model = sheet.models.Armor
+
 
 class HelmForm(forms.ModelForm):
-    base = forms.ModelChoiceField(queryset=ArmorTemplate.objects.filter(
-            is_helm=True))
+    base = forms.ModelChoiceField(
+        queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=True))
     class Meta:
-        model = Armor
+        model = sheet.models.Armor
+
 
 class CharacterForm(RequestForm):
     class Meta:
-        model = Character
+        model = sheet.models.Character
 
     def save(self, commit=True):
         if commit:
             if self.changed_data:
-                old_obj = Character.objects.get(pk=self.instance.pk)
+                old_obj = sheet.models.Character.objects.get(
+                    pk=self.instance.pk)
                 for ff in self.changed_data:
                     old_value = getattr(old_obj, ff)
                     if self.cleaned_data[ff] != old_value:
@@ -489,10 +510,11 @@ class CharacterForm(RequestForm):
 
         return super(CharacterForm, self).save(commit=commit)
 
+
 class AddXPForm(RequestForm):
     add_xp = forms.IntegerField()
     class Meta:
-        model = Character
+        model = sheet.models.Character
         fields = ()
 
     def save(self, commit=True):
