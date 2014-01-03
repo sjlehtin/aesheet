@@ -119,6 +119,7 @@ import subprocess
 from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
+import django.db
 
 logger = logging.getLogger(__name__)
 
@@ -699,6 +700,32 @@ def browse(request, type):
                                                         'header' : fields,
                                                         'rows' : rows }))
 
+
+def update_id_sequence(model_class):
+    """
+    When importing data from a database to another database, if the item ids
+    exceed the sequence in postgres, the sequence generator can get
+    out-of-sync.  This will lead to duplicate id errors, as the sequence
+    will generate key values, which are already present in the table.
+
+    This remedies the situation by assigning the sequence to the start from
+    the next value.
+    """
+    # Only with postgres.
+    if (settings.DATABASES['default']['ENGINE'] ==
+            "django.db.backends.postgresql_psycopg2"):
+        # The operation should only be performed for models with a serial id
+        # as the primary key.
+        cc = django.db.connection.cursor()
+        # String replace ok here, as the table name is not coming from an
+        # external source, and generating the query with execute is not
+        # trivial with a dynamic table name.
+        cc.execute("""
+        SELECT pg_catalog.setval(pg_get_serial_sequence('{table}', 'id'),
+                                 (SELECT MAX(id) FROM {table}));
+                                 """.format(
+            table=model_class._meta.db_table))
+
 def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
     data_type = reader.next()
@@ -713,6 +740,8 @@ def import_text(data):
     header = reader.next()
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
+
+    changed_models = set()
 
     for line, row in enumerate(reader):
         mdl = None
@@ -817,6 +846,10 @@ def import_text(data):
             rel.add(*vv)
         mdl.full_clean()
         mdl.save()
+        changed_models.add(mdl.__class__)
+
+    for mdl in changed_models:
+        update_id_sequence(mdl)
 
 def import_data(request, success=False):
     """

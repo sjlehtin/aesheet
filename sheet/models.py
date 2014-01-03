@@ -64,10 +64,27 @@ class ExportedModel(models.Model):
         abstract = True
 
 
-class TechLevel(models.Model):
+class NameManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
+class TechLevel(ExportedModel):
+    """
+    Different periods have different kinds of technologies available.
+    """
+    objects = NameManager()
+
     name = models.CharField(max_length=10, unique=True)
+
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def dont_export(cls):
+        return ["weapontemplate", "campaign", "armortemplate", "armorquality",
+                "miscellaneousitem", "weaponquality", "skill",
+                "rangedweapontemplate", "id"]
 
 
 class Campaign(models.Model):

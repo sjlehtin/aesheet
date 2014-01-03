@@ -10,6 +10,9 @@ import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
 import factories
+import django.db
+from django.conf import settings
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -711,6 +714,26 @@ class ImportExport(TestCase):
             'EdgeLevel', 'EdgeSkillBonus',
             'RangedWeaponTemplate', 'RangedWeapon']:
             self.assertIn(dt, sheet.models.EXPORTABLE_MODELS)
+        self.assertIn('TechLevel', sheet.models.EXPORTABLE_MODELS)
+
+
+class ImportExportPostgresSupport(TestCase):
+
+    def test_fix_sequence_after_import_in_postgres(self):
+        """
+        Note, this test only affects PostgreSQL installations.
+        """
+
+        new_value = 666
+        sheet.models.TechLevel.objects.create(id=new_value, name="foobar")
+        sheet.views.update_id_sequence(sheet.models.TechLevel)
+        if (settings.DATABASES['default']['ENGINE'] ==
+            "django.db.backends.postgresql_psycopg2"):
+            cc = django.db.connection.cursor()
+            cc.execute("""
+            SELECT last_value FROM sheet_techlevel_id_seq""")
+            last_value = cc.fetchall()[0][0]
+            self.assertEqual(last_value, new_value)
 
 
 class TechLevelTestCase(TestCase):
