@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
@@ -9,6 +11,9 @@ import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
 import factories
+import django.db
+from django.conf import settings
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -339,6 +344,7 @@ class FirearmTestCase(TestCase):
 
 class FirearmImportExportTestcase(TestCase):
     pass
+
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
@@ -747,7 +753,7 @@ class Views(TestCase):
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
 
-class Importing(TestCase):
+class ImportExport(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns",
                 "armor"]
 
@@ -822,6 +828,54 @@ class Importing(TestCase):
                                         { "import_data":
                                           ''.join(mangle(response.content)) })
             self.assertRedirects(response, reverse(sheet.views.import_data))
+
+    def test_export_unicode(self):
+        unicode_word = u'βαλλίζω'
+        factories.SkillFactory(name="Ballet dancing",
+                               description=u"This is ballet dancing, from the "
+                                           u"greek root of '{uword}' (to "
+                                           u"dance, to jump about).".format(
+                                   uword=unicode_word
+                               ))
+        data = sheet.views.csv_export(sheet.models.Skill)
+        self.assertTrue(data.startswith('Skill'),
+                        msg="The data should start with the table name")
+        self.assertIn(unicode_word, data.decode('utf-8'))
+
+    def test_exported_data_types(self):
+        """
+        Verify that certain minimum set of tables are exportable.
+        """
+        self.assertNotIn('BaseWeaponTemplate', sheet.models.EXPORTABLE_MODELS,
+                         msg="Abstract classes should not be exportable")
+        for dt in ['ArmorTemplate',
+            'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
+            'SpellEffect', 'WeaponTemplate', 'Weapon',
+            'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
+            'EdgeLevel', 'EdgeSkillBonus',
+            'RangedWeaponTemplate', 'RangedWeapon']:
+            self.assertIn(dt, sheet.models.EXPORTABLE_MODELS)
+        self.assertIn('TechLevel', sheet.models.EXPORTABLE_MODELS)
+
+
+class ImportExportPostgresSupport(TestCase):
+
+    def test_fix_sequence_after_import_in_postgres(self):
+        """
+        Note, this test only affects PostgreSQL installations.
+        """
+
+        new_value = 666
+        sheet.models.TechLevel.objects.create(id=new_value, name="foobar")
+        sheet.views.update_id_sequence(sheet.models.TechLevel)
+        if (settings.DATABASES['default']['ENGINE'] ==
+            "django.db.backends.postgresql_psycopg2"):
+            cc = django.db.connection.cursor()
+            cc.execute("""
+            SELECT last_value FROM sheet_techlevel_id_seq""")
+            last_value = cc.fetchall()[0][0]
+            self.assertEqual(last_value, new_value)
+
 
 class TechLevelTestCase(TestCase):
     fixtures = ["armor", "user", "char", "sheet", "ranged_weapons",

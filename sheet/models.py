@@ -6,6 +6,8 @@ import logging
 from functools import wraps
 from collections import namedtuple
 import itertools
+from django.utils.datastructures import SortedDict
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,14 +22,6 @@ SIZE_CHOICES = (
     ('G', 'Gargantuan'),
     ('C', 'Colossal'),
     )
-
-EXPORTABLE_MODELS = ['ArmorTemplate',
-                     'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
-                     'SpellEffect', 'WeaponTemplate', 'Weapon',
-                     'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
-                     'EdgeLevel', 'EdgeSkillBonus',
-                     'RangedWeaponTemplate', 'RangedWeapon']
-EXPORTABLE_MODELS.sort()
 
 def roundup(dec):
     if dec < 0:
@@ -48,7 +42,7 @@ class ExportedModel(models.Model):
     user trying to input data into the system.
     """
     @classmethod
-    def dont_export(self):
+    def dont_export(cls):
         return []
 
     @classmethod
@@ -68,10 +62,27 @@ class ExportedModel(models.Model):
         abstract = True
 
 
-class TechLevel(models.Model):
+class NameManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
+class TechLevel(ExportedModel):
+    """
+    Different periods have different kinds of technologies available.
+    """
+    objects = NameManager()
+
     name = models.CharField(max_length=10, unique=True)
+
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def dont_export(cls):
+        return ["weapontemplate", "campaign", "armortemplate", "armorquality",
+                "miscellaneousitem", "weaponquality", "skill",
+                "rangedweapontemplate", "id"]
 
 
 class Campaign(models.Model):
@@ -86,7 +97,6 @@ class Campaign(models.Model):
     def __unicode__(self):
         return self.name
 
-from django.utils.datastructures import SortedDict
 
 class CampaignItem(object):
     def __init__(self, campaign):
@@ -1856,3 +1866,25 @@ class CharacterLogEntry(models.Model):
                 return u"Changed %s." % (self.field)
         elif self.entry_type == self.SKILL:
             return u"Added skill %s %d." % (self.skill, self.skill_level)
+
+
+def _collect_exportable_classes(start_model):
+    """
+    Collect all models inheriting from, e.g., ExportedModel, which have not
+    been declared abstract.
+    """
+    subclasses = start_model.__subclasses__()
+    models = []
+    processed = []
+    while subclasses:
+        cc = subclasses[0]
+        processed.append(cc)
+        subclasses = subclasses[1:]
+        subclasses.extend(
+            set(cc.__subclasses__()) - set(processed))
+        if not cc._meta.abstract:
+            models.append(cc)
+    return models
+
+EXPORTABLE_MODELS = sorted([cc.__name__
+                     for cc in _collect_exportable_classes(ExportedModel)])
