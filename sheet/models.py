@@ -845,14 +845,21 @@ class RangedWeaponMixin(models.Model):
 
 
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
+    """
+    """
     def get_ammunition_types(self):
         """
         Return the accepted ammunition types for the firearm.
         """
         return [ammo.short_label for ammo in self.ammunition_types.all()]
 
+    @classmethod
+    def dont_export(cls):
+        return ['short_name', 'range_pb', 'range_xs', 'range_vs',
+                'range_xl', 'range_e', 'firearm', ]
 
-class Ammunition(BaseDamager):
+
+class Ammunition(ExportedModel, BaseDamager):
     label = models.CharField(max_length=20,
                             help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "

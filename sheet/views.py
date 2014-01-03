@@ -760,6 +760,7 @@ def update_id_sequence(model_class):
                                  """.format(
             table=model_class._meta.db_table))
 
+
 def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
     data_type = reader.next()
@@ -778,6 +779,10 @@ def import_text(data):
     changed_models = set()
 
     for line, row in enumerate(reader):
+        logger.debug('columns: {0}'.format(len(row)))
+        if len(row) < len(header):
+            logger.info("Ignoring too short row: {0}".format(row))
+            continue
         mdl = None
         fields = {}
         for (hh, index) in zip(header, range(len(header))):
@@ -792,28 +797,34 @@ def import_text(data):
         if not mdl:
             mdl = modelcls()
         m2m_values = {}
-        for (fieldname, value) in fields.items():
-            logger.debug(("importing field %s for %s.") % (fieldname,
+        ammunition_types = []
+        for (field_name, value) in fields.items():
+            logger.debug(("importing field %s for %s.") % (field_name,
                                                 modelcls._meta.object_name))
 
-            if fieldname not in modelcls.get_exported_fields():
+            if field_name not in modelcls.get_exported_fields():
                 logger.info(("ignoring field %s for %s, not in "
-                             "exported fields.") % (fieldname,
+                             "exported fields.") % (field_name,
                                                     modelcls.__class__
                                                     .__name__))
                 continue
             try:
                 (field, _, direct, m2m) = \
-                    modelcls._meta.get_field_by_name(fieldname)
+                    modelcls._meta.get_field_by_name(field_name)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
 
-            if fieldname == "tech_level":
+            if field_name == "tech_level":
                 try:
                     value = TechLevel.objects.get(name=value)
                 except TechLevel.DoesNotExist:
                     raise ValueError, "No matching TechLevel with name %s." % (
                                                 value)
+            elif field_name == "ammunition_types":
+                if modelcls != sheet.models.BaseFirearm:
+                    raise ValueError, "Invalid model for ammunition_types"
+                ammunition_types = value.split('|')
+                continue
             # If the field is a reference to another object, try to find
             # the matching instance.
             elif isinstance(field, django.db.models.ForeignKey):
@@ -835,7 +846,7 @@ def import_text(data):
                 if isinstance(field,
                               django.db.models.fields.related.ManyToManyField):
                     # Make sure the field will at least be cleared.
-                    m2m_values[fieldname] = []
+                    m2m_values[field_name] = []
                     if not value:
                         continue
                     ll = []
@@ -848,7 +859,7 @@ def import_text(data):
                                                "exist." % name)
                         ll.append(obj)
                     value = ll
-                    m2m_values[fieldname] = value
+                    m2m_values[field_name] = value
                     # These need to be added only after the object is saved.
                     continue
                 else:
@@ -862,15 +873,15 @@ def import_text(data):
                         value = field.to_python(value)
                     except Exception, e:
                         raise type(e), ("Failed to import field \"%s\", "
-                                        "value \"%s\" (%s)" % (fieldname, value,
+                                        "value \"%s\" (%s)" % (field_name, value,
                                                                str(e)))
-            setattr(mdl, fieldname, value)
+            setattr(mdl, field_name, value)
         try:
             mdl.full_clean()
             mdl.save()
         except Exception, e:
             raise type(e), ("Line %d: Failed to import field \"%s\", "
-                            "value \"%s\" (%s)" % (line, fieldname, value,
+                            "value \"%s\" (%s)" % (line, field_name, value,
                             str(e)))
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
@@ -878,12 +889,24 @@ def import_text(data):
             rel = getattr(mdl, kk)
             rel.clear()
             rel.add(*vv)
+
+        if ammunition_types:
+            # clear old ammunition types out.
+            mdl.ammunition_types.all().delete()
+
+            sheet.models.FirearmAmmunitionType.objects.filter()
+            for ammo_type in ammunition_types:
+                sheet.models.FirearmAmmunitionType.objects\
+                    .get_or_create(firearm=mdl,
+                                   short_label=ammo_type)
+
         mdl.full_clean()
         mdl.save()
         changed_models.add(mdl.__class__)
 
     for mdl in changed_models:
         update_id_sequence(mdl)
+
 
 def import_data(request, success=False):
     """

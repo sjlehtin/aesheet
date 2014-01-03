@@ -343,7 +343,26 @@ class FirearmTestCase(TestCase):
 
 
 class FirearmImportExportTestcase(TestCase):
-    pass
+    firearm_csv_data = """\
+"BaseFirearm",,,,,,,,,,,,,,,,,,,
+"name","description","notes","tech_level","draw_initiative","roa","bypass","durability","dp","weight","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
+"Glock 19",,,"2K",-3,2.89,0,5,10,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
+
+"""
+
+    def setUp(self):
+        factories.TechLevelFactory(name="2K")
+        factories.SkillFactory(name="Handguns", tech_level__name="2K")
+
+    def test_import_firearms(self):
+        sheet.views.import_text(self.firearm_csv_data)
+        firearm = sheet.models.BaseFirearm.objects.get(name="Glock 19")
+        # Import should create the ammunition types.
+        self.assertListEqual(sorted(["9Pb", "9Pb+"]),
+                             sorted(firearm.get_ammunition_types()))
+
+    def test_export_firearms(self):
+        pass
 
 
 class EdgeAndSkillHandling(TestCase):
