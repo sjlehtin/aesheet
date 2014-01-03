@@ -82,7 +82,8 @@ class TechLevel(ExportedModel):
     def dont_export(cls):
         return ["weapontemplate", "campaign", "armortemplate", "armorquality",
                 "miscellaneousitem", "weaponquality", "skill",
-                "rangedweapontemplate", "id"]
+                "rangedweapontemplate", "basefirearm",
+                "ammunition", "id"]
 
 
 class Campaign(models.Model):
