@@ -1422,6 +1422,12 @@ class Sheet(models.Model):
             return False
         return True
 
+    def _counter_penalty(self, penalty, stat):
+        if penalty > 0:
+            # It was actually a bonus, so no effect.
+            return penalty
+        return min(0, penalty + rounddown((stat - 45)/3.0))
+
     def weapon_skill_checks(self, weapon, use_type=FULL):
         roa = self.roa(weapon, use_type=use_type)
         roa = float(roa)
@@ -1467,8 +1473,7 @@ class Sheet(models.Model):
                            for act in filter(lambda act: act < roa * 2,
                                              self.actions)]
         def counter_penalty(penalty):
-            # Intuition counters ranged weapon penalties.
-            return min(0, penalty + rounddown((self.eff_int - 45)/3.0))
+            return self._counter_penalty(penalty, self.eff_int)
 
         checks = map(counter_penalty, checks)
         mov = self.eff_mov + modifiers
@@ -1504,8 +1509,7 @@ class Sheet(models.Model):
                                     self.ranged_actions)]
         logging.info("checks: %s" % checks)
         def counter_penalty(penalty):
-            # Fitness counters ranged weapon penalties.
-            return min(0, penalty + rounddown((self.eff_fit - 45)/3.0))
+            return self._counter_penalty(penalty, self.eff_fit)
 
         checks = map(counter_penalty, checks)
         base_skill = base_skill + weapon.to_hit
