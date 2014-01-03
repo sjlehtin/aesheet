@@ -23,14 +23,6 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
-EXPORTABLE_MODELS = ['ArmorTemplate',
-                     'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
-                     'SpellEffect', 'WeaponTemplate', 'Weapon',
-                     'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
-                     'EdgeLevel', 'EdgeSkillBonus',
-                     'RangedWeaponTemplate', 'RangedWeapon']
-EXPORTABLE_MODELS.sort()
-
 def roundup(dec):
     if dec < 0:
         return int(math.floor(dec))
@@ -1745,3 +1737,25 @@ class CharacterLogEntry(models.Model):
                 return u"Changed %s." % (self.field)
         elif self.entry_type == self.SKILL:
             return u"Added skill %s %d." % (self.skill, self.skill_level)
+
+
+def _collect_exportable_classes(start_model):
+    """
+    Collect all models inheriting from, e.g., ExportedModel, which have not
+    been declared abstract.
+    """
+    subclasses = start_model.__subclasses__()
+    models = []
+    processed = []
+    while subclasses:
+        cc = subclasses[0]
+        processed.append(cc)
+        subclasses = subclasses[1:]
+        subclasses.extend(
+            set(cc.__subclasses__()) - set(processed))
+        if not cc._meta.abstract:
+            models.append(cc)
+    return models
+
+EXPORTABLE_MODELS = sorted([cc.__name__
+                     for cc in _collect_exportable_classes(ExportedModel)])

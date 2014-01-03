@@ -206,6 +206,7 @@ class ItemHandling(TestCase):
         self.assertEqual(response.context['char'].armor.armor_t_pl, 3)
         self.assertEqual(response.context['char'].helm.armor_h_pl, 2)
 
+
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "test_skills", "campaigns", "armor"]
@@ -696,6 +697,21 @@ class ImportExport(TestCase):
         self.assertTrue(data.startswith('Skill'),
                         msg="The data should start with the table name")
         self.assertIn(unicode_word, data.decode('utf-8'))
+
+    def test_exported_data_types(self):
+        """
+        Verify that certain minimum set of tables are exportable.
+        """
+        self.assertNotIn('BaseWeaponTemplate', sheet.models.EXPORTABLE_MODELS,
+                         msg="Abstract classes should not be exportable")
+        for dt in ['ArmorTemplate',
+            'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
+            'SpellEffect', 'WeaponTemplate', 'Weapon',
+            'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
+            'EdgeLevel', 'EdgeSkillBonus',
+            'RangedWeaponTemplate', 'RangedWeapon']:
+            self.assertIn(dt, sheet.models.EXPORTABLE_MODELS)
+
 
 class TechLevelTestCase(TestCase):
     fixtures = ["armor", "user", "char", "sheet", "ranged_weapons",
