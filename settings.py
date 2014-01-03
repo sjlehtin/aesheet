@@ -61,8 +61,8 @@ except ImportError:
 
 DATABASES = {
     'default': {
-        'ENGINE': DB_ENGINE, # Add 'postgresql_psycopg2', 'postgresql',
-        # 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': DB_ENGINE,
+        'ATOMIC_REQUESTS': True,
         'NAME': DB_NAME, # Or path to database file if using sqlite3.
         'USER': USER,                      # Not used with sqlite3.
         'PASSWORD': PASSWORD,     # Not used with sqlite3.
