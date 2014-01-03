@@ -667,12 +667,14 @@ class EdgeSkillBonus(ExportedModel):
     def __unicode__(self):
         return u"%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
+
 class CharacterEdge(models.Model):
     character = models.ForeignKey(Character, related_name='edges')
     edge = models.ForeignKey(EdgeLevel)
 
     def __unicode__(self):
         return u"%s: %s" % (self.character, self.edge)
+
 
 class BaseWeaponQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
@@ -698,6 +700,7 @@ class BaseWeaponQuality(ExportedModel):
     class Meta:
         abstract = True
         ordering = ["roa", "ccv"]
+
 
 class WeaponQuality(BaseWeaponQuality):
     """
@@ -748,6 +751,7 @@ class WeaponDamage(object):
             "%+d" % self.extra_damage if self.extra_damage else "",
             self.leth, plus_leth_str)
 
+
 class BaseArmament(ExportedModel):
     class Meta:
         abstract = True
@@ -784,18 +788,22 @@ class BaseArmament(ExportedModel):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+
 class BaseDamager(models.Model):
     num_dice = models.IntegerField(default=1)
     dice = models.IntegerField(default=6)
     extra_damage = models.IntegerField(default=0)
     leth = models.IntegerField(default=5)
     plus_leth = models.IntegerField(default=0)
+
     class Meta:
         abstract = True
+
 
 class BaseWeaponTemplate(BaseArmament, BaseDamager):
     class Meta:
         abstract = True
+
 
 class RangedWeaponMixin(models.Model):
     type = models.CharField(max_length=5, default="P")
@@ -817,18 +825,51 @@ class RangedWeaponMixin(models.Model):
     class Meta:
         abstract = True
 
+
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
     pass
 
+
 class Ammunition(BaseDamager):
-    name = models.CharField(max_length=10)
+    label = models.CharField(max_length=60,
+                             help_text="Ammunition caliber, which should also "
+                                       "distinguish between barrel lengths "
+                                       "and such")
+    short_label = models.CharField(max_length=20,
+                                   help_text="Condensed version of label")
+    type = models.CharField(max_length=10,
+                            help_text="Make of the ammo, such as "
+                                      "full metal jacket")
+
     tech_level = models.ForeignKey(TechLevel)
+
+    rof_modifier = models.DecimalField(default=0, max_digits=2,
+                                       decimal_places=2)
+
     # XXX low recoil -> rof + 0.2
     # XXX high recoil -> rof - 0.2
+
+    def __unicode__(self):
+        return u"{label} {type}".format(label=self.label,
+                                        type=self.type)
+
+
+class FirearmAmmunitionType(models.Model):
+    firearm = models.ForeignKey(BaseFirearm,
+                                related_name="ammunition_types")
+    short_label = models.CharField(max_length=20,
+                                   help_text="Matches the respective field in "
+                                             "ammunition")
+
 
 class Firearm(models.Model):
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
+
+    def __unicode__(self):
+        return u"{base} w/ {ammo}".format(base=self.base,
+                                          ammo=self.ammo)
+
 
 class WeaponTemplate(BaseWeaponTemplate):
     """

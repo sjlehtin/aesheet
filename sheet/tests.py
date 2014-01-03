@@ -4,6 +4,7 @@ from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkillForm, AddXPForm
+import sheet.forms as forms
 import sheet.views, sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
@@ -41,10 +42,10 @@ class ItemHandling(TestCase):
                                           prefix="add-ranged-weapon",
                                           accessor=get_weapons)
 
-    def add_firearm_and_verify(self, weapon_template, quality, weapon):
+    def add_firearm_and_verify(self, weapon_template, ammunition, weapon):
         def get_weapons(char):
             return [wpn.name for wpn in char.firearms]
-        return self.add_weapon_and_verify(weapon_template, quality, weapon,
+        return self.add_weapon_and_verify(weapon_template, ammunition, weapon,
                                           prefix="add-firearm",
                                           accessor=get_weapons)
 
@@ -228,9 +229,27 @@ class ItemHandling(TestCase):
                                            args=[3]))
         self.assertContains(response, "No firearms.")
 
+        factories.AmmunitionFactory(name='FMJ')
         self.add_firearm_and_verify("Glock 19", "FMJ", "Glock 19 w/ FMJ")
 
+
 class FirearmTestCase(TestCase):
+    def setUp(self):
+        factories.CampaignFactory(name="MR", tech_levels=("all", "2k"))
+        self.sheet = factories.SheetFactory(character__campaign__name="MR")
+        self.ammo = factories.AmmunitionFactory(label="9x19", type='FMJ')
+        factories.BaseFirearmFactory(name="Glock 19",
+                                     ammunition_types=('9Pb', '9Pb+'))
+
+    def test_basic(self):
+        form = forms.AddFirearmForm(instance=self.sheet,
+                                    data={'item_template': 'Glock 19',
+                                          'item_quality': self.ammo.pk })
+        self.assertTrue(form.is_valid())
+        sheet = form.save()
+        self.assertEqual(unicode(sheet.firearms.all()[0]),
+                         "Glock 19 w/ 9x19 FMJ")
+
     def test_ammo_validation(self):
         """
         Verify that chosen ammo for the weapon is validated to be suitable.
@@ -251,6 +270,9 @@ class FirearmTestCase(TestCase):
     def test_autofire_penalty_for_burst_fire(self):
         pass
 
+
+class FirearmImportExportTestcase(TestCase):
+    pass
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
@@ -584,6 +606,8 @@ class Logging(WebTest):
 
         form['deity'].value = "Tharizdun"
         response = form.submit()
+        # XXX check the return value for a valid value.
+
 
 class AddXpTestCase(TestCase):
     fixtures = ["campaigns", "user", "char"]
@@ -614,6 +638,7 @@ class ModelBasics(TestCase):
         mana = ss.mana
         # XXX the above just checks that accessing the values does not cause
         # exceptions in the property handling.
+
 
 class Views(TestCase):
     fixtures = ["campaigns", "user", "char", "sheet", "armor",

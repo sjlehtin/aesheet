@@ -46,6 +46,18 @@ class SheetFactory(factory.DjangoModelFactory):
     owner = factory.LazyAttribute(lambda o: o.character.owner)
 
 
+class AmmunitionFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Ammunition
+    FACTORY_DJANGO_GET_OR_CREATE = ('label', )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2k"
+
+
+class FirearmAmmunitionTypeFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.FirearmAmmunitionType
+
+
 class SkillFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Skill
     FACTORY_DJANGO_GET_OR_CREATE = ('name', )
@@ -53,3 +65,27 @@ class SkillFactory(factory.DjangoModelFactory):
     tech_level = factory.SubFactory(TechLevelFactory)
 
 
+class BaseFirearmFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.BaseFirearm
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    base_skill = factory.SubFactory(SkillFactory)
+
+    base_skill__name = "Pistol"
+    tech_level__name = "2k"
+
+    range_s = 15
+    range_m = 30
+    range_l = 100
+
+    @factory.post_generation
+    def ammunition_types(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for ammo_type in extracted:
+                FirearmAmmunitionTypeFactory(firearm=self,
+                                             short_label=ammo_type)

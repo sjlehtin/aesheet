@@ -44,15 +44,17 @@ class AddWeaponForm(forms.ModelForm):
     item_quality = forms.ModelChoiceField(
         queryset=quality_queryset.all())
 
+    def get_default_quality(self):
+        quality = self.quality_queryset.filter(name="normal")
+        if quality.exists():
+            return quality[0]
+
     def __init__(self, *args, **kwargs):
         initial = kwargs.setdefault('initial', {})
         template_queryset = self.template_queryset
         quality_queryset = self.quality_queryset
-        # XXX should be done after super() call.
         if 'item_quality' not in initial:
-            quality = quality_queryset.filter(name="normal")
-            if quality.exists():
-                initial['item_quality'] = quality[0]
+            initial['item_quality'] = self.get_default_quality
         super(AddWeaponForm, self).__init__(*args, **kwargs)
         if self.instance.character.campaign:
             template_queryset = template_queryset.filter(
@@ -84,10 +86,11 @@ class AddWeaponForm(forms.ModelForm):
             item = item[0]
         else:
             item = self.item_class(**filter_kwargs)
-            if quality.name == "normal":
-                item.name = base.name
-            else:
-                item.name = "%s %s" % (base.name, quality.name)
+            if hasattr(item, 'name'):
+                if quality.name == "normal":
+                    item.name = base.name
+                else:
+                    item.name = "%s %s" % (base.name, quality.name)
         self.cleaned_data['item'] = item
         return self.cleaned_data
 
@@ -136,6 +139,9 @@ class AddFirearmForm(AddWeaponForm):
     template_queryset = BaseFirearm.objects.all()
     quality_queryset = Ammunition.objects.all()
     quality_field_name = "ammo"
+
+    def get_default_quality(self):
+        pass
 
     def add_item(self, item):
         self.instance.firearms.add(item)
