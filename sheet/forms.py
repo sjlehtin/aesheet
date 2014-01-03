@@ -153,7 +153,7 @@ class AddFirearmForm(AddWeaponForm):
             types = item.base.get_ammunition_types()
             ammunition = item.ammo.label
             if ammunition not in types:
-                raise ValidationError('Invalid ammo type')
+                raise forms.ValidationError('Invalid ammo type')
         return cleaned_data
 
 
@@ -283,8 +283,8 @@ class AddSkillForm(RequestForm):
         try:
             cost = skill.cost(level)
         except ValueError as e:
-            raise ValidationError("Invalid level for skill %s: %s (%s)" %
-                                  (self.skill, self.level, e))
+            raise forms.ValidationError("Invalid level for skill %s: %s (%s)" %
+                                        (self.skill, self.level, e))
 
         # verify skill and level go together.
         cs = CharacterSkill()
@@ -380,7 +380,7 @@ class StatModifyForm(RequestForm):
     def clean_stat(self):
         if self.cleaned_data['stat'] not in ["cur_" + xx.lower()
                                              for xx in sheet.models.BASE_STATS]:
-            raise ValidationError, "Invalid stat type."
+            raise forms.ValidationError, "Invalid stat type."
         return self.cleaned_data['stat'].lower()
 
     def save(self, commit=True):
