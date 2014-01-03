@@ -8,6 +8,8 @@ import pprint
 from collections import namedtuple
 from django.db.models import Sum
 from django.core.exceptions import ValidationError
+from django.utils.datastructures import SortedDict
+
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +77,6 @@ class Campaign(models.Model):
     def __unicode__(self):
         return self.name
 
-from django.utils.datastructures import SortedDict
 
 class CampaignItem(object):
     def __init__(self, campaign):
