@@ -83,7 +83,8 @@ Firearms:
 - burst fire
 - sweep fire
 - low/hi-recoil ammo
-- using two Berettas akimbo.
+- using two Berettas akimbo.  Check rule situation regarding instinctive fire.
+- firearms in CC.
 
 Priority list by JW:
 
