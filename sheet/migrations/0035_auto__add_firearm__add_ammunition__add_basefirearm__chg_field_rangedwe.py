@@ -42,7 +42,7 @@ class Migration(SchemaMigration):
         # Adding model 'BaseFirearm'
         db.create_table(u'sheet_basefirearm', (
             ('name', self.gf('django.db.models.fields.CharField')(max_length=256, primary_key=True)),
-            ('short_name', self.gf('django.db.models.fields.CharField')(max_length=64)),
+            ('short_name', self.gf('django.db.models.fields.CharField')(max_length=64, blank=True)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('notes', self.gf('django.db.models.fields.CharField')(max_length=64, blank=True)),
             ('tech_level', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sheet.TechLevel'])),
@@ -66,6 +66,8 @@ class Migration(SchemaMigration):
             ('range_l', self.gf('django.db.models.fields.IntegerField')()),
             ('range_xl', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('range_e', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('autofire_rpm', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('autofire_class', self.gf('django.db.models.fields.CharField')(max_length=1, blank=True)),
         ))
         db.send_create_signal(u'sheet', ['BaseFirearm'])
 
@@ -326,6 +328,8 @@ class Migration(SchemaMigration):
         u'sheet.basefirearm': {
             'Meta': {'ordering': "['name']", 'object_name': 'BaseFirearm'},
             'ammo_weight': ('django.db.models.fields.DecimalField', [], {'default': '0.1', 'max_digits': '4', 'decimal_places': '1'}),
+            'autofire_class': ('django.db.models.fields.CharField', [], {'max_length': '1', 'blank': 'True'}),
+            'autofire_rpm': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'base_skill': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'base_skill_for_basefirearm'", 'to': u"orm['sheet.Skill']"}),
             'bypass': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -343,7 +347,7 @@ class Migration(SchemaMigration):
             'range_xl': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'range_xs': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'roa': ('django.db.models.fields.DecimalField', [], {'default': '1.0', 'max_digits': '4', 'decimal_places': '3'}),
-            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'skill': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'primary_for_basefirearm'", 'null': 'True', 'to': u"orm['sheet.Skill']"}),
             'skill2': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'secondary_for_basefirearm'", 'null': 'True', 'to': u"orm['sheet.Skill']"}),
             'target_initiative': ('django.db.models.fields.IntegerField', [], {'default': '-2'}),
@@ -537,7 +541,7 @@ class Migration(SchemaMigration):
             'range_xl': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'range_xs': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'roa': ('django.db.models.fields.DecimalField', [], {'default': '1.0', 'max_digits': '4', 'decimal_places': '3'}),
-            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'skill': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'primary_for_rangedweapontemplate'", 'null': 'True', 'to': u"orm['sheet.Skill']"}),
             'skill2': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'secondary_for_rangedweapontemplate'", 'null': 'True', 'to': u"orm['sheet.Skill']"}),
             'target_initiative': ('django.db.models.fields.IntegerField', [], {'default': '-2'}),
@@ -681,7 +685,7 @@ class Migration(SchemaMigration):
             'num_dice': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
             'plus_leth': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'roa': ('django.db.models.fields.DecimalField', [], {'default': '1.0', 'max_digits': '4', 'decimal_places': '3'}),
-            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'skill': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'primary_for_weapontemplate'", 'null': 'True', 'to': u"orm['sheet.Skill']"}),
             'skill2': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'secondary_for_weapontemplate'", 'null': 'True', 'to': u"orm['sheet.Skill']"}),
             'tech_level': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sheet.TechLevel']"}),

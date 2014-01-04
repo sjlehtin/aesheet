@@ -847,6 +847,12 @@ class RangedWeaponMixin(models.Model):
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
     """
     """
+    autofire_rpm = models.IntegerField(blank=True, null=True)
+    _class_choices = ("A", "B", "C", "D", "E")
+    autofire_class = models.CharField(max_length=1, blank=True,
+                                      choices=zip(_class_choices,
+                                                  _class_choices))
+
     def get_ammunition_types(self):
         """
         Return the accepted ammunition types for the firearm.
