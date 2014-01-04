@@ -860,6 +860,8 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
 
 
 class Ammunition(ExportedModel, BaseDamager):
+    """
+    """
     label = models.CharField(max_length=20,
                             help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "

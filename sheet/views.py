@@ -709,15 +709,21 @@ def get_data_rows(results, fields):
                 value = getattr(obj, field)
             except AttributeError:
                 return ""
-            def get_descr(mdl):
-                if hasattr(mdl, 'name'):
-                    return mdl.name
-                return str(mdl.pk)
-            if isinstance(value, django.db.models.Model):
-                value = get_descr(value)
-            elif isinstance(value, django.db.models.Manager):
-                value = "|".join([get_descr(val) for val in value.all()])
-            return value
+            tag = "{model}.{field}".format(model=obj.__class__.__name__,
+                                           field=field)
+            if tag == "BaseFirearm.ammunition_types":
+                return '|'.join([ammo.short_label
+                                 for ammo in obj.ammunition_types.all()])
+            else:
+                def get_descr(mdl):
+                    if hasattr(mdl, 'name'):
+                        return mdl.name
+                    return str(mdl.pk)
+                if isinstance(value, django.db.models.Model):
+                    value = get_descr(value)
+                elif isinstance(value, django.db.models.Manager):
+                    value = "|".join([get_descr(val) for val in value.all()])
+                return value
         yield [get_field_value(field) for field in fields]
 
 def browse(request, type):

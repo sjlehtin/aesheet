@@ -13,6 +13,8 @@ import django.contrib.auth as auth
 import factories
 import django.db
 from django.conf import settings
+import csv
+import StringIO
 
 import logging
 
@@ -362,6 +364,24 @@ class FirearmImportExportTestcase(TestCase):
                              sorted(firearm.get_ammunition_types()))
 
     def test_export_firearms(self):
+        sheet.views.import_text(self.firearm_csv_data)
+
+        csv_data = sheet.views.csv_export(sheet.models.BaseFirearm)
+        reader = csv.reader(StringIO.StringIO(csv_data))
+        data_type = reader.next()
+        self.assertEqual(data_type[0], "BaseFirearm")
+
+        header = reader.next()
+        data_row = reader.next()
+        idx = header.index("ammunition_types")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "9Pb|9Pb+")
+
+    def test_import_ammunition(self):
+        pass
+
+    def test_export_ammunition(self):
         pass
 
 
