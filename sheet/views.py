@@ -694,9 +694,11 @@ class AddArmorTemplateView(AddSpellEffectView):
 class AddArmorQualityView(AddSpellEffectView):
     model = ArmorQuality
 
+
 class AddArmorSpecialQualityView(AddSpellEffectView):
     model = ArmorSpecialQuality
     template_name = 'sheet/add_armor_special_quality.html'
+
 
 def get_data_rows(results, fields):
     """
@@ -725,6 +727,7 @@ def get_data_rows(results, fields):
                     value = "|".join([get_descr(val) for val in value.all()])
                 return value
         yield [get_field_value(field) for field in fields]
+
 
 def browse(request, type):
     try:

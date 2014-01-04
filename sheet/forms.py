@@ -183,7 +183,6 @@ class AddExistingWeaponForm(forms.ModelForm):
         model = sheet.models.Sheet
         fields = ()
 
-
     def add_item(self, item):
         self.instance.weapons.add(item)
 
