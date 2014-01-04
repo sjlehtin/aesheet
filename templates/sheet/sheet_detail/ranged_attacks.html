@@ -48,11 +48,11 @@
     </td>
   </tr>
       <tr>
-      <td colspan="2" class="attack-help-text">
+      <td colspan="2" class="help-text">
           I vs. 1 target
       </td>
           {% for act in item.skill_checks %}
-              <td class="attack-initiative">
+              <td class="attack initiative">
                   {% if act.check != None %}
                       {{ act.initiative|stringformat:"+d" }}
                   {% endif %}

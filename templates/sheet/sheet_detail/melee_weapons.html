@@ -43,7 +43,7 @@
            <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.full.initiatives %}
-           <td>{{ init|stringformat:"+d" }}</td>
+           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.full.damage }}</td>
         {% for init in item.full.defense_initiatives %}
@@ -57,7 +57,7 @@
            <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.pri.initiatives %}
-           <td>{{ init|stringformat:"+d" }}</td>
+           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.pri.damage }}</td>
         {% for init in item.pri.defense_initiatives %}

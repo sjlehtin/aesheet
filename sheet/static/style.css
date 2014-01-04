@@ -62,9 +62,18 @@ margin: 0px;
 text-align: center;
 }
 
-div.armor td { 
+div.armor td.roll {
+    min-width: 3em;
+    font-weight: bold;
+}
+
+div.armor td.location {
+    font-weight: bold;
+}
+
+div.armor td {
 text-align: center;
-width: 20px;
+width: 2em;
 padding: 4px;
 border: 1px dotted gray;
 margin: 0px;
@@ -86,16 +95,18 @@ margin: 0px;
 }
 
 table.combat td {
-text-align: center;
-padding: 2px;
-border: 1px dotted gray;
-margin: 0px;
+    text-align: center;
+    padding: 2px;
+    border: 1px dotted gray;
+    margin: 0px;
+    min-width: 2em;
 }
 
 div.charge { color: red; }
 
-td.tohit { font-weight: bold; }
-
+td.tohit { font-weight: bold;  }
+td.attack.initiative { color: red; }
+.help-text { color: hotpink; }
 .defense { color: blue; }
 
 a { padding-right: 1em;}
