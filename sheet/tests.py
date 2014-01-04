@@ -1042,6 +1042,7 @@ class TechLevelTestCase(TestCase):
         # Jan (GZ)
         self.verify_character(5, False, True, False, True)
 
+
 class SheetOrganization(TestCase):
     def setUp(self):
         factories.SheetFactory(character__name="Martel",
@@ -1085,6 +1086,7 @@ class SheetOrganization(TestCase):
         # Verify the headings are present.
         self.assertContains(response, 'FRP')
         self.assertContains(response, 'MR')
+
 
 class CreateURLTestCase(TestCase):
     fixtures = ['user']
