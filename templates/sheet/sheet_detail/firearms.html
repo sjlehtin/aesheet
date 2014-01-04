@@ -1,54 +1,5 @@
-
 {% if char.firearms %}
-<table class="combat">
-  <tr>
-    <th></th>
-    <th>ROF</th>
-    {% for act in char.firearm_actions %}
-    <th>{{ act }}</th>
-    {% endfor %}
-    <th colspan="4">Attack</th>
-    <th>S/M/L</th>
-  </tr>
-
-  {% for item in char.firearms %}
-  <tr>
-    <td class="weapon name">
-    <div class="remove-container">
-        {{ item.item }}
-      {% if not item.skilled %}
-      <div class="unskilled">unskilled</div>
-      {% endif %}
-      {% if item.bypass %}
-          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
-      {% endif %}
-      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
-      <div class="remove edit-control">
-        <form action="" method="post">
-          {% csrf_token %}
-          {{ item.remove_form }}
-          <input type="submit" value="Remove" />
-        </form>
-      </div>
-    </div>
-    </td>
-    <td>{{ item.rof }}</td>
-    {% for act in item.skill_checks %}
-    <td class="tohit">{{ act.check|default:"" }}</td>
-    {% endfor %}
-    {% for init in item.initiatives %}
-    <td>{{ init|stringformat:"+d" }}</td>
-    {% endfor %}
-
-    <td>{{ item.damage }}</td>
-    <td>
-    {% with rr=item.ranges %}
-        {{ rr.s }} /  {{ rr.m }} / {{ rr.l }}
-    {% endwith %}
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+    {% include "sheet/sheet_detail/ranged_attacks.html" with actions=char.firearm_actions weapons=char.firearms %}
 {% else %}
 <p>No firearms.</p>
 {% endif %}

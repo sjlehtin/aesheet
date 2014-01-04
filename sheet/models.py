@@ -855,6 +855,12 @@ class RangedWeaponMixin(models.Model):
     class Meta:
         abstract = True
 
+    def ranges(self, sheet):
+        return Range._make([self.range_pb, self.range_xs,
+                            self.range_vs, self.range_s,
+                            self.range_m, self.range_l,
+                            self.range_xl, self.range_e])
+
 
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
     """
@@ -926,10 +932,8 @@ class Firearm(models.Model):
     def roa(self):
         return self.base.roa
 
-    def ranges(self):
-        return Range(range_s=self.base.range_s,
-                     range_m=self.base.range_m,
-                     range_l=self.base.range_l)
+    def ranges(self, sheet):
+        return self.base.ranges(sheet)
 
     def damage(self):
         return self.ammo.damage
@@ -1173,11 +1177,7 @@ class RangedWeapon(ExportedModel):
         return u"%s %s" % (quality, self.base)
 
     def ranges(self, sheet):
-        return Range._make([self.base.range_pb, self.base.range_xs,
-                            self.base.range_vs, self.base.range_s,
-                            self.base.range_m, self.base.range_l,
-                            self.base.range_xl, self.base.range_e])
-
+        return self.base.ranges(sheet)
 
 class ArmorTemplate(ExportedModel):
     """
@@ -1372,7 +1372,7 @@ class MiscellaneousItem(ExportedModel):
         return self.name
 
 
-Action = namedtuple('Action', ['action', 'check'])
+Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 
 class Sheet(models.Model):
@@ -1475,14 +1475,29 @@ class Sheet(models.Model):
         return self.eff_ref / 10.0 + self.eff_int / 20.0 + \
             self.eff_psy / 20.0
 
-    def initiatives(self, weapon, use_type=FULL):
+    def _initiatives(self, roa, actions=None, readied_base_i=-3,
+                     target_i=0):
         bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
-        roa = self.roa(weapon, use_type=use_type)
         bi = -5 / roa
+
+        if actions is None:
+            actions = range(1, self.max_attacks(roa) + 1)
+
         inits = []
-        for ii in range(1, self.max_attacks(roa) + 1):
-            inits.append(bi_multipliers[ii - 1] * bi)
+        for act in actions:
+            if roa > 2 * act and act < 1:
+                # House Rules, initiative, p. 8, initiatives when target
+                # acquired and weapon readied in a previous turn.
+                inits.append(max(readied_base_i, bi) + max(target_i + 3, 0))
+            else:
+                # If the action is less than one, we use the first.
+                action_index = roundup(act) - 1
+                inits.append(bi_multipliers[action_index] * bi + target_i)
+
         return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
+
+    def initiatives(self, weapon, use_type=FULL):
+        return self._initiatives(self.roa(weapon, use_type=use_type))
 
     def defense_initiatives(self, weapon, use_type=FULL):
         bi_multipliers = [0, 3, 6, 0, 3, 6, 0, 3, 6]
@@ -1606,7 +1621,8 @@ class Sheet(models.Model):
 
         # Pad actions with Nones where an action is not available.
         return [Action._make(xx)
-                for xx in itertools.izip_longest(actions, checks)]
+                for xx in itertools.izip_longest(
+                    actions, checks, self._initiatives(roa, actions))]
 
     def firearm_skill_checks(self, weapon):
         return self.ranged_skill_checks(weapon,

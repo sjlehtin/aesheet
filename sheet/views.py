@@ -231,32 +231,8 @@ class WeaponWrap(RemoveWrap, SkilledMixin):
         self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
         self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
 
+
 Action = namedtuple('Action', ['action', 'check'])
-
-
-class RangedWeaponWrap(RemoveWrap, SkilledMixin):
-    def __init__(self, item, sheet):
-        super(RangedWeaponWrap, self).__init__(item)
-        self.sheet = sheet
-        self.item = item
-
-    def rof(self):
-        return self.sheet.rof(self.item)
-
-    def skill_checks(self):
-        return self.sheet.ranged_skill_checks(self.item)
-
-    def ranges(self):
-        try:
-            return self.sheet.ranged_ranges(self.item)
-        except Exception, e:
-            logger.exception("Got exception %s" % e)
-
-    def initiatives(self):
-        return self.sheet.initiatives(self.item)
-
-    def damage(self):
-        return self.sheet.damage(self.item, use_type=Sheet.PRI)
 
 
 class FirearmWrap(RemoveWrap, SkilledMixin):
@@ -276,6 +252,22 @@ class FirearmWrap(RemoveWrap, SkilledMixin):
 
     def initiatives(self):
         return self.sheet.initiatives(self.item)
+
+    def level(self):
+        return self.sheet.character.skill_level(self.item.base.base_skill)
+
+    def draw_initiative(self):
+        return self.item.base.draw_initiative
+
+    def target_initiative(self):
+        return self.item.base.target_initiative
+
+class RangedWeaponWrap(FirearmWrap):
+    def skill_checks(self):
+        return self.sheet.ranged_skill_checks(self.item)
+
+    def damage(self):
+        return self.sheet.damage(self.item, use_type=Sheet.PRI)
 
 
 class SkillWrap(RemoveWrap):

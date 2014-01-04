@@ -1,0 +1,65 @@
+<table class="combat">
+  <tr>
+    <th></th>
+    <th>Lvl</th>
+    <th>ROF</th>
+    {% for act in actions %}
+    <th>{{ act }}</th>
+    {% endfor %}
+    <th>TI</th>
+    <th>DI</th>
+    <th>Damage</th>
+    <th>S/M/L</th>
+  </tr>
+
+  {% for item in weapons %}
+  <tr>
+    <td class="weapon name" rowspan="2">
+    <div class="remove-container">
+        {{ item.item }}
+      {% if not item.skilled %}
+      <div class="unskilled">unskilled</div>
+      {% endif %}
+      {% if item.bypass %}
+          <div class="bypass"><label>Bypass:</label>{{ item.bypass }}</div>
+      {% endif %}
+      <div class="durability"><label>Durability:</label>{{ item.durability }}</div>
+      <div class="remove edit-control">
+        <form action="" method="post">
+          {% csrf_token %}
+          {{ item.remove_form }}
+          <input type="submit" value="Remove" />
+        </form>
+      </div>
+    </div>
+    </td>
+    <td>{{ item.level|default:"B" }}</td>
+    <td>{{ item.rof }}</td>
+    {% for act in item.skill_checks %}
+    <td class="tohit">{{ act.check|default:"" }}</td>
+    {% endfor %}
+    <td>{{ item.target_initiative }}</td>
+    <td>{{ item.draw_initiative }}</td>
+    <td rowspan="2">{{ item.damage }}</td>
+    <td rowspan="2">
+    {% with rr=item.ranges %}
+        {{ rr.s }} /  {{ rr.m }} / {{ rr.l }}
+    {% endwith %}
+    </td>
+  </tr>
+      <tr>
+      <td colspan="2" class="attack-help-text">
+          I vs. 1 target
+      </td>
+          {% for act in item.skill_checks %}
+              <td class="attack-initiative">
+                  {% if act.check != None %}
+                      {{ act.initiative|stringformat:"+d" }}
+                  {% endif %}
+              </td>
+          {% endfor %}
+      <td></td>
+      <td></td>
+      </tr>
+  {% endfor %}
+</table>
