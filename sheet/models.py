@@ -863,7 +863,7 @@ class Ammunition(ExportedModel, BaseDamager):
     """
     """
     label = models.CharField(max_length=20,
-                            help_text="Ammunition caliber, which should also "
+                             help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "
                                        "and such")
     type = models.CharField(max_length=10,
@@ -877,6 +877,10 @@ class Ammunition(ExportedModel, BaseDamager):
 
     # XXX low recoil -> rof + 0.2
     # XXX high recoil -> rof - 0.2
+
+    @classmethod
+    def dont_export(cls):
+        return ['firearm']
 
     def __unicode__(self):
         return u"{label} {type}".format(label=self.label,
@@ -923,7 +927,7 @@ class WeaponTemplate(BaseWeaponTemplate):
     is_shield = models.BooleanField(default=False)
 
     @classmethod
-    def dont_export(self):
+    def dont_export(cls):
         return ['weapon']
 
 
