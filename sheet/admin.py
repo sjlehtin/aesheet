@@ -26,6 +26,7 @@ admin.site.register(sm.MiscellaneousItem)
 admin.site.register(sm.BaseFirearm)
 admin.site.register(sm.FirearmAmmunitionType)
 admin.site.register(sm.Firearm)
+admin.site.register(sm.Ammunition)
 
 class SkillAdmin(admin.ModelAdmin):
     list_display = ('name', 'tech_level','description', 'notes',
