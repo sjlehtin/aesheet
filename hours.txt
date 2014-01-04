@@ -57,4 +57,5 @@ sun 22.12.2013 3h Responsive layout, firearms.
 sun 29.12.2013 2h Sheets and characters grouped by campaign.
 mon 30.12.2013 6h Dev server installation, firearms.
 wed 1.1.2014 2h Firearms.
-fri 3.1.2014 6h Firearms, tests.
+fri 3.1.2014 9h Firearms, tests.
+sat 4.1.2014 3h Firearms, tests, importing.
