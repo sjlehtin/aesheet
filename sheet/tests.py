@@ -352,6 +352,13 @@ class FirearmImportExportTestcase(TestCase):
 
 """
 
+    ammo_csv_data = """\
+"Ammunition",,,,,,,,,
+"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","rof_modifier"
+,1,6,1,6,2,"9Pb+","FMJ","2K",0
+
+"""
+
     def setUp(self):
         factories.TechLevelFactory(name="2K")
         factories.SkillFactory(name="Handguns", tech_level__name="2K")
@@ -379,10 +386,30 @@ class FirearmImportExportTestcase(TestCase):
         self.assertEqual(data_row[idx], "9Pb|9Pb+")
 
     def test_import_ammunition(self):
-        pass
+        sheet.views.import_text(self.ammo_csv_data)
+        ammo = sheet.models.Ammunition.objects.filter(label='9Pb+')
+        self.assertEqual(ammo[0].label, "9Pb+")
 
     def test_export_ammunition(self):
-        pass
+        sheet.views.import_text(self.ammo_csv_data)
+
+        csv_data = sheet.views.csv_export(sheet.models.Ammunition)
+        reader = csv.reader(StringIO.StringIO(csv_data))
+        data_type = reader.next()
+        self.assertEqual(data_type[0], "Ammunition")
+
+        header = reader.next()
+        data_row = reader.next()
+
+        idx = header.index("label")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "9Pb+")
+
+        idx = header.index("id")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "1")
 
 
 class EdgeAndSkillHandling(TestCase):
