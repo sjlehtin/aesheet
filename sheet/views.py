@@ -37,7 +37,7 @@ TODO = """
 - short description of spell effect (+50 FIT etc)
 - suspended weight
 
-- when adding skills with imported CSV, the order of the rows matter.  Skills
++ when adding skills with imported CSV, the order of the rows matter.  Skills
   that are prereqs for other skills must appear first in the list.  This could
   be improved.
 
@@ -83,6 +83,7 @@ Firearms:
 - burst fire
 - sweep fire
 - low/hi-recoil ammo
+- using two Berettas akimbo.
 
 Priority list by JW:
 
