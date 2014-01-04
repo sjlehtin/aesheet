@@ -961,6 +961,7 @@ Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
         skill = sheet.models.Skill.objects.get(name="Nutcasing")
         self.assertEqual(len(skill.required_skills.all()), 0)
 
+
 class ImportExportPostgresSupport(TestCase):
 
     def test_fix_sequence_after_import_in_postgres(self):
