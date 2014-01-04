@@ -50,6 +50,10 @@ TODO = """
 - Inserting None as skill cost to the sheet should work to allow resetting
   skill costs from CSV import.
 
+- form errors should be highlighted, and if the form element is hidden, it
+  should be shown by default (errors in add forms can get hidden)
+-- form errorlist class should be highlighted.
+
 - Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
 
@@ -770,6 +774,69 @@ def update_id_sequence(model_class):
             table=model_class._meta.db_table))
 
 
+def sort_by_dependencies(header, rows):
+    """
+    Sort the list of rows, so that dependencies are satisfied as well as
+    possible.
+    """
+    logger.debug("Sorting skill rows rows by dependencies")
+    name_index = header.index("name")
+    if name_index < 0:
+        raise ValueError, "No name column"
+    required_index = header.index("required_skills")
+    if required_index < 0:
+        raise ValueError, "No required_skills column"
+
+    ordered = []
+    unsatisfied = {}
+    satisfied = {}
+
+    def all_satisfied(required_skills):
+        for ss in required_skills:
+            logger.debug("Checking for '{skill}'".format(skill=ss))
+            if not satisfied.has_key(ss):
+                return False
+        logger.debug("all satisfied for {0}".format(required_skills))
+        return True
+
+    def get_required(required_skills):
+        required_skills = required_skills.strip()
+        if required_skills:
+            required_skills = [req.strip()
+                               for req in required_skills.split('|')]
+        else:
+            required_skills = []
+        return required_skills
+
+    def satisfy(row):
+        logger.debug("all satisfied for {0}".format(row))
+        ordered.append(row)
+        skill_name = row[1][name_index]
+        satisfied[skill_name] = True
+        for sk in unsatisfied.pop(skill_name, []):
+            if all_satisfied(get_required(sk[1][required_index])):
+                satisfy(sk)
+
+    for row in rows:
+        required_skills = get_required(row[1][required_index])
+
+        if all_satisfied(required_skills):
+            satisfy(row)
+        else:
+            for required in required_skills:
+                unsat = unsatisfied.setdefault(
+                    required, [])
+                unsat.append(row)
+
+    # If still unsatisfied, just append them.
+    unsatisfied_values = unsatisfied.values()
+    if unsatisfied_values:
+        logger.debug("Unsatisfied values left")
+        ordered.extend([row for ll in unsatisfied_values for row in ll])
+
+    return ordered
+
+
 def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
     data_type = reader.next()
@@ -786,12 +853,16 @@ def import_text(data):
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
 
     changed_models = set()
+    rows = enumerate(reader)
+    if modelcls == sheet.models.Skill:
+        rows = sort_by_dependencies(header, rows)
 
-    for line, row in enumerate(reader):
+    for (line, row) in rows:
         logger.debug('columns: {0}'.format(len(row)))
         if len(row) < len(header):
             logger.info("Ignoring too short row: {0}".format(row))
             continue
+        tag = line
         mdl = None
         fields = {}
         for (hh, index) in zip(header, range(len(header))):
@@ -859,13 +930,25 @@ def import_text(data):
                     if not value:
                         continue
                     ll = []
+
+                    def is_self_loop(cls, field):
+                        if cls == field.rel.to and fields['name'] == name:
+                            return True
+                        else:
+                            return False
+
                     for name in value.split('|'):
                         name = name.strip()
+                        # Useless, and broken, to add a requirement to self.
+                        if is_self_loop(modelcls, field):
+                            continue
+
                         try:
                             obj = field.rel.to.objects.get(name=name)
                         except field.rel.to.DoesNotExist:
-                            raise ValueError, ("Requirement `%s' does not "
-                                               "exist." % name)
+                            raise ValueError, (
+                                "Requirement `{req}' for line {line} "
+                                "does not exist.".format(req=name, line=tag))
                         ll.append(obj)
                     value = ll
                     m2m_values[field_name] = value
