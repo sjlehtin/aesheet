@@ -4,14 +4,14 @@
   <tr>
     <th></th>
     <th>ROF</th>
-    {% for act in char.ranged_actions %}
+    {% for act in char.firearm_actions %}
     <th>{{ act }}</th>
     {% endfor %}
     <th colspan="4">Attack</th>
     <th>S/M/L</th>
   </tr>
 
-  {% for item in char.ranged_weapons %}
+  {% for item in char.firearms %}
   <tr>
     <td class="weapon name">
     <div class="remove-container">

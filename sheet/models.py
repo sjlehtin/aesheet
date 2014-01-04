@@ -733,6 +733,12 @@ class WeaponQuality(BaseWeaponQuality):
     def __unicode__(self):
         return self.name
 
+def format_damage(num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
+    return u"%sd%s%s/%d%s" % (
+            num_dice, dice,
+            "%+d" % extra_damage if extra_damage else "",
+            leth,
+            "%+d" % plus_leth if plus_leth else "")
 
 class WeaponDamage(object):
     def __init__(self, num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
@@ -758,6 +764,9 @@ class WeaponDamage(object):
         return self.num_dice * self.dice + self.extra_damage
 
     def __unicode__(self):
+        return format_damage(self.num_dice, self.dice, self.extra_damage,
+                             self.leth, self.plus_leth)
+
         if self.plus_leth:
             plus_leth_str = "%+d" % self.plus_leth
         else:
@@ -823,6 +832,9 @@ class BaseWeaponTemplate(BaseArmament, BaseDamager):
         abstract = True
 
 
+Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
+
+
 class RangedWeaponMixin(models.Model):
     type = models.CharField(max_length=5, default="P")
 
@@ -884,6 +896,11 @@ class Ammunition(ExportedModel, BaseDamager):
     # XXX low recoil -> rof + 0.2
     # XXX high recoil -> rof - 0.2
 
+    @property
+    def damage(self):
+        return format_damage(self.num_dice, self.dice, self.extra_damage,
+                             self.leth, self.plus_leth)
+
     @classmethod
     def dont_export(cls):
         return ['firearm']
@@ -908,6 +925,14 @@ class Firearm(models.Model):
 
     def roa(self):
         return self.base.roa
+
+    def ranges(self):
+        return Range(range_s=self.base.range_s,
+                     range_m=self.base.range_m,
+                     range_l=self.base.range_l)
+
+    def damage(self):
+        return self.ammo.damage
 
     @property
     def to_hit(self):
@@ -1090,9 +1115,6 @@ class Weapon(ExportedModel):
         if self.quality.name != "Normal":
             quality = self.quality
         return u"%s %s" % (quality, self.base)
-
-
-Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
 
 class RangedWeapon(ExportedModel):

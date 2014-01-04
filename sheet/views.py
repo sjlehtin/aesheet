@@ -243,11 +243,7 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
         return self.sheet.rof(self.item)
 
     def skill_checks(self):
-        ll = [Action._make(xx) for xx in izip_longest(
-                self.sheet.ranged_actions,
-                self.sheet.ranged_skill_checks(self.item))]
-        logger.info("Checks: %s" % ll)
-        return ll
+        return self.sheet.ranged_skill_checks(self.item)
 
     def ranges(self):
         try:
@@ -279,9 +275,6 @@ class FirearmWrap(RemoveWrap, SkilledMixin):
 
     def initiatives(self):
         return self.sheet.initiatives(self.item)
-
-    def damage(self):
-        return self.sheet.damage(self.item)
 
 
 class SkillWrap(RemoveWrap):
