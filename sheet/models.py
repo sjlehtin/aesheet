@@ -896,7 +896,7 @@ class Ammunition(ExportedModel, BaseDamager):
 
     tech_level = models.ForeignKey(TechLevel)
 
-    rof_modifier = models.DecimalField(default=0, max_digits=2,
+    rof_modifier = models.DecimalField(default=0, max_digits=4,
                                        decimal_places=2)
 
     # XXX low recoil -> rof + 0.2
