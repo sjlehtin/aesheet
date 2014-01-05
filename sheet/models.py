@@ -24,12 +24,18 @@ SIZE_CHOICES = (
     )
 
 def roundup(dec):
+    """
+    Works like Excel ROUNDUP, rounds the number away from zero.
+    """
     if dec < 0:
         return int(math.floor(dec))
     else:
         return int(math.ceil(dec))
 
 def rounddown(dec):
+    """
+    Works like Excel ROUNDDOWN, rounds the number toward zero.
+    """
     if dec < 0:
         return int(math.ceil(dec))
     else:
@@ -1488,13 +1494,13 @@ class Sheet(models.Model):
             if roa > 2 * act and act < 1:
                 # House Rules, initiative, p. 8, initiatives when target
                 # acquired and weapon readied in a previous turn.
-                inits.append(max(readied_base_i, bi) + max(target_i + 3, 0))
+                inits.append(max(readied_base_i, bi) + min(target_i + 3, 0))
             else:
                 # If the action is less than one, we use the first.
                 action_index = roundup(act) - 1
                 inits.append(bi_multipliers[action_index] * bi + target_i)
 
-        return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
+        return map(lambda xx: int(round(xx + self.base_initiative)), inits)
 
     def initiatives(self, weapon, use_type=FULL):
         return self._initiatives(self.roa(weapon, use_type=use_type))
@@ -1622,7 +1628,10 @@ class Sheet(models.Model):
         # Pad actions with Nones where an action is not available.
         return [Action._make(xx)
                 for xx in itertools.izip_longest(
-                    actions, checks, self._initiatives(roa, actions))]
+                    actions, checks, self._initiatives(
+                    roa, actions,
+                    readied_base_i=-1,
+                    target_i=weapon.base.target_initiative))]
 
     def firearm_skill_checks(self, weapon):
         return self.ranged_skill_checks(weapon,
