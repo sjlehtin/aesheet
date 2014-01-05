@@ -1,5 +1,10 @@
 # encoding: utf-8
 
+import csv
+import StringIO
+import logging
+import itertools
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
@@ -7,18 +12,17 @@ from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkillForm, AddXPForm
 import sheet.forms as forms
-import sheet.views, sheet.models
+import sheet.views
+import sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
 import factories
 import django.db
 from django.conf import settings
-import csv
-import StringIO
-
-import logging
+from collections import namedtuple
 
 logger = logging.getLogger(__name__)
+
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
@@ -252,11 +256,60 @@ class FirearmTestCase(TestCase):
         self.sheet = factories.SheetFactory(character__campaign__name="MR")
         self.ammo = factories.AmmunitionFactory(label="9Pb",
                                                 type='FMJ')
-        self.unsuitable_ammo = factories.AmmunitionFactory(label="50BMG",
+        self.unsuitable_ammo = factories.AmmunitionFactory(label="7.68x39",
                                                            type='FMJ')
+        factories.AmmunitionFactory(label="5.56Nto",
+                                    type='FMJ')
+        factories.AmmunitionFactory(label="12ga.",
+                                    type='00Buck')
         factories.BaseFirearmFactory(name="Glock 19",
                                      roa=2.89,
                                      ammunition_types=('9Pb', '9Pb+'))
+
+        # Note, stats are made to match classic sheet for cross-checking
+        # purposes.  Some things might be different in up-to-date weapon
+        # sheets.
+        factories.BaseFirearmFactory(name="SAKO RK95",
+                                     roa=2.78,
+                                     target_initiative=-4,
+                                     draw_initiative=-5,
+                                     range_s=50,
+                                     range_m=150,
+                                     range_l=300,
+                                     autofire_rpm=650,
+                                     autofire_class="C",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('5.56Nto',))
+
+        factories.BaseFirearmFactory(name="M29 (OICW)",
+                                     roa=3.6,
+                                     target_initiative=-4,
+                                     draw_initiative=-5,
+                                     range_s=85,
+                                     range_m=200,
+                                     range_l=350,
+                                     autofire_rpm=800,
+                                     autofire_class="A",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('7.62x39',))
+
+        factories.BaseFirearmFactory(name="Pancor Jackhammer",
+                                     roa=1.7,
+                                     target_initiative=-2,
+                                     draw_initiative=-5,
+                                     range_s=40,
+                                     range_m=75,
+                                     range_l=110,
+                                     autofire_rpm=240,
+                                     autofire_class="E",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('12ga.',))
+
+    def _add_skill(self, skill_name, level=0):
+        return factories.CharacterSkillFactory(
+                    character=self.sheet.character,
+                    skill=factories.SkillFactory(name=skill_name),
+                    level=level)
 
     def test_basic(self):
         form = forms.AddFirearmForm(instance=self.sheet,
@@ -291,10 +344,7 @@ class FirearmTestCase(TestCase):
         self.sheet.firearms.add(firearm)
 
         if level is not None:
-            cs = factories.CharacterSkillFactory(
-                character=self.sheet.character,
-                skill=factories.SkillFactory(name="Pistol"),
-                level=level)
+            cs = self._add_skill("Pistol", level)
             self.assertEqual(cs.level, level)
 
         if expected_rof is not None:
@@ -318,30 +368,176 @@ class FirearmTestCase(TestCase):
                       (6, 55), (7, 51), (8, 46)],
             expected_rof=4.33)
 
+    def test_fit_counter_for_rof_penalties_single_fire(self):
+        self.sheet.character.cur_fit = 90
+        self.sheet.character.save()
+        self.test_single_fire_skill_checks_unskilled(
+            level=0,
+            expected=[(0.5, 53), (1, 46), (2, 43), (3, 43), (4, 43), (5, 38)])
+
+    def verify_burst_checks(self, firearm, expected):
+        for (burst, exc) in zip(
+                self.sheet.firearm_burst_fire_skill_checks(firearm),
+                expected):
+            expected_action = exc[0]
+            expected_init = exc[1]
+            expected_checks = exc[2]
+
+            self.assertEqual(burst.initiative, expected_init)
+            self.assertEqual(burst.action, expected_action)
+
+            self.assertListEqual(burst.checks, expected_checks)
+
+        self.assertEqual(
+            len(self.sheet.firearm_burst_fire_skill_checks(firearm)),
+            len(expected))
+
     def test_burst_fire_skill_checks(self):
-        pass
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        expected = [[0.5, +7, [53, 50, 44, 35, 23]],
+                    [1, +3 , [46, 43, 37, 28, 16]],
+                    [2, -8, [36, 33, 27, 18 , 6]],
+                    [3, -4, [22, 19, 13, 4, -8]],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
 
     def test_autofire_penalty_for_burst_fire(self):
         """
         There should be -10 penalty for burst fire without the autofire skill.
         """
+        self._add_skill("Long guns")
+
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        expected = [[0.5, +7, [43, 40, 34, 25, 13]],
+                    [1, +3, [36, 33, 27, 18, 6]],
+                    [2, -8, [26, 23, 17, 8, -4]],
+                    [3, -4, [12, 9, 3, -6, -18]],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
+
+    def test_low_rpm_burst_fire_check(self):
+        """
+        There should be less checks per "column" with a low-RPM gun.
+        Also differs in autofire class.
+        """
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        firearm = factories.FirearmFactory(base__name="Pancor Jackhammer",
+                                           ammo__label='12ga.',
+                                           ammo__type='00Buck')
+        self.sheet.firearms.add(firearm)
+
+        expected = [[0.5, +8, [53, 48, None, None, None]],
+                    [1, +4 , [43, 38, None, None, None]],
+                    [2, -14, [23, 18, None, None, None]],
+                    [3, None, [None]*5],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
+
+    Expected = namedtuple("Exp", ["length", "first", "last"])
+
+    def verify_sweep_fire_checks(self, af_class, check, firearm, fit_counter=0):
+        # There should be 4 different categories of sweeps.
+        self.assertEqual(
+            len(self.sheet.firearm_sweep_fire_skill_checks(firearm)),
+            4)
+        check_5 = check + 5 - 10
+        check_10 = check + 10 - 10
+        check_15 = check + 15 - 10
+        check_20 = check + 20 - 10
+        expected = [self.Expected(length=4, first=check_5,
+                                  last=check_5 + 17 * af_class + fit_counter),
+                    self.Expected(length=8, first=check_10,
+                                  last=check_10 + 35 * af_class + fit_counter),
+                    self.Expected(length=12, first=check_15,
+                                  last=check_15 + 53 * af_class + fit_counter),
+                    self.Expected(length=16, first=check_20,
+                                  last=check_20 + 71 * af_class + fit_counter),
+        ]
+        for exp, sweep in itertools.izip_longest(
+                expected,
+                self.sheet.firearm_sweep_fire_skill_checks(firearm)):
+            self.assertEqual(exp.length, len(sweep.checks))
+            self.assertEqual(exp.first, sweep.checks[0])
+            self.assertEqual(exp.last, sweep.checks[-1])
 
     def test_sweep_fire_skill_checks(self):
         """
         There should be -10 penalty for sweep fire with the autofire skill.
         """
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        check = self.sheet.eff_dex
+        af_class = -3 # C
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm)
 
     def test_autofire_penalty_for_sweep_fire(self):
         """
         There should be -20 penalty for sweep fire without the autofire skill.
         """
-        pass
+        self._add_skill("Long guns")
 
-    def test_fit_counter_for_rof_penalties_single_fire(self):
-        pass
+        check = self.sheet.eff_dex - 10
+        af_class = -3 # C
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm)
 
     def test_fit_counter_for_rof_penalties_burst_fire(self):
-        pass
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+        self.sheet.character.cur_fit = 90
+        self.sheet.character.save()
+
+        check = self.sheet.eff_dex
+        af_class = -3 # C
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm,
+                                      fit_counter=15)
+
+    def test_sweep_fire_skill_checks_class_a(self):
+        """
+        There should be -10 penalty for sweep fire with the autofire skill.
+        """
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        check = self.sheet.eff_dex
+        af_class = -1 # A
+        firearm = factories.FirearmFactory(base__name="M29 (OICW)",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm)
 
 
 class FirearmImportExportTestcase(TestCase):

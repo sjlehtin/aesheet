@@ -1469,6 +1469,7 @@ class Sheet(models.Model):
     actions = [xx/2.0 for xx in range(1, 10, 1)]
     ranged_actions = [0.5, 1, 2, 3, 4, 5]
     firearm_actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    firearm_burst_fire_actions = [0.5, 1, 2, 3, 4]
 
     def max_attacks(self, roa):
         return min(int(math.floor(roa * 2)), 9)
@@ -1586,8 +1587,18 @@ class Sheet(models.Model):
         mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
+    def weapon_skill_check(self, weapon):
+        # skill level/unskilled.
+        cs = self.character.get_skill(weapon.base.base_skill)
+        if cs is not None:
+            base_skill = self.eff_dex + cs.level * 5
+        else:
+            base_skill = self.eff_dex / 2.0
+        return base_skill
+
     def ranged_skill_checks(self, weapon, actions=ranged_actions,
-                            extra_action_modifier=10):
+                            extra_action_modifier=10,
+                            counter_penalties=True):
         """
         extra_action_modifier is used to derive the check for actions exceeding
         the ROA.
@@ -1602,14 +1613,7 @@ class Sheet(models.Model):
                 return roa / act
             return 0
 
-        modifiers = 0
-
-        # skill level/unskilled.
-        cs = self.character.skills.filter(skill=weapon.base.base_skill)
-        if cs.count() > 0:
-            base_skill = self.eff_dex + cs[0].level * 5
-        else:
-            base_skill = self.eff_dex / 2.0
+        base_skill = self.weapon_skill_check(weapon)
 
         logging.info("ROF %s" % roa)
         checks = [check_mod_from_action_index(act)
@@ -1620,47 +1624,138 @@ class Sheet(models.Model):
         def counter_penalty(penalty):
             return self._counter_penalty(penalty, self.eff_fit)
 
-        checks = map(counter_penalty, checks)
+        if counter_penalties:
+            checks = map(counter_penalty, checks)
         base_skill = base_skill + weapon.to_hit
 
         checks = [int(round(xx + base_skill)) for xx in checks]
 
         # Pad actions with Nones where an action is not available.
-        return [Action._make(xx)
-                for xx in itertools.izip_longest(
+        return [Action(action=act, check=check,
+                       initiative=(init if check is not None else None))
+                for (act, check, init) in itertools.izip_longest(
                     actions, checks, self._initiatives(
                     roa, actions,
                     readied_base_i=-1,
                     target_i=weapon.base.target_initiative))]
 
-    def firearm_skill_checks(self, weapon):
+    def firearm_skill_checks(self, weapon, actions=None,
+                             counter_penalties=True):
+        if actions is None:
+            actions = self.firearm_actions
         return self.ranged_skill_checks(weapon,
-                                        actions=self.firearm_actions,
-                                        extra_action_modifier=15)
+                                        actions=actions,
+                                        extra_action_modifier=15,
+                                        counter_penalties=counter_penalties)
+
+    _autofire_classes = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5}
+
+    def firearm_burst_fire_skill_checks(self, weapon):
+        single_fire_actions = []
+        # Map burst fire actions to respective single fire actions to get the
+        # base skill check.
+        for act in self.firearm_burst_fire_actions:
+            if act >= 1:
+                act = 2*act - 1
+            single_fire_actions.append(act)
+
+        logger.debug("Burst fire actions mapped to single-fire actions: "
+                     "{acts}".format(acts=single_fire_actions))
+        checks = self.firearm_skill_checks(weapon,
+                                           actions=single_fire_actions,
+                                           counter_penalties=False)
+
+        burst_multipliers = [0, 1, 3, 6, 10]
+        burst_modifiers = [self._autofire_classes[weapon.base.autofire_class] * mod
+                           for mod in burst_multipliers]
+        # XXX Replace modifiers from the end with None if the RPM of the weapon
+        # is not enough for the obtained number of hits.
+
+        if not self.character.has_skill("Autofire"):
+            autofire_penalty = -10
+        else:
+            autofire_penalty = 0
+
+        Burst = namedtuple('Burst', ["action", "initiative", "checks"])
+
+        max_hits = int(min(weapon.base.autofire_rpm / 120, 5))
+
+        bursts = []
+        # Remap the actions to burst actions.
+        for (act, cc) in itertools.izip_longest(
+                                     self.firearm_burst_fire_actions,
+                                     checks):
+            burst = []
+            logger.debug("Processing check: {check}".format(check=cc))
+            for ii, burst_mod in zip(range(max_hits), burst_modifiers):
+                if cc.check is not None:
+                    # XXX Apply autofire penalty (not counterable).
+                    # XXX Counter penalties with high FIT.
+                    check = cc.check + burst_mod + autofire_penalty
+                else:
+                    check = None
+                burst.append(check)
+            bursts.append(Burst(action=act, initiative=cc.initiative,
+                                checks=list(itertools.islice(
+                                    itertools.chain(burst,
+                                                    itertools.repeat(None)),
+                                    0, 5))))
+        return bursts
+
+    def firearm_sweep_fire_skill_checks(self, weapon):
+        klass = self._autofire_classes[weapon.base.autofire_class]
+
+        check = self.weapon_skill_check(weapon)
+
+        Sweep = namedtuple('Sweep', ["rounds", "checks"])
+
+        if not self.character.has_skill("Autofire"):
+            autofire_penalty = -20
+        else:
+            autofire_penalty = -10
+
+        def burst_check(iter, sweep_bonus):
+            penalty_multiplier = 0
+            for ii in iter:
+                penalty_multiplier += ii
+                yield (self._counter_penalty(sweep_bonus +
+                                             penalty_multiplier * klass,
+                                             self.eff_fit) +
+                       autofire_penalty +
+                       check)
+
+        return [Sweep(rounds=5, checks=list(burst_check(
+                    [0, 2, 5, 10], 5))),
+                Sweep(rounds=10, checks=list(burst_check(
+                    [0, 1, 2, 2, 5, 5, 10, 10], 10))),
+                Sweep(rounds=15, checks=list(burst_check(
+                    [0, 1, 1, 2, 2, 2, 5, 5, 5, 10, 10, 10], 15))),
+                Sweep(rounds=20, checks=list(burst_check(
+                    [0, 1, 1, 1, 2, 2, 2, 2, 5, 5, 5, 5, 10, 10, 10, 10], 20)))]
 
     def ranged_ranges(self, weapon):
         return weapon.ranges(self)
 
     @property
-    def _cc_eff_fit(self):
+    def _cc_bonus_fit(self):
         return (self.eff_fit +
                 (self.character.skill_level("Martial arts expertise") or 0) * 5
                 - 45)
 
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
-        dmg.add_damage(rounddown(self._cc_eff_fit /
+        dmg.add_damage(rounddown(self._cc_bonus_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self._cc_eff_fit /
+        dmg.add_leth(rounddown(self._cc_bonus_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
-        dmg.add_damage(rounddown(self._cc_eff_fit /
+        dmg.add_damage(rounddown(self._cc_bonus_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self._cc_eff_fit /
+        dmg.add_leth(rounddown(self._cc_bonus_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
