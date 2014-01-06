@@ -610,8 +610,9 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = { 'char': SheetView(sheet),
-          'TODO': TODO,
           'notes': notes,
+          'sweep_fire_available': any([wpn.has_sweep_fire()
+                                       for wpn in sheet.firearms.all()]),
           }
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',

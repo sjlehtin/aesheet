@@ -944,6 +944,9 @@ class Firearm(models.Model):
     def damage(self):
         return self.ammo.damage
 
+    def has_sweep_fire(self):
+        return bool(self.base.autofire_rpm)
+
     @property
     def to_hit(self):
         # XXX scopes etc
