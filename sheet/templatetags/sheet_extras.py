@@ -55,7 +55,6 @@ def render_burst_fire(weapon):
 
     out.append("<thead>")
     out.append("<tr>")
-    #out.append("<th></th>")
     out.append("<th>Leth</th>")
     out.append("<th>Loc</th>")
     for act in acts:
@@ -63,7 +62,6 @@ def render_burst_fire(weapon):
     out.append("</tr></thead>")
 
     out.append("<tfoot><tr>")
-    #out.append("<th></th>")
     out.append("<th></th>")
     for init in inits:
         out.append("<th>{init}</th>".format(
@@ -73,7 +71,6 @@ def render_burst_fire(weapon):
     lethalities = ["{0:+d}".format(ii) for ii in [0, -2, 2, 0, -2]]
     hit_locations = ["{0:+d}".format(ii) for ii in [0, 0, 0, -1, -1]]
     out.append("<tbody>")
-    #out.append(u"""<tr><td rowspan="6" class="weapon-name">{weapon}</td></tr>""".format(weapon=unicode(weapon.base.name)))
 
     for row in zip(lethalities, hit_locations, *checks):
         out.append("<tr>")
