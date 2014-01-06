@@ -63,6 +63,7 @@ def render_burst_fire(weapon):
 
     out.append("<tfoot><tr>")
     out.append("<th></th>")
+    out.append("<th></th>")
     for init in inits:
         out.append("<th>{init}</th>".format(
             init="{0:+d}".format(init) if init else ""))
