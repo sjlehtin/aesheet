@@ -1651,6 +1651,10 @@ class Sheet(models.Model):
     _autofire_classes = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5}
 
     def firearm_burst_fire_skill_checks(self, weapon):
+        if not weapon.base.autofire_rpm:
+            # no burst fire with this weapon.
+            return
+
         single_fire_actions = []
         # Map burst fire actions to respective single fire actions to get the
         # base skill check.
@@ -1703,6 +1707,10 @@ class Sheet(models.Model):
         return bursts
 
     def firearm_sweep_fire_skill_checks(self, weapon):
+        if not weapon.base.autofire_rpm:
+            # no sweep fire with this weapon.
+            return
+
         klass = self._autofire_classes[weapon.base.autofire_class]
 
         check = self.weapon_skill_check(weapon)
