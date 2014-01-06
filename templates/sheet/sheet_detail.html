@@ -7,7 +7,7 @@
 
 {% block content %}
     <div class="row">
-<div class="col-md-8">
+<div class="col-md-9">
 <h1>{{ char.name }}</h1>
 {{ char.race }}
 {{ char.occupation }}
@@ -109,7 +109,7 @@ XP: {{ char.xp_used_stats }} +
 
 <div class="armor">
   {{ char.helm }} + {{ char.armor }}
-  <table>
+  <table class="">
     <thead>
       <tr><th></th><th></th>
           <th title="Protection against piercing damage">P</th>
@@ -196,7 +196,7 @@ XP: {{ char.xp_used_stats }} +
 
 </div>
 
-    <div id="skill-pane" class="col-md-4">
+    <div id="skill-pane" class="col-md-3">
         <div class="skills">
             <h3>Skills</h3>
             {% with skills=char.skills %}
