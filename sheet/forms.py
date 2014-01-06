@@ -259,7 +259,8 @@ class AddSkillForm(RequestForm):
             queryset = queryset.filter(
                tech_level__in=self.instance.campaign.tech_levels.all())
         self.fields['skill'] = forms.ModelChoiceField(queryset=queryset)
-
+        self.fields.keyOrder = ['skill', 'level']
+        
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
