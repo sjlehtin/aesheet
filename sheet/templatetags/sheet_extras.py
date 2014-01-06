@@ -30,6 +30,7 @@ def sum_sp_cost(skills):
 def active(request, url):
     return "active" if request.path.startswith(url) else ""
 
+
 @register.filter
 def padnone(value, arg):
     if len(value) >= int(arg):
@@ -37,12 +38,9 @@ def padnone(value, arg):
     return itertools.islice(itertools.chain(value, itertools.repeat(None)),
                             0, int(arg))
 
+
 @register.simple_tag
 def render_burst_fire(weapon):
-    """
-    Include sheet/sheet_detail/burst_header.html at the top of the table.
-    """
-
     bursts = weapon.burst_fire_skill_checks()
     if not bursts:
         return ""
@@ -51,7 +49,6 @@ def render_burst_fire(weapon):
     checks = [burst.checks for burst in bursts]
 
     out = []
-
 
     out.append("<thead>")
     out.append("<tr>")
