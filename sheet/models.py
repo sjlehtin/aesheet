@@ -121,6 +121,17 @@ def get_by_campaign(model_class, accessor):
     return items.values()
 
 
+class SkillLookup(object):
+    """
+    Allow skill lookup from templates more easily.
+    """
+    def __init__(self, character):
+        self.character = character
+
+    def __getattr__(self, skill):
+        return self.character.get_skill(skill)
+
+
 class Character(models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
@@ -196,6 +207,10 @@ class Character(models.Model):
 
     class Meta:
         ordering = ['name']
+
+    def __init__(self, *args, **kwargs):
+        super(Character, self).__init__(*args, **kwargs)
+        self.skill_lookup = SkillLookup(self)
 
     def get_ability(self, abilities, ability, accessor):
         """

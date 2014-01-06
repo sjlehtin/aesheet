@@ -54,7 +54,12 @@
         {% if sweeps %}
     <tbody>
     <tr>
-        <td rowspan="5">{{ item }}</td>
+        <td rowspan="5">
+            {{ item }}
+            {% if not char.skill_lookup.Autofire %}
+                <div class="unskilled">Unskilled</div>
+            {% endif %}
+        </td>
     </tr>
     {% for sweep in sweeps %}
         <tr>
