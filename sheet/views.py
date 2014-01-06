@@ -80,11 +80,15 @@ Minor:
 
 Firearms:
 
-- burst fire
-- sweep fire
-- low/hi-recoil ammo
++ burst fire
++ sweep fire
+- low/hi-recoil ammo, or probably rof calculation from weapon and
+  ammo based on recoil.
 - using two Berettas akimbo.  Check rule situation regarding instinctive fire.
 - firearms in CC.
+- some weapons with autofire do not have sweep fire enabled.
+- some weapons have restricted burst (restricted to 2 or 3 shots).
+- adding weapon with inline form does not allow setting ammo types.
 
 Priority list by JW:
 
