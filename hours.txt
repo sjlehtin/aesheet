@@ -59,4 +59,5 @@ mon 30.12.2013 6h Dev server installation, firearms.
 wed 1.1.2014 2h Firearms.
 fri 3.1.2014 9h Firearms, tests.
 sat 4.1.2014 6h Firearms, tests, importing.
-sun 5.1.2014 6h Firearms sweep fire.
+sun 5.1.2014 9h Firearms sweep fire.
+mon 6.1.2014 1h Firearms sweep fire.
