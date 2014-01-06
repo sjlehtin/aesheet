@@ -130,15 +130,18 @@ import django.db
 
 logger = logging.getLogger(__name__)
 
+
 def characters_index(request):
     return render_to_response('sheet/characters_index.html',
                               { 'campaigns': Character.get_by_campaign()},
                               context_instance=RequestContext(request))
 
+
 def sheets_index(request):
     return render_to_response('sheet/sheets_index.html',
                               { 'campaigns': Sheet.get_by_campaign()},
                               context_instance=RequestContext(request))
+
 
 class GenWrapper(object):
     def __init__(self, item, type=None):
@@ -153,6 +156,7 @@ class GenWrapper(object):
 
     def __unicode__(self):
         return unicode(self.item)
+
 
 class RemoveWrap(object):
     def __init__(self, item, type=None):
@@ -262,6 +266,13 @@ class FirearmWrap(RemoveWrap, SkilledMixin):
 
     def target_initiative(self):
         return self.item.base.target_initiative
+
+    def burst_fire_skill_checks(self):
+        return self.sheet.firearm_burst_fire_skill_checks(self.item)
+
+    def sweep_fire_skill_checks(self):
+        return self.sheet.firearm_sweep_fire_skill_checks(self.item)
+
 
 class RangedWeaponWrap(FirearmWrap):
     def skill_checks(self):

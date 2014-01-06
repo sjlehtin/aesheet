@@ -51,6 +51,7 @@ div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 div.armor table { 
 border: 1px dotted gray;
 border-collapse:collapse;
+    font-size: 85%;
 }
 
 div.armor th {
@@ -80,18 +81,22 @@ margin: 0px;
 }
 
 table.combat {
-border: 1px dotted gray;
 border-collapse:collapse;
 font-size: 85%;
 }
 
 table.combat th {
-font-weight: bold;
-text-align: center;
-padding: 2px;
-border: 1px gray;
-border-style: hidden hidden dotted hidden;
-margin: 0px;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px;
+    border: 0px;
+    margin: 0px;
+}
+
+table.combat tbody {
+    border: 1px gray;
+    border-top-style: dotted;
+    border-bottom-style: dotted;
 }
 
 table.combat td {

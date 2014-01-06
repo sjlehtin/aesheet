@@ -1,5 +1,6 @@
 {% if char.firearms %}
     {% include "sheet/sheet_detail/ranged_attacks.html" with actions=char.firearm_actions weapons=char.firearms %}
+    {% include "sheet/sheet_detail/firearm_sweep_fire.html" with weapons=char.firearms %}
 {% else %}
 <p>No firearms.</p>
 {% endif %}
