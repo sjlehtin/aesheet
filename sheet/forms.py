@@ -24,7 +24,7 @@ class ImportForm(forms.Form):
 
 EditSheetForm =  modelform_factory(sheet.models.Sheet, exclude=(
     'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects',
-    'miscellaneous_items'))
+    'miscellaneous_items', 'firearms'))
 
 
 def pretty_name(name):
@@ -260,7 +260,7 @@ class AddSkillForm(RequestForm):
                tech_level__in=self.instance.campaign.tech_levels.all())
         self.fields['skill'] = forms.ModelChoiceField(queryset=queryset)
         self.fields.keyOrder = ['skill', 'level']
-        
+
     choices = range(0,8)
     choices = zip(choices, choices)
     level = forms.ChoiceField(choices=choices)
