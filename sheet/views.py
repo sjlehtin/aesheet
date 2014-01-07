@@ -2,13 +2,38 @@ TODO = """
 + = done
 - = not done
 
--- xl and e range dependent on user FIT (SM)
+Priority list by JW:
+
+- possibility to copy characters and sheets (mainly sheets), which will copy
+  also the underlying character.
+- character addition form layout for easier "intake" (group cur, starting
+  stats, show raises).
+- adding weapon inplace ("add row" functionality), instead of the large set of
+  controls.  Might already be sufficient with the condensed layout, verify with
+  JW.
 -- access controls
 --- marking sheet as only visible to self (SM)
 --- marking characters as only visible to self (SM)
     these should not show in the lists.
+
+
+- character mugshot upload (SM)
+- senses (SM)
+- movement chart (SM)
+- spell skill checks (SM)
+
+- Creating a new character should automatically create a sheet for that
+  character and redirect to edit the new character.
+
+- form errors should be highlighted, and if the form element is hidden, it
+  should be shown by default (errors in add forms can get hidden)
+-- form errorlist class should be highlighted.
+
+- you should be able to leave current stats empty on character creation,
+  in which case the stats would be filled in from the initial stats.
+
+-- xl and e range dependent on user FIT (SM)
 -- password change (SM)
-+ rest of the edges (if some are missing, can be added online)
 + wondrous items
 - inventory ?
 - magic item location (only one item to each location)
@@ -23,23 +48,14 @@ TODO = """
 + body
 -- recovery
 - code simplification
-+ reordering skills (with current ordering, not necessary).
-- character mugshot upload (SM)
-- senses (SM)
-- movement chart (SM)
 - save bonuses (M)
 - encumbrance breakdown (M)
-- spell skill checks (SM)
 - sheet styling
 
 - weapon maximum damage based on durability.
 
 - short description of spell effect (+50 FIT etc)
 - suspended weight
-
-+ when adding skills with imported CSV, the order of the rows matter.  Skills
-  that are prereqs for other skills must appear first in the list.  This could
-  be improved.
 
 - Basic skill checks:  Adding skills without any points (or reduced amount of
   points) allocated.  For example, Climbing B -> show skill check at half
@@ -49,13 +65,6 @@ TODO = """
 
 - Inserting None as skill cost to the sheet should work to allow resetting
   skill costs from CSV import.
-
-- form errors should be highlighted, and if the form element is hidden, it
-  should be shown by default (errors in add forms can get hidden)
--- form errorlist class should be highlighted.
-
-- Creating a new character should automatically create a sheet for that
-  character and redirect to edit the new character.
 
 - creating new objects should be ajaxiced and redirects should occur in a
   sensible manner.
@@ -67,39 +76,19 @@ TODO = """
 - free edges based on campaign (probably should think about race
   in this context, for FRP at least)
 
-NOTES on creating Jan:
-
-- you should be able to leave current stats empty on character creation,
-  in which case the stats would be filled in from the initial stats.
-
 Minor:
 
 - adding missing skills (helps in just allowing inserting primary skills
   and autofilling rest)
-+ modifying skill level with +/- (at least add to skill level)
 
 Firearms:
 
-+ burst fire
-+ sweep fire
-- low/hi-recoil ammo, or probably rof calculation from weapon and
-  ammo based on recoil.
 - using two Berettas akimbo.  Check rule situation regarding instinctive fire.
 - firearms in CC.
 - some weapons with autofire do not have sweep fire enabled.
 - some weapons have restricted burst (restricted to 2 or 3 shots).
 - adding weapon with inline form does not allow setting ammo types.
 
-Priority list by JW:
-
-- possibility to copy characters and sheets (mainly sheets), which will copy
-  also the underlying character.
-- character addition form layout for easier "intake" (group cur, starting
-  stats, show raises).
-- adding weapon inplace ("add row" functionality), instead of the large set of
-  controls.  Might already be sufficient with the condensed layout, verify with
-  JW.
-+ sheets to campaign order.
 """
 
 BUGS = """
