@@ -815,8 +815,6 @@ class BaseArmament(ExportedModel):
 
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
 
-    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
-
     bypass = models.IntegerField(default=0)
 
     durability = models.IntegerField(default=5)
@@ -849,6 +847,9 @@ class BaseDamager(models.Model):
 
 
 class BaseWeaponTemplate(BaseArmament, BaseDamager):
+
+    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+
     class Meta:
         abstract = True
 
@@ -860,9 +861,6 @@ class RangedWeaponMixin(models.Model):
     type = models.CharField(max_length=5, default="P")
 
     target_initiative = models.IntegerField(default=-2)
-
-    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
-                                      default=0.1)
 
     range_pb = models.IntegerField(blank=True, null=True)
     range_xs = models.IntegerField(blank=True, null=True)
@@ -892,6 +890,18 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
                                       choices=zip(_class_choices,
                                                   _class_choices))
 
+    stock = models.DecimalField(max_digits=4, decimal_places=2,
+                                default=1,
+                                help_text="Weapon stock modifier for recoil "
+                                          "calculation.  Larger is better.")
+
+    duration = models.DecimalField(max_digits=5, decimal_places=3,
+                                   default=0.1,
+                                   help_text="Modifier for recoil.  In "
+                                             "principle, time in seconds from "
+                                             "the muzzle break, whatever that "
+                                             "means.  Bigger is better.")
+
     def get_ammunition_types(self):
         """
         Return the accepted ammunition types for the firearm.
@@ -910,31 +920,36 @@ class Ammunition(ExportedModel, BaseDamager):
     label = models.CharField(max_length=20,
                              help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "
-                                       "and such")
+                                       "and such.")
     type = models.CharField(max_length=10,
                             help_text="Make of the ammo, such as "
-                                      "full metal jacket")
+                                      "full metal jacket.")
 
     tech_level = models.ForeignKey(TechLevel)
 
-    rof_modifier = models.DecimalField(default=0, max_digits=4,
-                                       decimal_places=2)
+    weight = models.DecimalField(decimal_places=3, max_digits=7,
+                                 help_text="Weight of a single round in "
+                                           "grams.  Used to calculate recoil.")
 
-    # XXX low recoil -> rof + 0.2
-    # XXX high recoil -> rof - 0.2
-
+    velocity = models.IntegerField(help_text="Velocity of the bullet at muzzle "
+                                             "in meters per second.  Used to "
+                                             "calculate recoil.")
     @property
     def damage(self):
         return format_damage(self.num_dice, self.dice, self.extra_damage,
                              self.leth, self.plus_leth)
+
+    def impulse(self):
+        return (float(self.weight)* self.velocity)/1000
 
     @classmethod
     def dont_export(cls):
         return ['firearm']
 
     def __unicode__(self):
-        return u"{label} {type}".format(label=self.label,
-                                        type=self.type)
+        return u"{label} {type} ({impulse:.2f})".format(label=self.label,
+                                                        type=self.type,
+                                                        impulse=self.impulse())
 
 
 class FirearmAmmunitionType(models.Model):
@@ -951,7 +966,18 @@ class Firearm(models.Model):
     ammo = models.ForeignKey(Ammunition)
 
     def roa(self):
-        return self.base.roa
+        """
+        Calculated based on ammo and base.
+        """
+        # Magic formula for ROF calculation.
+        recoil = self.ammo.impulse()/float(
+            self.base.duration * self.base.stock * (self.base.weight + 6))
+        logger.debug("impulse: {impulse}, recoil: {recoil}".format(
+            impulse=self.ammo.impulse(),
+            recoil=recoil))
+        rof = 30 / (recoil + 6)
+        logger.debug("rof: {rof}".format(rof=rof))
+        return rof
 
     def ranges(self, sheet):
         return self.base.ranges(sheet)
@@ -995,6 +1021,9 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
+
+    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0.1)
 
     @classmethod
     def dont_export(self):

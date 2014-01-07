@@ -227,7 +227,9 @@ class ItemHandling(TestCase):
 
     def test_add_firearm(self):
         ammo = factories.AmmunitionFactory(label="9Pb",
-                                                type='FMJ')
+                                           weight=7.5,
+                                           velocity=440,
+                                           type='FMJ')
         factories.BaseFirearmFactory(name="Glock 19",
                                      ammunition_types=('9Pb', '9Pb+'))
 
@@ -247,7 +249,8 @@ class ItemHandling(TestCase):
                                            args=[3]))
         self.assertContains(response, "No firearms.")
 
-        self.add_firearm_and_verify("Glock 19", ammo.pk, "Glock 19 w/ 9Pb FMJ")
+        self.add_firearm_and_verify("Glock 19", ammo.pk,
+                                    "Glock 19 w/ 9Pb FMJ (3.30)")
 
 
 class FirearmTestCase(TestCase):
@@ -255,51 +258,67 @@ class FirearmTestCase(TestCase):
         factories.CampaignFactory(name="MR", tech_levels=("all", "2K"))
         self.sheet = factories.SheetFactory(character__campaign__name="MR")
         self.ammo = factories.AmmunitionFactory(label="9Pb",
+                                                weight=7.5,
+                                                velocity=440,
                                                 type='FMJ')
-        self.unsuitable_ammo = factories.AmmunitionFactory(label="7.68x39",
+        self.unsuitable_ammo = factories.AmmunitionFactory(label="7.62x39",
+                                                           weight=8,
+                                                           velocity=715,
                                                            type='FMJ')
         factories.AmmunitionFactory(label="5.56Nto",
+                                    weight=3.6,
+                                    velocity=913,
                                     type='FMJ')
         factories.AmmunitionFactory(label="12ga.",
-                                    type='00Buck')
+                                    weight=41.3,
+                                    velocity=381,
+                                    type='1Buck')
         factories.BaseFirearmFactory(name="Glock 19",
-                                     roa=2.89,
+                                     duration=0.11,
+                                     stock=1,
+                                     weight=0.6,
                                      ammunition_types=('9Pb', '9Pb+'))
 
         # Note, stats are made to match classic sheet for cross-checking
         # purposes.  Some things might be different in up-to-date weapon
         # sheets.
         factories.BaseFirearmFactory(name="SAKO RK95",
-                                     roa=2.78,
                                      target_initiative=-4,
                                      draw_initiative=-5,
                                      range_s=50,
                                      range_m=150,
                                      range_l=300,
+                                     duration=0.1,
+                                     stock=1.2,
+                                     weight=3.7,
                                      autofire_rpm=650,
                                      autofire_class="C",
                                      base_skill__name="Long guns",
                                      ammunition_types=('5.56Nto',))
 
         factories.BaseFirearmFactory(name="M29 (OICW)",
-                                     roa=3.6,
                                      target_initiative=-4,
                                      draw_initiative=-5,
                                      range_s=85,
                                      range_m=200,
                                      range_l=350,
+                                     duration=0.1,
+                                     stock=1.25,
+                                     weight=6.3,
                                      autofire_rpm=800,
                                      autofire_class="A",
                                      base_skill__name="Long guns",
                                      ammunition_types=('7.62x39',))
 
         factories.BaseFirearmFactory(name="Pancor Jackhammer",
-                                     roa=1.7,
                                      target_initiative=-2,
                                      draw_initiative=-5,
                                      range_s=40,
                                      range_m=75,
                                      range_l=110,
+                                     duration=0.1,
+                                     stock=1.25,
+                                     weight=4.6,
                                      autofire_rpm=240,
                                      autofire_class="E",
                                      base_skill__name="Long guns",
@@ -317,8 +336,8 @@ class FirearmTestCase(TestCase):
                                           'item_quality': self.ammo.pk })
         self.assertTrue(form.is_valid())
         sheet = form.save()
-        self.assertEqual(unicode(sheet.firearms.all()[0]),
-                         "Glock 19 w/ 9Pb FMJ")
+        self.assertTrue(unicode(sheet.firearms.all()[0]).startswith(
+            "Glock 19 w/ 9Pb FMJ"))
 
     def test_ammo_validation(self):
         """
@@ -336,7 +355,7 @@ class FirearmTestCase(TestCase):
             expected_rof=None):
         # default case for unskilled.
         if expected is None:
-            expected = [(0.5, 32), (1, 24), (2, 22), (3, 16), (4, 9), (5, 2)]
+            expected = [(0.5, 32), (1, 24), (2, 22), (3, 15), (4, 8), (5, 1)]
 
         firearm = factories.FirearmFactory(base__name="Glock 19",
                                            ammo__label='9Pb',
@@ -365,8 +384,8 @@ class FirearmTestCase(TestCase):
         self.test_single_fire_skill_checks_unskilled(
             level=5,
             expected=[(0.5, 78), (1, 72), (2, 70), (3, 68), (4, 68), (5, 60),
-                      (6, 55), (7, 51), (8, 46)],
-            expected_rof=4.33)
+                      (6, 55), (7, 50), (8, 46)],
+            expected_rof=4.267)
 
     def test_fit_counter_for_rof_penalties_single_fire(self):
         self.sheet.character.cur_fit = 90
@@ -438,12 +457,12 @@ class FirearmTestCase(TestCase):
 
         firearm = factories.FirearmFactory(base__name="Pancor Jackhammer",
                                            ammo__label='12ga.',
-                                           ammo__type='00Buck')
+                                           ammo__type='1Buck')
         self.sheet.firearms.add(firearm)
 
         expected = [[0.5, +8, [53, 48, None, None, None]],
                     [1, +4 , [43, 38, None, None, None]],
-                    [2, -14, [23, 18, None, None, None]],
+                    [2, -14, [22, 17, None, None, None]],
                     [3, None, [None]*5],
                     [4, None, [None]*5]]
 
@@ -542,16 +561,16 @@ class FirearmTestCase(TestCase):
 
 class FirearmImportExportTestcase(TestCase):
     firearm_csv_data = """\
-"BaseFirearm",,,,,,,,,,,,,,,,,,,
-"name","description","notes","tech_level","draw_initiative","roa","bypass","durability","dp","weight","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
-"Glock 19",,,"2K",-3,2.89,0,5,10,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
+"BaseFirearm",,,,,,,,,,,,,,,,,,,,
+"name","description","notes","tech_level","draw_initiative","bypass","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
+"Glock 19",,,"2K",-3,0,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
 
 """
 
     ammo_csv_data = """\
-"Ammunition",,,,,,,,,
-"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","rof_modifier"
-,1,6,1,6,2,"9Pb+","FMJ","2K",0
+"Ammunition",,,,,,,,,,
+"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","weight","velocity"
+,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400
 
 """
 
