@@ -53,6 +53,9 @@ class AmmunitionFactory(factory.DjangoModelFactory):
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
+    weight = 5
+    velocity = 600
+
 
 class FirearmAmmunitionTypeFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.FirearmAmmunitionType
@@ -104,3 +107,16 @@ class FirearmFactory(factory.DjangoModelFactory):
 
     base = factory.SubFactory(BaseFirearmFactory)
     ammo = factory.SubFactory(AmmunitionFactory)
+
+    @factory.post_generation
+    def ammunition_types(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            for ammo_type in extracted:
+                FirearmAmmunitionTypeFactory(firearm=self.base,
+                                             short_label=ammo_type)
+        else:
+            FirearmAmmunitionTypeFactory(firearm=self.base,
+                                         short_label=self.ammo.label)

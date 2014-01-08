@@ -559,6 +559,60 @@ class FirearmTestCase(TestCase):
         self.verify_sweep_fire_checks(af_class, check, firearm)
 
 
+class BaseFirearmFormTestCase(TestCase):
+    def setUp(self):
+        self.tech_level = factories.TechLevelFactory(name='2K')
+        self.pistol = factories.SkillFactory(name="Pistol")
+
+    def _get_form(self, ammo_type, **extra):
+        form_kwargs = {'name': 'Glock 19', 'range_s': 15, 'range_m': 30,
+                       'range_l': 45, 'tech_level': self.tech_level.pk,
+                       'weight': 0.6, 'base_skill': self.pistol, 'bypass': -1,
+                       'dp': 10, 'durability': 5, 'duration': 0.1, 'stock': 1,
+                       'target_initiative': -1, 'type': "P",
+                       'ammo_types': ammo_type}
+
+        form = forms.CreateBaseFirearmForm(
+            data=form_kwargs, **extra)
+        return form
+
+    def test_invalid_ammo_types(self):
+
+        for ammo_type in ["9Pb,", "9Pb!", "[guug]"]:
+            form = self._get_form(ammo_type)
+            self.assertFalse(form.is_valid())
+
+    def test_ammo_types_saved(self):
+        """
+        Check that ammo_types field works.
+        """
+        form = self._get_form("9Pb+|9Pb")
+        self.assertTrue(form.is_valid())
+        firearm = form.save()
+        self.assertListEqual(sorted(firearm.get_ammunition_types()),
+                             [u"9Pb", u"9Pb+"])
+
+    def test_valid_ammo_types(self):
+
+        for ammo_type in ["12ga.", "12/70", "112LAW", "25-06", "7.62x53R"]:
+            form = self._get_form(ammo_type)
+            self.assertTrue(form.is_valid(),
+                            msg="{ammo_type} should be valid".format(
+                                ammo_type=ammo_type))
+
+    def test_changing_ammo_type(self):
+        firearm = factories.FirearmFactory(base__name="M29 (OICW)",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ')
+        self.assertEqual(firearm.base.get_ammunition_types(), [u"5.56Nto"])
+
+        form = self._get_form('7.62x39', instance=firearm.base)
+        new_firearm = form.save()
+
+        self.assertEqual(firearm.base.pk, new_firearm.pk)
+        self.assertEqual(new_firearm.get_ammunition_types(), [u"7.62x39"])
+
+
 class FirearmImportExportTestcase(TestCase):
     firearm_csv_data = """\
 "BaseFirearm",,,,,,,,,,,,,,,,,,,,

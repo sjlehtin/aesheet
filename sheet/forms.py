@@ -526,3 +526,33 @@ class AddXPForm(RequestForm):
             self.instance.save()
 
         return super(AddXPForm, self).save(commit=commit)
+
+
+class CreateBaseFirearmForm(forms.ModelForm):
+    ammo_types = forms.CharField(help_text="Accepted ammo types, "
+                                           "separated by '|'")
+
+    def clean_ammo_types(self):
+        ammo_types = self.cleaned_data.get('ammo_types')
+        if ammo_types:
+            ammo_types = ammo_types.split('|')
+            ammo_types = filter(None, [tok.strip() for tok in ammo_types])
+            for ammo_type in ammo_types:
+                if not re.match('^[.\w+/-]*$', ammo_type):
+                    raise forms.ValidationError, (
+                           "Invalid ammo type `{ammo_type}'".format(
+                               ammo_type=ammo_type))
+            return ammo_types
+
+    def save(self, commit=True):
+        instance = super(CreateBaseFirearmForm, self).save(commit=True)
+        if commit:
+            instance.ammunition_types.all().delete()
+            for ammo_type in self.cleaned_data.get('ammo_types'):
+                sheet.models.FirearmAmmunitionType.objects.create(
+                    firearm=instance,
+                    short_label=ammo_type)
+        return instance
+
+    class Meta:
+        model = sheet.models.BaseFirearm

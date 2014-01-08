@@ -111,6 +111,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 import django.db.models
 from django.views.generic import UpdateView, CreateView
 import sheet.models
+import sheet.forms
 import csv
 import StringIO
 from django.db.models.fields import FieldDoesNotExist
@@ -689,8 +690,8 @@ class AddRangedWeaponView(AddWeaponView):
 
 
 class AddFirearmView(AddWeaponView):
-    model = BaseFirearm
-
+    model = sheet.models.BaseFirearm
+    form_class = sheet.forms.CreateBaseFirearmForm
 
 class AddAmmunitionView(AddWeaponView):
     model = Ammunition
