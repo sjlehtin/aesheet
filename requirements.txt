@@ -7,3 +7,4 @@ django_webtest
 psycopg2
 gunicorn
 docopt
+PIL

@@ -47,7 +47,8 @@ CREATE_NAMES = ["add_sheet", "add_edge", "add_edge_level",
                 "add_armor_quality", "add_armor_special_quality", "add_weapon",
                 "add_weapon_template", "add_weapon_quality",
                 "add_weapon_special_quality", "add_ranged_weapon",
-                "add_ranged_weapon_template", "add_miscellaneous_item"]
+                "add_ranged_weapon_template", "add_miscellaneous_item",
+                "add_firearm", "add_ammunition"]
 
 CREATE_URLS = ["sheets/{0}/".format(name) for name in CREATE_NAMES]
 

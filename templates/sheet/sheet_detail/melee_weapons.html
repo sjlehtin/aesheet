@@ -1,5 +1,6 @@
 {% if char.weapons %}
 <table class="combat">
+<thead>
       <tr >
       <th />
       <th>ROA</th>
@@ -9,13 +10,14 @@
       <th colspan="5">Attack</th>
       <th colspan="4" class="defense">Defenses</th>
        </tr>
-
+</thead>
 {% comment %}
       * Add a note about already applied penalties and bonuses
         * wrong hand penalty for SEC
 {% endcomment %}
 
     {% for item in char.weapons %}
+        <tbody>
       <tr>
       <td class="weapon name" rowspan="3">
       <div class="remove-container">
@@ -43,7 +45,7 @@
            <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.full.initiatives %}
-           <td>{{ init|stringformat:"+d" }}</td>
+           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.full.damage }}</td>
         {% for init in item.full.defense_initiatives %}
@@ -57,7 +59,7 @@
            <td class="tohit">{{ act }}</td>
         {% endfor %}
         {% for init in item.pri.initiatives %}
-           <td>{{ init|stringformat:"+d" }}</td>
+           <td class="attack initiative">{{ init|stringformat:"+d" }}</td>
         {% endfor %}
         <td>{{ item.pri.damage }}</td>
         {% for init in item.pri.defense_initiatives %}
@@ -79,6 +81,7 @@
         {% endfor %}
         <td class="defense damage">{{ item.sec.defense_damage }}</td>
         </tr>
+        </tbody>
     {% endfor %}
 </table>
 {% else %}

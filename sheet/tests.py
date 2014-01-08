@@ -1,18 +1,28 @@
 # encoding: utf-8
 
+import csv
+import StringIO
+import logging
+import itertools
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkillForm, AddXPForm
-import sheet.views, sheet.models
+import sheet.forms as forms
+import sheet.views
+import sheet.models
 from django_webtest import WebTest
 import django.contrib.auth as auth
 import factories
-import logging
+import django.db
+from django.conf import settings
+from collections import namedtuple
 
 logger = logging.getLogger(__name__)
+
 
 class ItemHandling(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
@@ -22,8 +32,9 @@ class ItemHandling(TestCase):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def add_weapon_and_verify(self, weapon_template, quality, weapon,
-                              prefix="add-weapon", accessor=None):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+                              prefix="add-weapon", accessor=None,
+                              sheet_id=1):
+        det_url = reverse('sheet.views.sheet_detail', args=[sheet_id])
         req_data = {'%s-item_template' % prefix: weapon_template,
                     '%s-item_quality' % prefix: quality}
         response = self.client.post(det_url, req_data)
@@ -37,11 +48,19 @@ class ItemHandling(TestCase):
         return response
 
     def add_ranged_weapon_and_verify(self, weapon_template, quality, weapon):
-        def get_ranged_weapons(char):
+        def get_weapons(char):
             return [wpn.name for wpn in char.ranged_weapons]
         return self.add_weapon_and_verify(weapon_template, quality, weapon,
                                           prefix="add-ranged-weapon",
-                                          accessor=get_ranged_weapons)
+                                          accessor=get_weapons)
+
+    def add_firearm_and_verify(self, weapon_template, ammunition, weapon):
+        def get_weapons(char):
+            return [unicode(wpn) for wpn in char.firearms]
+        return self.add_weapon_and_verify(weapon_template, ammunition, weapon,
+                                          prefix="add-firearm",
+                                          accessor=get_weapons,
+                                          sheet_id=3)
 
     def test_add_weapon(self):
         det_url = reverse('sheet.views.sheet_detail', args=[1])
@@ -205,6 +224,462 @@ class ItemHandling(TestCase):
                                            args=[2]))
         self.assertEqual(response.context['char'].armor.armor_t_pl, 3)
         self.assertEqual(response.context['char'].helm.armor_h_pl, 2)
+
+    def test_add_firearm(self):
+        ammo = factories.AmmunitionFactory(label="9Pb",
+                                           weight=7.5,
+                                           velocity=440,
+                                           type='FMJ')
+        factories.BaseFirearmFactory(name="Glock 19",
+                                     ammunition_types=('9Pb', '9Pb+'))
+
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[1]))
+        self.assertNotContains(response, "No firearms.",
+                               msg_prefix="FRP character sheets should not "
+                                          "contain firearms.")
+
+        sheet = Sheet.objects.get(pk=1)
+        self.assertFalse(sheet.character.campaign.has_firearms)
+
+        sheet = Sheet.objects.get(pk=3)
+        self.assertTrue(sheet.character.campaign.has_firearms)
+
+        response = self.client.get(reverse('sheet.views.sheet_detail',
+                                           args=[3]))
+        self.assertContains(response, "No firearms.")
+
+        self.add_firearm_and_verify("Glock 19", ammo.pk,
+                                    "Glock 19 w/ 9Pb FMJ (3.30)")
+
+
+class FirearmTestCase(TestCase):
+    def setUp(self):
+        factories.CampaignFactory(name="MR", tech_levels=("all", "2K"))
+        self.sheet = factories.SheetFactory(character__campaign__name="MR")
+        self.ammo = factories.AmmunitionFactory(label="9Pb",
+                                                weight=7.5,
+                                                velocity=440,
+                                                type='FMJ')
+        self.unsuitable_ammo = factories.AmmunitionFactory(label="7.62x39",
+                                                           weight=8,
+                                                           velocity=715,
+                                                           type='FMJ')
+        factories.AmmunitionFactory(label="5.56Nto",
+                                    weight=3.6,
+                                    velocity=913,
+                                    type='FMJ')
+        factories.AmmunitionFactory(label="12ga.",
+                                    weight=41.3,
+                                    velocity=381,
+                                    type='1Buck')
+        factories.BaseFirearmFactory(name="Glock 19",
+                                     duration=0.11,
+                                     stock=1,
+                                     weight=0.6,
+                                     ammunition_types=('9Pb', '9Pb+'))
+
+        # Note, stats are made to match classic sheet for cross-checking
+        # purposes.  Some things might be different in up-to-date weapon
+        # sheets.
+        factories.BaseFirearmFactory(name="SAKO RK95",
+                                     target_initiative=-4,
+                                     draw_initiative=-5,
+                                     range_s=50,
+                                     range_m=150,
+                                     range_l=300,
+                                     duration=0.1,
+                                     stock=1.2,
+                                     weight=3.7,
+                                     autofire_rpm=650,
+                                     autofire_class="C",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('5.56Nto',))
+
+        factories.BaseFirearmFactory(name="M29 (OICW)",
+                                     target_initiative=-4,
+                                     draw_initiative=-5,
+                                     range_s=85,
+                                     range_m=200,
+                                     range_l=350,
+                                     duration=0.1,
+                                     stock=1.25,
+                                     weight=6.3,
+                                     autofire_rpm=800,
+                                     autofire_class="A",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('7.62x39',))
+
+        factories.BaseFirearmFactory(name="Pancor Jackhammer",
+                                     target_initiative=-2,
+                                     draw_initiative=-5,
+                                     range_s=40,
+                                     range_m=75,
+                                     range_l=110,
+                                     duration=0.1,
+                                     stock=1.25,
+                                     weight=4.6,
+                                     autofire_rpm=240,
+                                     autofire_class="E",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('12ga.',))
+
+    def _add_skill(self, skill_name, level=0):
+        return factories.CharacterSkillFactory(
+                    character=self.sheet.character,
+                    skill=factories.SkillFactory(name=skill_name),
+                    level=level)
+
+    def test_basic(self):
+        form = forms.AddFirearmForm(instance=self.sheet,
+                                    data={'item_template': 'Glock 19',
+                                          'item_quality': self.ammo.pk })
+        self.assertTrue(form.is_valid())
+        sheet = form.save()
+        self.assertTrue(unicode(sheet.firearms.all()[0]).startswith(
+            "Glock 19 w/ 9Pb FMJ"))
+
+    def test_ammo_validation(self):
+        """
+        Verify that chosen ammo for the weapon is validated to be suitable.
+        """
+        form = forms.AddFirearmForm(instance=self.sheet,
+                                    data={'item_template': 'Glock 19',
+                                          'item_quality':
+                                              self.unsuitable_ammo.pk })
+        self.assertFalse(form.is_valid())
+
+    def test_single_fire_skill_checks_unskilled(
+            self, level=None,
+            expected=None,
+            expected_rof=None):
+        # default case for unskilled.
+        if expected is None:
+            expected = [(0.5, 32), (1, 24), (2, 22), (3, 15), (4, 8), (5, 1)]
+
+        firearm = factories.FirearmFactory(base__name="Glock 19",
+                                           ammo__label='9Pb',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        if level is not None:
+            cs = self._add_skill("Pistol", level)
+            self.assertEqual(cs.level, level)
+
+        if expected_rof is not None:
+            self.assertAlmostEqual(self.sheet.rof(firearm), expected_rof,
+                                   places=2)
+
+        for (cc, exp) in zip(self.sheet.firearm_skill_checks(firearm),
+                             expected):
+            self.assertEqual(cc.action, exp[0])
+            self.assertEqual(cc.check, exp[1])
+
+    def test_single_fire_skill_checks_level_0(self):
+        self.test_single_fire_skill_checks_unskilled(
+            level=0,
+            expected=[(0.5, 53), (1, 46), (2, 43), (3, 37), (4, 30), (5, 23)])
+
+    def test_single_fire_skill_checks_level_5(self):
+        self.test_single_fire_skill_checks_unskilled(
+            level=5,
+            expected=[(0.5, 78), (1, 72), (2, 70), (3, 68), (4, 68), (5, 60),
+                      (6, 55), (7, 50), (8, 46)],
+            expected_rof=4.267)
+
+    def test_fit_counter_for_rof_penalties_single_fire(self):
+        self.sheet.character.cur_fit = 90
+        self.sheet.character.save()
+        self.test_single_fire_skill_checks_unskilled(
+            level=0,
+            expected=[(0.5, 53), (1, 46), (2, 43), (3, 43), (4, 43), (5, 38)])
+
+    def verify_burst_checks(self, firearm, expected):
+        for (burst, exc) in zip(
+                self.sheet.firearm_burst_fire_skill_checks(firearm),
+                expected):
+            expected_action = exc[0]
+            expected_init = exc[1]
+            expected_checks = exc[2]
+
+            self.assertEqual(burst.initiative, expected_init)
+            self.assertEqual(burst.action, expected_action)
+
+            self.assertListEqual(burst.checks, expected_checks)
+
+        self.assertEqual(
+            len(self.sheet.firearm_burst_fire_skill_checks(firearm)),
+            len(expected))
+
+    def test_burst_fire_skill_checks(self):
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        expected = [[0.5, +7, [53, 50, 44, 35, 23]],
+                    [1, +3 , [46, 43, 37, 28, 16]],
+                    [2, -8, [36, 33, 27, 18 , 6]],
+                    [3, -4, [22, 19, 13, 4, -8]],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
+
+    def test_autofire_penalty_for_burst_fire(self):
+        """
+        There should be -10 penalty for burst fire without the autofire skill.
+        """
+        self._add_skill("Long guns")
+
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        expected = [[0.5, +7, [43, 40, 34, 25, 13]],
+                    [1, +3, [36, 33, 27, 18, 6]],
+                    [2, -8, [26, 23, 17, 8, -4]],
+                    [3, -4, [12, 9, 3, -6, -18]],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
+
+    def test_low_rpm_burst_fire_check(self):
+        """
+        There should be less checks per "column" with a low-RPM gun.
+        Also differs in autofire class.
+        """
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        firearm = factories.FirearmFactory(base__name="Pancor Jackhammer",
+                                           ammo__label='12ga.',
+                                           ammo__type='1Buck')
+        self.sheet.firearms.add(firearm)
+
+        expected = [[0.5, +8, [53, 48, None, None, None]],
+                    [1, +4 , [43, 38, None, None, None]],
+                    [2, -14, [22, 17, None, None, None]],
+                    [3, None, [None]*5],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
+
+    Expected = namedtuple("Exp", ["length", "first", "last"])
+
+    def verify_sweep_fire_checks(self, af_class, check, firearm, fit_counter=0):
+        # There should be 4 different categories of sweeps.
+        self.assertEqual(
+            len(self.sheet.firearm_sweep_fire_skill_checks(firearm)),
+            4)
+        check_5 = check + 5 - 10
+        check_10 = check + 10 - 10
+        check_15 = check + 15 - 10
+        check_20 = check + 20 - 10
+        expected = [self.Expected(length=4, first=check_5,
+                                  last=check_5 + 17 * af_class + fit_counter),
+                    self.Expected(length=8, first=check_10,
+                                  last=check_10 + 35 * af_class + fit_counter),
+                    self.Expected(length=12, first=check_15,
+                                  last=check_15 + 53 * af_class + fit_counter),
+                    self.Expected(length=16, first=check_20,
+                                  last=check_20 + 71 * af_class + fit_counter),
+        ]
+        for exp, sweep in itertools.izip_longest(
+                expected,
+                self.sheet.firearm_sweep_fire_skill_checks(firearm)):
+            self.assertEqual(exp.length, len(sweep.checks))
+            self.assertEqual(exp.first, sweep.checks[0])
+            self.assertEqual(exp.last, sweep.checks[-1])
+
+    def test_sweep_fire_skill_checks(self):
+        """
+        There should be -10 penalty for sweep fire with the autofire skill.
+        """
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        check = self.sheet.eff_dex
+        af_class = -3 # C
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm)
+
+    def test_autofire_penalty_for_sweep_fire(self):
+        """
+        There should be -20 penalty for sweep fire without the autofire skill.
+        """
+        self._add_skill("Long guns")
+
+        check = self.sheet.eff_dex - 10
+        af_class = -3 # C
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm)
+
+    def test_fit_counter_for_rof_penalties_burst_fire(self):
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+        self.sheet.character.cur_fit = 90
+        self.sheet.character.save()
+
+        check = self.sheet.eff_dex
+        af_class = -3 # C
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm,
+                                      fit_counter=15)
+
+    def test_sweep_fire_skill_checks_class_a(self):
+        """
+        There should be -10 penalty for sweep fire with the autofire skill.
+        """
+        self._add_skill("Long guns")
+        self._add_skill("Autofire")
+
+        check = self.sheet.eff_dex
+        af_class = -1 # A
+        firearm = factories.FirearmFactory(base__name="M29 (OICW)",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ')
+        self.sheet.firearms.add(firearm)
+
+        self.verify_sweep_fire_checks(af_class, check, firearm)
+
+
+class BaseFirearmFormTestCase(TestCase):
+    def setUp(self):
+        self.tech_level = factories.TechLevelFactory(name='2K')
+        self.pistol = factories.SkillFactory(name="Pistol")
+
+    def _get_form(self, ammo_type, **extra):
+        form_kwargs = {'name': 'Glock 19', 'range_s': 15, 'range_m': 30,
+                       'range_l': 45, 'tech_level': self.tech_level.pk,
+                       'weight': 0.6, 'base_skill': self.pistol, 'bypass': -1,
+                       'dp': 10, 'durability': 5, 'duration': 0.1, 'stock': 1,
+                       'target_initiative': -1, 'type': "P",
+                       'ammo_types': ammo_type}
+
+        form = forms.CreateBaseFirearmForm(
+            data=form_kwargs, **extra)
+        return form
+
+    def test_invalid_ammo_types(self):
+
+        for ammo_type in ["9Pb,", "9Pb!", "[guug]"]:
+            form = self._get_form(ammo_type)
+            self.assertFalse(form.is_valid())
+
+    def test_ammo_types_saved(self):
+        """
+        Check that ammo_types field works.
+        """
+        form = self._get_form("9Pb+|9Pb")
+        self.assertTrue(form.is_valid())
+        firearm = form.save()
+        self.assertListEqual(sorted(firearm.get_ammunition_types()),
+                             [u"9Pb", u"9Pb+"])
+
+    def test_valid_ammo_types(self):
+
+        for ammo_type in ["12ga.", "12/70", "112LAW", "25-06", "7.62x53R"]:
+            form = self._get_form(ammo_type)
+            self.assertTrue(form.is_valid(),
+                            msg="{ammo_type} should be valid".format(
+                                ammo_type=ammo_type))
+
+    def test_changing_ammo_type(self):
+        firearm = factories.FirearmFactory(base__name="M29 (OICW)",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ')
+        self.assertEqual(firearm.base.get_ammunition_types(), [u"5.56Nto"])
+
+        form = self._get_form('7.62x39', instance=firearm.base)
+        new_firearm = form.save()
+
+        self.assertEqual(firearm.base.pk, new_firearm.pk)
+        self.assertEqual(new_firearm.get_ammunition_types(), [u"7.62x39"])
+
+
+class FirearmImportExportTestcase(TestCase):
+    firearm_csv_data = """\
+"BaseFirearm",,,,,,,,,,,,,,,,,,,,
+"name","description","notes","tech_level","draw_initiative","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
+"Glock 19",,,"2K",-3,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
+
+"""
+
+    ammo_csv_data = """\
+"Ammunition",,,,,,,,,,
+"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","weight","velocity","bypass"
+,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400,0
+
+"""
+
+    def setUp(self):
+        factories.TechLevelFactory(name="2K")
+        factories.SkillFactory(name="Handguns", tech_level__name="2K")
+
+    def test_import_firearms(self):
+        sheet.views.import_text(self.firearm_csv_data)
+        firearm = sheet.models.BaseFirearm.objects.get(name="Glock 19")
+        # Import should create the ammunition types.
+        self.assertListEqual(sorted(["9Pb", "9Pb+"]),
+                             sorted(firearm.get_ammunition_types()))
+
+    def test_export_firearms(self):
+        sheet.views.import_text(self.firearm_csv_data)
+
+        csv_data = sheet.views.csv_export(sheet.models.BaseFirearm)
+        reader = csv.reader(StringIO.StringIO(csv_data))
+        data_type = reader.next()
+        self.assertEqual(data_type[0], "BaseFirearm")
+
+        header = reader.next()
+        data_row = reader.next()
+        idx = header.index("ammunition_types")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "9Pb|9Pb+")
+
+    def test_import_ammunition(self):
+        sheet.views.import_text(self.ammo_csv_data)
+        ammo = sheet.models.Ammunition.objects.filter(label='9Pb+')
+        self.assertEqual(ammo[0].label, "9Pb+")
+
+    def test_export_ammunition(self):
+        sheet.views.import_text(self.ammo_csv_data)
+
+        csv_data = sheet.views.csv_export(sheet.models.Ammunition)
+        reader = csv.reader(StringIO.StringIO(csv_data))
+        data_type = reader.next()
+        self.assertEqual(data_type[0], "Ammunition")
+
+        header = reader.next()
+        data_row = reader.next()
+
+        idx = header.index("label")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "9Pb+")
+
+        idx = header.index("id")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "1")
+
 
 class EdgeAndSkillHandling(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
@@ -440,12 +915,14 @@ class EdgeAndSkillHandling(TestCase):
                         "Adding an existing skill should result in an error")
         self.assertIn("__all__", form.errors)
 
+
 def get_fake_request(username):
     class FakeReq(object):
         pass
     req = FakeReq()
     req.user = auth.models.User.objects.get(username=username)
     return req
+
 
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
@@ -498,7 +975,7 @@ class Logging(WebTest):
 
         det_url = reverse('edit_character', args=[2])
         form = self.app.get(det_url, user='admin').form
-        form['cur_fit'].value = int(form['cur_fit'].value) - 2
+        form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -507,7 +984,7 @@ class Logging(WebTest):
         self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
 
         form = self.app.get(det_url, user='admin').form
-        form['cur_fit'].value = int(form['cur_fit'].value) + 5
+        form['cur_fit'].value = str(int(form['cur_fit'].value) + 5)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -516,7 +993,7 @@ class Logging(WebTest):
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 3)
 
         form = self.app.get(det_url, user='admin').form
-        form['cur_fit'].value = int(form['cur_fit'].value) - 2
+        form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -526,7 +1003,7 @@ class Logging(WebTest):
 
 
         form = self.app.get(det_url, user='admin').form
-        form['free_edges'].value = 0
+        form['free_edges'].value = str(0)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -536,6 +1013,9 @@ class Logging(WebTest):
 
         form['deity'].value = "Tharizdun"
         response = form.submit()
+        self.assertEqual(response.status_code, 302,
+                         "Should redirect after successful edit")
+
 
 class AddXpTestCase(TestCase):
     fixtures = ["campaigns", "user", "char"]
@@ -566,6 +1046,7 @@ class ModelBasics(TestCase):
         mana = ss.mana
         # XXX the above just checks that accessing the values does not cause
         # exceptions in the property handling.
+
 
 class Views(TestCase):
     fixtures = ["campaigns", "user", "char", "sheet", "armor",
@@ -607,6 +1088,7 @@ class Views(TestCase):
                              reverse(sheet.views.sheets_index))
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
+
 
 class ImportExport(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns",
@@ -697,6 +1179,78 @@ class ImportExport(TestCase):
                         msg="The data should start with the table name")
         self.assertIn(unicode_word, data.decode('utf-8'))
 
+    def test_exported_data_types(self):
+        """
+        Verify that certain minimum set of tables are exportable.
+        """
+        self.assertNotIn('BaseWeaponTemplate', sheet.models.EXPORTABLE_MODELS,
+                         msg="Abstract classes should not be exportable")
+        for dt in ['ArmorTemplate',
+            'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
+            'SpellEffect', 'WeaponTemplate', 'Weapon',
+            'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
+            'EdgeLevel', 'EdgeSkillBonus',
+            'RangedWeaponTemplate', 'RangedWeapon']:
+            self.assertIn(dt, sheet.models.EXPORTABLE_MODELS)
+        self.assertIn('TechLevel', sheet.models.EXPORTABLE_MODELS)
+
+
+class ImportExportDependencies(TestCase):
+    csv_data = """\
+Skill
+name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
+Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
+Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
+Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+"""
+
+    self_loop = """\
+Skill
+name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+"""
+
+    def setUp(self):
+        factories.TechLevelFactory(name="all")
+
+    def test_import_with_deps(self):
+        sheet.views.import_text(self.csv_data)
+        self.assertListEqual(
+            sorted([sk.name for sk in sheet.models.Skill.objects.all()]),
+            sorted(["Nutcasing", "Throw", "Unarmed combat", "Jackadeering"]))
+
+    def test_import_with_self_loops(self):
+        """
+        Verify that importing with selfloops works.
+        """
+        sheet.views.import_text(self.self_loop)
+        self.assertListEqual(
+            [sk.name for sk in sheet.models.Skill.objects.all()],
+            ["Nutcasing"])
+        skill = sheet.models.Skill.objects.get(name="Nutcasing")
+        self.assertEqual(len(skill.required_skills.all()), 0)
+
+
+class ImportExportPostgresSupport(TestCase):
+
+    def test_fix_sequence_after_import_in_postgres(self):
+        """
+        Note, this test only affects PostgreSQL installations.
+        """
+
+        new_value = 666
+        sheet.models.TechLevel.objects.create(id=new_value, name="foobar")
+        sheet.views.update_id_sequence(sheet.models.TechLevel)
+        if (settings.DATABASES['default']['ENGINE'] ==
+            "django.db.backends.postgresql_psycopg2"):
+            cc = django.db.connection.cursor()
+            cc.execute("""
+            SELECT last_value FROM sheet_techlevel_id_seq""")
+            last_value = cc.fetchall()[0][0]
+            self.assertEqual(last_value, new_value)
+
+
 class TechLevelTestCase(TestCase):
     fixtures = ["armor", "user", "char", "sheet", "ranged_weapons",
                 "weapons", "skills", "edges", "campaigns"]
@@ -748,7 +1302,7 @@ class TechLevelTestCase(TestCase):
         self.assertEqual(add_existing_armor.fields['item'].queryset
                          .filter(name="Plate mail L5").exists(), frp_items)
 
-    def test_frp_tech_level(self):
+    def test_tech_levels(self):
         # Martel (FRP)
         self.verify_character(1, True, True, False, False)
         # Asa (MR)
@@ -757,6 +1311,7 @@ class TechLevelTestCase(TestCase):
         self.verify_character(4, False, False, True, True)
         # Jan (GZ)
         self.verify_character(5, False, True, False, True)
+
 
 class SheetOrganization(TestCase):
     def setUp(self):
@@ -801,6 +1356,7 @@ class SheetOrganization(TestCase):
         # Verify the headings are present.
         self.assertContains(response, 'FRP')
         self.assertContains(response, 'MR')
+
 
 class CreateURLTestCase(TestCase):
     fixtures = ['user']

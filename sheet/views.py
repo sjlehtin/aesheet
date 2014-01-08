@@ -2,13 +2,38 @@ TODO = """
 + = done
 - = not done
 
--- xl and e range dependent on user FIT (SM)
+Priority list by JW:
+
+- possibility to copy characters and sheets (mainly sheets), which will copy
+  also the underlying character.
+- character addition form layout for easier "intake" (group cur, starting
+  stats, show raises).
+- adding weapon inplace ("add row" functionality), instead of the large set of
+  controls.  Might already be sufficient with the condensed layout, verify with
+  JW.
 -- access controls
 --- marking sheet as only visible to self (SM)
 --- marking characters as only visible to self (SM)
     these should not show in the lists.
+
+
+- character mugshot upload (SM)
+- senses (SM)
+- movement chart (SM)
+- spell skill checks (SM)
+
+- Creating a new character should automatically create a sheet for that
+  character and redirect to edit the new character.
+
+- form errors should be highlighted, and if the form element is hidden, it
+  should be shown by default (errors in add forms can get hidden)
+-- form errorlist class should be highlighted.
+
+- you should be able to leave current stats empty on character creation,
+  in which case the stats would be filled in from the initial stats.
+
+-- xl and e range dependent on user FIT (SM)
 -- password change (SM)
-+ rest of the edges (if some are missing, can be added online)
 + wondrous items
 - inventory ?
 - magic item location (only one item to each location)
@@ -23,23 +48,14 @@ TODO = """
 + body
 -- recovery
 - code simplification
-+ reordering skills (with current ordering, not necessary).
-- character mugshot upload (SM)
-- senses (SM)
-- movement chart (SM)
 - save bonuses (M)
 - encumbrance breakdown (M)
-- spell skill checks (SM)
 - sheet styling
 
 - weapon maximum damage based on durability.
 
 - short description of spell effect (+50 FIT etc)
 - suspended weight
-
-- when adding skills with imported CSV, the order of the rows matter.  Skills
-  that are prereqs for other skills must appear first in the list.  This could
-  be improved.
 
 - Basic skill checks:  Adding skills without any points (or reduced amount of
   points) allocated.  For example, Climbing B -> show skill check at half
@@ -49,9 +65,6 @@ TODO = """
 
 - Inserting None as skill cost to the sheet should work to allow resetting
   skill costs from CSV import.
-
-- Creating a new character should automatically create a sheet for that
-  character and redirect to edit the new character.
 
 - creating new objects should be ajaxiced and redirects should occur in a
   sensible manner.
@@ -63,33 +76,19 @@ TODO = """
 - free edges based on campaign (probably should think about race
   in this context, for FRP at least)
 
-NOTES on creating Jan:
-
-- you should be able to leave current stats empty on character creation,
-  in which case the stats would be filled in from the initial stats.
-
 Minor:
 
 - adding missing skills (helps in just allowing inserting primary skills
   and autofilling rest)
-+ modifying skill level with +/- (at least add to skill level)
 
 Firearms:
 
-- burst fire
-- sweep fire
-- low/hi-recoil ammo
+- using two Berettas akimbo.  Check rule situation regarding instinctive fire.
+- firearms in CC.
+- some weapons with autofire do not have sweep fire enabled.
+- some weapons have restricted burst (restricted to 2 or 3 shots).
+- adding weapon with inline form does not allow setting ammo types.
 
-Priority list by JW:
-
-- possibility to copy characters and sheets (mainly sheets), which will copy
-  also the underlying character.
-- character addition form layout for easier "intake" (group cur, starting
-  stats, show raises).
-- adding weapon inplace ("add row" functionality), instead of the large set of
-  controls.  Might already be sufficient with the condensed layout, verify with
-  JW.
-+ sheets to campaign order.
 """
 
 BUGS = """
@@ -110,7 +109,9 @@ import django.forms.util
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 import django.db.models
+from django.views.generic import UpdateView, CreateView
 import sheet.models
+import sheet.forms
 import csv
 import StringIO
 from django.db.models.fields import FieldDoesNotExist
@@ -119,18 +120,22 @@ import subprocess
 from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
+import django.db
 
 logger = logging.getLogger(__name__)
+
 
 def characters_index(request):
     return render_to_response('sheet/characters_index.html',
                               { 'campaigns': Character.get_by_campaign()},
                               context_instance=RequestContext(request))
 
+
 def sheets_index(request):
     return render_to_response('sheet/sheets_index.html',
                               { 'campaigns': Sheet.get_by_campaign()},
                               context_instance=RequestContext(request))
+
 
 class GenWrapper(object):
     def __init__(self, item, type=None):
@@ -145,6 +150,7 @@ class GenWrapper(object):
 
     def __unicode__(self):
         return unicode(self.item)
+
 
 class RemoveWrap(object):
     def __init__(self, item, type=None):
@@ -171,9 +177,11 @@ class RemoveWrap(object):
     def __unicode__(self):
         return unicode(self.item)
 
+
 class SkilledMixin(object):
     def skilled(self):
         return self.sheet.skilled(self.item)
+
 
 class WeaponWrap(RemoveWrap, SkilledMixin):
     class Stats(object):
@@ -222,11 +230,13 @@ class WeaponWrap(RemoveWrap, SkilledMixin):
         self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
         self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
 
+
 Action = namedtuple('Action', ['action', 'check'])
 
-class RangedWeaponWrap(RemoveWrap, SkilledMixin):
+
+class FirearmWrap(RemoveWrap, SkilledMixin):
     def __init__(self, item, sheet):
-        super(RangedWeaponWrap, self).__init__(item)
+        super(FirearmWrap, self).__init__(item)
         self.sheet = sheet
         self.item = item
 
@@ -234,28 +244,37 @@ class RangedWeaponWrap(RemoveWrap, SkilledMixin):
         return self.sheet.rof(self.item)
 
     def skill_checks(self):
-        ll = None
-        try:
-            ll = [Action._make(xx) for xx in map(
-                    None,
-                    self.sheet.ranged_actions,
-                    self.sheet.ranged_skill_checks(self.item))]
-            logger.info("Checks: %s" % ll)
-        except Exception, e:
-            logger.exception("Got exception")
-        return ll
+        return self.sheet.firearm_skill_checks(self.item)
 
     def ranges(self):
-        try:
-            return self.sheet.ranged_ranges(self.item)
-        except Exception, e:
-            logger.exception("Got exception %s" % e)
+        return self.sheet.ranged_ranges(self.item)
 
     def initiatives(self):
         return self.sheet.initiatives(self.item)
 
+    def level(self):
+        return self.sheet.character.skill_level(self.item.base.base_skill)
+
+    def draw_initiative(self):
+        return self.item.base.draw_initiative
+
+    def target_initiative(self):
+        return self.item.base.target_initiative
+
+    def burst_fire_skill_checks(self):
+        return self.sheet.firearm_burst_fire_skill_checks(self.item)
+
+    def sweep_fire_skill_checks(self):
+        return self.sheet.firearm_sweep_fire_skill_checks(self.item)
+
+
+class RangedWeaponWrap(FirearmWrap):
+    def skill_checks(self):
+        return self.sheet.ranged_skill_checks(self.item)
+
     def damage(self):
         return self.sheet.damage(self.item, use_type=Sheet.PRI)
+
 
 class SkillWrap(RemoveWrap):
     def __init__(self, item, sheet):
@@ -275,6 +294,7 @@ class SkillWrap(RemoveWrap):
 
     def check(self):
         return self.item.check(self.sheet)
+
 
 class ArmorWrap(RemoveWrap):
     def __init__(self, item, sheet, type):
@@ -313,29 +333,38 @@ class SheetView(object):
         self.sheet = sheet
 
     @property
-    def stats(self):
+    def base_stats(self):
         ll = []
-        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos",
-                   "mov", "dex", "imm"]:
+        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
             stat = {'name' : st,
                     'base' : getattr(self.sheet, st),
                     'eff' : getattr(self.sheet, "eff_" + st),
                     }
-            if st not in ["mov", "dex", "imm"]:
-                stat.update({
-                        'add_form' : StatModifyForm(
-                            instance=self.sheet.character,
-                            initial={ 'stat' : "cur_" + st,
-                                      'function' : "add" },
-                            prefix='stat-modify'),
-                        'dec_form' : StatModifyForm(
-                            instance=self.sheet.character,
-                            initial={ 'stat' : "cur_" + st,
-                                      'function' : "dec" },
-                            prefix='stat-modify'),
-                        'change': getattr(self.sheet, "cur_" + st) -
-                                  getattr(self.sheet, "start_" + st),
-                        })
+            stat.update({
+                'add_form': StatModifyForm(
+                    instance=self.sheet.character,
+                    initial={'stat': "cur_" + st,
+                             'function': "add"},
+                    prefix='stat-modify'),
+                'dec_form': StatModifyForm(
+                    instance=self.sheet.character,
+                    initial={'stat': "cur_" + st,
+                             'function': "dec"},
+                    prefix='stat-modify'),
+                'change': getattr(self.sheet, "cur_" + st) -
+                          getattr(self.sheet, "start_" + st),
+            })
+            ll.append(stat)
+        return ll
+
+    @property
+    def derived_stats(self):
+        ll = []
+        for st in ["mov", "dex", "imm"]:
+            stat = {'name' : st,
+                    'base' : getattr(self.sheet, st),
+                    'eff' : getattr(self.sheet, "eff_" + st),
+                    }
             ll.append(stat)
         return ll
 
@@ -346,11 +375,13 @@ class SheetView(object):
 
     @property
     def ranged_weapons(self):
-        try:
-            return [RangedWeaponWrap(xx, self.sheet)
-                  for xx in self.sheet.ranged_weapons.all()]
-        except:
-            logger.exception("Got exception")
+        return [RangedWeaponWrap(xx, self.sheet)
+              for xx in self.sheet.ranged_weapons.all()]
+
+    @property
+    def firearms(self):
+        return [FirearmWrap(xx, self.sheet)
+              for xx in self.sheet.firearms.all()]
 
     @property
     def spell_effects(self):
@@ -426,6 +457,9 @@ def process_sheet_change_request(request, sheet):
         elif item_type == "RangedWeapon":
             item = get_object_or_404(RangedWeapon, pk=item)
             sheet.ranged_weapons.remove(item)
+        elif item_type == "Firearm":
+            item = get_object_or_404(Firearm, pk=item)
+            sheet.firearms.remove(item)
         elif item_type == "Armor":
             sheet.armor = None
         elif item_type == "Helm":
@@ -451,7 +485,9 @@ def process_sheet_change_request(request, sheet):
 
     return False
 
+
 Notes = namedtuple("Notes", ["positive", "negative"])
+
 
 def get_notes(character, filter_kwargs):
     args = { 'character': character }
@@ -536,6 +572,9 @@ def sheet_detail(request, sheet_id=None):
         AddExistingRangedWeaponForm(data,
                                     instance=sheet,
                                     prefix="add-existing-ranged-weapon")
+    forms['add_firearm_form'] = AddFirearmForm(
+        data, instance=sheet,
+        prefix="add-firearm")
     forms['add_xp_form'] = \
         AddXPForm(data,
                   request=request,
@@ -572,14 +611,13 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = { 'char': SheetView(sheet),
-          'TODO': TODO,
           'notes': notes,
+          'sweep_fire_available': any([wpn.has_sweep_fire()
+                                       for wpn in sheet.firearms.all()]),
           }
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',
                               RequestContext(request, c))
-
-from django.views.generic import UpdateView, CreateView
 
 
 class AddWeaponView(CreateView):
@@ -587,18 +625,23 @@ class AddWeaponView(CreateView):
     template_name = 'sheet/add_weapon.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddWeaponTemplateView(AddWeaponView):
     model = WeaponTemplate
+
 
 class AddWeaponQualityView(AddWeaponView):
     model = WeaponQuality
 
+
 class AddWeaponSpecialQualityView(AddWeaponView):
     model = WeaponSpecialQuality
+
 
 class AddMiscellaneousItemView(AddWeaponView):
     model = MiscellaneousItem
     template_name = 'sheet/add_miscellaneous_item.html'
+
 
 class EditCharacterView(UpdateView):
     form_class = CharacterForm
@@ -611,18 +654,22 @@ class EditCharacterView(UpdateView):
         dd['request'] = self.request
         return dd
 
+
 class AddCharacterView(CreateView):
     model = Character
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(characters_index)
+
 
 class AddSpellEffectView(CreateView):
     model = SpellEffect
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddEdgeView(AddSpellEffectView):
     model = Edge
+
 
 class EditSheetView(UpdateView):
     form_class = EditSheetForm
@@ -630,38 +677,56 @@ class EditSheetView(UpdateView):
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddSheetView(CreateView):
     model = Sheet
     form_class = EditSheetForm
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddEdgeLevelView(AddSpellEffectView):
     form_class = EditEdgeLevelForm
     model = EdgeLevel
 
+
 class AddEdgeSkillBonusView(AddSpellEffectView):
     model = EdgeSkillBonus
+
 
 class AddRangedWeaponView(AddWeaponView):
     model = RangedWeapon
 
+
+class AddFirearmView(AddWeaponView):
+    model = sheet.models.BaseFirearm
+    form_class = sheet.forms.CreateBaseFirearmForm
+
+class AddAmmunitionView(AddWeaponView):
+    model = Ammunition
+
+
 class AddRangedWeaponTemplateView(AddRangedWeaponView):
     model = RangedWeaponTemplate
+
 
 class AddArmorView(AddSpellEffectView):
     model = Armor
     template_name = 'sheet/add_armor.html'
 
+
 class AddArmorTemplateView(AddSpellEffectView):
     model = ArmorTemplate
+
 
 class AddArmorQualityView(AddSpellEffectView):
     model = ArmorQuality
 
+
 class AddArmorSpecialQualityView(AddSpellEffectView):
     model = ArmorSpecialQuality
     template_name = 'sheet/add_armor_special_quality.html'
+
 
 def get_data_rows(results, fields):
     """
@@ -674,16 +739,23 @@ def get_data_rows(results, fields):
                 value = getattr(obj, field)
             except AttributeError:
                 return ""
-            def get_descr(mdl):
-                if hasattr(mdl, 'name'):
-                    return mdl.name
-                return str(mdl.pk)
-            if isinstance(value, django.db.models.Model):
-                value = get_descr(value)
-            elif isinstance(value, django.db.models.Manager):
-                value = "|".join([get_descr(val) for val in value.all()])
-            return value
+            tag = "{model}.{field}".format(model=obj.__class__.__name__,
+                                           field=field)
+            if tag == "BaseFirearm.ammunition_types":
+                return '|'.join([ammo.short_label
+                                 for ammo in obj.ammunition_types.all()])
+            else:
+                def get_descr(mdl):
+                    if hasattr(mdl, 'name'):
+                        return mdl.name
+                    return str(mdl.pk)
+                if isinstance(value, django.db.models.Model):
+                    value = get_descr(value)
+                elif isinstance(value, django.db.models.Manager):
+                    value = "|".join([get_descr(val) for val in value.all()])
+                return value
         yield [get_field_value(field) for field in fields]
+
 
 def browse(request, type):
     try:
@@ -698,6 +770,96 @@ def browse(request, type):
                               RequestContext(request, { 'type' : type,
                                                         'header' : fields,
                                                         'rows' : rows }))
+
+
+def update_id_sequence(model_class):
+    """
+    When importing data from a database to another database, if the item ids
+    exceed the sequence in postgres, the sequence generator can get
+    out-of-sync.  This will lead to duplicate id errors, as the sequence
+    will generate key values, which are already present in the table.
+
+    This remedies the situation by assigning the sequence to the start from
+    the next value.
+    """
+    # Only with postgres.
+    if (settings.DATABASES['default']['ENGINE'] ==
+            "django.db.backends.postgresql_psycopg2"):
+        # The operation should only be performed for models with a serial id
+        # as the primary key.
+        cc = django.db.connection.cursor()
+        # String replace ok here, as the table name is not coming from an
+        # external source, and generating the query with execute is not
+        # trivial with a dynamic table name.
+        cc.execute("""
+        SELECT pg_catalog.setval(pg_get_serial_sequence('{table}', 'id'),
+                                 (SELECT MAX(id) FROM {table}));
+                                 """.format(
+            table=model_class._meta.db_table))
+
+
+def sort_by_dependencies(header, rows):
+    """
+    Sort the list of rows, so that dependencies are satisfied as well as
+    possible.
+    """
+    logger.debug("Sorting skill rows rows by dependencies")
+    name_index = header.index("name")
+    if name_index < 0:
+        raise ValueError, "No name column"
+    required_index = header.index("required_skills")
+    if required_index < 0:
+        raise ValueError, "No required_skills column"
+
+    ordered = []
+    unsatisfied = {}
+    satisfied = {}
+
+    def all_satisfied(required_skills):
+        for ss in required_skills:
+            logger.debug("Checking for '{skill}'".format(skill=ss))
+            if not satisfied.has_key(ss):
+                return False
+        logger.debug("all satisfied for {0}".format(required_skills))
+        return True
+
+    def get_required(required_skills):
+        required_skills = required_skills.strip()
+        if required_skills:
+            required_skills = [req.strip()
+                               for req in required_skills.split('|')]
+        else:
+            required_skills = []
+        return required_skills
+
+    def satisfy(row):
+        logger.debug("all satisfied for {0}".format(row))
+        ordered.append(row)
+        skill_name = row[1][name_index]
+        satisfied[skill_name] = True
+        for sk in unsatisfied.pop(skill_name, []):
+            if all_satisfied(get_required(sk[1][required_index])):
+                satisfy(sk)
+
+    for row in rows:
+        required_skills = get_required(row[1][required_index])
+
+        if all_satisfied(required_skills):
+            satisfy(row)
+        else:
+            for required in required_skills:
+                unsat = unsatisfied.setdefault(
+                    required, [])
+                unsat.append(row)
+
+    # If still unsatisfied, just append them.
+    unsatisfied_values = unsatisfied.values()
+    if unsatisfied_values:
+        logger.debug("Unsatisfied values left")
+        ordered.extend([row for ll in unsatisfied_values for row in ll])
+
+    return ordered
+
 
 def import_text(data):
     reader = csv.reader(StringIO.StringIO(data))
@@ -714,7 +876,17 @@ def import_text(data):
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
 
-    for line, row in enumerate(reader):
+    changed_models = set()
+    rows = enumerate(reader)
+    if modelcls == sheet.models.Skill:
+        rows = sort_by_dependencies(header, rows)
+
+    for (line, row) in rows:
+        logger.debug('columns: {0}'.format(len(row)))
+        if len(row) < len(header):
+            logger.info("Ignoring too short row: {0}".format(row))
+            continue
+        tag = line
         mdl = None
         fields = {}
         for (hh, index) in zip(header, range(len(header))):
@@ -729,28 +901,34 @@ def import_text(data):
         if not mdl:
             mdl = modelcls()
         m2m_values = {}
-        for (fieldname, value) in fields.items():
-            logger.debug(("importing field %s for %s.") % (fieldname,
+        ammunition_types = []
+        for (field_name, value) in fields.items():
+            logger.debug(("importing field %s for %s.") % (field_name,
                                                 modelcls._meta.object_name))
 
-            if fieldname not in modelcls.get_exported_fields():
+            if field_name not in modelcls.get_exported_fields():
                 logger.info(("ignoring field %s for %s, not in "
-                             "exported fields.") % (fieldname,
+                             "exported fields.") % (field_name,
                                                     modelcls.__class__
                                                     .__name__))
                 continue
             try:
                 (field, _, direct, m2m) = \
-                    modelcls._meta.get_field_by_name(fieldname)
+                    modelcls._meta.get_field_by_name(field_name)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
 
-            if fieldname == "tech_level":
+            if field_name == "tech_level":
                 try:
                     value = TechLevel.objects.get(name=value)
                 except TechLevel.DoesNotExist:
                     raise ValueError, "No matching TechLevel with name %s." % (
                                                 value)
+            elif field_name == "ammunition_types":
+                if modelcls != sheet.models.BaseFirearm:
+                    raise ValueError, "Invalid model for ammunition_types"
+                ammunition_types = value.split('|')
+                continue
             # If the field is a reference to another object, try to find
             # the matching instance.
             elif isinstance(field, django.db.models.ForeignKey):
@@ -772,20 +950,32 @@ def import_text(data):
                 if isinstance(field,
                               django.db.models.fields.related.ManyToManyField):
                     # Make sure the field will at least be cleared.
-                    m2m_values[fieldname] = []
+                    m2m_values[field_name] = []
                     if not value:
                         continue
                     ll = []
+
+                    def is_self_loop(cls, field):
+                        if cls == field.rel.to and fields['name'] == name:
+                            return True
+                        else:
+                            return False
+
                     for name in value.split('|'):
                         name = name.strip()
+                        # Useless, and broken, to add a requirement to self.
+                        if is_self_loop(modelcls, field):
+                            continue
+
                         try:
                             obj = field.rel.to.objects.get(name=name)
                         except field.rel.to.DoesNotExist:
-                            raise ValueError, ("Requirement `%s' does not "
-                                               "exist." % name)
+                            raise ValueError, (
+                                "Requirement `{req}' for line {line} "
+                                "does not exist.".format(req=name, line=tag))
                         ll.append(obj)
                     value = ll
-                    m2m_values[fieldname] = value
+                    m2m_values[field_name] = value
                     # These need to be added only after the object is saved.
                     continue
                 else:
@@ -799,15 +989,15 @@ def import_text(data):
                         value = field.to_python(value)
                     except Exception, e:
                         raise type(e), ("Failed to import field \"%s\", "
-                                        "value \"%s\" (%s)" % (fieldname, value,
+                                        "value \"%s\" (%s)" % (field_name, value,
                                                                str(e)))
-            setattr(mdl, fieldname, value)
+            setattr(mdl, field_name, value)
         try:
             mdl.full_clean()
             mdl.save()
         except Exception, e:
             raise type(e), ("Line %d: Failed to import field \"%s\", "
-                            "value \"%s\" (%s)" % (line, fieldname, value,
+                            "value \"%s\" (%s)" % (line, field_name, value,
                             str(e)))
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
@@ -815,8 +1005,24 @@ def import_text(data):
             rel = getattr(mdl, kk)
             rel.clear()
             rel.add(*vv)
+
+        if ammunition_types:
+            # clear old ammunition types out.
+            mdl.ammunition_types.all().delete()
+
+            sheet.models.FirearmAmmunitionType.objects.filter()
+            for ammo_type in ammunition_types:
+                sheet.models.FirearmAmmunitionType.objects\
+                    .get_or_create(firearm=mdl,
+                                   short_label=ammo_type)
+
         mdl.full_clean()
         mdl.save()
+        changed_models.add(mdl.__class__)
+
+    for mdl in changed_models:
+        update_id_sequence(mdl)
+
 
 def import_data(request, success=False):
     """

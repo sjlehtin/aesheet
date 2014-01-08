@@ -1,0 +1,23 @@
+{% if char.firearms %}
+    {% include "sheet/sheet_detail/ranged_attacks.html" with actions=char.firearm_actions weapons=char.firearms %}
+    {% if sweep_fire_available %}
+        <h4>Sweep fire</h4>
+        {% include "sheet/sheet_detail/firearm_sweep_fire.html" with weapons=char.firearms %}
+    {% endif %}
+{% else %}
+<p>No firearms.</p>
+{% endif %}
+<div id="add_firearm_form" class="edit-control advanced"
+        data-advanced-text="Add firearms">
+    <label for="add_firearm_form">Add firearm</label>
+    <form id="add_firearm_form" action="{{ act }}" method="post"
+            >{% csrf_token %}
+        <ul>
+            {{ add_firearm_form.as_ul}}
+        </ul>
+        <input type="submit" value="Add" />
+    </form>
+
+    <a href="{% url "add_firearm" %}">Create a new firearm</a>
+    <a href="{% url "add_ammunition" %}">Create new ammo</a>
+</div>

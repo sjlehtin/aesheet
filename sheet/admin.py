@@ -1,4 +1,4 @@
-from sheet.models import *
+import sheet.models as sm
 
 from django.contrib import admin
 
@@ -8,20 +8,29 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
                     'dice', 'extra_damage', 'leth', 'plus_leth',
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
                     'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
-admin.site.register(Armor)
-admin.site.register(ArmorQuality)
-admin.site.register(ArmorTemplate)
-admin.site.register(ArmorSpecialQuality)
-admin.site.register(Character)
-admin.site.register(CharacterEdge)
-admin.site.register(CharacterSkill)
-admin.site.register(Edge)
-admin.site.register(EdgeLevel)
-admin.site.register(EdgeSkillBonus)
-admin.site.register(Sheet)
-admin.site.register(TechLevel)
-admin.site.register(Campaign)
-admin.site.register(MiscellaneousItem)
+admin.site.register(sm.Armor)
+admin.site.register(sm.ArmorQuality)
+admin.site.register(sm.ArmorTemplate)
+admin.site.register(sm.ArmorSpecialQuality)
+admin.site.register(sm.Character)
+admin.site.register(sm.CharacterEdge)
+admin.site.register(sm.CharacterSkill)
+admin.site.register(sm.Edge)
+admin.site.register(sm.EdgeLevel)
+admin.site.register(sm.EdgeSkillBonus)
+admin.site.register(sm.Sheet)
+admin.site.register(sm.TechLevel)
+
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ('name', 'has_firearms', 'has_spells')
+admin.site.register(sm.Campaign, CampaignAdmin)
+
+admin.site.register(sm.MiscellaneousItem)
+
+admin.site.register(sm.BaseFirearm)
+admin.site.register(sm.FirearmAmmunitionType)
+admin.site.register(sm.Firearm)
+admin.site.register(sm.Ammunition)
 
 class SkillAdmin(admin.ModelAdmin):
     list_display = ('name', 'tech_level','description', 'notes',
@@ -30,12 +39,12 @@ class SkillAdmin(admin.ModelAdmin):
                     'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
                     'skill_cost_3', 'stat', 'type')
 
-admin.site.register(Skill, SkillAdmin)
-admin.site.register(SpellEffect)
-admin.site.register(WeaponSpecialQuality)
-admin.site.register(WeaponTemplate, WeaponTemplateAdmin)
-admin.site.register(Weapon)
-admin.site.register(WeaponQuality)
-admin.site.register(RangedWeaponTemplate)
-admin.site.register(RangedWeapon)
-admin.site.register(CharacterLogEntry)
+admin.site.register(sm.Skill, SkillAdmin)
+admin.site.register(sm.SpellEffect)
+admin.site.register(sm.WeaponSpecialQuality)
+admin.site.register(sm.WeaponTemplate, WeaponTemplateAdmin)
+admin.site.register(sm.Weapon)
+admin.site.register(sm.WeaponQuality)
+admin.site.register(sm.RangedWeaponTemplate)
+admin.site.register(sm.RangedWeapon)
+admin.site.register(sm.CharacterLogEntry)

@@ -7,10 +7,14 @@
 
 {% block content %}
     <div class="row">
-<div class="col-md-8">
 <h1>{{ char.name }}</h1>
 {{ char.race }}
 {{ char.occupation }}
+    </div>
+    <div class="row">
+<div class="col-md-9">
+<div class="row">
+<div class="col-md-4">
 <p>
 {{ char.character.description }}
 </p>
@@ -34,61 +38,32 @@
 {% url "sheet.views.sheet_detail" char.id as act %}
 
 <table class="base">
-{% for stat in char.stats %}
-  <tr><td class="stats name">{{ stat.name|upper }}</td>
-      <td class="stats base">{{ stat.base }}</td>
-      <td class="stats eff">{{ stat.eff }}</td>
-      {% if stat.add_form %}
-      <td class="edit-control">
-           <div class="edit-control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ stat.add_form }}
-              <input type="submit" value="+" />
-              </form>
-           </div>
-      </td>
-      <td class="edit-control">
-           <div class="edit-control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ stat.dec_form }}
-              <input type="submit" value="-" />
-              </form>
-           </div>
-      </td>
-          <td class="stats change">({{ stat.change|stringformat:"+d" }})</td>
-      {% else %}
-          <td class="edit-control"></td>
-          <td class="edit-control"></td>
-          <td></td>
-      {% endif %}
-  </tr>
+{% for stat in char.base_stats %}
+    {% include "sheet/sheet_detail/stat.html" %}
 {% endfor %}
 </table>
 
-<table class="derived">
-{% with b=char.body sta=char.stamina mana=char.mana %}
-{# XXX Temporary stamina and body #}
-  <tr class="body">
-    <td>B</td><td>{{ b.base}}</td>
-    <td>{{ b.mod|default:""}}</td>
-    <td>{{ b.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="stamina">
-    <td>S</td><td>{{ sta.base}}</td>
-    <td>{{ sta.mod|default:""}}</td>
-    <td>{{sta.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="mana">
-    <td>M</td><td>{{ mana.base}}</td>
-    <td>{{ mana.mod|default:""}}</td>
-    <td>{{mana.recovery_rate|default:"" }}</td>
-  </tr>
-{% endwith %}
-</table>
-
 </div>
+</div>
+<div class="col-md-8">
+    {% if char.character.portrait %}
+    <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}" >
+    {% else %}
+        <div class="edit-control">You can add a portrait for your character in
+            the <a href="{% url "edit_character" char.character.id %}">
+                base character edit</a>.</div>
+    {% endif %}
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-4">
+
+<table class="derived">
+{% for stat in char.derived_stats %}
+    {% include "sheet/sheet_detail/stat.html" %}
+{% endfor %}
+</table>
 
 <div class="xp">
 XP: {{ char.xp_used_stats }} + 
@@ -109,7 +84,7 @@ XP: {{ char.xp_used_stats }} +
 
 <div class="armor">
   {{ char.helm }} + {{ char.armor }}
-  <table>
+  <table class="">
     <thead>
       <tr><th></th><th></th>
           <th title="Protection against piercing damage">P</th>
@@ -120,22 +95,22 @@ XP: {{ char.xp_used_stats }} +
                   title="Protection
 	level">PL</th></tr>
     </thead>
-    <tr><td>8</td><td title="Head">H</td>
+    <tr><td class="roll">8</td><td class="location" title="Head">H</td>
         {% render_armor char.helm "h" %}
       </tr>
-    <tr><td>5-7</td><td title="Torso">T</td>
+    <tr><td class="roll">5-7</td><td class="location" title="Torso">T</td>
         {% render_armor char.armor "t" %}
     </tr>
-    <tr><td>4</td><td title="RA">RA</td>
+    <tr><td class="roll">4</td><td class="location" title="RA">RA</td>
         {% render_armor char.armor "ra" %}
     </tr>
-    <tr><td>3</td><td title="Right leg">RL</td>
+    <tr><td class="roll">3</td><td class="location" title="Right leg">RL</td>
         {% render_armor char.armor "rl" %}
     </tr>
-    <tr><td>2</td><td title="Left arm">LA</td>
+    <tr><td class="roll">2</td><td class="location" title="Left arm">LA</td>
         {% render_armor char.armor "la" %}
     </tr>
-    <tr><td>1</td><td title="Left leg">LL</td>
+    <tr><td class="roll">1</td><td class="location" title="Left leg">LL</td>
         {% render_armor char.armor "ll" %}
     </tr>
   </table>
@@ -145,6 +120,31 @@ XP: {{ char.xp_used_stats }} +
     <ul>
     <li>Weight carried: {{ char.weight_carried }} kg </li>
     </ul>
+</div>
+
+</div>
+<div class="col-md-8">
+    <table class="derived">
+{% with b=char.body sta=char.stamina mana=char.mana %}
+{# XXX Temporary stamina and body #}
+  <tr class="body">
+    <td>B</td><td>{{ b.base}}</td>
+    <td>{{ b.mod|default:""}}</td>
+    <td>{{ b.recovery_rate|default:"" }}</td>
+  </tr>
+  <tr class="stamina">
+    <td>S</td><td>{{ sta.base}}</td>
+    <td>{{ sta.mod|default:""}}</td>
+    <td>{{sta.recovery_rate|default:"" }}</td>
+  </tr>
+  <tr class="mana">
+    <td>M</td><td>{{ mana.base}}</td>
+    <td>{{ mana.mod|default:""}}</td>
+    <td>{{mana.recovery_rate|default:"" }}</td>
+  </tr>
+{% endwith %}
+</table>
+</div>
 </div>
 
 <h3>Notes</h3>
@@ -165,11 +165,18 @@ XP: {{ char.xp_used_stats }} +
 <h3>Ranged combat</h3>
 {% include "sheet/sheet_detail/ranged_weapons.html" %}
 
+{% if char.campaign.has_firearms %}
+<h3>Firearms</h3>
+{% include "sheet/sheet_detail/firearms.html" %}
+{% endif %}
+
+{% if char.campaign.has_spells %}
 <h3>Miscellaneous items</h3>
 {% include "sheet/sheet_detail/miscellaneous_items.html" %}
 
 <h3>Spell effects</h3>
 {% include "sheet/sheet_detail/spell_effects.html" %}
+{% endif %}
 
 <h3>Edges</h3>
 {% include "sheet/sheet_detail/edges.html" %}
@@ -191,7 +198,7 @@ XP: {{ char.xp_used_stats }} +
 
 </div>
 
-    <div id="skill-pane" class="col-md-4">
+    <div id="skill-pane" class="col-md-3">
         <div class="skills">
             <h3>Skills</h3>
             {% with skills=char.skills %}

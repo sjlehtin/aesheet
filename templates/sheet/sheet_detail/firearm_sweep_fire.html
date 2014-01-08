@@ -1,0 +1,95 @@
+{% load sheet_extras %}
+
+<div class="sweep-fire">
+<div class="row">
+<table class="combat">
+<thead>
+<tr>
+    <th rowspan="2">Weapon</th>
+    <th rowspan="2">RPT</th>
+    <th rowspan="2">TGT</th>
+    <th colspan="16">Hits</th>
+</tr>
+<tr>
+<th>16</th>
+<th>15</th>
+<th>14</th>
+<th>13</th>
+<th>12</th>
+<th>11</th>
+<th>10</th>
+<th>9</th>
+<th>8</th>
+<th>7</th>
+<th>6</th>
+<th>5</th>
+<th>4</th>
+<th>3</th>
+<th>2</th>
+<th>1</th>
+</tr>
+</thead>
+    <tfoot>
+    <tr>
+        <th colspan="3">Lethality modifier</th>
+        <th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+    </tr>
+    <tr>
+        <th colspan="3">Lethality modifier</th>
+        <th>0</th>
+        <th>+2</th><th>+2</th><th>+2</th>
+        <th>-2</th><th>-2</th><th>-2</th>
+        <th>+1</th><th>+1</th><th>+1</th>
+        <th>-1</th><th>-1</th><th>-1</th>
+        <th>0</th><th>0</th><th>0</th>
+    </tr>
+    </tfoot>
+{% for item in weapons %}
+    {% with sweeps=item.sweep_fire_skill_checks %}
+        {% if sweeps %}
+    <tbody>
+    <tr>
+        <td rowspan="5">
+            {{ item }}
+            {% if not char.skill_lookup.Autofire %}
+                <div class="unskilled">Unskilled</div>
+            {% endif %}
+        </td>
+    </tr>
+    {% for sweep in sweeps %}
+        <tr>
+            <td>
+                {{ sweep.rounds }}
+            </td>
+            <td>
+
+            </td>
+        {% for check in sweep.checks|padnone:16 reversed %}
+            <td>{{ check|default:"" }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+        {% endif %}
+    {% endwith %}
+{% endfor %}
+</table>
+
+</div>
+
+<div class="row">
+<div class="help-text">
+    <p>
+        The distance between sweep targets may be up to 1 m (-5 penalty / target), or up to 2 m (-10 penalty / target).
+    </p>
+    <p>
+        All range penalties are doubled in sweep fire (i.e. M -20, L -40, XL -60, E -80)
+    </p>
+</div>
+</div>
+</div>

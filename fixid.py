@@ -4,7 +4,7 @@
 A script to fix sequence ids in postgres.  These might get out of sync when
 importing data to the database.
 
-Usage: fixid.py [options]
+Usage: fixid.py [options] DATABASE
 
 Options:
   --verbose, -v    Verbose mode.
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         if args['--verbose']:
             print msg
 
-    with psycopg2.connect(database='sheet', host="127.0.0.1",
+    with psycopg2.connect(database=args['DATABASE'], host="127.0.0.1",
         user=user, password=password) as conn:
         for seq in list_sequences(conn):
             verbose(seq)
@@ -52,6 +52,6 @@ if __name__ == "__main__":
                 last_value = cur.fetchall()[0][0]
                 verbose("Last value: {0}".format(last_value))
                 if last_value < max_id:
-                    print "{table} id has an inconsistence (max: {max_id}, " \
-                          "last value: {last_value}".format(locals())
+                    print "{table} id has an inconsistency: max: {max_id}, " \
+                          "last value: {last_value}".format(**locals())
                 #cur.execute("""SELECT nextval(%s)""")

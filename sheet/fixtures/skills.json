@@ -3891,5 +3891,43 @@
             "type":"Trades",
             "required_skills":["Meditation"]
         }
+    },
+    {
+        "pk":"Handguns",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":4,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":2,
+            "required_edges":[],
+            "skill_cost_0":null,
+            "skill_cost_1":1,
+            "skill_cost_2":2,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":["Basic firearms"]
+        }
+    },
+    {
+        "pk":"Basic firearms",
+        "model":"sheet.skill",
+        "fields":{
+            "tech_level":4,
+            "stat":"DEX",
+            "description":"",
+            "is_specialization":false,
+            "notes":"",
+            "skill_cost_3":null,
+            "required_edges":[],
+            "skill_cost_0":2,
+            "skill_cost_1":null,
+            "skill_cost_2":null,
+            "can_be_defaulted":true,
+            "type":"Physical",
+            "required_skills":[]
+        }
     }
 ]

@@ -4,10 +4,10 @@ import django.contrib.auth as auth
 import math
 import logging
 from functools import wraps
-import pprint
 from collections import namedtuple
-from django.db.models import Sum
-from django.core.exceptions import ValidationError
+import itertools
+from django.utils.datastructures import SortedDict
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,21 +23,19 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
-EXPORTABLE_MODELS = ['ArmorTemplate',
-                     'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
-                     'SpellEffect', 'WeaponTemplate', 'Weapon',
-                     'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
-                     'EdgeLevel', 'EdgeSkillBonus',
-                     'RangedWeaponTemplate', 'RangedWeapon']
-EXPORTABLE_MODELS.sort()
-
 def roundup(dec):
+    """
+    Works like Excel ROUNDUP, rounds the number away from zero.
+    """
     if dec < 0:
         return int(math.floor(dec))
     else:
         return int(math.ceil(dec))
 
 def rounddown(dec):
+    """
+    Works like Excel ROUNDDOWN, rounds the number toward zero.
+    """
     if dec < 0:
         return int(math.ceil(dec))
     else:
@@ -50,7 +48,7 @@ class ExportedModel(models.Model):
     user trying to input data into the system.
     """
     @classmethod
-    def dont_export(self):
+    def dont_export(cls):
         return []
 
     @classmethod
@@ -70,25 +68,46 @@ class ExportedModel(models.Model):
         abstract = True
 
 
-class TechLevel(models.Model):
+class NameManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
+class TechLevel(ExportedModel):
+    """
+    Different periods have different kinds of technologies available.
+    """
+    objects = NameManager()
+
     name = models.CharField(max_length=10, unique=True)
+
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def dont_export(cls):
+        return ["weapontemplate", "campaign", "armortemplate", "armorquality",
+                "miscellaneousitem", "weaponquality", "skill",
+                "rangedweapontemplate", "basefirearm",
+                "ammunition", "id"]
 
 
 class Campaign(models.Model):
     name = models.CharField(max_length=10, unique=True)
     tech_levels = models.ManyToManyField(TechLevel)
 
+    has_firearms = models.BooleanField(default=False)
+    has_spells = models.BooleanField(default=False)
+
     def __unicode__(self):
         return self.name
 
-from django.utils.datastructures import SortedDict
 
 class CampaignItem(object):
     def __init__(self, campaign):
         self.name = campaign.name
         self.objects = []
+
 
 def get_by_campaign(model_class, accessor):
     items = SortedDict()
@@ -99,6 +118,18 @@ def get_by_campaign(model_class, accessor):
         item.objects.append(obj)
     return items.values()
 
+
+class SkillLookup(object):
+    """
+    Allow skill lookup from templates more easily.
+    """
+    def __init__(self, character):
+        self.character = character
+
+    def __getattr__(self, skill):
+        return self.character.get_skill(skill)
+
+
 class Character(models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
@@ -106,9 +137,13 @@ class Character(models.Model):
     character.
     """
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(auth.models.User, related_name="characters")
+    owner = models.ForeignKey(auth.models.User,
+                              related_name="characters")
+
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
+
+    portrait = models.ImageField(blank=True, upload_to='portraits')
 
     # XXX race can be used to fill in basic edges and stats later for,
     # e.g., GM usage.
@@ -174,6 +209,10 @@ class Character(models.Model):
 
     class Meta:
         ordering = ['name']
+
+    def __init__(self, *args, **kwargs):
+        super(Character, self).__init__(*args, **kwargs)
+        self.skill_lookup = SkillLookup(self)
 
     def get_ability(self, abilities, ability, accessor):
         """
@@ -481,6 +520,7 @@ STAT_TYPES = BASE_STATS + [
     ]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
+
 class Skill(ExportedModel):
     """
     """
@@ -540,11 +580,15 @@ class Skill(ExportedModel):
                 'primary_for_weapontemplate',
                 'secondary_for_weapontemplate',
                 'base_skill_for_weapontemplate',
+                'primary_for_basefirearm',
+                'secondary_for_basefirearm',
+                'base_skill_for_basefirearm',
                 'skill', 'edgeskillbonus', 'characterlogentry',
                 'edgelevel']
 
     def __unicode__(self):
         return u"%s" % (self.name)
+
 
 class CharacterSkill(models.Model):
     character = models.ForeignKey(Character, related_name='skills')
@@ -592,6 +636,7 @@ class CharacterSkill(models.Model):
         ordering = ('skill__name', )
         unique_together = ('character', 'skill')
 
+
 class StatModifier(models.Model):
     # `notes' will be added to the effects list, which describes all the
     # noteworthy resistances and immunities of the character not
@@ -621,6 +666,7 @@ class StatModifier(models.Model):
     class Meta:
         abstract = True
 
+
 class EdgeLevel(ExportedModel, StatModifier):
     """
     This stores the actual modifiers for a specific edge at a certain
@@ -645,6 +691,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     class Meta:
         ordering = ('edge', 'level')
 
+
 class EdgeSkillBonus(ExportedModel):
     """
     Skill bonuses from edges, e.g., +15 to Surgery from Acute Touch, is
@@ -659,12 +706,14 @@ class EdgeSkillBonus(ExportedModel):
     def __unicode__(self):
         return u"%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
+
 class CharacterEdge(models.Model):
     character = models.ForeignKey(Character, related_name='edges')
     edge = models.ForeignKey(EdgeLevel)
 
     def __unicode__(self):
         return u"%s: %s" % (self.character, self.edge)
+
 
 class BaseWeaponQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
@@ -691,6 +740,7 @@ class BaseWeaponQuality(ExportedModel):
         abstract = True
         ordering = ["roa", "ccv"]
 
+
 class WeaponQuality(BaseWeaponQuality):
     """
     """
@@ -705,6 +755,13 @@ class WeaponQuality(BaseWeaponQuality):
 
     def __unicode__(self):
         return self.name
+
+def format_damage(num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
+    return u"%sd%s%s/%d%s" % (
+            num_dice, dice,
+            "%+d" % extra_damage if extra_damage else "",
+            leth,
+            "%+d" % plus_leth if plus_leth else "")
 
 class WeaponDamage(object):
     def __init__(self, num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
@@ -730,6 +787,9 @@ class WeaponDamage(object):
         return self.num_dice * self.dice + self.extra_damage
 
     def __unicode__(self):
+        return format_damage(self.num_dice, self.dice, self.extra_damage,
+                             self.leth, self.plus_leth)
+
         if self.plus_leth:
             plus_leth_str = "%+d" % self.plus_leth
         else:
@@ -740,32 +800,22 @@ class WeaponDamage(object):
             "%+d" % self.extra_damage if self.extra_damage else "",
             self.leth, plus_leth_str)
 
-class BaseWeaponTemplate(ExportedModel):
+
+class BaseArmament(ExportedModel):
     class Meta:
         abstract = True
         ordering = ['name']
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(
         max_length=64,
-        help_text="This is used when the name must be fit to a small space")
+        help_text="This is used when the name must be fit to a small space",
+        blank=True)
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=64, blank=True)
 
     tech_level = models.ForeignKey(TechLevel)
 
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
-
-    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
-
-    num_dice = models.IntegerField(default=1)
-    dice = models.IntegerField(default=6)
-    extra_damage = models.IntegerField(default=0)
-    leth = models.IntegerField(default=5)
-    plus_leth = models.IntegerField(default=0)
-
-    type = models.CharField(max_length=5, default="S")
-
-    bypass = models.IntegerField(default=0)
 
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
@@ -781,16 +831,182 @@ class BaseWeaponTemplate(ExportedModel):
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
                                related_name="secondary_for_%(class)s")
 
-    @classmethod
-    def dont_export(self):
-        return ['weapon']
-
     def __unicode__(self):
         return u"%s" % (self.name)
+
+
+class BaseDamager(models.Model):
+    num_dice = models.IntegerField(default=1)
+    dice = models.IntegerField(default=6)
+    extra_damage = models.IntegerField(default=0)
+    leth = models.IntegerField(default=5)
+    plus_leth = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+
+class BaseWeaponTemplate(BaseArmament, BaseDamager):
+
+    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+
+    bypass = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+
+
+Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
+
+
+class RangedWeaponMixin(models.Model):
+    type = models.CharField(max_length=5, default="P")
+
+    target_initiative = models.IntegerField(default=-2)
+
+    range_pb = models.IntegerField(blank=True, null=True)
+    range_xs = models.IntegerField(blank=True, null=True)
+    range_vs = models.IntegerField(blank=True, null=True)
+    range_s = models.IntegerField()
+    range_m = models.IntegerField()
+    range_l = models.IntegerField()
+    range_xl = models.IntegerField(blank=True, null=True)
+    range_e = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def ranges(self, sheet):
+        return Range._make([self.range_pb, self.range_xs,
+                            self.range_vs, self.range_s,
+                            self.range_m, self.range_l,
+                            self.range_xl, self.range_e])
+
+
+class BaseFirearm(BaseArmament, RangedWeaponMixin):
+    """
+    """
+    autofire_rpm = models.IntegerField(blank=True, null=True)
+    _class_choices = ("A", "B", "C", "D", "E")
+    autofire_class = models.CharField(max_length=1, blank=True,
+                                      choices=zip(_class_choices,
+                                                  _class_choices))
+
+    stock = models.DecimalField(max_digits=4, decimal_places=2,
+                                default=1,
+                                help_text="Weapon stock modifier for recoil "
+                                          "calculation.  Larger is better.")
+
+    duration = models.DecimalField(max_digits=5, decimal_places=3,
+                                   default=0.1,
+                                   help_text="Modifier for recoil.  In "
+                                             "principle, time in seconds from "
+                                             "the muzzle break, whatever that "
+                                             "means.  Bigger is better.")
+
+    def get_ammunition_types(self):
+        """
+        Return the accepted ammunition types for the firearm.
+        """
+        return [ammo.short_label for ammo in self.ammunition_types.all()]
+
+    @classmethod
+    def dont_export(cls):
+        return ['short_name', 'range_pb', 'range_xs', 'range_vs',
+                'range_xl', 'range_e', 'firearm', ]
+
+
+class Ammunition(ExportedModel, BaseDamager):
+    """
+    """
+    label = models.CharField(max_length=20,
+                             help_text="Ammunition caliber, which should also "
+                                       "distinguish between barrel lengths "
+                                       "and such.")
+    type = models.CharField(max_length=10,
+                            help_text="Make of the ammo, such as "
+                                      "full metal jacket.")
+
+    tech_level = models.ForeignKey(TechLevel)
+
+    bypass = models.IntegerField(default=0)
+
+    weight = models.DecimalField(decimal_places=3, max_digits=7,
+                                 help_text="Weight of a single round in "
+                                           "grams.  Used to calculate recoil.")
+
+    velocity = models.IntegerField(help_text="Velocity of the bullet at muzzle "
+                                             "in meters per second.  Used to "
+                                             "calculate recoil.")
+    @property
+    def damage(self):
+        return format_damage(self.num_dice, self.dice, self.extra_damage,
+                             self.leth, self.plus_leth)
+
+    def impulse(self):
+        return (float(self.weight)* self.velocity)/1000
+
+    @classmethod
+    def dont_export(cls):
+        return ['firearm']
+
+    def __unicode__(self):
+        return u"{label} {type} ({impulse:.2f})".format(label=self.label,
+                                                        type=self.type,
+                                                        impulse=self.impulse())
+
+
+class FirearmAmmunitionType(models.Model):
+    firearm = models.ForeignKey(BaseFirearm,
+                                related_name="ammunition_types")
+    short_label = models.CharField(max_length=20,
+                                   help_text="Matches the respective field in "
+                                             "ammunition")
+
+
+class Firearm(models.Model):
+    # modification, such as scopes could be added here.
+    base = models.ForeignKey(BaseFirearm)
+    ammo = models.ForeignKey(Ammunition)
+
+    def roa(self):
+        """
+        Calculated based on ammo and base.
+        """
+        # Magic formula for ROF calculation.
+        recoil = self.ammo.impulse()/float(
+            self.base.duration * self.base.stock * (self.base.weight + 6))
+        logger.debug("impulse: {impulse}, recoil: {recoil}".format(
+            impulse=self.ammo.impulse(),
+            recoil=recoil))
+        rof = 30 / (recoil + 6)
+        logger.debug("rof: {rof}".format(rof=rof))
+        return rof
+
+    def ranges(self, sheet):
+        return self.base.ranges(sheet)
+
+    def damage(self):
+        return self.ammo.damage
+
+    def has_sweep_fire(self):
+        return bool(self.base.autofire_rpm)
+
+    @property
+    def to_hit(self):
+        # XXX scopes etc
+        return 0
+
+    def __unicode__(self):
+        return u"{base} w/ {ammo}".format(base=self.base,
+                                          ammo=self.ammo)
+
 
 class WeaponTemplate(BaseWeaponTemplate):
     """
     """
+    type = models.CharField(max_length=5, default="S")
+
     ccv = models.IntegerField(default=10)
     ccv_unskilled_modifier = models.IntegerField(default=-10)
 
@@ -799,27 +1015,24 @@ class WeaponTemplate(BaseWeaponTemplate):
     is_lance = models.BooleanField(default=False)
     is_shield = models.BooleanField(default=False)
 
-class RangedWeaponTemplate(BaseWeaponTemplate):
+    @classmethod
+    def dont_export(cls):
+        return ['weapon']
+
+
+class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     """
-    target_initiative = models.IntegerField(default=-2)
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
 
     ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
                                       default=0.1)
-    range_pb = models.IntegerField(blank=True, null=True)
-    range_xs = models.IntegerField()
-    range_vs = models.IntegerField()
-    range_s = models.IntegerField()
-    range_m = models.IntegerField()
-    range_l = models.IntegerField()
-    range_xl = models.IntegerField()
-    range_e = models.IntegerField()
 
     @classmethod
     def dont_export(self):
         return ['rangedweapon']
+
 
 EFFECT_TYPES = [
     "enhancement",
@@ -827,6 +1040,7 @@ EFFECT_TYPES = [
     "circumstance",
     ]
 EFFECT_TYPES = zip(EFFECT_TYPES, EFFECT_TYPES)
+
 
 class Effect(StatModifier):
     name = models.CharField(primary_key=True, max_length=256)
@@ -844,6 +1058,7 @@ class Effect(StatModifier):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+
 class WeaponSpecialQuality(ExportedModel, Effect):
     """
     """
@@ -854,6 +1069,7 @@ class WeaponSpecialQuality(ExportedModel, Effect):
 
     def __unicode__(self):
         return u"WSQ: %s" % (self.name)
+
 
 class ArmorSpecialQuality(ExportedModel, Effect):
     """
@@ -901,6 +1117,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
     # name "effects".
     def __unicode__(self):
         return u"ASQ: %s" % (self.name)
+
 
 class Weapon(ExportedModel):
     """
@@ -960,7 +1177,6 @@ class Weapon(ExportedModel):
             quality = self.quality
         return u"%s %s" % (quality, self.base)
 
-Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
 class RangedWeapon(ExportedModel):
     """
@@ -1018,10 +1234,7 @@ class RangedWeapon(ExportedModel):
         return u"%s %s" % (quality, self.base)
 
     def ranges(self, sheet):
-        return Range._make([self.base.range_pb, self.base.range_xs,
-                            self.base.range_vs, self.base.range_s,
-                            self.base.range_m, self.base.range_l,
-                            self.base.range_xl, self.base.range_e])
+        return self.base.ranges(sheet)
 
 class ArmorTemplate(ExportedModel):
     """
@@ -1103,6 +1316,7 @@ class ArmorTemplate(ExportedModel):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+
 class ArmorQuality(ExportedModel):
     """
     """
@@ -1140,6 +1354,7 @@ class ArmorQuality(ExportedModel):
 
     def __unicode__(self):
         return u"AQ:" + self.name
+
 
 class Armor(ExportedModel):
     """
@@ -1190,12 +1405,14 @@ class Armor(ExportedModel):
     def mod_psy(self):
         return min(self.base.mod_psy + self.quality.mod_psy, 0)
 
+
 class SpellEffect(ExportedModel, Effect):
     """
     """
     @classmethod
     def dont_export(cls):
         return ['sheet']
+
 
 class MiscellaneousItem(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
@@ -1212,6 +1429,9 @@ class MiscellaneousItem(ExportedModel):
         return self.name
 
 
+Action = namedtuple('Action', ['action', 'check', 'initiative'])
+
+
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
@@ -1220,6 +1440,8 @@ class Sheet(models.Model):
 
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
+    firearms = models.ManyToManyField(Firearm, blank=True)
+
     miscellaneous_items = models.ManyToManyField(MiscellaneousItem, blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
@@ -1280,8 +1502,9 @@ class Sheet(models.Model):
         return roa
 
     def rof(self, weapon):
-        roa = weapon.roa()
+        roa = float(weapon.roa())
         level = self.character.skill_level(weapon.base.base_skill)
+        # XXX firearms...
         spec_level = self.character.skill_level("Rapid archery")
 
         if spec_level:
@@ -1296,6 +1519,8 @@ class Sheet(models.Model):
 
     actions = [xx/2.0 for xx in range(1, 10, 1)]
     ranged_actions = [0.5, 1, 2, 3, 4, 5]
+    firearm_actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    firearm_burst_fire_actions = [0.5, 1, 2, 3, 4]
 
     def max_attacks(self, roa):
         return min(int(math.floor(roa * 2)), 9)
@@ -1308,14 +1533,29 @@ class Sheet(models.Model):
         return self.eff_ref / 10.0 + self.eff_int / 20.0 + \
             self.eff_psy / 20.0
 
-    def initiatives(self, weapon, use_type=FULL):
+    def _initiatives(self, roa, actions=None, readied_base_i=-3,
+                     target_i=0):
         bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
-        roa = self.roa(weapon, use_type=use_type)
         bi = -5 / roa
+
+        if actions is None:
+            actions = range(1, self.max_attacks(roa) + 1)
+
         inits = []
-        for ii in range(1, self.max_attacks(roa) + 1):
-            inits.append(bi_multipliers[ii - 1] * bi)
-        return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
+        for act in actions:
+            if roa > 2 * act and act < 1:
+                # House Rules, initiative, p. 8, initiatives when target
+                # acquired and weapon readied in a previous turn.
+                inits.append(max(readied_base_i, bi) + min(target_i + 3, 0))
+            else:
+                # If the action is less than one, we use the first.
+                action_index = roundup(act) - 1
+                inits.append(bi_multipliers[action_index] * bi + target_i)
+
+        return map(lambda xx: int(round(xx + self.base_initiative)), inits)
+
+    def initiatives(self, weapon, use_type=FULL):
+        return self._initiatives(self.roa(weapon, use_type=use_type))
 
     def defense_initiatives(self, weapon, use_type=FULL):
         bi_multipliers = [0, 3, 6, 0, 3, 6, 0, 3, 6]
@@ -1340,6 +1580,12 @@ class Sheet(models.Model):
                          unicode(weapon.base.skill2))
             return False
         return True
+
+    def _counter_penalty(self, penalty, stat):
+        if penalty > 0:
+            # It was actually a bonus, so no effect.
+            return penalty
+        return min(0, penalty + rounddown((stat - 45)/3.0))
 
     def weapon_skill_checks(self, weapon, use_type=FULL):
         roa = self.roa(weapon, use_type=use_type)
@@ -1386,74 +1632,189 @@ class Sheet(models.Model):
                            for act in filter(lambda act: act < roa * 2,
                                              self.actions)]
         def counter_penalty(penalty):
-            # Intuition counters ranged weapon penalties.
-            return min(0, penalty + rounddown((self.eff_int - 45)/3.0))
+            return self._counter_penalty(penalty, self.eff_int)
 
         checks = map(counter_penalty, checks)
         mov = self.eff_mov + modifiers
         return [int(round(xx) + mov) for xx in checks]
 
+    def weapon_skill_check(self, weapon):
+        # skill level/unskilled.
+        cs = self.character.get_skill(weapon.base.base_skill)
+        if cs is not None:
+            base_skill = self.eff_dex + cs.level * 5
+        else:
+            base_skill = self.eff_dex / 2.0
+        return base_skill
 
-    def ranged_skill_checks(self, weapon):
-        rof = self.rof(weapon)
-        roa = float(rof)
+    def ranged_skill_checks(self, weapon, actions=ranged_actions,
+                            extra_action_modifier=10,
+                            counter_penalties=True):
+        """
+        extra_action_modifier is used to derive the check for actions exceeding
+        the ROA.
+        """
+        roa = float(self.rof(weapon))
         def check_mod_from_action_index(act):
-            act = float(act)
             if 1/act >= 1/roa + 1:
                 return 10 # ranged.
             if act > roa:
-                return - act/roa * 20 + 10
+                return - act/roa * 20 + extra_action_modifier
             if act < 0.5 * roa:
                 return roa / act
             return 0
 
-        modifiers = 0
-
-        # skill level/unskilled.
-        cs = self.character.skills.filter(skill=weapon.base.base_skill)
-        if cs.count() > 0:
-            base_skill = self.eff_dex + cs[0].level * 5
-        else:
-            base_skill = roundup(self.eff_dex / 2.0)
+        base_skill = self.weapon_skill_check(weapon)
 
         logging.info("ROF %s" % roa)
         checks = [check_mod_from_action_index(act)
                   # cap number of actions.
-                  for act in filter(lambda act: act < roa * 2,
-                                    self.ranged_actions)]
+                  for act in filter(lambda act: act < roa * 2, actions)]
         logging.info("checks: %s" % checks)
+
         def counter_penalty(penalty):
-            # Fitness counters ranged weapon penalties.
-            return min(0, penalty + rounddown((self.eff_fit - 45)/3.0))
+            return self._counter_penalty(penalty, self.eff_fit)
 
-        checks = map(counter_penalty, checks)
+        if counter_penalties:
+            checks = map(counter_penalty, checks)
         base_skill = base_skill + weapon.to_hit
-        return [int(round(xx) + base_skill) for xx in checks]
 
+        checks = [int(round(xx + base_skill)) for xx in checks]
+
+        # Pad actions with Nones where an action is not available.
+        return [Action(action=act, check=check,
+                       initiative=(init if check is not None else None))
+                for (act, check, init) in itertools.izip_longest(
+                    actions, checks, self._initiatives(
+                    roa, actions,
+                    readied_base_i=-1,
+                    target_i=weapon.base.target_initiative))]
+
+    def firearm_skill_checks(self, weapon, actions=None,
+                             counter_penalties=True):
+        if actions is None:
+            actions = self.firearm_actions
+        return self.ranged_skill_checks(weapon,
+                                        actions=actions,
+                                        extra_action_modifier=15,
+                                        counter_penalties=counter_penalties)
+
+    _autofire_classes = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5}
+
+    def firearm_burst_fire_skill_checks(self, weapon):
+        if not weapon.base.autofire_rpm:
+            # no burst fire with this weapon.
+            return
+
+        single_fire_actions = []
+        # Map burst fire actions to respective single fire actions to get the
+        # base skill check.
+        for act in self.firearm_burst_fire_actions:
+            if act >= 1:
+                act = 2*act - 1
+            single_fire_actions.append(act)
+
+        logger.debug("Burst fire actions mapped to single-fire actions: "
+                     "{acts}".format(acts=single_fire_actions))
+        checks = self.firearm_skill_checks(weapon,
+                                           actions=single_fire_actions,
+                                           counter_penalties=False)
+
+        burst_multipliers = [0, 1, 3, 6, 10]
+        burst_modifiers = [self._autofire_classes[weapon.base.autofire_class] * mod
+                           for mod in burst_multipliers]
+        # XXX Replace modifiers from the end with None if the RPM of the weapon
+        # is not enough for the obtained number of hits.
+
+        if not self.character.has_skill("Autofire"):
+            autofire_penalty = -10
+        else:
+            autofire_penalty = 0
+
+        Burst = namedtuple('Burst', ["action", "initiative", "checks"])
+
+        max_hits = int(min(weapon.base.autofire_rpm / 120, 5))
+
+        bursts = []
+        # Remap the actions to burst actions.
+        for (act, cc) in itertools.izip_longest(
+                                     self.firearm_burst_fire_actions,
+                                     checks):
+            burst = []
+            logger.debug("Processing check: {check}".format(check=cc))
+            for ii, burst_mod in zip(range(max_hits), burst_modifiers):
+                if cc.check is not None:
+                    # XXX Apply autofire penalty (not counterable).
+                    # XXX Counter penalties with high FIT.
+                    check = cc.check + burst_mod + autofire_penalty
+                else:
+                    check = None
+                burst.append(check)
+            bursts.append(Burst(action=act, initiative=cc.initiative,
+                                checks=list(itertools.islice(
+                                    itertools.chain(burst,
+                                                    itertools.repeat(None)),
+                                    0, 5))))
+        return bursts
+
+    def firearm_sweep_fire_skill_checks(self, weapon):
+        if not weapon.base.autofire_rpm:
+            # no sweep fire with this weapon.
+            return
+
+        klass = self._autofire_classes[weapon.base.autofire_class]
+
+        check = self.weapon_skill_check(weapon)
+
+        Sweep = namedtuple('Sweep', ["rounds", "checks"])
+
+        if not self.character.has_skill("Autofire"):
+            autofire_penalty = -20
+        else:
+            autofire_penalty = -10
+
+        def burst_check(iter, sweep_bonus):
+            penalty_multiplier = 0
+            for ii in iter:
+                penalty_multiplier += ii
+                yield (self._counter_penalty(sweep_bonus +
+                                             penalty_multiplier * klass,
+                                             self.eff_fit) +
+                       autofire_penalty +
+                       check)
+
+        return [Sweep(rounds=5, checks=list(burst_check(
+                    [0, 2, 5, 10], 5))),
+                Sweep(rounds=10, checks=list(burst_check(
+                    [0, 1, 2, 2, 5, 5, 10, 10], 10))),
+                Sweep(rounds=15, checks=list(burst_check(
+                    [0, 1, 1, 2, 2, 2, 5, 5, 5, 10, 10, 10], 15))),
+                Sweep(rounds=20, checks=list(burst_check(
+                    [0, 1, 1, 1, 2, 2, 2, 2, 5, 5, 5, 5, 10, 10, 10, 10], 20)))]
 
     def ranged_ranges(self, weapon):
         return weapon.ranges(self)
 
     @property
-    def _cc_eff_fit(self):
+    def _cc_bonus_fit(self):
         return (self.eff_fit +
                 (self.character.skill_level("Martial arts expertise") or 0) * 5
                 - 45)
 
     def damage(self, weapon, use_type=FULL):
         dmg = weapon.damage()
-        dmg.add_damage(rounddown(self._cc_eff_fit /
+        dmg.add_damage(rounddown(self._cc_bonus_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self._cc_eff_fit /
+        dmg.add_leth(rounddown(self._cc_bonus_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
-        dmg.add_damage(rounddown(self._cc_eff_fit /
+        dmg.add_damage(rounddown(self._cc_bonus_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self._cc_eff_fit /
+        dmg.add_leth(rounddown(self._cc_bonus_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
@@ -1745,3 +2106,25 @@ class CharacterLogEntry(models.Model):
                 return u"Changed %s." % (self.field)
         elif self.entry_type == self.SKILL:
             return u"Added skill %s %d." % (self.skill, self.skill_level)
+
+
+def _collect_exportable_classes(start_model):
+    """
+    Collect all models inheriting from, e.g., ExportedModel, which have not
+    been declared abstract.
+    """
+    subclasses = start_model.__subclasses__()
+    models = []
+    processed = []
+    while subclasses:
+        cc = subclasses[0]
+        processed.append(cc)
+        subclasses = subclasses[1:]
+        subclasses.extend(
+            set(cc.__subclasses__()) - set(processed))
+        if not cc._meta.abstract:
+            models.append(cc)
+    return models
+
+EXPORTABLE_MODELS = sorted([cc.__name__
+                     for cc in _collect_exportable_classes(ExportedModel)])
