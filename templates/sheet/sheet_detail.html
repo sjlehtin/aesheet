@@ -46,7 +46,13 @@
 </div>
 </div>
 <div class="col-md-8">
+    {% if char.character.portrait %}
     <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}" >
+    {% else %}
+        <div class="edit-control">You can add a portrait for your character in
+            the <a href="{% url "edit_character" char.character.id %}">
+                base character edit</a>.</div>
+    {% endif %}
 </div>
 </div>
 
