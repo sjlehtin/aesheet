@@ -813,8 +813,6 @@ class BaseArmament(ExportedModel):
 
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
 
-    bypass = models.IntegerField(default=0)
-
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
 
@@ -847,6 +845,8 @@ class BaseDamager(models.Model):
 class BaseWeaponTemplate(BaseArmament, BaseDamager):
 
     roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+
+    bypass = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -924,6 +924,8 @@ class Ammunition(ExportedModel, BaseDamager):
                                       "full metal jacket.")
 
     tech_level = models.ForeignKey(TechLevel)
+
+    bypass = models.IntegerField(default=0)
 
     weight = models.DecimalField(decimal_places=3, max_digits=7,
                                  help_text="Weight of a single round in "

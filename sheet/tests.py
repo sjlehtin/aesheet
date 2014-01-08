@@ -616,15 +616,15 @@ class BaseFirearmFormTestCase(TestCase):
 class FirearmImportExportTestcase(TestCase):
     firearm_csv_data = """\
 "BaseFirearm",,,,,,,,,,,,,,,,,,,,
-"name","description","notes","tech_level","draw_initiative","bypass","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
-"Glock 19",,,"2K",-3,0,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
+"name","description","notes","tech_level","draw_initiative","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
+"Glock 19",,,"2K",-3,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
 
 """
 
     ammo_csv_data = """\
 "Ammunition",,,,,,,,,,
-"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","weight","velocity"
-,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400
+"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","weight","velocity","bypass"
+,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400,0
 
 """
 
