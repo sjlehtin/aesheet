@@ -8,7 +8,9 @@
                 1, 
                 2, 
                 3
-            ]
+            ],
+            "has_firearms": false,
+            "has_spells": true
         }
     }, 
     {
@@ -19,7 +21,8 @@
             "tech_levels": [
                 1, 
                 4
-            ]
+            ],
+            "has_firearms": true
         }
     }, 
     {
@@ -31,7 +34,8 @@
                 1, 
                 4, 
                 5
-            ]
+            ],
+            "has_firearms": true
         }
     }, 
     {
@@ -43,7 +47,8 @@
                 1, 
                 3, 
                 5
-            ]
+            ],
+            "has_firearms": true
         }
     }, 
     {
@@ -54,7 +59,8 @@
             "tech_levels": [
                 1, 
                 4
-            ]
+            ],
+            "has_firearms": true
         }
     }, 
     {
@@ -65,7 +71,8 @@
             "tech_levels": [
                 1, 
                 3
-            ]
+            ],
+            "has_firearms": false
         }
     }, 
     {

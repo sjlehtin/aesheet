@@ -96,10 +96,8 @@ class Campaign(models.Model):
     name = models.CharField(max_length=10, unique=True)
     tech_levels = models.ManyToManyField(TechLevel)
 
-    @property
-    def has_firearms(self):
-        return BaseFirearm.objects.filter(
-            tech_level__in=self.tech_levels.all()).exists()
+    has_firearms = models.BooleanField(default=False)
+    has_spells = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name

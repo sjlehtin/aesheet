@@ -170,11 +170,13 @@ XP: {{ char.xp_used_stats }} +
 {% include "sheet/sheet_detail/firearms.html" %}
 {% endif %}
 
+{% if char.campaign.has_spells %}
 <h3>Miscellaneous items</h3>
 {% include "sheet/sheet_detail/miscellaneous_items.html" %}
 
 <h3>Spell effects</h3>
 {% include "sheet/sheet_detail/spell_effects.html" %}
+{% endif %}
 
 <h3>Edges</h3>
 {% include "sheet/sheet_detail/edges.html" %}
