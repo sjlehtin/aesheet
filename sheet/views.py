@@ -333,29 +333,38 @@ class SheetView(object):
         self.sheet = sheet
 
     @property
-    def stats(self):
+    def base_stats(self):
         ll = []
-        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos",
-                   "mov", "dex", "imm"]:
+        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
             stat = {'name' : st,
                     'base' : getattr(self.sheet, st),
                     'eff' : getattr(self.sheet, "eff_" + st),
                     }
-            if st not in ["mov", "dex", "imm"]:
-                stat.update({
-                        'add_form' : StatModifyForm(
-                            instance=self.sheet.character,
-                            initial={ 'stat' : "cur_" + st,
-                                      'function' : "add" },
-                            prefix='stat-modify'),
-                        'dec_form' : StatModifyForm(
-                            instance=self.sheet.character,
-                            initial={ 'stat' : "cur_" + st,
-                                      'function' : "dec" },
-                            prefix='stat-modify'),
-                        'change': getattr(self.sheet, "cur_" + st) -
-                                  getattr(self.sheet, "start_" + st),
-                        })
+            stat.update({
+                'add_form': StatModifyForm(
+                    instance=self.sheet.character,
+                    initial={'stat': "cur_" + st,
+                             'function': "add"},
+                    prefix='stat-modify'),
+                'dec_form': StatModifyForm(
+                    instance=self.sheet.character,
+                    initial={'stat': "cur_" + st,
+                             'function': "dec"},
+                    prefix='stat-modify'),
+                'change': getattr(self.sheet, "cur_" + st) -
+                          getattr(self.sheet, "start_" + st),
+            })
+            ll.append(stat)
+        return ll
+
+    @property
+    def derived_stats(self):
+        ll = []
+        for st in ["mov", "dex", "imm"]:
+            stat = {'name' : st,
+                    'base' : getattr(self.sheet, st),
+                    'eff' : getattr(self.sheet, "eff_" + st),
+                    }
             ll.append(stat)
         return ll
 

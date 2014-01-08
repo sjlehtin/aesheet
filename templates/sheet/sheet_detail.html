@@ -7,10 +7,14 @@
 
 {% block content %}
     <div class="row">
-<div class="col-md-9">
 <h1>{{ char.name }}</h1>
 {{ char.race }}
 {{ char.occupation }}
+    </div>
+    <div class="row">
+<div class="col-md-9">
+<div class="row">
+<div class="col-md-4">
 <p>
 {{ char.character.description }}
 </p>
@@ -34,61 +38,26 @@
 {% url "sheet.views.sheet_detail" char.id as act %}
 
 <table class="base">
-{% for stat in char.stats %}
-  <tr><td class="stats name">{{ stat.name|upper }}</td>
-      <td class="stats base">{{ stat.base }}</td>
-      <td class="stats eff">{{ stat.eff }}</td>
-      {% if stat.add_form %}
-      <td class="edit-control">
-           <div class="edit-control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ stat.add_form }}
-              <input type="submit" value="+" />
-              </form>
-           </div>
-      </td>
-      <td class="edit-control">
-           <div class="edit-control">
-              <form action="{{ act }}" method="post">
-                {% csrf_token %}
-                {{ stat.dec_form }}
-              <input type="submit" value="-" />
-              </form>
-           </div>
-      </td>
-          <td class="stats change">({{ stat.change|stringformat:"+d" }})</td>
-      {% else %}
-          <td class="edit-control"></td>
-          <td class="edit-control"></td>
-          <td></td>
-      {% endif %}
-  </tr>
+{% for stat in char.base_stats %}
+    {% include "sheet/sheet_detail/stat.html" %}
 {% endfor %}
 </table>
 
-<table class="derived">
-{% with b=char.body sta=char.stamina mana=char.mana %}
-{# XXX Temporary stamina and body #}
-  <tr class="body">
-    <td>B</td><td>{{ b.base}}</td>
-    <td>{{ b.mod|default:""}}</td>
-    <td>{{ b.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="stamina">
-    <td>S</td><td>{{ sta.base}}</td>
-    <td>{{ sta.mod|default:""}}</td>
-    <td>{{sta.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="mana">
-    <td>M</td><td>{{ mana.base}}</td>
-    <td>{{ mana.mod|default:""}}</td>
-    <td>{{mana.recovery_rate|default:"" }}</td>
-  </tr>
-{% endwith %}
-</table>
-
 </div>
+</div>
+<div class="col-md-8">
+    <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}" >
+</div>
+</div>
+
+<div class="row">
+<div class="col-md-4">
+
+<table class="derived">
+{% for stat in char.derived_stats %}
+    {% include "sheet/sheet_detail/stat.html" %}
+{% endfor %}
+</table>
 
 <div class="xp">
 XP: {{ char.xp_used_stats }} + 
@@ -145,6 +114,31 @@ XP: {{ char.xp_used_stats }} +
     <ul>
     <li>Weight carried: {{ char.weight_carried }} kg </li>
     </ul>
+</div>
+
+</div>
+<div class="col-md-8">
+    <table class="derived">
+{% with b=char.body sta=char.stamina mana=char.mana %}
+{# XXX Temporary stamina and body #}
+  <tr class="body">
+    <td>B</td><td>{{ b.base}}</td>
+    <td>{{ b.mod|default:""}}</td>
+    <td>{{ b.recovery_rate|default:"" }}</td>
+  </tr>
+  <tr class="stamina">
+    <td>S</td><td>{{ sta.base}}</td>
+    <td>{{ sta.mod|default:""}}</td>
+    <td>{{sta.recovery_rate|default:"" }}</td>
+  </tr>
+  <tr class="mana">
+    <td>M</td><td>{{ mana.base}}</td>
+    <td>{{ mana.mod|default:""}}</td>
+    <td>{{mana.recovery_rate|default:"" }}</td>
+  </tr>
+{% endwith %}
+</table>
+</div>
 </div>
 
 <h3>Notes</h3>

@@ -3,6 +3,7 @@ html { height : 100%; min-height : 100%; }
 table td { vertical-align: top }
 
 #content { min-height: 100%; overflow: auto; }
+#portrait { max-height: 400px; max-width: 400px;}
 #skill-pane { font-size: 80%; }
 #right-pane { position: absolute;
 	     font-size: 80%;
@@ -144,6 +145,8 @@ table.data { font-size: 80%; }
 .data td:not(:first-child) { text-align: center; }
 
 @media print {
-    #top,#navigation,#sidebar,#authbar,.edit-control,.no-print { display: none; }
-    body { font-size: 8pt; } 
+    #top,#navigation,#sidebar,#authbar,.edit-control,.no-print,
+    .show-hide.advanced { display: none; }
+    body { font-size: 8pt; }
+    #portrait { max-height: 150px; max-width: 300px;}
 }

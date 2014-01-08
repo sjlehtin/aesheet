@@ -137,9 +137,13 @@ class Character(models.Model):
     character.
     """
     name = models.CharField(max_length=256)
-    owner = models.ForeignKey(auth.models.User, related_name="characters")
+    owner = models.ForeignKey(auth.models.User,
+                              related_name="characters")
+
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
+
+    portrait = models.ImageField(blank=True, upload_to='portraits')
 
     # XXX race can be used to fill in basic edges and stats later for,
     # e.g., GM usage.
