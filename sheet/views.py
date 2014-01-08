@@ -109,6 +109,7 @@ import django.forms.util
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 import django.db.models
+from django.views.generic import UpdateView, CreateView
 import sheet.models
 import csv
 import StringIO
@@ -118,7 +119,6 @@ import subprocess
 from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
-from itertools import izip_longest
 import django.db
 
 logger = logging.getLogger(__name__)
@@ -475,7 +475,9 @@ def process_sheet_change_request(request, sheet):
 
     return False
 
+
 Notes = namedtuple("Notes", ["positive", "negative"])
+
 
 def get_notes(character, filter_kwargs):
     args = { 'character': character }
@@ -607,26 +609,29 @@ def sheet_detail(request, sheet_id=None):
     return render_to_response('sheet/sheet_detail.html',
                               RequestContext(request, c))
 
-from django.views.generic import UpdateView, CreateView
-
 
 class AddWeaponView(CreateView):
     model = Weapon
     template_name = 'sheet/add_weapon.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddWeaponTemplateView(AddWeaponView):
     model = WeaponTemplate
+
 
 class AddWeaponQualityView(AddWeaponView):
     model = WeaponQuality
 
+
 class AddWeaponSpecialQualityView(AddWeaponView):
     model = WeaponSpecialQuality
+
 
 class AddMiscellaneousItemView(AddWeaponView):
     model = MiscellaneousItem
     template_name = 'sheet/add_miscellaneous_item.html'
+
 
 class EditCharacterView(UpdateView):
     form_class = CharacterForm
@@ -639,18 +644,22 @@ class EditCharacterView(UpdateView):
         dd['request'] = self.request
         return dd
 
+
 class AddCharacterView(CreateView):
     model = Character
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(characters_index)
+
 
 class AddSpellEffectView(CreateView):
     model = SpellEffect
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddEdgeView(AddSpellEffectView):
     model = Edge
+
 
 class EditSheetView(UpdateView):
     form_class = EditSheetForm
@@ -658,37 +667,47 @@ class EditSheetView(UpdateView):
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddSheetView(CreateView):
     model = Sheet
     form_class = EditSheetForm
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
+
 class AddEdgeLevelView(AddSpellEffectView):
     form_class = EditEdgeLevelForm
     model = EdgeLevel
 
+
 class AddEdgeSkillBonusView(AddSpellEffectView):
     model = EdgeSkillBonus
+
 
 class AddRangedWeaponView(AddWeaponView):
     model = RangedWeapon
 
+
 class AddFirearmView(AddWeaponView):
     model = BaseFirearm
+
 
 class AddAmmunitionView(AddWeaponView):
     model = Ammunition
 
+
 class AddRangedWeaponTemplateView(AddRangedWeaponView):
     model = RangedWeaponTemplate
+
 
 class AddArmorView(AddSpellEffectView):
     model = Armor
     template_name = 'sheet/add_armor.html'
 
+
 class AddArmorTemplateView(AddSpellEffectView):
     model = ArmorTemplate
+
 
 class AddArmorQualityView(AddSpellEffectView):
     model = ArmorQuality
