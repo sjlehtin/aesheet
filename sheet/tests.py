@@ -975,7 +975,7 @@ class Logging(WebTest):
 
         det_url = reverse('edit_character', args=[2])
         form = self.app.get(det_url, user='admin').form
-        form['cur_fit'].value = int(form['cur_fit'].value) - 2
+        form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -984,7 +984,7 @@ class Logging(WebTest):
         self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
 
         form = self.app.get(det_url, user='admin').form
-        form['cur_fit'].value = int(form['cur_fit'].value) + 5
+        form['cur_fit'].value = str(int(form['cur_fit'].value) + 5)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -993,7 +993,7 @@ class Logging(WebTest):
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 3)
 
         form = self.app.get(det_url, user='admin').form
-        form['cur_fit'].value = int(form['cur_fit'].value) - 2
+        form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -1003,7 +1003,7 @@ class Logging(WebTest):
 
 
         form = self.app.get(det_url, user='admin').form
-        form['free_edges'].value = 0
+        form['free_edges'].value = str(0)
         response = form.submit()
         self.assertRedirects(response, reverse('sheet.views.characters_index'))
         new_ch = Character.objects.get(pk=2)
@@ -1013,7 +1013,8 @@ class Logging(WebTest):
 
         form['deity'].value = "Tharizdun"
         response = form.submit()
-        # XXX check the return value for a valid value.
+        self.assertEqual(response.status_code, 302,
+                         "Should redirect after successful edit")
 
 
 class AddXpTestCase(TestCase):
