@@ -20,7 +20,11 @@ admin.site.register(sm.EdgeLevel)
 admin.site.register(sm.EdgeSkillBonus)
 admin.site.register(sm.Sheet)
 admin.site.register(sm.TechLevel)
-admin.site.register(sm.Campaign)
+
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ('name', 'has_firearms', 'has_spells')
+admin.site.register(sm.Campaign, CampaignAdmin)
+
 admin.site.register(sm.MiscellaneousItem)
 
 admin.site.register(sm.BaseFirearm)
