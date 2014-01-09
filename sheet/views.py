@@ -123,6 +123,7 @@ from django.views.generic import TemplateView
 import logging
 from collections import namedtuple
 import django.db
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -622,7 +623,23 @@ def sheet_detail(request, sheet_id=None):
                               RequestContext(request, c))
 
 
-class AddWeaponView(CreateView):
+class FormSaveMixin(object):
+    def form_valid(self, form):
+        messages.success(self.request, "Object saved successfully.")
+        return super(FormSaveMixin, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request,
+                       "Error trying to modify object: field{plural} {error_fields} "
+                       "{poss} errors.".format(
+                           plural="s" if len(form.errors.keys()) != 1 else "",
+                           poss="have"
+                           if len(form.errors.keys()) != 1 else "has",
+                           error_fields=', '.join(form.errors.keys())))
+        return super(FormSaveMixin, self).form_invalid(form)
+
+
+class AddWeaponView(FormSaveMixin, CreateView):
     model = Weapon
     template_name = 'sheet/add_weapon.html'
     success_url = reverse_lazy(sheets_index)
@@ -645,7 +662,7 @@ class AddMiscellaneousItemView(AddWeaponView):
     template_name = 'sheet/add_miscellaneous_item.html'
 
 
-class EditCharacterView(UpdateView):
+class EditCharacterView(FormSaveMixin, UpdateView):
     form_class = CharacterForm
     model = Character
     template_name = 'sheet/gen_edit.html'
@@ -656,14 +673,21 @@ class EditCharacterView(UpdateView):
         dd['request'] = self.request
         return dd
 
+    def form_valid(self, form):
+        messages.success(self.request, "Character edit successful.")
+        return super(EditCharacterView, self).form_valid(form)
 
-class AddCharacterView(CreateView):
+    def get_success_url(self):
+        return reverse('edit_character', args=(self.object.pk, ))
+
+
+class AddCharacterView(FormSaveMixin, CreateView):
     model = Character
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(characters_index)
 
 
-class AddSpellEffectView(CreateView):
+class AddSpellEffectView(FormSaveMixin, CreateView):
     model = SpellEffect
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
@@ -673,14 +697,14 @@ class AddEdgeView(AddSpellEffectView):
     model = Edge
 
 
-class EditSheetView(UpdateView):
+class EditSheetView(FormSaveMixin, UpdateView):
     form_class = EditSheetForm
     model = Sheet
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
 
-class AddSheetView(CreateView):
+class AddSheetView(FormSaveMixin, CreateView):
     model = Sheet
     form_class = EditSheetForm
     template_name = 'sheet/gen_edit.html'

@@ -15,7 +15,7 @@ import sheet.forms as forms
 import sheet.views
 import sheet.models
 from django_webtest import WebTest
-import django.contrib.auth as auth
+from django.contrib import auth, messages
 import factories
 import django.db
 from django.conf import settings
@@ -977,7 +977,7 @@ class Logging(WebTest):
         form = self.app.get(det_url, user='admin').form
         form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
-        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        self.assertRedirects(response, det_url)
         new_ch = Character.objects.get(pk=2)
         self.assertEqual(old_ch.cur_fit - 2, new_ch.cur_fit)
 
@@ -986,7 +986,7 @@ class Logging(WebTest):
         form = self.app.get(det_url, user='admin').form
         form['cur_fit'].value = str(int(form['cur_fit'].value) + 5)
         response = form.submit()
-        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        self.assertRedirects(response, det_url)
         new_ch = Character.objects.get(pk=2)
         self.assertEqual(old_ch.cur_fit + 3, new_ch.cur_fit)
 
@@ -995,17 +995,16 @@ class Logging(WebTest):
         form = self.app.get(det_url, user='admin').form
         form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
-        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        self.assertRedirects(response, det_url)
         new_ch = Character.objects.get(pk=2)
         self.assertEqual(old_ch.cur_fit + 1, new_ch.cur_fit)
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 1)
 
-
         form = self.app.get(det_url, user='admin').form
         form['free_edges'].value = str(0)
         response = form.submit()
-        self.assertRedirects(response, reverse('sheet.views.characters_index'))
+        self.assertRedirects(response, det_url)
         new_ch = Character.objects.get(pk=2)
         self.assertEqual(new_ch.free_edges, 0)
 
@@ -1013,8 +1012,7 @@ class Logging(WebTest):
 
         form['deity'].value = "Tharizdun"
         response = form.submit()
-        self.assertEqual(response.status_code, 302,
-                         "Should redirect after successful edit")
+        self.assertRedirects(response, det_url)
 
 
 class AddXpTestCase(TestCase):
@@ -1372,3 +1370,32 @@ class CreateURLTestCase(TestCase):
             response = self.client.get(url)
             self.assertContains(response, "submit",
                                 msg_prefix="{0} has errors".format(name))
+
+
+class EditCharacterTestCase(WebTest):
+    """
+    Verify that the user is redirected to the editing page and a message is
+    displayed about the operation's success.
+    """
+
+    def setUp(self):
+        factories.UserFactory(username="admin", password="admin")
+        self.character = factories.CharacterFactory(campaign__name="2k",
+                                                    name="John Doe")
+        self.url = reverse('edit_character', args=(self.character.pk, ))
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+
+    def assertInMessages(self, response, message):
+        self.assertIn('messages', response.context)
+        for msg in response.context['messages']:
+            if message in msg.message:
+                return
+        self.fail("Message {msg} not found among messages.".format(msg=message))
+
+    def test_edit_character(self):
+        form = self.app.get(self.url, user='admin').form
+        form['cur_fit'].value = "50"
+        post_response = self.client.post(self.url, dict(form.submit_fields()))
+        response = self.client.get(self.url)
+        self.assertInMessages(response, 'Character edit successful.')
+        self.assertRedirects(post_response, self.url)

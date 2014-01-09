@@ -38,7 +38,8 @@ class CharacterFactory(factory.DjangoModelFactory):
     campaign = factory.SubFactory(CampaignFactory)
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda xx: "char-{0}".format(xx))
-
+    occupation = "Adventurer"
+    race = "Human"
 
 class SheetFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Sheet
