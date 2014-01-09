@@ -17,10 +17,12 @@ Priority list by JW:
     these should not show in the lists.
 
 
-- character mugshot upload (SM)
++ character mugshot upload (SM)
 - senses (SM)
 - movement chart (SM)
 - spell skill checks (SM)
+
+- weapon maximum damage based on durability.
 
 - Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
@@ -47,12 +49,12 @@ Priority list by JW:
 -- recovery
 + body
 -- recovery
-- code simplification
+
+- code simplification; sheet detail form handling mainly.
+
 - save bonuses (M)
 - encumbrance breakdown (M)
 - sheet styling
-
-- weapon maximum damage based on durability.
 
 - short description of spell effect (+50 FIT etc)
 - suspended weight
