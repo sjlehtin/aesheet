@@ -31,6 +31,12 @@ def active(request, url):
     return "active" if request.path.startswith(url) else ""
 
 
+@register.simple_tag
+def map_tag_to_bootstrap(tag):
+    tags = {'debug': 'info', 'info': 'info', 'success': 'success',
+            'warning': 'warning', 'error': 'danger'}
+    return tags[tag]
+
 @register.filter
 def padnone(value, arg):
     if len(value) >= int(arg):

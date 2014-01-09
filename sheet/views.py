@@ -1026,7 +1026,7 @@ def import_text(data):
         update_id_sequence(mdl)
 
 
-def import_data(request, success=False):
+def import_data(request):
     """
     XXX Create tests and refactor.
     """
@@ -1039,16 +1039,13 @@ def import_data(request, success=False):
                 import_data = file.read()
             try:
                 import_text(import_data)
-                return HttpResponseRedirect(
-                    reverse('import-success'))
+                messages.success(request, "Import successful.")
+                return HttpResponseRedirect(reverse('import'))
             except (TypeError, ValueError, ValidationError), e:
                 logger.exception("failed.")
                 el = form._errors.setdefault('__all__',
                                              django.forms.util.ErrorList())
                 el.append(str(e))
-            except Exception, e:
-                logger.exception("failed.")
-                raise
     else:
         form = ImportForm()
     types = []
@@ -1060,13 +1057,9 @@ def import_data(request, success=False):
         item['fields'] = cls.get_exported_fields()
         types.append(item)
 
-    message = ""
-    if success:
-        message = "Import successful."
     return render_to_response('sheet/import_data.html',
                               RequestContext(request,
-                                             { 'message' : message,
-                                               'types' : types,
+                                             { 'types' : types,
                                                'import_form' : form }))
 
 

@@ -4,9 +4,6 @@
 {% block title %} Import data {% endblock %}
 
 {% block content %}
-{% if message %}
-<p><strong>{{message}}</strong></p>
-{% endif %}
 
 <form action="{% url "import" %}" method="post" 
       enctype="multipart/form-data">

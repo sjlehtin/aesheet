@@ -53,21 +53,28 @@
         {% block navigation %}
         {% endblock %}
 
-      {% if user.is_authenticated %}
-          <ul class="nav navbar-nav navbar-right">
-              {% url "profile" as profile_url %}
-	  <li class="{% active request profile_url %}">
-          <a href="{{ profile_url }}">{{ user }} </a>
-	  </li>
-	  <li>
-      <a href="{% url "logout" %}">Logout</a>
-      </li>
-      </ul>
-      {% endif %}
-      </div>
+              {% if user.is_authenticated %}
+                  <ul class="nav navbar-nav navbar-right">
+                      {% url "profile" as profile_url %}
+                      <li class="{% active request profile_url %}">
+                          <a href="{{ profile_url }}">{{ user }} </a>
+                      </li>
+                      <li>
+                          <a href="{% url "logout" %}">Logout</a>
+                      </li>
+                  </ul>
+              {% endif %}
+          </div>
       </nav>
   </div>
 
+  <div id="messages" class="container">
+      {% for msg in messages %}
+          <div class="alert alert-{% map_tag_to_bootstrap msg.tags %}">
+              {{ msg }}
+          </div>
+      {% endfor %}
+  </div>
   <div id="content" class="container">
     {% block content %}{% endblock %}
   </div>
