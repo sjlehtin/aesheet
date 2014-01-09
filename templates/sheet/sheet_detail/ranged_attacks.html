@@ -44,7 +44,7 @@
     </div>
     </td>
     <td>{{ item.level|default:"B" }}</td>
-    <td>{{ item.rof }}</td>
+    <td>{{ item.rof|stringformat:".2f" }}</td>
     {% for act in item.skill_checks %}
     <td class="tohit">{{ act.check|default:"" }}</td>
     {% endfor %}
