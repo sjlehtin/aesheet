@@ -39,6 +39,11 @@ div.stats table.derived { position: absolute; left: 12em; top: 50%; }
     left: -2px;
 }
 
+.errorlist li:not(.label-danger) {
+    color: red;
+    font-variant: small-caps;
+}
+
 .remove input[value="Remove"] {
     width: 24px;
     height: 24px;
