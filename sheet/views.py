@@ -24,7 +24,7 @@ Priority list by JW:
 
 - weapon maximum damage based on durability.
 
-- Creating a new character should automatically create a sheet for that
++ Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
 
 + form errors should be highlighted, and if the form element is hidden, it
@@ -669,8 +669,19 @@ class EditCharacterView(FormSaveMixin, UpdateView):
 
 class AddCharacterView(FormSaveMixin, CreateView):
     model = Character
-    template_name = 'sheet/gen_edit.html'
-    success_url = reverse_lazy(characters_index)
+    template_name = 'sheet/create_character.html'
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.sheet = sheet.models.Sheet.objects.create(
+            character=self.object,
+            owner=self.object.owner)
+        messages.success(self.request, "Character add successful.  "
+                                       "Sheet has been created automatically.")
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('sheet_detail', args=(self.sheet.pk, ))
 
 
 class AddSpellEffectView(FormSaveMixin, CreateView):

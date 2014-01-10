@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %} Create character {% endblock %}
+
+{% block content %}
+<h2>Create character</h2>
+
+<form action="{{ request.path }}"
+      method="post" 
+      enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Create" />
+</form>
+
+{% endblock %}

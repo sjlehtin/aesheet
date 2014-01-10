@@ -1372,7 +1372,45 @@ class CreateURLTestCase(TestCase):
                                 msg_prefix="{0} has errors".format(name))
 
 
-class EditCharacterTestCase(WebTest):
+class TestHelperMixin(object):
+    def assertInMessages(self, response, message):
+        self.assertIn('messages', response.context)
+        for msg in response.context['messages']:
+            if message in msg.message:
+                return
+        self.fail("Message {msg} not found among messages.".format(msg=message))
+
+
+class AddCharacterTestCase(TestHelperMixin, WebTest):
+    """
+    Verify that after creating a character a
+    new sheet for the character has been created, a message about the
+    successful operation is displayed, and the user is redirected to the sheet
+    edit page.
+    """
+
+    def setUp(self):
+        self.campaign = factories.CampaignFactory(name='2K')
+        self.admin = factories.UserFactory(username="admin", password="admin")
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+        self.sheet_url = reverse("sheet_detail", args=(1, ))
+
+    def test_edit_character(self):
+        add_char_url = reverse('add_char')
+        form = self.app.get(add_char_url, user='admin').form
+        form['name'] = "John Doe"
+        form['occupation'] = "adventurer"
+        form['campaign'] = self.campaign.pk
+        form['owner'] = self.admin.pk
+        form['race'] = 'human'
+        post_response = self.client.post(add_char_url,
+                                         dict(form.submit_fields()))
+        response = self.client.get(self.sheet_url)
+        self.assertInMessages(response, 'Character add successful.')
+        self.assertRedirects(post_response, self.sheet_url)
+
+
+class EditCharacterTestCase(TestHelperMixin, WebTest):
     """
     Verify that the user is redirected to the editing page and a message is
     displayed about the operation's success.
@@ -1384,13 +1422,6 @@ class EditCharacterTestCase(WebTest):
                                                     name="John Doe")
         self.url = reverse('edit_character', args=(self.character.pk, ))
         self.assertTrue(self.client.login(username="admin", password="admin"))
-
-    def assertInMessages(self, response, message):
-        self.assertIn('messages', response.context)
-        for msg in response.context['messages']:
-            if message in msg.message:
-                return
-        self.fail("Message {msg} not found among messages.".format(msg=message))
 
     def test_edit_character(self):
         form = self.app.get(self.url, user='admin').form
