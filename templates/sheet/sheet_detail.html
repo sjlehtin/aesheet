@@ -321,7 +321,13 @@ $(document).ready(function () {
             .hover(function () { showRemoves(this); },
                    function () { hideRemoves(this); });
 
-    $('.advanced').hideAdvanced({style: 'plain'});
+    $('.advanced').each(function () {
+        var has_errors = $(this).find('.errorlist').length > 0;
+            $(this).hideAdvanced({
+                style: 'plain',
+                startOpen: has_errors
+            });
+    });
 });
 </script>
 
