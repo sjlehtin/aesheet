@@ -32,7 +32,19 @@ def pretty_name(name):
                                           name))).lower().capitalize()
 
 
-class AddWeaponForm(forms.ModelForm):
+class RequestFormMixin(object):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RequestFormMixin, self).__init__(*args, **kwargs)
+
+
+class RequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RequestForm, self).__init__(*args, **kwargs)
+
+
+class AddWeaponForm(RequestForm):
     item_class = sheet.models.Weapon
     item_queryset = sheet.models.Weapon.objects.all()
     template_queryset = sheet.models.WeaponTemplate.objects.all()
@@ -160,7 +172,7 @@ class AddFirearmForm(AddWeaponForm):
         return cleaned_data
 
 
-class AddExistingWeaponForm(forms.ModelForm):
+class AddExistingWeaponForm(RequestForm):
     item_queryset = sheet.models.Weapon.objects.all()
 
     def _filter_tech_level(self, qs):
@@ -228,7 +240,7 @@ class AddExistingMiscellaneousItemForm(AddExistingWeaponForm):
         self.instance.miscellaneous_items.add(item)
 
 
-class AddSpellEffectForm(forms.ModelForm):
+class AddSpellEffectForm(RequestForm):
     effect = forms.ModelChoiceField(
         queryset=sheet.models.SpellEffect.objects.all())
 
@@ -241,12 +253,6 @@ class AddSpellEffectForm(forms.ModelForm):
         self.instance.full_clean()
         self.instance.save()
         return self.instance
-
-
-class RequestForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RequestForm, self).__init__(*args, **kwargs)
 
 
 class AddSkillForm(RequestForm):
@@ -321,7 +327,7 @@ class AddLanguageForm(AddSkillForm):
     item_queryset = sheet.models.Skill.objects.filter(type="Language")
 
 
-class AddEdgeForm(forms.ModelForm):
+class AddEdgeForm(RequestForm):
     edge = forms.ModelChoiceField(
         queryset=sheet.models.EdgeLevel.objects.all())
     choices = range(0,8)
@@ -415,7 +421,7 @@ class StatModifyForm(RequestForm):
         return char
 
 
-class CharacterSkillLevelModifyForm(forms.Form):
+class CharacterSkillLevelModifyForm(RequestFormMixin, forms.Form):
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     skill_id = forms.IntegerField(widget=widgets.HiddenInput)
 
@@ -473,14 +479,14 @@ class CharacterSkillLevelModifyForm(forms.Form):
         return self.instance
 
 
-class ArmorForm(forms.ModelForm):
+class ArmorForm(RequestForm):
     base = forms.ModelChoiceField(
         queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=False))
     class Meta:
         model = sheet.models.Armor
 
 
-class HelmForm(forms.ModelForm):
+class HelmForm(RequestForm):
     base = forms.ModelChoiceField(
         queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=True))
     class Meta:

@@ -27,9 +27,9 @@ Priority list by JW:
 - Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
 
-- form errors should be highlighted, and if the form element is hidden, it
++ form errors should be highlighted, and if the form element is hidden, it
   should be shown by default (errors in add forms can get hidden)
--- form errorlist class should be highlighted.
+++ form errorlist class should be highlighted.
 
 - you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
@@ -533,77 +533,63 @@ def sheet_detail(request, sheet_id=None):
     else:
         data = None
 
-    forms['_stat_modify'] = StatModifyForm(data,
-                                           instance=sheet.character,
-                                           request=request,
-                                           prefix="stat-modify")
-    forms['_skill_modify'] = CharacterSkillLevelModifyForm(
-        data,
-        prefix="skill-level-modify")
-    forms['add_skill_form'] = AddSkillForm(data,
-                                           instance=sheet.character,
-                                           request=request,
-                                           prefix="add-skill")
-    forms['add_lang_form'] = AddLanguageForm(data,
-                                             instance=sheet.character,
-                                             prefix="add-language")
-    forms['add_edge_form'] = AddEdgeForm(data,
-                                         instance=sheet.character,
-                                         prefix="add-edge")
-    forms['add_spell_effect_form'] = AddSpellEffectForm(
-        data, instance=sheet, prefix="add-spell-effect")
-    forms['add_existing_helm_form'] = AddExistingHelmForm(
-        data, instance=sheet, prefix="add-existing-helm")
-    forms['add_helm_form'] = AddHelmForm(
-        data, instance=sheet, prefix="add-helm")
-    forms['add_existing_armor_form'] = AddExistingArmorForm(
-        data, instance=sheet, prefix="add-existing-armor")
-    forms['add_armor_form'] = AddArmorForm(
-        data, instance=sheet, prefix="add-armor")
-    forms['add_existing_weapon_form'] = AddExistingWeaponForm(
-        data, instance=sheet, prefix="add-existing-weapon")
-    forms['add_existing_miscellaneous_item_form'] = (
-        AddExistingMiscellaneousItemForm(
-        data, instance=sheet, prefix="add-existing-weapon"))
-    forms['add_weapon_form'] = AddWeaponForm(data, instance=sheet,
-                                             prefix="add-weapon")
-    forms['new_helm_form'] = HelmForm(data, prefix="new-helm")
-    forms['add_ranged_weapon_form'] = AddRangedWeaponForm(
-        data, instance=sheet,
-        prefix="add-ranged-weapon")
-    forms['add_existing_ranged_weapon_form'] = \
-        AddExistingRangedWeaponForm(data,
-                                    instance=sheet,
-                                    prefix="add-existing-ranged-weapon")
-    forms['add_firearm_form'] = AddFirearmForm(
-        data, instance=sheet,
-        prefix="add-firearm")
-    forms['add_xp_form'] = \
-        AddXPForm(data,
-                  request=request,
-                  instance=sheet.character,
-                  prefix="add-xp")
+    def add_form(form_class, prefix, **kwargs):
+        key = prefix.replace('-', '_') + "_form"
+        if data is not None:
+            has_prefix = any([var.startswith(prefix) for var in data.keys()])
+            form_data = data if has_prefix else None
+        else:
+            form_data = None
+        forms[key] = form_class(form_data,
+                                request=request,
+                                prefix=prefix, **kwargs)
+
+    add_form(StatModifyForm, "stat-modify", instance=sheet.character)
+    add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
+    add_form(AddSkillForm, "add-skill", instance=sheet.character)
+    add_form(AddLanguageForm, "add-lang", instance=sheet.character)
+    add_form(AddEdgeForm, "add-edge", instance=sheet.character)
+    add_form(AddSpellEffectForm, "add-spell-effect", instance=sheet)
+    add_form(AddExistingHelmForm, "add-existing-helm", instance=sheet)
+    add_form(AddHelmForm, "add-helm", instance=sheet)
+    add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
+    add_form(AddArmorForm, "add-armor", instance=sheet)
+    add_form(AddExistingWeaponForm, "add-existing-weapon", instance=sheet)
+    add_form(AddWeaponForm, "add-weapon", instance=sheet)
+    add_form(AddRangedWeaponForm, "add-ranged-weapon", instance=sheet)
+    add_form(AddExistingRangedWeaponForm, "add-existing-ranged-weapon",
+             instance=sheet)
+    add_form(AddExistingMiscellaneousItemForm,
+             "add-existing-miscellaneous-item", instance=sheet)
+    add_form(HelmForm, "new-helm")
+
+    add_form(AddFirearmForm, "add-firearm", instance=sheet)
+    add_form(AddXPForm, "add-xp", instance=sheet.character)
 
     if request.method == "POST":
         should_change = False
 
         for kk, ff in forms.items():
             logger.info("handling %s" % kk)
-            if ff.is_valid():
-                logger.info("saved %s" % kk)
-                oo = ff.save()
-                should_change = True
-                if kk == 'new_weapon_form':
-                    sheet.weapons.add(oo)
-                elif kk == 'new_ranged_weapon_form':
-                    sheet.ranged_weapons.add(oo)
-                elif kk == 'new_armor_form':
-                    sheet.armor = oo
-                    sheet.save()
-                elif kk == 'new_helm_form':
-                    sheet.helm = oo
-                    sheet.save()
-
+            if ff.is_bound:
+                if ff.is_valid():
+                    logger.info("saved %s" % kk)
+                    oo = ff.save()
+                    should_change = True
+                    if kk == 'new_weapon_form':
+                        sheet.weapons.add(oo)
+                    elif kk == 'new_ranged_weapon_form':
+                        sheet.ranged_weapons.add(oo)
+                    elif kk == 'new_armor_form':
+                        sheet.armor = oo
+                        sheet.save()
+                    elif kk == 'new_helm_form':
+                        sheet.helm = oo
+                        sheet.save()
+                else:
+                    messages.error(request, 'Errors in processing request '
+                                            '({form_slug}).'.format(
+                        form_slug=ff.prefix.replace('-', ' ')))
         if not should_change:
             should_change = process_sheet_change_request(request,
                                                          sheet)
