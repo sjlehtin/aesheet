@@ -158,7 +158,7 @@ class Character(models.Model):
 
     hero = models.BooleanField(default=False)
 
-    deity = models.CharField(max_length=256, default="Kord")
+    deity = models.CharField(max_length=256, blank=True)
     adventures = models.PositiveIntegerField(default=0)
     gained_sp = models.PositiveIntegerField(default=0)
 
@@ -1435,7 +1435,7 @@ Action = namedtuple('Action', ['action', 'check', 'initiative'])
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
-    description = models.TextField()
+    description = models.TextField(blank=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
     weapons = models.ManyToManyField(Weapon, blank=True)
@@ -2060,7 +2060,9 @@ class Sheet(models.Model):
         return getattr(self.character, v)
 
     def __unicode__(self):
-        return u"sheet for %s: %s" % (self.character.name, self.description)
+        return u"sheet for {name}{descr}".format(
+            name=self.character.name,
+            descr=(": %s" % self.description) if self.description else "")
 
     class Meta:
         ordering = ('character__name', )
