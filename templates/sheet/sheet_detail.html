@@ -47,7 +47,8 @@
 </div>
 <div class="col-md-8">
     {% if char.character.portrait %}
-    <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}" >
+    <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}"
+            class="img-rounded">
     {% else %}
         <div class="edit-control">You can add a portrait for your character in
             the <a href="{% url "edit_character" char.character.id %}">
@@ -170,37 +171,74 @@ XP: {{ char.xp_used_stats }} +
 {% include "sheet/sheet_detail/firearms.html" %}
 {% endif %}
 
-{% if char.campaign.has_spells %}
-<h3>Miscellaneous items</h3>
-{% include "sheet/sheet_detail/miscellaneous_items.html" %}
+<div class="row">
+    {% if char.campaign.has_spells %}
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Miscellaneous items</h3>
+                </div>
+                <div class="panel-body">
+                    {% include "sheet/sheet_detail/miscellaneous_items.html" %}
+                </div>
+            </div>
+        </div>
 
-<h3>Spell effects</h3>
-{% include "sheet/sheet_detail/spell_effects.html" %}
-{% endif %}
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Spell effects</h3>
+                </div>
+                <div class="panel-body">
+                    {% include "sheet/sheet_detail/spell_effects.html" %}
+                </div>
+            </div>
+        </div>
 
-<h3>Edges</h3>
-{% include "sheet/sheet_detail/edges.html" %}
+    {% endif %}
 
-<h3>Helm</h3>
-{% include "sheet/sheet_detail/helm.html" %}
+    <div class="col-sm-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Edges</h3>
+            </div>
+            <div class="panel-body">
+                {% include "sheet/sheet_detail/edges.html" %}
+            </div>
+        </div>
+    </div>
 
-<h3>Armor</h3>
-{% include "sheet/sheet_detail/armor.html" %}
+    <div class="col-sm-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Helm</h3>
+            </div>
+            <div class="panel-body">
+                {% include "sheet/sheet_detail/helm.html" %}
+            </div>
+        </div>
+    </div>
 
-<script src="{{ STATIC_URL }}jquery-combobox.js"></script>
-<script src="{{ STATIC_URL }}hideAdvanced.js"></script>
-<script>
-    $(document).ready(function () {
-    $("#add_skill select").combobox();
-    $("#add_lang select").combobox();
-    });
-</script>
+    <div class="col-sm-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Armor</h3>
+            </div>
+            <div class="panel-body">
+                {% include "sheet/sheet_detail/armor.html" %}
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>
 
     <div id="skill-pane" class="col-md-3">
-        <div class="skills">
-            <h3>Skills</h3>
+        <div class="skills panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Skills</h3>
+        </div>
+        <div class="panel-body">
             {% with skills=char.skills %}
                 {% if skills %}
                     <table>
@@ -293,7 +331,7 @@ XP: {{ char.xp_used_stats }} +
                 </form>
             </div>
         </div>
-
+        </div>
         <div>Missing skills: {{ char.missing_skills }}</div>
 
 
@@ -330,5 +368,12 @@ $(document).ready(function () {
     });
 });
 </script>
-
+<script src="{{ STATIC_URL }}jquery-combobox.js"></script>
+<script src="{{ STATIC_URL }}hideAdvanced.js"></script>
+<script>
+    $(document).ready(function () {
+    $("#add_skill select").combobox();
+    $("#add_lang select").combobox();
+    });
+</script>
 {% endblock %}
