@@ -4,8 +4,10 @@ import csv
 import StringIO
 import logging
 import itertools
+from collections import namedtuple
 
 from django.test import TestCase
+
 from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
@@ -19,7 +21,7 @@ from django.contrib import auth
 import factories
 import django.db
 from django.conf import settings
-from collections import namedtuple
+
 
 logger = logging.getLogger(__name__)
 
