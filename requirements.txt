@@ -8,3 +8,4 @@ psycopg2
 gunicorn
 docopt
 PIL
+django-widget-tweaks

@@ -1,3 +1,4 @@
+from collections import namedtuple
 from django import forms
 from django.forms import widgets
 import sheet.models
@@ -493,10 +494,40 @@ class HelmForm(RequestForm):
         model = sheet.models.Armor
 
 
-class CharacterForm(RequestForm):
+class AddCharacterForm(RequestForm):
+    base_stat_field_names = []
+    PREFIXES = ["start_", "cur_", "base_mod_"]
+    for prefix in PREFIXES:
+        for stat in sheet.models.Character.BASE_STATS:
+            base_stat_field_names.append(prefix + stat)
+    derived_field_names = ["base_mod_mov", "base_mod_dex", "base_mod_imm"]
+    stat_field_names = base_stat_field_names + derived_field_names
+
+    def non_stat_fields(self):
+        return filter(lambda field:
+                      field.name not in self.stat_field_names,
+                      self.visible_fields())
+
+    def base_stat_fields(self):
+        Stat = namedtuple('Stat', ['stat', 'fields'])
+
+        stat_fields = {}
+
+        for stat in sheet.models.Character.BASE_STATS:
+            stat_fields[stat] = [self[prefix + stat]
+                                 for prefix in self.PREFIXES]
+
+        return [Stat(stat=stat, fields=stat_fields[stat])
+                for stat in sheet.models.Character.BASE_STATS]
+
+    def derived_stat_fields(self):
+        return [self[field_name] for field_name in self.derived_field_names]
+
     class Meta:
         model = sheet.models.Character
 
+
+class EditCharacterForm(AddCharacterForm):
     def save(self, commit=True):
         if commit:
             if self.changed_data:
@@ -514,7 +545,7 @@ class CharacterForm(RequestForm):
                         else:
                             log_stat_change(self.instance, self.request, ff, 0)
 
-        return super(CharacterForm, self).save(commit=commit)
+        return super(EditCharacterForm, self).save(commit=commit)
 
 
 class AddXPForm(RequestForm):

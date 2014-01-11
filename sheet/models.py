@@ -214,6 +214,8 @@ class Character(models.Model):
         super(Character, self).__init__(*args, **kwargs)
         self.skill_lookup = SkillLookup(self)
 
+    BASE_STATS = ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]
+
     def get_ability(self, abilities, ability, accessor):
         """
         Optimized for prefetched many-to-many fields.
@@ -385,7 +387,7 @@ class Character(models.Model):
     @property
     def xp_used_stats(self):
         xp_used_stats = 0
-        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
+        for st in self.BASE_STATS:
             xp_used_stats += (getattr(self, "cur_" + st) -
                               getattr(self, "start_" + st))
         xp_used_stats += self.bought_stamina

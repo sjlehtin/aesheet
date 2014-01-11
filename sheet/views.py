@@ -610,9 +610,12 @@ def sheet_detail(request, sheet_id=None):
 
 
 class FormSaveMixin(object):
+    success_message = "Object saved successfully."
     def form_valid(self, form):
-        messages.success(self.request, "Object saved successfully.")
-        return super(FormSaveMixin, self).form_valid(form)
+        response = super(FormSaveMixin, self).form_valid(form)
+        messages.success(self.request, self.success_message.format(
+            object=self.object))
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request,
@@ -649,26 +652,24 @@ class AddMiscellaneousItemView(AddWeaponView):
 
 
 class EditCharacterView(FormSaveMixin, UpdateView):
-    form_class = CharacterForm
+    form_class = EditCharacterForm
     model = Character
-    template_name = 'sheet/gen_edit.html'
+    template_name = 'sheet/create_character.html'
     success_url = reverse_lazy(characters_index)
+    success_message = "Character edit successful."
 
     def get_form_kwargs(self):
         dd = super(EditCharacterView, self).get_form_kwargs()
         dd['request'] = self.request
         return dd
 
-    def form_valid(self, form):
-        messages.success(self.request, "Character edit successful.")
-        return super(EditCharacterView, self).form_valid(form)
-
     def get_success_url(self):
         return reverse('edit_character', args=(self.object.pk, ))
 
 
 class AddCharacterView(FormSaveMixin, CreateView):
-    model = Character
+    model = sheet.models.Character
+    form_class = sheet.forms.AddCharacterForm
     template_name = 'sheet/create_character.html'
 
     def form_valid(self, form):

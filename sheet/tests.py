@@ -15,7 +15,7 @@ import sheet.forms as forms
 import sheet.views
 import sheet.models
 from django_webtest import WebTest
-from django.contrib import auth, messages
+from django.contrib import auth
 import factories
 import django.db
 from django.conf import settings
@@ -1430,3 +1430,17 @@ class EditCharacterTestCase(TestHelperMixin, WebTest):
         response = self.client.get(self.url)
         self.assertInMessages(response, 'Character edit successful.')
         self.assertRedirects(post_response, self.url)
+
+
+class CharacterFormTestCase(TestCase):
+    def test_fields(self):
+        form = sheet.forms.AddCharacterForm()
+        # Combined, the two field sets should hold all the fields.
+        self.assertSetEqual(set([field.name
+                                 for field in form.visible_fields()]),
+                            set([field.name for row in form.base_stat_fields()
+                                 for field in row.fields]) |
+                            set([field.name
+                                 for field in form.derived_stat_fields()]) |
+                            set([field.name
+                                 for field in form.non_stat_fields()]))

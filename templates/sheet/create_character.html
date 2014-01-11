@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load url from future %}
+{% load widget_tweaks %}
 
 {% block title %} Create character {% endblock %}
 
@@ -7,11 +7,51 @@
 <h2>Create character</h2>
 
 <form action="{{ request.path }}"
+      class="form-horizontal"
       method="post" 
       enctype="multipart/form-data">
 {% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Create" />
+    {% if form.non_field_errors %}
+    <ul class="errorlist">
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% for field in form.non_stat_fields %}
+    {% if field.name %}
+    <div class="form-group">
+    <ul class="errorlist">
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    <label class="control-label col-sm-2">{{ field.label }}</label>
+        <div class="col-sm-10">{{ field|add_class:"form-control" }}</div>
+    </div>
+    {% endif %}
+{% endfor %}
+
+<table class="table">
+<thead>
+<tr><th>Stat</th><th>Start</th><th>Cur</th>
+    <th title="Permanent modifier to the stat">Base mod</th></tr>
+</thead>
+<tbody>
+{% for row in form.base_stat_fields %}
+    <tr>
+        <td><strong>{{ row.stat|upper }}</strong></td>
+    {% for field in row.fields %}
+        <td>{{ field|add_class:"form-control" }}</td>
+    {% endfor %}
+    </tr>
+{% endfor %}
+<tr><td><strong>MOV</strong></td><td></td><td></td><td>{{ form.base_mod_mov|add_class:"form-control" }}</td></tr>
+<tr><td><strong>DEX</strong></td><td></td><td></td><td>{{ form.base_mod_dex|add_class:"form-control" }}</td></tr>
+<tr><td><strong>IMM</strong></td><td></td><td></td><td>{{ form.base_mod_imm|add_class:"form-control" }}</td></tr>
+</tbody>
+</table>
+    <input type="submit" value="Create" />
 </form>
 
 {% endblock %}
