@@ -15,6 +15,7 @@ from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkillForm, AddXPForm
 import sheet.forms as forms
 import sheet.views
+from sheet.views import marshal
 import sheet.models
 from django_webtest import WebTest
 from django.contrib import auth
@@ -635,16 +636,16 @@ class FirearmImportExportTestcase(TestCase):
         factories.SkillFactory(name="Handguns", tech_level__name="2K")
 
     def test_import_firearms(self):
-        sheet.views.import_text(self.firearm_csv_data)
+        marshal.import_text(self.firearm_csv_data)
         firearm = sheet.models.BaseFirearm.objects.get(name="Glock 19")
         # Import should create the ammunition types.
         self.assertListEqual(sorted(["9Pb", "9Pb+"]),
                              sorted(firearm.get_ammunition_types()))
 
     def test_export_firearms(self):
-        sheet.views.import_text(self.firearm_csv_data)
+        marshal.import_text(self.firearm_csv_data)
 
-        csv_data = sheet.views.csv_export(sheet.models.BaseFirearm)
+        csv_data = marshal.csv_export(sheet.models.BaseFirearm)
         reader = csv.reader(StringIO.StringIO(csv_data))
         data_type = reader.next()
         self.assertEqual(data_type[0], "BaseFirearm")
@@ -657,14 +658,14 @@ class FirearmImportExportTestcase(TestCase):
         self.assertEqual(data_row[idx], "9Pb|9Pb+")
 
     def test_import_ammunition(self):
-        sheet.views.import_text(self.ammo_csv_data)
+        marshal.import_text(self.ammo_csv_data)
         ammo = sheet.models.Ammunition.objects.filter(label='9Pb+')
         self.assertEqual(ammo[0].label, "9Pb+")
 
     def test_export_ammunition(self):
-        sheet.views.import_text(self.ammo_csv_data)
+        marshal.import_text(self.ammo_csv_data)
 
-        csv_data = sheet.views.csv_export(sheet.models.Ammunition)
+        csv_data = marshal.csv_export(sheet.models.Ammunition)
         reader = csv.reader(StringIO.StringIO(csv_data))
         data_type = reader.next()
         self.assertEqual(data_type[0], "Ammunition")
@@ -1098,7 +1099,7 @@ class ImportExport(TestCase):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def test_add_new_skill_with_required_skills(self):
-        det_url = reverse(sheet.views.import_data)
+        det_url = reverse("import")
         response = self.client.post(det_url, { 'import_data' :
         "Skill\n"
         "name,tech_level,description,notes,can_be_defaulted,"
@@ -1106,8 +1107,8 @@ class ImportExport(TestCase):
         "skill_cost_3,type,stat,required_edges,required_skills\n"
         "Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat",
                                                })
-        self.assertRedirects(response, reverse(sheet.views.import_data))
-        response = self.client.get(reverse(sheet.views.browse,
+        self.assertRedirects(response, reverse("import"))
+        response = self.client.get(reverse("browse",
                                            args=["Skill"]))
         self.assertContains(response, "Unarmed combat")
         hdr = response.context['header']
@@ -1127,7 +1128,7 @@ class ImportExport(TestCase):
             "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
             "Unarmed combat|Surgery",
             })
-        self.assertRedirects(response, reverse(sheet.views.import_data))
+        self.assertRedirects(response, reverse("import"))
         sk = Skill.objects.get(name="Surgical strike")
         self.assertTrue(sk.required_skills.filter(name="Unarmed combat"
                                                   ).exists())
@@ -1143,13 +1144,12 @@ class ImportExport(TestCase):
                 "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
                 "Unarmed combat | Surgery",
             })
-        self.assertRedirects(response, reverse(sheet.views.import_data))
+        self.assertRedirects(response, reverse("import"))
 
     def test_import_export(self):
         for data_type in sheet.models.EXPORTABLE_MODELS:
             logger.info("Import test for %s", data_type)
-            response = self.client.get(reverse(sheet.views.export_data,
-                                       args=[data_type]))
+            response = self.client.get(reverse("export", args=[data_type]))
             self.assertIn("attachment", response.get('Content-Disposition'))
             self.assertContains(response, data_type)
             def mangle(data):
@@ -1161,10 +1161,10 @@ class ImportExport(TestCase):
                     else:
                         yield ll + "\n"
 
-            response = self.client.post(reverse(sheet.views.import_data),
+            response = self.client.post(reverse("import"),
                                         { "import_data":
                                           ''.join(mangle(response.content)) })
-            self.assertRedirects(response, reverse(sheet.views.import_data))
+            self.assertRedirects(response, reverse("import"))
 
     def test_export_unicode(self):
         unicode_word = u'βαλλίζω'
@@ -1174,7 +1174,7 @@ class ImportExport(TestCase):
                                            u"dance, to jump about).".format(
                                    uword=unicode_word
                                ))
-        data = sheet.views.csv_export(sheet.models.Skill)
+        data = marshal.csv_export(sheet.models.Skill)
         self.assertTrue(data.startswith('Skill'),
                         msg="The data should start with the table name")
         self.assertIn(unicode_word, data.decode('utf-8'))
@@ -1215,7 +1215,7 @@ Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
         factories.TechLevelFactory(name="all")
 
     def test_import_with_deps(self):
-        sheet.views.import_text(self.csv_data)
+        marshal.import_text(self.csv_data)
         self.assertListEqual(
             sorted([sk.name for sk in sheet.models.Skill.objects.all()]),
             sorted(["Nutcasing", "Throw", "Unarmed combat", "Jackadeering"]))
@@ -1224,7 +1224,7 @@ Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
         """
         Verify that importing with selfloops works.
         """
-        sheet.views.import_text(self.self_loop)
+        marshal.import_text(self.self_loop)
         self.assertListEqual(
             [sk.name for sk in sheet.models.Skill.objects.all()],
             ["Nutcasing"])
@@ -1241,7 +1241,7 @@ class ImportExportPostgresSupport(TestCase):
 
         new_value = 666
         sheet.models.TechLevel.objects.create(id=new_value, name="foobar")
-        sheet.views.update_id_sequence(sheet.models.TechLevel)
+        marshal.update_id_sequence(sheet.models.TechLevel)
         if (settings.DATABASES['default']['ENGINE'] ==
             "django.db.backends.postgresql_psycopg2"):
             cc = django.db.connection.cursor()

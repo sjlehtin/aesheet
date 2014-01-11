@@ -1,7 +1,15 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, include, url
 import sheet.views
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
+
+marshal_urls = patterns(
+    'sheet.views.marshal',
+
+    url(r'^import/$', 'import_data', name='import'),
+    url(r'^export/(?P<type>\w+)/$', 'export_data', name='export'),
+    url(r'^browse/(?P<type>\w+)/$', 'browse', name='browse'),
+)
 
 urlpatterns = patterns(
     'sheet.views',
@@ -24,9 +32,8 @@ urlpatterns = patterns(
     url(r'^sheets/$', 'sheets_index', name='sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet_detail', name='sheet_detail'),
 
-    url(r'^import-export/import/$', 'import_data', name='import'),
-    url(r'^import-export/export/(?P<type>\w+)/$', 'export_data'),
-    url(r'^import-export/browse/(?P<type>\w+)/$', 'browse'),
+    url(r'^import-export/', include(marshal_urls)),
+
     url(r'^ChangeLog$', 'version_history'),
     url(r'^TODO$', sheet.views.TODOView.as_view(), name="todo"),
 )
