@@ -1,6 +1,4 @@
 from django.conf.urls import patterns, url
-from sheet.views import (AddSpellEffectView, EditCharacterView,
-                         AddCharacterView, EditSheetView)
 import sheet.views
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
@@ -11,15 +9,15 @@ urlpatterns = patterns(
     url(r'^$', RedirectView.as_view(url=reverse_lazy('sheets_index'))),
     url(r'^characters/$', 'characters_index', name='characters_index'),
 
-    url(r'^characters/add_char/$', AddCharacterView.as_view(),
+    url(r'^characters/add_char/$', sheet.views.AddCharacterView.as_view(),
         name="add_char"),
 
     url(r'^characters/edit_char/(?P<pk>\d+)/$',
-        EditCharacterView.as_view(),
+        sheet.views.EditCharacterView.as_view(),
         name='edit_character'),
 
     url(r'^characters/edit_sheet/(?P<pk>\d+)/$',
-        EditSheetView.as_view(),
+        sheet.views.EditSheetView.as_view(),
         name='edit_sheet'),
 
     # Specific sheets for the characters.
