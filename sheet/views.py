@@ -130,13 +130,13 @@ logger = logging.getLogger(__name__)
 
 def characters_index(request):
     return render_to_response('sheet/characters_index.html',
-                              { 'campaigns': Character.get_by_campaign()},
+                              {'campaigns': Character.get_by_campaign()},
                               context_instance=RequestContext(request))
 
 
 def sheets_index(request):
     return render_to_response('sheet/sheets_index.html',
-                              { 'campaigns': Sheet.get_by_campaign()},
+                              {'campaigns': Sheet.get_by_campaign()},
                               context_instance=RequestContext(request))
 
 
@@ -167,8 +167,8 @@ class RemoveWrap(object):
         else:
             type = self.item.__class__.__name__
         return RemoveGenericForm(item=self.item,
-                             item_type=type,
-                             prefix='remove')
+                                 item_type=type,
+                                 prefix='remove')
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -190,6 +190,7 @@ class WeaponWrap(RemoveWrap, SkilledMixin):
     class Stats(object):
         rendered_attack_inits = 4
         rendered_defense_inits = 3
+
         def __init__(self, item, sheet, use_type):
             self.use_type = use_type
             self.sheet = sheet
@@ -287,12 +288,12 @@ class SkillWrap(RemoveWrap):
 
     def add_level_form(self):
         return CharacterSkillLevelModifyForm(instance=self.item,
-                                             initial={ 'function': 'add' },
+                                             initial={'function': 'add'},
                                              prefix="skill-level-modify")
 
     def dec_level_form(self):
         return CharacterSkillLevelModifyForm(instance=self.item,
-                                             initial={ 'function': 'dec' },
+                                             initial={'function': 'dec'},
                                              prefix="skill-level-modify")
 
     def check(self):
@@ -324,8 +325,9 @@ class ArmorWrap(RemoveWrap):
             if self.item:
                 original_value = getattr(self.item, v)
                 value += original_value
-            logger.debug("Value for {value}: {current}, Orig: {original}".format(
-                value=v, current=value, original=original_value))
+            logger.debug(
+                "Value for {value}: {current}, Orig: {original}".format(
+                    value=v, current=value, original=original_value))
             return value
         else:
             return getattr(self.item, v)
@@ -339,10 +341,10 @@ class SheetView(object):
     def base_stats(self):
         ll = []
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
-            stat = {'name' : st,
-                    'base' : getattr(self.sheet, st),
-                    'eff' : getattr(self.sheet, "eff_" + st),
-                    }
+            stat = {'name': st,
+                    'base': getattr(self.sheet, st),
+                    'eff': getattr(self.sheet, "eff_" + st),
+            }
             stat.update({
                 'add_form': StatModifyForm(
                     instance=self.sheet.character,
@@ -364,10 +366,10 @@ class SheetView(object):
     def derived_stats(self):
         ll = []
         for st in ["mov", "dex", "imm"]:
-            stat = {'name' : st,
-                    'base' : getattr(self.sheet, st),
-                    'eff' : getattr(self.sheet, "eff_" + st),
-                    }
+            stat = {'name': st,
+                    'base': getattr(self.sheet, st),
+                    'eff': getattr(self.sheet, "eff_" + st),
+            }
             ll.append(stat)
         return ll
 
@@ -379,12 +381,12 @@ class SheetView(object):
     @property
     def ranged_weapons(self):
         return [RangedWeaponWrap(xx, self.sheet)
-              for xx in self.sheet.ranged_weapons.all()]
+                for xx in self.sheet.ranged_weapons.all()]
 
     @property
     def firearms(self):
         return [FirearmWrap(xx, self.sheet)
-              for xx in self.sheet.firearms.all()]
+                for xx in self.sheet.firearms.all()]
 
     @property
     def spell_effects(self):
@@ -401,6 +403,7 @@ class SheetView(object):
         class Node(object):
             def __init__(self):
                 self.children = []
+
         root = Node()
 
         for sk in ll:
@@ -411,11 +414,13 @@ class SheetView(object):
             else:
                 root.children.append(sk)
         logger.debug("Original skill list length: %d", len(ll))
+
         def depthfirst(node, indent):
             yield node, indent
             for cc in node.children:
                 for nn in depthfirst(cc, indent + 1):
                     yield nn
+
         ll = []
         for nn, indent in depthfirst(root, 0):
             nn.indent = indent
@@ -445,6 +450,7 @@ class SheetView(object):
         if v.startswith("_"):
             raise AttributeError()
         return getattr(self.sheet, v)
+
 
 def process_sheet_change_request(request, sheet):
     assert request.method == "POST"
@@ -484,7 +490,7 @@ def process_sheet_change_request(request, sheet):
         sheet.full_clean()
         sheet.save()
         return True
-    # removal forms are forgotten and not updated on failures.
+        # removal forms are forgotten and not updated on failures.
 
     return False
 
@@ -493,11 +499,11 @@ Notes = namedtuple("Notes", ["positive", "negative"])
 
 
 def get_notes(character, filter_kwargs):
-    args = { 'character': character }
+    args = {'character': character}
     args.update(filter_kwargs)
     positive = CharacterEdge.objects.filter(**args).exclude(
-                  edge__notes=u'').values_list('edge__edge__name',
-                                               'edge__notes')
+        edge__notes=u'').values_list('edge__edge__name',
+                                     'edge__notes')
     return positive
 
 
@@ -505,27 +511,27 @@ def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
                               .select_related('sheet__armor__base',
                                               'sheet__armor__quality'
-                                              'sheet__helm',)
+                                              'sheet__helm', )
                               .prefetch_related(
-            'spell_effects',
-            'weapons__base',
-            'weapons__quality',
-            'ranged_weapons__base',
-            'ranged_weapons__quality',
-            'miscellaneous_items',
-            'character__campaign',
-            'character__skills',
-            'character__skills__skill',
-            'character__skills__skill__required_skills',
-            'character__skills__skill__edgeskillbonus_set',
-            'character__edges',
-            'character__edges__edge__skill_bonuses'),
+        'spell_effects',
+        'weapons__base',
+        'weapons__quality',
+        'ranged_weapons__base',
+        'ranged_weapons__quality',
+        'miscellaneous_items',
+        'character__campaign',
+        'character__skills',
+        'character__skills__skill',
+        'character__skills__skill__required_skills',
+        'character__skills__skill__edgeskillbonus_set',
+        'character__edges',
+        'character__edges__edge__skill_bonuses'),
                               pk=sheet_id)
 
     forms = {}
 
-    positive = get_notes(sheet.character, { 'edge__cost__gt': 0 })
-    negative = get_notes(sheet.character, { 'edge__cost__lte': 0 })
+    positive = get_notes(sheet.character, {'edge__cost__gt': 0})
+    negative = get_notes(sheet.character, {'edge__cost__lte': 0})
     notes = Notes(positive=positive, negative=negative)
 
     if request.method == "POST":
@@ -599,11 +605,11 @@ def sheet_detail(request, sheet_id=None):
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
 
-    c = { 'char': SheetView(sheet),
-          'notes': notes,
-          'sweep_fire_available': any([wpn.has_sweep_fire()
-                                       for wpn in sheet.firearms.all()]),
-          }
+    c = {'char': SheetView(sheet),
+         'notes': notes,
+         'sweep_fire_available': any([wpn.has_sweep_fire()
+                                      for wpn in sheet.firearms.all()]),
+    }
     c.update(forms)
     return render_to_response('sheet/sheet_detail.html',
                               RequestContext(request, c))
@@ -611,6 +617,7 @@ def sheet_detail(request, sheet_id=None):
 
 class FormSaveMixin(object):
     success_message = "Object saved successfully."
+
     def form_valid(self, form):
         response = super(FormSaveMixin, self).form_valid(form)
         messages.success(self.request, self.success_message.format(
@@ -726,6 +733,7 @@ class AddFirearmView(AddWeaponView):
     model = sheet.models.BaseFirearm
     form_class = sheet.forms.CreateBaseFirearmForm
 
+
 class AddAmmunitionView(AddWeaponView):
     model = Ammunition
 
@@ -773,11 +781,13 @@ def get_data_rows(results, fields):
                     if hasattr(mdl, 'name'):
                         return mdl.name
                     return str(mdl.pk)
+
                 if isinstance(value, django.db.models.Model):
                     value = get_descr(value)
                 elif isinstance(value, django.db.models.Manager):
                     value = "|".join([get_descr(val) for val in value.all()])
                 return value
+
         yield [get_field_value(field) for field in fields]
 
 
@@ -791,9 +801,9 @@ def browse(request, type):
     rows = get_data_rows(results, fields)
     fields = [" ".join(ff.split('_')) for ff in fields]
     return render_to_response('sheet/browse.html',
-                              RequestContext(request, { 'type' : type,
-                                                        'header' : fields,
-                                                        'rows' : rows }))
+                              RequestContext(request, {'type': type,
+                                                       'header': fields,
+                                                       'rows': rows}))
 
 
 def update_id_sequence(model_class):
@@ -807,19 +817,27 @@ def update_id_sequence(model_class):
     the next value.
     """
     # Only with postgres.
+
     if (settings.DATABASES['default']['ENGINE'] ==
             "django.db.backends.postgresql_psycopg2"):
-        # The operation should only be performed for models with a serial id
-        # as the primary key.
-        cc = django.db.connection.cursor()
-        # String replace ok here, as the table name is not coming from an
-        # external source, and generating the query with execute is not
-        # trivial with a dynamic table name.
-        cc.execute("""
-        SELECT pg_catalog.setval(pg_get_serial_sequence('{table}', 'id'),
-                                 (SELECT MAX(id) FROM {table}));
-                                 """.format(
-            table=model_class._meta.db_table))
+
+        try:
+            if model_class._meta.get_field_by_name('id'):
+                # The operation should only be performed for models with a
+                # serial id as the primary key.
+                cc = django.db.connection.cursor()
+                # String replace ok here, as the table name is not coming
+                # from an external source, and generating the query with
+                # execute is not trivial with a dynamic table name.
+                cc.execute("""
+                SELECT pg_catalog.setval(pg_get_serial_sequence('{table}',
+                                         'id'),
+                                         (SELECT MAX(id) FROM {table}));
+                                         """.format(
+                    table=model_class._meta.db_table))
+        except django.db.models.FieldDoesNotExist:
+            pass
+
 
 
 def sort_by_dependencies(header, rows):
@@ -928,13 +946,12 @@ def import_text(data):
         ammunition_types = []
         for (field_name, value) in fields.items():
             logger.debug(("importing field %s for %s.") % (field_name,
-                                                modelcls._meta.object_name))
+                                                           modelcls._meta.object_name))
 
             if field_name not in modelcls.get_exported_fields():
                 logger.info(("ignoring field %s for %s, not in "
-                             "exported fields.") % (field_name,
-                                                    modelcls.__class__
-                                                    .__name__))
+                             "exported fields.") % (
+                    field_name, modelcls.__class__.__name__))
                 continue
             try:
                 (field, _, direct, m2m) = \
@@ -947,7 +964,7 @@ def import_text(data):
                     value = TechLevel.objects.get(name=value)
                 except TechLevel.DoesNotExist:
                     raise ValueError, "No matching TechLevel with name %s." % (
-                                                value)
+                        value)
             elif field_name == "ammunition_types":
                 if modelcls != sheet.models.BaseFirearm:
                     raise ValueError, "Invalid model for ammunition_types"
@@ -1013,8 +1030,9 @@ def import_text(data):
                         value = field.to_python(value)
                     except Exception, e:
                         raise type(e), ("Failed to import field \"%s\", "
-                                        "value \"%s\" (%s)" % (field_name, value,
-                                                               str(e)))
+                                        "value \"%s\" (%s)" % (
+                            field_name, value,
+                            str(e)))
             setattr(mdl, field_name, value)
         try:
             mdl.full_clean()
@@ -1022,7 +1040,7 @@ def import_text(data):
         except Exception, e:
             raise type(e), ("Line %d: Failed to import field \"%s\", "
                             "value \"%s\" (%s)" % (line, field_name, value,
-                            str(e)))
+                                                   str(e)))
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
                         (mdl, mdl.__class__.__name__, kk, vv))
@@ -1036,7 +1054,7 @@ def import_text(data):
 
             sheet.models.FirearmAmmunitionType.objects.filter()
             for ammo_type in ammunition_types:
-                sheet.models.FirearmAmmunitionType.objects\
+                sheet.models.FirearmAmmunitionType.objects \
                     .get_or_create(firearm=mdl,
                                    short_label=ammo_type)
 
@@ -1081,8 +1099,8 @@ def import_data(request):
 
     return render_to_response('sheet/import_data.html',
                               RequestContext(request,
-                                             { 'types' : types,
-                                               'import_form' : form }))
+                                             {'types': types,
+                                              'import_form': form}))
 
 
 def csv_export(exported_type):
@@ -1125,12 +1143,13 @@ def version_history(request):
                 acc = ""
             acc += ll
         yield acc
+
     proc = subprocess.Popen(['git', 'log'], stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             cwd=os.path.dirname(__file__))
     return render_to_response('sheet/changelog.html',
                               RequestContext(request,
-                                             { 'log' : logiter(proc.stdout) }))
+                                             {'log': logiter(proc.stdout)}))
 
 
 class TODOView(TemplateView):
