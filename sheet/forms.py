@@ -23,11 +23,6 @@ class ImportForm(forms.Form):
         return cd
 
 
-EditSheetForm =  modelform_factory(sheet.models.Sheet, exclude=(
-    'weapons', 'ranged_weapons', 'armor', 'helm', 'spell_effects',
-    'miscellaneous_items', 'firearms'))
-
-
 def pretty_name(name):
     return ' '.join(filter(None, re.split('([A-Z][a-z]*[^A-Z])',
                                           name))).lower().capitalize()
@@ -43,6 +38,23 @@ class RequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(RequestForm, self).__init__(*args, **kwargs)
+
+
+class SetOwnerMixin(object):
+    def save(self, commit=True):
+        inst = super(SetOwnerMixin, self).save(commit=False)
+        inst.owner = self.request.user
+        if commit:
+            inst.save()
+        return inst
+
+
+class EditSheetForm(SetOwnerMixin, RequestForm):
+    class Meta:
+        model = sheet.models.Sheet
+        exclude = ('owner',
+                   'weapons', 'ranged_weapons', 'armor', 'helm',
+                   'spell_effects', 'miscellaneous_items', 'firearms')
 
 
 class AddWeaponForm(RequestForm):
@@ -346,7 +358,7 @@ class AddEdgeForm(RequestForm):
         return self.instance
 
 
-class EditEdgeLevelForm(forms.ModelForm):
+class EditEdgeLevelForm(RequestForm):
     class Meta:
         model = sheet.models.EdgeLevel
         exclude = ('skill_bonuses',)
@@ -494,7 +506,7 @@ class HelmForm(RequestForm):
         model = sheet.models.Armor
 
 
-class AddCharacterForm(RequestForm):
+class AddCharacterForm(SetOwnerMixin, RequestForm):
     base_stat_field_names = []
     PREFIXES = ["start_", "cur_", "base_mod_"]
     for prefix in PREFIXES:
@@ -525,6 +537,7 @@ class AddCharacterForm(RequestForm):
 
     class Meta:
         model = sheet.models.Character
+        exclude = ('owner', )
 
 
 class EditCharacterForm(AddCharacterForm):
@@ -565,7 +578,7 @@ class AddXPForm(RequestForm):
         return super(AddXPForm, self).save(commit=commit)
 
 
-class CreateBaseFirearmForm(forms.ModelForm):
+class CreateBaseFirearmForm(RequestForm):
     ammo_types = forms.CharField(help_text="Accepted ammo types, "
                                            "separated by '|'")
 

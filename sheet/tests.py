@@ -1395,21 +1395,47 @@ class AddCharacterTestCase(TestHelperMixin, WebTest):
         self.campaign = factories.CampaignFactory(name='2K')
         self.admin = factories.UserFactory(username="admin", password="admin")
         self.assertTrue(self.client.login(username="admin", password="admin"))
-        self.sheet_url = reverse("sheet_detail", args=(1, ))
 
-    def test_edit_character(self):
+    def test_add_character(self):
         add_char_url = reverse('add_char')
         form = self.app.get(add_char_url, user='admin').form
         form['name'] = "John Doe"
         form['occupation'] = "adventurer"
         form['campaign'] = self.campaign.pk
-        form['owner'] = self.admin.pk
         form['race'] = 'human'
         post_response = self.client.post(add_char_url,
                                          dict(form.submit_fields()))
-        response = self.client.get(self.sheet_url)
-        self.assertInMessages(response, 'Character add successful.')
-        self.assertRedirects(post_response, self.sheet_url)
+        last_id = sheet.models.Sheet.objects.order_by('-id')[0].pk
+        sheet_url = reverse('sheet_detail', args=(last_id, ))
+
+        response = self.client.get(sheet_url)
+        self.assertInMessages(response, 'Character added successfully.')
+        self.assertRedirects(post_response, sheet_url)
+
+
+class AddSheetTestCase(TestHelperMixin, WebTest):
+    def setUp(self):
+        self.campaign = factories.CampaignFactory(name='2K')
+        self.admin = factories.UserFactory(username="admin", password="admin")
+        self.character = factories.CharacterFactory(name="John Doe",
+                                                    owner=self.admin,
+                                                    campaign=self.campaign,
+                                                    occupation="adventurer")
+
+        self.assertTrue(self.client.login(username="admin", password="admin"))
+
+    def test_add_sheet(self):
+        add_sheet_url = reverse('add_sheet')
+        form = self.app.get(add_sheet_url, user='admin').form
+        form['character'] = self.character.pk
+        form.submit()
+        post_response = self.client.post(add_sheet_url,
+                                         dict(form.submit_fields()))
+        last_id = sheet.models.Sheet.objects.order_by('-id')[0].pk
+        sheet_url = reverse('sheet_detail', args=(last_id, ))
+        response = self.client.get(sheet_url)
+        self.assertRedirects(post_response, sheet_url)
+        self.assertInMessages(response, "Sheet added successfully.")
 
 
 class EditCharacterTestCase(TestHelperMixin, WebTest):

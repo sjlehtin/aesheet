@@ -629,7 +629,28 @@ class FormSaveMixin(object):
         return super(FormSaveMixin, self).form_invalid(form)
 
 
-class AddWeaponView(FormSaveMixin, CreateView):
+class RequestMixin(object):
+    def get_form_kwargs(self, **kwargs):
+        new_kwargs = dict(request=self.request)
+        new_kwargs.update(super(RequestMixin, self).get_form_kwargs(**kwargs))
+        return new_kwargs
+
+
+class BaseCreateView(FormSaveMixin, RequestMixin, CreateView):
+    def get_form_class(self):
+        if self.form_class:
+            return self.form_class
+        return modelform_factory(self.model, form=sheet.forms.RequestForm)
+
+
+class BaseUpdateView(FormSaveMixin, RequestMixin, UpdateView):
+    def get_form_class(self):
+        if self.form_class:
+            return self.form_class
+        return modelform_factory(self.model, form=sheet.forms.RequestForm)
+
+
+class AddWeaponView(BaseCreateView):
     model = Weapon
     template_name = 'sheet/add_weapon.html'
     success_url = reverse_lazy(sheets_index)
@@ -652,7 +673,7 @@ class AddMiscellaneousItemView(AddWeaponView):
     template_name = 'sheet/add_miscellaneous_item.html'
 
 
-class EditCharacterView(FormSaveMixin, UpdateView):
+class EditCharacterView(BaseUpdateView):
     form_class = EditCharacterForm
     model = Character
     template_name = 'sheet/create_character.html'
@@ -668,7 +689,7 @@ class EditCharacterView(FormSaveMixin, UpdateView):
         return reverse('edit_character', args=(self.object.pk, ))
 
 
-class AddCharacterView(FormSaveMixin, CreateView):
+class AddCharacterView(BaseCreateView):
     model = sheet.models.Character
     form_class = sheet.forms.AddCharacterForm
     template_name = 'sheet/create_character.html'
@@ -678,7 +699,7 @@ class AddCharacterView(FormSaveMixin, CreateView):
         self.sheet = sheet.models.Sheet.objects.create(
             character=self.object,
             owner=self.object.owner)
-        messages.success(self.request, "Character add successful.  "
+        messages.success(self.request, "Character added successfully.  "
                                        "Sheet has been created automatically.")
         return HttpResponseRedirect(self.get_success_url())
 
@@ -686,7 +707,7 @@ class AddCharacterView(FormSaveMixin, CreateView):
         return reverse('sheet_detail', args=(self.sheet.pk, ))
 
 
-class AddSpellEffectView(FormSaveMixin, CreateView):
+class AddSpellEffectView(BaseCreateView):
     model = SpellEffect
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
@@ -696,18 +717,21 @@ class AddEdgeView(AddSpellEffectView):
     model = Edge
 
 
-class EditSheetView(FormSaveMixin, UpdateView):
+class EditSheetView(BaseUpdateView):
     form_class = EditSheetForm
     model = Sheet
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
 
-class AddSheetView(FormSaveMixin, CreateView):
+class AddSheetView(BaseCreateView):
     model = Sheet
     form_class = EditSheetForm
     template_name = 'sheet/gen_edit.html'
-    success_url = reverse_lazy(sheets_index)
+    success_message = "Sheet added successfully."
+
+    def get_success_url(self):
+        return reverse('sheet_detail', args=(self.object.pk, ))
 
 
 class AddEdgeLevelView(AddSpellEffectView):
