@@ -63,3 +63,6 @@ sun 5.1.2014 9h Firearms sweep fire.
 mon 6.1.2014 1h Firearms sweep fire.
 tue 7.1.2014 6h Firearms sweep and burst fire.
 wed 8.1.2014 4h Firearms ROF calculation, firearm base creation form finalization, portrait upload.
+thu 9.1.2014 4h Sheet addition when creating character.  Styling.
+fri 10.1.2014 3h Base character edit layout.  Styling.
+sun 11.1.2014 1h Sheet owner.
