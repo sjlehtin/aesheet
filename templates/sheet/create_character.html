@@ -4,7 +4,20 @@
 {% block title %} Create character {% endblock %}
 
 {% block content %}
-<h2>Create character</h2>
+<h2>{% if form.instance.pk %}
+    Edit
+{% else %}
+    Create
+{% endif %} character</h2>
+
+    {% if form.instance.owner %}
+    <div class="panel panel-default">
+    <div class="panel-heading"><h3 class="panel-title">Owner</h3></div>
+        <div class="panel-body">
+        {{ form.instance.owner }}
+        </div>
+    </div>
+    {% endif %}
 
 <form action="{{ request.path }}"
       class="form-horizontal"
