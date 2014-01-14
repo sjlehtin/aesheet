@@ -53,7 +53,12 @@
 <tr><td><strong>IMM</strong></td><td></td><td></td><td>{{ form.base_mod_imm|add_class:"form-control" }}</td></tr>
 </tbody>
 </table>
-    <input type="submit" value="Create" />
+    <input type="submit"
+           {% if form.instance.pk %}
+           value="Save"
+           {% else %}
+           value="Create"
+           {% endif %}/>
 </form>
 
 {% endblock %}
