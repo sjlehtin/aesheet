@@ -103,6 +103,7 @@ BUGS = """
 
 from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect
+import django.http
 from django.template import RequestContext
 from sheet.models import *
 from sheet.forms import *
@@ -124,13 +125,15 @@ logger = logging.getLogger(__name__)
 
 def characters_index(request):
     return render_to_response('sheet/characters_index.html',
-                              {'campaigns': Character.get_by_campaign()},
+                              {'campaigns':
+                                   Character.get_by_campaign(request.user)},
                               context_instance=RequestContext(request))
 
 
 def sheets_index(request):
     return render_to_response('sheet/sheets_index.html',
-                              {'campaigns': Sheet.get_by_campaign()},
+                              {'campaigns':
+                                   Sheet.get_by_campaign(request.user)},
                               context_instance=RequestContext(request))
 
 
@@ -521,6 +524,8 @@ def sheet_detail(request, sheet_id=None):
         'character__edges',
         'character__edges__edge__skill_bonuses'),
                               pk=sheet_id)
+    if not sheet.character.access_allowed(request.user):
+        raise django.core.exceptions.PermissionDenied
 
     forms = {}
 
@@ -680,6 +685,12 @@ class EditCharacterView(BaseUpdateView):
     success_url = reverse_lazy(characters_index)
     success_message = "Character edit successful."
 
+    def get_object(self, queryset=None):
+        object = super(EditCharacterView, self).get_object(queryset)
+        if not object.access_allowed(self.request.user):
+            raise django.core.exceptions.PermissionDenied
+        return object
+
     def get_form_kwargs(self):
         dd = super(EditCharacterView, self).get_form_kwargs()
         dd['request'] = self.request
@@ -721,7 +732,15 @@ class EditSheetView(BaseUpdateView):
     form_class = EditSheetForm
     model = Sheet
     template_name = 'sheet/gen_edit.html'
-    success_url = reverse_lazy(sheets_index)
+
+    def get_object(self, queryset=None):
+        object = super(EditSheetView, self).get_object(queryset)
+        if not object.character.access_allowed(self.request.user):
+            raise django.core.exceptions.PermissionDenied
+        return object
+
+    def get_success_url(self):
+        return reverse('sheet_detail', args=(self.object.pk, ))
 
 
 class AddSheetView(BaseCreateView):

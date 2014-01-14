@@ -109,12 +109,17 @@ class CampaignItem(object):
         self.objects = []
 
 
-def get_by_campaign(model_class, accessor):
+def get_by_campaign(model_class, user, get_character=lambda obj: obj):
     items = SortedDict()
-    objects = [(accessor(obj), obj) for obj in model_class.objects.all()]
-    objects.sort(key=lambda xx: xx[0].name)
-    for (campaign, obj) in objects:
-        item =  items.setdefault(campaign.name, CampaignItem(campaign))
+    objects = [(get_character(obj), obj) for obj in model_class.objects.all()]
+    objects.sort(key=lambda xx: xx[0].campaign.name)
+    for (char, obj) in objects:
+        # Skip private characters where the user is not the owner.
+        if char.private:
+            if char.owner != user:
+                continue
+        item = items.setdefault(char.campaign.name,
+                                CampaignItem(char.campaign))
         item.objects.append(obj)
     return items.values()
 
@@ -139,6 +144,13 @@ class Character(models.Model):
     name = models.CharField(max_length=256)
     owner = models.ForeignKey(auth.models.User,
                               related_name="characters")
+    private = models.BooleanField(default=False,
+                                  help_text="If set, access to the character "
+                                            "will be denied for other users.  "
+                                            "The character will also be hidden "
+                                            "in lists.  As a rule of thumb, "
+                                            "only the GM should mark characters"
+                                            " as private.")
 
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
@@ -208,7 +220,7 @@ class Character(models.Model):
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['campaign', 'name']
 
     def __init__(self, *args, **kwargs):
         super(Character, self).__init__(*args, **kwargs)
@@ -472,8 +484,16 @@ class Character(models.Model):
         return dict(cursor.fetchall())
 
     @classmethod
-    def get_by_campaign(cls):
-        return get_by_campaign(cls, lambda obj: obj.campaign)
+    def get_by_campaign(cls, user):
+        return get_by_campaign(cls, user)
+
+    def access_allowed(self, user):
+        if not self.private:
+            return True
+        if self.owner.pk == user.pk:
+            return True
+        else:
+            return False
 
 
 class Edge(ExportedModel):
@@ -1461,7 +1481,7 @@ class Sheet(models.Model):
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
-        ordering = ['last_update_at']
+        ordering = ['campaign', 'name']
 
     (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
 
@@ -2051,8 +2071,8 @@ class Sheet(models.Model):
         return weight + self.extra_weight_carried
 
     @classmethod
-    def get_by_campaign(cls):
-        return get_by_campaign(cls, lambda obj: obj.character.campaign)
+    def get_by_campaign(cls, user):
+        return get_by_campaign(cls, user, lambda obj: obj.character)
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -2111,6 +2131,9 @@ class CharacterLogEntry(models.Model):
         elif self.entry_type == self.SKILL:
             return u"Added skill %s %d." % (self.skill, self.skill_level)
 
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
+
 
 def _collect_exportable_classes(start_model):
     """
@@ -2129,6 +2152,7 @@ def _collect_exportable_classes(start_model):
         if not cc._meta.abstract:
             models.append(cc)
     return models
+
 
 EXPORTABLE_MODELS = sorted([cc.__name__
                      for cc in _collect_exportable_classes(ExportedModel)])

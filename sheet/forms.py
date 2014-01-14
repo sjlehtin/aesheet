@@ -549,6 +549,13 @@ class AddCharacterForm(SetOwnerMixin, BaseEditCharacterForm):
 
 
 class EditCharacterForm(BaseEditCharacterForm):
+
+    def __init__(self, *args, **kwargs):
+        super(EditCharacterForm, self).__init__(*args, **kwargs)
+        # Only owner can check private flag.
+        if self.request.user != self.instance.owner:
+            del self.fields['private']
+
     def save(self, commit=True):
         if commit:
             if self.changed_data:
