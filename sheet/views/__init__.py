@@ -6,15 +6,16 @@ Priority list by JW:
 
 - possibility to copy characters and sheets (mainly sheets), which will copy
   also the underlying character.
-- character addition form layout for easier "intake" (group cur, starting
-  stats, show raises).
-- adding weapon inplace ("add row" functionality), instead of the large set of
-  controls.  Might already be sufficient with the condensed layout, verify with
-  JW.
--- access controls
---- marking sheet as only visible to self (SM)
---- marking characters as only visible to self (SM)
-    these should not show in the lists.
+- character addition form layout for easier "intake"
+  + group cur, starting stats
+  - show raises
++/- adding weapon inplace ("add row" functionality), instead of the large set of
+    controls.  Might already be sufficient with the condensed layout, verify with
+    JW.
++ access controls
+++ marking sheet as only visible to self (SM)
+++ marking characters as only visible to self (SM)
++++ these should not show in the lists.
 
 
 + character mugshot upload (SM)
