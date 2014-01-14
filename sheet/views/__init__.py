@@ -89,7 +89,7 @@ Firearms:
 - firearms in CC.
 - some weapons with autofire do not have sweep fire enabled.
 - some weapons have restricted burst (restricted to 2 or 3 shots).
-- adding weapon with inline form does not allow setting ammo types.
++ adding weapon with inline form does not allow setting ammo types.
 
 """
 
