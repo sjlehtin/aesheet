@@ -66,3 +66,5 @@ wed 8.1.2014 4h Firearms ROF calculation, firearm base creation form finalizatio
 thu 9.1.2014 4h Sheet addition when creating character.  Styling.
 fri 10.1.2014 3h Base character edit layout.  Styling.
 sun 11.1.2014 1h Sheet owner.
+mon 12.1.2014 0.5h Sheet owner.
+tue 13.1.2014 2h Sheet owner.
