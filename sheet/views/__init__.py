@@ -726,7 +726,7 @@ class EditSheetView(BaseUpdateView):
 
 class AddSheetView(BaseCreateView):
     model = Sheet
-    form_class = EditSheetForm
+    form_class = AddSheetForm
     template_name = 'sheet/gen_edit.html'
     success_message = "Sheet added successfully."
 

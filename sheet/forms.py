@@ -49,12 +49,16 @@ class SetOwnerMixin(object):
         return inst
 
 
-class EditSheetForm(SetOwnerMixin, RequestForm):
+class EditSheetForm(RequestForm):
     class Meta:
         model = sheet.models.Sheet
         exclude = ('owner',
                    'weapons', 'ranged_weapons', 'armor', 'helm',
                    'spell_effects', 'miscellaneous_items', 'firearms')
+
+
+class AddSheetForm(SetOwnerMixin, EditSheetForm):
+    pass
 
 
 class AddWeaponForm(RequestForm):
@@ -506,7 +510,7 @@ class HelmForm(RequestForm):
         model = sheet.models.Armor
 
 
-class AddCharacterForm(SetOwnerMixin, RequestForm):
+class BaseEditCharacterForm(RequestForm):
     base_stat_field_names = []
     PREFIXES = ["start_", "cur_", "base_mod_"]
     for prefix in PREFIXES:
@@ -540,7 +544,11 @@ class AddCharacterForm(SetOwnerMixin, RequestForm):
         exclude = ('owner', )
 
 
-class EditCharacterForm(AddCharacterForm):
+class AddCharacterForm(SetOwnerMixin, BaseEditCharacterForm):
+    pass
+
+
+class EditCharacterForm(BaseEditCharacterForm):
     def save(self, commit=True):
         if commit:
             if self.changed_data:

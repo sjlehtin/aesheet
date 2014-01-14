@@ -23,8 +23,43 @@ import factories
 import django.db
 from django.conf import settings
 
-
 logger = logging.getLogger(__name__)
+
+
+class SetOwnerTestCase(WebTest):
+    def setUp(self):
+        self.owner = factories.UserFactory.create(username="luke")
+        self.other = factories.UserFactory.create(username="leia")
+        self.sheet = factories.SheetFactory.create(character__name="John Doe",
+                                                   character__owner=self.owner)
+        self.other_client = django.test.Client()
+        self.assertTrue(self.other_client.login(username=self.other.username,
+                                                password="foobar"))
+        self.assertTrue(self.client.login(username=self.owner.username,
+                                          password="foobar"))
+
+    def test_character_owner_is_retained_in_edit(self):
+        character_url = reverse('edit_character',
+                                args=(self.sheet.character.id, ))
+        form = self.app.get(character_url, user=self.owner.username).form
+        request_dict = dict(form.submit_fields())
+        response = self.other_client.post(character_url, request_dict)
+        self.assertRedirects(response, character_url)
+        char = Character.objects.get(name=self.sheet.character.name)
+        # Owner should be the same as before.
+        self.assertEqual(char.owner, self.owner)
+
+    def test_sheet_owner_is_retained_in_edit(self):
+        sheet_url = reverse('edit_sheet',
+                            args=(self.sheet.id, ))
+        form = self.app.get(sheet_url, user=self.owner.username).form
+        request_dict = dict(form.submit_fields())
+        response = self.other_client.post(sheet_url, request_dict)
+        self.assertRedirects(response, reverse("sheet_detail",
+                                               args=(self.sheet.id, )))
+        sheet = Sheet.objects.get(character=self.sheet.character)
+        # Owner should be the same as before.
+        self.assertEqual(sheet.owner, self.owner)
 
 
 class ItemHandling(TestCase):
