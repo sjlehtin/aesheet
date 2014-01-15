@@ -32,17 +32,19 @@ comma in the names.  If this is not necessary, the behaviour can be
 changed.
 </p>
 <p>
-<strong>Column "id" should always be left unchanged.</strong>
+<strong class="text-danger">Column "id" should always be left unchanged.</strong>
 </p>
 
-<dl>
+<div class="list-group">
 {% for item in types %}
-<dt><a href="{% url "browse" item.name %}">{{ item.name}}</a></dt>
+    <div class="list-group-item">
+<h4><a href="{% url "browse" item.name %}">{{ item.name}}</a></h4>
 {% if item.doc %}<dd>{{ item.doc }}</dd>{% endif %}
-<dd><label>Fields:</label> <span style="font-style: italic; ">{{ item.fields|join:", " }}</span></dd>
-<dd><a href="{% url "export" item.name %}">Download</a></dd>
+<label>Fields:</label> <span style="font-style: italic; ">{{ item.fields|join:", " }}</span>
+<div><a href="{% url "export" item.name %}">Download</a></div>
+    </div>
 {% endfor %}
-</dl>
+</div>
 </div>
 
 {% endblock %}
