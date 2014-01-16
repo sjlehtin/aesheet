@@ -33,6 +33,39 @@ class CampaignFactory(factory.DjangoModelFactory):
                 self.tech_levels.add(TechLevelFactory(name=tech_level))
 
 
+class SkillFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Skill
+    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+
+
+class CharacterSkillFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.CharacterSkill
+
+    skill = factory.SubFactory(SkillFactory)
+    level = 0
+
+
+class EdgeFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Edge
+    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
+
+
+class EdgeLevelFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.EdgeLevel
+
+    edge = factory.SubFactory(EdgeFactory)
+    level = 0
+    cost = level * .5 + 1
+
+
+class CharacterEdgeFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.CharacterEdge
+
+    edge = factory.SubFactory(EdgeLevelFactory)
+
+
 class CharacterFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Character
     campaign = factory.SubFactory(CampaignFactory)
@@ -40,6 +73,34 @@ class CharacterFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda xx: "char-{0}".format(xx))
     occupation = "Adventurer"
     race = "Human"
+
+    @factory.post_generation
+    def skills(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for (skill, level) in extracted:
+                CharacterSkillFactory(character=self,
+                                      skill=SkillFactory(name=skill),
+                                      level=level)
+
+    @factory.post_generation
+    def edges(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for (edge, level) in extracted:
+                CharacterEdgeFactory(
+                    character=self,
+                    edge=EdgeLevelFactory(edge=EdgeFactory(name=edge),
+                                          level=level))
+
 
 class SheetFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Sheet
@@ -60,20 +121,6 @@ class AmmunitionFactory(factory.DjangoModelFactory):
 
 class FirearmAmmunitionTypeFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.FirearmAmmunitionType
-
-
-class SkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Skill
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
-
-    tech_level = factory.SubFactory(TechLevelFactory)
-
-
-class CharacterSkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.CharacterSkill
-
-    skill = factory.SubFactory(SkillFactory)
-    level = 0
 
 
 class BaseFirearmFactory(factory.DjangoModelFactory):

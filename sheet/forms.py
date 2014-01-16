@@ -621,3 +621,44 @@ class CreateBaseFirearmForm(RequestForm):
 
     class Meta:
         model = sheet.models.BaseFirearm
+
+
+class CopySheetForm(RequestFormMixin, forms.Form):
+    sheet = forms.ModelChoiceField(queryset=sheet.models.Sheet.objects.all())
+    to_name = forms.CharField(max_length=256)
+
+    def clean_to_name(self):
+        to_name = self.cleaned_data.get('to_name', None)
+        if to_name:
+            qs = sheet.models.Character.objects.filter(name=to_name)
+            if qs.exists():
+                raise forms.ValidationError, \
+                    "Character {to_name} already exists.".format(
+                        to_name=to_name)
+            else:
+                return to_name
+
+    def save(self):
+        original_sheet = self.cleaned_data['sheet']
+        new_sheet = original_sheet
+        new_sheet.pk = None
+        skills = original_sheet.character.skills.all()
+        edges = original_sheet.character.edges.all()
+
+        new_char = new_sheet.character
+        new_char.name = self.cleaned_data['to_name']
+        new_char.pk = None
+        new_char.owner = self.request.user
+        new_char.save()
+
+        for skill in skills:
+            new_char.skills.create(skill=skill.skill,
+                                   level=skill.level)
+
+        for ce in edges:
+            new_char.edges.create(edge=ce.edge)
+
+        new_sheet.character = new_char
+        new_sheet.save()
+
+        return new_sheet

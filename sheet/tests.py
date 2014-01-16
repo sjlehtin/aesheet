@@ -1690,3 +1690,85 @@ class CharacterFormTestCase(TestCase):
                                  for field in form.derived_stat_fields()]) |
                             set([field.name
                                  for field in form.non_stat_fields()]))
+
+
+class SheetCopyTestCase(TestCase):
+    def setUp(self):
+        self.request_factory = django.test.RequestFactory()
+        self.admin = factories.UserFactory(username="admin")
+        self.original_owner = factories.UserFactory(username="leia")
+        self.original_sheet = factories.SheetFactory(
+            character__name="John Doe",
+            character__campaign__name="3K",
+            character__owner=self.original_owner,
+            character__skills=[("Shooting", 3),
+                               ("Heckling", 2),
+                               ("Drunken boxing", 4)],
+            character__edges=[("Toughness", 3),
+                               ("Athletic ability", 2),
+                               ("Bad eyesight", 4)])
+        self.original_character = self.original_sheet.character
+
+    def _post_request(self):
+        post = self.request_factory.post('/copy/')
+        post.user = self.admin
+        return post
+
+    def get_skill_list(self, character):
+        return ["{skill} {level}".format(skill=skill.skill.name,
+                                         level=skill.level)
+                for skill in character.skills.all()]
+
+    def get_edge_list(self, character):
+        return ["{edge} {level}".format(edge=ce.edge.edge.name,
+                                        level=ce.edge.level)
+                for ce in character.edges.all()]
+
+    def test_copy_sheet(self):
+        data = {'sheet': self.original_sheet.pk,
+                'to_name': 'Foo Johnson'}
+        form = sheet.forms.CopySheetForm(request=self._post_request(),
+                                         data=data)
+        self.assertTrue(form.is_valid())
+        new_sheet = form.save()
+
+        # Verify the old sheet is still there.
+        self.assertEqual(sheet.models.Sheet.objects.get(
+            character__name='John Doe'), self.original_sheet)
+        orig = sheet.models.Character.objects.get(name='John Doe')
+        self.assertEqual(orig, self.original_character)
+        self.assertEqual(orig.owner, self.original_owner)
+
+        self.assertEqual(new_sheet.character.owner, self.admin)
+
+        self.assertEqual(sheet.models.Sheet.objects.get(
+            character__name='John Doe'), self.original_sheet)
+
+        self.assertEqual(new_sheet.character.campaign,
+                         self.original_sheet.campaign)
+        self.assertNotEqual(new_sheet, self.original_sheet)
+
+        # Skills should match.
+        self.assertListEqual(
+            self.get_skill_list(new_sheet.character),
+            self.get_skill_list(self.original_character))
+
+        self.assertTrue(CharacterSkill.objects.filter(
+            character=new_sheet.character).exists())
+
+        # Edges should match.
+        self.assertListEqual(
+            self.get_edge_list(new_sheet.character),
+            self.get_edge_list(self.original_character))
+
+        self.assertTrue(CharacterEdge.objects.filter(
+            character=new_sheet.character).exists())
+
+    def test_copy_fails_if_target_exists(self):
+        factories.SheetFactory(character__name="Jane Doe")
+
+        form = sheet.forms.CopySheetForm(request=self._post_request,
+                                         data={'sheet': self.original_sheet.pk,
+                                               'to_name': 'Jane Doe'})
+        self.assertFalse(form.is_valid())
+        self.assertIn("already exists", '/'.join(form.errors['to_name']))
