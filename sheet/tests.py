@@ -1807,6 +1807,19 @@ class SheetCopyTestCase(TestCase):
 
         self.assertEqual(new_sheet.owner, self.admin)
 
+    def test_copied_character_has_log_entry(self):
+        data = {'sheet': self.original_sheet.pk,
+                'to_name': 'Foo Johnson'}
+        form = sheet.forms.CopySheetForm(request=self._post_request(),
+                                         data=data)
+        self.assertTrue(form.is_valid())
+        new_sheet = form.save()
+
+        log = "/".join([unicode(e) for e in
+                        new_sheet.character.characterlogentry_set.all()])
+        self.assertIn("Copied from {original_name}.".format(
+            original_name=self.original_character.name), log)
+
     def test_copy_fails_if_target_exists(self):
         factories.SheetFactory(character__name="Jane Doe")
 

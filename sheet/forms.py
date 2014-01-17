@@ -653,6 +653,7 @@ class CopySheetForm(RequestFormMixin, forms.Form):
 
 
         new_char = new_sheet.character
+        original_name = new_char.name
         new_char.name = self.cleaned_data['to_name']
         new_char.pk = None
         new_char.owner = self.request.user
@@ -664,6 +665,13 @@ class CopySheetForm(RequestFormMixin, forms.Form):
 
         for ce in edges:
             new_char.edges.create(edge=ce.edge)
+
+        sheet.models.CharacterLogEntry.objects.create(
+            character=new_char,
+            user=self.request.user,
+            entry="Copied from {orig}.".format(orig=original_name),
+            entry_type=sheet.models.CharacterLogEntry.NON_FIELD
+        )
 
         new_sheet.character = new_char
         new_sheet.owner = self.request.user

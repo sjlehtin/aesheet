@@ -2095,10 +2095,12 @@ class CharacterLogEntry(models.Model):
     user = models.ForeignKey(auth.models.User)
     character = models.ForeignKey(Character)
 
-    STAT, SKILL, EDGE = range(0, 3)
+    STAT, SKILL, EDGE, NON_FIELD = range(0, 4)
     entry_type = models.PositiveIntegerField(choices=((STAT, ("stat")),
                                                       (SKILL, ("skill")),
-                                                      (EDGE, ("edge"))),
+                                                      (EDGE, ("edge")),
+                                                      (NON_FIELD, ("non-field")),
+                                                      ),
                                              default=STAT)
 
     entry = models.TextField(blank=True,
@@ -2130,6 +2132,8 @@ class CharacterLogEntry(models.Model):
                 return u"Changed %s." % (self.field)
         elif self.entry_type == self.SKILL:
             return u"Added skill %s %d." % (self.skill, self.skill_level)
+        elif self.entry_type == self.NON_FIELD:
+            return u"{0}".format(self.entry)
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)
