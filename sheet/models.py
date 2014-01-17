@@ -895,8 +895,6 @@ Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
 
 class RangedWeaponMixin(models.Model):
-    type = models.CharField(max_length=5, default="P")
-
     target_initiative = models.IntegerField(default=-2)
 
     range_pb = models.IntegerField(blank=True, null=True)
@@ -1060,6 +1058,8 @@ class WeaponTemplate(BaseWeaponTemplate):
 class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     """
+    type = models.CharField(max_length=5, default="P")
+    
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
 
