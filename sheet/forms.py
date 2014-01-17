@@ -666,6 +666,7 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             new_char.edges.create(edge=ce.edge)
 
         new_sheet.character = new_char
+        new_sheet.owner = self.request.user
         new_sheet.save()
 
         for weapon in weapons:

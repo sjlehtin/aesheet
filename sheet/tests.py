@@ -1805,6 +1805,8 @@ class SheetCopyTestCase(TestCase):
             self.assertTrue(getattr(self.original_sheet,
                                     accessor).exists())
 
+        self.assertEqual(new_sheet.owner, self.admin)
+
     def test_copy_fails_if_target_exists(self):
         factories.SheetFactory(character__name="Jane Doe")
 
