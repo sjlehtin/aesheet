@@ -4,7 +4,7 @@ TODO = """
 
 Priority list by JW:
 
-- possibility to copy characters and sheets (mainly sheets), which will copy
++ possibility to copy characters and sheets (mainly sheets), which will copy
   also the underlying character.
 - character addition form layout for easier "intake"
   + group cur, starting stats
