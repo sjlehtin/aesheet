@@ -958,7 +958,7 @@ class Ammunition(ExportedModel, BaseDamager):
                              help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "
                                        "and such.")
-    type = models.CharField(max_length=10,
+    bullet_type = models.CharField(max_length=10,
                             help_text="Make of the ammo, such as "
                                       "full metal jacket.")
 
@@ -987,7 +987,7 @@ class Ammunition(ExportedModel, BaseDamager):
 
     def __unicode__(self):
         return u"{label} {type} ({impulse:.2f})".format(label=self.label,
-                                                        type=self.type,
+                                                        type=self.bullet_type,
                                                         impulse=self.impulse())
 
 

@@ -450,7 +450,7 @@ class ItemHandling(TestCase):
         ammo = factories.AmmunitionFactory(label="9Pb",
                                            weight=7.5,
                                            velocity=440,
-                                           type='FMJ')
+                                           bullet_type='FMJ')
         factories.BaseFirearmFactory(name="Glock 19",
                                      ammunition_types=('9Pb', '9Pb+'))
 
@@ -481,19 +481,19 @@ class FirearmTestCase(TestCase):
         self.ammo = factories.AmmunitionFactory(label="9Pb",
                                                 weight=7.5,
                                                 velocity=440,
-                                                type='FMJ')
+                                                bullet_type='FMJ')
         self.unsuitable_ammo = factories.AmmunitionFactory(label="7.62x39",
                                                            weight=8,
                                                            velocity=715,
-                                                           type='FMJ')
+                                                           bullet_type='FMJ')
         factories.AmmunitionFactory(label="5.56Nto",
                                     weight=3.6,
                                     velocity=913,
-                                    type='FMJ')
+                                    bullet_type='FMJ')
         factories.AmmunitionFactory(label="12ga.",
                                     weight=41.3,
                                     velocity=381,
-                                    type='1Buck')
+                                    bullet_type='1Buck')
         factories.BaseFirearmFactory(name="Glock 19",
                                      duration=0.11,
                                      stock=1,
@@ -580,7 +580,7 @@ class FirearmTestCase(TestCase):
 
         firearm = factories.FirearmFactory(base__name="Glock 19",
                                            ammo__label='9Pb',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         if level is not None:
@@ -638,7 +638,7 @@ class FirearmTestCase(TestCase):
 
         firearm = factories.FirearmFactory(base__name="SAKO RK95",
                                            ammo__label='7.62x39',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         expected = [[0.5, +7, [53, 50, 44, 35, 23]],
@@ -657,7 +657,7 @@ class FirearmTestCase(TestCase):
 
         firearm = factories.FirearmFactory(base__name="SAKO RK95",
                                            ammo__label='7.62x39',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         expected = [[0.5, +7, [43, 40, 34, 25, 13]],
@@ -678,7 +678,7 @@ class FirearmTestCase(TestCase):
 
         firearm = factories.FirearmFactory(base__name="Pancor Jackhammer",
                                            ammo__label='12ga.',
-                                           ammo__type='1Buck')
+                                           ammo__bullet_type='1Buck')
         self.sheet.firearms.add(firearm)
 
         expected = [[0.5, +8, [53, 48, None, None, None]],
@@ -727,7 +727,7 @@ class FirearmTestCase(TestCase):
         af_class = -3 # C
         firearm = factories.FirearmFactory(base__name="SAKO RK95",
                                            ammo__label='7.62x39',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         self.verify_sweep_fire_checks(af_class, check, firearm)
@@ -742,7 +742,7 @@ class FirearmTestCase(TestCase):
         af_class = -3 # C
         firearm = factories.FirearmFactory(base__name="SAKO RK95",
                                            ammo__label='7.62x39',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         self.verify_sweep_fire_checks(af_class, check, firearm)
@@ -757,7 +757,7 @@ class FirearmTestCase(TestCase):
         af_class = -3 # C
         firearm = factories.FirearmFactory(base__name="SAKO RK95",
                                            ammo__label='7.62x39',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         self.verify_sweep_fire_checks(af_class, check, firearm,
@@ -774,7 +774,7 @@ class FirearmTestCase(TestCase):
         af_class = -1 # A
         firearm = factories.FirearmFactory(base__name="M29 (OICW)",
                                            ammo__label='5.56Nto',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.sheet.firearms.add(firearm)
 
         self.verify_sweep_fire_checks(af_class, check, firearm)
@@ -824,7 +824,7 @@ class BaseFirearmFormTestCase(TestCase):
     def test_changing_ammo_type(self):
         firearm = factories.FirearmFactory(base__name="M29 (OICW)",
                                            ammo__label='5.56Nto',
-                                           ammo__type='FMJ')
+                                           ammo__bullet_type='FMJ')
         self.assertEqual(firearm.base.get_ammunition_types(), [u"5.56Nto"])
 
         form = self._get_form('7.62x39', instance=firearm.base)
@@ -844,7 +844,7 @@ class FirearmImportExportTestcase(TestCase):
 
     ammo_csv_data = """\
 "Ammunition",,,,,,,,,,
-"id","num_dice","dice","extra_damage","leth","plus_leth","label","type","tech_level","weight","velocity","bypass"
+"id","num_dice","dice","extra_damage","leth","plus_leth","label","bullet_type","tech_level","weight","velocity","bypass"
 ,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400,0
 
 """
@@ -1711,10 +1711,10 @@ class SheetCopyTestCase(TestCase):
                 factories.RangedWeaponFactory(base__name="Javelin")],
             firearms=[factories.FirearmFactory(base__name="M29 (OICW)",
                                            ammo__label='5.56Nto',
-                                           ammo__type='FMJ'),
+                                           ammo__bullet_type='FMJ'),
                       factories.FirearmFactory(base__name="RK95",
                                            ammo__label='5.56Nto',
-                                           ammo__type='FMJ')],
+                                           ammo__bullet_type='FMJ')],
             miscellaneous_items=[
                 factories.MiscellaneousItemFactory(name="Geiger counter"),
                 factories.MiscellaneousItemFactory(name="Bandolier")],
