@@ -1843,3 +1843,22 @@ class SheetCopyTestCase(TestCase):
         sheet_ids = [pair[0] for pair in form.fields['sheet'].choices]
         self.assertNotIn(private_sheet.id, sheet_ids)
 
+
+class CopySheetViewTestCase(TestCase):
+    def setUp(self):
+        self.admin = factories.UserFactory(username="admin")
+        factories.SheetFactory(character__name="Foo")
+        self.middle_sheet = factories.SheetFactory(character__name="Bar")
+        factories.SheetFactory(character__name="Qux")
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
+
+    def test_initial_choice(self):
+        response = self.client.get(reverse('copy_sheet',
+                                           kwargs={'sheet_id':
+                                                       self.middle_sheet.id}))
+        # Check that the form is rendered.
+        self.assertContains(response, 'to_name')
+        form = response.context['form']
+        # Sheet id should be selected with the given URL.
+        self.assertIn('sheet', form.initial)
+        self.assertEqual(int(form['sheet'].value()), self.middle_sheet.id)

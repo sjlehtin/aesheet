@@ -31,6 +31,10 @@
     <a href="{% url "edit_sheet" char.id %}">
       Edit base sheet</a>
   </p>
+  <p>
+    <a href="{% url "copy_sheet" sheet_id=char.id %}">
+      Copy this sheet</a>
+  </p>
 </div>
 
 <div class="stats">

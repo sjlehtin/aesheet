@@ -32,6 +32,9 @@ urlpatterns = patterns(
     url(r'^sheets/$', 'sheets_index', name='sheets_index'),
     url(r'^sheets/(?P<sheet_id>\d+)/$', 'sheet_detail', name='sheet_detail'),
 
+    url(r'^sheets/copy/(?P<sheet_id>\d+)?$',
+        sheet.views.CopySheetView.as_view(), name='copy_sheet'),
+
     url(r'^import-export/', include(marshal_urls)),
 
     url(r'^ChangeLog$', 'version_history'),

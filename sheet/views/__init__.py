@@ -111,7 +111,7 @@ from sheet.forms import *
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.views.generic import UpdateView, CreateView
+from django.views.generic import UpdateView, CreateView, FormView
 import sheet.models
 import sheet.forms
 import os.path
@@ -796,6 +796,35 @@ class AddArmorQualityView(AddSpellEffectView):
 class AddArmorSpecialQualityView(AddSpellEffectView):
     model = ArmorSpecialQuality
     template_name = 'sheet/add_armor_special_quality.html'
+
+
+class CopySheetView(RequestMixin, FormView):
+    form_class = sheet.forms.CopySheetForm
+    template_name = "sheet/gen_edit.html"
+
+    def __init__(self, **kwargs):
+        super(CopySheetView, self).__init__(**kwargs)
+        self.sheet_id = None
+
+    def get_form_kwargs(self, **kwargs):
+        form_kwargs = super(CopySheetView, self).get_form_kwargs()
+        if self.sheet_id:
+            initial = form_kwargs.setdefault('initial', dict())
+            initial['sheet'] = self.sheet_id
+        return form_kwargs
+
+    def get(self, request, *args, **kwargs):
+        self.sheet_id = kwargs.pop('sheet_id', None)
+        return super(CopySheetView, self).get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        new_sheet = form.save()
+        self.success_url = reverse('edit_sheet', args=(new_sheet.id, ))
+        messages.success(self.request, "Successfully copied sheet to "
+                                       "{new_char}.".format(
+            new_char=new_sheet.character.name
+        ))
+        return super(CopySheetView, self).form_valid(form)
 
 
 def version_history(request):
