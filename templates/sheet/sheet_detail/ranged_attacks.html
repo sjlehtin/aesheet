@@ -50,7 +50,8 @@
     {% endfor %}
     <td>{{ item.target_initiative }}</td>
     <td>{{ item.draw_initiative }}</td>
-    <td rowspan="2">{{ item.damage }}<div>{{ item.item.ammo }}</div></td>
+    <td rowspan="2">{{ item.damage }} ({{ item.item.ammo.type }})
+        <div>{{ item.item.ammo }}</div></td>
     <td rowspan="2">
     {% with rr=item.ranges %}
         {{ rr.s }} /  {{ rr.m }} / {{ rr.l }}

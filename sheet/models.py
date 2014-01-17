@@ -958,9 +958,11 @@ class Ammunition(ExportedModel, BaseDamager):
                              help_text="Ammunition caliber, which should also "
                                        "distinguish between barrel lengths "
                                        "and such.")
+    type = models.CharField(max_length=10, default="P",
+                            help_text="Damage type of the ammo.")
     bullet_type = models.CharField(max_length=10,
-                            help_text="Make of the ammo, such as "
-                                      "full metal jacket.")
+                                   help_text="Make of the ammo, such as "
+                                             "full metal jacket.")
 
     tech_level = models.ForeignKey(TechLevel)
 
