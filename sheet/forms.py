@@ -640,10 +640,17 @@ class CopySheetForm(RequestFormMixin, forms.Form):
 
     def save(self):
         original_sheet = self.cleaned_data['sheet']
+        weapons = original_sheet.weapons.all()
+        ranged_weapons = original_sheet.ranged_weapons.all()
+        firearms = original_sheet.firearms.all()
+        miscellaneous_items = original_sheet.miscellaneous_items.all()
+        spell_effects = original_sheet.spell_effects.all()
+
         new_sheet = original_sheet
         new_sheet.pk = None
         skills = original_sheet.character.skills.all()
         edges = original_sheet.character.edges.all()
+
 
         new_char = new_sheet.character
         new_char.name = self.cleaned_data['to_name']
@@ -660,5 +667,20 @@ class CopySheetForm(RequestFormMixin, forms.Form):
 
         new_sheet.character = new_char
         new_sheet.save()
+
+        for weapon in weapons:
+            new_sheet.weapons.add(weapon)
+
+        for weapon in ranged_weapons:
+            new_sheet.ranged_weapons.add(weapon)
+
+        for firearm in firearms:
+            new_sheet.firearms.add(firearm)
+
+        for item in miscellaneous_items:
+            new_sheet.miscellaneous_items.add(item)
+
+        for effect in spell_effects:
+            new_sheet.spell_effects.add(effect)
 
         return new_sheet

@@ -1701,6 +1701,26 @@ class SheetCopyTestCase(TestCase):
             character__name="John Doe",
             character__campaign__name="3K",
             character__owner=self.original_owner,
+
+            armor=factories.ArmorFactory(base__name="Hard Leather"),
+            helm=factories.HelmFactory(base__name="Leather hood"),
+            weapons=[factories.WeaponFactory(base__name="Short sword"),
+                     factories.WeaponFactory(base__name="Baton")],
+            ranged_weapons=[
+                factories.RangedWeaponFactory(base__name="Short bow"),
+                factories.RangedWeaponFactory(base__name="Javelin")],
+            firearms=[factories.FirearmFactory(base__name="M29 (OICW)",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ'),
+                      factories.FirearmFactory(base__name="RK95",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ')],
+            miscellaneous_items=[
+                factories.MiscellaneousItemFactory(name="Geiger counter"),
+                factories.MiscellaneousItemFactory(name="Bandolier")],
+            spell_effects=[
+                factories.SpellEffectFactory(name="Bless of templars"),
+                factories.SpellEffectFactory(name="Courage of ancients")],
             character__skills=[("Shooting", 3),
                                ("Heckling", 2),
                                ("Drunken boxing", 4)],
@@ -1723,6 +1743,10 @@ class SheetCopyTestCase(TestCase):
         return ["{edge} {level}".format(edge=ce.edge.edge.name,
                                         level=ce.edge.level)
                 for ce in character.edges.all()]
+
+    def get_item_list(self, sheet, accessor):
+        return ["{item}".format(item=unicode(item))
+                for item in getattr(sheet, accessor).all()]
 
     def test_copy_sheet(self):
         data = {'sheet': self.original_sheet.pk,
@@ -1763,6 +1787,23 @@ class SheetCopyTestCase(TestCase):
 
         self.assertTrue(CharacterEdge.objects.filter(
             character=new_sheet.character).exists())
+
+        self.assertEqual(self.original_sheet.helm,
+                         new_sheet.helm)
+        self.assertIsNotNone(new_sheet.helm)
+        self.assertEqual(self.original_sheet.armor,
+                         new_sheet.armor)
+        self.assertIsNotNone(new_sheet.armor)
+
+        for accessor in ["weapons", "firearms", "ranged_weapons",
+                         "miscellaneous_items", "spell_effects"]:
+            logger.debug("Checking {acc}...".format(acc=accessor))
+            self.assertListEqual(self.get_item_list(new_sheet,
+                                                    accessor),
+                                 self.get_item_list(self.original_sheet,
+                                                    accessor))
+            self.assertTrue(getattr(self.original_sheet,
+                                    accessor).exists())
 
     def test_copy_fails_if_target_exists(self):
         factories.SheetFactory(character__name="Jane Doe")
