@@ -624,8 +624,13 @@ class CreateBaseFirearmForm(RequestForm):
 
 
 class CopySheetForm(RequestFormMixin, forms.Form):
-    sheet = forms.ModelChoiceField(queryset=sheet.models.Sheet.objects.all())
     to_name = forms.CharField(max_length=256)
+
+    def __init__(self, *args, **kwargs):
+        super(CopySheetForm, self).__init__(*args, **kwargs)
+        self.fields['sheet'] = forms.ModelChoiceField(
+            queryset=sheet.models.get_sheets(self.request.user))
+        self.fields.keyOrder = ['sheet', 'to_name']
 
     def clean_to_name(self):
         to_name = self.cleaned_data.get('to_name', None)

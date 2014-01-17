@@ -1729,6 +1729,11 @@ class SheetCopyTestCase(TestCase):
                                ("Bad eyesight", 4)])
         self.original_character = self.original_sheet.character
 
+    def _get_request(self):
+        get = self.request_factory.post('/copy/')
+        get.user = self.admin
+        return get
+
     def _post_request(self):
         post = self.request_factory.post('/copy/')
         post.user = self.admin
@@ -1823,8 +1828,18 @@ class SheetCopyTestCase(TestCase):
     def test_copy_fails_if_target_exists(self):
         factories.SheetFactory(character__name="Jane Doe")
 
-        form = sheet.forms.CopySheetForm(request=self._post_request,
+        form = sheet.forms.CopySheetForm(request=self._post_request(),
                                          data={'sheet': self.original_sheet.pk,
                                                'to_name': 'Jane Doe'})
         self.assertFalse(form.is_valid())
         self.assertIn("already exists", '/'.join(form.errors['to_name']))
+
+    def test_copy_sheet_choices_exclude_private_sheets(self):
+        private_sheet = factories.SheetFactory(
+            character__name="Johnny Mnemonic",
+            character__owner=self.original_owner,
+            character__private=True)
+        form = sheet.forms.CopySheetForm(request=self._get_request())
+        sheet_ids = [pair[0] for pair in form.fields['sheet'].choices]
+        self.assertNotIn(private_sheet.id, sheet_ids)
+
