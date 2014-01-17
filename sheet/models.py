@@ -7,6 +7,7 @@ from functools import wraps
 from collections import namedtuple
 import itertools
 from django.utils.datastructures import SortedDict
+from django.db.models import Q
 
 
 logger = logging.getLogger(__name__)
@@ -109,15 +110,27 @@ class CampaignItem(object):
         self.objects = []
 
 
-def get_by_campaign(model_class, user, get_character=lambda obj: obj):
+def _filter_out_private(char, user):
+    if char.private and char.owner != user:
+        return False
+    else:
+        return True
+
+
+def get_characters(user):
+    return Character.objects.filter(Q(private=False) | Q(owner=user))
+
+
+def get_sheets(user):
+    return Sheet.objects.filter(Q(character__private=False) |
+                                Q(character__owner=user))
+
+
+def get_by_campaign(objects, get_character=lambda obj: obj):
     items = SortedDict()
-    objects = [(get_character(obj), obj) for obj in model_class.objects.all()]
+    objects = [(get_character(obj), obj) for obj in objects]
     objects.sort(key=lambda xx: xx[0].campaign.name)
     for (char, obj) in objects:
-        # Skip private characters where the user is not the owner.
-        if char.private:
-            if char.owner != user:
-                continue
         item = items.setdefault(char.campaign.name,
                                 CampaignItem(char.campaign))
         item.objects.append(obj)
@@ -485,7 +498,7 @@ class Character(models.Model):
 
     @classmethod
     def get_by_campaign(cls, user):
-        return get_by_campaign(cls, user)
+        return get_by_campaign(get_characters(user))
 
     def access_allowed(self, user):
         if not self.private:
@@ -2072,7 +2085,7 @@ class Sheet(models.Model):
 
     @classmethod
     def get_by_campaign(cls, user):
-        return get_by_campaign(cls, user, lambda obj: obj.character)
+        return get_by_campaign(get_sheets(user), lambda sheet: sheet.character)
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -2095,10 +2108,12 @@ class CharacterLogEntry(models.Model):
     user = models.ForeignKey(auth.models.User)
     character = models.ForeignKey(Character)
 
-    STAT, SKILL, EDGE = range(0, 3)
+    STAT, SKILL, EDGE, NON_FIELD = range(0, 4)
     entry_type = models.PositiveIntegerField(choices=((STAT, ("stat")),
                                                       (SKILL, ("skill")),
-                                                      (EDGE, ("edge"))),
+                                                      (EDGE, ("edge")),
+                                                      (NON_FIELD, ("non-field")),
+                                                      ),
                                              default=STAT)
 
     entry = models.TextField(blank=True,
@@ -2130,6 +2145,8 @@ class CharacterLogEntry(models.Model):
                 return u"Changed %s." % (self.field)
         elif self.entry_type == self.SKILL:
             return u"Added skill %s %d." % (self.skill, self.skill_level)
+        elif self.entry_type == self.NON_FIELD:
+            return u"{0}".format(self.entry)
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)

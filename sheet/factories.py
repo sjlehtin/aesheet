@@ -33,6 +33,39 @@ class CampaignFactory(factory.DjangoModelFactory):
                 self.tech_levels.add(TechLevelFactory(name=tech_level))
 
 
+class SkillFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Skill
+    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+
+
+class CharacterSkillFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.CharacterSkill
+
+    skill = factory.SubFactory(SkillFactory)
+    level = 0
+
+
+class EdgeFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Edge
+    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
+
+
+class EdgeLevelFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.EdgeLevel
+
+    edge = factory.SubFactory(EdgeFactory)
+    level = 0
+    cost = level * .5 + 1
+
+
+class CharacterEdgeFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.CharacterEdge
+
+    edge = factory.SubFactory(EdgeLevelFactory)
+
+
 class CharacterFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Character
     campaign = factory.SubFactory(CampaignFactory)
@@ -41,10 +74,93 @@ class CharacterFactory(factory.DjangoModelFactory):
     occupation = "Adventurer"
     race = "Human"
 
+    @factory.post_generation
+    def skills(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for (skill, level) in extracted:
+                CharacterSkillFactory(character=self,
+                                      skill=SkillFactory(name=skill),
+                                      level=level)
+
+    @factory.post_generation
+    def edges(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for (edge, level) in extracted:
+                CharacterEdgeFactory(
+                    character=self,
+                    edge=EdgeLevelFactory(edge=EdgeFactory(name=edge),
+                                          level=level))
+
+
 class SheetFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Sheet
     character = factory.SubFactory(CharacterFactory)
     owner = factory.LazyAttribute(lambda o: o.character.owner)
+
+    @factory.post_generation
+    def firearms(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for firearm in extracted:
+                self.firearms.add(firearm)
+
+    @factory.post_generation
+    def weapons(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for weapon in extracted:
+                self.weapons.add(weapon)
+
+    @factory.post_generation
+    def ranged_weapons(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for weapon in extracted:
+                self.ranged_weapons.add(weapon)
+
+    @factory.post_generation
+    def miscellaneous_items(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for item in extracted:
+                self.miscellaneous_items.add(item)
+
+    @factory.post_generation
+    def spell_effects(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for effect in extracted:
+                self.spell_effects.add(effect)
 
 
 class AmmunitionFactory(factory.DjangoModelFactory):
@@ -60,20 +176,6 @@ class AmmunitionFactory(factory.DjangoModelFactory):
 
 class FirearmAmmunitionTypeFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.FirearmAmmunitionType
-
-
-class SkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Skill
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
-
-    tech_level = factory.SubFactory(TechLevelFactory)
-
-
-class CharacterSkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.CharacterSkill
-
-    skill = factory.SubFactory(SkillFactory)
-    level = 0
 
 
 class BaseFirearmFactory(factory.DjangoModelFactory):
@@ -121,3 +223,86 @@ class FirearmFactory(factory.DjangoModelFactory):
         else:
             FirearmAmmunitionTypeFactory(firearm=self.base,
                                          short_label=self.ammo.label)
+
+
+class ArmorTemplateFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.ArmorTemplate
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
+
+class ArmorQualityFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.ArmorQuality
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
+
+class ArmorFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Armor
+
+    base = factory.SubFactory(ArmorTemplateFactory)
+    quality = factory.SubFactory(ArmorQualityFactory)
+    quality__name = "normal"
+
+
+class HelmFactory(ArmorFactory):
+    base__is_helm = True
+
+
+class WeaponTemplateFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.WeaponTemplate
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+    base_skill = factory.SubFactory(SkillFactory)
+    base_skill__name = "Weapon combat"
+
+
+class WeaponQualityFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.WeaponQuality
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
+
+class WeaponFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.Weapon
+
+    base = factory.SubFactory(WeaponTemplateFactory)
+    quality = factory.SubFactory(WeaponQualityFactory)
+    quality__name = "normal"
+
+
+class RangedWeaponTemplateFactory(WeaponTemplateFactory):
+    FACTORY_FOR = models.RangedWeaponTemplate
+
+    range_s = 20
+    range_m = 40
+    range_l = 60
+
+
+class RangedWeaponFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.RangedWeapon
+
+    base = factory.SubFactory(RangedWeaponTemplateFactory)
+    quality = factory.SubFactory(WeaponQualityFactory)
+    quality__name = "normal"
+
+
+class MiscellaneousItemFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.MiscellaneousItem
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
+
+class SpellEffectFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.SpellEffect
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )

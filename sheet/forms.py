@@ -621,3 +621,80 @@ class CreateBaseFirearmForm(RequestForm):
 
     class Meta:
         model = sheet.models.BaseFirearm
+
+
+class CopySheetForm(RequestFormMixin, forms.Form):
+    to_name = forms.CharField(max_length=256)
+
+    def __init__(self, *args, **kwargs):
+        super(CopySheetForm, self).__init__(*args, **kwargs)
+        self.fields['sheet'] = forms.ModelChoiceField(
+            queryset=sheet.models.get_sheets(self.request.user))
+        self.fields.keyOrder = ['sheet', 'to_name']
+
+    def clean_to_name(self):
+        to_name = self.cleaned_data.get('to_name', None)
+        if to_name:
+            qs = sheet.models.Character.objects.filter(name=to_name)
+            if qs.exists():
+                raise forms.ValidationError, \
+                    "Character {to_name} already exists.".format(
+                        to_name=to_name)
+            else:
+                return to_name
+
+    def save(self):
+        original_sheet = self.cleaned_data['sheet']
+        weapons = original_sheet.weapons.all()
+        ranged_weapons = original_sheet.ranged_weapons.all()
+        firearms = original_sheet.firearms.all()
+        miscellaneous_items = original_sheet.miscellaneous_items.all()
+        spell_effects = original_sheet.spell_effects.all()
+
+        new_sheet = original_sheet
+        new_sheet.pk = None
+        skills = original_sheet.character.skills.all()
+        edges = original_sheet.character.edges.all()
+
+
+        new_char = new_sheet.character
+        original_name = new_char.name
+        new_char.name = self.cleaned_data['to_name']
+        new_char.pk = None
+        new_char.owner = self.request.user
+        new_char.save()
+
+        for skill in skills:
+            new_char.skills.create(skill=skill.skill,
+                                   level=skill.level)
+
+        for ce in edges:
+            new_char.edges.create(edge=ce.edge)
+
+        sheet.models.CharacterLogEntry.objects.create(
+            character=new_char,
+            user=self.request.user,
+            entry="Copied from {orig}.".format(orig=original_name),
+            entry_type=sheet.models.CharacterLogEntry.NON_FIELD
+        )
+
+        new_sheet.character = new_char
+        new_sheet.owner = self.request.user
+        new_sheet.save()
+
+        for weapon in weapons:
+            new_sheet.weapons.add(weapon)
+
+        for weapon in ranged_weapons:
+            new_sheet.ranged_weapons.add(weapon)
+
+        for firearm in firearms:
+            new_sheet.firearms.add(firearm)
+
+        for item in miscellaneous_items:
+            new_sheet.miscellaneous_items.add(item)
+
+        for effect in spell_effects:
+            new_sheet.spell_effects.add(effect)
+
+        return new_sheet

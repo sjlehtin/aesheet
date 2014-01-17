@@ -1690,3 +1690,175 @@ class CharacterFormTestCase(TestCase):
                                  for field in form.derived_stat_fields()]) |
                             set([field.name
                                  for field in form.non_stat_fields()]))
+
+
+class SheetCopyTestCase(TestCase):
+    def setUp(self):
+        self.request_factory = django.test.RequestFactory()
+        self.admin = factories.UserFactory(username="admin")
+        self.original_owner = factories.UserFactory(username="leia")
+        self.original_sheet = factories.SheetFactory(
+            character__name="John Doe",
+            character__campaign__name="3K",
+            character__owner=self.original_owner,
+
+            armor=factories.ArmorFactory(base__name="Hard Leather"),
+            helm=factories.HelmFactory(base__name="Leather hood"),
+            weapons=[factories.WeaponFactory(base__name="Short sword"),
+                     factories.WeaponFactory(base__name="Baton")],
+            ranged_weapons=[
+                factories.RangedWeaponFactory(base__name="Short bow"),
+                factories.RangedWeaponFactory(base__name="Javelin")],
+            firearms=[factories.FirearmFactory(base__name="M29 (OICW)",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ'),
+                      factories.FirearmFactory(base__name="RK95",
+                                           ammo__label='5.56Nto',
+                                           ammo__type='FMJ')],
+            miscellaneous_items=[
+                factories.MiscellaneousItemFactory(name="Geiger counter"),
+                factories.MiscellaneousItemFactory(name="Bandolier")],
+            spell_effects=[
+                factories.SpellEffectFactory(name="Bless of templars"),
+                factories.SpellEffectFactory(name="Courage of ancients")],
+            character__skills=[("Shooting", 3),
+                               ("Heckling", 2),
+                               ("Drunken boxing", 4)],
+            character__edges=[("Toughness", 3),
+                               ("Athletic ability", 2),
+                               ("Bad eyesight", 4)])
+        self.original_character = self.original_sheet.character
+
+    def _get_request(self):
+        get = self.request_factory.post('/copy/')
+        get.user = self.admin
+        return get
+
+    def _post_request(self):
+        post = self.request_factory.post('/copy/')
+        post.user = self.admin
+        return post
+
+    def get_skill_list(self, character):
+        return ["{skill} {level}".format(skill=skill.skill.name,
+                                         level=skill.level)
+                for skill in character.skills.all()]
+
+    def get_edge_list(self, character):
+        return ["{edge} {level}".format(edge=ce.edge.edge.name,
+                                        level=ce.edge.level)
+                for ce in character.edges.all()]
+
+    def get_item_list(self, sheet, accessor):
+        return ["{item}".format(item=unicode(item))
+                for item in getattr(sheet, accessor).all()]
+
+    def test_copy_sheet(self):
+        data = {'sheet': self.original_sheet.pk,
+                'to_name': 'Foo Johnson'}
+        form = sheet.forms.CopySheetForm(request=self._post_request(),
+                                         data=data)
+        self.assertTrue(form.is_valid())
+        new_sheet = form.save()
+
+        # Verify the old sheet is still there.
+        self.assertEqual(sheet.models.Sheet.objects.get(
+            character__name='John Doe'), self.original_sheet)
+        orig = sheet.models.Character.objects.get(name='John Doe')
+        self.assertEqual(orig, self.original_character)
+        self.assertEqual(orig.owner, self.original_owner)
+
+        self.assertEqual(new_sheet.character.owner, self.admin)
+
+        self.assertEqual(sheet.models.Sheet.objects.get(
+            character__name='John Doe'), self.original_sheet)
+
+        self.assertEqual(new_sheet.character.campaign,
+                         self.original_sheet.campaign)
+        self.assertNotEqual(new_sheet, self.original_sheet)
+
+        # Skills should match.
+        self.assertListEqual(
+            self.get_skill_list(new_sheet.character),
+            self.get_skill_list(self.original_character))
+
+        self.assertTrue(CharacterSkill.objects.filter(
+            character=new_sheet.character).exists())
+
+        # Edges should match.
+        self.assertListEqual(
+            self.get_edge_list(new_sheet.character),
+            self.get_edge_list(self.original_character))
+
+        self.assertTrue(CharacterEdge.objects.filter(
+            character=new_sheet.character).exists())
+
+        self.assertEqual(self.original_sheet.helm,
+                         new_sheet.helm)
+        self.assertIsNotNone(new_sheet.helm)
+        self.assertEqual(self.original_sheet.armor,
+                         new_sheet.armor)
+        self.assertIsNotNone(new_sheet.armor)
+
+        for accessor in ["weapons", "firearms", "ranged_weapons",
+                         "miscellaneous_items", "spell_effects"]:
+            logger.debug("Checking {acc}...".format(acc=accessor))
+            self.assertListEqual(self.get_item_list(new_sheet,
+                                                    accessor),
+                                 self.get_item_list(self.original_sheet,
+                                                    accessor))
+            self.assertTrue(getattr(self.original_sheet,
+                                    accessor).exists())
+
+        self.assertEqual(new_sheet.owner, self.admin)
+
+    def test_copied_character_has_log_entry(self):
+        data = {'sheet': self.original_sheet.pk,
+                'to_name': 'Foo Johnson'}
+        form = sheet.forms.CopySheetForm(request=self._post_request(),
+                                         data=data)
+        self.assertTrue(form.is_valid())
+        new_sheet = form.save()
+
+        log = "/".join([unicode(e) for e in
+                        new_sheet.character.characterlogentry_set.all()])
+        self.assertIn("Copied from {original_name}.".format(
+            original_name=self.original_character.name), log)
+
+    def test_copy_fails_if_target_exists(self):
+        factories.SheetFactory(character__name="Jane Doe")
+
+        form = sheet.forms.CopySheetForm(request=self._post_request(),
+                                         data={'sheet': self.original_sheet.pk,
+                                               'to_name': 'Jane Doe'})
+        self.assertFalse(form.is_valid())
+        self.assertIn("already exists", '/'.join(form.errors['to_name']))
+
+    def test_copy_sheet_choices_exclude_private_sheets(self):
+        private_sheet = factories.SheetFactory(
+            character__name="Johnny Mnemonic",
+            character__owner=self.original_owner,
+            character__private=True)
+        form = sheet.forms.CopySheetForm(request=self._get_request())
+        sheet_ids = [pair[0] for pair in form.fields['sheet'].choices]
+        self.assertNotIn(private_sheet.id, sheet_ids)
+
+
+class CopySheetViewTestCase(TestCase):
+    def setUp(self):
+        self.admin = factories.UserFactory(username="admin")
+        factories.SheetFactory(character__name="Foo")
+        self.middle_sheet = factories.SheetFactory(character__name="Bar")
+        factories.SheetFactory(character__name="Qux")
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
+
+    def test_initial_choice(self):
+        response = self.client.get(reverse('copy_sheet',
+                                           kwargs={'sheet_id':
+                                                       self.middle_sheet.id}))
+        # Check that the form is rendered.
+        self.assertContains(response, 'to_name')
+        form = response.context['form']
+        # Sheet id should be selected with the given URL.
+        self.assertIn('sheet', form.initial)
+        self.assertEqual(int(form['sheet'].value()), self.middle_sheet.id)
