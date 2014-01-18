@@ -88,8 +88,9 @@ Firearms:
 
 - using two Berettas akimbo.  Check rule situation regarding instinctive fire.
 - firearms in CC.
-- some weapons with autofire do not have sweep fire enabled.
-- some weapons have restricted burst (restricted to 2 or 3 shots).
++ some weapons with autofire do not have sweep fire enabled.
++ some weapons have restricted burst (restricted to 2 or 3 shots).
++ weapon class modifiers for ROF calculations
 + adding weapon with inline form does not allow setting ammo types.
 
 """
