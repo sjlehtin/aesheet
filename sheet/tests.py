@@ -490,60 +490,12 @@ class FirearmTestCase(TestCase):
                                     weight=3.6,
                                     velocity=913,
                                     bullet_type='FMJ')
-        factories.AmmunitionFactory(label="12ga.",
-                                    weight=41.3,
-                                    velocity=381,
-                                    bullet_type='1Buck')
         factories.BaseFirearmFactory(name="Glock 19",
                                      duration=0.11,
                                      stock=1,
                                      weight=0.6,
                                      ammunition_types=('9Pb', '9Pb+'))
 
-        # Note, stats are made to match classic sheet for cross-checking
-        # purposes.  Some things might be different in up-to-date weapon
-        # sheets.
-        factories.BaseFirearmFactory(name="SAKO RK95",
-                                     target_initiative=-4,
-                                     draw_initiative=-5,
-                                     range_s=50,
-                                     range_m=150,
-                                     range_l=300,
-                                     duration=0.1,
-                                     stock=1.2,
-                                     weight=3.7,
-                                     autofire_rpm=650,
-                                     autofire_class="C",
-                                     base_skill__name="Long guns",
-                                     ammunition_types=('5.56Nto',))
-
-        factories.BaseFirearmFactory(name="M29 (OICW)",
-                                     target_initiative=-4,
-                                     draw_initiative=-5,
-                                     range_s=85,
-                                     range_m=200,
-                                     range_l=350,
-                                     duration=0.1,
-                                     stock=1.25,
-                                     weight=6.3,
-                                     autofire_rpm=800,
-                                     autofire_class="A",
-                                     base_skill__name="Long guns",
-                                     ammunition_types=('7.62x39',))
-
-        factories.BaseFirearmFactory(name="Pancor Jackhammer",
-                                     target_initiative=-2,
-                                     draw_initiative=-5,
-                                     range_s=40,
-                                     range_m=75,
-                                     range_l=110,
-                                     duration=0.1,
-                                     stock=1.25,
-                                     weight=4.6,
-                                     autofire_rpm=240,
-                                     autofire_class="E",
-                                     base_skill__name="Long guns",
-                                     ammunition_types=('12ga.',))
 
     def _add_skill(self, skill_name, level=0):
         return factories.CharacterSkillFactory(
@@ -614,6 +566,97 @@ class FirearmTestCase(TestCase):
         self.test_single_fire_skill_checks_unskilled(
             level=0,
             expected=[(0.5, 53), (1, 46), (2, 43), (3, 43), (4, 43), (5, 38)])
+
+    def test_weapon_class_matters(self):
+        factories.BaseFirearmFactory(name="Foo",
+                                            duration=0.11,
+                                            stock=1,
+                                            weight=0.6,
+                                            weapon_class_modifier=6,
+                                            ammunition_types=('9Pb', '9Pb+'))
+        factories.BaseFirearmFactory(name="Bar",
+                                            duration=0.11,
+                                            stock=1,
+                                            weight=0.6,
+                                            weapon_class_modifier=15,
+                                            ammunition_types=('9Pb', '9Pb+'))
+        wpn1 = factories.FirearmFactory(base__name="Foo",
+                                        ammo__label='9Pb',
+                                        ammo__bullet_type='FMJ')
+        wpn2 = factories.FirearmFactory(base__name="Bar",
+                                        ammo__label='9Pb',
+                                        ammo__bullet_type='FMJ')
+        checks = filter(lambda check: check.check,
+                        self.sheet.firearm_skill_checks(wpn1))
+        idx = len(checks) - 1
+        self.assertNotEqual(checks[idx].check,
+                            self.sheet.firearm_skill_checks(wpn2)[idx].check)
+
+
+class AutofireTestCase(TestCase):
+    def setUp(self):
+        factories.CampaignFactory(name="MR", tech_levels=("all", "2K"))
+        self.sheet = factories.SheetFactory(character__campaign__name="MR")
+        # Note, stats are made to match classic sheet for cross-checking
+        # purposes.  Some things might be different in up-to-date weapon
+        # sheets.
+        factories.BaseFirearmFactory(name="SAKO RK95",
+                                     target_initiative=-4,
+                                     draw_initiative=-5,
+                                     range_s=50,
+                                     range_m=150,
+                                     range_l=300,
+                                     duration=0.1,
+                                     stock=1.2,
+                                     weight=3.7,
+                                     autofire_rpm=650,
+                                     autofire_class="C",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('5.56Nto',))
+
+        factories.BaseFirearmFactory(name="M29 (OICW)",
+                                     target_initiative=-4,
+                                     draw_initiative=-5,
+                                     range_s=85,
+                                     range_m=200,
+                                     range_l=350,
+                                     duration=0.1,
+                                     stock=1.25,
+                                     weight=6.3,
+                                     autofire_rpm=800,
+                                     autofire_class="A",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('7.62x39',))
+
+        factories.BaseFirearmFactory(name="Pancor Jackhammer",
+                                     target_initiative=-2,
+                                     draw_initiative=-5,
+                                     range_s=40,
+                                     range_m=75,
+                                     range_l=110,
+                                     duration=0.1,
+                                     stock=1.25,
+                                     weight=4.6,
+                                     autofire_rpm=240,
+                                     autofire_class="E",
+                                     base_skill__name="Long guns",
+                                     ammunition_types=('12ga.',))
+
+        factories.AmmunitionFactory(label="7.62x39",
+                                    weight=8,
+                                    velocity=715,
+                                    bullet_type='FMJ')
+
+        factories.AmmunitionFactory(label="12ga.",
+                                    weight=41.3,
+                                    velocity=381,
+                                    bullet_type='1Buck')
+
+    def _add_skill(self, skill_name, level=0):
+        return factories.CharacterSkillFactory(
+                    character=self.sheet.character,
+                    skill=factories.SkillFactory(name=skill_name),
+                    level=level)
 
     def verify_burst_checks(self, firearm, expected):
         for (burst, exc) in zip(
@@ -779,6 +822,39 @@ class FirearmTestCase(TestCase):
 
         self.verify_sweep_fire_checks(af_class, check, firearm)
 
+    def test_autofire_sweep_disabled(self):
+        """
+        There should be -10 penalty for burst fire without the autofire skill.
+        """
+        self._add_skill("Long guns")
+
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__bullet_type='FMJ')
+        self.sheet.firearms.add(firearm)
+        firearm.base.sweep_fire_disabled = True
+        self.assertFalse(firearm.has_sweep_fire())
+
+    def test_autofire_restricted_burst(self):
+        """
+        There should be -10 penalty for burst fire without the autofire skill.
+        """
+        self._add_skill("Long guns")
+
+        firearm = factories.FirearmFactory(base__name="SAKO RK95",
+                                           ammo__label='7.62x39',
+                                           ammo__bullet_type='FMJ')
+        self.sheet.firearms.add(firearm)
+        firearm.base.restricted_burst_rounds = 2
+
+        expected = [[0.5, +7, [43, 40, None, None, None]],
+                    [1, +3, [36, 33, None, None, None]],
+                    [2, -8, [26, 23, None, None, None]],
+                    [3, -4, [12, 9, None, None, None]],
+                    [4, None, [None]*5]]
+
+        self.verify_burst_checks(firearm, expected)
+
 
 class BaseFirearmFormTestCase(TestCase):
     def setUp(self):
@@ -790,7 +866,9 @@ class BaseFirearmFormTestCase(TestCase):
                        'range_l': 45, 'tech_level': self.tech_level.pk,
                        'weight': 0.6, 'base_skill': self.pistol, 'bypass': -1,
                        'dp': 10, 'durability': 5, 'duration': 0.1, 'stock': 1,
-                       'target_initiative': -1, 'type': "P",
+                       'target_initiative': -1, 'weapon_class_modifier': 6,
+                       'restricted_burst_rounds': 0,
+                       'sweep_fire_disabled': False,
                        'ammo_types': ammo_type}
 
         form = forms.CreateBaseFirearmForm(

@@ -924,6 +924,8 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
     autofire_class = models.CharField(max_length=1, blank=True,
                                       choices=zip(_class_choices,
                                                   _class_choices))
+    sweep_fire_disabled = models.BooleanField(default=False)
+    restricted_burst_rounds = models.IntegerField(default=0)
 
     stock = models.DecimalField(max_digits=4, decimal_places=2,
                                 default=1,
@@ -936,6 +938,11 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
                                              "principle, time in seconds from "
                                              "the muzzle break, whatever that "
                                              "means.  Bigger is better.")
+
+    weapon_class_modifier = models.DecimalField(
+        max_digits=4, decimal_places=2, default=6,
+        help_text="ROF modifier for weapon class.  Generally from 6-15, "
+                  "smaller is better.")
 
     def get_ammunition_types(self):
         """
@@ -1014,7 +1021,7 @@ class Firearm(models.Model):
         logger.debug("impulse: {impulse}, recoil: {recoil}".format(
             impulse=self.ammo.impulse(),
             recoil=recoil))
-        rof = 30 / (recoil + 6)
+        rof = 30 / (recoil + float(self.base.weapon_class_modifier))
         logger.debug("rof: {rof}".format(rof=rof))
         return rof
 
@@ -1025,7 +1032,7 @@ class Firearm(models.Model):
         return self.ammo.damage
 
     def has_sweep_fire(self):
-        return bool(self.base.autofire_rpm)
+        return not self.base.sweep_fire_disabled and bool(self.base.autofire_rpm)
 
     @property
     def to_hit(self):
@@ -1059,7 +1066,7 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     """
     type = models.CharField(max_length=5, default="P")
-    
+
     # XXX special max leth due to dura (durability for this purpose is
     # max leth+1, max leth due to high fit is thus max leth + 2)
 
@@ -1771,6 +1778,9 @@ class Sheet(models.Model):
         Burst = namedtuple('Burst', ["action", "initiative", "checks"])
 
         max_hits = int(min(weapon.base.autofire_rpm / 120, 5))
+        # Cap the burst if the weapon has restricted burst.
+        if weapon.base.restricted_burst_rounds:
+            max_hits = min(max_hits, weapon.base.restricted_burst_rounds)
 
         bursts = []
         # Remap the actions to burst actions.
