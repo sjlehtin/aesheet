@@ -13,6 +13,7 @@ table td { vertical-align: top }
 td.stats.name { font-weight: bold; }
 td.stats.base { text-align: right; 
 		padding-left: 5px }
+td.weapon.name { width: 10em; }
 td.stats.eff { font-weight: bold; 
 	       text-align: right;
 	       padding-left: 5px }
