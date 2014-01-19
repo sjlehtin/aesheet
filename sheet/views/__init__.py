@@ -23,7 +23,8 @@ Priority list by JW:
 - movement chart (SM)
 - spell skill checks (SM)
 
-- weapon maximum damage based on durability.
+- automatic used edge point calculation
++ weapon maximum damage based on durability.
 
 + Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
@@ -99,7 +100,7 @@ BUGS = """
 - Adding skills with multiple prereqs doesn't work.
 - Better error messages on importing completely invalid CSV (heading line or
   data type broken)
-- crossbows should not have FIT modifiers for damage
++ crossbows should not have FIT modifiers for damage
 - draw I missing
 """
 
