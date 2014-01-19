@@ -1315,11 +1315,10 @@ class Logging(WebTest):
 
 
 class AddXpTestCase(TestCase):
-    fixtures = ["campaigns", "user", "char"]
-
     def test_added_xp(self):
-
-        ch = Character.objects.get(pk=1)
+        admin = factories.UserFactory(username="admin")
+        ch = factories.CharacterFactory(name="John Doe",
+                                        owner=admin)
         form = AddXPForm({'add_xp': '15'},
                          request=get_fake_request(
                          username='admin'),
