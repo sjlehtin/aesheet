@@ -1096,8 +1096,13 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
                                       default=0.1)
 
-    is_crossbow = models.BooleanField(default=False)
-
+    THROWN = "thrown"
+    CROSSBOW = "xbow"
+    BOW = "bow"
+    weapon_type = models.CharField(max_length=10, default=THROWN,
+                                   choices=(("thrown", THROWN),
+                                            ("xbow", CROSSBOW),
+                                            ("bow", BOW)))
     @classmethod
     def dont_export(self):
         return ['rangedweapon']
@@ -1878,11 +1883,15 @@ class Sheet(models.Model):
             extra_damage = bonus_fit / self.fit_modifiers_for_damage[use_type]
             extra_leth = bonus_fit / self.fit_modifiers_for_lethality[use_type]
         elif isinstance(weapon, RangedWeapon):
-            if weapon.base.is_crossbow:
+            if weapon.base.weapon_type == weapon.base.CROSSBOW:
                 extra_damage = 0
                 extra_leth = 0
             else:
-                bonus_fit = min(self.eff_fit, weapon.max_fit) - 45
+                if weapon.base.weapon_type == weapon.base.BOW:
+                    eff_fit = min(self.eff_fit, weapon.max_fit)
+                else:
+                    eff_fit = self.eff_fit
+                bonus_fit = eff_fit - 45
                 extra_damage = (bonus_fit /
                                 self.fit_modifiers_for_damage[self.PRI])
                 extra_leth = (bonus_fit /

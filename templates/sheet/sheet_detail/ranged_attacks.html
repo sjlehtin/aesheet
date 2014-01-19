@@ -56,7 +56,7 @@
     {% with rr=item.ranges %}
         {{ rr.s }} /  {{ rr.m }} / {{ rr.l }}
     {% endwith %}
-    {% if item.max_fit %}
+    {% if item.weapon_type == "bow" %}
         <div>Max pull: FIT {{ item.max_fit }}</div>
     {% endif %}
     </td>

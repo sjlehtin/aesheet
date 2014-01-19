@@ -1996,7 +1996,7 @@ class DamageTestCase(TestCase):
         """
         weapon = factories.RangedWeaponFactory(
             base__name="Heavy crossbow",
-            base__is_crossbow=True,
+            base__weapon_type=sheet.models.RangedWeaponTemplate.CROSSBOW,
             base__num_dice=1,
             base__dice=6,
             base__extra_damage=3,
@@ -2012,6 +2012,7 @@ class DamageTestCase(TestCase):
         """
         weapon = factories.RangedWeaponFactory(
             base__name="Composite shortbow",
+            base__weapon_type=sheet.models.RangedWeaponTemplate.BOW,
             base__num_dice=1,
             base__dice=6,
             base__extra_damage=1,
@@ -2026,6 +2027,7 @@ class DamageTestCase(TestCase):
 
         weapon = factories.RangedWeaponFactory(
             base__name="Composite shortbow",
+            base__weapon_type=sheet.models.RangedWeaponTemplate.BOW,
             quality__name="normal75",
             quality__max_fit=75)
 
@@ -2033,6 +2035,17 @@ class DamageTestCase(TestCase):
         # dmg = 3, leth = 1
         self.assertDamageEqual(self.strong_man.damage(weapon),
             num_dice=1, dice=6, extra_damage=4, leth=6, plus_leth=-1)
+
+    def test_javelin_damage(self):
+        weapon = factories.RangedWeaponFactory(
+            base__name="Special javelin",
+            base__num_dice=2,
+            base__dice=6,
+            base__leth=4,
+            quality__name="normal")
+
+        self.assertDamageEqual(self.strong_man.damage(weapon),
+            num_dice=2, dice=6, extra_damage=12, leth=6)
 
     def test_shield_damage(self):
         """
