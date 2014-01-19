@@ -70,3 +70,4 @@ mon 13.1.2014 0.5h Sheet owner.
 tue 14.1.2014 2h Sheet owner.
 thu 16.1.2014 2h Copying sheets.
 fri 17.1.2014 4h Copying sheets.  Firearm autofire characteristics.
+sun 19.1.2014 2h FIT bonus from weapon max damage, lethality from durability.
