@@ -23,8 +23,10 @@ Priority list by JW:
 - movement chart (SM)
 - spell skill checks (SM)
 
-- automatic used edge point calculation
 + weapon maximum damage based on durability.
+- automatic used edge point calculation
+- edge levels from items (toughness, darkvision, etc)
+- weapon sizes.
 
 + Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
