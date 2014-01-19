@@ -1653,10 +1653,9 @@ class SheetOrganization(TestCase):
 
 
 class CreateURLTestCase(TestCase):
-    fixtures = ['user']
-
     def setUp(self):
-        self.assertTrue(self.client.login(username="admin", password="admin"))
+        factories.UserFactory(username="admin")
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
 
     def test_urls(self):
         from sheet.urls import CREATE_NAMES
