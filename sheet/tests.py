@@ -1940,3 +1940,105 @@ class CopySheetViewTestCase(TestCase):
         # Sheet id should be selected with the given URL.
         self.assertIn('sheet', form.initial)
         self.assertEqual(int(form['sheet'].value()), self.middle_sheet.id)
+
+
+class DamageTestCase(TestCase):
+    def setUp(self):
+        sword = factories.WeaponTemplateFactory(name="Bastard sword",
+                                                num_dice=2, dice=6,
+                                                extra_damage=-1, leth=6,
+                                                durability=7)
+        normal_quality = factories.WeaponQualityFactory(name="normal")
+        magic_quality = factories.WeaponQualityFactory(name="L5", damage=5,
+                                                       leth=3,
+                                                       durability=5)
+        self.normal_weapon = factories.WeaponFactory(base=sword,
+                                                     quality=normal_quality)
+        self.magic_weapon = factories.WeaponFactory(base=sword,
+                                                    quality=magic_quality)
+        self.strong_man = factories.SheetFactory(character__cur_fit=250)
+
+    def assertDamageEqual(self, damage, num_dice=1, dice=6, extra_damage=0,
+                          leth=5, plus_leth=0):
+        self.assertEqual(damage.num_dice, num_dice)
+        self.assertEqual(damage.dice, dice)
+        self.assertEqual(damage.extra_damage, extra_damage)
+        self.assertEqual(damage.leth, leth)
+        self.assertEqual(damage.plus_leth, plus_leth)
+
+    def test_damage_normal(self):
+        self.normal_man = factories.SheetFactory()
+        self.assertDamageEqual(self.normal_man.damage(
+            self.normal_weapon,
+            use_type=self.normal_man.FULL),
+            num_dice=2, dice=6, extra_damage=-1, leth=6)
+        self.assertDamageEqual(self.normal_man.damage(
+            self.magic_weapon,
+            use_type=self.normal_man.FULL),
+            num_dice=2, dice=6, extra_damage=4, leth=9)
+
+    def test_damage_capped(self):
+        # Extra damage for FIT cannot exceed base maximum damage from weapon.
+        # Maximum lethality of the weapon cannot be more than
+        # weapon durability + 1.
+        self.assertDamageEqual(self.strong_man.damage(
+            self.normal_weapon,
+            use_type=self.strong_man.FULL),
+            num_dice=2, dice=6, extra_damage=10, leth=8)
+        self.assertDamageEqual(self.strong_man.damage(
+            self.magic_weapon,
+            use_type=self.strong_man.FULL),
+            num_dice=2, dice=6, extra_damage=20, leth=13)
+
+    def test_crossbow_damage(self):
+        """
+        Crossbows receive no FIT bonuses.
+        """
+        weapon = factories.RangedWeaponFactory(
+            base__name="Heavy crossbow",
+            base__is_crossbow=True,
+            base__num_dice=1,
+            base__dice=6,
+            base__extra_damage=3,
+            base__leth=5,
+            base__plus_leth=2,
+            quality__name="normal")
+        self.assertDamageEqual(self.strong_man.damage(weapon),
+            num_dice=1, dice=6, extra_damage=3, leth=5, plus_leth=2)
+
+    def test_bow_damage(self):
+        """
+        Bows have maximum FIT, based on what pull they are created.
+        """
+        weapon = factories.RangedWeaponFactory(
+            base__name="Composite shortbow",
+            base__num_dice=1,
+            base__dice=6,
+            base__extra_damage=1,
+            base__leth=5,
+            base__plus_leth=-1,
+            quality__name="normal")
+        # Assume pull for FIT 90.
+        # Max FIT 90: PRI dmg: (FIT-45)/10, leth: (FIT-45)/40
+        # dmg = 5, leth = 1
+        self.assertDamageEqual(self.strong_man.damage(weapon),
+            num_dice=1, dice=6, extra_damage=6, leth=6, plus_leth=-1)
+
+        weapon = factories.RangedWeaponFactory(
+            base__name="Composite shortbow",
+            quality__name="normal75",
+            quality__max_fit=75)
+
+        # Max FIT 75: PRI dmg: (FIT-45)/10, leth: (FIT-45)/40
+        # dmg = 3, leth = 1
+        self.assertDamageEqual(self.strong_man.damage(weapon),
+            num_dice=1, dice=6, extra_damage=4, leth=6, plus_leth=-1)
+
+    def test_shield_damage(self):
+        """
+        Totally different damages on attack and defense.
+        """
+        pass
+
+    # XXX firearms receive no FIT bonuses (this is handled already by the
+    # separation of the damage to ammo)

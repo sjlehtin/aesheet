@@ -778,12 +778,21 @@ class BaseWeaponQuality(ExportedModel):
 
 class WeaponQuality(BaseWeaponQuality):
     """
+    Fields for quality are added to the fields in the base, unless the
+    modifier is a multiplier.
     """
     defense_leth = models.IntegerField(default=0)
 
     versus_missile_modifier = models.IntegerField(default=0)
     versus_area_save_modifier = models.IntegerField(default=0)
 
+    max_fit = models.IntegerField(default=90,
+                                  help_text="Applies for bows, this is the "
+                                            "maximum FIT "
+                                            "the weapon pull adjusts to.  This "
+                                            "caps the damage and range of the "
+                                            "weapon in case the character has "
+                                            "a higher FIT than this.")
     @classmethod
     def dont_export(cls):
         return ['weapon', 'rangedweapon', 'rangedweaponammo_set']
@@ -799,27 +808,41 @@ def format_damage(num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
             "%+d" % plus_leth if plus_leth else "")
 
 class WeaponDamage(object):
-    def __init__(self, num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
-        self.num_dice = num_dice
-        self.dice = dice
-        self.extra_damage = extra_damage
-        self.leth = leth
-        self.plus_leth = plus_leth
+    def __init__(self, weapon, quality, defense=False):
+        self.weapon = weapon
+        self.quality = quality
+        self.num_dice = weapon.num_dice
+        self.dice = weapon.dice
+        self.base_extra_damage = weapon.extra_damage + self.quality.damage
+        if not defense:
+            self.base_leth = weapon.leth
+        else:
+            self.base_leth = weapon.defense_leth
+        self.base_leth += self.quality.leth
+        self.plus_leth = weapon.plus_leth + self.quality.plus_leth
+        self.durability = weapon.durability + self.quality.durability
+
+        self.max_damage = self.num_dice * self.dice + self.base_extra_damage
+
+        self.added_extra_damage = 0
+        self.added_leth = 0
 
     def add_damage(self, dmg):
-        self.extra_damage += dmg
-
-    # XXX remove and add size modification on the fly?
-    def multiply_damage(self, mult):
-        self.num_dice *= mult
-        self.extra_damage *= mult
+        self.added_extra_damage += dmg
 
     def add_leth(self, leth):
-        self.leth += leth
+        self.added_leth += leth
 
-    # XXX remove?
-    def max_damage(self):
-        return self.num_dice * self.dice + self.extra_damage
+    @property
+    def extra_damage(self):
+        # Handle capping of extra damage to the weapon maximum.
+        return self.base_extra_damage + min(self.max_damage,
+                                            self.added_extra_damage)
+    @property
+    def leth(self):
+        # Handle capping of lethality to maximum durability.
+        return min(self.durability + 1,
+                   self.base_leth + self.added_leth)
 
     def __unicode__(self):
         return format_damage(self.num_dice, self.dice, self.extra_damage,
@@ -1073,6 +1096,8 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
                                       default=0.1)
 
+    is_crossbow = models.BooleanField(default=False)
+
     @classmethod
     def dont_export(self):
         return ['rangedweapon']
@@ -1163,7 +1188,29 @@ class ArmorSpecialQuality(ExportedModel, Effect):
         return u"ASQ: %s" % (self.name)
 
 
-class Weapon(ExportedModel):
+class DamageMixin(object):
+        # def damage(self):
+        # XXX modifiers for size of weapon.
+        #
+        # XXX respect the maximum damage allowed by the weapon (from
+        # damage dice and magical bonuses) to cap bonuses from FIT.
+        # return WeaponDamage(
+        #     self.base.num_dice, self.base.dice,
+        #     extra_damage=self.base.extra_damage + self.quality.damage,
+        #     leth=self.base.leth + self.quality.leth,
+        #     plus_leth=self.base.plus_leth + self.quality.plus_leth,
+        #     weapon=self)
+
+    def damage(self, defense=False):
+        # XXX modifiers for size of weapon.
+        #
+        # XXX respect the maximum damage allowed by the weapon (from
+        # damage dice and magical bonuses) to cap bonuses from FIT.
+        return WeaponDamage(weapon=self.base, quality=self.quality,
+                            defense=defense)
+
+
+class Weapon(DamageMixin, ExportedModel):
     """
     """
     # XXX name from template (appended with quality or something to that
@@ -1195,23 +1242,8 @@ class Weapon(ExportedModel):
         # XXX modifiers for size of weapon.
         return float(self.base.roa + self.quality.roa)
 
-    def damage(self):
-        # XXX modifiers for size of weapon.
-        #
-        # XXX respect the maximum damage allowed by the weapon (from
-        # damage dice and magical bonuses) to cap bonuses from FIT.
-        return WeaponDamage(
-            self.base.num_dice, self.base.dice,
-            extra_damage=self.base.extra_damage + self.quality.damage,
-            leth=self.base.leth + self.quality.leth,
-            plus_leth=self.base.plus_leth + self.quality.plus_leth)
-
     def defense_damage(self):
-        # XXX modifiers for size of weapon.
-        return WeaponDamage(
-            self.base.num_dice, self.base.dice,
-            extra_damage=self.base.extra_damage + self.quality.damage,
-            leth=self.base.defense_leth + self.quality.leth)
+        return self.damage(defense=True)
 
     def __unicode__(self):
         if self.name:
@@ -1222,7 +1254,7 @@ class Weapon(ExportedModel):
         return u"%s %s" % (quality, self.base)
 
 
-class RangedWeapon(ExportedModel):
+class RangedWeapon(DamageMixin, ExportedModel):
     """
     """
     # XXX name from template (appended with quality or something to that
@@ -1258,16 +1290,9 @@ class RangedWeapon(ExportedModel):
     def bypass(self):
         return self.base.bypass + self.quality.bypass
 
-    def damage(self):
-        # XXX modifiers for size of weapon.
-        #
-        # XXX respect the maximum damage allowed by the weapon (from
-        # damage dice and magical bonuses) to cap bonuses from FIT.
-        return WeaponDamage(
-            self.base.num_dice, self.base.dice,
-            extra_damage=self.base.extra_damage + self.quality.damage,
-            leth=self.base.leth + self.quality.leth,
-            plus_leth=self.base.plus_leth + self.quality.plus_leth)
+    @property
+    def max_fit(self):
+        return self.quality.max_fit
 
     def __unicode__(self):
         if self.name:
@@ -1520,7 +1545,6 @@ class Sheet(models.Model):
         PRI : 30,
         SEC : 45
         }
-
 
     def roa(self, weapon, use_type=FULL):
         roa = weapon.roa()
@@ -1842,26 +1866,41 @@ class Sheet(models.Model):
     def ranged_ranges(self, weapon):
         return weapon.ranges(self)
 
-    @property
     def _cc_bonus_fit(self):
         return (self.eff_fit +
                 (self.character.skill_level("Martial arts expertise") or 0) * 5
                 - 45)
 
-    def damage(self, weapon, use_type=FULL):
+    def damage(self, weapon, use_type=PRI):
         dmg = weapon.damage()
-        dmg.add_damage(rounddown(self._cc_bonus_fit /
-                                 self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self._cc_bonus_fit /
-                               self.fit_modifiers_for_lethality[use_type]))
+        if isinstance(weapon, Weapon):
+            bonus_fit = self._cc_bonus_fit()
+            extra_damage = bonus_fit / self.fit_modifiers_for_damage[use_type]
+            extra_leth = bonus_fit / self.fit_modifiers_for_lethality[use_type]
+        elif isinstance(weapon, RangedWeapon):
+            if weapon.base.is_crossbow:
+                extra_damage = 0
+                extra_leth = 0
+            else:
+                bonus_fit = min(self.eff_fit, weapon.max_fit) - 45
+                extra_damage = (bonus_fit /
+                                self.fit_modifiers_for_damage[self.PRI])
+                extra_leth = (bonus_fit /
+                              self.fit_modifiers_for_lethality[self.PRI])
+        else:
+            extra_damage = 0
+            extra_leth = 0
+        dmg.add_damage(int(round(extra_damage)))
+        dmg.add_leth(int(round(extra_leth)))
 
         return dmg
 
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
-        dmg.add_damage(rounddown(self._cc_bonus_fit /
+        bonus_fit = self._cc_bonus_fit()
+        dmg.add_damage(rounddown(bonus_fit /
                                  self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(self._cc_bonus_fit /
+        dmg.add_leth(rounddown(bonus_fit /
                                self.fit_modifiers_for_lethality[use_type]))
 
         return dmg
