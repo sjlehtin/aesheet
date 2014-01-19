@@ -1215,14 +1215,6 @@ class EdgeAndSkillHandling(TestCase):
         self.assertIn("__all__", form.errors)
 
 
-def get_fake_request(username):
-    class FakeReq(object):
-        pass
-    req = FakeReq()
-    req.user = auth.models.User.objects.get(username=username)
-    return req
-
-
 class Logging(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "assigned_edges", "armor", "campaigns"]
@@ -1315,13 +1307,20 @@ class Logging(WebTest):
 
 
 class AddXpTestCase(TestCase):
+    def setUp(self):
+        self.request_factory = django.test.RequestFactory()
+        self.admin = factories.UserFactory(username="admin")
+
+    def _get_request(self):
+        get = self.request_factory.post('/copy/')
+        get.user = self.admin
+        return get
+
     def test_added_xp(self):
-        admin = factories.UserFactory(username="admin")
         ch = factories.CharacterFactory(name="John Doe",
-                                        owner=admin)
+                                        owner=self.admin)
         form = AddXPForm({'add_xp': '15'},
-                         request=get_fake_request(
-                         username='admin'),
+                         request=self._get_request(),
                          instance=ch)
         self.assertTrue(form.is_valid())
         form.save()
