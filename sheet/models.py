@@ -912,7 +912,7 @@ class BaseWeaponTemplate(BaseArmament, BaseDamager):
 
     class Meta:
         abstract = True
-
+        ordering = ['name']
 
 Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
@@ -931,6 +931,7 @@ class RangedWeaponMixin(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['name']
 
     def ranges(self, sheet):
         return Range._make([self.range_pb, self.range_xs,
@@ -1089,9 +1090,6 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     """
     type = models.CharField(max_length=5, default="P")
-
-    # XXX special max leth due to dura (durability for this purpose is
-    # max leth+1, max leth due to high fit is thus max leth + 2)
 
     ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
                                       default=0.1)
