@@ -800,63 +800,13 @@ class WeaponQuality(BaseWeaponQuality):
     def __unicode__(self):
         return self.name
 
+
 def format_damage(num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
     return u"%sd%s%s/%d%s" % (
             num_dice, dice,
             "%+d" % extra_damage if extra_damage else "",
             leth,
             "%+d" % plus_leth if plus_leth else "")
-
-class WeaponDamage(object):
-    def __init__(self, weapon, quality, defense=False):
-        self.weapon = weapon
-        self.quality = quality
-        self.num_dice = weapon.num_dice
-        self.dice = weapon.dice
-        self.base_extra_damage = weapon.extra_damage + self.quality.damage
-        if not defense:
-            self.base_leth = weapon.leth
-        else:
-            self.base_leth = weapon.defense_leth
-        self.base_leth += self.quality.leth
-        self.plus_leth = weapon.plus_leth + self.quality.plus_leth
-        self.durability = weapon.durability + self.quality.durability
-
-        self.max_damage = self.num_dice * self.dice + self.base_extra_damage
-
-        self.added_extra_damage = 0
-        self.added_leth = 0
-
-    def add_damage(self, dmg):
-        self.added_extra_damage += dmg
-
-    def add_leth(self, leth):
-        self.added_leth += leth
-
-    @property
-    def extra_damage(self):
-        # Handle capping of extra damage to the weapon maximum.
-        return self.base_extra_damage + min(self.max_damage,
-                                            self.added_extra_damage)
-    @property
-    def leth(self):
-        # Handle capping of lethality to maximum durability.
-        return min(self.durability + 1,
-                   self.base_leth + self.added_leth)
-
-    def __unicode__(self):
-        return format_damage(self.num_dice, self.dice, self.extra_damage,
-                             self.leth, self.plus_leth)
-
-        if self.plus_leth:
-            plus_leth_str = "%+d" % self.plus_leth
-        else:
-            plus_leth_str = ""
-
-        return u"%sd%s%s/%d%s" % (
-            self.num_dice, self.dice,
-            "%+d" % self.extra_damage if self.extra_damage else "",
-            self.leth, plus_leth_str)
 
 
 class BaseArmament(ExportedModel):
@@ -1191,98 +1141,165 @@ class ArmorSpecialQuality(ExportedModel, Effect):
         return u"ASQ: %s" % (self.name)
 
 
-class DamageMixin(object):
-        # def damage(self):
-        # XXX modifiers for size of weapon.
-        #
-        # XXX respect the maximum damage allowed by the weapon (from
-        # damage dice and magical bonuses) to cap bonuses from FIT.
-        # return WeaponDamage(
-        #     self.base.num_dice, self.base.dice,
-        #     extra_damage=self.base.extra_damage + self.quality.damage,
-        #     leth=self.base.leth + self.quality.leth,
-        #     plus_leth=self.base.plus_leth + self.quality.plus_leth,
-        #     weapon=self)
+class WeaponDamage(object):
+    def __init__(self, weapon, quality, defense=False):
+        self.weapon = weapon.base
+        self.quality = quality
+        self.num_dice = weapon.base.num_dice * weapon.size
+        self.dice = weapon.base.dice
+        self.base_extra_damage = (weapon.base.extra_damage * weapon.size +
+                                  self.quality.damage)
+        if not defense:
+            self.base_leth = weapon.base.leth
+        else:
+            self.base_leth = weapon.base.defense_leth
 
-    def damage(self, defense=False):
-        # XXX modifiers for size of weapon.
-        #
-        # XXX respect the maximum damage allowed by the weapon (from
-        # damage dice and magical bonuses) to cap bonuses from FIT.
-        return WeaponDamage(weapon=self.base, quality=self.quality,
-                            defense=defense)
+        self.base_leth += weapon.size - 1
+
+        if not defense:
+            self.base_leth += self.quality.leth
+        else:
+            # Approximates the weapons list, where weapons with 0.5 lethality
+            # increase get a 1 lethality increase to defense lethality.
+            self.base_leth += round(self.quality.leth)
+
+        self.plus_leth = weapon.base.plus_leth + self.quality.plus_leth
+
+        self.durability = weapon.durability
+
+        self.max_damage = self.num_dice * self.dice + self.base_extra_damage
+
+        self.added_extra_damage = 0
+        self.added_leth = 0
+
+    def add_damage(self, dmg):
+        self.added_extra_damage += dmg
+
+    def add_leth(self, leth):
+        self.added_leth += leth
+
+    @property
+    def extra_damage(self):
+        # Handle capping of extra damage to the weapon maximum.
+        return self.base_extra_damage + min(self.max_damage,
+                                            self.added_extra_damage)
+    @property
+    def leth(self):
+        # Handle capping of lethality to maximum durability.
+        return min(self.durability + 1,
+                   self.base_leth + self.added_leth)
+
+    def __unicode__(self):
+        return format_damage(self.num_dice, self.dice, self.extra_damage,
+                             self.leth, self.plus_leth)
 
 
-class Weapon(DamageMixin, ExportedModel):
-    """
-    """
+class BaseWeapon(ExportedModel):
     # XXX name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
     # verify this.
     name = models.CharField(max_length=256, blank=True)
     description = models.TextField(blank=True)
-    base = models.ForeignKey(WeaponTemplate)
     quality = models.ForeignKey(WeaponQuality)
-    special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
 
-    class Meta:
-        ordering = ['name']
-
-    @classmethod
-    def dont_export(cls):
-        return ['sheet']
-
-    @property
-    def ccv(self):
-        return self.base.ccv + self.quality.ccv
+    size = models.PositiveSmallIntegerField(default=1,
+                                            choices=((1, "normal"),
+                                                     (2, "double"),
+                                                     (3, "triple"),
+                                                     (4, "quadruple")))
 
     @property
     def bypass(self):
-        return self.base.bypass + self.quality.bypass
+        size_mod = -1 * (self.size - 1)
+        return self.base.bypass + size_mod + self.quality.bypass
 
     def roa(self):
-        # XXX modifiers for size of weapon.
-        return float(self.base.roa + self.quality.roa)
+        size_mod = 0
+        if self.size > 1:
+            size_mod = -0.15 * (self.size - 1)
+        return float(self.base.roa) + size_mod + float(self.quality.roa)
 
-    def defense_damage(self):
-        return self.damage(defense=True)
+    @property
+    def draw_initiative(self):
+        size_mod = 0
+        if self.size > 1:
+            size_mod = -2 * (self.size - 1)
+        return self.base.draw_initiative + size_mod
+
+    @property
+    def durability(self):
+        size_mod = 0
+        if self.size > 1:
+            size_mod = (self.size - 1) * 2
+        return self.base.durability + size_mod + self.quality.durability
+
+    @property
+    def dp(self):
+        size_mod = pow(2, (self.size - 1))
+        return self.base.dp * size_mod * self.quality.dp_multiplier
+
+    @property
+    def weight(self):
+        size_mod = pow(3, (self.size - 1))
+        return round(self.base.weight * size_mod *
+                     self.quality.weight_multiplier, 2)
+
+    def damage(self, defense=False):
+        return WeaponDamage(weapon=self, quality=self.quality,
+                            defense=defense)
 
     def __unicode__(self):
         if self.name:
             return self.name
         quality = ""
-        if self.quality.name != "Normal":
-            quality = self.quality
-        return u"%s %s" % (quality, self.base)
-
-
-class RangedWeapon(DamageMixin, ExportedModel):
-    """
-    """
-    # XXX name from template (appended with quality or something to that
-    # effect) will be used if this is not set (= is blank).  If this is
-    # set, the name given here should be unique.  Add a validator to
-    # verify this.
-    name = models.CharField(max_length=256, blank=True)
-    description = models.TextField(blank=True)
-    base = models.ForeignKey(RangedWeaponTemplate)
-    quality = models.ForeignKey(WeaponQuality)
-    ammo_quality = models.ForeignKey(WeaponQuality, blank=True, null=True,
-                                     related_name="rangedweaponammo_set")
-    special_qualities = models.ManyToManyField(WeaponSpecialQuality,
-                                               blank=True)
-
-    class Meta:
-        ordering = ['name']
+        if self.quality.name.lower() != "normal":
+            quality = self.quality.name + " "
+        if self.size > 1:
+            size = {2: "Large",
+                    3: "Huge",
+                    4: "Gargantuan"}[self.size]
+            size += " "
+        else:
+            size = ""
+        return u"{size}{quality}{weapon}".format(size=size,
+                                                 quality=quality,
+                                                 weapon=self.base)
 
     @classmethod
     def dont_export(cls):
         return ['sheet']
 
-    def roa(self):
-        # XXX modifiers for size of weapon.
-        return float(self.base.roa + self.quality.roa)
+    class Meta:
+        abstract = True
+        ordering = ['name']
+
+class Weapon(BaseWeapon):
+    """
+    """
+    base = models.ForeignKey(WeaponTemplate)
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+
+    @property
+    def ccv(self):
+        size_mod = 0
+        if self.size > 1:
+            size_mod = 5 * (self.size - 1)
+
+        return self.base.ccv + size_mod + self.quality.ccv
+
+    def defense_damage(self):
+        return self.damage(defense=True)
+
+
+class RangedWeapon(BaseWeapon):
+    """
+    """
+    base = models.ForeignKey(RangedWeaponTemplate)
+    ammo_quality = models.ForeignKey(WeaponQuality, blank=True, null=True,
+                                     related_name="rangedweaponammo_set")
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality,
+                                               blank=True)
 
     @property
     def to_hit(self):
@@ -1290,23 +1307,12 @@ class RangedWeapon(DamageMixin, ExportedModel):
         return self.quality.ccv
 
     @property
-    def bypass(self):
-        return self.base.bypass + self.quality.bypass
-
-    @property
     def max_fit(self):
         return self.quality.max_fit
 
-    def __unicode__(self):
-        if self.name:
-            return self.name
-        quality = ""
-        if self.quality.name != "Normal":
-            quality = self.quality
-        return u"%s %s" % (quality, self.base)
-
     def ranges(self, sheet):
         return self.base.ranges(sheet)
+
 
 class ArmorTemplate(ExportedModel):
     """

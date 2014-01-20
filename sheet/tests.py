@@ -245,7 +245,7 @@ class PrivateSheetListTestCase(TestCase):
         return self.test_character_list_others_denied(others_restricted=False)
 
 
-class ItemHandling(TestCase):
+class ItemHandlingTestCase(TestCase):
     fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
                 "ranged_weapons", "campaigns"]
 
@@ -1939,12 +1939,22 @@ class CopySheetViewTestCase(TestCase):
         self.assertEqual(int(form['sheet'].value()), self.middle_sheet.id)
 
 
-class DamageTestCase(TestCase):
+class DamageMixin(object):
+    def assertDamageEqual(self, damage, num_dice=1, dice=6, extra_damage=0,
+                          leth=5, plus_leth=0):
+        self.assertEqual(damage.num_dice, num_dice)
+        self.assertEqual(damage.dice, dice)
+        self.assertEqual(damage.extra_damage, extra_damage)
+        self.assertEqual(damage.leth, leth)
+        self.assertEqual(damage.plus_leth, plus_leth)
+
+
+class DamageTestCase(DamageMixin, TestCase):
     def setUp(self):
         sword = factories.WeaponTemplateFactory(name="Bastard sword",
                                                 num_dice=2, dice=6,
                                                 extra_damage=-1, leth=6,
-                                                durability=7)
+                                                durability=7, bypass=-2)
         normal_quality = factories.WeaponQualityFactory(name="normal")
         magic_quality = factories.WeaponQualityFactory(name="L5", damage=5,
                                                        leth=3,
@@ -1954,14 +1964,6 @@ class DamageTestCase(TestCase):
         self.magic_weapon = factories.WeaponFactory(base=sword,
                                                     quality=magic_quality)
         self.strong_man = factories.SheetFactory(character__cur_fit=250)
-
-    def assertDamageEqual(self, damage, num_dice=1, dice=6, extra_damage=0,
-                          leth=5, plus_leth=0):
-        self.assertEqual(damage.num_dice, num_dice)
-        self.assertEqual(damage.dice, dice)
-        self.assertEqual(damage.extra_damage, extra_damage)
-        self.assertEqual(damage.leth, leth)
-        self.assertEqual(damage.plus_leth, plus_leth)
 
     def test_damage_normal(self):
         self.normal_man = factories.SheetFactory()
@@ -2052,3 +2054,77 @@ class DamageTestCase(TestCase):
 
     # XXX firearms receive no FIT bonuses (this is handled already by the
     # separation of the damage to ammo)
+
+
+class WeaponSizeTestCase(DamageMixin, TestCase):
+    def setUp(self):
+        self.sword_template = factories.WeaponTemplateFactory(name="Bastard sword",
+                                                num_dice=2, dice=6,
+                                                extra_damage=-1, leth=5,
+                                                durability=7, bypass=-2,
+                                                dp=12,
+                                                weight=2.4,
+                                                draw_initiative=-5,
+                                                ccv=12,
+                                                roa=0.85)
+        self.normal_quality = factories.WeaponQualityFactory(name="normal")
+        self.strong_man = factories.SheetFactory(character__cur_fit=250)
+
+    def test_large_weapon_damage(self):
+        normal_weapon = factories.WeaponFactory(base=self.sword_template,
+                                                quality=self.normal_quality,
+                                                size=2)
+
+        damage = normal_weapon.damage()
+        self.assertDamageEqual(damage, num_dice=4,
+                               extra_damage=-2, leth=6)
+        self.assertEqual(normal_weapon.durability, 9)
+        self.assertEqual(normal_weapon.bypass, -3)
+        self.assertEqual(normal_weapon.dp, 24)
+        self.assertEqual(normal_weapon.ccv, 17)
+        self.assertEqual(normal_weapon.roa(), 0.70)
+        self.assertEqual(normal_weapon.draw_initiative, -7)
+        self.assertEqual(normal_weapon.weight, 7.2)
+
+    def test_huge_weapon_damage(self):
+        normal_weapon = factories.WeaponFactory(base=self.sword_template,
+                                                quality=self.normal_quality,
+                                                size=3)
+
+        damage = normal_weapon.damage()
+        self.assertDamageEqual(damage, num_dice=6,
+                               extra_damage=-3, leth=7)
+        self.assertEqual(normal_weapon.durability, 11)
+        self.assertEqual(normal_weapon.bypass, -4)
+        self.assertEqual(normal_weapon.dp, 48)
+        self.assertEqual(normal_weapon.ccv, 22)
+        self.assertEqual(normal_weapon.roa(), 0.55)
+        self.assertEqual(normal_weapon.draw_initiative, -9)
+        self.assertEqual(normal_weapon.weight, 21.6)
+
+    def test_gargantuan_weapon_damage(self):
+        normal_weapon = factories.WeaponFactory(base=self.sword_template,
+                                                quality=self.normal_quality,
+                                                size=4)
+
+        damage = normal_weapon.damage()
+        self.assertDamageEqual(damage, num_dice=8,
+                               extra_damage=-4, leth=8)
+        self.assertEqual(normal_weapon.durability, 13)
+        self.assertEqual(normal_weapon.bypass, -5)
+        self.assertEqual(normal_weapon.dp, 96)
+        self.assertEqual(normal_weapon.ccv, 27)
+        self.assertEqual(normal_weapon.roa(), 0.40)
+        self.assertEqual(normal_weapon.draw_initiative, -11)
+        self.assertEqual(normal_weapon.weight, 64.8)
+
+    def test_weapon_roa_decimal_field_bug(self):
+        """
+        There was a bug in roa calculation, where the decimal field was not
+        cast to float properly.
+        """
+        factories.WeaponQualityFactory(name="L3", roa=0.03)
+        weapon = factories.WeaponFactory(base=self.sword_template,
+                                                quality__name="L3",
+                                                size=2)
+        self.assertEqual(weapon.roa(), 0.73)
