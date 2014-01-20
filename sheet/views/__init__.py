@@ -26,7 +26,6 @@ Priority list by JW:
 + weapon maximum damage based on durability.
 - automatic used edge point calculation
 - edge levels from items (toughness, darkvision, etc)
-- weapon sizes.
 
 + Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
@@ -77,7 +76,7 @@ Priority list by JW:
 
 - hardened skin + toughness -> natural weapons durability.
 -- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
-- size field for weapons (huge cretin with Large bite)
++ size field for weapons (huge cretin with Large bite)
 
 - free edges based on campaign (probably should think about race
   in this context, for FRP at least)
