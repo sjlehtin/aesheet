@@ -165,28 +165,52 @@ class AddHelmForm(AddArmorForm):
         self.instance.save()
 
 
-class AddFirearmForm(AddWeaponForm):
-    item_class = sheet.models.Firearm
-    item_queryset = sheet.models.Firearm.objects.all()
-    template_queryset = sheet.models.BaseFirearm.objects.all()
-    quality_queryset = sheet.models.Ammunition.objects.all()
-    quality_field_name = "ammo"
+class AddFirearmForm(RequestForm):
+    def __init__(self, *args, **kwargs):
+        super(AddFirearmForm, self).__init__(*args, **kwargs)
+        template_queryset = sheet.models.BaseFirearm.objects.filter(
+            tech_level__in=self.instance.campaign.tech_levels.all())
+        quality_queryset = sheet.models.Ammunition.objects.filter(
+            tech_level__in=self.instance.campaign.tech_levels.all())
 
-    def get_default_quality(self):
-        pass
+        self.fields['item_template'] = forms.ModelChoiceField(
+                              queryset=template_queryset.all(),
+                              label="Firearm")
+        self.fields['item_quality'] = forms.ModelChoiceField(
+            queryset=quality_queryset.all(),
+            label="Ammunition")
 
-    def add_item(self, item):
-        self.instance.firearms.add(item)
+    class Meta:
+        model = sheet.models.Sheet
+        fields = ()
 
     def clean(self):
-        cleaned_data = super(AddFirearmForm, self).clean()
-        item = cleaned_data.get('item', None)
-        if item:
-            types = item.base.get_ammunition_types()
-            ammunition = item.ammo.label
-            if ammunition not in types:
-                raise forms.ValidationError('Invalid ammo type')
-        return cleaned_data
+        base = self.cleaned_data.get('item_template')
+        quality = self.cleaned_data.get('item_quality')
+        if not base or not quality:
+            raise forms.ValidationError, \
+                "Both base and ammunition are required."
+        types = base.get_ammunition_types()
+        ammunition = quality.label
+        if ammunition not in types:
+            raise forms.ValidationError, 'Invalid ammo type'
+
+        return self.cleaned_data
+
+    def save(self, commit=True):
+        if commit:
+            qs = sheet.models.Firearm.objects.filter(
+                base=self.cleaned_data['item_template'],
+                ammo=self.cleaned_data['item_quality'])
+            if qs:
+                item = qs[0]
+            else:
+                item = sheet.models.Firearm.objects.create(
+                    base=self.cleaned_data['item_template'],
+                    ammo=self.cleaned_data['item_quality'])
+
+            self.instance.firearms.add(item)
+        return self.instance
 
 
 class AddExistingWeaponForm(RequestForm):
