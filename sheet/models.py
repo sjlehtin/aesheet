@@ -539,10 +539,10 @@ SKILL_TYPES = [
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
 BASE_STATS = Character.BASE_STATS
-STAT_TYPES = BASE_STATS + [
-    "dex",
-    "mov",
-    "imm",
+STAT_TYPES = [st.upper() for st in BASE_STATS] + [
+    "DEX",
+    "MOV",
+    "IMM",
     ]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
