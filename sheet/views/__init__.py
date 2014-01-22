@@ -7,7 +7,7 @@ TODO = """
 Priority list by JW:
 
 - 0) restrict ammo by chosen weapon dynamically with JS
-- 1) basic skill checks
++ 1) basic skill checks
 - 2) movement rates
 - 3) berettas akimbo
 - 4) overland
