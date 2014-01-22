@@ -39,6 +39,12 @@ class SkillFactory(factory.DjangoModelFactory):
 
     tech_level = factory.SubFactory(TechLevelFactory)
 
+    skill_cost_0 = 2
+    skill_cost_1 = 1
+    skill_cost_2 = 2
+    skill_cost_3 = 3
+
+    stat = "fit"
 
 class CharacterSkillFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.CharacterSkill
