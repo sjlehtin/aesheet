@@ -538,20 +538,11 @@ SKILL_TYPES = [
     ]
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
-BASE_STATS = [
-    "FIT",
-    "REF",
-    "LRN",
-    "INT",
-    "PSY",
-    "WIL",
-    "CHA",
-    "POS",
-    ]
+BASE_STATS = Character.BASE_STATS
 STAT_TYPES = BASE_STATS + [
-    "DEX",
-    "MOV",
-    "IMM",
+    "dex",
+    "mov",
+    "imm",
     ]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
@@ -633,24 +624,10 @@ class CharacterSkill(models.Model):
     def cost(self):
         try:
             return self.skill.cost(self.level)
-        except ValueError, e:
+        except ValueError:
             return "invalid skill level"
 
-    def comments(self):
-        comments = []
-
-        #if self.skill.required_skills.exists():
-        #    missing = self.skill.required_skills.exclude(
-        #        name__in=[xx.skill.name for xx in self.character.skills.all()])
-        #
-        #    if missing.exists():
-        #        comments.append("Required skill %s missing." %
-        #                        ','.join((xx.name for xx in missing)))
-        #        print comments
-        return "\n".join(comments)
-
-
-    def check(self, sheet):
+    def check(self, sheet, stat=None):
         mod = 0
         # edge modifiers.  Avoids database hit.  Will not scale with a
         # very large number of edges giving bonuses to skills, so watch
@@ -661,8 +638,11 @@ class CharacterSkill(models.Model):
                     mod += sk.bonus
                     break
         # XXX armor modifiers
+        if stat is None:
+            # Allow overriding stat to check against.
+            stat = self.skill.stat.lower()
         return mod + self.level * 5 + \
-            getattr(sheet, "eff_" + self.skill.stat.lower())
+            getattr(sheet, "eff_" + stat)
 
     def __unicode__(self):
         return u"%s: %s %s" % (self.character, self.skill, self.level)
