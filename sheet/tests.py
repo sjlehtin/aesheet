@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 
 
 class PrivateSheetTestCase(TestCase):
-
     def setUp(self):
         self.owner = factories.UserFactory.create(username="luke")
         self.other = factories.UserFactory.create(username="leia")
@@ -2128,3 +2127,64 @@ class WeaponSizeTestCase(DamageMixin, TestCase):
                                                 quality__name="L3",
                                                 size=2)
         self.assertEqual(weapon.roa(), 0.73)
+
+class SheetViewTestCase(TestCase):
+    def test_sheet_view(self):
+        char_sheet = factories.SheetFactory()
+        factories.CharacterSkillFactory(character=char_sheet.character,
+                                        skill__name="Endurance / run",
+                                        skill__skill_cost_0=0,
+                                        level=2)
+        factories.SkillFactory(name="Balance", skill_cost_0=0)
+
+        factories.CharacterSkillFactory(character=char_sheet.character,
+                                        skill__name="Concealment")
+        factories.CharacterSkillFactory(character=char_sheet.character,
+                                        skill__name="Handguns")
+        factories.CharacterSkillFactory(character=char_sheet.character,
+                                        skill__name="Liberal arts")
+        sheet_view = sheet.views.SheetView(char_sheet)
+
+        costs = sum([skill.cost() for skill in sheet_view.skills()])
+        costs += sum([skill.cost() for skill in sheet_view.physical_skills()])
+        costs += sheet_view.endurance().cost()
+        costs += sheet_view.balance().cost()
+
+        # Skill lists should have skills with total cost equal to the total
+        # amount of skill points used.
+        self.assertEqual(sheet_view.used_sp(), costs)
+
+        skills = dict([(sk.skill_name, sk)
+                       for sk in sheet_view.physical_skills()])
+
+        self.assertEqual(skills['Stealth'].check(), 22)
+        self.assertEqual(skills['Stealth'].level(), "B")
+        self.assertEqual(skills['Stealth'].cost(), 0)
+
+        self.assertEqual(skills['Concealment'].check(), 43)
+        self.assertEqual(skills['Concealment'].level(), 0)
+        self.assertEqual(skills['Concealment'].cost(), 2)
+        self.assertIsInstance(skills['Concealment'].remove_form(),
+                              sheet.forms.RemoveGenericForm)
+        self.assertIsInstance(skills['Concealment'].add_level_form(),
+                              sheet.forms.CharacterSkillLevelModifyForm)
+        self.assertIsInstance(skills['Concealment'].dec_level_form(),
+                              sheet.forms.CharacterSkillLevelModifyForm)
+
+        endurance = sheet_view.endurance()
+        self.assertEqual(endurance.check()['wil'], 53)
+        self.assertEqual(endurance.check()['fit'], 53)
+        self.assertEqual(endurance.level(), 2)
+        self.assertEqual(endurance.cost(), 3)
+        self.assertIsInstance(endurance.remove_form(),
+                              sheet.forms.RemoveGenericForm)
+        self.assertIsInstance(endurance.add_level_form(),
+                              sheet.forms.CharacterSkillLevelModifyForm)
+        self.assertIsInstance(endurance.dec_level_form(),
+                              sheet.forms.CharacterSkillLevelModifyForm)
+
+        balance = sheet_view.balance()
+        self.assertEqual(balance.check()['ref'], 43)
+        self.assertEqual(balance.check()['mov'], 43)
+        self.assertEqual(balance.level(), 0)
+        self.assertEqual(balance.cost(), 0)

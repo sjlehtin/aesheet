@@ -1,3 +1,5 @@
+from __future__ import division
+
 TODO = """
 + = done
 - = not done
@@ -170,7 +172,6 @@ class RemoveWrap(object):
         self.item = item
         self.type = type
 
-    @property
     def remove_form(self):
         if self.type:
             type = self.type
@@ -309,6 +310,9 @@ class SkillWrap(RemoveWrap):
     def check(self):
         return self.item.check(self.sheet)
 
+    def __unicode__(self):
+        return unicode(self.item.skill)
+
 
 class ArmorWrap(RemoveWrap):
     def __init__(self, item, sheet, type):
@@ -343,11 +347,111 @@ class ArmorWrap(RemoveWrap):
             return getattr(self.item, v)
 
 
-class SheetView(object):
-    def __init__(self, sheet):
-        self.sheet = sheet
+class PhysicalSkill(SkillWrap):
+    """
+    If character has the skill, use the check directly.
 
-    @property
+    If character does not have the skill, but the skill level 0
+    has cost of 0, use level 0 check.  This should use the normal
+    skill check calculation, as the character may have armor
+    or edges which modify the skill check.
+
+    If character doesn't have the skill, and the skill level 0 has
+    a non-zero cost, calculate check defaulted to half-ability
+    (maybe check default-attribute).
+    """
+
+    sm = sheet.models
+    def __init__(self, skill_name, sheet, stats=None):
+        self.skill_name = skill_name
+        self.sheet = sheet
+        self.char_skill = sheet.character.get_skill(skill_name)
+        # for SkillWrap functions.
+        self.item = self.char_skill
+        self.stats = stats
+        try:
+            self.base_skill = self.sm.Skill.objects.get(name=skill_name)
+        except self.sm.Skill.DoesNotExist:
+            self.base_skill = None
+
+        if self.char_skill:
+            skill = self.char_skill
+        else:
+            if self.base_skill is not None and \
+                            self.base_skill.skill_cost_0 == 0:
+                skill = self.sm.CharacterSkill(
+                    character=self.sheet.character,
+                    skill=self.base_skill)
+            else:
+                class BaseCheck(object):
+                    def __init__(self, sheet, base_skill):
+                        self.sheet = sheet
+                        self.base_skill = base_skill
+
+                    def check(self, sheet, stat=None):
+                        if not stat:
+                            if self.base_skill:
+                                stat = self.base_skill.stat.lower()
+                            else:
+                                stat = "mov"
+                        return int(round(getattr(sheet,
+                                                 "eff_" + stat)/2))
+
+                    @property
+                    def level(self):
+                        return "B"
+
+                skill = BaseCheck(self.sheet, self.base_skill)
+        self.skill = skill
+        super(PhysicalSkill, self).__init__(self.item, sheet=self.sheet)
+
+    def level(self):
+        return self.skill.level
+
+    def check(self):
+        if self.stats:
+            checks = {}
+            for st in self.stats:
+                checks[st] = self.skill.check(self.sheet, stat=st)
+        else:
+            checks = self.skill.check(self.sheet)
+        return checks
+
+    def formatted_checks(self):
+        check = self.check()
+        if isinstance(check, dict):
+            return ["{key}: {value}".format(key=key.upper(), value=value)
+                    for (key, value) in check.items()]
+
+    def cost(self):
+        return self.char_skill.cost() if self.char_skill else 0
+
+    def __unicode__(self):
+        return unicode(self.skill_name)
+
+
+class SheetView(object):
+    _base_physical = ["Stealth",
+                      "Concealment",
+                      "Search",
+                      "Climbing",
+                      "Swimming",
+                      "Jump",
+                      "Sleight of hand"]
+    _all_physical = ["Endurance / run",
+                      "Balance"] + _base_physical
+
+
+
+    def __init__(self, char_sheet):
+        self.sheet = char_sheet
+        self._skills = self.sheet.skills.all()
+        self.all_physical_skills = sheet.models.Skill.objects.filter(
+            name__in=self._all_physical)
+
+    def used_sp(self):
+        return sum([cs.cost() for cs in self._skills])
+
     def base_stats(self):
         ll = []
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
@@ -372,7 +476,6 @@ class SheetView(object):
             ll.append(stat)
         return ll
 
-    @property
     def derived_stats(self):
         ll = []
         for st in ["mov", "dex", "imm"]:
@@ -383,32 +486,44 @@ class SheetView(object):
             ll.append(stat)
         return ll
 
-    @property
     def weapons(self):
         return [WeaponWrap(xx, self.sheet)
                 for xx in self.sheet.weapons.all()]
 
-    @property
     def ranged_weapons(self):
         return [RangedWeaponWrap(xx, self.sheet)
                 for xx in self.sheet.ranged_weapons.all()]
 
-    @property
     def firearms(self):
         return [FirearmWrap(xx, self.sheet)
                 for xx in self.sheet.firearms.all()]
 
-    @property
     def spell_effects(self):
         return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
 
-    @property
+    def endurance(self):
+        return PhysicalSkill("Endurance / run", stats=["fit", "wil"],
+                                  sheet=self.sheet)
+
+    def balance(self):
+        return PhysicalSkill("Balance", stats=["ref", "mov"],
+                                  sheet=self.sheet)
+
+    def physical_skills(self):
+
+        return [PhysicalSkill(sk, sheet=self.sheet)
+                for sk in self._base_physical]
+
     def skills(self):
-        ll = [SkillWrap(xx, self.sheet)
-              for xx in
-              self.sheet.skills.all()]
+
+        char_skills = filter(
+            lambda cs: cs.skill not in self.all_physical_skills,
+            self._skills)
+
+        char_skills = [SkillWrap(xx, self.sheet) for xx in char_skills]
+        
         skills = dict()
-        skills.update([(sk.skill.name, sk) for sk in ll])
+        skills.update([(sk.skill.name, sk) for sk in char_skills])
 
         class Node(object):
             def __init__(self):
@@ -416,14 +531,14 @@ class SheetView(object):
 
         root = Node()
 
-        for sk in ll:
+        for sk in char_skills:
             # Assign as child of first required skill.
             reqd = sk.skill.required_skills.all()
             if len(reqd) and reqd[0].name in skills:
                 skills[reqd[0].name].children.append(sk)
             else:
                 root.children.append(sk)
-        logger.debug("Original skill list length: %d", len(ll))
+        logger.debug("Original skill list length: %d", len(char_skills))
 
         def depthfirst(node, indent):
             yield node, indent
@@ -431,26 +546,22 @@ class SheetView(object):
                 for nn in depthfirst(cc, indent + 1):
                     yield nn
 
-        ll = []
+        skill_list = []
         for nn, indent in depthfirst(root, 0):
             nn.indent = indent
-            ll.append(nn)
-        logger.debug("New skill list length: %d", len(ll))
-        return ll[1:] # Skip root node.
+            skill_list.append(nn)
+        logger.debug("New skill list length: %d", len(skill_list))
+        return skill_list[1:] # Skip root node.
 
-    @property
     def edges(self):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
-    @property
     def armor(self):
         return ArmorWrap(self.sheet.armor, sheet=self.sheet, type="Armor")
 
-    @property
     def helm(self):
         return ArmorWrap(self.sheet.helm, sheet=self.sheet, type="Helm")
 
-    @property
     def miscellaneous_items(self):
         return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
 
@@ -459,7 +570,11 @@ class SheetView(object):
         # base character.
         if v.startswith("_"):
             raise AttributeError()
-        return getattr(self.sheet, v)
+        try:
+            return getattr(self.sheet, v)
+        except AttributeError:
+            raise AttributeError, \
+                "'SheetView' object has no attribute '{attr}'".format(attr=v)
 
 
 def process_sheet_change_request(request, sheet):

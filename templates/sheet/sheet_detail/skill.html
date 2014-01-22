@@ -1,0 +1,69 @@
+{% with formatted=skill.formatted_checks %}
+<tr class="{% spaceless %}
+		 remove-container indent{{ skill.indent }}
+		 {% if skill.skill.is_specialization %}
+		 specialization
+		 {% endif %}
+		 {% endspaceless %}">
+    <td class="skill_name">
+        <div>
+        {% if skill.item %}
+            <div class="remove edit-control">
+                <form action="{{ act }}"
+                      method="post">
+                    {% csrf_token %}
+                    {{ skill.remove_form }}
+                    <input type="submit"
+                           value="Remove"/>
+                </form>
+            </div>
+            {% endif %}
+            {{ skill }}
+        </div>
+    </td>
+    <td>
+        {% if skill.item %}
+        <div class="edit-control">
+            <form action="{{ act }}"
+                  method="post">
+                {% csrf_token %}
+                {{ skill.dec_level_form }}
+                <input type="submit" value="-"/>
+            </form>
+        </div>
+        {% endif %}
+    </td>
+    <td>{{ skill.level }}</td>
+    <td>
+        {% if skill.item %}
+
+        <div class="edit-control">
+            <form action="{{ act }}"
+                  method="post">
+                {% csrf_token %}
+                {{ skill.add_level_form }}
+                <input type="submit" value="+"/>
+            </form>
+        </div>
+        {% endif %}
+    </td>
+    <td>{{ skill.cost }}</td>
+    <td class="check">
+        {% if not skill.skill.is_specialization %}
+                {% if not formatted %}
+                    {{ skill.check }}
+                {% endif %}
+        {% endif %}
+    </td>
+</tr>
+    {% if formatted %}
+    <tr>
+    <td></td>
+    <td class="check" colspan="5">
+    {% for check in formatted %}
+        <span>{{ check }}</span>
+    {% endfor %}
+    </td>
+    </tr>
+    {% endif %}
+{% endwith %}

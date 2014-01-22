@@ -7,9 +7,20 @@
 
 {% block content %}
     <div class="row">
+    <div class="col-md-9">
 <h1>{{ char.name }}</h1>
 {{ char.race }}
 {{ char.occupation }}
+    </div>
+    <div class="col-md-3 no-print">
+    <div class="panel panel-default">
+        <div class="panel-heading">Owner</div>
+        <div class="panel-body">{{ char.owner }}
+            {% if char.private %}
+                <span class="label label-danger">Private</span>
+            {% endif %}</div>
+    </div>
+    </div>
     </div>
     <div class="row">
 <div class="col-md-9">
@@ -243,63 +254,20 @@ XP: {{ char.xp_used_stats }} +
             <h3 class="panel-title">Skills</h3>
         </div>
         <div class="panel-body">
-            {% with skills=char.skills %}
-                {% if skills %}
                     <table>
-                        {% for skill in skills %}
-                            <tr class="{% spaceless %}
-		 remove-container indent{{ skill.indent }}
-		 {% if skill.skill.is_specialization %}
-		 specialization
-		 {% endif %}
-		 {% endspaceless %}">
-                                <td class="skill_name">
-                                    <div>
-                                        <div class="remove edit-control">
-                                            <form action="{{ act }}"
-                                                  method="post">
-                                                {% csrf_token %}
-                                                {{ skill.remove_form }}
-                                                <input type="submit"
-                                                       value="Remove"/>
-                                            </form>
-                                        </div>
-                                        {{ skill.skill }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="edit-control">
-                                        <form action="{{ act }}"
-                                              method="post">
-                                            {% csrf_token %}
-                                            {{ skill.dec_level_form }}
-                                            <input type="submit" value="-"/>
-                                        </form>
-                                    </div>
-                                </td>
-                                <td>{{ skill.level }}</td>
-                                <td>
-                                    <div class="edit-control">
-                                        <form action="{{ act }}"
-                                              method="post">
-                                            {% csrf_token %}
-                                            {{ skill.add_level_form }}
-                                            <input type="submit" value="+"/>
-                                        </form>
-                                    </div>
-                                </td>
-                                <td>{{ skill.cost }}</td>
-                                <td class="check">
-                                    {% if not skill.skill.is_specialization %}
-                                        {{ skill.check }}{% endif %}</td>
-                                <td>{{ skill.comments }}</td>
-                            </tr>
+                        {% include "sheet/sheet_detail/skill.html" with skill=char.endurance %}
+                        {% include "sheet/sheet_detail/skill.html" with skill=char.balance %}
+                        {% for skill in char.physical_skills %}
+                            {% include "sheet/sheet_detail/skill.html" %}
+                        {% endfor %}
+                        {% for skill in char.skills %}
+                            {% include "sheet/sheet_detail/skill.html" %}
                         {% endfor %}
                     </table>
                     <div>
                         SP: {{ char.initial_sp }} + {{ char.edge_sp }}
                         + {{ char.gained_sp }} =
-                        {{ char.total_sp }} / {% sum_sp_cost skills %}
+                        {{ char.total_sp }} / {{ char.used_sp }}
                     </div>
                     <div>Age SP: {{ char.age_sp }} </div>
                     {% with char.optimized_age_sp as opt %}
@@ -307,10 +275,6 @@ XP: {{ char.xp_used_stats }} +
                             INT
                         </div>
                     {% endwith %}
-                {% else %}
-                    <p>No skills.</p>
-                {% endif %}
-            {% endwith %}
 
             <div id="add_skill" class="edit-control">
                 <label for="add_skill_form"><strong>Add a skill</strong></label>
