@@ -4,6 +4,15 @@ TODO = """
 
 Priority list by JW:
 
+- 0) restrict ammo by chosen weapon dynamically with JS
+- 1) basic skill checks
+- 2) movement rates
+- 3) berettas akimbo
+- 4) overland
+- 5) spell skill cheks
+
+- armor modifiers to skill checks.
+
 + possibility to copy characters and sheets (mainly sheets), which will copy
   also the underlying character.
 - character addition form layout for easier "intake"
