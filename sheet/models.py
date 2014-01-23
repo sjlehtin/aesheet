@@ -628,6 +628,9 @@ class CharacterSkill(models.Model):
             return "invalid skill level"
 
     def check(self, sheet, stat=None):
+        # XXX To better support skill checks, even if the character does not
+        # have the skill, move this code to Sheet.
+
         mod = 0
         # edge modifiers.  Avoids database hit.  Will not scale with a
         # very large number of edges giving bonuses to skills, so watch
@@ -1561,8 +1564,10 @@ class Sheet(models.Model):
     def rof(self, weapon):
         roa = float(weapon.roa())
         level = self.character.skill_level(weapon.base.base_skill)
-        # XXX firearms...
-        spec_level = self.character.skill_level("Rapid archery")
+        spec_level = 0
+        if isinstance(weapon, RangedWeapon):
+            if weapon.base.weapon_type == weapon.base.BOW:
+                spec_level = self.character.skill_level("Rapid archery")
 
         if spec_level:
             roa += spec_level * 0.05

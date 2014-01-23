@@ -911,6 +911,47 @@ class BaseFirearmFormTestCase(TestCase):
         self.assertEqual(new_firearm.get_ammunition_types(), [u"7.62x39"])
 
 
+class RapidArcheryTestCase(TestCase):
+    """
+    Rapid archery should have no effect in firearm or thrown weapon rates,
+    but instead it should have a big effect in bow rates.
+    """
+    def setUp(self):
+        self.sheet = factories.SheetFactory()
+
+    def test_rapid_archery_effect_firearms(self):
+        firearm = factories.FirearmFactory(base__name="Glock",
+                                           ammo__label="FMJ")
+        rof_without = self.sheet.rof(firearm)
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Rapid archery",
+                                        level=5)
+        rof_with = self.sheet.rof(firearm)
+        self.assertEqual(rof_with, rof_without)
+
+    def test_rapid_archery_effect_crossbows(self):
+        xbow = factories.RangedWeaponFactory(base__name="Heavy crossbow",
+                                             base__weapon_type="xbow")
+
+        rof_without = self.sheet.rof(xbow)
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Rapid archery",
+                                        level=5)
+        rof_with = self.sheet.rof(xbow)
+        self.assertEqual(rof_with, rof_without)
+
+    def test_rapid_archery_effect_bows(self):
+        bow = factories.RangedWeaponFactory(base__name="Bow",
+                                            base__weapon_type="bow")
+
+        rof_without = self.sheet.rof(bow)
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Rapid archery",
+                                        level=5)
+        rof_with = self.sheet.rof(bow)
+        self.assertGreater(rof_with, rof_without)
+
+
 class FirearmImportExportTestcase(TestCase):
     firearm_csv_data = """\
 "BaseFirearm",,,,,,,,,,,,,,,,,,,,
@@ -2036,6 +2077,7 @@ class DamageTestCase(DamageMixin, TestCase):
         """
         Totally different damages on attack and defense.
         """
+        # XXX implement this test.
         pass
 
     # XXX firearms receive no FIT bonuses (this is handled already by the

@@ -114,6 +114,7 @@ BUGS = """
   data type broken)
 + crossbows should not have FIT modifiers for damage
 - draw I missing
++ Rapid archery affects thrown weapons, crossbows and firearms.
 """
 
 from django.shortcuts import render_to_response, get_object_or_404
