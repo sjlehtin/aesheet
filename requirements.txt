@@ -9,3 +9,4 @@ gunicorn
 docopt
 PIL
 django-widget-tweaks
+djangorestframework

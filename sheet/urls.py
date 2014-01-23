@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 import sheet.views
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
+from sheet.rest.urls import urlpatterns as rest_urls
 
 marshal_urls = patterns(
     'sheet.views.marshal',
@@ -39,6 +40,10 @@ urlpatterns = patterns(
 
     url(r'^ChangeLog$', 'version_history'),
     url(r'^TODO$', sheet.views.TODOView.as_view(), name="todo"),
+
+   url(r'^rest/', include(rest_urls)),
+   url(r'^api-auth/', include('rest_framework.urls',
+                              namespace='rest_framework'))
 )
 
 def class_from_name(name):

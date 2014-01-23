@@ -21,3 +21,25 @@
     <a href="{% url "add_firearm" %}">Create a new firearm</a>
     <a href="{% url "add_ammunition" %}">Create new ammo</a>
 </div>
+
+<script type="application/javascript">
+    {# This code should be put to a separate file, maybe a plugin.  Perhaps try to find some prior art, based on Angular or somesuch. #}
+    $(document).ready(function () {
+    /*
+    Replace ammo field with values suitable for the chosen weapon.
+    */
+        $('#id_add-firearm-item_template').change(function () {
+            var $ammo_field = $('#id_add-firearm-item_quality');
+            $ammo_field.children().remove();
+            $.ajax(url='/rest/ammunition/firearm/' + $(this).val() + '/')
+                    .error(function () { console.log('got error') })
+                    .done(function (data) {
+                        var ii;
+                        for (ii = 0; ii < data.length; ii++) {
+                            var label = data[ii].label + " " + data[ii].bullet_type + " (" + data[ii].weight + ")";
+                            $ammo_field.append('<option value="' + data[ii].id +'">' + label +'</option');
+                        }
+                    });
+        });
+    });
+</script>

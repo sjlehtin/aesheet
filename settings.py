@@ -206,6 +206,7 @@ INSTALLED_APPS = (
     'sheet',
     'profiling',
     'django.contrib.humanize',
+    'rest_framework',
 )
 
 if DEBUG_TOOLBAR_ENABLED:
