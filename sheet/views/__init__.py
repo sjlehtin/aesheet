@@ -6,7 +6,7 @@ TODO = """
 
 Priority list by JW:
 
-- 0) restrict ammo by chosen weapon dynamically with JS
++ 0) restrict ammo by chosen weapon dynamically with JS
 + 1) basic skill checks
 - 2) movement rates
 - 3) berettas akimbo
@@ -14,6 +14,11 @@ Priority list by JW:
 - 5) spell skill cheks
 
 - armor modifiers to skill checks.
+
+- reordering weapons.  possible to do with ajax, so it would be faster.
+-- removing weapons etc to use REST API.  If removed item has repercussions on
+   character stats, the character sheet should be refreshed (maybe add a
+   notification on top of the page to notify user of this?)
 
 + possibility to copy characters and sheets (mainly sheets), which will copy
   also the underlying character.
@@ -329,6 +334,8 @@ class ArmorWrap(RemoveWrap):
         if v.startswith("armor_"):
             value = 0
             # TODO: Rethink, this is approaching the ludicrous.
+            # The armor values calculation should probably be in the SheetView,
+            # which would collate values from Armor, Helm and other sources.
             for misc_item in self.sheet.miscellaneous_items.all():
                 logger.debug("getting " + v)
                 for quality in misc_item.armor_qualities.all():
@@ -442,8 +449,6 @@ class SheetView(object):
     _all_physical = ["Endurance / run",
                       "Balance"] + _base_physical
 
-
-
     def __init__(self, char_sheet):
         self.sheet = char_sheet
         self._skills = self.sheet.skills.all()
@@ -504,19 +509,17 @@ class SheetView(object):
 
     def endurance(self):
         return PhysicalSkill("Endurance / run", stats=["fit", "wil"],
-                                  sheet=self.sheet)
+                             sheet=self.sheet)
 
     def balance(self):
         return PhysicalSkill("Balance", stats=["ref", "mov"],
-                                  sheet=self.sheet)
+                             sheet=self.sheet)
 
     def physical_skills(self):
-
         return [PhysicalSkill(sk, sheet=self.sheet)
                 for sk in self._base_physical]
 
     def skills(self):
-
         char_skills = filter(
             lambda cs: cs.skill not in self.all_physical_skills,
             self._skills)
