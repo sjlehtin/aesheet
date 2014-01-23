@@ -71,4 +71,6 @@ tue 14.1.2014 2h Sheet owner.
 thu 16.1.2014 2h Copying sheets.
 fri 17.1.2014 4h Copying sheets.  Firearm autofire characteristics.
 sun 19.1.2014 4h FIT bonus from weapon max damage, lethality from durability.  Weapon size.
-tue 20.1.2014 3h Base skill checks.
+tue 21.1.2014 3h Base skill checks.
+wed 22.1.2014 2.5h REST API for browsing ammunition; fixing usability in ammo selection.
+thu 23.1.2014 1h Fixing bug with Rapid archery.
