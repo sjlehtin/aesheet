@@ -13,7 +13,8 @@ Priority list by JW:
 - 4) overland
 - 5) spell skill cheks
 
-- armor modifiers to skill checks.
+- armor modifiers to skill checks.  These should work for the physical skills
+  where the check is shown even without the character having the skill.
 
 - reordering weapons.  possible to do with ajax, so it would be faster.
 -- removing weapons etc to use REST API.  If removed item has repercussions on
@@ -40,8 +41,8 @@ Priority list by JW:
 - spell skill checks (SM)
 
 + weapon maximum damage based on durability.
-- automatic used edge point calculation
 - edge levels from items (toughness, darkvision, etc)
+- automatic used edge point calculation
 
 + Creating a new character should automatically create a sheet for that
   character and redirect to edit the new character.
@@ -77,6 +78,9 @@ Priority list by JW:
 
 - short description of spell effect (+50 FIT etc)
 - suspended weight
+- marking weapons as having no weight; useful for alternate weapons, or
+  weapons with larger sizes (Martel enlarged).
+- stats, armors etc if the character is larger sized.
 
 - Basic skill checks:  Adding skills without any points (or reduced amount of
   points) allocated.  For example, Climbing B -> show skill check at half
@@ -111,6 +115,20 @@ Firearms:
 + weapon class modifiers for ROF calculations
 + adding weapon with inline form does not allow setting ammo types.
 
+Edges:
+
+- run speed multiplier
+- climb speed multiplier
+- jump distance multiplier
+- swim speed multiplier
+- overland speed multiplier
+- superior balance effect on ref/mov balance checks
+
+- fly speed multiplier
+
+Skills:
+
+- jumping/tumbling synergy, see AEN skills and edges.
 """
 
 BUGS = """
@@ -250,9 +268,6 @@ class WeaponWrap(RemoveWrap, SkilledMixin):
         self.full = self.Stats(self.item, self.sheet, use_type=sheet.FULL)
         self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
         self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
-
-
-Action = namedtuple('Action', ['action', 'check'])
 
 
 class FirearmWrap(RemoveWrap, SkilledMixin):
