@@ -23,6 +23,8 @@ div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 .note.positive { color: blue; }
 .note.negative { color: red; }
 
+.movement-rates { white-space: nowrap; font-size: 80%; }
+
 .skill_name { position: relative; }
 .remove-container {
     position: relative;

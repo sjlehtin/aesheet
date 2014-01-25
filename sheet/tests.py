@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from __future__ import division
+
 import csv
 import StringIO
 import logging
@@ -911,6 +913,197 @@ class BaseFirearmFormTestCase(TestCase):
         self.assertEqual(new_firearm.get_ammunition_types(), [u"7.62x39"])
 
 
+class MovementRateTestCase(TestCase):
+    def setUp(self):
+        self.sheet = factories.SheetFactory()
+        self.boots_of_speed = factories.MiscellaneousItemFactory(
+            name="Boots of Speed")
+        # These boots are special, they increase all speeds.
+        speed = factories.ArmorSpecialQualityFactory(name="speed",
+                                                     run_multiplier=2,
+                                                     climb_multiplier=2,
+                                                     swim_multiplier=2)
+        self.boots_of_speed.armor_qualities.add(speed)
+
+    def test_climbing_speed_unskilled(self):
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.climbing(), 43/60)
+
+    def test_climbing_speed_skilled(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Climbing")
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.climbing(), 43/30)
+
+    def test_climbing_speed_skilled_level_3(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Climbing",
+                                        level=3)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.climbing(), 43/30 + 3)
+
+    def test_natural_climber(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Climbing",
+                                        level=3)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Natural climber",
+                                       edge__level=1,
+                                       edge__climb_multiplier=2)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.climbing(), (43/30)*2 + 3)
+
+    def test_munckin_climber(self):
+        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Climbing",
+                                        level=3)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Natural climber",
+                                       edge__level=1,
+                                       edge__climb_multiplier=2)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.climbing(), 2*((43/30)*2 + 3))
+
+    def test_swimming_speed_unskilled(self):
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.swimming(), 43/10)
+
+    def test_swimming_speed_skilled(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Swimming")
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.swimming(), 43/5)
+
+    def test_swimming_speed_skilled_level_3(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Swimming",
+                                        level=3)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.swimming(), 43/5 + 3*5)
+
+    def test_natural_swimmer(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Swimming",
+                                        level=3)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Natural swimmer",
+                                       edge__level=1,
+                                       edge__swim_multiplier=2)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.swimming(), (2*43/5) + 3*5)
+
+    def test_munchkin_swimmer(self):
+        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Swimming",
+                                        level=3)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Natural swimmer",
+                                       edge__level=1,
+                                       edge__swim_multiplier=2)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.swimming(), 2 * ((2*43/5) + 3*5))
+
+    def test_jumping_distance_unskilled(self):
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.jumping_distance(), 43/12)
+
+    def test_jumping_distance_skilled_level_3(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Jumping",
+                                        level=3)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.jumping_distance(), 43/12 + 3*0.75)
+
+    def test_natural_jumper(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Jumping",
+                                        level=3)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Natural jumper",
+                                       edge__level=1)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.jumping_distance(), 2*43/12 + 3*0.75)
+
+    def test_munchkin_jumper(self):
+        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Jumping",
+                                        level=3)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Natural jumper",
+                                       edge__level=1)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.jumping_distance(), 2 * (2*43/12 + 3*0.75))
+
+    def test_jumping_height_skilled_level_3(self):
+        factories.CharacterSkillFactory(character=self.sheet.character,
+                                        skill__name="Jumping",
+                                        level=3)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.jumping_height(), 43/36 + 3*0.25)
+
+    def test_stealth_speed(self):
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.stealth(), 43/5)
+
+    def test_increased_stealth_speed(self):
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Increased land speed",
+                                       edge__level=2,
+                                       edge__run_multiplier=1.5)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.stealth(), 43/5 * 1.5)
+
+    def test_stealth_speed_should_not_increase_with_boots_of_speed(self):
+        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.stealth(), 43/5)
+
+    def test_running_speed(self):
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.running(), 43)
+
+    def test_increased_running_speed(self):
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Increased land speed",
+                                       edge__level=2,
+                                       edge__run_multiplier=1.5)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.running(), 43 * 1.5)
+
+    def test_enchanced_running_speed(self):
+        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.running(), 43 * 2)
+
+    def test_munchkin_running_speed(self):
+        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Increased land speed",
+                                       edge__level=2,
+                                       edge__run_multiplier=1.5)
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.running(), 43 * 2 * 1.5)
+
+    def test_fly_speed(self):
+
+        item = factories.MiscellaneousItemFactory(
+            name="Wings of flying")
+        # These boots are special, they increase all speeds.
+        fly = factories.ArmorSpecialQualityFactory(name="fly",
+                                                   fly_multiplier=6)
+        item.armor_qualities.add(fly)
+
+        self.sheet.miscellaneous_items.add(item)
+
+        rates = self.sheet.movement_rates()
+        self.assertAlmostEqual(rates.flying(), 6*43)
+        # Verify that the speed stays constant with multiple calls.
+        self.assertAlmostEqual(rates.flying(), 6*43)
+
+
 class RapidArcheryTestCase(TestCase):
     """
     Rapid archery should have no effect in firearm or thrown weapon rates,
@@ -1370,7 +1563,7 @@ class ModelBasics(TestCase):
         # exceptions in the property handling.
 
 
-class Views(TestCase):
+class Views(WebTest):
     fixtures = ["campaigns", "user", "char", "sheet", "armor",
                 "edges", "basic_skills"]
 
@@ -1383,29 +1576,12 @@ class Views(TestCase):
 
     def testNewSpellEffect(self):
         det_url = reverse('add_spell_effect')
-        response = self.client.get(det_url)
-        self.assertContains(response, "Fit")
+        form = self.app.get(det_url, user="admin").form
+        form['fit'] = 40
+        form['name'] = "MyEffect"
+        form['type'] = "enhancement"
 
-        response = self.client.post(det_url, { 'fit' : 40,
-                                               'name' : 'MyEffect',
-                                               'type' : 'enhancement',
-                                               'cc_skill_levels' : 0,
-                                               'ref' : 0,
-                                               'lrn' : 0,
-                                               'int' : 0,
-                                               'psy' : 0,
-                                               'wil' : 0,
-                                               'cha' : 0,
-                                               'pos' : 0,
-                                               'mov' : 0,
-                                               'dex' : 0,
-                                               'imm' : 0,
-                                               'saves_vs_fire' : 0,
-                                               'saves_vs_cold' : 0,
-                                               'saves_vs_lightning' : 0,
-                                               'saves_vs_poison' : 0,
-                                               'saves_vs_all' : 0,
-                                               })
+        response = self.client.post(det_url, dict(form.submit_fields()))
         self.assertRedirects(response,
                              reverse(sheet.views.sheets_index))
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
@@ -2157,6 +2333,7 @@ class WeaponSizeTestCase(DamageMixin, TestCase):
                                                 size=2)
         self.assertEqual(weapon.roa(), 0.73)
 
+
 class SheetViewTestCase(TestCase):
     def test_sheet_view(self):
         char_sheet = factories.SheetFactory()
@@ -2187,7 +2364,7 @@ class SheetViewTestCase(TestCase):
                        for sk in sheet_view.physical_skills()])
 
         self.assertEqual(skills['Stealth'].check(), 22)
-        self.assertEqual(skills['Stealth'].level(), "B")
+        self.assertIsNone(skills['Stealth'].level())
         self.assertEqual(skills['Stealth'].cost(), 0)
 
         self.assertEqual(skills['Concealment'].check(), 43)

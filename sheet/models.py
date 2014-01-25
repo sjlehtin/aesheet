@@ -267,6 +267,13 @@ class Character(models.Model):
         else:
             return None
 
+    def has_edge(self, edge):
+        if edge is None:
+            return True
+        if self.get_edge(edge):
+            return True
+        return False
+
     def get_skill(self, skill):
         cs = self.get_ability(self.skills, skill,
                               accessor=lambda xx: xx.skill)
@@ -680,6 +687,15 @@ class StatModifier(models.Model):
     saves_vs_lightning = models.IntegerField(default=0)
     saves_vs_poison = models.IntegerField(default=0)
     saves_vs_all = models.IntegerField(default=0)
+
+    run_multiplier = models.DecimalField(default=0,
+                                         max_digits=4, decimal_places=2)
+    swim_multiplier = models.DecimalField(default=0,
+                                          max_digits=4, decimal_places=2)
+    climb_multiplier = models.DecimalField(default=0,
+                                           max_digits=4, decimal_places=2)
+    fly_multiplier = models.DecimalField(default=0,
+                                         max_digits=4, decimal_places=2)
 
     class Meta:
         abstract = True
@@ -1490,6 +1506,62 @@ class MiscellaneousItem(ExportedModel):
         return self.name
 
 
+class MovementRates(object):
+    def __init__(self, sheet):
+        self.sheet = sheet
+
+    def climbing(self):
+        innate_multiplier = self.sheet.innate_climb_multiplier()
+        enhancement_multiplier = self.sheet.enhancement_climb_multiplier()
+        level = self.sheet.character.skill_level("Climbing")
+        if level is None:
+            base_rate = self.sheet.eff_mov / 60
+            level_bonus = 0
+        else:
+            base_rate = self.sheet.eff_mov / 30
+            level_bonus = level
+        return enhancement_multiplier * (base_rate * innate_multiplier +
+                                         level_bonus)
+
+    def swimming(self):
+        innate_multiplier = self.sheet.innate_swim_multiplier()
+        enhancement_multiplier = self.sheet.enhancement_swim_multiplier()
+        level = self.sheet.character.skill_level("Swimming")
+        if level is None:
+            base_rate = self.sheet.eff_mov / 10
+            level_bonus = 0
+        else:
+            base_rate = self.sheet.eff_mov / 5
+            level_bonus = 5 * level
+        return enhancement_multiplier * (base_rate * innate_multiplier +
+                                         level_bonus)
+
+    def jumping_distance(self):
+        edge_level = self.sheet.character.edge_level("Natural jumper")
+        multiplier = (2 * edge_level if edge_level else 1)
+        enhancement_multiplier = self.sheet.enhancement_run_multiplier()
+        level = self.sheet.character.skill_level("Jumping")
+        level_bonus = level * 0.75 if level is not None else 0
+        base_rate = self.sheet.eff_mov / 12
+        return enhancement_multiplier * (base_rate * multiplier + level_bonus)
+
+    def jumping_height(self):
+        return self.jumping_distance()/3
+
+    def stealth(self):
+        return self.sheet.eff_mov / 5 * self.sheet.innate_run_multiplier()
+
+    def running(self):
+        return (self.sheet.eff_mov * self.sheet.innate_run_multiplier() *
+                self.sheet.enhancement_run_multiplier())
+
+    def sprinting(self):
+        return 1.5 * self.running()
+
+    def flying(self):
+        return self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
+
+
 Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 
@@ -2108,7 +2180,7 @@ class Sheet(models.Model):
         """
         # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
         lvl = self.character.edge_level('Fast mana recovery')
-        extra_recovery = rounddown(2 * ((self.eff_cha - 45) // 15))
+        extra_recovery = rounddown(2 * ((self.eff_cha - 45) / 15))
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.psy + self.wil) / 4.0) +
                           self.bought_mana),
@@ -2131,6 +2203,90 @@ class Sheet(models.Model):
             weight += sum([ww.base.weight for ww in wpns])
 
         return weight + self.extra_weight_carried
+
+    def innate_effects(self):
+        """
+        Iterate over all innate effects.
+        """
+        return  [edge.edge for edge in self.character.edges.all()]
+
+    def _special_effects(self):
+        """
+        Iterate over all effects except for innate ones, such as edges.
+        """
+        if self.armor:
+            armor_special_qualities = self.armor.special_qualities.all()
+        else:
+            armor_special_qualities = []
+        if self.helm:
+            helm_special_qualities = self.helm.special_qualities.all()
+        else:
+            helm_special_qualities = []
+
+        weapon_special_qualities = [
+            effect
+            for weapon in self.weapons.all()
+                for effect in weapon.special_qualities.all()]
+        items = self.miscellaneous_items.all()
+        item_special_qualities = [
+            effect for item in items
+            for effect in item.weapon_qualities.all()
+            ] + [
+            effect for item in items
+            for effect in item.armor_qualities.all()
+        ]
+
+        return list(itertools.chain(armor_special_qualities,
+                               helm_special_qualities,
+                               weapon_special_qualities,
+                               item_special_qualities,
+                               self.spell_effects.all()))
+
+    _cached_special_effects = None
+    def special_effects(self):
+        if not self._cached_special_effects:
+            self._cached_special_effects = self._special_effects()
+        return self._cached_special_effects
+
+    def innate_run_multiplier(self, field="run_multiplier"):
+        # Assume edges stack.
+        multiplier = sum([float(getattr(effect, field))
+                          for effect in self.innate_effects()])
+        return multiplier or 1
+
+    def enhancement_run_multiplier(self, field="run_multiplier"):
+        # Assume effects do not stack.
+        effects = [getattr(effect, field) for effect in self.special_effects()]
+        if effects:
+            return float(max(effects)) or 1
+        else:
+            return 1
+
+    def innate_climb_multiplier(self):
+        return self.innate_run_multiplier(field="climb_multiplier")
+
+    def enhancement_climb_multiplier(self):
+        return self.enhancement_run_multiplier(field="climb_multiplier")
+
+    def innate_swim_multiplier(self):
+        return self.innate_run_multiplier(field="swim_multiplier")
+
+    def enhancement_swim_multiplier(self):
+        return self.enhancement_run_multiplier(field="swim_multiplier")
+
+    _cached_movement_rates = None
+    def movement_rates(self):
+        if not self._cached_movement_rates:
+            self._cached_movement_rates = MovementRates(self)
+        return self._cached_movement_rates
+
+    def enhancement_fly_multiplier(self):
+        # Assume effects do not stack.
+        effects = [effect.fly_multiplier for effect in self.special_effects()]
+        if effects:
+            return float(max(effects))
+        else:
+            return 0
 
     @classmethod
     def get_by_campaign(cls, user):

@@ -33,7 +33,7 @@
         </div>
         {% endif %}
     </td>
-    <td>{{ skill.level }}</td>
+    <td>{{ skill.level|default_if_none:"B" }}</td>
     <td>
         {% if skill.item %}
 

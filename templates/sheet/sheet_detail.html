@@ -139,7 +139,7 @@ XP: {{ char.xp_used_stats }} +
 </div>
 
 </div>
-<div class="col-md-8">
+<div class="col-md-2">
     <table class="derived">
 {% with b=char.body sta=char.stamina mana=char.mana %}
 {# XXX Temporary stamina and body #}
@@ -160,6 +160,75 @@ XP: {{ char.xp_used_stats }} +
   </tr>
 {% endwith %}
 </table>
+</div>
+
+<div class="col-md-6">
+    <div class="panel panel-default movement-rates">
+        <div class="panel-heading">
+            <h4 class="panel-title">Movement rates per turn</h4>
+        </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Jump</th>
+                    <th>Climb</th>
+                    <th>Swim</th>
+                    <th>Stealth</th>
+                    <th>Run</th>
+                    <th>Sprint</th>
+                    <th>Fly</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    {% with rates=char.movement_rates %}
+                    <td>
+                        <div>
+                            H = {{ rates.jumping_distance|floatformat }} m
+                        </div>
+                        <div>
+                            V = {{ rates.jumping_height|floatformat }} m
+                        </div>
+                    </td>
+                    <td>{{ rates.climbing|floatformat }} m</td>
+                    <td>{{ rates.swimming|floatformat }} m</td>
+                    <td>{{ rates.stealth|floatformat }} m</td>
+                    <td>{{ rates.running|floatformat }} m</td>
+                    <td>{{ rates.sprinting|floatformat }} m</td>
+                    <td>{{ rates.flying|floatformat }} m</td>
+                    {% endwith %}
+                </tr>
+                </tbody>
+            </table>
+    {% comment %}
+        <div class="panel-heading">
+            <h4 class="panel-title">Initiative penalty for advancing in combat</h4>
+        </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Distance</th>
+                    <th>30 m</th>
+                    <th>20 m</th>
+                    <th>10 m</th>
+                    <th>5 m</th>
+                    <th>2 m</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Charge</td>
+                </tr>
+                <tr>
+                    <td>Melee</td>
+                </tr>
+                <tr>
+                    <td>Ranged / casting</td>
+                </tr>
+                </tbody>
+            </table>
+            {% endcomment %}
+    </div>
 </div>
 </div>
 

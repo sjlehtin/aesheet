@@ -16,6 +16,8 @@ Priority list by JW:
 - armor modifiers to skill checks.  These should work for the physical skills
   where the check is shown even without the character having the skill.
 
+- shield damages
+
 - reordering weapons.  possible to do with ajax, so it would be faster.
 -- removing weapons etc to use REST API.  If removed item has repercussions on
    character stats, the character sheet should be refreshed (maybe add a
@@ -109,6 +111,9 @@ Minor:
 Firearms:
 
 - using two Berettas akimbo.  Check rule situation regarding instinctive fire.
+-- fireams are assigned to hands (right, left, both).  Penalties/bonuses should
+   be applied based on weapon type.  If both hands are occupied, apply penalty
+   for two guns.
 - firearms in CC.
 + some weapons with autofire do not have sweep fire enabled.
 + some weapons have restricted burst (restricted to 2 or 3 shots).
@@ -117,18 +122,21 @@ Firearms:
 
 Edges:
 
-- run speed multiplier
-- climb speed multiplier
++ run speed multiplier
++ climb speed multiplier
 - jump distance multiplier
-- swim speed multiplier
-- overland speed multiplier
++ swim speed multiplier
++ overland speed multiplier
 - superior balance effect on ref/mov balance checks
-
-- fly speed multiplier
 
 Skills:
 
 - jumping/tumbling synergy, see AEN skills and edges.
+
+Spells:
+- fly speed multiplier
+
+
 """
 
 BUGS = """
@@ -422,7 +430,7 @@ class PhysicalSkill(SkillWrap):
 
                     @property
                     def level(self):
-                        return "B"
+                        return None
 
                 skill = BaseCheck(self.sheet, self.base_skill)
         self.skill = skill
@@ -469,6 +477,10 @@ class SheetView(object):
         self._skills = self.sheet.skills.all()
         self.all_physical_skills = sheet.models.Skill.objects.filter(
             name__in=self._all_physical)
+
+        self._wrapped_physical = dict([(sk,
+                                        PhysicalSkill(sk, sheet=self.sheet)) for sk in
+                                        self._all_physical])
 
     def used_sp(self):
         return sum([cs.cost() for cs in self._skills])
@@ -531,7 +543,7 @@ class SheetView(object):
                              sheet=self.sheet)
 
     def physical_skills(self):
-        return [PhysicalSkill(sk, sheet=self.sheet)
+        return [self._wrapped_physical[sk]
                 for sk in self._base_physical]
 
     def skills(self):

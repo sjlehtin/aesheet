@@ -247,6 +247,11 @@ class ArmorQualityFactory(factory.DjangoModelFactory):
     tech_level__name = "2K"
 
 
+class ArmorSpecialQualityFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.ArmorSpecialQuality
+    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+
+
 class ArmorFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Armor
 
