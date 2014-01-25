@@ -52,13 +52,13 @@
         <tr>
             <td>mpd</td>
         {% for rate in rates.miles_per_day %}
-            <td>{{ rate }}</td>
+            <td>{{ rate|floatformat }}</td>
         {% endfor %}
         </tr>
         <tr>
             <td>mph</td>
         {% for rate in rates.miles_per_hour %}
-            <td>{{ rate }}</td>
+            <td>{{ rate|floatformat }}</td>
         {% endfor %}
         </tr>
         </tbody>
