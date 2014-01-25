@@ -596,6 +596,33 @@ class SheetView(object):
     def miscellaneous_items(self):
         return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
 
+    def advancing_initiative_penalties(self):
+        distances = [30, 20, 10, 5, 2]
+        def initiatives(multiplyer):
+            return [-roundup((dist*multiplyer)/
+                             (self.sheet.eff_mov *
+                              self.sheet.innate_run_multiplier()))
+                    for dist in distances]
+        charging = initiatives(20)
+        melee = initiatives(30)
+        ranged = initiatives(60)
+        return dict(distances=distances,
+                    charge_initiatives=charging,
+                    melee_initiatives=melee,
+                    ranged_initiatives=ranged)
+
+    def overland_movement(self):
+        overland_mov = self.sheet.eff_mov * self.sheet.innate_run_multiplier()
+        fly_mov = self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
+
+        terrains = [1, 2, 3, 4, 5, 6, 10, 15]
+        miles_per_day = [round(overland_mov / (2 * mult)) for mult in terrains]
+        miles_per_day.append(round(fly_mov/2))
+        return dict(terrains=["Road", "Clear", "Scrub", "Woods", "Sand",
+                              "Forest", "Mtn", "Swamp", "Fly"],
+                    miles_per_day=miles_per_day,
+                    miles_per_hour=[round(rate/7.5) for rate in miles_per_day])
+
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
         # base character.

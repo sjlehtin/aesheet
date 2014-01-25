@@ -1,0 +1,68 @@
+<div class="panel panel-default movement-rates">
+    <div class="panel-heading">
+        <h4 class="panel-title">Movement rates per turn</h4>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Jump</th>
+            <th>Climb</th>
+            <th>Swim</th>
+            <th>Stealth</th>
+            <th>Run</th>
+            <th>Sprint</th>
+            <th>Fly</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            {% with rates=char.movement_rates %}
+                <td>
+                    <div>
+                        H = {{ rates.jumping_distance|floatformat }} m
+                    </div>
+                    <div>
+                        V = {{ rates.jumping_height|floatformat }} m
+                    </div>
+                </td>
+                <td>{{ rates.climbing|floatformat }} m</td>
+                <td>{{ rates.swimming|floatformat }} m</td>
+                <td>{{ rates.stealth|floatformat }} m</td>
+                <td>{{ rates.running|floatformat }} m</td>
+                <td>{{ rates.sprinting|floatformat }} m</td>
+                <td>{{ rates.flying|floatformat }} m</td>
+            {% endwith %}
+        </tr>
+        </tbody>
+    </table>
+    <div class="panel-heading">
+        <h4 class="panel-title">Overland movement</h4>
+    </div>
+    <table class="table">
+    {% with rates=char.overland_movement %}
+        <thead>
+        <tr>
+            <th></th>
+            {% for terrain in rates.terrains %}
+            <th>{{ terrain }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>mpd</td>
+        {% for rate in rates.miles_per_day %}
+            <td>{{ rate }}</td>
+        {% endfor %}
+        </tr>
+        <tr>
+            <td>mph</td>
+        {% for rate in rates.miles_per_hour %}
+            <td>{{ rate }}</td>
+        {% endfor %}
+        </tr>
+        </tbody>
+    {% endwith %}
+    </table>
+
+</div>
