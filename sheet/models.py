@@ -1511,8 +1511,8 @@ class MovementRates(object):
         self.sheet = sheet
 
     def climbing(self):
-        innate_multiplier = self.sheet.innate_climb_multiplier()
-        enhancement_multiplier = self.sheet.enhancement_climb_multiplier()
+        multiplier = self.sheet.innate_climb_multiplier()
+        multiplier *= self.sheet.enhancement_climb_multiplier()
         level = self.sheet.character.skill_level("Climbing")
         if level is None:
             base_rate = self.sheet.eff_mov / 60
@@ -1520,12 +1520,11 @@ class MovementRates(object):
         else:
             base_rate = self.sheet.eff_mov / 30
             level_bonus = level
-        return enhancement_multiplier * (base_rate * innate_multiplier +
-                                         level_bonus)
+        return multiplier * (base_rate + level_bonus)
 
     def swimming(self):
-        innate_multiplier = self.sheet.innate_swim_multiplier()
-        enhancement_multiplier = self.sheet.enhancement_swim_multiplier()
+        multiplier = self.sheet.innate_swim_multiplier()
+        multiplier *= self.sheet.enhancement_swim_multiplier()
         level = self.sheet.character.skill_level("Swimming")
         if level is None:
             base_rate = self.sheet.eff_mov / 10
@@ -1533,17 +1532,16 @@ class MovementRates(object):
         else:
             base_rate = self.sheet.eff_mov / 5
             level_bonus = 5 * level
-        return enhancement_multiplier * (base_rate * innate_multiplier +
-                                         level_bonus)
+        return multiplier * (base_rate + level_bonus)
 
     def jumping_distance(self):
         edge_level = self.sheet.character.edge_level("Natural jumper")
         multiplier = (2 * edge_level if edge_level else 1)
-        enhancement_multiplier = self.sheet.enhancement_run_multiplier()
+        multiplier *= self.sheet.enhancement_run_multiplier()
         level = self.sheet.character.skill_level("Jumping")
         level_bonus = level * 0.75 if level is not None else 0
         base_rate = self.sheet.eff_mov / 12
-        return enhancement_multiplier * (base_rate * multiplier + level_bonus)
+        return multiplier * (base_rate + level_bonus)
 
     def jumping_height(self):
         return self.jumping_distance()/3
@@ -2261,6 +2259,9 @@ class Sheet(models.Model):
             return float(max(effects)) or 1
         else:
             return 1
+
+    def run_multiplier(self):
+        return self.innate_run_multiplier() * self.enhancement_run_multiplier()
 
     def innate_climb_multiplier(self):
         return self.innate_run_multiplier(field="climb_multiplier")

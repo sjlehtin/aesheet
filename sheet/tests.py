@@ -951,7 +951,7 @@ class MovementRateTestCase(TestCase):
                                        edge__level=1,
                                        edge__climb_multiplier=2)
         rates = self.sheet.movement_rates()
-        self.assertAlmostEqual(rates.climbing(), (43/30)*2 + 3)
+        self.assertAlmostEqual(rates.climbing(), (43/30 + 3) * 2)
 
     def test_munckin_climber(self):
         self.sheet.miscellaneous_items.add(self.boots_of_speed)
@@ -963,7 +963,7 @@ class MovementRateTestCase(TestCase):
                                        edge__level=1,
                                        edge__climb_multiplier=2)
         rates = self.sheet.movement_rates()
-        self.assertAlmostEqual(rates.climbing(), 2*((43/30)*2 + 3))
+        self.assertAlmostEqual(rates.climbing(), 2* 2 *(43/30 + 3))
 
     def test_swimming_speed_unskilled(self):
         rates = self.sheet.movement_rates()
@@ -991,7 +991,7 @@ class MovementRateTestCase(TestCase):
                                        edge__level=1,
                                        edge__swim_multiplier=2)
         rates = self.sheet.movement_rates()
-        self.assertAlmostEqual(rates.swimming(), (2*43/5) + 3*5)
+        self.assertAlmostEqual(rates.swimming(), 2*(43/5 + 3*5))
 
     def test_munchkin_swimmer(self):
         self.sheet.miscellaneous_items.add(self.boots_of_speed)
@@ -1003,7 +1003,7 @@ class MovementRateTestCase(TestCase):
                                        edge__level=1,
                                        edge__swim_multiplier=2)
         rates = self.sheet.movement_rates()
-        self.assertAlmostEqual(rates.swimming(), 2 * ((2*43/5) + 3*5))
+        self.assertAlmostEqual(rates.swimming(), 2 * 2 * ((43/5) + 3*5))
 
     def test_jumping_distance_unskilled(self):
         rates = self.sheet.movement_rates()
@@ -1024,7 +1024,7 @@ class MovementRateTestCase(TestCase):
                                        edge__edge__name="Natural jumper",
                                        edge__level=1)
         rates = self.sheet.movement_rates()
-        self.assertAlmostEqual(rates.jumping_distance(), 2*43/12 + 3*0.75)
+        self.assertAlmostEqual(rates.jumping_distance(), 2*(43/12 + 3*0.75))
 
     def test_munchkin_jumper(self):
         self.sheet.miscellaneous_items.add(self.boots_of_speed)
@@ -1035,7 +1035,8 @@ class MovementRateTestCase(TestCase):
                                        edge__edge__name="Natural jumper",
                                        edge__level=1)
         rates = self.sheet.movement_rates()
-        self.assertAlmostEqual(rates.jumping_distance(), 2 * (2*43/12 + 3*0.75))
+        self.assertAlmostEqual(rates.jumping_distance(),
+                               2 * 2 * (43/12 + 3*0.75))
 
     def test_jumping_height_skilled_level_3(self):
         factories.CharacterSkillFactory(character=self.sheet.character,
