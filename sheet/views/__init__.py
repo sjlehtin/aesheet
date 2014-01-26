@@ -8,14 +8,18 @@ Priority list by JW:
 
 + 0) restrict ammo by chosen weapon dynamically with JS
 + 1) basic skill checks
-- 2) movement rates
++ 2) movement rates
 - 3) berettas akimbo
-- 4) overland
++ 4) overland
 - 5) spell skill cheks
 
 - armor modifiers to skill checks.  These should work for the physical skills
   where the check is shown even without the character having the skill.
 
+- show character height, weight in sheet.
+- "add xp used ingame" with a possibility to enter description (to log)
+-- if a log entry is added, entry should not be coalesced.
+- "add xp" with an optional log entry, allowing for in-game notes.
 - shield damages
 - tiring
 - bootstrap data pop-up links for armor, effects in edit area
