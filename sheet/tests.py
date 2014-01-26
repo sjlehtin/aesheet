@@ -1021,7 +1021,7 @@ class MovementRateTestCase(TestCase):
                                         skill__name="Jumping",
                                         level=3)
         factories.CharacterEdgeFactory(character=self.sheet.character,
-                                       edge__edge__name="Natural jumper",
+                                       edge__edge__name="Natural Jumper",
                                        edge__level=1)
         rates = self.sheet.movement_rates()
         self.assertAlmostEqual(rates.jumping_distance(), 2*(43/12 + 3*0.75))
@@ -1032,7 +1032,7 @@ class MovementRateTestCase(TestCase):
                                         skill__name="Jumping",
                                         level=3)
         factories.CharacterEdgeFactory(character=self.sheet.character,
-                                       edge__edge__name="Natural jumper",
+                                       edge__edge__name="Natural Jumper",
                                        edge__level=1)
         rates = self.sheet.movement_rates()
         self.assertAlmostEqual(rates.jumping_distance(),

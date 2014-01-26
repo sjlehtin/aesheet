@@ -710,7 +710,6 @@ class EdgeLevel(ExportedModel, StatModifier):
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
-    # XXX race requirement?
     skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
                                            blank=True, null=True)
 
@@ -1535,7 +1534,7 @@ class MovementRates(object):
         return multiplier * (base_rate + level_bonus)
 
     def jumping_distance(self):
-        edge_level = self.sheet.character.edge_level("Natural jumper")
+        edge_level = self.sheet.character.edge_level("Natural Jumper")
         multiplier = (2 * edge_level if edge_level else 1)
         multiplier *= self.sheet.enhancement_run_multiplier()
         level = self.sheet.character.skill_level("Jumping")
