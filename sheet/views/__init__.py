@@ -86,11 +86,13 @@ Priority list by JW:
   weapons with larger sizes (Martel enlarged).
 - stats, armors etc if the character is larger sized.
 
-- Basic skill checks:  Adding skills without any points (or reduced amount of
++ Basic skill checks:  Adding skills without any points (or reduced amount of
   points) allocated.  For example, Climbing B -> show skill check at half
-  ability.  This is a larger item than it sounds, as the current design assumes
-  whole skill levels.  Investigate if could be done as a skill level model
-  field.
+  ability.  Currently supported are the basic physical skills.
+
+- Partial skills.  This is a larger item than it sounds, as the current design
+  assumes whole skill levels.  Investigate if could be done as a skill level
+  model field.
 
 - Inserting None as skill cost to the sheet should work to allow resetting
   skill costs from CSV import.
@@ -136,7 +138,7 @@ Skills:
 - jumping/tumbling synergy, see AEN skills and edges.
 
 Spells:
-- fly speed multiplier
++ fly speed multiplier
 
 
 """
