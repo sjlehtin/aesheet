@@ -162,46 +162,9 @@ XP: {{ char.xp_used_stats }} +
 </table>
 </div>
 
-    <div class="col-md-6">
-    <div class="panel panel-default movement-rates">
-            <div class="panel-heading">
-                <h4 class="panel-title">Initiative penalty for advancing in
-                    combat</h4>
-            </div>
-            <table class="table">
-                {% with inits=char.advancing_initiative_penalties %}
-                    <thead>
-                    <tr>
-                        <th>Distance</th>
-                        {% for dist in inits.distances %}
-                            <th>{{ dist }} m</th>
-                        {% endfor %}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>Charge</td>
-                        {% for init in inits.charge_initiatives %}
-                            <td>{{ init }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <td>Melee</td>
-                        {% for init in inits.melee_initiatives %}
-                            <td>{{ init }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <td>Ranged / casting</td>
-                        {% for init in inits.ranged_initiatives %}
-                            <td>{{ init }}</td>
-                        {% endfor %}
-                    </tr>
-                    </tbody>
-                {% endwith %}
-            </table>
-    </div>
-    </div>
+<div class="col-md-6">
+    {% include "sheet/sheet_detail/advancing_initiatives.html" %}
+</div>
 </div>
 
 <h3>Notes</h3>
