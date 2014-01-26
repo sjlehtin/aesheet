@@ -74,3 +74,4 @@ sun 19.1.2014 4h FIT bonus from weapon max damage, lethality from durability.  W
 tue 21.1.2014 3h Base skill checks.
 wed 22.1.2014 2.5h REST API for browsing ammunition; fixing usability in ammo selection.
 thu 23.1.2014 3h Fixing bug with Rapid archery.  Reverse engineering excel sheet for movement speeds.
+sat 25.1.2014 6h Movement rates, advancing initiatives.
