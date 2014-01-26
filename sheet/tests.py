@@ -20,7 +20,6 @@ import sheet.views
 from sheet.views import marshal
 import sheet.models
 from django_webtest import WebTest
-from django.contrib import auth
 import django.http
 import factories
 import django.db
@@ -1214,7 +1213,7 @@ class FirearmImportExportTestcase(TestCase):
         self.assertEqual(data_row[idx], "1")
 
 
-class EdgeAndSkillHandling(TestCase):
+class EdgeAndSkillHandlingTestCase(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "test_skills", "campaigns", "armor"]
 
@@ -1436,7 +1435,7 @@ class EdgeAndSkillHandling(TestCase):
         self.assertIn("__all__", form.errors)
 
 
-class Logging(WebTest):
+class LoggingTestCase(WebTest):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "assigned_edges", "armor", "campaigns"]
 
@@ -1550,7 +1549,7 @@ class AddXpTestCase(TestCase):
         self.assertEqual(entry.field, "total_xp")
 
 
-class ModelBasics(TestCase):
+class ModelBasicsTestCase(TestCase):
     fixtures = ["user", "char", "sheet", "edges", "basic_skills",
                 "assigned_edges", "armor", "campaigns"]
 
@@ -1811,7 +1810,7 @@ class TechLevelTestCase(TestCase):
         self.verify_character(5, False, True, False, True)
 
 
-class SheetOrganization(TestCase):
+class SheetOrganizationTestCase(TestCase):
     def setUp(self):
         factories.SheetFactory(character__name="Martel",
                                character__campaign__name="FRP")
