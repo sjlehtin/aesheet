@@ -17,7 +17,9 @@ Priority list by JW:
   where the check is shown even without the character having the skill.
 
 - shield damages
-
+- tiring
+- bootstrap data pop-up links for armor, effects in edit area
+-- show basic info.
 - reordering weapons.  possible to do with ajax, so it would be faster.
 -- removing weapons etc to use REST API.  If removed item has repercussions on
    character stats, the character sheet should be refreshed (maybe add a
