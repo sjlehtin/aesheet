@@ -4,7 +4,6 @@ from django.forms import widgets
 import sheet.models
 import datetime
 import re
-from django.forms.models import modelform_factory
 import logging
 
 logger = logging.getLogger(__name__)
@@ -602,6 +601,7 @@ class EditCharacterForm(BaseEditCharacterForm):
 
 class AddXPForm(RequestForm):
     add_xp = forms.IntegerField()
+
     class Meta:
         model = sheet.models.Character
         fields = ()
