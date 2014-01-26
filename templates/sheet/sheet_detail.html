@@ -82,7 +82,7 @@
 </table>
 
 <div class="xp">
-XP: {{ char.xp_used_stats }} + 
+<label>XP:</label> {{ char.xp_used_stats }} +
 {% if char.hero %}
 {{ char.xp_used_hero }} + 
 {% endif %}
@@ -97,15 +97,6 @@ XP: {{ char.xp_used_stats }} +
     </form>
 </div>
 </div>
-
-{% include "sheet/sheet_detail/armor.html" %}
-
-    <div>
-        <ul>
-            <li>Weight carried: {{ char.weight_carried }} kg </li>
-        </ul>
-    </div>
-
 </div>
 
 <div class="col-md-2">
@@ -136,6 +127,22 @@ XP: {{ char.xp_used_stats }} +
 </div>
 </div>
 
+<div class="row">
+<div class="col-md-4">
+    {% include "sheet/sheet_detail/armor.html" %}
+
+    <div>
+        <ul>
+            <li>Weight carried: {{ char.weight_carried }} kg </li>
+        </ul>
+    </div>
+</div>
+    <div class="col-md-8">
+        {% include "sheet/sheet_detail/movement.html" %}
+    </div>
+</div>
+
+
 <h3>Notes</h3>
 <ul class="note positive">
     {% for note in notes.positive %}
@@ -158,12 +165,6 @@ XP: {{ char.xp_used_stats }} +
 <h3>Firearms</h3>
 {% include "sheet/sheet_detail/edit_firearms.html" %}
 {% endif %}
-
-<div class="row">
-    <div class="col-md-8">
-        {% include "sheet/sheet_detail/movement.html" %}
-    </div>
-</div>
 
 <div class="row">
     {% if char.campaign.has_spells %}
@@ -319,8 +320,8 @@ $(document).ready(function () {
 <script src="{{ STATIC_URL }}hideAdvanced.js"></script>
 <script>
     $(document).ready(function () {
-    $("#add_skill select").combobox();
-    $("#add_lang select").combobox();
+        $("#add_skill select").combobox();
+        $("#add_lang select").combobox();
     });
 </script>
 {% endblock %}
