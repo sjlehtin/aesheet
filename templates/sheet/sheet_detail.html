@@ -224,7 +224,7 @@ XP: {{ char.xp_used_stats }} +
 
 {% if char.campaign.has_firearms %}
 <h3>Firearms</h3>
-{% include "sheet/sheet_detail/firearms.html" %}
+{% include "sheet/sheet_detail/edit_firearms.html" %}
 {% endif %}
 
 <div class="row">
@@ -241,7 +241,7 @@ XP: {{ char.xp_used_stats }} +
                     <h3 class="panel-title">Miscellaneous items</h3>
                 </div>
                 <div class="panel-body">
-                    {% include "sheet/sheet_detail/miscellaneous_items.html" %}
+                    {% include "sheet/sheet_detail/edit_miscellaneous_items.html" %}
                 </div>
             </div>
         </div>
@@ -252,7 +252,7 @@ XP: {{ char.xp_used_stats }} +
                     <h3 class="panel-title">Spell effects</h3>
                 </div>
                 <div class="panel-body">
-                    {% include "sheet/sheet_detail/spell_effects.html" %}
+                    {% include "sheet/sheet_detail/edit_spell_effects.html" %}
                 </div>
             </div>
         </div>
@@ -265,7 +265,7 @@ XP: {{ char.xp_used_stats }} +
                 <h3 class="panel-title">Edges</h3>
             </div>
             <div class="panel-body">
-                {% include "sheet/sheet_detail/edges.html" %}
+                {% include "sheet/sheet_detail/edit_edges.html" %}
             </div>
         </div>
     </div>
@@ -276,7 +276,7 @@ XP: {{ char.xp_used_stats }} +
                 <h3 class="panel-title">Helm</h3>
             </div>
             <div class="panel-body">
-                {% include "sheet/sheet_detail/helm.html" %}
+                {% include "sheet/sheet_detail/edit_helm.html" %}
             </div>
         </div>
     </div>
@@ -287,7 +287,7 @@ XP: {{ char.xp_used_stats }} +
                 <h3 class="panel-title">Armor</h3>
             </div>
             <div class="panel-body">
-                {% include "sheet/sheet_detail/armor.html" %}
+                {% include "sheet/sheet_detail/edit_armor.html" %}
             </div>
         </div>
     </div>
