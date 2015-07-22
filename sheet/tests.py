@@ -1436,21 +1436,27 @@ class EdgeAndSkillHandlingTestCase(TestCase):
 
 
 class LoggingTestCase(WebTest):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "assigned_edges", "armor", "campaigns"]
 
     def setUp(self):
-        self.assertTrue(self.client.login(username="admin", password="admin"))
+        self.request_factory = django.test.RequestFactory()
+        self.admin = factories.UserFactory(username="admin")
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
+        self.sheet = factories.SheetFactory()
+        factories.SkillFactory(name="Acting / Bluff")
+
+    def _get_request(self):
+        post = self.request_factory.post('/copy/')
+        post.user = self.admin
+        return post
 
     def test_stat_changes(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[2])
+        det_url = reverse('sheet.views.sheet_detail', args=[self.sheet.pk])
         req_data = { 'stat-modify-function' : 'add',
                      'stat-modify-stat' : 'cur_fit' }
         response = self.client.post(det_url, req_data)
         self.assertRedirects(response, det_url)
         entry = CharacterLogEntry.objects.latest()
         self.assertEqual(entry.user.username, "admin")
-        self.assertEqual(entry.character.pk, 2)
         self.assertEqual(entry.field, "cur_fit")
         self.assertEqual(entry.amount, 1)
         former_id = entry.id
@@ -1482,14 +1488,14 @@ class LoggingTestCase(WebTest):
         self.assertEqual(CharacterLogEntry.objects.count(), 0)
 
     def test_base_char_edit(self):
-        old_ch = Character.objects.get(pk=2)
+        old_ch = Character.objects.get(pk=self.sheet.character.pk)
 
-        det_url = reverse('edit_character', args=[2])
+        det_url = reverse('edit_character', args=[self.sheet.character.pk])
         form = self.app.get(det_url, user='admin').form
         form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, det_url)
-        new_ch = Character.objects.get(pk=2)
+        new_ch = Character.objects.get(pk=self.sheet.character.pk)
         self.assertEqual(old_ch.cur_fit - 2, new_ch.cur_fit)
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
@@ -1498,7 +1504,7 @@ class LoggingTestCase(WebTest):
         form['cur_fit'].value = str(int(form['cur_fit'].value) + 5)
         response = form.submit()
         self.assertRedirects(response, det_url)
-        new_ch = Character.objects.get(pk=2)
+        new_ch = Character.objects.get(pk=self.sheet.character.pk)
         self.assertEqual(old_ch.cur_fit + 3, new_ch.cur_fit)
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 3)
@@ -1507,7 +1513,7 @@ class LoggingTestCase(WebTest):
         form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, det_url)
-        new_ch = Character.objects.get(pk=2)
+        new_ch = Character.objects.get(pk=self.sheet.character.pk)
         self.assertEqual(old_ch.cur_fit + 1, new_ch.cur_fit)
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 1)
@@ -1516,7 +1522,7 @@ class LoggingTestCase(WebTest):
         form['free_edges'].value = str(0)
         response = form.submit()
         self.assertRedirects(response, det_url)
-        new_ch = Character.objects.get(pk=2)
+        new_ch = Character.objects.get(pk=self.sheet.character.pk)
         self.assertEqual(new_ch.free_edges, 0)
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
@@ -1528,10 +1534,11 @@ class LoggingTestCase(WebTest):
 
     def test_added_skill(self):
 
-        ch = Character.objects.get(pk=2)
+        ch = Character.objects.get(pk=self.sheet.character.pk)
         req = { 'skill' : "Acting / Bluff", 'level' : 2 }
-        form = AddSkill(req, request=get_fake_request(username='admin'),
-                        instance=ch)
+        form = AddSkillForm(req,
+                            request=self._get_request(),
+                            instance=ch)
         self.assertTrue(form.is_valid())
         form.save()
         ch = Character.objects.get(pk=2)
@@ -1558,6 +1565,7 @@ class LoggingTestCase(WebTest):
 
     def test_change_edge_level(self):
         pass
+
 
 class AddXpTestCase(TestCase):
     def setUp(self):

@@ -361,7 +361,7 @@ class AddSkillForm(RequestForm):
         cs.level = self.cleaned_data.get('level')
         cs.save()
 
-        entry = CharacterLogEntry()
+        entry = sheet.models.CharacterLogEntry()
         entry.character = cs.character
         entry.user = self.request.user
         entry.entry_type = entry.SKILL
