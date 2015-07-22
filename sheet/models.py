@@ -1957,8 +1957,8 @@ class Sheet(models.Model):
         else:
             extra_damage = 0
             extra_leth = 0
-        dmg.add_damage(int(round(extra_damage)))
-        dmg.add_leth(int(round(extra_leth)))
+        dmg.add_damage(rounddown(extra_damage))
+        dmg.add_leth(rounddown(extra_leth))
 
         return dmg
 
