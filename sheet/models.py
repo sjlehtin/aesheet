@@ -1601,10 +1601,10 @@ class Sheet(models.Model):
         }
 
     fit_modifiers_for_lethality = {
-        SPECIAL : 15,
-        FULL : 22.5,
-        PRI : 30,
-        SEC : 45
+        SPECIAL : 20,
+        FULL : 30,
+        PRI : 40,
+        SEC : 60
         }
 
     def roa(self, weapon, use_type=FULL):
