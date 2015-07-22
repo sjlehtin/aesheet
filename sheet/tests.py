@@ -2264,9 +2264,9 @@ class DamageTestCase(DamageMixin, TestCase):
             quality__name="normal")
         # Assume pull for FIT 90.
         # Max FIT 90: PRI dmg: (FIT-45)/10, leth: (FIT-45)/40
-        # dmg = 5, leth = 1
+        # dmg = 4.5 -> 4 + base__extra_damage = 5, leth = 1
         self.assertDamageEqual(self.strong_man.damage(weapon),
-            num_dice=1, dice=6, extra_damage=6, leth=6, plus_leth=-1)
+            num_dice=1, dice=6, extra_damage=5, leth=6, plus_leth=-1)
 
         weapon = factories.RangedWeaponFactory(
             base__name="Composite shortbow",
@@ -2275,9 +2275,9 @@ class DamageTestCase(DamageMixin, TestCase):
             quality__max_fit=75)
 
         # Max FIT 75: PRI dmg: (FIT-45)/10, leth: (FIT-45)/40
-        # dmg = 3, leth = 1
+        # dmg = 3, leth = rounddown(0.75) = 0
         self.assertDamageEqual(self.strong_man.damage(weapon),
-            num_dice=1, dice=6, extra_damage=4, leth=6, plus_leth=-1)
+            num_dice=1, dice=6, extra_damage=4, leth=5, plus_leth=-1)
 
     def test_javelin_damage(self):
         weapon = factories.RangedWeaponFactory(
@@ -2299,6 +2299,14 @@ class DamageTestCase(DamageMixin, TestCase):
 
     # XXX firearms receive no FIT bonuses (this is handled already by the
     # separation of the damage to ammo)
+
+    def test_lethality_rules(self):
+        man = factories.SheetFactory(character__cur_fit=85)
+        self.assertEqual(man.damage(self.normal_weapon).leth, 7,
+                         "Lethality should be just increased")
+        man = factories.SheetFactory(character__cur_fit=74)
+        self.assertEqual(man.damage(self.normal_weapon).leth, 6,
+                         "Lethality should just stay normal")
 
 
 class WeaponSizeTestCase(DamageMixin, TestCase):

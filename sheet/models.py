@@ -1601,10 +1601,10 @@ class Sheet(models.Model):
         }
 
     fit_modifiers_for_lethality = {
-        SPECIAL : 15,
-        FULL : 22.5,
-        PRI : 30,
-        SEC : 45
+        SPECIAL : 20,
+        FULL : 30,
+        PRI : 40,
+        SEC : 60
         }
 
     def roa(self, weapon, use_type=FULL):
@@ -1957,8 +1957,8 @@ class Sheet(models.Model):
         else:
             extra_damage = 0
             extra_leth = 0
-        dmg.add_damage(int(round(extra_damage)))
-        dmg.add_leth(int(round(extra_leth)))
+        dmg.add_damage(rounddown(extra_damage))
+        dmg.add_leth(rounddown(extra_leth))
 
         return dmg
 
