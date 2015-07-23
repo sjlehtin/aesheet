@@ -300,6 +300,8 @@ class AddSkillForm(RequestForm):
     # XXX Change this to use CharacterSkill as the model.
     def __init__(self, *args, **kwargs):
         super(AddSkillForm, self).__init__(*args, **kwargs)
+        if not self.request:
+            raise RuntimeError("request is required")
         queryset = self.item_queryset
         if self.instance.campaign:
             queryset = queryset.filter(
