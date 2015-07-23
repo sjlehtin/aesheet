@@ -46,6 +46,7 @@ class SkillFactory(factory.DjangoModelFactory):
 
     stat = "fit"
 
+
 class CharacterSkillFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.CharacterSkill
 
@@ -58,12 +59,31 @@ class EdgeFactory(factory.DjangoModelFactory):
     FACTORY_DJANGO_GET_OR_CREATE = ('name', )
 
 
+class EdgeSkillBonusFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.EdgeSkillBonus
+
+    edge_level = factory.SubFactory('sheet.factories.EdgeLevelFactory')
+    skill = factory.SubFactory(SkillFactory)
+    bonus = 15
+
+
 class EdgeLevelFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.EdgeLevel
 
     edge = factory.SubFactory(EdgeFactory)
     level = 0
     cost = level * .5 + 1
+
+    @factory.post_generation
+    def edge_skill_bonuses(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            for skill, bonus in extracted:
+                EdgeSkillBonusFactory(edge_level=self,
+                                      skill=SkillFactory(name=skill),
+                                      bonus=bonus)
 
 
 class CharacterEdgeFactory(factory.DjangoModelFactory):
