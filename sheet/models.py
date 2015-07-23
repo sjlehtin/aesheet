@@ -1272,6 +1272,7 @@ class BaseWeapon(ExportedModel):
         abstract = True
         ordering = ['name']
 
+
 class Weapon(BaseWeapon):
     """
     """
