@@ -302,11 +302,11 @@ class AddSkillForm(RequestForm):
         super(AddSkillForm, self).__init__(*args, **kwargs)
         if not self.request:
             raise RuntimeError("request is required")
-        queryset = self.item_queryset
+        queryset = self.item_queryset.all()
         if self.instance.campaign:
             queryset = queryset.filter(
                tech_level__in=self.instance.campaign.tech_levels.all())
-        self.fields['skill'] = forms.ModelChoiceField(queryset=queryset)
+        self.fields['skill'] = forms.ModelChoiceField(queryset=queryset.all())
         self.fields.keyOrder = ['skill', 'level']
 
     choices = range(0,8)
