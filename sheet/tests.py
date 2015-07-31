@@ -1342,16 +1342,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.assertEqual(sheet.edge_sp, 10)
         self.assertEqual(original + 10, sheet.character.total_sp)
 
-    def test_flaw_notes(self):
-        response = self.client.get(reverse('sheet.views.sheet_detail',
-                                           args=[2]))
-        self.assertNotContains(response, "Reduced tolerance to cold.")
 
-        sheet = Sheet.objects.get(pk=2)
-        self.add_edge(sheet.character, "Cold Sensitivity", 1)
-        response = self.client.get(reverse('sheet.views.sheet_detail',
-                                           args=[2]))
-        self.assertContains(response, "Reduced tolerance to cold.")
 
     def test_edge_notes(self):
         sheet = Sheet.objects.get(pk=2)
