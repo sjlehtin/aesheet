@@ -1541,7 +1541,7 @@ class LoggingTestCase(WebTest):
                             instance=ch)
         self.assertTrue(form.is_valid())
         form.save()
-        ch = Character.objects.get(pk=2)
+        ch = Character.objects.get(pk=self.sheet.character.pk)
         sk = ch.skills.filter(skill="Acting / Bluff")[0]
         self.assertEqual(sk.level, 2)
 
