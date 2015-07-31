@@ -44,14 +44,19 @@ class SkillFactory(factory.DjangoModelFactory):
     skill_cost_2 = 2
     skill_cost_3 = 3
 
+    type = "Combat"
     stat = "fit"
 
+    @factory.post_generation
+    def required_skills(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
 
-class CharacterSkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.CharacterSkill
-
-    skill = factory.SubFactory(SkillFactory)
-    level = 0
+        if extracted:
+            # A list of groups were passed in, use them
+            for skill in extracted:
+                self.required_skills.add(SkillFactory(name=skill))
 
 
 class EdgeFactory(factory.DjangoModelFactory):
@@ -126,6 +131,14 @@ class CharacterFactory(factory.DjangoModelFactory):
                     character=self,
                     edge=EdgeLevelFactory(edge=EdgeFactory(name=edge),
                                           level=level))
+
+
+class CharacterSkillFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = models.CharacterSkill
+
+    character = factory.SubFactory(CharacterFactory)
+    skill = factory.SubFactory(SkillFactory)
+    level = 0
 
 
 class SheetFactory(factory.DjangoModelFactory):
