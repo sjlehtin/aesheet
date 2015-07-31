@@ -99,7 +99,7 @@ class CharacterEdgeFactory(factory.DjangoModelFactory):
 
 class CharacterFactory(factory.DjangoModelFactory):
     FACTORY_FOR = models.Character
-    campaign = factory.SubFactory(CampaignFactory)
+    campaign = factory.SubFactory(CampaignFactory, tech_levels=("all", ))
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda xx: "char-{0}".format(xx))
     occupation = "Adventurer"
