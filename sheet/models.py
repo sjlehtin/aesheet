@@ -600,7 +600,7 @@ class Skill(ExportedModel):
         else:
             cost_at_this_level = self.skill_cost_3
 
-        if cost_at_this_level == None:
+        if cost_at_this_level is None:
             raise ValueError("Skill does not support level %s" % level)
         return cost_at_this_level + self.cost(level - 1)
 
