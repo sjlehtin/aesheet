@@ -1219,14 +1219,15 @@ class EdgeAndSkillHandlingTestCase(TestCase):
 
     def setUp(self):
         self.client.login(username="admin", password="admin")
+        self.sheet_url = reverse('sheet.views.sheet_detail',
+                                 args=[1])
 
     def test_adding_skill(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
         req_data = { 'add-skill-skill' : 'Weapon combat',
                      'add-skill-level' : '5'}
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
+        response = self.client.post(self.sheet_url, req_data)
+        self.assertRedirects(response, self.sheet_url)
+        response = self.client.get(self.sheet_url)
         self.assertContains(response, "Weapon combat")
         skills = response.context['char'].skills()[0]
         self.assertEquals(skills.skill.name, 'Weapon combat')
@@ -1234,22 +1235,20 @@ class EdgeAndSkillHandlingTestCase(TestCase):
 
     def test_required_skills_present(self):
         sheet = Sheet.objects.get(id=1)
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
         factories.CharacterSkillFactory(character=sheet.character,
                                         skill__name="Weapon combat")
         factories.CharacterSkillFactory(character=sheet.character,
                                         skill__name="Sword")
-        response = self.client.get(det_url)
+        response = self.client.get(self.sheet_url)
         self.assertNotContains(response, "Required skill Weapon "
                                "combat missing.")
 
     def test_required_skills_missing(self):
         sheet = Sheet.objects.get(id=1)
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
         factories.CharacterSkillFactory(character=sheet.character,
                                         skill__name="Martial arts expertise",
                                         level=4)
-        response = self.client.get(det_url)
+        response = self.client.get(self.sheet_url)
         self.assertTrue('Unarmed combat' in
                         response.context['char'].missing_skills.values())
 
@@ -1260,7 +1259,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         factories.CharacterSkillFactory(character=sheet.character,
                                         skill__name="Unarmed combat",
                                         level=4)
-        response = self.client.get(det_url)
+        response = self.client.get(self.sheet_url)
         self.assertTrue('Unarmed combat' not in
                         response.context['char'].missing_skills.values())
         unarmed = filter(lambda xx: xx.skill.name == "Unarmed combat",
@@ -1269,13 +1268,12 @@ class EdgeAndSkillHandlingTestCase(TestCase):
                          ["Unarmed combat"])
 
     def test_add_remove_edge(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
         req_data = { 'add-edge-edge' : '2'}
-        response = self.client.get(det_url)
+        response = self.client.get(self.sheet_url)
         self.assertContains(response, "No edges.")
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
+        response = self.client.post(self.sheet_url, req_data)
+        self.assertRedirects(response, self.sheet_url)
+        response = self.client.get(self.sheet_url)
         self.assertNotContains(response, "No edges.")
         ce = response.context['char'].edges()[0]
         self.assertEquals(ce.edge.edge.name, 'Toughness')
@@ -1288,10 +1286,10 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         req_data = { 'remove-form_id' : 'RemoveGeneric',
                      'remove-item_type' : 'CharacterEdge',
                      'remove-item' : ce.pk }
-        response = self.client.post(det_url, req_data)
+        response = self.client.post(self.sheet_url, req_data)
 
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
+        self.assertRedirects(response, self.sheet_url)
+        response = self.client.get(self.sheet_url)
         self.assertContains(response, "No edges.")
 
     def add_edge(self, character, edge_name, level=1):
@@ -1369,21 +1367,20 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         det_url = reverse('sheet.views.sheet_detail', args=[2])
         req_data = { 'skill-level-modify-skill_id' : cs.pk,
                      'skill-level-modify-function' : 'add' }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
         cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
                                         character__name="Yukaghir")
+        response = self.client.post(self.sheet_url, req_data)
+        self.assertRedirects(response, self.sheet_url)
         self.assertEqual(cs.level, 5)
 
     def test_decrease_skill_level(self):
         cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
                                         character__name="Yukaghir")
         self.assertEqual(cs.level, 4)
-        det_url = reverse('sheet.views.sheet_detail', args=[2])
         req_data = { 'skill-level-modify-skill_id' : cs.pk,
                      'skill-level-modify-function' : 'dec' }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
+        response = self.client.post(self.sheet_url, req_data)
+        self.assertRedirects(response, self.sheet_url)
         cs = CharacterSkill.objects.get(skill__name="Unarmed combat",
                                         character__name="Yukaghir")
         self.assertEqual(cs.level, 3)
@@ -1396,11 +1393,10 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         cs = CharacterSkill.objects.get(skill__name="Sword",
                                         character__name="Yukaghir")
         self.assertEqual(cs.level, 1)
-        det_url = reverse('sheet.views.sheet_detail', args=[2])
         req_data = { 'skill-level-modify-skill_id' : cs.pk,
                      'skill-level-modify-function' : 'dec' }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url) # XXX
+        response = self.client.post(self.sheet_url, req_data)
+        self.assertRedirects(response, self.sheet_url)
         cs = CharacterSkill.objects.get(skill__name="Sword",
                                         character__name="Yukaghir")
         self.assertEqual(cs.level, 1)
@@ -1416,7 +1412,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         response = self.client.get(reverse('sheet.views.sheet_detail',
                                            args=[1]))
         self.assertContains(response, "invalid skill level")
-
 
     def test_duplicated_skill_level(self):
         form = AddSkillForm(
