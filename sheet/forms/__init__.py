@@ -309,9 +309,9 @@ class AddSkillForm(RequestForm):
         self.fields['skill'] = forms.ModelChoiceField(queryset=queryset.all())
         self.fields.keyOrder = ['skill', 'level']
 
-    choices = range(0,8)
-    choices = zip(choices, choices)
-    level = forms.ChoiceField(choices=choices)
+    _level_choices = range(0,8)
+    _level_choices = zip(_level_choices, _level_choices)
+    level = forms.ChoiceField(choices=_level_choices)
 
     def clean_level(self):
         level = self.cleaned_data.get('level')
