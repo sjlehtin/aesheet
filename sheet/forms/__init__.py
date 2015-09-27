@@ -525,7 +525,14 @@ class CharacterSkillLevelModifyForm(RequestFormMixin, forms.Form):
 
     def save(self, commit=True):
         if self.new_level != self.instance.level:
+            self.instance.character.add_skill_log_entry(
+                self.instance.skill,
+                self.new_level,
+                request=self.request,
+                amount=self.new_level - self.instance.level)
+
             self.instance.level = self.new_level
+
             return self.instance.save()
         return self.instance
 

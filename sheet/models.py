@@ -515,6 +515,19 @@ class Character(models.Model):
         else:
             return False
 
+    def add_skill_log_entry(self, skill, level,
+                            request=None,
+                            amount=0, removed=False):
+        entry = CharacterLogEntry()
+        entry.character = self
+        entry.user = request.user if request else None
+        entry.entry_type = entry.SKILL
+        entry.skill = skill
+        entry.skill_level = level
+        entry.amount = amount
+        entry.removed = removed
+        entry.save()
+
 
 class Edge(ExportedModel):
     """
@@ -2327,6 +2340,8 @@ class CharacterLogEntry(models.Model):
                              "entry, input by the user.")
 
     field = models.CharField(max_length=64, blank=True)
+    # For skills, amount is non-zero if the level has been modified.  It is
+    # zero when the skill has been added or removed.
     amount = models.IntegerField(default=0)
 
     skill = models.ForeignKey(Skill, blank=True, null=True)
@@ -2350,7 +2365,19 @@ class CharacterLogEntry(models.Model):
             else:
                 return u"Changed %s." % (self.field)
         elif self.entry_type == self.SKILL:
-            return u"Added skill %s %d." % (self.skill, self.skill_level)
+            if self.amount < 0:
+                return u"Skill {skill} decreased to level {level}".format(
+                    skill=self.skill,
+                    level=self.skill_level)
+            elif self.amount > 0:
+                return u"Skill {skill} increased to level {level}".format(
+                    skill=self.skill,
+                    level=self.skill_level)
+            elif self.removed:
+                return u"Removed skill {skill} {level}.".format(
+                    skill=self.skill, level=self.skill_level)
+            else:
+                return u"Added skill %s %d." % (self.skill, self.skill_level)
         elif self.entry_type == self.NON_FIELD:
             return u"{0}".format(self.entry)
 

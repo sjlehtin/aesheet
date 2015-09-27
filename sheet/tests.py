@@ -1542,7 +1542,6 @@ class LoggingTestCase(WebTest):
         response = form.submit()
         self.assertRedirects(response, det_url)
 
-
     def test_added_skill(self):
 
         ch = Character.objects.get(pk=self.sheet.character.pk)
@@ -1560,13 +1559,50 @@ class LoggingTestCase(WebTest):
         self.assertEqual(entry.entry_type, CharacterLogEntry.SKILL)
         self.assertEqual(entry.skill.pk, "Acting / Bluff")
         self.assertEqual(entry.skill_level, 2)
-        self.assertTrue(unicode(entry))
+        self.assertEqual(u"Added skill Acting / Bluff 2.", unicode(entry))
 
     def test_removed_skill(self):
-        pass
+        det_url = reverse('sheet.views.sheet_detail', args=[self.sheet.pk])
+
+        cs = factories.CharacterSkillFactory(skill__name="Fencing",
+                                             level=2)
+        req_data = { 'remove-form_id' : 'RemoveGeneric',
+                     'remove-item_type' : 'CharacterSkill',
+                     'remove-item' : cs.pk,
+                     }
+        response = self.client.post(det_url, req_data)
+        self.assertRedirects(response, det_url)
+
+        entry = CharacterLogEntry.objects.latest()
+        self.assertIn(u"Removed skill Fencing 2.", unicode(entry))
 
     def test_change_skill_level(self):
-        pass
+        # "Weapon combat increased to level 3"
+        # "Weapon combat decreased to level 2"
+        cs = factories.CharacterSkillFactory(skill__name="Fencing",
+                                             level=2)
+        mod_form = forms.CharacterSkillLevelModifyForm(
+            {'function': 'add',
+            'skill_id': cs.pk},
+            request=self._get_request(),
+            instance=cs)
+        self.assertTrue(mod_form.is_valid())
+        mod_form.save()
+        entry = CharacterLogEntry.objects.latest()
+        self.assertIn(u"Skill Fencing increased to level 3", unicode(entry))
+
+        # Could do bundling of messages, if same skill touched many times during fifteen
+        # minutes.
+        mod_form = forms.CharacterSkillLevelModifyForm(
+            {'function': 'dec',
+            'skill_id': cs.pk},
+            request=self._get_request(),
+            instance=cs)
+        self.assertTrue(mod_form.is_valid())
+        mod_form.save()
+
+        entry = CharacterLogEntry.objects.latest()
+        self.assertIn(u"Skill Fencing decreased to level 2", unicode(entry))
 
     def test_added_edge(self):
         pass
@@ -1794,8 +1830,7 @@ class ImportExportPostgresSupport(TestCase):
         if (settings.DATABASES['default']['ENGINE'] ==
             "django.db.backends.postgresql_psycopg2"):
             cc = django.db.connection.cursor()
-            cc.execute("""
-            SELECT last_value FROM sheet_techlevel_id_seq""")
+            cc.execute("""SELECT last_value FROM sheet_techlevel_id_seq""")
             last_value = cc.fetchall()[0][0]
             self.assertEqual(last_value, new_value)
 

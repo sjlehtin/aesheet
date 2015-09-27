@@ -673,6 +673,10 @@ def process_sheet_change_request(request, sheet):
             sheet.miscellaneous_items.remove(item)
         elif item_type == "CharacterSkill":
             item = get_object_or_404(CharacterSkill, pk=item)
+            sheet.character.add_skill_log_entry(item.skill,
+                                                item.level,
+                                                request=request,
+                                                removed=True)
             item.delete()
         elif item_type == "CharacterEdge":
             item = get_object_or_404(CharacterEdge, pk=item)
