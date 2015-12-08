@@ -545,6 +545,10 @@ class Edge(ExportedModel):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+    class Meta:
+        ordering = ['name']
+
+
 SKILL_TYPES = [
     "Physical",
     "Combat",
