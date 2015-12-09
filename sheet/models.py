@@ -4,9 +4,8 @@ import django.contrib.auth as auth
 import math
 import logging
 from functools import wraps
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import itertools
-from django.utils.datastructures import SortedDict
 from django.db.models import Q
 
 
@@ -24,6 +23,7 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
+
 def roundup(dec):
     """
     Works like Excel ROUNDUP, rounds the number away from zero.
@@ -33,6 +33,7 @@ def roundup(dec):
     else:
         return int(math.ceil(dec))
 
+
 def rounddown(dec):
     """
     Works like Excel ROUNDDOWN, rounds the number toward zero.
@@ -41,6 +42,7 @@ def rounddown(dec):
         return int(math.ceil(dec))
     else:
         return int(math.floor(dec))
+
 
 class ExportedModel(models.Model):
     """
@@ -127,7 +129,7 @@ def get_sheets(user):
 
 
 def get_by_campaign(objects, get_character=lambda obj: obj):
-    items = SortedDict()
+    items = OrderedDict()
     objects = [(get_character(obj), obj) for obj in objects]
     objects.sort(key=lambda xx: xx[0].campaign.name)
     for (char, obj) in objects:
