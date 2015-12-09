@@ -536,6 +536,7 @@ class ArmorForm(RequestForm):
         queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=False))
     class Meta:
         model = sheet.models.Armor
+        fields = '__all__'
 
 
 class HelmForm(RequestForm):
@@ -543,6 +544,7 @@ class HelmForm(RequestForm):
         queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=True))
     class Meta:
         model = sheet.models.Armor
+        fields = '__all__'
 
 
 class BaseEditCharacterForm(RequestForm):
@@ -657,6 +659,7 @@ class CreateBaseFirearmForm(RequestForm):
 
     class Meta:
         model = sheet.models.BaseFirearm
+        fields = '__all__'
 
 
 class CopySheetForm(RequestFormMixin, forms.Form):
