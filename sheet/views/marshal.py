@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
-import django.forms.util
+from django.forms.utils import ErrorList
 import sheet.models
 import sheet.forms
 from django.conf import settings
@@ -342,7 +342,7 @@ def import_data(request):
             except (TypeError, ValueError, ValidationError), e:
                 logger.exception("failed.")
                 el = form._errors.setdefault('__all__',
-                                             django.forms.util.ErrorList())
+                                             ErrorList())
                 el.append(str(e))
     else:
         form = sheet.forms.ImportForm()
