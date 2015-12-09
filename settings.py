@@ -20,8 +20,6 @@ PRODUCTION = True if os.environ.get('PRODUCTION') else False
 LOGIN_URL = ROOT_URL + "accounts/login/"
 LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
-SOUTH_TESTS_MIGRATE = False
-
 BASEDIR = os.path.dirname(__file__)
 DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 
@@ -202,7 +200,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'widget_tweaks',
-    'south',
     'sheet',
     'profiling',
     'django.contrib.humanize',
