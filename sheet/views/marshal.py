@@ -234,10 +234,10 @@ def import_text(data):
                 if value:
                     try:
                         value = \
-                            field.related.parent_model.objects.get(pk=value)
-                    except field.related.parent_model.DoesNotExist:
+                            field.related.model.objects.get(pk=value)
+                    except field.related.model.DoesNotExist:
                         raise ValueError, "No matching %s with name %s." % (
-                            field.related.parent_model._meta.object_name, value)
+                            field.related.model._meta.object_name, value)
                 else:
                     value = None
             else:
