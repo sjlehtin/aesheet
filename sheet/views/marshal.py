@@ -387,6 +387,6 @@ def export_data(request, type):
         raise Http404, "%s is not a supported type." % type
     csv_data = csv_export(cls)
 
-    response = HttpResponse(csv_data, mimetype="text/csv")
+    response = HttpResponse(csv_data, content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
     return response
