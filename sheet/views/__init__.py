@@ -844,14 +844,16 @@ class BaseCreateView(FormSaveMixin, RequestMixin, CreateView):
     def get_form_class(self):
         if self.form_class:
             return self.form_class
-        return modelform_factory(self.model, form=sheet.forms.RequestForm)
+        return modelform_factory(self.model, form=sheet.forms.RequestForm,
+                                 fields="__all__")
 
 
 class BaseUpdateView(FormSaveMixin, RequestMixin, UpdateView):
     def get_form_class(self):
         if self.form_class:
             return self.form_class
-        return modelform_factory(self.model, form=sheet.forms.RequestForm)
+        return modelform_factory(self.model, form=sheet.forms.RequestForm,
+                                 fields="__all__")
 
 
 class AddWeaponView(BaseCreateView):
