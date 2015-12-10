@@ -40,7 +40,7 @@ if PRODUCTION:
     DEBUG_TOOLBAR_ENABLED = False
 else:
     DB_ENGINE = 'django.db.backends.sqlite3'
-    DB_NAME = os.path.join(os.path.dirname(__file__), 'db/sheet.db')
+    DB_NAME = os.path.join(os.path.dirname(__file__), 'sql.db')
     (USER, PASSWORD) = "", ""
     DEBUG_TOOLBAR_ENABLED = True
 
