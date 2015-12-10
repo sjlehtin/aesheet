@@ -1330,7 +1330,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         sheet = Sheet.objects.get(pk=self.sheet.pk)
         # Verify Acute Touch has an effect.
         self.assertEqual(sheet.eff_dex + 13,
-                         sheet.skills.get(skill__name="Surgery").check(sheet))
+                         sheet.skills.get(skill__name="Surgery").skill_check(sheet))
 
     def test_childhood_education_skill_mod(self):
         factories.EdgeLevelFactory(edge__name="Childhood Education", level=1)
@@ -2458,11 +2458,11 @@ class SheetViewTestCase(TestCase):
         skills = dict([(sk.skill_name, sk)
                        for sk in sheet_view.physical_skills()])
 
-        self.assertEqual(skills['Stealth'].check(), 22)
+        self.assertEqual(skills['Stealth'].skill_check(), 22)
         self.assertIsNone(skills['Stealth'].level())
         self.assertEqual(skills['Stealth'].cost(), 0)
 
-        self.assertEqual(skills['Concealment'].check(), 43)
+        self.assertEqual(skills['Concealment'].skill_check(), 43)
         self.assertEqual(skills['Concealment'].level(), 0)
         self.assertEqual(skills['Concealment'].cost(), 2)
         self.assertIsInstance(skills['Concealment'].remove_form(),
@@ -2473,8 +2473,8 @@ class SheetViewTestCase(TestCase):
                               sheet.forms.CharacterSkillLevelModifyForm)
 
         endurance = sheet_view.endurance()
-        self.assertEqual(endurance.check()['wil'], 53)
-        self.assertEqual(endurance.check()['fit'], 53)
+        self.assertEqual(endurance.skill_check()['wil'], 53)
+        self.assertEqual(endurance.skill_check()['fit'], 53)
         self.assertEqual(endurance.level(), 2)
         self.assertEqual(endurance.cost(), 3)
         self.assertIsInstance(endurance.remove_form(),
@@ -2485,7 +2485,7 @@ class SheetViewTestCase(TestCase):
                               sheet.forms.CharacterSkillLevelModifyForm)
 
         balance = sheet_view.balance()
-        self.assertEqual(balance.check()['ref'], 43)
-        self.assertEqual(balance.check()['mov'], 43)
+        self.assertEqual(balance.skill_check()['ref'], 43)
+        self.assertEqual(balance.skill_check()['mov'], 43)
         self.assertEqual(balance.level(), 0)
         self.assertEqual(balance.cost(), 0)

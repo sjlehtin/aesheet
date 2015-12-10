@@ -344,9 +344,9 @@ class SkillWrap(RemoveWrap):
         return CharacterSkillLevelModifyForm(instance=self.item,
                                              initial={'function': 'dec'},
                                              prefix="skill-level-modify")
-
+    # XXX rename
     def check(self):
-        return self.item.check(self.sheet)
+        return self.item.skill_check(self.sheet)
 
     def __unicode__(self):
         return unicode(self.item.skill)
@@ -428,7 +428,7 @@ class PhysicalSkill(SkillWrap):
                         self.sheet = sheet
                         self.base_skill = base_skill
 
-                    def check(self, sheet, stat=None):
+                    def skill_check(self, sheet, stat=None):
                         if not stat:
                             if self.base_skill:
                                 stat = self.base_skill.stat.lower()
@@ -452,9 +452,9 @@ class PhysicalSkill(SkillWrap):
         if self.stats:
             checks = {}
             for st in self.stats:
-                checks[st] = self.skill.check(self.sheet, stat=st)
+                checks[st] = self.skill.skill_check(self.sheet, stat=st)
         else:
-            checks = self.skill.check(self.sheet)
+            checks = self.skill.skill_check(self.sheet)
         return checks
 
     def formatted_checks(self):

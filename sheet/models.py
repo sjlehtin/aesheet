@@ -653,7 +653,7 @@ class CharacterSkill(models.Model):
         except ValueError:
             return "invalid skill level"
 
-    def check(self, sheet, stat=None):
+    def skill_check(self, sheet, stat=None):
         # XXX To better support skill checks, even if the character does not
         # have the skill, move this code to Sheet.
 
