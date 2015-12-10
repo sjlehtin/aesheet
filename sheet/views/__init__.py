@@ -705,9 +705,9 @@ def get_notes(character, filter_kwargs):
 
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
-                              .select_related('sheet__armor__base',
-                                              'sheet__armor__quality'
-                                              'sheet__helm', )
+                              .select_related('armor__base',
+                                              'armor__quality',
+                                              'helm', )
                               .prefetch_related(
         'spell_effects',
         'weapons__base',
