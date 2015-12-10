@@ -111,6 +111,9 @@ Priority list by JW:
 - free edges based on campaign (probably should think about race
   in this context, for FRP at least)
 
+- it should be really easy to bootstrap the sheet system.  There should be
+  some initial data, like tech-levels and campaigns.
+
 Minor:
 
 - adding missing skills (helps in just allowing inserting primary skills
