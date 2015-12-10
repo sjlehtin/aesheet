@@ -495,7 +495,11 @@ class SheetView(object):
                                         self._all_physical])
 
     def used_sp(self):
-        return sum([cs.cost() for cs in self._skills])
+        try:
+            return sum([cs.cost() for cs in self._skills])
+        # Invalid skill level.
+        except TypeError:
+            return 0
 
     def base_stats(self):
         ll = []
