@@ -57,7 +57,7 @@ class ExportedModel(models.Model):
     @classmethod
     def get_exported_fields(cls):
         names = [field.name for field in cls._meta.fields]
-        names.extend(list(set(cls._meta.get_all_field_names()
+        names.extend(list(set([ff.name for ff in cls._meta.get_fields()]
                               ).difference(set(names))))
         if "edge" in names:
             names.remove("edge")
