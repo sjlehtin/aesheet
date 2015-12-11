@@ -8,8 +8,8 @@ marshal_urls = patterns(
     'sheet.views.marshal',
 
     url(r'^import/$', 'import_data', name='import'),
-    url(r'^export/(?P<type>\w+)/$', 'export_data', name='export'),
-    url(r'^browse/(?P<type>\w+)/$', 'browse', name='browse'),
+    url(r'^export/(?P<data_type>\w+)/$', 'export_data', name='export'),
+    url(r'^browse/(?P<data_type>\w+)/$', 'browse', name='browse'),
 )
 
 urlpatterns = patterns(

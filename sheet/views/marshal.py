@@ -49,17 +49,17 @@ def get_data_rows(results, fields):
         yield [get_field_value(field) for field in fields]
 
 
-def browse(request, type):
+def browse(request, data_type):
     try:
-        cls = getattr(sheet.models, type)
+        cls = getattr(sheet.models, data_type)
     except AttributeError, e:
-        raise Http404, "%s is not a supported type." % type
+        raise Http404, "%s is not a supported type." % data_type
     results = cls.objects.all()
     fields = cls.get_exported_fields()
     rows = get_data_rows(results, fields)
     fields = [" ".join(ff.split('_')) for ff in fields]
     return render_to_response('sheet/browse.html',
-                              RequestContext(request, {'type': type,
+                              RequestContext(request, {'type': data_type,
                                                        'header': fields,
                                                        'rows': rows}))
 
@@ -380,13 +380,13 @@ def csv_export(exported_type):
     return f.getvalue()
 
 
-def export_data(request, type):
+def export_data(request, data_type):
     try:
-        cls = getattr(sheet.models, type)
+        cls = getattr(sheet.models, data_type)
     except AttributeError, e:
-        raise Http404, "%s is not a supported type." % type
+        raise Http404, "%s is not a supported type." % data_type
     csv_data = csv_export(cls)
 
     response = HttpResponse(csv_data, content_type="text/csv")
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % data_type
     return response
