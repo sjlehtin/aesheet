@@ -1731,6 +1731,12 @@ class ImportExport(TestCase):
             })
         self.assertRedirects(response, reverse("import"))
 
+    def test_import_export_functions(self):
+        for data_type in sheet.models.EXPORTABLE_MODELS:
+            logger.info("Import test for %s", data_type)
+            exported_data = marshal.csv_export(getattr(sheet.models, data_type))
+            marshal.import_text(exported_data)
+
     def test_import_export(self):
         for data_type in sheet.models.EXPORTABLE_MODELS:
             logger.info("Import test for %s", data_type)
