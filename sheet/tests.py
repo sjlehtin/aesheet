@@ -1752,10 +1752,10 @@ class ImportExport(TestCase):
                     else:
                         yield ll + "\n"
 
-            response = self.client.post(reverse("import"),
+            post_response = self.client.post(reverse("import"),
                                         { "import_data":
                                           ''.join(mangle(response.content)) })
-            self.assertRedirects(response, reverse("import"))
+            self.assertRedirects(post_response, reverse("import"))
 
     def test_export_unicode(self):
         unicode_word = u'βαλλίζω'
