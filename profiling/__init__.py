@@ -1,2 +1,0 @@
-from profiling import ProfileMiddleware
-from memory_prof import MemoryProfileMiddleware

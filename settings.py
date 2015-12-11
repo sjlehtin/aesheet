@@ -159,8 +159,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'profiling.ProfileMiddleware',
-    'profiling.MemoryProfileMiddleware',
 )
 
 if DEBUG_TOOLBAR_ENABLED:
@@ -201,7 +199,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'widget_tweaks',
     'sheet',
-    'profiling',
     'django.contrib.humanize',
     'rest_framework',
 )
