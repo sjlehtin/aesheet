@@ -1931,11 +1931,11 @@ class Sheet(models.Model):
             penalty_multiplier = 0
             for ii in iter:
                 penalty_multiplier += ii
-                yield (self._counter_penalty(sweep_bonus +
+                yield int(round(self._counter_penalty(sweep_bonus +
                                              penalty_multiplier * klass,
                                              self.eff_fit) +
                        autofire_penalty +
-                       check)
+                       check))
 
         return [Sweep(rounds=5, checks=list(burst_check(
                     [0, 2, 5, 10], 5))),
