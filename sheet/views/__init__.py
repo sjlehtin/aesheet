@@ -161,11 +161,9 @@ BUGS = """
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
-import django.http
-from django.template import RequestContext
 from sheet.models import *
 from sheet.forms import *
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import UpdateView, CreateView, FormView
@@ -727,7 +725,7 @@ def sheet_detail(request, sheet_id=None):
         'character__edges__edge__skill_bonuses'),
                               pk=sheet_id)
     if not sheet.character.access_allowed(request.user):
-        raise django.core.exceptions.PermissionDenied
+        raise PermissionDenied
 
     forms = {}
 
@@ -891,7 +889,7 @@ class EditCharacterView(BaseUpdateView):
     def get_object(self, queryset=None):
         object = super(EditCharacterView, self).get_object(queryset)
         if not object.access_allowed(self.request.user):
-            raise django.core.exceptions.PermissionDenied
+            raise PermissionDenied
         return object
 
     def get_form_kwargs(self):
@@ -939,7 +937,7 @@ class EditSheetView(BaseUpdateView):
     def get_object(self, queryset=None):
         object = super(EditSheetView, self).get_object(queryset)
         if not object.character.access_allowed(self.request.user):
-            raise django.core.exceptions.PermissionDenied
+            raise PermissionDenied
         return object
 
     def get_success_url(self):
