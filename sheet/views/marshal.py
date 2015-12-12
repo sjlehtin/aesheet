@@ -1,6 +1,6 @@
 import csv
 import StringIO
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.db.models.fields import FieldDoesNotExist
 import django.db.models
 from django.contrib import messages
@@ -58,10 +58,10 @@ def browse(request, data_type):
     fields = cls.get_exported_fields()
     rows = get_data_rows(results, fields)
     fields = [" ".join(ff.split('_')) for ff in fields]
-    return render_to_response('sheet/browse.html',
-                              RequestContext(request, {'type': data_type,
-                                                       'header': fields,
-                                                       'rows': rows}))
+    return render(request, 'sheet/browse.html',
+                  {'type': data_type,
+                   'header': fields,
+                   'rows': rows})
 
 
 def update_id_sequence(model_class):
@@ -355,10 +355,9 @@ def import_data(request):
         item['fields'] = cls.get_exported_fields()
         types.append(item)
 
-    return render_to_response('sheet/import_data.html',
-                              RequestContext(request,
-                                             {'types': types,
-                                              'import_form': form}))
+    return render(request, 'sheet/import_data.html',
+                  {'types': types,
+                   'import_form': form})
 
 
 def csv_export(exported_type):

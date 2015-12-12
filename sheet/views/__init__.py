@@ -159,7 +159,7 @@ BUGS = """
 + Rapid archery affects thrown weapons, crossbows and firearms.
 """
 
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 import django.http
 from django.template import RequestContext
@@ -183,17 +183,13 @@ logger = logging.getLogger(__name__)
 
 
 def characters_index(request):
-    return render_to_response('sheet/characters_index.html',
-                              {'campaigns':
-                                   Character.get_by_campaign(request.user)},
-                              context_instance=RequestContext(request))
+    return render(request, 'sheet/characters_index.html',
+                  {'campaigns': Character.get_by_campaign(request.user)})
 
 
 def sheets_index(request):
-    return render_to_response('sheet/sheets_index.html',
-                              {'campaigns':
-                                   Sheet.get_by_campaign(request.user)},
-                              context_instance=RequestContext(request))
+    return render(request, 'sheet/sheets_index.html',
+                  {'campaigns': Sheet.get_by_campaign(request.user)})
 
 
 class GenWrapper(object):
@@ -804,8 +800,8 @@ def sheet_detail(request, sheet_id=None):
         if not should_change:
             should_change = process_sheet_change_request(request,
                                                          sheet)
-        # XXX more complex forms need to be passed back to
-        # render_to_response, below.
+        # More complex forms need to be passed back to
+        # render(), below.
         if should_change:
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
@@ -816,8 +812,7 @@ def sheet_detail(request, sheet_id=None):
                                       for wpn in sheet.firearms.all()]),
     }
     c.update(forms)
-    return render_to_response('sheet/sheet_detail.html',
-                              RequestContext(request, c))
+    return render(request, 'sheet/sheet_detail.html', c)
 
 
 class FormSaveMixin(object):
@@ -1047,9 +1042,8 @@ def version_history(request):
     proc = subprocess.Popen(['git', 'log'], stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             cwd=os.path.dirname(__file__))
-    return render_to_response('sheet/changelog.html',
-                              RequestContext(request,
-                                             {'log': logiter(proc.stdout)}))
+    return render(request, 'sheet/changelog.html',
+                  {'log': logiter(proc.stdout)})
 
 
 class TODOView(TemplateView):
