@@ -1,6 +1,7 @@
 import itertools
 from django import template
 from sheet.models import rounddown
+from django.utils.html import format_html, mark_safe
 
 register = template.Library()
 
@@ -15,7 +16,7 @@ def render_armor(armor, loc_desc):
         value = "%s%s" % ("-" if value < 0 else "", rounddown(abs(value)))
         descr.append(unicode(value))
 
-    return "<td>" + "</td><td>".join(descr) + "</td>"
+    return format_html("<td>{}</td>", mark_safe("</td><td>".join(descr)))
 
 
 @register.simple_tag
@@ -82,4 +83,4 @@ def render_burst_fire(weapon):
             out.append("<td>{check}</td>".format(check=check if check else ""))
         out.append("</tr>")
     out.append("</tbody>")
-    return "\n".join(out)
+    return mark_safe("\n".join(out))
