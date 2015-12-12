@@ -16,7 +16,7 @@ from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkillForm, AddXPForm
 import sheet.forms as forms
-import sheet.views
+import sheet.views as views
 from sheet.views import marshal
 import sheet.models
 from django_webtest import WebTest
@@ -255,7 +255,7 @@ class ItemHandlingTestCase(TestCase):
     def add_weapon_and_verify(self, weapon_template, quality, weapon,
                               prefix="add-weapon", accessor=None,
                               sheet_id=1):
-        det_url = reverse('sheet.views.sheet_detail', args=[sheet_id])
+        det_url = reverse(views.sheet_detail, args=[sheet_id])
         req_data = {'%s-item_template' % prefix: weapon_template,
                     '%s-item_quality' % prefix: quality}
         response = self.client.post(det_url, req_data)
@@ -284,7 +284,7 @@ class ItemHandlingTestCase(TestCase):
                                           sheet_id=3)
 
     def test_add_weapon(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        det_url = reverse(views.sheet_detail, args=[1])
         self.assertContains(self.client.get(det_url), "No weapons")
         response = self.add_weapon_and_verify("Greatsword, 2h", "L1",
                                               "Greatsword L1")
@@ -293,7 +293,7 @@ class ItemHandlingTestCase(TestCase):
         self.add_weapon_and_verify("Whip", "normal", "Whip")
 
     def test_add_ranged_weapon(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        det_url = reverse(views.sheet_detail, args=[1])
         self.assertContains(self.client.get(det_url), "No ranged weapons")
         response = self.add_ranged_weapon_and_verify("Javelin", "L1",
                                                      "Javelin L1")
@@ -314,7 +314,7 @@ class ItemHandlingTestCase(TestCase):
                                           [char.helm().name])
 
     def test_add_armor(self):
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[1]))
         self.assertContains(response, "No armor.")
         self.assertContains(response, "No helmet.")
@@ -330,7 +330,7 @@ class ItemHandlingTestCase(TestCase):
                                  "Basinet wfa L3")
 
     def test_add_remove_weapon(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        det_url = reverse(views.sheet_detail, args=[1])
         response = self.client.get(det_url)
         self.assertContains(response, "No weapons.")
         req_data = { 'add-existing-weapon-item' :
@@ -362,7 +362,7 @@ class ItemHandlingTestCase(TestCase):
 
 
     def test_add_remove_armor(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        det_url = reverse(views.sheet_detail, args=[1])
 
         hh = Armor.objects.get(name='Basinet wfa L5')
         # Add helmet.
@@ -406,7 +406,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertContains(response, "No armor.")
 
     def test_add_remove_effect(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[1])
+        det_url = reverse(views.sheet_detail, args=[1])
         req_data = { 'add-spell-effect-effect' : 'Bull\'s strength L5' }
         response = self.client.get(det_url)
 
@@ -427,7 +427,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertContains(response, "No spell effects.")
 
     def test_weapon_properties(self):
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                    args=[2]))
         weapon = response.context['char'].weapons()[0]
 
@@ -441,7 +441,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertEqual(weapon.bypass, -2)
 
     def test_armor_protection_level(self):
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[2]))
         self.assertEqual(response.context['char'].armor().armor_t_pl, 3)
         self.assertEqual(response.context['char'].helm().armor_h_pl, 2)
@@ -454,7 +454,7 @@ class ItemHandlingTestCase(TestCase):
         factories.BaseFirearmFactory(name="Glock 19",
                                      ammunition_types=('9Pb', '9Pb+'))
 
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[1]))
         self.assertNotContains(response, "No firearms.",
                                msg_prefix="FRP character sheets should not "
@@ -466,7 +466,7 @@ class ItemHandlingTestCase(TestCase):
         sheet = Sheet.objects.get(pk=3)
         self.assertTrue(sheet.character.campaign.has_firearms)
 
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[3]))
         self.assertContains(response, "No firearms.")
 
@@ -1225,7 +1225,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.admin = factories.UserFactory(username="admin")
         self.sheet = factories.SheetFactory()
         self.assertTrue(self.client.login(username="admin", password="foobar"))
-        self.sheet_url = reverse('sheet.views.sheet_detail',
+        self.sheet_url = reverse(views.sheet_detail,
                                  args=[self.sheet.pk])
 
     def _get_request(self):
@@ -1364,7 +1364,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
 
         self.add_edge(self.sheet.character, "Superior Endurance")
 
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[self.sheet.pk]))
         self.assertContains(response, "Recover AC penalty")
 
@@ -1423,7 +1423,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         # Add a skill with a known invalid level.
         self.add_skill(self.sheet.character, skill.name, 2)
 
-        response = self.client.get(reverse('sheet.views.sheet_detail',
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[self.sheet.pk]))
         self.assertContains(response, "invalid skill level")
 
@@ -1461,7 +1461,7 @@ class LoggingTestCase(WebTest):
         return post
 
     def test_stat_changes(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[self.sheet.pk])
+        det_url = reverse(views.sheet_detail, args=[self.sheet.pk])
         req_data = { 'stat-modify-function' : 'add',
                      'stat-modify-stat' : 'cur_fit' }
         response = self.client.post(det_url, req_data)
@@ -1562,7 +1562,7 @@ class LoggingTestCase(WebTest):
         self.assertEqual(u"Added skill Acting / Bluff 2.", unicode(entry))
 
     def test_removed_skill(self):
-        det_url = reverse('sheet.views.sheet_detail', args=[self.sheet.pk])
+        det_url = reverse(views.sheet_detail, args=[self.sheet.pk])
 
         cs = factories.CharacterSkillFactory(skill__name="Fencing",
                                              level=2)
@@ -1670,8 +1670,7 @@ class Views(WebTest):
         form['type'] = "enhancement"
 
         response = self.client.post(det_url, dict(form.submit_fields()))
-        self.assertRedirects(response,
-                             reverse(sheet.views.sheets_index))
+        self.assertRedirects(response, reverse(views.sheets_index))
         eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
         self.assertEqual(eff.fit, 40)
 
@@ -1850,7 +1849,7 @@ class TechLevelTestCase(TestCase):
 
     def verify_character(self, sheet_id, frp_items, onek_items,
                          twok_items, threek_items):
-        response = self.client.get(reverse(sheet.views.sheet_detail,
+        response = self.client.get(reverse(views.sheet_detail,
                                            args=[sheet_id]))
         add_skill = response.context['add_skill_form']
         self.assertEqual(add_skill.fields['skill'].queryset.filter(
@@ -2450,7 +2449,7 @@ class SheetViewTestCase(TestCase):
                                         skill__name="Handguns")
         factories.CharacterSkillFactory(character=char_sheet.character,
                                         skill__name="Liberal arts")
-        sheet_view = sheet.views.SheetView(char_sheet)
+        sheet_view = views.SheetView(char_sheet)
 
         costs = sum([skill.cost() for skill in sheet_view.skills()])
         costs += sum([skill.cost() for skill in sheet_view.physical_skills()])
