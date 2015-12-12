@@ -4,7 +4,6 @@ import os
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Sami J. Lehtinen', 'sjl@iki.fi'),
@@ -140,18 +139,6 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'wDbImXEkn/v9oAnEjxquj/3u9DY'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS += (
-    "context_processors.variables",
-    "django.core.context_processors.request",
-    )
-
 MIDDLEWARE_CLASSES = (
     'loginreqd.RequireLoginMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -171,13 +158,18 @@ ROOT_URLCONF = 'urls'
 
 import sys
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or
-    # "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(__file__), "templates"),
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(os.path.dirname(__file__), "templates"),],
+        'APP_DIRS': True,
+        'OPTIONS': {'context_processors':
+                        TEMPLATE_CONTEXT_PROCESSORS +
+                        ["context_processors.variables",
+                         "django.template.context_processors.request",],
+                     }
+    },
+]
 
 LOGIN_REQUIRED_URLS = (
     r'(.*)$',
