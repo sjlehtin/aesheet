@@ -3,9 +3,9 @@ import StringIO
 from django.shortcuts import render
 from django.db.models.fields import FieldDoesNotExist
 import django.db.models
+import django.db.models.fields.related
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.forms.utils import ErrorList
@@ -80,7 +80,7 @@ def update_id_sequence(model_class):
             "django.db.backends.postgresql_psycopg2"):
 
         try:
-            if model_class._meta.get_field_by_name('id'):
+            if model_class._meta.get_field('id'):
                 # The operation should only be performed for models with a
                 # serial id as the primary key.
                 cc = django.db.connection.cursor()
@@ -212,8 +212,7 @@ def import_text(data):
                     field_name, modelcls.__class__.__name__))
                 continue
             try:
-                (field, _, direct, m2m) = \
-                    modelcls._meta.get_field_by_name(field_name)
+                field = modelcls._meta.get_field(field_name)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
 
@@ -234,10 +233,10 @@ def import_text(data):
                 if value:
                     try:
                         value = \
-                            field.related.model.objects.get(pk=value)
-                    except field.related.model.DoesNotExist:
+                            field.remote_field.model.objects.get(pk=value)
+                    except field.remote_field.model.DoesNotExist:
                         raise ValueError, "No matching %s with name %s." % (
-                            field.related.model._meta.object_name, value)
+                            field.remote_field.model._meta.object_name, value)
                 else:
                     value = None
             else:
