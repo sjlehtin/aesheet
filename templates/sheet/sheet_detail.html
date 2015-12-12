@@ -49,7 +49,7 @@
 
 <div class="stats">
 
-{% url "sheet.views.sheet_detail" char.id as act %}
+{% url "sheet_detail" char.id as act %}
 
 <table class="base">
 {% for stat in char.base_stats %}

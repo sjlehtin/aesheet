@@ -33,10 +33,10 @@
 
           <div class="collapse navbar-collapse" id="collapsible-navbar">
         <ul class="nav navbar-nav">
-        {% url "sheet.views.sheets_index" as sheets_url %}
-            {% url "sheet.views.characters_index" as chars_url%}
+        {% url "sheets_index" as sheets_url %}
+            {% url "characters_index" as chars_url%}
             {% url "import" as import_url %}
-            {% url "sheet.views.version_history" as history_url %}
+            {% url "version_history" as history_url %}
             {% url "todo" as todo_url %}
             <li class="{% active request sheets_url %}">
                 <a href="{{ sheets_url }}">Sheets</a></li>
