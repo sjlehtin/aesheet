@@ -1691,6 +1691,20 @@ class ImportExport(TestCase):
                 self.assertEqual(rr[required_skills_index], "Unarmed combat")
                 break
 
+        # Missing a skill should be an error.
+        response = self.client.post(det_url, {
+            'import_data' :
+            "Skill\n"
+            "name,tech_level,description,notes,can_be_defaulted,"
+            "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
+            "skill_cost_3,type,stat,required_edges,required_skills\n"
+            "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
+            "Unarmed combat|Surgery",
+            })
+        self.assertContains(response, "Requirement `Surgery")
+
+        factories.SkillFactory(name="Surgery")
+
         response = self.client.post(det_url, {
             'import_data' :
             "Skill\n"
