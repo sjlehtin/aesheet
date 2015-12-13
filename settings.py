@@ -3,8 +3,6 @@
 import os
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
-DEBUG = True
-
 ADMINS = (
     ('Sami J. Lehtinen', 'sjl@iki.fi'),
 )
@@ -14,13 +12,18 @@ MANAGERS = ADMINS
 ROOT_URL = os.environ.get('ROOT_URL')
 if not ROOT_URL:
     ROOT_URL = "/"
-PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
 LOGIN_URL = ROOT_URL + "accounts/login/"
 LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
-BASEDIR = os.path.dirname(__file__)
 DBHOST = os.getenv("DBHOST", default='127.0.0.1')
+
+ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org"]
+
+BASEDIR = os.path.dirname(__file__)
+PRODUCTION = os.path.exists(os.path.join(BASEDIR, "auth"))
+if os.environ.has_key('PRODUCTION'):
+    PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
 if PRODUCTION:
 
@@ -36,12 +39,14 @@ if PRODUCTION:
     f = open(os.path.join(BASEDIR, "auth"), "r")
     auth_details = f.read()
     (USER, PASSWORD) = auth_details.strip().split()
+    DEBUG = False
     DEBUG_TOOLBAR_ENABLED = False
 else:
     DB_ENGINE = 'django.db.backends.sqlite3'
     DB_NAME = os.path.join(os.path.dirname(__file__), 'sql.db')
     (USER, PASSWORD) = "", ""
     DEBUG_TOOLBAR_ENABLED = True
+    DEBUG = True
 
 val = os.getenv('DEBUG_TOOLBAR')
 if val is not None:
