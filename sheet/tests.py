@@ -1664,11 +1664,12 @@ class Views(WebTest):
 
 
 class ImportExport(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills", "campaigns",
-                "armor"]
-
     def setUp(self):
-        self.assertTrue(self.client.login(username="admin", password="admin"))
+        self.admin = factories.UserFactory(username='admin')
+
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
+        factories.SkillFactory(name="Unarmed combat")
+        factories.BaseFirearmFactory(name="Glock 19")
 
     def test_add_new_skill_with_required_skills(self):
         det_url = reverse("import")
