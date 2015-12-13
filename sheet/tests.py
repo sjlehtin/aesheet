@@ -1733,30 +1733,36 @@ class ImportExport(TestCase):
         self.assertRedirects(response, reverse("import"))
 
     def test_import_export_functions(self):
+        # More data is needed for a meaningful test, for this and the following.
+        # Whenever a new exported type is added, samples of it should be added
+        # here, as well.
         for data_type in sheet.models.EXPORTABLE_MODELS:
             logger.info("Import test for %s", data_type)
             exported_data = marshal.csv_export(getattr(sheet.models, data_type))
             marshal.import_text(exported_data)
 
-    def test_import_export(self):
-        for data_type in sheet.models.EXPORTABLE_MODELS:
-            logger.info("Import test for %s", data_type)
-            response = self.client.get(reverse("export", args=[data_type]))
-            self.assertIn("attachment", response.get('Content-Disposition'))
-            self.assertContains(response, data_type)
-            def mangle(data):
-                for index, ll in enumerate(data.splitlines()):
-                    if index >= 2:
-                        yield ll + "," + "\n"
-                    elif index == 1:
-                        yield ll + ",edgelevel" + "\n"
-                    else:
-                        yield ll + "\n"
+    def test_import_export_views(self):
+        # This is a wider system test, testing the whole stack, contrary to the
+        # previous test.
+        data_type = "BaseFirearm"
 
-            post_response = self.client.post(reverse("import"),
-                                        { "import_data":
-                                          ''.join(mangle(response.content)) })
-            self.assertRedirects(post_response, reverse("import"))
+        logger.info("Import test for %s", data_type)
+        response = self.client.get(reverse("export", args=[data_type]))
+        self.assertIn("attachment", response.get('Content-Disposition'))
+        self.assertContains(response, data_type)
+        def mangle(data):
+            for index, ll in enumerate(data.splitlines()):
+                if index >= 2:
+                    yield ll + "," + "\n"
+                elif index == 1:
+                    yield ll + ",edgelevel" + "\n"
+                else:
+                    yield ll + "\n"
+
+        post_response = self.client.post(reverse("import"),
+                                    { "import_data":
+                                      ''.join(mangle(response.content)) })
+        self.assertRedirects(post_response, reverse("import"))
 
     def test_export_unicode(self):
         unicode_word = u'βαλλίζω'
