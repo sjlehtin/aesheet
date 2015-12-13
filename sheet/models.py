@@ -613,6 +613,10 @@ class Skill(ExportedModel):
 
     stat = models.CharField(max_length=64, choices=STAT_TYPES)
 
+    def clean_fields(self, exclude=None):
+        self.stat = self.stat.upper()
+        super(Skill, self).clean_fields(exclude=exclude)
+
     def cost(self, level):
         if level == 0:
             if not self.skill_cost_0:
