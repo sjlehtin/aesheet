@@ -1184,7 +1184,9 @@ class FirearmImportExportTestcase(TestCase):
         idx = header.index("ammunition_types")
         self.assertGreaterEqual(idx, 0, msg="Required column should be found")
         # Correct ammunition_types should be available.
-        self.assertEqual(data_row[idx], "9Pb|9Pb+")
+        # "9Pb|9Pb+" or "9Pb+|9Pb"
+        self.assertListEqual(sorted(["9Pb", "9Pb+"]),
+                             sorted(data_row[idx].split('|')))
 
     def test_import_ammunition(self):
         marshal.import_text(self.ammo_csv_data)
