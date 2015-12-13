@@ -95,7 +95,12 @@ class TechLevel(ExportedModel):
                 "ammunition", "id"]
 
 
-class Campaign(models.Model):
+class Campaign(ExportedModel):
+    """
+    Campaign is the world setting for the characters.
+    """
+    objects = NameManager()
+
     name = models.CharField(max_length=10, unique=True)
     tech_levels = models.ManyToManyField(TechLevel)
 
@@ -104,6 +109,10 @@ class Campaign(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def dont_export(cls):
+        return ["character", "id"]
 
 
 class CampaignItem(object):
