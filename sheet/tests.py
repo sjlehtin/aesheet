@@ -1637,20 +1637,6 @@ class AddXpTestCase(TestCase):
         self.assertEqual(entry.field, "total_xp")
 
 
-class ModelBasicsTestCase(TestCase):
-    fixtures = ["user", "char", "sheet", "edges", "basic_skills",
-                "assigned_edges", "armor", "campaigns"]
-
-    def test_basic_stats(self):
-        ss = Sheet.objects.get(pk=1)
-        self.assertEqual(ss.character.edge_level('Toughness'), 2)
-        sta = ss.stamina
-        body = ss.body
-        mana = ss.mana
-        # XXX the above just checks that accessing the values does not cause
-        # exceptions in the property handling.
-
-
 class Views(WebTest):
     fixtures = ["campaigns", "user", "char", "sheet", "armor",
                 "edges", "basic_skills"]
