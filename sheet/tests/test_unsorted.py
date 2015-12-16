@@ -2,8 +2,6 @@
 
 from __future__ import division
 
-import csv
-import StringIO
 import logging
 import itertools
 from collections import namedtuple
@@ -18,13 +16,11 @@ from sheet.models import CharacterLogEntry
 from sheet.forms import AddSkillForm, AddXPForm
 import sheet.forms as forms
 import sheet.views as views
-from sheet.views import marshal
 import sheet.models
 from django_webtest import WebTest
 import django.http
 import sheet.factories as factories
 import django.db
-from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
