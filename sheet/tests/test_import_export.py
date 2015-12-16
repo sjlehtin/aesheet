@@ -272,5 +272,3 @@ class FirearmImportExportTestcase(TestCase):
 
         idx = header.index("id")
         self.assertGreaterEqual(idx, 0, msg="Required column should be found")
-        # Correct ammunition_types should be available.
-        self.assertEqual(data_row[idx], "1")
