@@ -1182,14 +1182,14 @@ class AddXpTestCase(TestCase):
 
 
 class Views(WebTest):
-    fixtures = ["campaigns", "user", "char", "sheet", "armor",
-                "edges", "basic_skills"]
-
     def setUp(self):
-        self.assertTrue(self.client.login(username="admin", password="admin"))
+        factories.UserFactory(username="admin")
+        self.character = factories.CharacterFactory(occupation="Priest")
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
 
     def testViewCharacter(self):
-        response = self.client.get("/characters/edit_char/2/")
+        response = self.client.get("/characters/edit_char/{}/".format(
+                self.character.pk))
         self.assertContains(response, "Priest")
 
     def testNewSpellEffect(self):
