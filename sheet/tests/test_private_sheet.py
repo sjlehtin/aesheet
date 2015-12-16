@@ -55,7 +55,7 @@ class PrivateSheetTestCase(TestCase):
             self.sheet.character.private = True
             self.sheet.character.save()
 
-        sheet_url = reverse('edit_sheet', args=(self.sheet.character.id, ))
+        sheet_url = reverse('edit_sheet', args=(self.sheet.id, ))
         self.check_view_access(url=sheet_url,
                                others_restricted=others_restricted)
 
@@ -66,7 +66,7 @@ class PrivateSheetTestCase(TestCase):
         if others_restricted:
             self.sheet.character.private = True
             self.sheet.character.save()
-        sheet_url = reverse('sheet_detail', args=(self.sheet.character.id, ))
+        sheet_url = reverse('sheet_detail', args=(self.sheet.id, ))
         self.check_view_access(url=sheet_url,
                                others_restricted=others_restricted)
 
