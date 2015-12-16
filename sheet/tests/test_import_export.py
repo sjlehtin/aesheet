@@ -15,6 +15,8 @@ import django.http
 import sheet.factories as factories
 import django.db
 from django.conf import settings
+import csv
+import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -204,3 +206,71 @@ class ImportExportPostgresSupport(TestCase):
             self.assertEqual(last_value, new_value)
 
 
+class FirearmImportExportTestcase(TestCase):
+    firearm_csv_data = """\
+"BaseFirearm",,,,,,,,,,,,,,,,,,,,
+"name","description","notes","tech_level","draw_initiative","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
+"Glock 19",,,"2K",-3,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
+
+"""
+
+    ammo_csv_data = """\
+"Ammunition",,,,,,,,,,
+"id","num_dice","dice","extra_damage","leth","plus_leth","label","bullet_type","tech_level","weight","velocity","bypass"
+,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400,0
+
+"""
+
+    def setUp(self):
+        factories.TechLevelFactory(name="2K")
+        factories.SkillFactory(name="Handguns", tech_level__name="2K")
+
+    def test_import_firearms(self):
+        marshal.import_text(self.firearm_csv_data)
+        firearm = sheet.models.BaseFirearm.objects.get(name="Glock 19")
+        # Import should create the ammunition types.
+        self.assertListEqual(sorted(["9Pb", "9Pb+"]),
+                             sorted(firearm.get_ammunition_types()))
+
+    def test_export_firearms(self):
+        marshal.import_text(self.firearm_csv_data)
+
+        csv_data = marshal.csv_export(sheet.models.BaseFirearm)
+        reader = csv.reader(StringIO.StringIO(csv_data))
+        data_type = reader.next()
+        self.assertEqual(data_type[0], "BaseFirearm")
+
+        header = reader.next()
+        data_row = reader.next()
+        idx = header.index("ammunition_types")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        # "9Pb|9Pb+" or "9Pb+|9Pb"
+        self.assertListEqual(sorted(["9Pb", "9Pb+"]),
+                             sorted(data_row[idx].split('|')))
+
+    def test_import_ammunition(self):
+        marshal.import_text(self.ammo_csv_data)
+        ammo = sheet.models.Ammunition.objects.filter(label='9Pb+')
+        self.assertEqual(ammo[0].label, "9Pb+")
+
+    def test_export_ammunition(self):
+        marshal.import_text(self.ammo_csv_data)
+
+        csv_data = marshal.csv_export(sheet.models.Ammunition)
+        reader = csv.reader(StringIO.StringIO(csv_data))
+        data_type = reader.next()
+        self.assertEqual(data_type[0], "Ammunition")
+
+        header = reader.next()
+        data_row = reader.next()
+
+        idx = header.index("label")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "9Pb+")
+
+        idx = header.index("id")
+        self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+        # Correct ammunition_types should be available.
+        self.assertEqual(data_row[idx], "1")
