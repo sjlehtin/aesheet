@@ -1,0 +1,23 @@
+{
+  "name": "aesheet",
+  "version": "0.0.0",
+  "description": "Client-side presentation and manipulation of the server-side sheet data.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sami J. Lehtinen <sjl@iki.fi>",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^0.14.3",
+    "whatwg-fetch": "^0.10.1"
+  },
+  "devDependencies": {
+    "webpack": "^1.12.9",
+    "babel-core": "^6.3.21",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "react-dom": "^0.14.3"
+  }
+}
