@@ -2,6 +2,26 @@
 {% load sheet_extras %}
 {% load humanize %}
 
+{% comment %}
+The sheet should move to a more REST / ReactJS mode.  First, parts of the
+sheet, which introduce changes elsewhere in the sheet, such as weapon
+and armor with weight, stats wrt skill checks, should be passed a
+onSheetChange property, which is signaled when a change requiring sheet reload
+is done.
+
+See https://facebook.github.io/react/docs/tutorial.html
+
+Once the whole sheet is RESTified, the property can be retired.
+
+As all the skill checks etc are currently calculated in the python backend,
+this will probably not happen soon.  Perhaps the sheet components can gradually
+be reloaded in React code once the situation has improved.
+
+In any case, Reactifying and RESTifying the sheet should never result in test
+coverage of the sheet functionality in getting worse; it should only increase,
+but naturally with the focus moving towards the JavaScript unit-tests and
+perhaps Robot-system tests.
+{% endcomment %}
 {% block title %} {{ char.name }}'s sheet {% endblock %}
 
 {% block content %}
