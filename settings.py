@@ -44,6 +44,7 @@ if PRODUCTION:
 else:
     DB_ENGINE = 'django.db.backends.sqlite3'
     DB_NAME = os.path.join(os.path.dirname(__file__), 'sql.db')
+    DB_NAME = os.getenv("DB_NAME", DB_NAME)
     (USER, PASSWORD) = "", ""
     DEBUG_TOOLBAR_ENABLED = True
     DEBUG = True
