@@ -4,8 +4,12 @@ module.exports = {
     entry: "./main.js",
     output: {
         path: __dirname,
-        filename: "bundle.js"
+        filename: "bundle.js",
+        // Expose the bundle to a var for the Django templates.
+        libraryTarget: "var",
+        library: "SheetApp"
     },
+
     resolve: {
         root: path.resolve('.'),
         extensions: ['', '.js', '.jsx']

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load sheet_extras %}
+{% load static %}
 {% load humanize %}
 
 {% comment %}
@@ -80,6 +81,7 @@ perhaps Robot-system tests.
 </div>
 </div>
 <div class="col-md-8">
+<div>
     {% if char.character.portrait %}
     <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}"
             class="img-rounded">
@@ -88,6 +90,7 @@ perhaps Robot-system tests.
             the <a href="{% url "edit_character" char.character.id %}">
                 base character edit</a>.</div>
     {% endif %}
+</div>
 </div>
 </div>
 
@@ -245,6 +248,11 @@ perhaps Robot-system tests.
     </div>
 </div>
 
+<div class="row">
+    <div class="col-sm-12">
+        <div id="character-notes-container"></div>
+    </div>
+</div>
 </div>
 
     <div id="skill-pane" class="col-md-3">
@@ -343,4 +351,11 @@ $(document).ready(function () {
         $("#add_lang select").combobox();
     });
 </script>
+<script src="{% static "react/bundle.js" %}"></script>
+<script type="application/javascript">
+    var node = SheetApp.React.createElement(SheetApp.Character,
+            {url: '/rest/characters/{{ char.pk }}/'});
+    SheetApp.render(node, document.getElementById('character-notes-container'));
+</script>
+
 {% endblock %}
