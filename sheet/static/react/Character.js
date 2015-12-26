@@ -6,14 +6,13 @@ class Character extends React.Component {
         this.state = {
             editing: false,
 
-            char: {notes: "original notes\n\nskudaa pudaa"}
+            char: {notes: "original notes\n\nfoo and bar"}
         };
     }
 
     componentDidMount() {
 
     }
-
 
     handleSubmit(event) {
         this.setState({editing: false});
@@ -34,15 +33,17 @@ class Character extends React.Component {
         var notesField;
         console.log("my state: ", this.state);
         if (!this.state.editing) {
-            console.log("eh");
-            notesField = (<div><pre alt="Click to edit notes" onClick={this.handleEdit.bind(this)}>{this.state.char.notes}</pre>
+            notesField = (<div>
+                <pre alt="Click to edit notes"
+                     onClick={this.handleEdit.bind(this)}
+                >{this.state.char.notes}</pre>
+                <a href="#" onClick={this.handleEdit.bind(this)}>Edit</a>
                 </div>);
         } else {
-            console.log("uh");
             notesField = (<form><textarea
                 value={this.state.char.notes}
                 onChange={this.handleChange.bind(this)}/>
-                <input type="submit" value="Update"
+                <input type="submit" value="Update" name="character-note"
                        onClick={this.handleSubmit.bind(this)}/></form>);
         }
         return (<div>
