@@ -185,12 +185,17 @@ class Character(models.Model):
     # e.g., GM usage.
     race = models.CharField(max_length=256)
     description = models.TextField(blank=True)
-    age =  models.PositiveIntegerField(default=20)
+    age = models.PositiveIntegerField(default=20)
     unnatural_aging = models.IntegerField(default=0)
     height = models.IntegerField(default=175)
     weigth = models.IntegerField(default=75)
-    times_wounded  =  models.PositiveIntegerField(default=0)
+    times_wounded = models.PositiveIntegerField(default=0)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
+
+    notes = models.TextField(blank=True,
+                             help_text="Freeform notes for the character, "
+                                       "intended for quick notes across gaming "
+                                       "sessions.")
 
     hero = models.BooleanField(default=False)
 
