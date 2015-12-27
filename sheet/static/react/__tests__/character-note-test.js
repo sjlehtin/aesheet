@@ -1,10 +1,10 @@
-jest.dontMock('../Character');
+jest.dontMock('../CharacterNotes');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
-const Character = require('../Character').default;
+const CharacterNotes = require('../CharacterNotes').default;
 
 describe('character note tests', function (){
     "use strict";
@@ -34,7 +34,7 @@ describe('character note tests', function (){
 
     it('starts in non-editing mode', function () {
         var character = TestUtils.renderIntoDocument(
-            <Character />
+            <CharacterNotes />
         );
         var characterNode = ReactDOM.findDOMNode(character);
 
@@ -43,7 +43,7 @@ describe('character note tests', function (){
 
     it('can change to editing mode by clicking the edit link', function () {
         var character = TestUtils.renderIntoDocument(
-            <Character />
+            <CharacterNotes />
         );
         var characterNode = ReactDOM.findDOMNode(character);
 
@@ -55,19 +55,20 @@ describe('character note tests', function (){
 
     it('can change to editing mode by clicking the text area', function () {
         var character = TestUtils.renderIntoDocument(
-            <Character />
+            <CharacterNotes />
         );
-        var characterNode = ReactDOM.findDOMNode(character);
+        expect(character.state.editing).not.toEqual(true);
 
-        TestUtils.Simulate.click(characterNode.querySelectorAll(
-            'pre')[0]);
+        var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
+            "textarea");
+        TestUtils.Simulate.click(areaNode);
 
-        expect(characterNode.textContent).not.toContain('Edit');
+        expect(character.state.editing).toEqual(true);
     });
 
     it('can start in editing mode', function () {
         var character = TestUtils.renderIntoDocument(
-            <Character editing={true} />
+            <CharacterNotes editing={true} />
         );
         var characterNode = ReactDOM.findDOMNode(character);
         expect(characterNode.textContent).not.toContain('Edit');
@@ -75,9 +76,8 @@ describe('character note tests', function (){
 
     it('updates state on textarea edit', function () {
         var character = TestUtils.renderIntoDocument(
-            <Character editing={true} />
+            <CharacterNotes editing={true} />
         );
-        var characterNode = ReactDOM.findDOMNode(character);
         var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
             "textarea");
         areaNode.value = "new note";
@@ -88,7 +88,7 @@ describe('character note tests', function (){
 
     it('reverts value on cancel', function () {
         var character = TestUtils.renderIntoDocument(
-            <Character editing={true} />
+            <CharacterNotes editing={true} />
         );
         var characterNode = ReactDOM.findDOMNode(character);
         var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
@@ -116,7 +116,7 @@ describe('character note tests', function (){
 
         runs(function () {
             character = TestUtils.renderIntoDocument(
-            <Character url="/rest/characters/42" />
+            <CharacterNotes url="/rest/characters/42" />
             );
 
             expect(mockFetch.mock.calls[0][0]).toEqual("/rest/characters/42");
@@ -131,8 +131,7 @@ describe('character note tests', function (){
         }, "for the backend to be queried", 1000);
 
         runs(function () {
-            var characterNode = ReactDOM.findDOMNode(character);
-            expect(characterNode.textContent).toContain('this is char pk 42 notes');
+            expect(character.state.notes).toContain('this is char pk 42 notes');
         });
     });
 
@@ -146,14 +145,13 @@ describe('character note tests', function (){
 
         runs(function () {
             character = TestUtils.renderIntoDocument(
-            <Character url="/rest/characters/42" editing={true} />
+            <CharacterNotes url="/rest/characters/42" editing={true} />
             );
             var characterNode = ReactDOM.findDOMNode(character);
 
             expect(mockFetch.mock.calls[0][0]).toEqual("/rest/characters/42");
 
             mockPromise.then(function () {
-                console.log("foo?");
                 promiseDelivered = true;
             });
         });
@@ -163,41 +161,34 @@ describe('character note tests', function (){
         }, "for the backend to be queried", 1000);
 
         runs(function () {
-            console.log("next set");
+            mockPromise2 = Promise.resolve(
+                new Response('{}', {
+                    status: 200,
+                    headers: {
+                        'Content-type': 'application/json'
+                    }
+                }));
+            mockFetch.mockReturnValue(mockPromise2);
 
-                mockPromise2 = Promise.resolve(
-                    new Response('{}', {
-                        status: 200,
-                        headers: {
-                            'Content-type': 'application/json'
-                        }
-                    }));
-                mockFetch.mockReturnValue(mockPromise2);
+            // Cause an update to the backend.
 
-                // Cause an update to the backend.
-            console.log("was?");
+            var areaNode = TestUtils.findRenderedDOMComponentWithTag(
+                character, "textarea");
 
-                var areaNode = TestUtils.findRenderedDOMComponentWithTag(
-                    character, "textarea");
+            TestUtils.Simulate.change(areaNode,
+                {target: {value: "new note"}});
 
-                TestUtils.Simulate.change(areaNode,
-                    {target: {value: "new note"}});
-
-                expect(character.state.notes).toEqual("new note");
+            expect(character.state.notes).toEqual("new note");
 
             characterNode = ReactDOM.findDOMNode(character);
 
-                var submitButton = characterNode.querySelectorAll(
+            var submitButton = characterNode.querySelectorAll(
                     'input[type=submit]')[0];
-                console.log("submit:", submitButton);
-                TestUtils.Simulate.click(submitButton);
+            TestUtils.Simulate.click(submitButton);
 
-            console.log("progress");
-
-                mockPromise2.then(function () {
-            console.log("bar?");
-                    promise2Delivered = true;
-                });
+            mockPromise2.then(function () {
+                promise2Delivered = true;
+            });
         });
 
         waitsFor(function () {
