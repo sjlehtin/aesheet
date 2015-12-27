@@ -10,14 +10,14 @@ class Character extends React.Component {
         this.state = {
             editing: props.editing,
             csrftoken: cookie.load('csrftoken'),
-            // Should be filled in componentDidMount if left undefined.
+            // TODO: Should be filled in componentDidMount if left undefined.
             notes: undefined,
             old_value: ""
         };
     }
 
     componentDidMount() {
-        window.fetch(this.props.url)
+        fetch(this.props.url)
             .then((response) =>
         {
             response.json().then((json) => {
@@ -29,8 +29,8 @@ class Character extends React.Component {
     handleSubmit(event) {
         /* PATCH the backend character with updated values. */
         event.preventDefault();
-        window.fetch(this.props.url, {
-            method: "patch",
+        fetch(this.props.url, {
+            method: "PATCH",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -41,6 +41,8 @@ class Character extends React.Component {
                 "notes": this.state.notes
             })
         }).then((response) => {
+            // TODO: should use more generic handling for the error values,
+            // see, e.g., fetch README.md.
             if (response.status >= 200 && response.status < 300) {
                 this.setState({
                     editing: false
@@ -81,14 +83,16 @@ class Character extends React.Component {
                    className="edit-control">Edit</a>
                 </div>);
         } else {
-            notesField = (<form><textarea
-                value={this.state.notes}
-                onChange={this.handleChange.bind(this)}/>
-                <a href="#" onClick={this.handleCancel.bind(this)}
-                   className="edit-control">Cancel</a>
-                <input type="submit" value="Update" name="character-note"
-                       className="edit-control"
-                       onClick={this.handleSubmit.bind(this)}/></form>);
+            notesField = (
+                <form><textarea
+                    value={this.state.notes}
+                    onChange={this.handleChange.bind(this)}/>
+                    <a href="#" onClick={this.handleCancel.bind(this)}
+                       className="edit-control">Cancel</a>
+                    <input type="submit" value="Update" name="character-note"
+                           className="edit-control"
+                           onClick={this.handleSubmit.bind(this)}/>
+                </form>);
         }
         return (<div className="character-note">
             <h3>
