@@ -13,6 +13,21 @@ Priority list by JW:
 + 4) overland
 - 5) spell skill cheks
 
+- inventory
+- damage taken
+-- stamina
+-- lethal
+-- incurred to character, with approriate wounds
+-- healing damage
+-- bleeding damage, retain original wound, but incurs AA etc penalties
+   as per bleeding.
+
+- suspended weight
+- marking weapons as having no weight; useful for alternate weapons, or
+  weapons with larger sizes (Martel enlarged).
+
+- finalize initial robot tests.
+
 - armor modifiers to skill checks.  These should work for the physical skills
   where the check is shown even without the character having the skill.
 
@@ -65,7 +80,6 @@ Priority list by JW:
 -- xl and e range dependent on user FIT (SM)
 -- password change (SM)
 + wondrous items
-- inventory ?
 - magic item location (only one item to each location)
 + change log for sheet (stat modifications etc)
 -- skills
@@ -85,9 +99,6 @@ Priority list by JW:
 - sheet styling
 
 - short description of spell effect (+50 FIT etc)
-- suspended weight
-- marking weapons as having no weight; useful for alternate weapons, or
-  weapons with larger sizes (Martel enlarged).
 - stats, armors etc if the character is larger sized.
 
 + Basic skill checks:  Adding skills without any points (or reduced amount of
