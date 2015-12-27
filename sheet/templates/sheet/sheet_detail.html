@@ -354,7 +354,7 @@ $(document).ready(function () {
 <script src="{% static "react/bundle.js" %}"></script>
 <script type="application/javascript">
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes,
-            {url: '/rest/characters/{{ char.pk }}/'});
+            {url: '/rest/characters/{{ char.character.pk }}/'});
     SheetApp.render(node, document.getElementById('character-notes-container'));
 </script>
 
