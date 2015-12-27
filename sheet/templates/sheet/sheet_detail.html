@@ -27,10 +27,28 @@ perhaps Robot-system tests.
 
 {% block content %}
     <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-3">
 <h1>{{ char.name }}</h1>
 {{ char.race }}
 {{ char.occupation }}
+    </div>
+    <div class="col-md-2">
+        <div class="edit-control">
+        <a href="{% url "edit_character" char.character.id %}">
+      Edit base character</a>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="edit-control">
+    <a href="{% url "edit_sheet" char.id %}">
+      Edit base sheet</a>
+            </div>
+    </div>
+    <div class="col-md-2">
+        <div class="edit-control">
+    <a href="{% url "copy_sheet" sheet_id=char.id %}">
+      Copy this sheet</a>
+        </div>
     </div>
     <div class="col-md-3 no-print">
     <div class="panel panel-default">
@@ -52,21 +70,6 @@ perhaps Robot-system tests.
 <p>
 {{ char.description }}
 </p>
-
-<div class="edit-control">
-  <p>
-    <a href="{% url "edit_character" char.character.id %}">
-      Edit base character</a>
-  </p>
-  <p>
-    <a href="{% url "edit_sheet" char.id %}">
-      Edit base sheet</a>
-  </p>
-  <p>
-    <a href="{% url "copy_sheet" sheet_id=char.id %}">
-      Copy this sheet</a>
-  </p>
-</div>
 
 <div class="stats">
 
