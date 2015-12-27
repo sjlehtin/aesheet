@@ -4,7 +4,7 @@ import cookie from 'react-cookie';
 
 require('whatwg-fetch');
 
-class Character extends React.Component {
+class CharacterNotes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -110,4 +110,4 @@ class Character extends React.Component {
     }
 }
 
-export default Character;
+export default CharacterNotes;

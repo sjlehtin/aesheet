@@ -3,7 +3,7 @@ import React from 'react'
 // import only the render function of react-dom using ES2015 destructuring
 import { render } from 'react-dom'
 
-import Character from "Character.js"
+import CharacterNotes from "CharacterNotes"
 
 /* This is what this would look like in JSX.  We cannot use this directly, or
    it would be even more awkward, as we need to get the URL for the REST API
@@ -20,6 +20,6 @@ import Character from "Character.js"
 /* Expose for use in Django templates. */
 module.exports = {
     "React": React,
-    "Character": Character,
+    "CharacterNotes": CharacterNotes,
     "render": render
 }
