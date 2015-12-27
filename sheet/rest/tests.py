@@ -47,7 +47,8 @@ class SheetTestCase(TestCase):
 
 class SheetWeaponTestCase(TestCase):
     def setUp(self):
-        self.update_view = views.SheetViewSet.as_view({'patch': 'partial_update'})
+        self.update_view = views.SheetViewSet.as_view(
+                {'patch': 'partial_update'})
 
         self.sword = factories.WeaponFactory(base__name="Sword")
         self.plate = factories.ArmorFactory(base__name="Plate mail")
@@ -148,5 +149,6 @@ class CharacterTestCase(TestCase):
 
         char = models.Character.objects.get(pk=self.character.pk)
         self.assertEqual(char.gained_sp, 6, "Gained SP should get updated")
+        # TODO: A log entry should be generated.
         self.assertEqual(char.times_wounded, 2,
                          "Other aspects should not change")
