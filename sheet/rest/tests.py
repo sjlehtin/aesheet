@@ -44,14 +44,64 @@ class SheetTestCase(TestCase):
     def test_movement_rates(self):
         pass
 
-    def test_remove_weapon(self):
-        pass
 
-    def test_remove_armor(self):
-        pass
+class SheetWeaponTestCase(TestCase):
+    def setUp(self):
+        self.update_view = views.SheetViewSet.as_view({'patch': 'partial_update'})
+
+        self.sword = factories.WeaponFactory(base__name="Sword")
+        self.plate = factories.ArmorFactory(base__name="Plate mail")
+        self.spear = factories.WeaponFactory(base__name="Spear")
+        self.request_factory = APIRequestFactory()
+        self.user = factories.UserFactory(username="leia")
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory(character__owner=self.owner,
+                                            character__private=True)
+        self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
+
+    def _make_verify_patch(self, query_data):
+        req = self.request_factory.patch(self.url, query_data)
+        force_authenticate(req, user=self.owner)
+        response = self.update_view(req, pk=self.sheet.pk)
+        self.assertEqual(response.status_code, 200)
+
+    def test_remove_weapon(self):
+        self.sheet.weapons.add(self.spear)
+        self.sheet.weapons.add(self.sword)
+        self.sheet.armor = self.plate
+        self.sheet.save()
+
+        updated_weapons = [self.spear.pk]
+        self._make_verify_patch({'weapons': updated_weapons})
+
+        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+        self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
+                         updated_weapons)
+        self.assertEqual(sheet.armor, self.plate,
+                         "Other aspects should not change")
+
+    def test_add_armor(self):
+        self.sheet.weapons.add(self.spear)
+        armor = {'armor': self.plate.pk}
+        self._make_verify_patch(armor)
+
+        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+        self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
+                         [self.spear.pk], "Other aspects should not change")
 
     def test_add_weapon(self):
-        pass
+        self.sheet.weapons.add(self.spear)
+        self.sheet.armor = self.plate
+        self.sheet.save()
+
+        updated_weapons = [self.spear.pk, self.sword.pk]
+        self._make_verify_patch({'weapons': updated_weapons})
+
+        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+        self.assertEqual(sorted([wpn.pk for wpn in sheet.weapons.all()]),
+                         sorted(updated_weapons))
+        self.assertEqual(sheet.armor, self.plate,
+                         "Other aspects should not change")
 
 
 class CharacterTestCase(TestCase):
