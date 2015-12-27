@@ -74,17 +74,23 @@ class Character extends React.Component {
     }
 
     render() {
+        var fieldStyle = {
+            width: "100%",
+            height: "20em",
+            scrollY: "auto"
+        };
         var notesField;
         if (!this.state.editing) {
             notesField = (<div>
-                <pre onClick={this.handleEdit.bind(this)}
-                >{this.state.notes}</pre>
+                <textarea style={fieldStyle} onClick={this.handleEdit.bind(this)}
+                 disabled value={this.state.notes} />
                 <a href="#" onClick={this.handleEdit.bind(this)}
                    className="edit-control">Edit</a>
                 </div>);
         } else {
             notesField = (
                 <form><textarea
+                    style={fieldStyle}
                     value={this.state.notes}
                     onChange={this.handleChange.bind(this)}/>
                     <a href="#" onClick={this.handleCancel.bind(this)}
