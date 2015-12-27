@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %} Import data {% endblock %}
+
+{% block content %}
+
+<form action="{% url "import" %}" method="post" 
+      enctype="multipart/form-data">
+  {% csrf_token %}
+Choose either import method:
+<table>
+  {{ import_form.as_table }}
+</table>
+<input type="submit" value="Import" />
+</form>
+
+<div style="max-width: 35em;">
+<p>
+First row, first cell, is the data type, e.g. "ArmorTemplate".
+</p>
+<p>
+Second row is the header, which indicates the type of the data in the
+column it is in, such as "name" or "cc_skill_level".
+</p>
+<p>
+Columns pointing to other objects (tables) and which can have multiple
+objects, such as 'required_edges' or 'required_skills' for Skill, need
+to point to the other object with the 'name' attribute.  Multiple items
+should be separated with the 'pipe' ('|') sign.  This allows usage of
+comma in the names.  If this is not necessary, the behaviour can be
+changed.
+</p>
+<p>
+<strong class="text-danger">Column "id" should always be left unchanged.</strong>
+</p>
+
+<div class="list-group">
+{% for item in types %}
+    <div class="list-group-item">
+<h4><a href="{% url "browse" item.name %}">{{ item.name}}</a></h4>
+{% if item.doc %}<dd>{{ item.doc }}</dd>{% endif %}
+<label>Fields:</label> <span style="font-style: italic; ">{{ item.fields|join:", " }}</span>
+<div><a href="{% url "export" item.name %}">Download</a></div>
+    </div>
+{% endfor %}
+</div>
+</div>
+
+{% endblock %}

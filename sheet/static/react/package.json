@@ -1,0 +1,39 @@
+{
+  "name": "aesheet",
+  "version": "0.0.0",
+  "description": "Client-side presentation and manipulation of the server-side sheet data.",
+  "main": "main.js",
+  "scripts": {
+    "test": "jest --testRunner '<rootDir>/node_modules/jest-cli/src/testRunners/jasmine/jasmine2.js'"
+  },
+  "author": "Sami J. Lehtinen <sjl@iki.fi>",
+  "license": "ISC",
+  "dependencies": {
+    "exports-loader": "^0.6.2",
+    "imports-loader": "^0.6.5",
+    "react": "^0.14.3",
+    "react-cookie": "^0.4.3",
+    "react-dom": "^0.14.3",
+    "whatwg-fetch": "^0.10.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.3.21",
+    "babel-jest": "^6.0.1",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "jest-cli": "^0.8.2",
+    "jest-webpack-alias": "^2.0.0",
+    "react-addons-test-utils": "^0.14.3",
+    "webpack": "^1.12.9"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/jest/preprocessor.js",
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/react",
+      "<rootDir>/node_modules/react-dom",
+      "<rootDir>/node_modules/react-addons-test-utils",
+      "<rootDir>/node_modules/fbjs"
+    ]
+  }
+}

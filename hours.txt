@@ -75,3 +75,9 @@ tue 21.1.2014 3h Base skill checks.
 wed 22.1.2014 2.5h REST API for browsing ammunition; fixing usability in ammo selection.
 thu 23.1.2014 3h Fixing bug with Rapid archery.  Reverse engineering excel sheet for movement speeds.
 sat 25.1.2014 6h Movement rates, advancing initiatives.
+sun 27.9.2015 2h Skill changelog.
+wed 10.12.2015 2.5h Upgrading django (to 1.9) and other software components.
+thu 12.12.2015 1h Upgrading django (to 1.9) and other software components.
+sat 12.12.2015 1h Upgrading django (to 1.9) and other software components.
+sun 13.12.2015 1h Upgrading django (to 1.9) and other software components.
+sat 26.12.2015 2h Character note with JS.  Learning React time not included (around 10 hours)

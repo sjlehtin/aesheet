@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} Character list {% endblock %}
+
+{% block content %}
+
+<p>
+<a href="{% url "add_char" %}">Add a new character</a>
+</p>
+
+{% if campaigns %}
+    {% for campaign in campaigns %}
+        <h3 class="campaign">{{ campaign.name }}</h3>
+        <ul>
+            {% for char in campaign.objects %}
+                <li><a href="{% url "edit_character" char.id %}">
+                    {{ char }}</a>
+                    {% if char.private %}
+                    <span class="label label-danger">private</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% else %}
+    <p>No characters.</p>
+{% endif %}
+
+{% endblock %}

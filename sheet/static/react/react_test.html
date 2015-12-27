@@ -1,0 +1,13 @@
+<html>
+<title>React Test</title>
+<body>
+<div id="character-container">Loading...</div>
+
+<script src="bundle.js">
+</script>
+<script type="application/javascript">
+    var node = SheetApp.React.createElement(SheetApp.CharacterNotes, {url: '/rest/characters/1/'});
+    SheetApp.render(node, document.getElementById('character-container'));
+</script>
+</body>
+</html>

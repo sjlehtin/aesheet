@@ -4,9 +4,8 @@ import django.contrib.auth as auth
 import math
 import logging
 from functools import wraps
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import itertools
-from django.utils.datastructures import SortedDict
 from django.db.models import Q
 
 
@@ -24,6 +23,7 @@ SIZE_CHOICES = (
     ('C', 'Colossal'),
     )
 
+
 def roundup(dec):
     """
     Works like Excel ROUNDUP, rounds the number away from zero.
@@ -33,6 +33,7 @@ def roundup(dec):
     else:
         return int(math.ceil(dec))
 
+
 def rounddown(dec):
     """
     Works like Excel ROUNDDOWN, rounds the number toward zero.
@@ -41,6 +42,7 @@ def rounddown(dec):
         return int(math.ceil(dec))
     else:
         return int(math.floor(dec))
+
 
 class ExportedModel(models.Model):
     """
@@ -55,7 +57,7 @@ class ExportedModel(models.Model):
     @classmethod
     def get_exported_fields(cls):
         names = [field.name for field in cls._meta.fields]
-        names.extend(list(set(cls._meta.get_all_field_names()
+        names.extend(list(set([ff.name for ff in cls._meta.get_fields()]
                               ).difference(set(names))))
         if "edge" in names:
             names.remove("edge")
@@ -93,7 +95,12 @@ class TechLevel(ExportedModel):
                 "ammunition", "id"]
 
 
-class Campaign(models.Model):
+class Campaign(ExportedModel):
+    """
+    Campaign is the world setting for the characters.
+    """
+    objects = NameManager()
+
     name = models.CharField(max_length=10, unique=True)
     tech_levels = models.ManyToManyField(TechLevel)
 
@@ -102,6 +109,10 @@ class Campaign(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def dont_export(cls):
+        return ["character", "id"]
 
 
 class CampaignItem(object):
@@ -127,7 +138,7 @@ def get_sheets(user):
 
 
 def get_by_campaign(objects, get_character=lambda obj: obj):
-    items = SortedDict()
+    items = OrderedDict()
     objects = [(get_character(obj), obj) for obj in objects]
     objects.sort(key=lambda xx: xx[0].campaign.name)
     for (char, obj) in objects:
@@ -174,12 +185,17 @@ class Character(models.Model):
     # e.g., GM usage.
     race = models.CharField(max_length=256)
     description = models.TextField(blank=True)
-    age =  models.PositiveIntegerField(default=20)
+    age = models.PositiveIntegerField(default=20)
     unnatural_aging = models.IntegerField(default=0)
     height = models.IntegerField(default=175)
     weigth = models.IntegerField(default=75)
-    times_wounded  =  models.PositiveIntegerField(default=0)
+    times_wounded = models.PositiveIntegerField(default=0)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
+
+    notes = models.TextField(blank=True,
+                             help_text="Freeform notes for the character, "
+                                       "intended for quick notes across gaming "
+                                       "sessions.")
 
     hero = models.BooleanField(default=False)
 
@@ -545,6 +561,10 @@ class Edge(ExportedModel):
     def __unicode__(self):
         return u"%s" % (self.name)
 
+    class Meta:
+        ordering = ['name']
+
+
 SKILL_TYPES = [
     "Physical",
     "Combat",
@@ -586,8 +606,8 @@ class Skill(ExportedModel):
     # TODO: Fix construction skill.
 
     required_skills = models.ManyToManyField('self', symmetrical=False,
-                                             blank=True, null=True)
-    required_edges = models.ManyToManyField(Edge, blank=True, null=True)
+                                             blank=True)
+    required_edges = models.ManyToManyField(Edge, blank=True)
 
     skill_cost_0 = models.IntegerField(blank=True, null=True)
     skill_cost_1 = models.IntegerField(blank=True, null=True)
@@ -597,6 +617,10 @@ class Skill(ExportedModel):
     type = models.CharField(max_length=64, choices=SKILL_TYPES)
 
     stat = models.CharField(max_length=64, choices=STAT_TYPES)
+
+    def clean_fields(self, exclude=None):
+        self.stat = self.stat.upper()
+        super(Skill, self).clean_fields(exclude=exclude)
 
     def cost(self, level):
         if level == 0:
@@ -647,7 +671,7 @@ class CharacterSkill(models.Model):
         except ValueError:
             return "invalid skill level"
 
-    def check(self, sheet, stat=None):
+    def skill_check(self, sheet, stat=None):
         # XXX To better support skill checks, even if the character does not
         # have the skill, move this code to Sheet.
 
@@ -724,7 +748,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
     skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
-                                           blank=True, null=True)
+                                           blank=True)
 
     @classmethod
     def dont_export(cls):
@@ -1582,6 +1606,8 @@ class Sheet(models.Model):
     description = models.TextField(blank=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
+    # TODO: These relations would need to go through separate tables, e.g.,
+    # SheetWeapon, to allow adding parameters like "in_inventory", or "order".
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
     firearms = models.ManyToManyField(Firearm, blank=True)
@@ -1925,11 +1951,11 @@ class Sheet(models.Model):
             penalty_multiplier = 0
             for ii in iter:
                 penalty_multiplier += ii
-                yield (self._counter_penalty(sweep_bonus +
+                yield int(round(self._counter_penalty(sweep_bonus +
                                              penalty_multiplier * klass,
                                              self.eff_fit) +
                        autofire_penalty +
-                       check)
+                       check))
 
         return [Sweep(rounds=5, checks=list(burst_check(
                     [0, 2, 5, 10], 5))),

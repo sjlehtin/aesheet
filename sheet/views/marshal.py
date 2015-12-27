@@ -1,14 +1,14 @@
 import csv
 import StringIO
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.db.models.fields import FieldDoesNotExist
 import django.db.models
+import django.db.models.fields.related
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
-import django.forms.util
+from django.forms.utils import ErrorList
 import sheet.models
 import sheet.forms
 from django.conf import settings
@@ -49,19 +49,19 @@ def get_data_rows(results, fields):
         yield [get_field_value(field) for field in fields]
 
 
-def browse(request, type):
+def browse(request, data_type):
     try:
-        cls = getattr(sheet.models, type)
+        cls = getattr(sheet.models, data_type)
     except AttributeError, e:
-        raise Http404, "%s is not a supported type." % type
+        raise Http404, "%s is not a supported type." % data_type
     results = cls.objects.all()
     fields = cls.get_exported_fields()
     rows = get_data_rows(results, fields)
     fields = [" ".join(ff.split('_')) for ff in fields]
-    return render_to_response('sheet/browse.html',
-                              RequestContext(request, {'type': type,
-                                                       'header': fields,
-                                                       'rows': rows}))
+    return render(request, 'sheet/browse.html',
+                  {'type': data_type,
+                   'header': fields,
+                   'rows': rows})
 
 
 def update_id_sequence(model_class):
@@ -80,7 +80,7 @@ def update_id_sequence(model_class):
             "django.db.backends.postgresql_psycopg2"):
 
         try:
-            if model_class._meta.get_field_by_name('id'):
+            if model_class._meta.get_field('id'):
                 # The operation should only be performed for models with a
                 # serial id as the primary key.
                 cc = django.db.connection.cursor()
@@ -212,8 +212,7 @@ def import_text(data):
                     field_name, modelcls.__class__.__name__))
                 continue
             try:
-                (field, _, direct, m2m) = \
-                    modelcls._meta.get_field_by_name(field_name)
+                field = modelcls._meta.get_field(field_name)
             except FieldDoesNotExist, e:
                 raise ValueError, str(e)
 
@@ -234,10 +233,10 @@ def import_text(data):
                 if value:
                     try:
                         value = \
-                            field.related.parent_model.objects.get(pk=value)
-                    except field.related.parent_model.DoesNotExist:
+                            field.remote_field.model.objects.get(pk=value)
+                    except field.remote_field.model.DoesNotExist:
                         raise ValueError, "No matching %s with name %s." % (
-                            field.related.parent_model._meta.object_name, value)
+                            field.remote_field.model._meta.object_name, value)
                 else:
                     value = None
             else:
@@ -342,7 +341,7 @@ def import_data(request):
             except (TypeError, ValueError, ValidationError), e:
                 logger.exception("failed.")
                 el = form._errors.setdefault('__all__',
-                                             django.forms.util.ErrorList())
+                                             ErrorList())
                 el.append(str(e))
     else:
         form = sheet.forms.ImportForm()
@@ -355,10 +354,9 @@ def import_data(request):
         item['fields'] = cls.get_exported_fields()
         types.append(item)
 
-    return render_to_response('sheet/import_data.html',
-                              RequestContext(request,
-                                             {'types': types,
-                                              'import_form': form}))
+    return render(request, 'sheet/import_data.html',
+                  {'types': types,
+                   'import_form': form})
 
 
 def csv_export(exported_type):
@@ -380,13 +378,13 @@ def csv_export(exported_type):
     return f.getvalue()
 
 
-def export_data(request, type):
+def export_data(request, data_type):
     try:
-        cls = getattr(sheet.models, type)
+        cls = getattr(sheet.models, data_type)
     except AttributeError, e:
-        raise Http404, "%s is not a supported type." % type
+        raise Http404, "%s is not a supported type." % data_type
     csv_data = csv_export(cls)
 
-    response = HttpResponse(csv_data, mimetype="text/csv")
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % type
+    response = HttpResponse(csv_data, content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % data_type
     return response

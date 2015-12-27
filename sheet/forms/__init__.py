@@ -536,6 +536,7 @@ class ArmorForm(RequestForm):
         queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=False))
     class Meta:
         model = sheet.models.Armor
+        fields = '__all__'
 
 
 class HelmForm(RequestForm):
@@ -543,14 +544,15 @@ class HelmForm(RequestForm):
         queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=True))
     class Meta:
         model = sheet.models.Armor
+        fields = '__all__'
 
 
 class BaseEditCharacterForm(RequestForm):
     base_stat_field_names = []
     PREFIXES = ["start_", "cur_", "base_mod_"]
-    for prefix in PREFIXES:
+    for _prefix in PREFIXES:
         for stat in sheet.models.Character.BASE_STATS:
-            base_stat_field_names.append(prefix + stat)
+            base_stat_field_names.append(_prefix + stat)
     derived_field_names = ["base_mod_mov", "base_mod_dex", "base_mod_imm"]
     stat_field_names = base_stat_field_names + derived_field_names
 
@@ -657,6 +659,7 @@ class CreateBaseFirearmForm(RequestForm):
 
     class Meta:
         model = sheet.models.BaseFirearm
+        fields = '__all__'
 
 
 class CopySheetForm(RequestFormMixin, forms.Form):

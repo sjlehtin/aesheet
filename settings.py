@@ -3,9 +3,6 @@
 import os
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
     ('Sami J. Lehtinen', 'sjl@iki.fi'),
 )
@@ -15,15 +12,18 @@ MANAGERS = ADMINS
 ROOT_URL = os.environ.get('ROOT_URL')
 if not ROOT_URL:
     ROOT_URL = "/"
-PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
 LOGIN_URL = ROOT_URL + "accounts/login/"
 LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
-SOUTH_TESTS_MIGRATE = False
+DBHOST = os.getenv("DBHOST", default='127.0.0.1')
+
+ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org"]
 
 BASEDIR = os.path.dirname(__file__)
-DBHOST = os.getenv("DBHOST", default='127.0.0.1')
+PRODUCTION = os.path.exists(os.path.join(BASEDIR, "auth"))
+if os.environ.has_key('PRODUCTION'):
+    PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
 if PRODUCTION:
 
@@ -39,12 +39,15 @@ if PRODUCTION:
     f = open(os.path.join(BASEDIR, "auth"), "r")
     auth_details = f.read()
     (USER, PASSWORD) = auth_details.strip().split()
+    DEBUG = False
     DEBUG_TOOLBAR_ENABLED = False
 else:
     DB_ENGINE = 'django.db.backends.sqlite3'
-    DB_NAME = os.path.join(os.path.dirname(__file__), 'db/sheet.db')
+    DB_NAME = os.path.join(os.path.dirname(__file__), 'sql.db')
+    DB_NAME = os.getenv("DB_NAME", DB_NAME)
     (USER, PASSWORD) = "", ""
     DEBUG_TOOLBAR_ENABLED = True
+    DEBUG = True
 
 val = os.getenv('DEBUG_TOOLBAR')
 if val is not None:
@@ -142,18 +145,6 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'wDbImXEkn/v9oAnEjxquj/3u9DY'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS += (
-    "context_processors.variables",
-    "django.core.context_processors.request",
-    )
-
 MIDDLEWARE_CLASSES = (
     'loginreqd.RequireLoginMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -161,8 +152,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'profiling.ProfileMiddleware',
-    'profiling.MemoryProfileMiddleware',
 )
 
 if DEBUG_TOOLBAR_ENABLED:
@@ -175,13 +164,18 @@ ROOT_URLCONF = 'urls'
 
 import sys
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or
-    # "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(__file__), "templates")
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(os.path.dirname(__file__), "templates"),],
+        'APP_DIRS': True,
+        'OPTIONS': {'context_processors':
+                        TEMPLATE_CONTEXT_PROCESSORS +
+                        ["context_processors.variables",
+                         "django.template.context_processors.request",],
+                     }
+    },
+]
 
 LOGIN_REQUIRED_URLS = (
     r'(.*)$',
@@ -202,9 +196,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'widget_tweaks',
-    'south',
     'sheet',
-    'profiling',
     'django.contrib.humanize',
     'rest_framework',
 )

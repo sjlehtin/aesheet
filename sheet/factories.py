@@ -3,23 +3,27 @@ import sheet.models as models
 import django.contrib.auth as auth
 
 class UserFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = auth.get_user_model()
     username = factory.Sequence(lambda n: "user-%03d" % n)
     password = factory.PostGenerationMethodCall('set_password',
                                                 'foobar')
+    class Meta:
+        model = auth.get_user_model()
 
 
 class TechLevelFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.TechLevel
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
-
     name = "all"
+
+    class Meta:
+        model = models.TechLevel
+        django_get_or_create = ('name', )
 
 
 class CampaignFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Campaign
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
     name = factory.Sequence(lambda xx: "camp-{0}".format(xx))
+
+    class Meta:
+        model = models.Campaign
+        django_get_or_create = ('name', )
 
     @factory.post_generation
     def tech_levels(self, create, extracted, **kwargs):
@@ -34,9 +38,6 @@ class CampaignFactory(factory.DjangoModelFactory):
 
 
 class SkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Skill
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
-
     tech_level = factory.SubFactory(TechLevelFactory)
 
     skill_cost_0 = 2
@@ -46,6 +47,10 @@ class SkillFactory(factory.DjangoModelFactory):
 
     type = "Combat"
     stat = "fit"
+
+    class Meta:
+        model = models.Skill
+        django_get_or_create = ('name', )
 
     @factory.post_generation
     def required_skills(self, create, extracted, **kwargs):
@@ -60,24 +65,27 @@ class SkillFactory(factory.DjangoModelFactory):
 
 
 class EdgeFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Edge
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
+    class Meta:
+        model = models.Edge
+        django_get_or_create = ('name', )
 
 
 class EdgeSkillBonusFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.EdgeSkillBonus
-
     edge_level = factory.SubFactory('sheet.factories.EdgeLevelFactory')
     skill = factory.SubFactory(SkillFactory)
     bonus = 15
 
+    class Meta:
+        model = models.EdgeSkillBonus
+
 
 class EdgeLevelFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.EdgeLevel
-
     edge = factory.SubFactory(EdgeFactory)
     level = 0
     cost = level * .5 + 1
+
+    class Meta:
+        model = models.EdgeLevel
 
     @factory.post_generation
     def edge_skill_bonuses(self, create, extracted, **kwargs):
@@ -92,18 +100,21 @@ class EdgeLevelFactory(factory.DjangoModelFactory):
 
 
 class CharacterEdgeFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.CharacterEdge
-
     edge = factory.SubFactory(EdgeLevelFactory)
+
+    class Meta:
+        model = models.CharacterEdge
 
 
 class CharacterFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Character
     campaign = factory.SubFactory(CampaignFactory, tech_levels=("all", ))
     owner = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda xx: "char-{0}".format(xx))
     occupation = "Adventurer"
     race = "Human"
+
+    class Meta:
+        model = models.Character
 
     @factory.post_generation
     def skills(self, create, extracted, **kwargs):
@@ -134,17 +145,20 @@ class CharacterFactory(factory.DjangoModelFactory):
 
 
 class CharacterSkillFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.CharacterSkill
-
     character = factory.SubFactory(CharacterFactory)
     skill = factory.SubFactory(SkillFactory)
     level = 0
 
+    class Meta:
+        model = models.CharacterSkill
+
 
 class SheetFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Sheet
     character = factory.SubFactory(CharacterFactory)
     owner = factory.LazyAttribute(lambda o: o.character.owner)
+
+    class Meta:
+        model = models.Sheet
 
     @factory.post_generation
     def firearms(self, create, extracted, **kwargs):
@@ -203,24 +217,23 @@ class SheetFactory(factory.DjangoModelFactory):
 
 
 class AmmunitionFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Ammunition
-    FACTORY_DJANGO_GET_OR_CREATE = ('label', )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
     weight = 5
     velocity = 600
 
+    class Meta:
+        model = models.Ammunition
+        django_get_or_create = ('label', )
+
 
 class FirearmAmmunitionTypeFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.FirearmAmmunitionType
+    class Meta:
+        model = models.FirearmAmmunitionType
 
 
 class BaseFirearmFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.BaseFirearm
-    FACTORY_DJANGO_GET_OR_CREATE = ('name', )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     base_skill = factory.SubFactory(SkillFactory)
 
@@ -230,6 +243,10 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
     range_s = 15
     range_m = 30
     range_l = 100
+
+    class Meta:
+        model = models.BaseFirearm
+        django_get_or_create = ('name', )
 
     @factory.post_generation
     def ammunition_types(self, create, extracted, **kwargs):
@@ -245,10 +262,11 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
 
 
 class FirearmFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Firearm
-
     base = factory.SubFactory(BaseFirearmFactory)
     ammo = factory.SubFactory(AmmunitionFactory)
+
+    class Meta:
+        model = models.Firearm
 
     @factory.post_generation
     def ammunition_types(self, create, extracted, **kwargs):
@@ -265,32 +283,35 @@ class FirearmFactory(factory.DjangoModelFactory):
 
 
 class ArmorTemplateFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.ArmorTemplate
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
+
+    class Meta:
+        model = models.ArmorTemplate
+        django_get_or_create = ('name', )
 
 
 class ArmorQualityFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.ArmorQuality
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
+    class Meta:
+        model = models.ArmorQuality
+        django_get_or_create = ('name', )
+
 
 class ArmorSpecialQualityFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.ArmorSpecialQuality
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+    class Meta:
+        model = models.ArmorSpecialQuality
+        django_get_or_create = ('name', )
 
 
 class ArmorFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Armor
-
     base = factory.SubFactory(ArmorTemplateFactory)
     quality = factory.SubFactory(ArmorQualityFactory)
     quality__name = "normal"
+    class Meta:
+        model = models.Armor
 
 
 class HelmFactory(ArmorFactory):
@@ -298,55 +319,62 @@ class HelmFactory(ArmorFactory):
 
 
 class WeaponTemplateFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.WeaponTemplate
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
     base_skill = factory.SubFactory(SkillFactory)
     base_skill__name = "Weapon combat"
 
+    class Meta:
+        model = models.WeaponTemplate
+        django_get_or_create = ('name', )
+
 
 class WeaponQualityFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.WeaponQuality
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
+    class Meta:
+        model = models.WeaponQuality
+        django_get_or_create = ('name', )
+
 
 class WeaponFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.Weapon
-
     base = factory.SubFactory(WeaponTemplateFactory)
     quality = factory.SubFactory(WeaponQualityFactory)
     quality__name = "normal"
 
+    class Meta:
+        model = models.Weapon
+
 
 class RangedWeaponTemplateFactory(WeaponTemplateFactory):
-    FACTORY_FOR = models.RangedWeaponTemplate
-
     range_s = 20
     range_m = 40
     range_l = 60
 
+    class Meta:
+        model = models.RangedWeaponTemplate
+
 
 class RangedWeaponFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.RangedWeapon
-
     base = factory.SubFactory(RangedWeaponTemplateFactory)
     quality = factory.SubFactory(WeaponQualityFactory)
     quality__name = "normal"
 
+    class Meta:
+        model = models.RangedWeapon
+
 
 class MiscellaneousItemFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.MiscellaneousItem
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
-
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
+    class Meta:
+        model = models.MiscellaneousItem
+        django_get_or_create = ('name', )
+
 
 class SpellEffectFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = models.SpellEffect
-    FACTORY_DJANGO_GET_OR_CREATE = ("name", )
+    class Meta:
+        model = models.SpellEffect
+        django_get_or_create = ('name', )

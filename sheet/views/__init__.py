@@ -13,6 +13,21 @@ Priority list by JW:
 + 4) overland
 - 5) spell skill cheks
 
+- inventory
+- damage taken
+-- stamina
+-- lethal
+-- incurred to character, with approriate wounds
+-- healing damage
+-- bleeding damage, retain original wound, but incurs AA etc penalties
+   as per bleeding.
+
+- suspended weight
+- marking weapons as having no weight; useful for alternate weapons, or
+  weapons with larger sizes (Martel enlarged).
+
+- finalize initial robot tests.
+
 - armor modifiers to skill checks.  These should work for the physical skills
   where the check is shown even without the character having the skill.
 
@@ -65,7 +80,6 @@ Priority list by JW:
 -- xl and e range dependent on user FIT (SM)
 -- password change (SM)
 + wondrous items
-- inventory ?
 - magic item location (only one item to each location)
 + change log for sheet (stat modifications etc)
 -- skills
@@ -85,9 +99,6 @@ Priority list by JW:
 - sheet styling
 
 - short description of spell effect (+50 FIT etc)
-- suspended weight
-- marking weapons as having no weight; useful for alternate weapons, or
-  weapons with larger sizes (Martel enlarged).
 - stats, armors etc if the character is larger sized.
 
 + Basic skill checks:  Adding skills without any points (or reduced amount of
@@ -110,6 +121,9 @@ Priority list by JW:
 
 - free edges based on campaign (probably should think about race
   in this context, for FRP at least)
+
+- it should be really easy to bootstrap the sheet system.  There should be
+  some initial data, like tech-levels and campaigns.
 
 Minor:
 
@@ -156,13 +170,11 @@ BUGS = """
 + Rapid archery affects thrown weapons, crossbows and firearms.
 """
 
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
-import django.http
-from django.template import RequestContext
 from sheet.models import *
 from sheet.forms import *
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.views.generic import UpdateView, CreateView, FormView
@@ -180,17 +192,13 @@ logger = logging.getLogger(__name__)
 
 
 def characters_index(request):
-    return render_to_response('sheet/characters_index.html',
-                              {'campaigns':
-                                   Character.get_by_campaign(request.user)},
-                              context_instance=RequestContext(request))
+    return render(request, 'sheet/characters_index.html',
+                  {'campaigns': Character.get_by_campaign(request.user)})
 
 
 def sheets_index(request):
-    return render_to_response('sheet/sheets_index.html',
-                              {'campaigns':
-                                   Sheet.get_by_campaign(request.user)},
-                              context_instance=RequestContext(request))
+    return render(request, 'sheet/sheets_index.html',
+                  {'campaigns': Sheet.get_by_campaign(request.user)})
 
 
 class GenWrapper(object):
@@ -345,8 +353,8 @@ class SkillWrap(RemoveWrap):
                                              initial={'function': 'dec'},
                                              prefix="skill-level-modify")
 
-    def check(self):
-        return self.item.check(self.sheet)
+    def skill_check(self):
+        return self.item.skill_check(self.sheet)
 
     def __unicode__(self):
         return unicode(self.item.skill)
@@ -428,7 +436,7 @@ class PhysicalSkill(SkillWrap):
                         self.sheet = sheet
                         self.base_skill = base_skill
 
-                    def check(self, sheet, stat=None):
+                    def skill_check(self, sheet, stat=None):
                         if not stat:
                             if self.base_skill:
                                 stat = self.base_skill.stat.lower()
@@ -448,17 +456,17 @@ class PhysicalSkill(SkillWrap):
     def level(self):
         return self.skill.level
 
-    def check(self):
+    def skill_check(self):
         if self.stats:
             checks = {}
             for st in self.stats:
-                checks[st] = self.skill.check(self.sheet, stat=st)
+                checks[st] = self.skill.skill_check(self.sheet, stat=st)
         else:
-            checks = self.skill.check(self.sheet)
+            checks = self.skill.skill_check(self.sheet)
         return checks
 
     def formatted_checks(self):
-        check = self.check()
+        check = self.skill_check()
         if isinstance(check, dict):
             return ["{key}: {value}".format(key=key.upper(), value=value)
                     for (key, value) in check.items()]
@@ -492,7 +500,11 @@ class SheetView(object):
                                         self._all_physical])
 
     def used_sp(self):
-        return sum([cs.cost() for cs in self._skills])
+        try:
+            return sum([cs.cost() for cs in self._skills])
+        # Invalid skill level.
+        except TypeError:
+            return 0
 
     def base_stats(self):
         ll = []
@@ -705,9 +717,9 @@ def get_notes(character, filter_kwargs):
 
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
-                              .select_related('sheet__armor__base',
-                                              'sheet__armor__quality'
-                                              'sheet__helm', )
+                              .select_related('armor__base',
+                                              'armor__quality',
+                                              'helm', )
                               .prefetch_related(
         'spell_effects',
         'weapons__base',
@@ -724,7 +736,7 @@ def sheet_detail(request, sheet_id=None):
         'character__edges__edge__skill_bonuses'),
                               pk=sheet_id)
     if not sheet.character.access_allowed(request.user):
-        raise django.core.exceptions.PermissionDenied
+        raise PermissionDenied
 
     forms = {}
 
@@ -797,20 +809,19 @@ def sheet_detail(request, sheet_id=None):
         if not should_change:
             should_change = process_sheet_change_request(request,
                                                          sheet)
-        # XXX more complex forms need to be passed back to
-        # render_to_response, below.
+        # More complex forms need to be passed back to
+        # render(), below.
         if should_change:
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
 
-    c = {'char': SheetView(sheet),
+    c = {'sheet': SheetView(sheet),
          'notes': notes,
          'sweep_fire_available': any([wpn.has_sweep_fire()
                                       for wpn in sheet.firearms.all()]),
-    }
+         }
     c.update(forms)
-    return render_to_response('sheet/sheet_detail.html',
-                              RequestContext(request, c))
+    return render(request, 'sheet/sheet_detail.html', c)
 
 
 class FormSaveMixin(object):
@@ -844,14 +855,16 @@ class BaseCreateView(FormSaveMixin, RequestMixin, CreateView):
     def get_form_class(self):
         if self.form_class:
             return self.form_class
-        return modelform_factory(self.model, form=sheet.forms.RequestForm)
+        return modelform_factory(self.model, form=sheet.forms.RequestForm,
+                                 fields="__all__")
 
 
 class BaseUpdateView(FormSaveMixin, RequestMixin, UpdateView):
     def get_form_class(self):
         if self.form_class:
             return self.form_class
-        return modelform_factory(self.model, form=sheet.forms.RequestForm)
+        return modelform_factory(self.model, form=sheet.forms.RequestForm,
+                                 fields="__all__")
 
 
 class AddWeaponView(BaseCreateView):
@@ -887,7 +900,7 @@ class EditCharacterView(BaseUpdateView):
     def get_object(self, queryset=None):
         object = super(EditCharacterView, self).get_object(queryset)
         if not object.access_allowed(self.request.user):
-            raise django.core.exceptions.PermissionDenied
+            raise PermissionDenied
         return object
 
     def get_form_kwargs(self):
@@ -935,7 +948,7 @@ class EditSheetView(BaseUpdateView):
     def get_object(self, queryset=None):
         object = super(EditSheetView, self).get_object(queryset)
         if not object.character.access_allowed(self.request.user):
-            raise django.core.exceptions.PermissionDenied
+            raise PermissionDenied
         return object
 
     def get_success_url(self):
@@ -1038,9 +1051,8 @@ def version_history(request):
     proc = subprocess.Popen(['git', 'log'], stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             cwd=os.path.dirname(__file__))
-    return render_to_response('sheet/changelog.html',
-                              RequestContext(request,
-                                             {'log': logiter(proc.stdout)}))
+    return render(request, 'sheet/changelog.html',
+                  {'log': logiter(proc.stdout)})
 
 
 class TODOView(TemplateView):

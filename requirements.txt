@@ -10,3 +10,6 @@ docopt
 Pillow
 django-widget-tweaks
 djangorestframework
+robotframework
+robotframework-selenium2library
+
