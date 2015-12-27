@@ -4,7 +4,7 @@
   "description": "Client-side presentation and manipulation of the server-side sheet data.",
   "main": "main.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --testRunner '<rootDir>/node_modules/jest-cli/src/testRunners/jasmine/jasmine2.js'"
   },
   "author": "Sami J. Lehtinen <sjl@iki.fi>",
   "license": "ISC",

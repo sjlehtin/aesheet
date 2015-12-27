@@ -1,15 +1,12 @@
 import React from 'react';
 
-import cookie from 'react-cookie';
-
-require('whatwg-fetch');
+var rest = require('sheet-rest');
 
 class CharacterNotes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             editing: props.editing,
-            csrftoken: cookie.load('csrftoken'),
             // TODO: Should be filled in componentDidMount if left undefined.
             notes: undefined,
             old_value: ""
@@ -17,40 +14,22 @@ class CharacterNotes extends React.Component {
     }
 
     componentDidMount() {
-        fetch(this.props.url)
-            .then((response) =>
-        {
-            response.json().then((json) => {
-                this.setState({notes: json.notes});
-            });
+        rest.getData(this.props.url).then((json) => {
+            this.setState({notes: json.notes});
         });
     }
 
     handleSubmit(event) {
         /* PATCH the backend character with updated values. */
         event.preventDefault();
-        fetch(this.props.url, {
-            method: "PATCH",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRFToken': this.state.csrftoken
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-                "notes": this.state.notes
+        rest.patch(this.props.url, {
+            "notes": this.state.notes
+        }).then(function () {
+            this.setState({
+                editing: false
             })
-        }).then((response) => {
-            // TODO: should use more generic handling for the error values,
-            // see, e.g., fetch README.md.
-            if (response.status >= 200 && response.status < 300) {
-                this.setState({
-                    editing: false
-                });
-                return response.json();
-            } else {
-                throw new Error(response.statusText);
-            }
+        }.bind(this)).catch(function (reason) {
+            console.log("Failed to update char:", reason)
         });
     }
 

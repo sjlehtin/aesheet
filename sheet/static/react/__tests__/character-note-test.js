@@ -4,32 +4,28 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
+var rest = require('sheet-rest');
+
 const CharacterNotes = require('../CharacterNotes').default;
 
 describe('character note tests', function (){
     "use strict";
 
-    var fetch_prev;
-    var mockFetch;
-    var mockPromise;
+    var promises;
+
+    var patchOk = function () {
+        var response = Promise.resolve({});
+        rest.patch.mockReturnValue(response);
+        promises.push(response);
+    };
 
     beforeEach(function () {
-        fetch_prev = global.fetch;
-        mockFetch = jest.genMockFunction();
-
-        mockPromise = Promise.resolve(
-            new Response('{"notes": "this is char pk 42 notes"}', {
-                status: 200,
-                headers: {
-                    'Content-type': 'application/json'
-                }
-            }));
-        mockFetch.mockReturnValue(mockPromise);
-        global.fetch = mockFetch;
-    });
-
-    afterEach(function () {
-        global.fetch = fetch_prev;
+        var mockPromise = Promise.resolve({"notes": "this is char pk 42 notes"});
+        rest.getData = jest.genMockFunction();
+        rest.patch = jest.genMockFunction();
+        rest.getData.mockReturnValue(mockPromise);
+        promises = [];
+        promises.push(mockPromise);
     });
 
     it('starts in non-editing mode', function () {
@@ -110,67 +106,31 @@ describe('character note tests', function (){
     });
 
 
-    it('obtains initial data with fetch', function () {
-        var character;
-        var promiseDelivered = false;
-
-        runs(function () {
-            character = TestUtils.renderIntoDocument(
+    it('obtains initial data with fetch', function (done) {
+        var character = TestUtils.renderIntoDocument(
             <CharacterNotes url="/rest/characters/42" />
-            );
+        );
 
-            expect(mockFetch.mock.calls[0][0]).toEqual("/rest/characters/42");
-
-            mockPromise.then(function () {
-                promiseDelivered = true;
-            });
-        });
-
-        waitsFor(function () {
-            return promiseDelivered === true
-        }, "for the backend to be queried", 1000);
-
-        runs(function () {
+        Promise.all(promises).then(function () {
+            expect(rest.getData.mock.calls[0][0]).toEqual("/rest/characters/42");
             expect(character.state.notes).toContain('this is char pk 42 notes');
+            done();
         });
     });
 
-    it('updates state to the server', function () {
+    it('updates state to the server', function (done) {
         var character;
-        var characterNode;
 
-        var promiseDelivered = false;
-        var promise2Delivered = false;
-        var mockPromise2;
-
-        runs(function () {
-            character = TestUtils.renderIntoDocument(
+        character = TestUtils.renderIntoDocument(
             <CharacterNotes url="/rest/characters/42" editing={true} />
-            );
-            var characterNode = ReactDOM.findDOMNode(character);
+        );
 
-            expect(mockFetch.mock.calls[0][0]).toEqual("/rest/characters/42");
+        // TODO: seems to work without this, probably because no asserts
+        // require that the promise would be delivered successfully.
+        patchOk();
 
-            mockPromise.then(function () {
-                promiseDelivered = true;
-            });
-        });
-
-        waitsFor(function () {
-            return promiseDelivered === true
-        }, "for the backend to be queried", 1000);
-
-        runs(function () {
-            mockPromise2 = Promise.resolve(
-                new Response('{}', {
-                    status: 200,
-                    headers: {
-                        'Content-type': 'application/json'
-                    }
-                }));
-            mockFetch.mockReturnValue(mockPromise2);
-
-            // Cause an update to the backend.
+        Promise.all(promises).then(function () {
+            expect(rest.getData.mock.calls[0][0]).toEqual("/rest/characters/42");
 
             var areaNode = TestUtils.findRenderedDOMComponentWithTag(
                 character, "textarea");
@@ -180,26 +140,18 @@ describe('character note tests', function (){
 
             expect(character.state.notes).toEqual("new note");
 
-            characterNode = ReactDOM.findDOMNode(character);
+            var submitButton= TestUtils.findRenderedDOMComponentWithTag(
+                character, "input");
 
-            var submitButton = characterNode.querySelectorAll(
-                    'input[type=submit]')[0];
             TestUtils.Simulate.click(submitButton);
 
-            mockPromise2.then(function () {
-                promise2Delivered = true;
-            });
+            expect(rest.patch.mock.calls[0][0]).toEqual("/rest/characters/42");
+            expect(rest.patch.mock.calls[0][1]).toEqual({notes: "new note"});
+
+        }).then(function () {
+            expect(character.state.editing).toEqual(false);
+            done();
         });
-
-        waitsFor(function () {
-            return promise2Delivered === true
-        }, "for the backend to be queried again", 1000);
-
-        runs(function () {
-            expect(mockFetch.mock.calls[1][0]).toEqual("/rest/characters/42");
-            expect(mockFetch.mock.calls[1][1].body).toContain("new note");
-
-        });
-    })
+    });
 });
 
