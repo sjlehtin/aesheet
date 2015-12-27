@@ -1,10 +1,10 @@
-{% if char.weapons %}
+{% if sheet.weapons %}
 <table class="combat">
 <thead>
       <tr >
       <th />
       <th>ROA</th>
-      {% for act in char.actions %}
+      {% for act in sheet.actions %}
          <th>{{ act }}</th>
       {% endfor %}
       <th colspan="5">Attack</th>
@@ -16,7 +16,7 @@
         * wrong hand penalty for SEC
 {% endcomment %}
 
-    {% for item in char.weapons %}
+    {% for item in sheet.weapons %}
         <tbody>
       <tr>
       <td class="weapon name" rowspan="3">

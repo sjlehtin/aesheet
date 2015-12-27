@@ -1,6 +1,6 @@
-{% if char.spell_effects %}
+{% if sheet.spell_effects %}
 <ul>
-    {% for item in char.spell_effects %}
+    {% for item in sheet.spell_effects %}
         <li>{{ item.item }} 
            <div class="edit-control">
               <form action="{{ act }}" method="post">

@@ -1,7 +1,7 @@
 {% load sheet_extras %}
 
 <div class="armor">
-  {{ char.helm }} + {{ char.armor }}
+  {{ sheet.helm }} + {{ sheet.armor }}
   <table class="">
     <thead>
       <tr><th></th><th></th>
@@ -14,22 +14,22 @@
 	level">PL</th></tr>
     </thead>
     <tr><td class="roll">8</td><td class="location" title="Head">H</td>
-        {% render_armor char.helm "h" %}
+        {% render_armor sheet.helm "h" %}
       </tr>
     <tr><td class="roll">5-7</td><td class="location" title="Torso">T</td>
-        {% render_armor char.armor "t" %}
+        {% render_armor sheet.armor "t" %}
     </tr>
     <tr><td class="roll">4</td><td class="location" title="RA">RA</td>
-        {% render_armor char.armor "ra" %}
+        {% render_armor sheet.armor "ra" %}
     </tr>
     <tr><td class="roll">3</td><td class="location" title="Right leg">RL</td>
-        {% render_armor char.armor "rl" %}
+        {% render_armor sheet.armor "rl" %}
     </tr>
     <tr><td class="roll">2</td><td class="location" title="Left arm">LA</td>
-        {% render_armor char.armor "la" %}
+        {% render_armor sheet.armor "la" %}
     </tr>
     <tr><td class="roll">1</td><td class="location" title="Left leg">LL</td>
-        {% render_armor char.armor "ll" %}
+        {% render_armor sheet.armor "ll" %}
     </tr>
   </table>
 </div>

@@ -1,5 +1,5 @@
-{% if char.ranged_weapons %}
-    {% include "sheet/sheet_detail/ranged_attacks.html" with actions=char.ranged_actions weapons=char.ranged_weapons %}
+{% if sheet.ranged_weapons %}
+    {% include "sheet/sheet_detail/ranged_attacks.html" with actions=sheet.ranged_actions weapons=sheet.ranged_weapons %}
 {% else %}
 <p>No ranged weapons.</p>
 {% endif %}

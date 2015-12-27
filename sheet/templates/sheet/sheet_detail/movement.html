@@ -16,7 +16,7 @@
         </thead>
         <tbody>
         <tr>
-            {% with rates=char.movement_rates %}
+            {% with rates=sheet.movement_rates %}
                 <td>
                     <div>
                         H = {{ rates.jumping_distance|floatformat }} m
@@ -39,7 +39,7 @@
         <h4 class="panel-title">Overland movement</h4>
     </div>
     <table class="table">
-    {% with rates=char.overland_movement %}
+    {% with rates=sheet.overland_movement %}
         <thead>
         <tr>
             <th></th>

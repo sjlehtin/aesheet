@@ -45,7 +45,7 @@ class ItemHandlingTestCase(TestCase):
             return [wpn.name for wpn in char.weapons()]
         if not accessor:
             accessor = get_weapons
-        self.assertIn(weapon, accessor(response.context['char']))
+        self.assertIn(weapon, accessor(response.context['sheet']))
         return response
 
     def add_ranged_weapon_and_verify(self, weapon_template, quality, weapon):
@@ -119,7 +119,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertNotContains(response, "No weapons.")
-        wpn = response.context['char'].weapons()[0]
+        wpn = response.context['sheet'].weapons()[0]
         self.assertEquals(wpn.name, 'Greatsword L1')
 
         tmpl = WeaponTemplate.objects.get(name='Greatsword, 2h')
@@ -153,7 +153,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertNotContains(response, "No helmet.")
-        self.assertEquals(response.context['char'].helm().name,
+        self.assertEquals(response.context['sheet'].helm().name,
                           'Basinet wfa L5')
         # Remove helmet.
         req_data = { 'remove-form_id' : 'RemoveGeneric',
@@ -173,7 +173,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertNotContains(response, "No armor.")
-        self.assertEquals(response.context['char'].armor().name,
+        self.assertEquals(response.context['sheet'].armor().name,
                           'Plate mail L5')
 
         # Remove armor.
@@ -195,7 +195,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertNotContains(response, "No spell effects.")
-        self.assertEquals(response.context['char'].spell_effects()[0].name,
+        self.assertEquals(response.context['sheet'].spell_effects()[0].name,
                           'Bull\'s strength L5')
 
         req_data = { 'remove-form_id' : 'RemoveGeneric',
@@ -209,13 +209,13 @@ class ItemHandlingTestCase(TestCase):
     def test_weapon_properties(self):
         response = self.client.get(reverse(views.sheet_detail,
                                    args=[2]))
-        weapon = response.context['char'].weapons()[0]
+        weapon = response.context['sheet'].weapons()[0]
 
         self.assertEqual(weapon.name, "Voulge")
         self.assertTrue(unicode(weapon.full.damage()).endswith("+1"))
         self.assertEqual(weapon.bypass, -3)
 
-        weapon = response.context['char'].ranged_weapons()[0]
+        weapon = response.context['sheet'].ranged_weapons()[0]
 
         self.assertEqual(weapon.name, "Javelin L1")
         self.assertEqual(weapon.bypass, -2)
@@ -223,8 +223,8 @@ class ItemHandlingTestCase(TestCase):
     def test_armor_protection_level(self):
         response = self.client.get(reverse(views.sheet_detail,
                                            args=[2]))
-        self.assertEqual(response.context['char'].armor().armor_t_pl, 3)
-        self.assertEqual(response.context['char'].helm().armor_h_pl, 2)
+        self.assertEqual(response.context['sheet'].armor().armor_t_pl, 3)
+        self.assertEqual(response.context['sheet'].helm().armor_h_pl, 2)
 
     def test_add_firearm(self):
         ammo = factories.AmmunitionFactory(label="9Pb",
@@ -953,7 +953,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.assertRedirects(response, self.sheet_url)
         response = self.client.get(self.sheet_url)
         self.assertContains(response, "Weapon combat")
-        skills = response.context['char'].skills()[0]
+        skills = response.context['sheet'].skills()[0]
         self.assertEquals(skills.skill.name, 'Weapon combat')
         self.assertEquals(skills.level, 5)
 
@@ -972,9 +972,9 @@ class EdgeAndSkillHandlingTestCase(TestCase):
                                         level=4)
         response = self.client.get(self.sheet_url)
         self.assertTrue('Unarmed combat' in
-                        response.context['char'].missing_skills.values())
+                        response.context['sheet'].missing_skills.values())
 
-        skills = response.context['char'].skills()
+        skills = response.context['sheet'].skills()
         self.assertEquals(skills[0].skill.name, 'Martial arts expertise')
         self.assertEquals(skills[0].level, 4)
 
@@ -983,9 +983,9 @@ class EdgeAndSkillHandlingTestCase(TestCase):
                                         level=4)
         response = self.client.get(self.sheet_url)
         self.assertTrue('Unarmed combat' not in
-                        response.context['char'].missing_skills.values())
+                        response.context['sheet'].missing_skills.values())
         unarmed = filter(lambda xx: xx.skill.name == "Unarmed combat",
-                        response.context['char'].skills())
+                        response.context['sheet'].skills())
         self.assertEqual([sk.skill.name for sk in unarmed],
                          ["Unarmed combat"])
 
@@ -999,11 +999,11 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.assertRedirects(response, self.sheet_url)
         response = self.client.get(self.sheet_url)
         self.assertNotContains(response, "No edges.")
-        ce = response.context['char'].edges()[0]
+        ce = response.context['sheet'].edges()[0]
         self.assertEquals(ce.edge.edge.name, 'Toughness')
         self.assertEquals(ce.edge.level, 2)
 
-        self.assertEqual(response.context['char'].character
+        self.assertEqual(response.context['sheet'].character
                          .edge_level("Toughness"), 2)
 
         # Remove edge.
