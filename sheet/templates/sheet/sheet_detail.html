@@ -23,38 +23,38 @@ coverage of the sheet functionality in getting worse; it should only increase,
 but naturally with the focus moving towards the JavaScript unit-tests and
 perhaps Robot-system tests.
 {% endcomment %}
-{% block title %} {{ char.name }}'s sheet {% endblock %}
+{% block title %} {{ sheet.name }}'s sheet {% endblock %}
 
 {% block content %}
     <div class="row">
     <div class="col-md-3">
-<h1>{{ char.name }}</h1>
-{{ char.race }}
-{{ char.occupation }}
+<h1>{{ sheet.name }}</h1>
+{{ sheet.race }}
+{{ sheet.occupation }}
     </div>
     <div class="col-md-2">
         <div class="edit-control">
-        <a href="{% url "edit_character" char.character.id %}">
+        <a href="{% url "edit_character" sheet.character.id %}">
       Edit base character</a>
         </div>
     </div>
     <div class="col-md-2">
         <div class="edit-control">
-    <a href="{% url "edit_sheet" char.id %}">
+    <a href="{% url "edit_sheet" sheet.id %}">
       Edit base sheet</a>
             </div>
     </div>
     <div class="col-md-2">
         <div class="edit-control">
-    <a href="{% url "copy_sheet" sheet_id=char.id %}">
+    <a href="{% url "copy_sheet" sheet_id=sheet.id %}">
       Copy this sheet</a>
         </div>
     </div>
     <div class="col-md-3 no-print">
     <div class="panel panel-default">
         <div class="panel-heading">Owner</div>
-        <div class="panel-body">{{ char.owner }}
-            {% if char.private %}
+        <div class="panel-body">{{ sheet.owner }}
+            {% if sheet.private %}
                 <span class="label label-danger">Private</span>
             {% endif %}</div>
     </div>
@@ -65,18 +65,18 @@ perhaps Robot-system tests.
 <div class="row">
 <div class="col-md-4">
 <p>
-{{ char.character.description }}
+{{ sheet.character.description }}
 </p>
 <p>
-{{ char.description }}
+{{ sheet.description }}
 </p>
 
 <div class="stats">
 
-{% url "sheet_detail" char.id as act %}
+{% url "sheet_detail" sheet.id as act %}
 
 <table class="base">
-{% for stat in char.base_stats %}
+{% for stat in sheet.base_stats %}
     {% include "sheet/sheet_detail/stat.html" %}
 {% endfor %}
 </table>
@@ -85,12 +85,12 @@ perhaps Robot-system tests.
 </div>
 <div class="col-md-8">
 <div>
-    {% if char.character.portrait %}
-    <img id="portrait" src="{{ char.character.portrait.url }}" title="{{ char.name }}"
-            class="img-rounded">
+    {% if sheet.character.portrait %}
+    <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
+         class="img-rounded">
     {% else %}
         <div class="edit-control">You can add a portrait for your character in
-            the <a href="{% url "edit_character" char.character.id %}">
+            the <a href="{% url "edit_character" sheet.character.id %}">
                 base character edit</a>.</div>
     {% endif %}
 </div>
@@ -101,18 +101,18 @@ perhaps Robot-system tests.
 <div class="col-md-4">
 
 <table class="derived">
-{% for stat in char.derived_stats %}
+{% for stat in sheet.derived_stats %}
     {% include "sheet/sheet_detail/stat.html" %}
 {% endfor %}
 </table>
 
 <div class="xp">
-<label>XP:</label> {{ char.xp_used_stats }} +
-{% if char.hero %}
-{{ char.xp_used_hero }} + 
+<label>XP:</label> {{ sheet.xp_used_stats }} +
+{% if sheet.hero %}
+{{ sheet.xp_used_hero }} +
 {% endif %}
-{{ char.xp_used_edges }} + 
-{{ char.xp_used_ingame }} = {{ char.xp_used }} / {{char.total_xp}}
+{{ sheet.xp_used_edges }} +
+{{ sheet.xp_used_ingame }} = {{ sheet.xp_used }} / {{ sheet.total_xp}}
 
 <div class="edit-control">
     <form action="{{ act }}" method="post">
@@ -126,7 +126,7 @@ perhaps Robot-system tests.
 
 <div class="col-md-2">
     <table class="derived">
-{% with b=char.body sta=char.stamina mana=char.mana %}
+{% with b=sheet.body sta=sheet.stamina mana=sheet.mana %}
 {# XXX Temporary stamina and body #}
   <tr class="body">
     <td>B</td><td>{{ b.base}}</td>
@@ -158,7 +158,7 @@ perhaps Robot-system tests.
 
     <div>
         <ul>
-            <li>Weight carried: {{ char.weight_carried }} kg </li>
+            <li>Weight carried: {{ sheet.weight_carried }} kg </li>
         </ul>
     </div>
 </div>
@@ -186,13 +186,13 @@ perhaps Robot-system tests.
 <h3>Ranged combat</h3>
 {% include "sheet/sheet_detail/ranged_weapons.html" %}
 
-{% if char.campaign.has_firearms %}
+{% if sheet.campaign.has_firearms %}
 <h3>Firearms</h3>
 {% include "sheet/sheet_detail/edit_firearms.html" %}
 {% endif %}
 
 <div class="row">
-    {% if char.campaign.has_spells %}
+    {% if sheet.campaign.has_spells %}
         <div class="col-sm-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -265,22 +265,22 @@ perhaps Robot-system tests.
         </div>
         <div class="panel-body">
                     <table>
-                        {% include "sheet/sheet_detail/skill.html" with skill=char.endurance %}
-                        {% include "sheet/sheet_detail/skill.html" with skill=char.balance %}
-                        {% for skill in char.physical_skills %}
+                        {% include "sheet/sheet_detail/skill.html" with skill=sheet.endurance %}
+                        {% include "sheet/sheet_detail/skill.html" with skill=sheet.balance %}
+                        {% for skill in sheet.physical_skills %}
                             {% include "sheet/sheet_detail/skill.html" %}
                         {% endfor %}
-                        {% for skill in char.skills %}
+                        {% for skill in sheet.skills %}
                             {% include "sheet/sheet_detail/skill.html" %}
                         {% endfor %}
                     </table>
                     <div>
-                        SP: {{ char.initial_sp }} + {{ char.edge_sp }}
-                        + {{ char.gained_sp }} =
-                        {{ char.total_sp }} / {{ char.used_sp }}
+                        SP: {{ sheet.initial_sp }} + {{ sheet.edge_sp }}
+                        + {{ sheet.gained_sp }} =
+                        {{ sheet.total_sp }} / {{ sheet.used_sp }}
                     </div>
-                    <div>Age SP: {{ char.age_sp }} </div>
-                    {% with char.optimized_age_sp as opt %}
+                    <div>Age SP: {{ sheet.age_sp }} </div>
+                    {% with sheet.optimized_age_sp as opt %}
                         <div>Munch munch: +{{ opt.lrn }} LRN, + {{ opt.int }}
                             INT
                         </div>
@@ -310,12 +310,12 @@ perhaps Robot-system tests.
             </div>
         </div>
         </div>
-        <div>Missing skills: {{ char.missing_skills }}</div>
+        <div>Missing skills: {{ sheet.missing_skills }}</div>
 
 
         <div id="log-entries">
             <ul>
-                {% for entry in char.character.characterlogentry_set.all %}
+                {% for entry in sheet.character.characterlogentry_set.all %}
                     <li>{{ entry.timestamp|naturaltime }}: {{ entry }}</li>
                 {% endfor %}
             </ul>
@@ -357,7 +357,7 @@ $(document).ready(function () {
 <script src="{% static "react/bundle.js" %}"></script>
 <script type="application/javascript">
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes,
-            {url: '/rest/characters/{{ char.character.pk }}/'});
+            {url: '/rest/characters/{{ sheet.character.pk }}/'});
     SheetApp.render(node, document.getElementById('character-notes-container'));
 </script>
 

@@ -815,11 +815,11 @@ def sheet_detail(request, sheet_id=None):
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
 
-    c = {'char': SheetView(sheet),
+    c = {'sheet': SheetView(sheet),
          'notes': notes,
          'sweep_fire_available': any([wpn.has_sweep_fire()
                                       for wpn in sheet.firearms.all()]),
-    }
+         }
     c.update(forms)
     return render(request, 'sheet/sheet_detail.html', c)
 
