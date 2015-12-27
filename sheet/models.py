@@ -606,8 +606,8 @@ class Skill(ExportedModel):
     # TODO: Fix construction skill.
 
     required_skills = models.ManyToManyField('self', symmetrical=False,
-                                             blank=True, null=True)
-    required_edges = models.ManyToManyField(Edge, blank=True, null=True)
+                                             blank=True)
+    required_edges = models.ManyToManyField(Edge, blank=True)
 
     skill_cost_0 = models.IntegerField(blank=True, null=True)
     skill_cost_1 = models.IntegerField(blank=True, null=True)
@@ -748,7 +748,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
     skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
-                                           blank=True, null=True)
+                                           blank=True)
 
     @classmethod
     def dont_export(cls):
@@ -1606,6 +1606,8 @@ class Sheet(models.Model):
     description = models.TextField(blank=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
+    # TODO: These relations would need to go through separate tables, e.g.,
+    # SheetWeapon, to allow adding parameters like "in_inventory", or "order".
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
     firearms = models.ManyToManyField(Firearm, blank=True)
