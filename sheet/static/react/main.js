@@ -4,6 +4,9 @@ import React from 'react'
 import { render } from 'react-dom'
 
 import CharacterNotes from "CharacterNotes"
+import StatRow from "StatRow"
+
+var rest = require('sheet-rest');
 
 /* This is what this would look like in JSX.  We cannot use this directly, or
    it would be even more awkward, as we need to get the URL for the REST API
@@ -19,7 +22,9 @@ import CharacterNotes from "CharacterNotes"
 
 /* Expose for use in Django templates. */
 module.exports = {
+    "rest": rest,
     "React": React,
     "CharacterNotes": CharacterNotes,
+    "StatRow": StatRow,
     "render": render
 }

@@ -1,13 +1,30 @@
 <html>
 <title>React Test</title>
 <body>
+<table>
+    <tbody id="stat-row"><tr><td>Loading...</td></tr></tbody>
+</table>
 <div id="character-container">Loading...</div>
-
 <script src="bundle.js">
 </script>
 <script type="application/javascript">
+    SheetApp.rest.getData('/rest/sheets/1/').then(function (sheet) {
+        console.log(sheet);
+        var charURL = `/rest/characters/${sheet.character}/`;
+        SheetApp.rest.getData(charURL).then(
+                function (char) {
+                    console.log(char);
+                    var row = SheetApp.React.createElement(SheetApp.StatRow,
+                            {stat: "fit", initialChar: char, initialSheet: sheet,
+                            url: charURL});
+                    SheetApp.render(row, document.getElementById('stat-row'));
+                    }
+        );
+    });
+
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes, {url: '/rest/characters/1/'});
     SheetApp.render(node, document.getElementById('character-container'));
+
 </script>
 </body>
 </html>
