@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 import sheet.factories as factories
 import views
 import sheet.models as models
+from serializers import SheetSerializer, CharacterSerializer
 
 class SheetTestCase(TestCase):
     def setUp(self):
@@ -43,6 +44,15 @@ class SheetTestCase(TestCase):
 
     def test_movement_rates(self):
         pass
+
+    def test_stat_modifications(self):
+        serializer = SheetSerializer(self.sheet)
+        for stat in models.BASE_STATS:
+            self.assertIn('mod_' + stat.lower(), serializer.data)
+
+    def test_weight(self):
+        serializer = SheetSerializer(self.sheet)
+        self.assertIn('weight_carried', serializer.data)
 
 
 class SheetWeaponTestCase(TestCase):
@@ -152,3 +162,9 @@ class CharacterTestCase(TestCase):
         # TODO: A log entry should be generated.
         self.assertEqual(char.times_wounded, 2,
                          "Other aspects should not change")
+
+    def test_stat_modifications(self):
+        serializer = CharacterSerializer(self.character)
+        for stat in models.BASE_STATS:
+            self.assertIn('mod_' + stat.lower(), serializer.data)
+
