@@ -6,7 +6,7 @@ class CharacterNotes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            editing: props.editing,
+            editing: props.initialEditing,
             // TODO: Should be filled in componentDidMount if left undefined.
             notes: undefined,
             old_value: ""
@@ -61,11 +61,12 @@ class CharacterNotes extends React.Component {
         var notesField;
         if (!this.state.editing) {
             notesField = (<div>
-                <textarea style={fieldStyle} onClick={this.handleEdit.bind(this)}
+                <textarea style={fieldStyle}
+                          onClick={this.handleEdit.bind(this)}
                  disabled value={this.state.notes} />
                 <a href="#" onClick={this.handleEdit.bind(this)}
                    className="edit-control">Edit</a>
-                </div>);
+            </div>);
         } else {
             notesField = (
                 <form><textarea
@@ -88,5 +89,7 @@ class CharacterNotes extends React.Component {
         </div>)
     }
 }
+
+CharacterNotes.defaultProps = { initialEditing: false };
 
 export default CharacterNotes;
