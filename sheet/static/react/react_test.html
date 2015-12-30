@@ -14,9 +14,15 @@
         SheetApp.rest.getData(charURL).then(
                 function (char) {
                     console.log(char);
-                    var row = SheetApp.React.createElement(SheetApp.StatRow,
-                            {stat: "fit", initialChar: char, initialSheet: sheet,
-                            url: charURL});
+                    var onMod = function (stat, oldValue, newValue) {
+                                console.log("onChange:", stat, oldValue, newValue);
+                            };
+                    var row = SheetApp.React.createElement(
+                            SheetApp.StatRow,
+                            {stat: "fit", initialChar: char,
+                                initialSheet: sheet,
+                                url: charURL,
+                                onMod: onMod });
                     SheetApp.render(row, document.getElementById('stat-row'));
                     }
         );

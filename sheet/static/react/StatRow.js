@@ -22,8 +22,6 @@ class StatRow extends React.Component {
 
     handleModification(event, amount) {
         event.stopPropagation();
-        /* TODO: the many places in need of update highlights the fact that
-           the derived attributes should perhaps not be part of the state. */
         var oldValue = this.state.cur;
         var newValue = this.state.cur + amount;
 
@@ -36,9 +34,13 @@ class StatRow extends React.Component {
            moment before sending?  */
         var data = {};
         data['cur_' + this.state.stat] = newValue;
-        rest.patch(this.props.url, data).catch(function (reason) {
+
+        rest.patch(this.props.url, data).then((response) => {
+            if (typeof(this.props.onMod) !== "undefined") {
+                this.props.onMod(this.state.stat, oldValue, newValue);
+            }
+        }).catch((reason) => {
             this.setState({cur: oldValue});
-            console.log("Failed to update char:", reason);
         });
     }
 
@@ -66,19 +68,24 @@ class StatRow extends React.Component {
     }
 
     render() {
+
         var changeStyle = {
             color: "#a9a9a9",
             fontSize: "80%",
             minWidth: "2.5em"
         };
+
         var baseStyle = {
             textAlign: "right",
+            padding: 0,
             ///paddingLeft: 5,
             minWidth: "2em"
         };
         var effStyle = { fontWeight: "bold" };
         effStyle = Object.assign(effStyle, baseStyle);
         var statStyle = { fontWeight: "bold" };
+
+
         var controlStyle = {
             visibility: this.state.showEditControls ? "visible" : "hidden",
             fontWeight: "bold"
@@ -87,7 +94,7 @@ class StatRow extends React.Component {
             color: "green",
             paddingLeft: 5,
             cursor: "pointer",
-            fontSize: "150%",
+            //fontSize: "150%",
 
             // No selection of the text on double click.
             MozUserSelect: "none",
@@ -101,6 +108,7 @@ class StatRow extends React.Component {
         var change = this.state.cur
             - this.props.initialChar["start_" + this.state.stat];
         var base = this.state.cur + this.state.hard_mod;
+
         return (
             <tr onMouseEnter={this.handleMouseEnter.bind(this)}
                 onMouseLeave={this.handleMouseOut.bind(this)}
@@ -113,14 +121,14 @@ class StatRow extends React.Component {
                 </td>
                 {/* Tap here should not make the controls disappear. */}
                 <td onTouchEnd={(e) => e.stopPropagation()}>
-                    <span style={controlStyle}>
+                    <div style={controlStyle}>
                         <span ref={(c) => this._increaseButton = c }
                               style={incStyle}
                               onClick={this.handleIncrease.bind(this)}>+</span>
                         <span ref={(c) => this._decreaseButton = c }
                               style={decStyle}
                               onClick={this.handleDecrease.bind(this)}>-</span>
-                    </span>
+                    </div>
                 </td>
             </tr>)
     }
@@ -130,7 +138,8 @@ StatRow.propTypes = {
     stat: React.PropTypes.string.isRequired,
     initialChar: React.PropTypes.object.isRequired,
     initialSheet: React.PropTypes.object.isRequired,
-    url: React.PropTypes.string.isRequired
+    url: React.PropTypes.string.isRequired,
+    onMod: React.PropTypes.func
 };
 
 export default StatRow;
