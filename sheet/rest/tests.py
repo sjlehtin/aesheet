@@ -47,7 +47,7 @@ class SheetTestCase(TestCase):
 
     def test_stat_modifications(self):
         serializer = SheetSerializer(self.sheet)
-        for stat in models.BASE_STATS:
+        for stat in models.ALL_STATS:
             self.assertIn('mod_' + stat.lower(), serializer.data)
 
     def test_weight(self):
@@ -165,7 +165,7 @@ class CharacterTestCase(TestCase):
 
     def test_stat_modifications(self):
         serializer = CharacterSerializer(self.character)
-        for stat in models.BASE_STATS:
+        for stat in models.ALL_STATS:
             self.assertIn('mod_' + stat.lower(), serializer.data)
 
     def test_generated_log_entries(self):

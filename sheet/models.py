@@ -256,6 +256,8 @@ class Character(models.Model):
         self.skill_lookup = SkillLookup(self)
 
     BASE_STATS = ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]
+    DERIVED_STATS = ["mov", "dex", "imm"]
+    ALL_STATS = BASE_STATS + DERIVED_STATS
 
     def get_ability(self, abilities, ability, accessor):
         """
@@ -579,11 +581,9 @@ SKILL_TYPES = [
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
 BASE_STATS = Character.BASE_STATS
-STAT_TYPES = [st.upper() for st in BASE_STATS] + [
-    "DEX",
-    "MOV",
-    "IMM",
-    ]
+DERIVED_STATS = Character.DERIVED_STATS
+ALL_STATS = Character.ALL_STATS
+STAT_TYPES = [st.upper() for st in ALL_STATS]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
 

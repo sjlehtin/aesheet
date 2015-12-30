@@ -16,6 +16,9 @@ class SheetSerializer(serializers.ModelSerializer):
     mod_wil = serializers.IntegerField(read_only=True)
     mod_cha = serializers.IntegerField(read_only=True)
     mod_pos = serializers.IntegerField(read_only=True)
+    mod_mov = serializers.IntegerField(read_only=True)
+    mod_dex = serializers.IntegerField(read_only=True)
+    mod_imm = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = sheet.models.Sheet
@@ -31,6 +34,9 @@ class CharacterSerializer(serializers.ModelSerializer):
     mod_wil = serializers.IntegerField(read_only=True)
     mod_cha = serializers.IntegerField(read_only=True)
     mod_pos = serializers.IntegerField(read_only=True)
+    mod_mov = serializers.IntegerField(read_only=True)
+    mod_dex = serializers.IntegerField(read_only=True)
+    mod_imm = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = sheet.models.Character
