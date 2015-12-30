@@ -8,7 +8,13 @@ var exports = function () {
         getData: function (url) {
             "use strict";
             return new Promise(function (resolved, rejected) {
-                fetch(url).then((response) => {
+                fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                }).then((response) => {
                     response.json().then((json) => {
                         resolved(json);
                     });
