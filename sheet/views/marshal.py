@@ -143,7 +143,11 @@ def sort_by_dependencies(header, rows):
 
     for row in rows:
         required_skills = get_required(row[1][required_index])
-
+        # Omit useless self loops.
+        try:
+            required_skills.remove(row[1][name_index])
+        except ValueError:
+            pass # We do not care if the value was not in the list.
         if all_satisfied(required_skills):
             satisfy(row)
         else:
