@@ -168,3 +168,36 @@ class CharacterTestCase(TestCase):
         for stat in models.BASE_STATS:
             self.assertIn('mod_' + stat.lower(), serializer.data)
 
+    def test_generated_log_entries(self):
+        update_view = views.CharacterViewSet.as_view({
+            'patch': 'partial_update'})
+        req = self.request_factory.patch(self.url, {'gained_sp': 6,
+                                                    'cur_fit': 50})
+        force_authenticate(req, user=self.owner)
+        response = update_view(req, pk=self.character.pk)
+        self.assertEqual(response.status_code, 200)
+
+        qs = models.CharacterLogEntry.objects.filter(character=self.character)
+        self.assertEqual(len(qs), 2, "There should be two field changes.")
+
+        fit_entry, sp_entry = sorted(qs, key=lambda xx:  xx.field)
+        self.assertEqual(fit_entry.amount, 7)
+        self.assertEqual(fit_entry.field, "cur_fit")
+
+        self.assertEqual(sp_entry.amount, 6)
+        self.assertEqual(sp_entry.field, "gained_sp")
+
+    def test_generated_log_entries_non_integer(self):
+        update_view = views.CharacterViewSet.as_view({
+            'patch': 'partial_update'})
+        req = self.request_factory.patch(self.url, {'deity': "Jahve"})
+        force_authenticate(req, user=self.owner)
+        response = update_view(req, pk=self.character.pk)
+        self.assertEqual(response.status_code, 200)
+
+        qs = models.CharacterLogEntry.objects.filter(character=self.character)
+        self.assertEqual(len(qs), 1, "There should be one field change.")
+
+        deity_entry = qs[0]
+        self.assertEqual(deity_entry.amount, 0)
+        self.assertEqual(deity_entry.field, "deity")

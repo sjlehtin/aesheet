@@ -6,7 +6,9 @@ import sheet.models as models
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
-import json
+from django.db import transaction
+from sheet.forms import log_stat_change
+
 
 class WeaponAmmunitionList(generics.ListAPIView):
     serializer_class = serializers.AmmunitionSerializer
@@ -63,3 +65,19 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
     queryset = sheet.models.Character.objects.all()
     serializer_class = serializers.CharacterSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            for field, new_value in serializer.validated_data.items():
+                old_value = getattr(instance, field)
+                if isinstance(old_value, int):
+                    change = new_value - old_value
+                else:
+                    change = 0
+                log_stat_change(instance, request, field, change)
+            self.perform_update(serializer)
+        return Response(serializer.data)
