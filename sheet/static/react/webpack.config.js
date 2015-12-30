@@ -1,6 +1,18 @@
 var path = require('path');
 var webpack = require('webpack');
 
+var plugins = [
+        new webpack.ProvidePlugin({
+            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
+        })
+    ];
+
+var minimize = process.argv.indexOf('--no-minimize') === -1 ? true : false;
+
+if (minimize) {
+    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
+}
+
 module.exports = {
     entry: "./main.js",
     output: {
@@ -11,11 +23,7 @@ module.exports = {
         library: "SheetApp"
     },
 
-    plugins: [
-        new webpack.ProvidePlugin({
-            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-        })
-    ],
+    plugins: plugins,
 
     resolve: {
         root: path.resolve('.'),
