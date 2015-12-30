@@ -28,7 +28,7 @@ var exports = function () {
         patch: function (url, data) {
             "use strict";
 
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolved, rejected) {
                 fetch(url, {
                     method: "PATCH",
                     headers: {
@@ -42,14 +42,16 @@ var exports = function () {
                     // TODO: should use more generic handling for the error values,
                     // see, e.g., fetch README.md.
                     if (response.status >= 200 && response.status < 300) {
-                        resolve(response.json());
+                        response.json().then((json) => {
+                            resolved(json);
+                        }).catch((err) => {rejected(err)});
                     } else {
-                        reject({
+                        rejected({
                             status: response.status,
-                            data: response.statusText}
-                        );
+                            data: response.statusText
+                        });
                     }
-                });
+                }).catch((e) => { rejected(e)});
             });
         }
     }
