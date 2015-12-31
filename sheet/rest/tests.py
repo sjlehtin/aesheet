@@ -201,3 +201,21 @@ class CharacterTestCase(TestCase):
         deity_entry = qs[0]
         self.assertEqual(deity_entry.amount, 0)
         self.assertEqual(deity_entry.field, "deity")
+
+
+class EdgeTestCase(TestCase):
+    def setUp(self):
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.edge_level = factories.EdgeLevelFactory(edge__name="Toughness")
+
+    def test_url(self):
+        client = APIClient()
+        url = '/rest/edgelevels/{}/'.format(self.edge_level.pk)
+        self.assertTrue(client.login(username="luke", password="foobar"))
+        response = client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("edge", response.data)
+        self.assertEqual(response.data['edge'], "Toughness")
+
+

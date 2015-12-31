@@ -5,6 +5,7 @@ from rest_framework import routers
 router = routers.SimpleRouter()
 router.register(r'sheets', views.SheetViewSet)
 router.register(r'characters', views.CharacterViewSet)
+router.register(r'edgelevels', views.EdgeLevelViewSet)
 
 urlpatterns = router.urls + [
     url(r'^ammunition/firearm/(?P<firearm>.+)/$',

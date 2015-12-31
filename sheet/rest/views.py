@@ -97,3 +97,9 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
                 log_stat_change(instance, request, field, change)
             self.perform_update(serializer)
         return Response(serializer.data)
+
+
+class EdgeLevelViewSet(viewsets.ModelViewSet):
+    queryset = sheet.models.EdgeLevel.objects.all()
+    serializer_class = serializers.EdgeLevelSerializer
+    permission_classes = [permissions.IsAuthenticated]
