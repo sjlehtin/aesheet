@@ -37,10 +37,12 @@ describe('stat block', function() {
             "mod_pos": 0,
             "mod_mov": 0,
             "mod_dex": 0,
-            "mod_imm": 0
+            "mod_imm": 0,
+            bought_mana: 0,
+            bought_stamina: 0
         };
 
-        return _charData;
+        return Object.assign(_charData, statOverrides);
     };
 
     var sheetDataFactory = function (statOverrides) {
@@ -61,7 +63,7 @@ describe('stat block', function() {
             "mod_imm": 0
         };
 
-        return _sheetData;
+        return Object.assign(_sheetData, statOverrides);
     };
 
     var jsonResponse = function (json) {
@@ -157,6 +159,60 @@ describe('stat block', function() {
         afterLoad(function () {
             expect(block.baseIMM()).toEqual(45);
             expect(block.effIMM()).toEqual(45);
+            done();
+        });
+    });
+
+    it('calculates stamina correctly', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+
+        afterLoad(function () {
+            expect(block.stamina()).toEqual(26);
+            done();
+        });
+    });
+
+    it('calculates stamina with bought stamina correctly', function (done) {
+        var block = getStatBlock(charDataFactory({bought_stamina: 5}),
+            sheetDataFactory());
+
+        afterLoad(function () {
+            expect(block.stamina()).toEqual(31);
+            done();
+        });
+    });
+
+    it('calculates mana correctly', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+
+        afterLoad(function () {
+            expect(block.mana()).toEqual(24);
+            done();
+        });
+    });
+
+    it('calculates mana with bought mana correctly', function (done) {
+        var block = getStatBlock(charDataFactory({bought_mana: 5}),
+            sheetDataFactory());
+
+        afterLoad(function () {
+            expect(block.mana()).toEqual(29);
+            done();
+        });
+    });
+
+    it('calculates body correctly upwards', function (done) {
+        var block = getStatBlock(charDataFactory({cur_fit: 41}), sheetDataFactory());
+        afterLoad(function () {
+            expect(block.body()).toEqual(11);
+            done();
+        });
+    });
+
+    it('calculates body correctly', function (done) {
+        var block = getStatBlock(charDataFactory({cur_fit: 39}), sheetDataFactory());
+        afterLoad(function () {
+            expect(block.body()).toEqual(10);
             done();
         });
     });
