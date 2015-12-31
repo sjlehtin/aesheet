@@ -31,7 +31,11 @@ class StatRow extends React.Component {
         });
 
         /* TODO: throttling updates to server, maybe wait a
-           moment before sending?  */
+           moment before sending?
+
+           If user clicks the add/remove buttons multiple times per second, the
+           results are unpredictable.
+        */
         var data = {};
         data['cur_' + this.state.stat] = newValue;
 
@@ -90,6 +94,7 @@ class StatRow extends React.Component {
             visibility: this.state.showEditControls ? "visible" : "hidden",
             fontWeight: "bold"
         };
+
         var incStyle = {
             color: "green",
             paddingLeft: 5,
