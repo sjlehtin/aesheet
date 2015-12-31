@@ -506,6 +506,7 @@ class SheetView(object):
         except TypeError:
             return 0
 
+    # TODO: Remove.
     def base_stats(self):
         ll = []
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
@@ -530,6 +531,7 @@ class SheetView(object):
             ll.append(stat)
         return ll
 
+    # TODO: Remove.
     def derived_stats(self):
         ll = []
         for st in ["mov", "dex", "imm"]:
@@ -760,6 +762,7 @@ def sheet_detail(request, sheet_id=None):
                                 request=request,
                                 prefix=prefix, **kwargs)
 
+    # TODO: Remove.
     add_form(StatModifyForm, "stat-modify", instance=sheet.character)
     add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
     add_form(AddSkillForm, "add-skill", instance=sheet.character)
