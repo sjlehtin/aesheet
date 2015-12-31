@@ -66,6 +66,40 @@ describe('stat block', function() {
         return Object.assign(_sheetData, statOverrides);
     };
 
+    var edgeFactory = function (statOverrides) {
+        var _edgeLevelData = {
+            "id": 1,
+            "notes": "",
+            "cc_skill_levels": 0,
+            "fit": 0,
+            "ref": 0,
+            "lrn": 0,
+            "int": 0,
+            "psy": 0,
+            "wil": 0,
+            "cha": 0,
+            "pos": 0,
+            "mov": 0,
+            "dex": 0,
+            "imm": 0,
+            "saves_vs_fire": 0,
+            "saves_vs_cold": 0,
+            "saves_vs_lightning": 0,
+            "saves_vs_poison": 0,
+            "saves_vs_all": 0,
+            "run_multiplier": "0.00",
+            "swim_multiplier": "0.00",
+            "climb_multiplier": "0.00",
+            "fly_multiplier": "0.00",
+            "level": 1,
+            "cost": "2.0",
+            "requires_hero": false,
+            "edge": "Toughness",
+            "skill_bonuses": []
+        };
+        return Object.assign(_edgeLevelData, statOverrides);
+    };
+
     var jsonResponse = function (json) {
         var promise = Promise.resolve(json);
         promises.push(promise);
@@ -107,7 +141,8 @@ describe('stat block', function() {
             expect(rest.getData.mock.calls[0][0]).toEqual('/rest/sheets/1/');
 
             Promise.all(promises).then(function () {
-                expect(rest.getData.mock.calls[1][0]).toEqual('/rest/characters/2/');
+                expect(rest.getData.mock.calls[1][0])
+                    .toEqual('/rest/characters/2/');
 
                 Promise.all(promises).then(function () {
                     /* TODO: Ridiculoso! */
@@ -133,7 +168,7 @@ describe('stat block', function() {
         });
     };
 
-    it('calculates MOV correctly', function (done) {
+    it('calculates MOV', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
@@ -143,7 +178,7 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates DEX correctly', function (done) {
+    it('calculates DEX', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
@@ -153,7 +188,7 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates IMM correctly', function (done) {
+    it('calculates IMM', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
@@ -163,7 +198,7 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates stamina correctly', function (done) {
+    it('calculates stamina', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
@@ -172,7 +207,7 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates stamina with bought stamina correctly', function (done) {
+    it('calculates stamina with bought stamina', function (done) {
         var block = getStatBlock(charDataFactory({bought_stamina: 5}),
             sheetDataFactory());
 
@@ -182,7 +217,7 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates mana correctly', function (done) {
+    it('calculates mana', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
@@ -191,7 +226,7 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates mana with bought mana correctly', function (done) {
+    it('calculates mana with bought mana', function (done) {
         var block = getStatBlock(charDataFactory({bought_mana: 5}),
             sheetDataFactory());
 
@@ -201,18 +236,114 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates body correctly upwards', function (done) {
-        var block = getStatBlock(charDataFactory({cur_fit: 41}), sheetDataFactory());
+    it('calculates body upwards', function (done) {
+        var block = getStatBlock(charDataFactory({cur_fit: 41}),
+            sheetDataFactory());
         afterLoad(function () {
-            expect(block.body()).toEqual(11);
+            expect(block.baseBody()).toEqual(11);
             done();
         });
     });
 
-    it('calculates body correctly', function (done) {
-        var block = getStatBlock(charDataFactory({cur_fit: 39}), sheetDataFactory());
+    it('calculates body', function (done) {
+        var block = getStatBlock(charDataFactory({cur_fit: 39}),
+            sheetDataFactory());
         afterLoad(function () {
-            expect(block.body()).toEqual(10);
+            expect(block.baseBody()).toEqual(10);
+            done();
+        });
+    });
+
+    it('handles edge addition', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            block.handleEdgeAdded(edgeFactory({"Toughness": 2}));
+            expect(Object.keys(block.state.edges).length).toBe(1);
+            expect(block.state.edges.Toughness).not.toBe(undefined);
+            done();
+        });
+    });
+
+    xit('handles edge removal');
+
+    it('can indicate toughness', function (done) {
+        var block = getStatBlock(charDataFactory({cur_fit: 40}),
+            sheetDataFactory());
+        afterLoad(function () {
+            expect(block.toughness()).toEqual(0);
+            block.handleEdgeAdded(edgeFactory({"Toughness": 1}));
+            expect(block.toughness()).toEqual(1);
+            expect(block.baseBody()).toEqual(10);
+            done();
+        });
+    });
+
+    it('can indicate stamina recovery', function (done) {
+        var block = getStatBlock(charDataFactory(),
+            sheetDataFactory());
+        afterLoad(function () {
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 1}));
+            expect(block.staminaRecovery()).toEqual('1d6/8h');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 2}));
+            expect(block.staminaRecovery()).toEqual('2d6/8h');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 3}));
+            expect(block.staminaRecovery()).toEqual('4d6/8h');
+            done();
+        });
+    });
+
+    it('can indicate stamina recovery with high stat', function (done) {
+        var block = getStatBlock(charDataFactory({cur_fit: 75}),
+            sheetDataFactory());
+        afterLoad(function () {
+            expect(block.staminaRecovery()).toEqual('1/8h');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 1}));
+            expect(block.staminaRecovery()).toEqual('1+1d6/8h');
+            done();
+        });
+    });
+
+    it('can indicate mana recovery', function (done) {
+        var block = getStatBlock(charDataFactory(),
+            sheetDataFactory());
+        afterLoad(function () {
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+                level: 1}));
+            expect(block.manaRecovery()).toEqual('2d6/8h');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+                level: 2}));
+            expect(block.manaRecovery()).toEqual('4d6/8h');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+                level: 3}));
+            expect(block.manaRecovery()).toEqual('8d6/8h');
+            done();
+        });
+    });
+
+    it('can indicate mana recovery with high stat', function (done) {
+        var block = getStatBlock(charDataFactory({cur_cha: 70}),
+            sheetDataFactory());
+        afterLoad(function () {
+            expect(block.manaRecovery()).toEqual('2/8h');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+                level: 1}));
+            expect(block.manaRecovery()).toEqual('2+2d6/8h');
+            done();
+        });
+    });
+
+    it('can indicate body healing', function (done) {
+        var block = getStatBlock(charDataFactory(),
+            sheetDataFactory());
+        afterLoad(function () {
+            expect(block.bodyHealing()).toEqual('3/16d');
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 3}));
+            expect(block.bodyHealing()).toEqual('3/2d');
             done();
         });
     });

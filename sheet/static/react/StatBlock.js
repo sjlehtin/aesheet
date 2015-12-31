@@ -29,7 +29,11 @@ class StatBlock extends React.Component {
         super(props);
         this.state = {
             sheet: undefined,
-            char: undefined
+            char: undefined,
+            /* This is preferred over the edges list in the char.  A
+               subcomponent will handle the actual edges for the character,
+               and will notify this component of changes. */
+            edges: {}
         };
     }
 
@@ -43,6 +47,16 @@ class StatBlock extends React.Component {
             rest.getData(this.state.url)
                 .then((json) => {
                     this.setState({char: json});
+                    /* TODO: until we have the EdgeComponent. */
+                    Promise.all(json.edges.map(
+                    (edge_id) => {
+                        return rest.getData(`/rest/edgelevels/${edge_id}/`)
+                            .then((json) => { this.handleEdgeAdded(json);
+                            console.log("Added edge: ", json); })
+                            .catch((err) => { console.log("got err:", err)});}))
+                        .then((status) => { console.log("All loaded.")})
+                        .catch((err) => { console.log("There was an error:",
+                            err)});
                 });
         });
     }
@@ -86,9 +100,20 @@ class StatBlock extends React.Component {
             this.state.sheet.mod_imm;
     }
 
-    body() {
-        /* TODO: Tests for value. */
+    getEdgeLevel(edge) {
+        if (typeof(this.state.edges[edge]) !== "undefined") {
+            return this.state.edges[edge].level;
+        } else {
+            return 0;
+        }
+    }
+
+    baseBody() {
         return roundup(this.baseStat("fit") / 4);
+    }
+
+    toughness() {
+        return this.getEdgeLevel("Toughness");
     }
 
     stamina() {
@@ -101,12 +126,91 @@ class StatBlock extends React.Component {
             + this.state.char.bought_mana;
     }
 
-    staminaRecovery() {
+    bodyHealing() {
+        var level = this.getEdgeLevel("Fast Healing");
+        if (level > 0) {
+            var _lookupFastHealing = {
+                1: "3/8d",
+                2: "3/4d",
+                3: "3/2d",
+                4: "1/8h",
+                5: "1/4h",
+                6: "1/2h"
+            };
+            return _lookupFastHealing[level];
+        } else {
+            return "3/16d";
+        }
 
     }
 
-    manaRecovery() {
+    staminaRecovery() {
+        /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
+        var highStat = rounddown((this.effIMM() - 45)/15);
+        var level = this.getEdgeLevel("Fast Healing");
 
+        var rates = [];
+
+        if (highStat != 0) {
+            rates.push(highStat);
+        }
+        if (level > 0) {
+            var _lookupFastHealing = {
+                1: "1d6",
+                2: "2d6",
+                3: "4d6",
+                4: "8d6",
+                5: "16d6",
+                6: "32d6"
+            };
+            rates.push(_lookupFastHealing[level]);
+        }
+        if (rates.length) {
+            return rates.join('+') + "/8h";
+        } else {
+            return ""
+        }
+    }
+
+    manaRecovery() {
+        /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
+        var highStat = 2*rounddown((this.effStat("cha") - 45)/15);
+        var level = this.getEdgeLevel("Fast Mana Recovery");
+
+        var rates = [];
+
+        if (highStat != 0) {
+            rates.push(highStat);
+        }
+        if (level > 0) {
+            var _lookupManaRecovery = {
+                1: "2d6",
+                2: "4d6",
+                3: "8d6",
+                4: "16d6",
+                5: "32d6",
+                6: "64d6"
+            };
+            rates.push(_lookupManaRecovery[level]);
+        }
+        if (rates.length) {
+            return rates.join('+') + "/8h";
+        } else {
+            return ""
+        }
+    }
+
+    handleEdgeAdded(data) {
+        /* This assumes that characters will only have a single edgelevel of
+           an edge.  I think this is an invariant.
+
+           TODO: The lower level (the upcoming EdgeComponent) will need to
+           remove old edgelevels when an upgraded level is added; otherwise
+           the database will contain crud from the past, which may then pop
+           up when, e.g., trying to remove edges. */
+        var update = {};
+        update[data.edge] = data
+        this.setState({edge: Object.assign(this.state.edges, update)});
     }
 
     handleModification(stat, oldValue, newValue) {
@@ -116,7 +220,7 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var rows, derivedRows, usableRows;
+        var rows, derivedRows, usableRows, edges;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
@@ -159,23 +263,39 @@ class StatBlock extends React.Component {
                         <td style={baseStyle}>{this.baseIMM()}</td>
                         <td style={effStyle}>{this.effIMM()}</td>
                     </tr>)
-                ]
+                ];
 
-                usableRows = [
-                    (<tr key="body"><td style={statStyle}>B</td>
-                        <td>{this.body()}</td><td></td></tr>),
-                    (<tr key="stamina"><td style={statStyle}>S</td>
-                        <td>{this.stamina()}</td>
-                        <td>{this.staminaRecovery()}</td></tr>),
-                    (<tr key="mana"><td style={statStyle}>M</td>
-                        <td>{this.mana()}</td>
-                        <td>{this.manaRecovery()}</td></tr>)
-                ]
+            var toughness = this.toughness();
+            if (toughness) {
+                toughness = (<span>+<span
+                    style={{ fontWeight: "bold"}}>{toughness}</span></span>);
+            } else {
+                toughness = "";
+            }
+
+            var recoveryStyle = {
+                color: "grey",
+                paddingLeft: 5
+            };
+            usableRows = [
+                (<tr key="body"><td style={statStyle}>B</td>
+                    <td>{this.baseBody()}{toughness}</td>
+                    <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>),
+                (<tr key="stamina"><td style={statStyle}>S</td>
+                    <td>{this.stamina()}</td>
+                    <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>),
+                (<tr key="mana"><td style={statStyle}>M</td>
+                    <td>{this.mana()}</td>
+                    <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>)
+            ];
+
         }
+
         var statsStyle = {verticalAlign: "center", border: 1};
 
         return (
-            <div style={{position: "relative", width: "15em"}}>
+            <div>
+                <div style={{position: "relative", width: "18em"}}>
                 <h4>Stats</h4>
                 <table style={statsStyle}>
                     <tbody>
@@ -191,6 +311,7 @@ class StatBlock extends React.Component {
                         {usableRows}
                         </tbody>
                     </table>
+                </div>
                 </div>
             </div>
         )
