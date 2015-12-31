@@ -282,10 +282,6 @@ class Character(models.Model):
     def get_edge(self, edge_name):
         return self.get_ability(self.edges, edge_name,
                               accessor=lambda xx: xx.edge)
-        if ce:
-            return ce.edge
-        else:
-            return None
 
     def has_edge(self, edge):
         if edge is None:
