@@ -2160,6 +2160,7 @@ class Sheet(models.Model):
     def mod_imm(self):
         pass
 
+    # TODO: Remove.
     @property
     def body(self):
         """
@@ -2179,6 +2180,7 @@ class Sheet(models.Model):
                  'recovery_rate' : "",
                  }
 
+    # TODO: Remove.
     def _format_recovery(self, level, extra_recovery):
         rate = ""
         if level:
@@ -2193,6 +2195,7 @@ class Sheet(models.Model):
             rate += "/8h"
         return rate
 
+    # TODO: Remove.
     @property
     def stamina(self):
         """
@@ -2208,6 +2211,7 @@ class Sheet(models.Model):
                  'mod': 0,
                  'recovery_rate' : rate }
 
+    # TODO: Remove.
     @property
     def mana(self):
         """
