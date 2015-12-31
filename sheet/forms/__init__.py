@@ -578,7 +578,7 @@ class BaseEditCharacterForm(RequestForm):
 
     class Meta:
         model = sheet.models.Character
-        exclude = ('owner', )
+        exclude = ('owner', 'edges')
 
 
 class AddCharacterForm(SetOwnerMixin, BaseEditCharacterForm):
@@ -707,8 +707,9 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             new_char.skills.create(skill=skill.skill,
                                    level=skill.level)
 
-        for ce in edges:
-            new_char.edges.create(edge=ce.edge)
+        for edge in edges:
+            sheet.models.CharacterEdge.objects.create(character=new_char,
+                                                      edge=edge)
 
         sheet.models.CharacterLogEntry.objects.create(
             character=new_char,

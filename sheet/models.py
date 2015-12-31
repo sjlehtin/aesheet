@@ -246,6 +246,8 @@ class Character(models.Model):
 
     free_edges = models.IntegerField(default=2)
 
+    edges = models.ManyToManyField('EdgeLevel', through='CharacterEdge',
+                                   blank=True)
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
@@ -277,9 +279,9 @@ class Character(models.Model):
 
         return None
 
-    def get_edge(self, edge):
-        ce = self.get_ability(self.edges, edge,
-                              accessor=lambda xx: xx.edge.edge)
+    def get_edge(self, edge_name):
+        return self.get_ability(self.edges, edge_name,
+                              accessor=lambda xx: xx.edge)
         if ce:
             return ce.edge
         else:
@@ -329,7 +331,7 @@ class Character(models.Model):
 
         edges = self.edges.all() # prefetched.
         if edges:
-            mod += sum([getattr(ee.edge, stat) for ee in edges])
+            mod += sum([getattr(ee, stat) for ee in edges])
 
         mod += getattr(self, 'base_mod_' + stat)
         return mod
@@ -681,7 +683,7 @@ class CharacterSkill(models.Model):
         # out for that.
         for sk in self.skill.edgeskillbonus_set.all():
             for ee in self.character.edges.all():
-                if ee.edge == sk.edge_level:
+                if ee == sk.edge_level:
                     mod += sk.bonus
                     break
         # XXX armor modifiers
@@ -778,7 +780,7 @@ class EdgeSkillBonus(ExportedModel):
 
 
 class CharacterEdge(models.Model):
-    character = models.ForeignKey(Character, related_name='edges')
+    character = models.ForeignKey(Character)
     edge = models.ForeignKey(EdgeLevel)
 
     def __unicode__(self):
@@ -2245,7 +2247,7 @@ class Sheet(models.Model):
         """
         Iterate over all innate effects.
         """
-        return  [edge.edge for edge in self.character.edges.all()]
+        return self.character.edges.all()
 
     def _special_effects(self):
         """
