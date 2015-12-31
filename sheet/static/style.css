@@ -1,6 +1,6 @@
 body { height : 100%; min-height : 100%; }
 html { height : 100%; min-height : 100%; }
-table td { vertical-align: top }
+/* table td { vertical-align: top }*/
 
 #content { min-height: 100%; overflow: auto; }
 #portrait { max-height: 400px; max-width: 400px;}
@@ -20,6 +20,7 @@ td.stats.eff { font-weight: bold;
 div.stats { position: relative; }
 div.stats table.derived { position: absolute; left: 12em; top: 50%; }
 td.weapon.name { width: 10em; }
+
 .note.positive { color: blue; }
 .note.negative { color: red; }
 
