@@ -711,10 +711,10 @@ Notes = namedtuple("Notes", ["positive", "negative"])
 def get_notes(character, filter_kwargs):
     args = {'character': character}
     args.update(filter_kwargs)
-    positive = CharacterEdge.objects.filter(**args).exclude(
+    notes = CharacterEdge.objects.filter(**args).exclude(
         edge__notes=u'').values_list('edge__edge__name',
                                      'edge__notes')
-    return positive
+    return notes
 
 
 def sheet_detail(request, sheet_id=None):
