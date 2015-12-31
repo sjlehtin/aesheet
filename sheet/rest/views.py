@@ -45,6 +45,18 @@ class SheetViewSet(mixins.RetrieveModelMixin,
     serializer_class = serializers.SheetSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
+    def get_queryset(self):
+        return models.Sheet.objects.prefetch_related('character__edges',
+                                                     'character__edges__edge',
+                                                     'spell_effects',
+                                                     'weapons__base',
+                                                     'weapons__quality',
+                                                     'ranged_weapons__base',
+                                                     'ranged_weapons__quality',
+                                                     'miscellaneous_items',
+                                                     'character__campaign',
+                                                     ).all()
+
     @detail_route(methods=['get'])
     def movement_rates(self, request, pk=None):
         try:
@@ -65,6 +77,10 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
     queryset = sheet.models.Character.objects.all()
     serializer_class = serializers.CharacterSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        return models.Character.objects.prefetch_related('edges',
+                                                         'edges__edge',).all()
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
