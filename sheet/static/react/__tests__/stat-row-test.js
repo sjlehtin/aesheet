@@ -115,7 +115,6 @@ describe('it updates its parent', function (){
     };
 
     it('calls parent component set change callback', function (done) {
-        console.log("tsup");
         patchOk({});
         var callback = jasmine.createSpy("callback");
         row = statRowFactory({onMod: callback});
