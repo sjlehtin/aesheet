@@ -2203,7 +2203,7 @@ class Sheet(models.Model):
         """
 
         # Stamina recovery modifier = ROUNDDOWN((IMM-45)/15;0)
-        lvl = self.character.edge_level('Fast healing')
+        lvl = self.character.edge_level('Fast Healing')
         extra_recovery = rounddown((self.eff_imm - 45) / 15)
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.ref + self.wil) / 4.0) +
@@ -2218,7 +2218,7 @@ class Sheet(models.Model):
         Return amount of mana as a dict (see "body").
         """
         # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
-        lvl = self.character.edge_level('Fast mana recovery')
+        lvl = self.character.edge_level('Fast Mana Recovery')
         extra_recovery = rounddown(2 * ((self.eff_cha - 45) / 15))
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.psy + self.wil) / 4.0) +
