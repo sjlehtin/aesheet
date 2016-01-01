@@ -129,5 +129,4 @@ describe('it updates its parent', function (){
             }).catch(function (err) { fail(err);});;
         }).catch(function (err) { fail(err);});
     })
-
-})
+});
