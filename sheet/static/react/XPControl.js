@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
+import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 
@@ -24,7 +26,10 @@ class XPControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            initialTotalXP: this.props.initialChar.total_xp,
+            totalXP: this.props.initialChar.total_xp,
+            addXP: 0,
+            showDialog: false
         };
     }
 
@@ -44,6 +49,49 @@ class XPControl extends React.Component {
     xpEdgesBought() {
         return (this.props.edgesBought - this.props.initialChar.free_edges)
             * 25;
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+        var oldValue = this.state.initialTotalXP;
+        var newValue = this.state.initialTotalXP + parseInt(this.state.addXP);
+        rest.patch(this.props.url, {total_xp: newValue}).then(
+            (data) => {
+                this.setState({initialTotalXP: newValue,
+                    addXP: 0, showDialog: false });
+                this.props.onMod('total_xp', oldValue, newValue);
+            }
+        ).catch((err) => {console.log("Error in adding XP:", err);
+            this.setState({initialTotalXP: oldValue });
+        })
+    }
+
+    showEditControl() {
+        this.setState({showDialog: true});
+    }
+
+    handleChange(event) {
+        this.setState({addXP: event.target.value});
+    }
+
+    getInputDOMNode() {
+        return this._inputField.getInputDOMNode();
+    }
+
+    getAddDOMNode() {
+        return ReactDOM.findDOMNode(this._addButton);
+    }
+
+    getCancelDOMNode() {
+        return ReactDOM.findDOMNode(this._cancelButton);
+    }
+
+    getSubmitDOMNode() {
+        return ReactDOM.findDOMNode(this._submitButton);
+    }
+
+    handleCancel() {
+        this.setState({addXP: 0, showDialog: false});
     }
 
     render() {
@@ -72,7 +120,32 @@ class XPControl extends React.Component {
             .props.initialChar.free_edges} free edges`}>
                 {xpEdgesBought} + </span>
             <span title="XP used ingame">{this.props.initialChar.xp_used_ingame}</span>
-            <span> = {totalXP} / {this.props.initialChar.total_xp}</span>
+            <span> = <span title="Used XP">{totalXP}
+            </span> / <span title="Total XP">{this.props.initialChar.total_xp}
+            </span>
+            </span>
+            <span style={{paddingLeft: 5}}>
+                <Button bsSize="xsmall"
+                        ref={(c) => this._addButton = c}
+                        onClick={this.showEditControl.bind(this)}>
+                    Add XP</Button></span>
+            <Modal show={this.state.showDialog}>
+                <Modal.Header><Modal.Title>Add XP</Modal.Title></Modal.Header>
+                <Modal.Body>
+                    <Input ref={(c) => { this._inputField = c}}
+                           type="text"
+                           label="Add XP"
+                           onChange={this.handleChange.bind(this)}
+                           value={this.state.addXP} />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button ref={(c) => this._cancelButton = c}
+                            onClick={this.handleCancel.bind(this)}>Cancel</Button>
+                    <Button ref={(c) => this._submitButton = c}
+                            onClick={(e) => { this.handleSubmit(e);}}
+                            bsStyle="primary">Save changes</Button>
+                </Modal.Footer>
+            </Modal>
             {xpWarning}
         </div>);
     }

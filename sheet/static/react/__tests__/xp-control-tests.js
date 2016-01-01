@@ -7,9 +7,6 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 const XPControl = require('../XPControl').default;
-import { calculateStatRaises } from '../XPControl';
-
-
 
 describe('stat block', function() {
     "use strict";
@@ -38,7 +35,9 @@ describe('stat block', function() {
             "cur_pos": 48,
             bought_mana: 0,
             bought_stamina: 0,
-            free_edges: 0
+            free_edges: 0,
+
+            total_xp: 0
         };
 
         return Object.assign(_charData, statOverrides);
@@ -86,23 +85,88 @@ describe('stat block', function() {
         expect(control.xpEdgesBought()).toEqual(25);
     });
 
-    //it('calls parent component set change callback', function (done) {
-    //    patchOk({});
-    //    var callback = jasmine.createSpy("callback");
-    //    var control = xpControlFactory({onMod: callback, totalXP: 60});
-    //        TestUtils.Simulate.change(control._xpField,
-    //            {target: {value: 200}});
-    //    TestUtils.Simulate.click(control._addButton);
-    //
-    //    Promise.all(promises).then(function () {
-    //        expect(rest.patch.mock.calls[0][0]).toEqual('/rest/characters/1/');
-    //        expect(rest.patch.mock.calls[0][1]).toEqual({total_xp: 260});
-    //
-    //        Promise.all(promises).then(function () {
-    //            expect(callback).toHaveBeenCalledWith("total_xp", 60, 260);
-    //            done();
-    //        }).catch(function (err) { fail(err);});;
-    //    }).catch(function (err) { fail(err);});
-    //});
+    var jsonResponse = function (json) {
+        var promise = Promise.resolve(json);
+        promises.push(promise);
+        return promise;
+    };
 
+    it('calls parent component set change callback', function (done) {
+        rest.patch.mockReturnValue(jsonResponse({}));
+
+        var callback = jasmine.createSpy("callback");
+        var control = xpControlFactory({onMod: callback,
+            initialChar: charDataFactory({total_xp: 60})});
+
+        TestUtils.Simulate.click(control.getAddDOMNode());
+
+        var input = control.getInputDOMNode();
+        /* Required with Bootstrap. */
+        input.value = 200;
+        TestUtils.Simulate.change(input, {target: {value: 200}});
+
+        control.handleSubmit(new Event("submit", {}));
+
+        Promise.all(promises).then(function () {
+            expect(rest.patch.mock.calls[0][0]).toEqual('/rest/characters/1/');
+            expect(rest.patch.mock.calls[0][1]).toEqual({total_xp: 260});
+
+            Promise.all(promises).then(function () {
+                expect(callback).toHaveBeenCalledWith("total_xp", 60, 260);
+                done();
+            }).catch(function (err) { fail(err);});;
+        }).catch(function (err) { fail(err);});
+    });
+
+    it('reacts to input', function () {
+        var control = xpControlFactory({
+            initialChar: charDataFactory({total_xp: 60})
+        });
+
+        expect(control.state.addXP).toEqual(0);
+
+        TestUtils.Simulate.click(control.getAddDOMNode());
+
+        var input = control.getInputDOMNode();
+        input.value = 200;
+        TestUtils.Simulate.change(
+            control.getInputDOMNode(), {target: {value: 200}});
+        expect(control.state.addXP).toEqual(200);
+    });
+
+    it('allows dialog to be shown', function () {
+        var control = xpControlFactory();
+        expect(control.state.showDialog).toBe(false);
+        TestUtils.Simulate.click(control.getAddDOMNode(), {});
+        expect(control.state.showDialog).toBe(true);
+    });
+
+    it('allows adding to be canceled', function () {
+        var control = xpControlFactory();
+        TestUtils.Simulate.click(control.getAddDOMNode());
+        var input = control.getInputDOMNode();
+        input.value = 200;
+        TestUtils.Simulate.change(input, {target: {value: 200}});
+
+        expect(control.state.addXP).toEqual(200);
+
+        TestUtils.Simulate.click(control.getCancelDOMNode());
+        expect(control.state.addXP).toEqual(0);
+        expect(control.state.showDialog).toBe(false);
+    });
+
+    it('reacts to submit button', function (done) {
+        var control = xpControlFactory();
+        var response = jsonResponse({});
+        rest.patch.mockReturnValue(response);
+
+        var spy = spyOn(control, 'handleSubmit');
+
+        TestUtils.Simulate.click(control.getAddDOMNode());
+        TestUtils.Simulate.click(control.getSubmitDOMNode());
+        response.then(function () {
+            expect(spy).toHaveBeenCalled();
+            done();
+        });
+    });
 });
