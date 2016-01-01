@@ -31,6 +31,13 @@ perhaps Robot-system tests.
 <h1>{{ sheet.name }}</h1>
 {{ sheet.race }}
 {{ sheet.occupation }}
+        <p title="Character description">
+            {{ sheet.character.description }}
+        </p>
+        <p title="Sheet description">
+            {{ sheet.description }}
+        </p>
+
     </div>
     <div class="col-md-2">
         <div class="edit-control">
@@ -60,52 +67,51 @@ perhaps Robot-system tests.
     </div>
     </div>
     </div>
+
     <div class="row">
-<div class="col-md-9">
-<div class="row">
-<div class="col-md-4">
-<p>
-{{ sheet.character.description }}
-</p>
-<p>
-{{ sheet.description }}
-</p>
 
-<div class="stats">
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col-md-4">
+            {% comment %}
+                    <div class="stats">
+                        {% url "sheet_detail" sheet.id as act %}
+                        <table class="base">
+                        {% for stat in sheet.base_stats %}
+                            {% include "sheet/sheet_detail/stat.html" %}
+                        {% endfor %}
+                        </table>
 
-{% url "sheet_detail" sheet.id as act %}
+                    </div>
+            {% endcomment %}
+                <div id="stat-block-container">Loading...</div>
 
-<table class="base">
-{% for stat in sheet.base_stats %}
-    {% include "sheet/sheet_detail/stat.html" %}
-{% endfor %}
-</table>
-
-</div>
-</div>
-<div class="col-md-8">
-<div>
-    {% if sheet.character.portrait %}
-    <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
-         class="img-rounded">
-    {% else %}
-        <div class="edit-control">You can add a portrait for your character in
-            the <a href="{% url "edit_character" sheet.character.id %}">
-                base character edit</a>.</div>
-    {% endif %}
-</div>
-</div>
-</div>
+                </div>
+                <div class="col-md-8">
+                    <div>
+                        {% if sheet.character.portrait %}
+                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
+                             class="img-rounded">
+                        {% else %}
+                            <div class="edit-control">You can add a portrait for your character in
+                                the <a href="{% url "edit_character" sheet.character.id %}">
+                                    base character edit</a>.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
 <div class="row">
-<div class="col-md-4">
-
+<div class="col-md-6">
+{% comment %}
 <table class="derived">
 {% for stat in sheet.derived_stats %}
     {% include "sheet/sheet_detail/stat.html" %}
 {% endfor %}
 </table>
+{% endcomment %}
 
+{% comment %}
 <div class="xp">
 <label>XP:</label> {{ sheet.xp_used_stats }} +
 {% if sheet.hero %}
@@ -124,6 +130,9 @@ perhaps Robot-system tests.
 </div>
 </div>
 
+{% endcomment %}
+
+{% comment %}
 <div class="col-md-2">
     <table class="derived">
 {% with b=sheet.body sta=sheet.stamina mana=sheet.mana %}
@@ -145,6 +154,7 @@ perhaps Robot-system tests.
   </tr>
 {% endwith %}
 </table>
+{% endcomment %}
 </div>
 
 <div class="col-md-6">
@@ -359,6 +369,9 @@ $(document).ready(function () {
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes,
             {url: '/rest/characters/{{ sheet.character.pk }}/'});
     SheetApp.render(node, document.getElementById('character-notes-container'));
+    var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,
+            {url: '/rest/sheets/{{ sheet.pk }}/'});
+    SheetApp.render(statBlock, document.getElementById('stat-block-container'));
 </script>
 
 {% endblock %}
