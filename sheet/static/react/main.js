@@ -8,6 +8,8 @@ import StatRow from "StatRow"
 import StatBlock from "StatBlock"
 import XPControl from "XPControl"
 
+import 'bootstrap/dist/css/bootstrap.css';
+
 var rest = require('sheet-rest');
 
 /* This is what this would look like in JSX.  We cannot use this directly, or
