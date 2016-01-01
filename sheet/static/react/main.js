@@ -6,6 +6,7 @@ import { render } from 'react-dom'
 import CharacterNotes from "CharacterNotes"
 import StatRow from "StatRow"
 import StatBlock from "StatBlock"
+import XPControl from "XPControl"
 
 var rest = require('sheet-rest');
 
@@ -28,5 +29,6 @@ module.exports = {
     "CharacterNotes": CharacterNotes,
     "StatRow": StatRow,
     "StatBlock": StatBlock,
+    "XPControl": XPControl,
     "render": render
 }

@@ -5,6 +5,7 @@
     <tbody id="stat-row"><tr><td>Loading...</td></tr></tbody>
 </table>
 <div id="stat-block">Loading...</div>
+<div id="xp-control">Loading...</div>
 <div id="character-container">Loading...</div>
 <script src="bundle.js">
 </script>
@@ -24,6 +25,14 @@
                                 url: charURL,
                                 onMod: onMod });
                     SheetApp.render(row, document.getElementById('stat-row'));
+                    var control = SheetApp.React.createElement(
+                            SheetApp.XPControl, {
+                                url: '/rest/characters/1/',
+                                initialChar: char,
+                                edgesBought: 5,
+                                onMod: onMod});
+                    SheetApp.render(control,
+                            document.getElementById('xp-control'));
                     }
         );
     });
@@ -33,6 +42,8 @@
 
     var block = SheetApp.React.createElement(SheetApp.StatBlock, {url: '/rest/sheets/1/'});
     SheetApp.render(block, document.getElementById('stat-block'));
+
+    SheetApp.render(node, document.getElementById('character-container'));
 
 </script>
 </body>
