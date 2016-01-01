@@ -47,4 +47,4 @@ class CharacterSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Character
         fields = "__all__"
-
+        read_only_fields = ("owner", )

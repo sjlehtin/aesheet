@@ -42,6 +42,8 @@ class SheetTestCase(TestCase):
         response = self.detail_view(req, pk=self.sheet.pk)
         self.assertEqual(response.status_code, 403)
 
+    # TODO: Probably unnecessary, as these should be calculated in a React
+    # component.
     def test_url(self):
         client = APIClient()
         url = '/rest/sheets/{}/movement_rates/'.format(self.sheet.pk)
@@ -169,6 +171,18 @@ class CharacterTestCase(TestCase):
         # TODO: A log entry should be generated.
         self.assertEqual(char.times_wounded, 2,
                          "Other aspects should not change")
+
+    def test_change_owner_should_be_prohibited(self):
+        update_view = views.CharacterViewSet.as_view({
+            'patch': 'partial_update'})
+        self.assertEqual(self.character.owner.pk, self.owner.pk)
+        req = self.request_factory.patch(self.url, {'owner': self.user.pk})
+        force_authenticate(req, user=self.owner)
+        response = update_view(req, pk=self.character.pk)
+        # Read-only field is just ignored.
+        self.assertEqual(response.status_code, 200)
+        char = models.Character.objects.get(pk=self.character.pk)
+        self.assertEqual(char.owner, self.owner)
 
     def test_stat_modifications(self):
         serializer = CharacterSerializer(self.character)
