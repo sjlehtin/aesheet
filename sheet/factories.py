@@ -115,6 +115,7 @@ class CharacterFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = models.Character
+        django_get_or_create = ('name', )
 
     @factory.post_generation
     def skills(self, create, extracted, **kwargs):
