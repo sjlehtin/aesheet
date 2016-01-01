@@ -24,6 +24,7 @@ class XPControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+
         };
     }
 
@@ -40,11 +41,16 @@ class XPControl extends React.Component {
         return sum;
     };
 
+    xpEdgesBought() {
+        return (this.props.edgesBought - this.props.initialChar.free_edges)
+            * 25;
+    }
+
     render() {
         var totalXP = 0;
         var xpStatsBought = XPControl.calculateStatRaises(this.props.initialChar) * 5;
         totalXP += xpStatsBought;
-        var xpEdgesBought = this.props.edgesBought * 25;
+        var xpEdgesBought = this.xpEdgesBought();
         totalXP += xpEdgesBought;
         totalXP += this.props.initialChar.xp_used_ingame;
 
@@ -62,10 +68,12 @@ class XPControl extends React.Component {
         return (<div><span style={stat}>XP:</span>
             <span title="Stats, stamina and mana bought">{xpStatsBought} + </span>
             {hero}
-            <span title="Edges bought {this.props.edgesBought}">{xpEdgesBought} + </span>
+            <span title={`${this.props.edgesBought} edges bought, ${this
+            .props.initialChar.free_edges} free edges`}>
+                {xpEdgesBought} + </span>
             <span title="XP used ingame">{this.props.initialChar.xp_used_ingame}</span>
-            <span> = {totalXP} /
-                {this.props.initialChar.total_xp}</span>{xpWarning}
+            <span> = {totalXP} / {this.props.initialChar.total_xp}</span>
+            {xpWarning}
         </div>);
     }
 }

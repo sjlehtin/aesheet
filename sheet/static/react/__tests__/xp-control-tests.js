@@ -37,7 +37,8 @@ describe('stat block', function() {
             "cur_cha": 62,
             "cur_pos": 48,
             bought_mana: 0,
-            bought_stamina: 0
+            bought_stamina: 0,
+            free_edges: 0
         };
 
         return Object.assign(_charData, statOverrides);
@@ -45,26 +46,16 @@ describe('stat block', function() {
 
 
     var xpControlFactory = function(givenProps) {
-        //// TODO: React TestUtils suck a bit of a balls.
-        //var Wrapper = React.createClass({
-        //    render: function() {
-        //        return <table><tbody>{this.props.children}</tbody></table>;
-        //    }
-        //});
         var props = {
             url: "/rest/characters/1/",
-            initialChar: charDataFactory()
+            initialChar: charDataFactory(),
+            edgesBought: 0
         };
+
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);
         }
         var control = React.createElement(XPControl, props);
-
-        //var table = TestUtils.renderIntoDocument(
-        //    <Wrapper>
-        //        {rowElement}
-        //    </Wrapper>
-        //);
 
         var node = TestUtils.renderIntoDocument(control);
         return TestUtils.findRenderedComponentWithType(node,
@@ -81,6 +72,18 @@ describe('stat block', function() {
         expect(XPControl.calculateStatRaises(charDataFactory())).toEqual(76);
         expect(XPControl.calculateStatRaises(charDataFactory({bought_mana: 2}))).toEqual(78);
         expect(XPControl.calculateStatRaises(charDataFactory({bought_stamina: 2}))).toEqual(78);
+    });
+
+    it('can calculate used xp from edges', function () {
+        var control = xpControlFactory();
+        expect(control.xpEdgesBought()).toEqual(0);
+    });
+
+    it('can take free edges into account', function () {
+        var control = xpControlFactory({
+            edgesBought: 3, initialChar:
+            charDataFactory({free_edges: 2})});
+        expect(control.xpEdgesBought()).toEqual(25);
     });
 
     //it('calls parent component set change callback', function (done) {
