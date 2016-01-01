@@ -1,5 +1,6 @@
 jest.dontMock('../StatBlock');
 jest.dontMock('../StatRow');
+jest.dontMock('../XPControl');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -348,7 +349,7 @@ describe('stat block', function() {
         });
     });
 
-    it('handles modifications from child components', function (done) {
+    it('handles modifications of stats from child components', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {
             block.handleModification("fit", 40, 41);
@@ -356,4 +357,14 @@ describe('stat block', function() {
             done();
         });
     });
+
+    it('handles modifications of xp from child components', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            block.handleXPMod("total_xp", 0, 231);
+            expect(block.state.char.total_xp).toEqual(231);
+            done();
+        });
+    });
+
 });

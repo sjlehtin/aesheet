@@ -1,9 +1,13 @@
 import React from 'react';
 
 import StatRow from 'StatRow';
+import XPControl from 'XPControl';
 
 var rest = require('sheet-rest');
 
+/**
+ * TODO: controls to add bought_mana, bought_stamina.
+ */
 /* Like excel roundup, rounds away from zero. */
 var roundup = function (value) {
     "use strict";
@@ -12,7 +16,7 @@ var roundup = function (value) {
     } else {
         return Math.ceil(value);
     }
-}
+};
 
 /* Like excel roundup, rounds away from zero. */
 var rounddown = function (value) {
@@ -22,7 +26,7 @@ var rounddown = function (value) {
     } else {
         return Math.floor(value);
     }
-}
+};
 
 class StatBlock extends React.Component {
     constructor(props) {
@@ -219,12 +223,19 @@ class StatBlock extends React.Component {
         this.setState({char: data});
     }
 
+    handleXPMod(field, oldValue, newValue) {
+        var data = this.state.char;
+        data.total_xp = newValue;
+        this.setState({char: data});
+    }
+
     render() {
-        var rows, derivedRows, usableRows, edges;
+        var rows, derivedRows, usableRows, xpcontrol;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
             usableRows = <tr><td>Loading...</td></tr>;
+            xpcontrol = <div>Loading</div>
         } else {
             var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
@@ -239,8 +250,7 @@ class StatBlock extends React.Component {
 
             var baseStyle = {
                 textAlign: "right",
-                padding: 0,
-                ///paddingLeft: 5,
+                paddingLeft: 5,
                 minWidth: "2em"
             };
             var effStyle = { fontWeight: "bold" };
@@ -265,6 +275,11 @@ class StatBlock extends React.Component {
                     </tr>)
                 ];
 
+            xpcontrol = <XPControl
+                url={this.state.url} edgesBought={0}
+                initialChar={this.state.char}
+                onMod={this.handleXPMod.bind(this)} />;
+
             var toughness = this.toughness();
             if (toughness) {
                 toughness = (<span>+<span
@@ -279,13 +294,13 @@ class StatBlock extends React.Component {
             };
             usableRows = [
                 (<tr key="body"><td style={statStyle}>B</td>
-                    <td>{this.baseBody()}{toughness}</td>
+                    <td style={baseStyle}>{this.baseBody()}{toughness}</td>
                     <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>),
                 (<tr key="stamina"><td style={statStyle}>S</td>
-                    <td>{this.stamina()}</td>
+                    <td style={baseStyle}>{this.stamina()}</td>
                     <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>),
                 (<tr key="mana"><td style={statStyle}>M</td>
-                    <td>{this.mana()}</td>
+                    <td style={baseStyle}>{this.mana()}</td>
                     <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>)
             ];
 
@@ -313,6 +328,7 @@ class StatBlock extends React.Component {
                     </table>
                 </div>
                 </div>
+                {xpcontrol}
             </div>
         )
     }
