@@ -613,6 +613,7 @@ class EditCharacterForm(BaseEditCharacterForm):
         return super(EditCharacterForm, self).save(commit=commit)
 
 
+# TODO: Remove.
 class AddXPForm(RequestForm):
     add_xp = forms.IntegerField()
 
