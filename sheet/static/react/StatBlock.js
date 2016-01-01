@@ -37,7 +37,9 @@ class StatBlock extends React.Component {
             /* This is preferred over the edges list in the char.  A
                subcomponent will handle the actual edges for the character,
                and will notify this component of changes. */
-            edges: {}
+            edges: {},
+            /* Running total of edge cost. */
+            edgesBought: 0
         };
     }
 
@@ -213,8 +215,12 @@ class StatBlock extends React.Component {
            the database will contain crud from the past, which may then pop
            up when, e.g., trying to remove edges. */
         var update = {};
-        update[data.edge] = data
-        this.setState({edge: Object.assign(this.state.edges, update)});
+        update[data.edge] = data;
+        this.setState({edges: Object.assign({}, this.state.edges, update),
+            /* TODO: the data in JSON will have the floats rendered as
+             strings.   Anyway around this? */
+            edgesBought: this.state.edgesBought + parseFloat(data.cost)
+        });
     }
 
     handleModification(stat, oldValue, newValue) {
@@ -276,7 +282,7 @@ class StatBlock extends React.Component {
                 ];
 
             xpcontrol = <XPControl
-                url={this.state.url} edgesBought={0}
+                url={this.state.url} edgesBought={this.state.edgesBought}
                 initialChar={this.state.char}
                 onMod={this.handleXPMod.bind(this)} />;
 

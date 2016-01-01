@@ -88,12 +88,12 @@ describe('stat block', function() {
             "saves_vs_lightning": 0,
             "saves_vs_poison": 0,
             "saves_vs_all": 0,
-            "run_multiplier": "0.00",
-            "swim_multiplier": "0.00",
-            "climb_multiplier": "0.00",
-            "fly_multiplier": "0.00",
+            "run_multiplier": 0.0,
+            "swim_multiplier": 0.0,
+            "climb_multiplier": 0.0,
+            "fly_multiplier": 0.0,
             "level": 1,
-            "cost": "2.0",
+            "cost": 2.0,
             "requires_hero": false,
             "edge": "Toughness",
             "skill_bonuses": []
@@ -258,9 +258,21 @@ describe('stat block', function() {
     it('handles edge addition', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {
-            block.handleEdgeAdded(edgeFactory({"Toughness": 2}));
+            block.handleEdgeAdded(edgeFactory({name: "Toughness", level: 2}));
             expect(Object.keys(block.state.edges).length).toBe(1);
             expect(block.state.edges.Toughness).not.toBe(undefined);
+            expect(block.state.edges.Toughness.level).toEqual(2);
+            done();
+        });
+    });
+
+    it('handles edge point calculation', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            expect(block.state.edgesBought).toEqual(0);
+            block.handleEdgeAdded(edgeFactory({"Toughness": 2, cost: 4}));
+            block.handleEdgeAdded(edgeFactory({"Acute Touch": 1, cost: 1}));
+            expect(block.state.edgesBought).toEqual(5);
             done();
         });
     });
