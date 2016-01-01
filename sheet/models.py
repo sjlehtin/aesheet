@@ -165,7 +165,7 @@ class Character(models.Model):
     basic character will immediately affect all sheets based on the
     character.
     """
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, unique=True)
     owner = models.ForeignKey(auth.models.User,
                               related_name="characters")
     private = models.BooleanField(default=False,
@@ -178,6 +178,7 @@ class Character(models.Model):
 
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
+
 
     portrait = models.ImageField(blank=True, upload_to='portraits')
 
