@@ -28,9 +28,10 @@ class WeaponAmmunitionList(generics.ListAPIView):
         return sheet.models.Ammunition.objects.filter(
             label__in=weapon.get_ammunition_types())
 
-
-class IsOwner(BasePermission):
+class IsAccessible(BasePermission):
     def has_object_permission(self, request, view, obj):
+        if not obj.private:
+            return True
         if obj.owner == request.user:
             return True
         else:
@@ -43,7 +44,7 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     queryset = sheet.models.Sheet.objects.all()
     serializer_class = serializers.SheetSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsAccessible]
 
     def get_queryset(self):
         return models.Sheet.objects.prefetch_related('character__edges',
@@ -76,7 +77,7 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
     queryset = sheet.models.Character.objects.all()
     serializer_class = serializers.CharacterSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsAccessible]
 
     def get_queryset(self):
         return models.Character.objects.prefetch_related('edges',

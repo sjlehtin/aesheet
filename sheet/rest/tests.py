@@ -13,8 +13,7 @@ class SheetTestCase(TestCase):
         self.request_factory = APIRequestFactory()
         self.user = factories.UserFactory(username="leia")
         self.owner = factories.UserFactory(username="luke")
-        self.sheet = factories.SheetFactory(character__owner=self.owner,
-                                            character__private=True)
+        self.sheet = factories.SheetFactory(character__owner=self.owner)
         self.detail_view = views.SheetViewSet.as_view({'get': 'retrieve'})
         self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
 
@@ -30,6 +29,14 @@ class SheetTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_authenticated_but_not_owner(self):
+        req = self.request_factory.get(self.url)
+        force_authenticate(req, user=self.user)
+        response = self.detail_view(req, pk=self.sheet.pk)
+        self.assertEqual(response.status_code, 200)
+
+    def test_authenticated_but_not_owner_sheet_private(self):
+        self.sheet.character.private = True
+        self.sheet.character.save()
         req = self.request_factory.get(self.url)
         force_authenticate(req, user=self.user)
         response = self.detail_view(req, pk=self.sheet.pk)
