@@ -435,7 +435,7 @@ def log_stat_change(character, request, field, change):
     if entry.amount == 0 and change != 0:
         entry.delete()
 
-
+# TODO: Remove.
 class StatModifyForm(RequestForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
