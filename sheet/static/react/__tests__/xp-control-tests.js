@@ -141,6 +141,27 @@ describe('stat block', function() {
         expect(control.state.showDialog).toBe(true);
     });
 
+    it('validates integer values', function () {
+        var control = xpControlFactory();
+        TestUtils.Simulate.click(control.getAddDOMNode());
+        var input = control.getInputDOMNode();
+        TestUtils.Simulate.change(input, {target: {value: "20a"}});
+
+        expect(control.validationState()).toEqual("error");
+
+        TestUtils.Simulate.change(input, {target: {value: "tsap"}});
+
+        expect(control.validationState()).toEqual("error");
+
+        TestUtils.Simulate.change(input, {target: {value: 10}});
+
+        expect(control.validationState()).toEqual("success");
+
+        TestUtils.Simulate.change(input, {target: {value: "10"}});
+        
+        expect(control.validationState()).toEqual("success");
+    });
+
     it('allows adding to be canceled', function () {
         var control = xpControlFactory();
         TestUtils.Simulate.click(control.getAddDOMNode());
@@ -150,7 +171,10 @@ describe('stat block', function() {
 
         expect(control.state.addXP).toEqual(200);
 
-        TestUtils.Simulate.click(control.getCancelDOMNode());
+        /* TODO: it would be nice to trigger the cancel by triggering the
+         dialog, but the DOM manipulation seems to be a bit tricky.  For
+          later... */
+        control.handleCancel();
         expect(control.state.addXP).toEqual(0);
         expect(control.state.showDialog).toBe(false);
     });
@@ -163,7 +187,7 @@ describe('stat block', function() {
         var spy = spyOn(control, 'handleSubmit');
 
         TestUtils.Simulate.click(control.getAddDOMNode());
-        TestUtils.Simulate.click(control.getSubmitDOMNode());
+        TestUtils.Simulate.submit(control.getSubmitDOMNode());
         response.then(function () {
             expect(spy).toHaveBeenCalled();
             done();

@@ -4,24 +4,6 @@ import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 
-//<div class="xp">
-//<label>XP:</label> {{ sheet.xp_used_stats }} +
-//{% if sheet.hero %}
-//{{ sheet.xp_used_hero }} +
-//{% endif %}
-//{{ sheet.xp_used_edges }} +
-//{{ sheet.xp_used_ingame }} = {{ sheet.xp_used }} / {{ sheet.total_xp}}
-//
-//<div class="edit-control">
-//    <form action="{{ act }}" method="post">
-//        {% csrf_token %}
-//        {{ add_xp_form }}
-//        <input type="submit" value="Add XP" />
-//    </form>
-//</div>
-//</div>
-//</div>
-
 class XPControl extends React.Component {
     constructor(props) {
         super(props);
@@ -94,6 +76,20 @@ class XPControl extends React.Component {
         this.setState({addXP: 0, showDialog: false});
     }
 
+    validationState() {
+        /* Checking if a number is an integer
+         *
+         *  http://stackoverflow.com/questions/14636536/how-to-check-if-a-variable-is-an-integer-in-javascript
+         **/
+        if (isNaN(this.state.addXP)) {
+            return "error";
+        }
+        if ((this.state.addXP|0) === parseInt(this.state.addXP)) {
+            return "success";
+        }
+        return "error";
+    }
+
     render() {
         var totalXP = 0;
         var xpStatsBought = XPControl.calculateStatRaises(this.props.initialChar) * 5;
@@ -129,22 +125,31 @@ class XPControl extends React.Component {
                         ref={(c) => this._addButton = c}
                         onClick={this.showEditControl.bind(this)}>
                     Add XP</Button></span>
-            <Modal show={this.state.showDialog}>
-                <Modal.Header><Modal.Title>Add XP</Modal.Title></Modal.Header>
+            <Modal show={this.state.showDialog} keyboard
+                   onHide={this.handleCancel.bind(this)}>
+                <Modal.Header closeButton={true}><Modal.Title>Add XP</Modal.Title></Modal.Header>
+                <form onSubmit={(e) => { this.handleSubmit(e);}}>
                 <Modal.Body>
-                    <Input ref={(c) => { this._inputField = c}}
+                    <Input ref={(c) => { this._inputField = c;
+                    /* Set focus initially here. */
+                    if (c) {
+                    c.getInputDOMNode().focus();
+                    }
+                    }}
                            type="text"
                            label="Add XP"
                            onChange={this.handleChange.bind(this)}
+                           bsStyle={this.validationState()}
+                           hasFeedback
+                           labelClassName="col-xs-2"
                            value={this.state.addXP} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button ref={(c) => this._cancelButton = c}
-                            onClick={this.handleCancel.bind(this)}>Cancel</Button>
-                    <Button ref={(c) => this._submitButton = c}
-                            onClick={(e) => { this.handleSubmit(e);}}
-                            bsStyle="primary">Save changes</Button>
+                    <ButtonInput type="submit" ref={(c) => this._submitButton = c}
+                                 onClick={(e) => { this.handleSubmit(e);}}
+                                 bsStyle="primary">Add</ButtonInput>
                 </Modal.Footer>
+                </form>
             </Modal>
             {xpWarning}
         </div>);
