@@ -2,6 +2,7 @@ import React from 'react';
 
 import StatRow from 'StatRow';
 import XPControl from 'XPControl';
+import NoteBlock from 'NoteBlock';
 
 import {Row, Col, Image} from 'react-bootstrap';
 
@@ -244,7 +245,7 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var rows, derivedRows, usableRows, xpcontrol, portrait;
+        var rows, derivedRows, usableRows, xpcontrol, portrait, notes;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
@@ -339,6 +340,7 @@ class StatBlock extends React.Component {
                         {% endif %}
                     </div>
                     */
+            notes = <NoteBlock edges={this.state.edgeList} />;
         }
 
         var statsStyle = {verticalAlign: "center", border: 1};
@@ -367,7 +369,16 @@ class StatBlock extends React.Component {
                 {xpcontrol}
                     </Col>
                 <Col md={7}>
-                    {portrait}
+                    <Row>
+                        <Col>
+                            {portrait}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            {notes}
+                        </Col>
+                    </Row>
                 </Col>
             </Row>
         )

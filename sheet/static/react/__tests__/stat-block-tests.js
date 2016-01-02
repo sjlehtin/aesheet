@@ -1,6 +1,7 @@
 jest.dontMock('../StatBlock');
 jest.dontMock('../StatRow');
 jest.dontMock('../XPControl');
+jest.dontMock('../NoteBlock');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -9,6 +10,7 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
+const NoteBlock = require('../NoteBlock').default;
 
 describe('stat block', function() {
     "use strict";
@@ -40,7 +42,8 @@ describe('stat block', function() {
             "mod_dex": 0,
             "mod_imm": 0,
             bought_mana: 0,
-            bought_stamina: 0
+            bought_stamina: 0,
+            edges: []
         };
 
         return Object.assign(_charData, statOverrides);
@@ -394,4 +397,14 @@ describe('stat block', function() {
         });
     });
 
+    it('contains a NoteBlock component', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            var noteBlock = TestUtils.findRenderedComponentWithType(
+                block, NoteBlock);
+            expect(TestUtils.isCompositeComponent(noteBlock)).toBe(true);
+            done();
+        });
+
+    });
 });
