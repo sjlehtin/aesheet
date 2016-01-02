@@ -22,6 +22,8 @@ Priority list by JW:
 -- bleeding damage, retain original wound, but incurs AA etc penalties
    as per bleeding.
 
+- notes changes should not be logged.
+
 - suspended weight
 - marking weapons as having no weight; useful for alternate weapons, or
   weapons with larger sizes (Martel enlarged).
