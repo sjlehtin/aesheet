@@ -27,6 +27,9 @@ perhaps Robot-system tests.
 
 {% block content %}
     <div class="row">
+    <div class="col-md-9">
+
+    <div class="row">
     <div class="col-md-3">
 <h1>{{ sheet.name }}</h1>
 {{ sheet.race }}
@@ -57,52 +60,45 @@ perhaps Robot-system tests.
       Copy this sheet</a>
         </div>
     </div>
-    <div class="col-md-3 no-print">
-    <div class="panel panel-default">
-        <div class="panel-heading">Owner</div>
-        <div class="panel-body">{{ sheet.owner }}
-            {% if sheet.private %}
-                <span class="label label-danger">Private</span>
-            {% endif %}</div>
-    </div>
-    </div>
     </div>
 
     <div class="row">
 
-        <div class="col-md-9">
-            <div class="row">
-                <div class="col-md-4">
-            {% comment %}
-                    <div class="stats">
-                        {% url "sheet_detail" sheet.id as act %}
-                        <table class="base">
-                        {% for stat in sheet.base_stats %}
-                            {% include "sheet/sheet_detail/stat.html" %}
-                        {% endfor %}
-                        </table>
-
-                    </div>
-            {% endcomment %}
+        <div class="col-md-12">
                 <div id="stat-block-container">Loading...</div>
-
-                </div>
-                <div class="col-md-8">
-                    <div>
-                        {% if sheet.character.portrait %}
-                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
-                             class="img-rounded">
-                        {% else %}
-                            <div class="edit-control">You can add a portrait for your character in
-                                the <a href="{% url "edit_character" sheet.character.id %}">
-                                    base character edit</a>.</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
+{#            <div class="row">#}
+{#                <div class="col-md-4">#}
+{#            {% comment %}#}
+{#                    <div class="stats">#}
+{#                        {% url "sheet_detail" sheet.id as act %}#}
+{#                        <table class="base">#}
+{#                        {% for stat in sheet.base_stats %}#}
+{#                            {% include "sheet/sheet_detail/stat.html" %}#}
+{#                        {% endfor %}#}
+{#                        </table>#}
+{##}
+{#                    </div>#}
+{#            {% endcomment %}#}
+{#                <div id="stat-block-container">Loading...</div>#}
+{##}
+{#                </div>#}
+{#                <div class="col-md-8">#}
+{#                    <div>#}
+{#                        {% if sheet.character.portrait %}#}
+{#                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"#}
+{#                             class="img-rounded">#}
+{#                        {% else %}#}
+{#                            <div class="edit-control">You can add a portrait for your character in#}
+{#                                the <a href="{% url "edit_character" sheet.character.id %}">#}
+{#                                    base character edit</a>.</div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+        </div>
+    </div>
 <div class="row">
-<div class="col-md-6">
+{#<div class="col-md-6">#}
 {% comment %}
 <table class="derived">
 {% for stat in sheet.derived_stats %}
@@ -155,9 +151,9 @@ perhaps Robot-system tests.
 {% endwith %}
 </table>
 {% endcomment %}
-</div>
+{#</div>#}
 
-<div class="col-md-6">
+<div class="col-md-12">
     {% include "sheet/sheet_detail/advancing_initiatives.html" %}
 </div>
 </div>
@@ -177,7 +173,7 @@ perhaps Robot-system tests.
     </div>
 </div>
 
-
+<div class="row">
 <h3>Notes</h3>
 <ul class="note positive">
     {% for note in notes.positive %}
@@ -189,17 +185,24 @@ perhaps Robot-system tests.
         <li>{{ note|join:": " }}</li>
     {% endfor %}
 </ul>
+</div>
 
+        <div class="row">
 <h3>Close combat</h3>
 {% include "sheet/sheet_detail/melee_weapons.html" %}
+</div>
 
+        <div class="row">
 <h3>Ranged combat</h3>
 {% include "sheet/sheet_detail/ranged_weapons.html" %}
+</div>
 
+<div class="row">
 {% if sheet.campaign.has_firearms %}
 <h3>Firearms</h3>
 {% include "sheet/sheet_detail/edit_firearms.html" %}
 {% endif %}
+</div>
 
 <div class="row">
     {% if sheet.campaign.has_spells %}
@@ -269,6 +272,14 @@ perhaps Robot-system tests.
 </div>
 
     <div id="skill-pane" class="col-md-3">
+    <div class="panel panel-default">
+        <div class="panel-heading">Owner</div>
+        <div class="panel-body">{{ sheet.owner }}
+            {% if sheet.private %}
+                <span class="label label-danger">Private</span>
+            {% endif %}</div>
+    </div>
+
         <div class="skills panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Skills</h3>
@@ -332,6 +343,7 @@ perhaps Robot-system tests.
         </div>
     </div>
 </div>
+{#    </div>#}
 {% endblock %}
 
 {% block script %}

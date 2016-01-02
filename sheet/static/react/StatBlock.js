@@ -3,6 +3,8 @@ import React from 'react';
 import StatRow from 'StatRow';
 import XPControl from 'XPControl';
 
+import {Row, Col, Image} from 'react-bootstrap';
+
 var rest = require('sheet-rest');
 
 /**
@@ -236,7 +238,7 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var rows, derivedRows, usableRows, xpcontrol;
+        var rows, derivedRows, usableRows, xpcontrol, portrait;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
@@ -310,12 +312,34 @@ class StatBlock extends React.Component {
                     <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>)
             ];
 
+            if (this.state.char.portrait) {
+                portrait = <Image style={{maxWidth: 300}} src={this.state.char.portrait} rounded />;
+            } else {
+                portrait = <div className="edit-control">
+                    You can add a portrait for your character in the
+                    <a href="`/characters/edit_char/${this.state.char}/`">
+                        base character edit</a>.
+                </div>;
+            }
+                    /*
+                    <div>
+                        {% if sheet.character.portrait %}
+                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
+                             class="img-rounded">
+                        {% else %}
+                            <div class="edit-control">You can add a portrait for your character in
+                                the <a href="{% url "edit_character" sheet.character.id %}">
+                                    base character edit</a>.</div>
+                        {% endif %}
+                    </div>
+                    */
         }
 
         var statsStyle = {verticalAlign: "center", border: 1};
 
         return (
-            <div>
+            <Row>
+                <Col md={5}>
                 <div style={{position: "relative", width: "18em"}}>
                 <h4>Stats</h4>
                 <table style={statsStyle}>
@@ -335,7 +359,11 @@ class StatBlock extends React.Component {
                 </div>
                 </div>
                 {xpcontrol}
-            </div>
+                    </Col>
+                <Col md={7}>
+                    {portrait}
+                </Col>
+            </Row>
         )
     }
 }
