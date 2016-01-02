@@ -96,7 +96,7 @@ describe('stat row', function() {
 
 });
 
-describe('it updates its parent', function (){
+describe('StatRow updates', function (){
     "use strict";
 
     var promises;
