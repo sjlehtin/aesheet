@@ -25,10 +25,14 @@ class NoteBlock extends React.Component {
         var positive, negative;
 
         var generateNoteContainer = function (noteType, edgeList) {
-            return <ul className={noteType}>{edgeList.map((elem, ii) => {
-                return <li key={ii}
-                           title={`${elem.edge} ${elem.level}`}>{elem.notes}</li>;
-            })}</ul>;
+            var color = noteType === "positive" ? "blue" : "red";
+            return <ul className={noteType}
+                       style={{fontSize: "80%", color: color}}>
+                {edgeList.map((elem, ii) => {
+                    return <li key={ii}
+                               title={`${elem.edge} ${elem.level}`}>
+                        {`${elem.edge}: ${elem.notes}`}</li>;
+                })}</ul>;
         };
 
         if (positiveList.length > 0) {

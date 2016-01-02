@@ -4,7 +4,7 @@ import StatRow from 'StatRow';
 import XPControl from 'XPControl';
 import NoteBlock from 'NoteBlock';
 
-import {Row, Col, Image} from 'react-bootstrap';
+import {Row, Col, Image, Panel} from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 
@@ -328,19 +328,7 @@ class StatBlock extends React.Component {
                         base character edit</a>.
                 </div>;
             }
-                    /*
-                    <div>
-                        {% if sheet.character.portrait %}
-                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
-                             class="img-rounded">
-                        {% else %}
-                            <div class="edit-control">You can add a portrait for your character in
-                                the <a href="{% url "edit_character" sheet.character.id %}">
-                                    base character edit</a>.</div>
-                        {% endif %}
-                    </div>
-                    */
-            notes = <NoteBlock edges={this.state.edgeList} />;
+            notes = <Panel><NoteBlock edges={this.state.edgeList} /></Panel>;
         }
 
         var statsStyle = {verticalAlign: "center", border: 1};
@@ -369,15 +357,11 @@ class StatBlock extends React.Component {
                 {xpcontrol}
                     </Col>
                 <Col md={7}>
-                    <Row>
-                        <Col>
-                            {portrait}
-                        </Col>
+                    <Row style={{paddingBottom: 5}}>
+                        {portrait}
                     </Row>
                     <Row>
-                        <Col>
-                            {notes}
-                        </Col>
+                        {notes}
                     </Row>
                 </Col>
             </Row>
