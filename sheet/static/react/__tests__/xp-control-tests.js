@@ -158,7 +158,7 @@ describe('stat block', function() {
         expect(control.validationState()).toEqual("success");
 
         TestUtils.Simulate.change(input, {target: {value: "10"}});
-        
+
         expect(control.validationState()).toEqual("success");
     });
 
