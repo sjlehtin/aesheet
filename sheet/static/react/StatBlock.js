@@ -322,11 +322,11 @@ class StatBlock extends React.Component {
             if (this.state.char.portrait) {
                 portrait = <Image style={{maxWidth: 300}} src={this.state.char.portrait} rounded />;
             } else {
-                portrait = <div className="edit-control">
-                    You can add a portrait for your character in the
-                    <a href="`/characters/edit_char/${this.state.char}/`">
-                        base character edit</a>.
-                </div>;
+                portrait = (
+                    <div className="edit-control">You can add a portrait for
+                        your character in the <a href="`/characters/edit_char/${
+                        this.state.char}/`"> base character edit</a>.
+                </div>);
             }
             notes = <Panel><NoteBlock edges={this.state.edgeList} /></Panel>;
         }
