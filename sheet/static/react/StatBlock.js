@@ -40,6 +40,7 @@ class StatBlock extends React.Component {
                subcomponent will handle the actual edges for the character,
                and will notify this component of changes. */
             edges: {},
+            edgeList: [],
             /* Running total of edge cost. */
             edgesBought: 0
         };
@@ -218,10 +219,15 @@ class StatBlock extends React.Component {
            up when, e.g., trying to remove edges. */
         var update = {};
         update[data.edge] = data;
+
+        this.state.edgeList.push(data);
+        var newList = this.state.edgeList;
+
         this.setState({edges: Object.assign({}, this.state.edges, update),
             /* TODO: the data in JSON will have the floats rendered as
              strings.   Anyway around this? */
-            edgesBought: this.state.edgesBought + parseFloat(data.cost)
+            edgesBought: this.state.edgesBought + parseFloat(data.cost),
+            edgeList: newList
         });
     }
 

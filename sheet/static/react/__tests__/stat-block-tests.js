@@ -266,6 +266,20 @@ describe('stat block', function() {
         });
     });
 
+    it('handles a list of edges to pass to child components', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            expect(block.state.edgeList.length).toBe(0);
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 3}));
+            expect(block.state.edgeList.length).toBe(1);
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+                level: 3}));
+            expect(block.state.edgeList.length).toBe(2);
+            done();
+        });
+    });
+
     it('handles edge point calculation', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {
@@ -278,6 +292,7 @@ describe('stat block', function() {
     });
 
     xit('handles edge removal');
+    xit('handles edge point calculation after edge removal');
 
     it('can indicate toughness', function (done) {
         var block = getStatBlock(charDataFactory({cur_fit: 40}),
