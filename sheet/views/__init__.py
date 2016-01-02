@@ -707,18 +707,6 @@ def process_sheet_change_request(request, sheet):
     return False
 
 
-Notes = namedtuple("Notes", ["positive", "negative"])
-
-
-def get_notes(character, filter_kwargs):
-    args = {'character': character}
-    args.update(filter_kwargs)
-    notes = CharacterEdge.objects.filter(**args).exclude(
-        edge__notes=u'').values_list('edge__edge__name',
-                                     'edge__notes')
-    return notes
-
-
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
                               .select_related('armor__base',
@@ -742,10 +730,6 @@ def sheet_detail(request, sheet_id=None):
         raise PermissionDenied
 
     forms = {}
-
-    positive = get_notes(sheet.character, {'edge__cost__gt': 0})
-    negative = get_notes(sheet.character, {'edge__cost__lte': 0})
-    notes = Notes(positive=positive, negative=negative)
 
     if request.method == "POST":
         data = request.POST
@@ -820,7 +804,6 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = {'sheet': SheetView(sheet),
-         'notes': notes,
          'sweep_fire_available': any([wpn.has_sweep_fire()
                                       for wpn in sheet.firearms.all()]),
          }

@@ -1070,16 +1070,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.assertEqual(sheet.edge_sp, 10)
         self.assertEqual(original + 10, sheet.character.total_sp)
 
-    def test_edge_notes(self):
-        factories.EdgeLevelFactory(edge__name="Superior Endurance", level=1,
-                                   notes="Recover AC penalty")
-
-        self.add_edge(self.sheet.character, "Superior Endurance")
-
-        response = self.client.get(reverse(views.sheet_detail,
-                                           args=[self.sheet.pk]))
-        self.assertContains(response, "Recover AC penalty")
-
     def test_increase_skill_level(self):
         cs = factories.CharacterSkillFactory(
             skill__name="Unarmed combat",
