@@ -28,14 +28,19 @@ class WeaponAmmunitionList(generics.ListAPIView):
         return sheet.models.Ammunition.objects.filter(
             label__in=weapon.get_ammunition_types())
 
+
+def character_accessible(character, user):
+    if not character.private:
+        return True
+    if character.owner == user:
+        return True
+    else:
+        return False
+
+
 class IsAccessible(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if not obj.private:
-            return True
-        if obj.owner == request.user:
-            return True
-        else:
-            return False
+        return character_accessible(obj, request.user)
 
 
 class SheetViewSet(mixins.RetrieveModelMixin,
@@ -104,3 +109,31 @@ class EdgeLevelViewSet(viewsets.ModelViewSet):
     queryset = sheet.models.EdgeLevel.objects.all()
     serializer_class = serializers.EdgeLevelSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class IsInventoryItemAccessible(BasePermission):
+    def has_permission(self, request, view):
+        return character_accessible(view.sheet.character, request.user)
+
+
+class InventoryEntryViewSet(viewsets.ModelViewSet):
+    """
+    Inventory for a sheet.
+
+    Requires sheet_pk argument from, e.g., urlconf.
+    """
+    serializer_class = serializers.InventoryEntrySerializer
+    permission_classes = [permissions.IsAuthenticated, IsInventoryItemAccessible]
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.select_related(
+                'character__owner').get(pk=self.kwargs['sheet_pk'])
+        return super(InventoryEntryViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        return models.InventoryEntry.objects.select_related(
+            'sheet__character__owner').filter(sheet=self.sheet)
+
+    def perform_create(self, serializer):
+        serializer.save(sheet=self.sheet)

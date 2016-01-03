@@ -8,6 +8,7 @@ import views
 import sheet.models as models
 from serializers import SheetSerializer, CharacterSerializer
 
+
 class SheetTestCase(TestCase):
     def setUp(self):
         self.request_factory = APIRequestFactory()
@@ -134,7 +135,8 @@ class CharacterTestCase(TestCase):
                                                     gained_sp=0,
                                                     times_wounded=2)
         self.detail_view = views.CharacterViewSet.as_view({'get': 'retrieve'})
-        self.url = reverse('character-detail', kwargs={'pk': self.character.pk})
+        self.url = reverse('character-detail',
+                           kwargs={'pk': self.character.pk})
         self.request = self.request_factory.get(self.url)
 
     def test_unauthenticated(self):
@@ -240,3 +242,150 @@ class EdgeTestCase(TestCase):
         self.assertEqual(response.data['edge'], "Toughness")
 
 
+class InventoryTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+
+    def test_url(self):
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_items(self):
+        factories.InventoryEntryFactory(description="long bow arrow",
+                                        quantity=20,
+                                        unit_weight=0.05,
+                                        sheet=self.sheet,
+                                        order=2)
+        factories.InventoryEntryFactory(description="potion of flying",
+                                        quantity=1,
+                                        unit_weight=0.5,
+                                        sheet=self.sheet,
+                                        order=1)
+
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+        self.assertEqual(response.data[0]['description'], "potion of flying")
+        self.assertEqual(response.data[1]['description'], "long bow arrow")
+
+    def test_adding_items(self):
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet.pk)
+        response = self.client.post(
+                url,
+                data={'description': "potion of flying",
+                      'unit_weight': 0.5, }, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        entries = models.InventoryEntry.objects.filter(sheet=self.sheet)
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].unit_weight, 0.5)
+        self.assertEqual(entries[0].quantity, 1)
+        self.assertEqual(entries[0].description, "potion of flying")
+
+    def test_modifying_items(self):
+        entry = factories.InventoryEntryFactory(description="long bow arrow",
+                                                quantity=20,
+                                                unit_weight=0.05,
+                                                sheet=self.sheet,
+                                                order=2)
+        url = '/rest/sheets/{}/inventory/{}/'.format(self.sheet.pk,
+                                                     entry.pk)
+
+        response = self.client.patch(url, data={'quantity': 19 },
+                                     format='json')
+        self.assertEqual(response.status_code, 200)
+        entries = models.InventoryEntry.objects.filter(sheet=self.sheet)
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0].quantity, 19)
+        self.assertEqual(entries[0].description, "long bow arrow")
+
+    def test_deleting_items(self):
+        entry = factories.InventoryEntryFactory(description="long bow arrow",
+                                                quantity=20,
+                                                unit_weight=0.05,
+                                                sheet=self.sheet,
+                                                order=2)
+        url = '/rest/sheets/{}/inventory/{}/'.format(self.sheet.pk,
+                                                     entry.pk)
+
+        response = self.client.delete(url, data={'id': entry.pk },
+                                      format='json')
+        self.assertEqual(response.status_code, 204)
+        entries = models.InventoryEntry.objects.filter(sheet=self.sheet)
+        self.assertEqual(len(entries), 0)
+
+
+class InventoryPrivateSheetTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.user = factories.UserFactory(username="leia")
+        self.sheet = factories.SheetFactory(character__owner=self.owner,
+                                            character__private=True)
+
+    def test_url_valid_user(self):
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_url_invalid_user(self):
+        self.assertTrue(
+            self.client.login(username="leia", password="foobar"))
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 403)
+
+
+class InventoryMultipleSheetsTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.user = factories.UserFactory(username="leia")
+        self.sheet1 = factories.SheetFactory(character__owner=self.owner)
+        self.sheet2 = factories.SheetFactory(character__owner=self.user)
+
+        factories.InventoryEntryFactory(description="long bow arrow",
+                                        quantity=20,
+                                        unit_weight=0.05,
+                                        sheet=self.sheet1,
+                                        order=2)
+
+        factories.InventoryEntryFactory(description="potion of flying",
+                                        quantity=1,
+                                        unit_weight=0.5,
+                                        sheet=self.sheet2,
+                                        order=2)
+
+    def test_url_inventory_for_user1(self):
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet1.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertEqual(response.data[0]['description'], "long bow arrow")
+
+    def test_url_inventory_for_user2(self):
+        self.assertTrue(
+            self.client.login(username="leia", password="foobar"))
+        url = '/rest/sheets/{}/inventory/'.format(self.sheet2.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertEqual(response.data[0]['description'], "potion of flying")

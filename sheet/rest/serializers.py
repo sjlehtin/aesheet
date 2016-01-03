@@ -48,3 +48,10 @@ class CharacterSerializer(serializers.ModelSerializer):
         model = sheet.models.Character
         fields = "__all__"
         read_only_fields = ("owner", )
+
+
+class InventoryEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.InventoryEntry
+        fields = "__all__"
+        read_only_fields = ("sheet", )

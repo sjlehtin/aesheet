@@ -2351,6 +2351,25 @@ class Sheet(models.Model):
         ordering = ('character__name', )
 
 
+class InventoryEntry(models.Model):
+    sheet = models.ForeignKey(Sheet, related_name='inventory_entries')
+
+    quantity = models.PositiveIntegerField(default=1)
+    description = models.CharField(max_length=100)
+    location = models.CharField(max_length=30, blank=True,
+                                help_text="Indicate where the item(s) is "
+                                          "stored")
+    unit_weight = models.DecimalField(max_digits=3, decimal_places=3,
+                                      default=1, help_text="Item weight in "
+                                                           "kilograms")
+
+    order = models.IntegerField(help_text="explicit ordering for the "
+                                          "entries", default=0)
+
+    class Meta:
+        ordering = ('order', )
+
+
 class CharacterLogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     user = models.ForeignKey(auth.models.User)

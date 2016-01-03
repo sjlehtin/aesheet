@@ -379,3 +379,10 @@ class SpellEffectFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.SpellEffect
         django_get_or_create = ('name', )
+
+
+class InventoryEntryFactory(factory.DjangoModelFactory):
+    description = factory.Sequence(lambda n: "inventory entry %03d" % n)
+
+    class Meta:
+        model = models.InventoryEntry
