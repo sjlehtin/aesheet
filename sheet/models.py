@@ -161,13 +161,14 @@ class Character(models.Model):
     name = models.CharField(max_length=256, unique=True)
     owner = models.ForeignKey(auth.models.User,
                               related_name="characters")
-    private = models.BooleanField(default=False,
-                                  help_text="If set, access to the character "
-                                            "will be denied for other users.  "
-                                            "The character will also be hidden "
-                                            "in lists.  As a rule of thumb, "
-                                            "only the GM should mark characters"
-                                            " as private.")
+    private = models.BooleanField(
+            default=False,
+            help_text="If set, access to the character "
+            "will be denied for other users. "
+            "The character will also be hidden "
+            "in lists.  As a rule of thumb, "
+            "only the GM should mark characters"
+            " as private.")
 
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
@@ -336,46 +337,57 @@ class Character(models.Model):
                 base += extra
             return base + o._mod_stat(func.func_name[4:])
         return _pass_name
+
     @property
     @_stat_wrapper
     def mod_fit(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_ref(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_lrn(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_int(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_psy(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_wil(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_cha(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_pos(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_mov(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_dex(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_imm(self):
@@ -813,13 +825,12 @@ class WeaponQuality(BaseWeaponQuality):
     versus_missile_modifier = models.IntegerField(default=0)
     versus_area_save_modifier = models.IntegerField(default=0)
 
-    max_fit = models.IntegerField(default=90,
-                                  help_text="Applies for bows, this is the "
-                                            "maximum FIT "
-                                            "the weapon pull adjusts to.  This "
-                                            "caps the damage and range of the "
-                                            "weapon in case the character has "
-                                            "a higher FIT than this.")
+    max_fit = models.IntegerField(
+            default=90,
+            help_text="Applies for bows, this is the maximum FIT "
+            "the weapon pull adjusts to.  This caps the damage and range "
+            "of the weapon in case the character has a higher FIT than this.")
+
     @classmethod
     def dont_export(cls):
         return ['weapon', 'rangedweapon', 'rangedweaponammo_set']
@@ -1594,17 +1605,20 @@ Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
+    # TODO: Remove this.  It should be determined from the Character.owner.
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
     description = models.TextField(blank=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
     # TODO: These relations would need to go through separate tables, e.g.,
-    # SheetWeapon, to allow adding parameters like "in_inventory", or "order".
+    #  SheetWeapon, to allow adding parameters like "in_inventory",
+    # or "order".
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
     firearms = models.ManyToManyField(Firearm, blank=True)
 
-    miscellaneous_items = models.ManyToManyField(MiscellaneousItem, blank=True)
+    miscellaneous_items = models.ManyToManyField(MiscellaneousItem,
+                                                 blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
@@ -1693,8 +1707,8 @@ class Sheet(models.Model):
 
     @property
     def base_initiative(self):
-        return self.eff_ref / 10.0 + self.eff_int / 20.0 + \
-            self.eff_psy / 20.0
+        return (self.eff_ref / 10.0 + self.eff_int / 20.0 +
+                self.eff_psy / 20.0)
 
     def _initiatives(self, roa, actions=None, readied_base_i=-3,
                      target_i=0):
@@ -2133,22 +2147,27 @@ class Sheet(models.Model):
     @_stat_wrapper
     def mod_wil(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_cha(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_pos(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_mov(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_dex(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_imm(self):
