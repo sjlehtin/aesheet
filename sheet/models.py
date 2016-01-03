@@ -121,13 +121,6 @@ class CampaignItem(object):
         self.objects = []
 
 
-def _filter_out_private(char, user):
-    if char.private and char.owner != user:
-        return False
-    else:
-        return True
-
-
 def get_characters(user):
     return Character.objects.filter(Q(private=False) | Q(owner=user))
 
