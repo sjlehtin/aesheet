@@ -4,33 +4,15 @@ import cookie from 'react-cookie';
 
 var exports = function () {
     var csrftoken = cookie.load('csrftoken');
-    return {
-        getData: function (url) {
-            "use strict";
+
+    var patchMethod = function (url, data, method) {
+        "use strict";
+            if (method === undefined) {
+                method = "PATCH"
+            }
             return new Promise(function (resolved, rejected) {
                 fetch(url, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                }).then((response) => {
-                    response.json().then((json) => {
-                        resolved(json);
-                    });
-                }).catch((e) => {
-                    rejected(e)
-                });
-
-            })
-        },
-
-        patch: function (url, data) {
-            "use strict";
-
-            return new Promise(function (resolved, rejected) {
-                fetch(url, {
-                    method: "PATCH",
+                    method: method,
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
@@ -53,6 +35,34 @@ var exports = function () {
                     }
                 }).catch((e) => { rejected(e)});
             });
+    };
+
+    return {
+        getData: function (url) {
+            "use strict";
+            return new Promise(function (resolved, rejected) {
+                fetch(url, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                }).then((response) => {
+                    response.json().then((json) => {
+                        resolved(json);
+                    });
+                }).catch((e) => {
+                    rejected(e)
+                });
+
+            })
+        },
+
+        patch: patchMethod,
+
+        post: function (url, data) {
+            "use strict";
+            return patchMethod(url, data, "POST");
         }
     }
 }();
