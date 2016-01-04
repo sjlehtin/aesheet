@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
 
+var util = require('sheet-util');
 var rest = require('sheet-rest');
 
 class XPControl extends React.Component {
@@ -77,17 +78,7 @@ class XPControl extends React.Component {
     }
 
     validationState() {
-        /* Checking if a number is an integer
-         *
-         *  http://stackoverflow.com/questions/14636536/how-to-check-if-a-variable-is-an-integer-in-javascript
-         **/
-        if (isNaN(this.state.addXP)) {
-            return "error";
-        }
-        if ((this.state.addXP|0) === parseInt(this.state.addXP)) {
-            return "success";
-        }
-        return "error";
+        return util.isInt(this.state.addXP) ? "success" : "error";
     }
 
     render() {
