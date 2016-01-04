@@ -4,9 +4,8 @@ import React from 'react'
 import { render } from 'react-dom'
 
 import CharacterNotes from "CharacterNotes"
-import StatRow from "StatRow"
 import StatBlock from "StatBlock"
-import XPControl from "XPControl"
+import Inventory from "Inventory"
 
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -29,8 +28,7 @@ module.exports = {
     "rest": rest,
     "React": React,
     "CharacterNotes": CharacterNotes,
-    "StatRow": StatRow,
     "StatBlock": StatBlock,
-    "XPControl": XPControl,
+    "Inventory": Inventory,
     "render": render
 }

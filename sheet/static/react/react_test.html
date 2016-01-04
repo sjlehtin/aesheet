@@ -1,41 +1,21 @@
 <html>
 <title>React Test</title>
 <body>
-<table>
-    <tbody id="stat-row"><tr><td>Loading...</td></tr></tbody>
-</table>
 <div id="stat-block">Loading...</div>
-<div id="xp-control">Loading...</div>
+<div id="inventory">Loading...</div>
 <div id="character-container">Loading...</div>
 <script src="bundle.js">
 </script>
 <script type="application/javascript">
+    /*
     SheetApp.rest.getData('/rest/sheets/1/').then(function (sheet) {
         var charURL = `/rest/characters/${sheet.character}/`;
         SheetApp.rest.getData(charURL).then(
                 function (char) {
-                    console.log(char);
-                    var onMod = function (stat, oldValue, newValue) {
-                                console.log("onChange:", stat, oldValue, newValue);
-                            };
-                    var row = SheetApp.React.createElement(
-                            SheetApp.StatRow,
-                            {stat: "fit", initialChar: char,
-                                initialSheet: sheet,
-                                url: charURL,
-                                onMod: onMod });
-                    SheetApp.render(row, document.getElementById('stat-row'));
-                    var control = SheetApp.React.createElement(
-                            SheetApp.XPControl, {
-                                url: '/rest/characters/1/',
-                                initialChar: char,
-                                edgesBought: 5,
-                                onMod: onMod});
-                    SheetApp.render(control,
-                            document.getElementById('xp-control'));
                     }
         );
     });
+    */
 
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes, {url: '/rest/characters/1/'});
     SheetApp.render(node, document.getElementById('character-container'));
@@ -43,7 +23,10 @@
     var block = SheetApp.React.createElement(SheetApp.StatBlock, {url: '/rest/sheets/1/'});
     SheetApp.render(block, document.getElementById('stat-block'));
 
-    SheetApp.render(node, document.getElementById('character-container'));
+    var inventory = SheetApp.React.createElement(SheetApp.Inventory, {url:
+            '/rest/sheets/1/inventory/'});
+    SheetApp.render(inventory, document.getElementById('inventory'));
+
 
 </script>
 </body>
