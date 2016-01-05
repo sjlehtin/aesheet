@@ -3,18 +3,24 @@ import ReactDOM from 'react-dom';
 
 import {Table, Button, Input} from 'react-bootstrap';
 
+var util = require('sheet-util');
 var rest = require('sheet-rest');
 
 class Inventory extends React.Component {
+
     constructor(props) {
         super(props);
-        this.state = {addEnabled: false,
-            inventory: [],
+
+        this.defaultValues = {
+            addEnabled: false,
             newDescription: '',
             newLocation: '',
-            newUnitWeight: 1.0,
+            newUnitWeight: "1.0",
             newQuantity: 1
         };
+
+        this.state = Object.assign({inventory: []},
+            this.defaultValues);
     }
 
     componentDidMount() {
@@ -54,7 +60,31 @@ class Inventory extends React.Component {
         this.setState({newUnitWeight: e.target.value})
     }
 
+    unitWeightValidationState() {
+        return util.isFloat(this.state.newUnitWeight) ? "success" : "error";
+    }
+
+    quantityValidationState() {
+        return util.isInt(this.state.newQuantity) ? "success" : "error";
+    }
+
+    descriptionValidationState() {
+        return this.state.newDescription.length > 0 ? "success" : "error";
+    }
+
     submit() {
+        if (this.unitWeightValidationState() != "success") {
+            return;
+        }
+
+        if (this.quantityValidationState() != "success") {
+            return;
+        }
+
+        if (this.descriptionValidationState() != "success") {
+            return;
+        }
+
         var newInventory = this.state.inventory;
         var data = {
             description: this.state.newDescription,
@@ -68,7 +98,8 @@ class Inventory extends React.Component {
         rest.post(this.props.url,
             data)
             .then((json) => { console.log(json);
-                this.setState({inventory: newInventory}) })
+                this.setState(Object.assign({inventory: newInventory},
+                    this.defaultValues)) })
             .catch((err) => {console.log("Failed to update: ", err); })
     }
 
@@ -95,35 +126,38 @@ class Inventory extends React.Component {
         if (this.state.addEnabled) {
             inputRow = <tr>
                 <td><Input type="text"
-                           ref={(c) => {
-                       this._descriptionInputField = c ?
-                       c.getInputDOMNode() : undefined }}
+                           ref={(c) => { this._descriptionInputField = c ?
+                           c.getInputDOMNode() : undefined}}
+                           bsStyle={this.descriptionValidationState()}
+                           hasFeedback
                            onChange={(e) => this.handleDescriptionChange(e)}
                            onKeyDown={(e) => this.handleKeyDown(e)}
                            value={this.state.newDescription} /></td>
                 <td><Input type="text"
-                       ref={(c) => {
-                       this._locationInputField = c ?
-                       c.getInputDOMNode() : undefined }}
-                       onChange={(e) => this.handleLocationChange(e)}
+                           ref={(c) => {
+                           this._locationInputField = c ?
+                           c.getInputDOMNode() : undefined }}
+                           onChange={(e) => this.handleLocationChange(e)}
                            onKeyDown={(e) => this.handleKeyDown(e)}
                            value={this.state.newLocation} /></td>
                 <td><Input type="text"
-                       ref={(c) => {
-                       this._quantityInputField = c ?
-                       c.getInputDOMNode() : undefined }}
-                       onChange={(e) => this.handleQuantityChange(e)}
+                           ref={(c) => {
+                           this._quantityInputField = c ?
+                           c.getInputDOMNode() : undefined }}
+                           bsStyle={this.quantityValidationState()}
+                           hasFeedback
+                           onChange={(e) => this.handleQuantityChange(e)}
                            onKeyDown={(e) => this.handleKeyDown(e)}
-
-                       value={this.state.newQuantity} /></td>
+                           value={this.state.newQuantity} /></td>
                 <td><Input type="text"
-                       ref={(c) => {
-                       this._unitWeightInputField = c ?
-                       c.getInputDOMNode() : undefined }}
-                       onChange={(e) => this.handleUnitWeightChange(e)}
+                           ref={(c) => {
+                           this._unitWeightInputField = c ?
+                           c.getInputDOMNode() : undefined }}
+                           bsStyle={this.quantityValidationState()}
+                           hasFeedback
+                           onChange={(e) => this.handleUnitWeightChange(e)}
                            onKeyDown={(e) => this.handleKeyDown(e)}
-
-                       value={this.state.newUnitWeight} /></td>
+                           value={this.state.newUnitWeight} /></td>
                 <td></td>
             </tr>
         }

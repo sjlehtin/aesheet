@@ -1,10 +1,11 @@
 jest.dontMock('../Inventory');
+jest.dontMock('../sheet-util');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
-var rest = require('sheet-rest');
+var rest = require('../sheet-rest');
 
 const Inventory = require('../Inventory').default;
 
@@ -81,10 +82,10 @@ describe('Inventory', function() {
         });
     });
 
-    pit('allows items to be added', function () {
+    it('allows items to be added', function (done) {
         rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
         var inventory = getInventory();
-        return Promise.all(promises).then(() => {
+        Promise.all(promises).then(() => {
             expect(inventory._addButton).not.toBe(undefined);
 
             TestUtils.Simulate.click(inventory._addButton);
@@ -92,7 +93,7 @@ describe('Inventory', function() {
             expect(inventory.state.addEnabled).toBe(true);
 
             expect(inventory.state.newQuantity).toEqual(1);
-            expect(inventory.state.newUnitWeight).toEqual(1.0);
+            expect(inventory.state.newUnitWeight).toEqual("1.0");
             expect(inventory.state.newLocation).toEqual("");
             expect(inventory.state.newDescription).toEqual("");
 
@@ -118,6 +119,9 @@ describe('Inventory', function() {
                 inventory._unitWeightInputField,
                 {key: "Enter", keyCode: 13, which: 13});
 
+            expect(inventory.unitWeightValidationState()).toEqual("success");
+            expect(inventory.quantityValidationState()).toEqual("success");
+
             expect(rest.post.mock.calls[0][0]).toEqual(
                 '/rest/sheets/1/inventory/');
 
@@ -127,7 +131,106 @@ describe('Inventory', function() {
             expect(data.unit_weight).toEqual("2.5");
             expect(data.quantity).toEqual(1);
             expect(data.order).toEqual(2);
-        });
 
-    })
+            Promise.all(promises).then(function() {
+                expect(inventory.state.addEnabled).toBe(false);
+
+                expect(inventory.state.newQuantity).toEqual(1);
+                expect(inventory.state.newUnitWeight).toEqual("1.0");
+                expect(inventory.state.newLocation).toEqual("");
+                expect(inventory.state.newDescription).toEqual("");
+                done();
+            });
+        }).catch(function (err) { fail(err);});
+    });
+
+    it('has decent defaults', function (done) {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
+        var inventory = getInventory();
+        Promise.all(promises).then(() => {
+            TestUtils.Simulate.click(inventory._addButton);
+
+            TestUtils.Simulate.change(
+                inventory._descriptionInputField,
+                {target: { value: "foobar"}});
+
+            rest.post.mockReturnValue(jsonResponse({}));
+
+            TestUtils.Simulate.keyDown(
+                inventory._unitWeightInputField,
+                {key: "Enter", keyCode: 13, which: 13});
+
+            expect(rest.post.mock.calls.length).toEqual(1);
+
+            done();
+        }).catch(function (err) { fail(err);});
+    });
+
+    it('validates unit weight field', function (done) {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
+        var inventory = getInventory();
+        Promise.all(promises).then(() => {
+            TestUtils.Simulate.click(inventory._addButton);
+
+            TestUtils.Simulate.change(
+                inventory._descriptionInputField,
+                {target: { value: "foobar"}});
+
+            TestUtils.Simulate.change(
+                inventory._unitWeightInputField,
+                {target: { value: "a2.5"}});
+
+            TestUtils.Simulate.keyDown(
+                inventory._unitWeightInputField,
+                {key: "Enter", keyCode: 13, which: 13});
+
+            expect(rest.post.mock.calls.length).toEqual(0);
+
+            done();
+        }).catch(function (err) { fail(err);});
+    });
+
+    it('validates quantity field', function (done) {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
+        var inventory = getInventory();
+        Promise.all(promises).then(() => {
+            TestUtils.Simulate.click(inventory._addButton);
+
+            TestUtils.Simulate.change(
+                inventory._descriptionInputField,
+                {target: { value: "foobar"}});
+
+            TestUtils.Simulate.change(
+                inventory._quantityInputField,
+                {target: { value: "a1"}});
+
+            TestUtils.Simulate.keyDown(
+                inventory._unitWeightInputField,
+                {key: "Enter", keyCode: 13, which: 13});
+
+            expect(rest.post.mock.calls.length).toEqual(0);
+
+            done();
+        }).catch(function (err) { fail(err);});
+    });
+
+    it('validates description field', function (done) {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
+        var inventory = getInventory();
+        Promise.all(promises).then(() => {
+            TestUtils.Simulate.click(inventory._addButton);
+
+            TestUtils.Simulate.change(
+                inventory._descriptionInputField,
+                {target: { value: ""}});
+
+            TestUtils.Simulate.keyDown(
+                inventory._unitWeightInputField,
+                {key: "Enter", keyCode: 13, which: 13});
+
+            expect(rest.post.mock.calls.length).toEqual(0);
+
+            done();
+        }).catch(function (err) { fail(err);});
+    });
 });
