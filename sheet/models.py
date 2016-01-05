@@ -2371,7 +2371,7 @@ class InventoryEntry(models.Model):
     location = models.CharField(max_length=30, blank=True,
                                 help_text="Indicate where the item(s) is "
                                           "stored")
-    unit_weight = models.DecimalField(max_digits=3, decimal_places=3,
+    unit_weight = models.DecimalField(max_digits=6, decimal_places=3,
                                       default=1, help_text="Item weight in "
                                                            "kilograms")
 
