@@ -115,4 +115,70 @@ describe('Inventory', function() {
             });
         }).catch((err) => fail(err));
     });
+
+    it('allows items to be removed', function (done) {
+        var initialElem = inventoryEntryFactory({id: 1});
+        rest.getData.mockReturnValue(jsonResponse([initialElem]));
+        var inventory = getInventory();
+
+        Promise.all(promises).then((data) => {
+
+            expect(inventory.state.inventory.length).toEqual(1);
+            expect(inventory.state.inventory[0].id).toEqual(1);
+
+            //TestUtils.Simulate.click(inventory._addButton);
+            //
+            rest.delete.mockReturnValue(jsonResponse());
+
+            inventory.handleRemove(0);
+
+            Promise.all(promises).then((data) => {
+                expect(rest.delete.mock.calls.length).toEqual(1);
+                expect(rest.delete.mock.calls[0][0]).toEqual(
+                    '/rest/sheets/1/inventory/1/');
+                expect(rest.delete.mock.calls[0][1]).toEqual(
+                    initialElem);
+                expect(inventory.state.inventory.length).toEqual(0);
+                done();
+            }).catch((err) => {
+                fail(err)
+            });
+        }).catch((err) => fail(err));
+    });
+
+    it('allows items to be edited', function (done) {
+        var initialElem = inventoryEntryFactory({id: 1});
+        rest.getData.mockReturnValue(jsonResponse([initialElem]));
+        var inventory = getInventory();
+
+        Promise.all(promises).then((data) => {
+
+            expect(inventory.state.inventory.length).toEqual(1);
+            expect(inventory.state.inventory[0].id).toEqual(1);
+
+            var newElem = Object.assign({}, initialElem,
+                {description: "New description"});
+
+            //TestUtils.Simulate.click(inventory._addButton);
+            //
+            rest.put.mockReturnValue(jsonResponse(newElem));
+
+            inventory.handleEdit(0, newElem);
+
+            Promise.all(promises).then((data) => {
+                expect(rest.put.mock.calls.length).toEqual(1);
+                expect(rest.put.mock.calls[0][0]).toEqual(
+                    '/rest/sheets/1/inventory/1/');
+                expect(rest.put.mock.calls[0][1]).toEqual(
+                    newElem);
+                expect(inventory.state.inventory.length).toEqual(1);
+                expect(inventory.state.inventory[0]).not.toEqual(initialElem);
+                expect(inventory.state.inventory[0]).toEqual(newElem);
+                done();
+            }).catch((err) => {
+                fail(err)
+            });
+        }).catch((err) => fail(err));
+    });
+
 });
