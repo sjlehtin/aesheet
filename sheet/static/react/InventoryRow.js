@@ -1,0 +1,231 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import {Button, Input} from 'react-bootstrap';
+
+/* Handling reordering, additions... perhaps most convenient to signal
+   updates towards parent.
+
+    But, maybe not.  Let's see.  If the updates/modifications are
+     performed by this component, how will the reorderings be handled?
+*/
+
+var util = require('sheet-util');
+
+class InventoryRow extends React.Component {
+    constructor(props) {
+        super(props);
+
+        var initial = {
+            description: "",
+            unitWeight: "1.0",
+            location: "",
+            quantity: "1"
+        };
+
+        if (this.props.initialEntry) {
+            initial = {
+                description: this.props.initialEntry.description,
+                unitWeight: this.props.initialEntry.unit_weight,
+                location: this.props.initialEntry.location,
+                quantity: this.props.initialEntry.quantity
+            }
+        }
+        var edits;
+
+        if (this.props.createNew) {
+            edits = {showDescriptionEdit: true,
+            showLocationEdit: true,
+            showQuantityEdit: true,
+            showUnitWeightEdit: true};
+        } else {
+            edits = {showDescriptionEdit: false,
+            showLocationEdit: false,
+            showQuantityEdit: false,
+            showUnitWeightEdit: false};
+        }
+        this.state = Object.assign(edits, initial);
+    }
+
+    handleDescriptionChange(e) {
+        this.setState({description: e.target.value})
+    }
+
+    handleLocationChange(e) {
+        this.setState({location: e.target.value})
+    }
+
+    handleQuantityChange(e) {
+        this.setState({quantity: e.target.value})
+    }
+
+    handleUnitWeightChange(e) {
+        this.setState({unitWeight: e.target.value})
+    }
+
+    unitWeightValidationState() {
+        return util.isFloat(this.state.unitWeight) ? "success" : "error";
+    }
+
+    quantityValidationState() {
+        return util.isInt(this.state.quantity) ? "success" : "error";
+    }
+
+    descriptionValidationState() {
+        return this.state.description.length > 0 ? "success" : "error";
+    }
+
+    isValid() {
+        if (this.unitWeightValidationState() != "success") {
+            return false;
+        }
+
+        if (this.quantityValidationState() != "success") {
+            return false;
+        }
+
+        if (this.descriptionValidationState() != "success") {
+            return false;
+        }
+
+        return true;
+    }
+
+    submit() {
+        if (!this.isValid()) {
+            return;
+        }
+
+        if (typeof(this.props.onMod) !== "undefined") {
+            var initial = this.props.initialEntry;
+            if (!initial) {
+                initial = {};
+            }
+            this.props.onMod(Object.assign(initial,
+                { description: this.state.description,
+                    unit_weight: this.state.unitWeight,
+                    location: this.state.location,
+                    quantity: this.state.quantity
+                }
+            ));
+        }
+
+        this.setState({showDescriptionEdit: false,
+            showLocationEdit: false,
+            showQuantityEdit: false,
+            showUnitWeightEdit: false});
+    }
+
+    handleKeyDown(e) {
+        if (e.keyCode === 13) {
+            this.submit();
+        }
+    }
+
+    handleRemove(event) {
+        event.stopPropagation();
+        if (typeof(this.props.onDelete) !== "undefined") {
+            this.props.onDelete();
+        }
+    }
+
+    render () {
+        var description, unitWeight, quantity, location;
+
+        if (this.state.showDescriptionEdit) {
+            description = <Input type="text"
+                           ref={(c) => { this._descriptionInputField = c ?
+                           c.getInputDOMNode() : undefined}}
+                           bsStyle={this.descriptionValidationState()}
+                           hasFeedback
+                           onChange={(e) => this.handleDescriptionChange(e)}
+                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           value={this.state.description} />;
+        } else {
+            description = this.state.description;
+        }
+
+        if (this.state.showQuantityEdit) {
+            quantity = <Input type="text"
+                           ref={(c) => { this._quantityInputField = c ?
+                           c.getInputDOMNode() : undefined}}
+                           bsStyle={this.quantityValidationState()}
+                           hasFeedback
+                           onChange={(e) => this.handleQuantityChange(e)}
+                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           value={this.state.quantity} />;
+        } else {
+            quantity = this.state.quantity;
+        }
+
+        if (this.state.showLocationEdit) {
+            location = <Input type="text"
+                           ref={(c) => { this._locationInputField = c ?
+                           c.getInputDOMNode() : undefined}}
+                           onChange={(e) => this.handleLocationChange(e)}
+                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           value={this.state.location} />;
+        } else {
+            location = this.state.location;
+        }
+        
+        if (this.state.showUnitWeightEdit) {
+            unitWeight = <Input type="text"
+                           ref={(c) => { this._unitWeightInputField = c ?
+                           c.getInputDOMNode() : undefined}}
+                           bsStyle={this.unitWeightValidationState()}
+                           hasFeedback
+                           onChange={(e) => this.handleUnitWeightChange(e)}
+                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           value={this.state.unitWeight} />;
+        } else {
+            unitWeight = this.state.unitWeight;
+        }
+
+        var removeButton;
+        if (!this.props.createNew) {
+            removeButton =
+                <Button
+                    ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
+                    bsSize="xsmall"
+                    onClick={(e) => {this.handleRemove(e); }}>
+                    Remove</Button>;
+        }
+        return (<tr>
+            <td ref={(c) => this._descriptionField = c}
+                onClick={(e) => this.setState({
+                       showDescriptionEdit: true})}>
+                {description}
+                {removeButton}
+            </td>
+
+            <td ref={(c) => this._locationField = c}
+                onClick={(e) => this.setState({
+                       showLocationEdit: true})}>
+                {location}</td>
+
+            <td ref={(c) => this._quantityField = c}
+                onClick={(e) => this.setState({
+                       showQuantityEdit: true})}>
+                {quantity}</td>
+
+            <td ref={(c) => this._unitWeightField = c}
+                onClick={(e) => this.setState({
+                       showUnitWeightEdit: true})}>
+                {unitWeight}</td>
+
+            <td>{ parseFloat(this.state.unitWeight) * parseInt(this.state.quantity) }</td>
+        </tr>);
+    }
+}
+
+InventoryRow.propTypes = {
+    onDelete: React.PropTypes.func,
+    onMod: React.PropTypes.func,
+    initialEntry: React.PropTypes.object,
+    createNew: React.PropTypes.bool
+};
+
+InventoryRow.defaultProps = { createNew: false };
+
+export default InventoryRow;
