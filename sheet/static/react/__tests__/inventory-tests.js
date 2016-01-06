@@ -1,4 +1,5 @@
 jest.dontMock('../Inventory');
+jest.dontMock('../InventoryRow');
 jest.dontMock('../sheet-util');
 
 import React from 'react';
@@ -42,8 +43,7 @@ describe('Inventory', function() {
     var getInventory = function () {
         var inventory = <Inventory url="/rest/sheets/1/inventory/" />;
         var node = TestUtils.renderIntoDocument(inventory);
-        return TestUtils.findRenderedComponentWithType(node,
-            Inventory);
+        return TestUtils.findRenderedComponentWithType(node, Inventory);
     };
 
     it('renders also as empty', function () {
@@ -63,174 +63,56 @@ describe('Inventory', function() {
     });
 
     it('renders inventory', function (done) {
+        console.log("bar?");
         rest.getData.mockReturnValue(jsonResponse([
-            inventoryEntryFactory({description: 'potion of flying'}),
+            inventoryEntryFactory({description: 'potion of flying', id: 1}),
             inventoryEntryFactory({
                 description: 'podkin point arrows',
                 unit_weight: "0.1",
-                quantity: 20
+                quantity: 20,
+                id: 2
             })
         ]));
         var inventory = getInventory();
         expect(rest.getData.mock.calls[0][0]).toEqual('/rest/sheets/1/inventory/');
         Promise.all(promises).then(() => {
-            var table = TestUtils.findRenderedDOMComponentWithTag(inventory,
-                "table");
-            var nodeList = table.querySelectorAll('.weight');
-            expect(nodeList.length).toEqual(2);
-            done();
+            Promise.all(promises).then(() => {
+                var table = TestUtils.findRenderedDOMComponentWithTag(inventory,
+                    "table");
+                expect(inventory.state.inventory.length).toEqual(2);
+                /* InventoryRow */
+                var nodeList = table.querySelectorAll('.weight');
+                expect(nodeList.length).toEqual(2);
+                done();
+            });
         });
     });
 
     it('allows items to be added', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
         var inventory = getInventory();
-        Promise.all(promises).then(() => {
-            expect(inventory._addButton).not.toBe(undefined);
+
+        Promise.all(promises).then((data) => {
 
             TestUtils.Simulate.click(inventory._addButton);
 
-            expect(inventory.state.addEnabled).toBe(true);
+            var newElem = inventoryEntryFactory();
+            rest.post.mockReturnValue(jsonResponse(Object.assign(newElem,
+                {id: '42'})));
 
-            expect(inventory.state.newQuantity).toEqual(1);
-            expect(inventory.state.newUnitWeight).toEqual("1.0");
-            expect(inventory.state.newLocation).toEqual("");
-            expect(inventory.state.newDescription).toEqual("");
+            inventory.handleNew(newElem);
 
-            TestUtils.Simulate.change(
-                inventory._descriptionInputField,
-                {target: { value: "foobar"}});
-
-            TestUtils.Simulate.change(
-                inventory._locationInputField,
-                {target: { value: "qux"}});
-
-            expect(inventory.state.newLocation).toEqual("qux");
-
-            TestUtils.Simulate.change(
-                inventory._unitWeightInputField,
-                {target: { value: "2.5"}});
-
-            expect(inventory.state.newUnitWeight).toEqual("2.5");
-
-            rest.post.mockReturnValue(jsonResponse({}));
-
-            TestUtils.Simulate.keyDown(
-                inventory._unitWeightInputField,
-                {key: "Enter", keyCode: 13, which: 13});
-
-            expect(inventory.unitWeightValidationState()).toEqual("success");
-            expect(inventory.quantityValidationState()).toEqual("success");
-
-            expect(rest.post.mock.calls[0][0]).toEqual(
-                '/rest/sheets/1/inventory/');
-
-            var data = rest.post.mock.calls[0][1];
-            expect(data.location).toEqual("qux");
-            expect(data.description).toEqual("foobar");
-            expect(data.unit_weight).toEqual("2.5");
-            expect(data.quantity).toEqual(1);
-            expect(data.order).toEqual(2);
-
-            Promise.all(promises).then(function() {
-                expect(inventory.state.addEnabled).toBe(false);
-
-                expect(inventory.state.newQuantity).toEqual(1);
-                expect(inventory.state.newUnitWeight).toEqual("1.0");
-                expect(inventory.state.newLocation).toEqual("");
-                expect(inventory.state.newDescription).toEqual("");
+            Promise.all(promises).then((data) => {
+                expect(rest.post.mock.calls.length).toEqual(1);
+                expect(rest.post.mock.calls[0][0]).toEqual(
+                    '/rest/sheets/1/inventory/');
+                expect(rest.post.mock.calls[0][1]).toEqual(
+                    newElem);
+                expect(inventory.state.inventory.length).toEqual(2);
                 done();
+            }).catch((err) => {
+                fail(err)
             });
-        }).catch(function (err) { fail(err);});
-    });
-
-    it('has decent defaults', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
-        var inventory = getInventory();
-        Promise.all(promises).then(() => {
-            TestUtils.Simulate.click(inventory._addButton);
-
-            TestUtils.Simulate.change(
-                inventory._descriptionInputField,
-                {target: { value: "foobar"}});
-
-            rest.post.mockReturnValue(jsonResponse({}));
-
-            TestUtils.Simulate.keyDown(
-                inventory._unitWeightInputField,
-                {key: "Enter", keyCode: 13, which: 13});
-
-            expect(rest.post.mock.calls.length).toEqual(1);
-
-            done();
-        }).catch(function (err) { fail(err);});
-    });
-
-    it('validates unit weight field', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
-        var inventory = getInventory();
-        Promise.all(promises).then(() => {
-            TestUtils.Simulate.click(inventory._addButton);
-
-            TestUtils.Simulate.change(
-                inventory._descriptionInputField,
-                {target: { value: "foobar"}});
-
-            TestUtils.Simulate.change(
-                inventory._unitWeightInputField,
-                {target: { value: "a2.5"}});
-
-            TestUtils.Simulate.keyDown(
-                inventory._unitWeightInputField,
-                {key: "Enter", keyCode: 13, which: 13});
-
-            expect(rest.post.mock.calls.length).toEqual(0);
-
-            done();
-        }).catch(function (err) { fail(err);});
-    });
-
-    it('validates quantity field', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
-        var inventory = getInventory();
-        Promise.all(promises).then(() => {
-            TestUtils.Simulate.click(inventory._addButton);
-
-            TestUtils.Simulate.change(
-                inventory._descriptionInputField,
-                {target: { value: "foobar"}});
-
-            TestUtils.Simulate.change(
-                inventory._quantityInputField,
-                {target: { value: "a1"}});
-
-            TestUtils.Simulate.keyDown(
-                inventory._unitWeightInputField,
-                {key: "Enter", keyCode: 13, which: 13});
-
-            expect(rest.post.mock.calls.length).toEqual(0);
-
-            done();
-        }).catch(function (err) { fail(err);});
-    });
-
-    it('validates description field', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory()]));
-        var inventory = getInventory();
-        Promise.all(promises).then(() => {
-            TestUtils.Simulate.click(inventory._addButton);
-
-            TestUtils.Simulate.change(
-                inventory._descriptionInputField,
-                {target: { value: ""}});
-
-            TestUtils.Simulate.keyDown(
-                inventory._unitWeightInputField,
-                {key: "Enter", keyCode: 13, which: 13});
-
-            expect(rest.post.mock.calls.length).toEqual(0);
-
-            done();
-        }).catch(function (err) { fail(err);});
+        }).catch((err) => fail(err));
     });
 });
