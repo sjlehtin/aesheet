@@ -226,11 +226,15 @@ class InventoryRow extends React.Component {
             removeButton = '';
         }
         return (<tr>
-            <td ref={(c) => this._descriptionField = c}
+            <td style={{position: "relative"}} ref={(c) => this._descriptionField = c}
                 onClick={(e) => this.startEdit("description")}>
+                <span>
                 {description}
-                {removeButton}
                 {this.props.children}
+                </span>
+                <span style={{float: "right"}}>
+                {removeButton}
+                </span>
             </td>
 
             <td ref={(c) => this._locationField = c}
