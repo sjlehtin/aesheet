@@ -268,6 +268,12 @@ perhaps Robot-system tests.
 
 <div class="row">
     <div class="col-sm-12">
+        <div id="inventory-container"></div>
+    </div>
+</div>
+
+        <div class="row">
+    <div class="col-sm-12">
         <div id="character-notes-container"></div>
     </div>
 </div>
@@ -386,6 +392,10 @@ $(document).ready(function () {
     var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,
             {url: '/rest/sheets/{{ sheet.pk }}/'});
     SheetApp.render(statBlock, document.getElementById('stat-block-container'));
+    var inventory = SheetApp.React.createElement(SheetApp.Inventory,
+            {url: '/rest/sheets/{{ sheet.pk }}/inventory/'});
+    SheetApp.render(inventory, document.getElementById
+    ('inventory-container'));
 </script>
 
 {% endblock %}
