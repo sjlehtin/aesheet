@@ -190,6 +190,8 @@ class InventoryRow extends React.Component {
                     bsSize="xsmall"
                     onClick={(e) => {this.handleRemove(e); }}>
                     Remove</Button>;
+        } else {
+            removeButton = '';
         }
         return (<tr>
             <td ref={(c) => this._descriptionField = c}
@@ -211,10 +213,11 @@ class InventoryRow extends React.Component {
 
             <td ref={(c) => this._unitWeightField = c}
                 onClick={(e) => this.setState({
-                       showUnitWeightEdit: true})}>
+                       showUnitWeightEdit: true})}
+                >
                 {unitWeight}</td>
 
-            <td>{ parseFloat(this.state.unitWeight) * parseInt(this.state.quantity) }</td>
+            <td className="weight">{ parseFloat(this.state.unitWeight) * parseInt(this.state.quantity) }</td>
         </tr>);
     }
 }
