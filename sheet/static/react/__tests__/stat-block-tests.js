@@ -400,6 +400,9 @@ describe('stat block', function() {
     it('contains a NoteBlock component', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+                level: 1, notes: "Foofaafom"}));
+
             var noteBlock = TestUtils.findRenderedComponentWithType(
                 block, NoteBlock);
             expect(TestUtils.isCompositeComponent(noteBlock)).toBe(true);

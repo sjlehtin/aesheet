@@ -328,7 +328,12 @@ class StatBlock extends React.Component {
                         this.state.char}/`"> base character edit</a>.
                 </div>);
             }
-            notes = <Panel><NoteBlock edges={this.state.edgeList} /></Panel>;
+            if (this.state.edgeList.length > 0) {
+                notes =
+                    <Panel><NoteBlock edges={this.state.edgeList}/></Panel>;
+            } else {
+                notes = '';
+            }
         }
 
         var statsStyle = {verticalAlign: "center", border: 1};
