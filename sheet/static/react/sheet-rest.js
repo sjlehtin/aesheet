@@ -70,6 +70,16 @@ var exports = function () {
         post: function (url, data) {
             "use strict";
             return patchMethod(url, data, "POST");
+        },
+
+        put: function (url, data) {
+            "use strict";
+            return patchMethod(url, data, "PUT");
+        },
+
+        delete: function (url, data) {
+            "use strict";
+            return patchMethod(url, data, "DELETE");
         }
     }
 }();
