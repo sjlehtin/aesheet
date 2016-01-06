@@ -199,6 +199,7 @@ class InventoryRow extends React.Component {
                        showDescriptionEdit: true})}>
                 {description}
                 {removeButton}
+                {this.props.children}
             </td>
 
             <td ref={(c) => this._locationField = c}

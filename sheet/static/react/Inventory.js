@@ -84,9 +84,13 @@ class Inventory extends React.Component {
         });
 
         if (this.state.addEnabled) {
-            rows.push(<InventoryRow key={-1} createNew={true} onMod={(newElem) => this.handleNew(newElem)} />);
+            rows.push(
+                <InventoryRow key={-1} createNew={true}
+                              onMod={(newElem) => this.handleNew(newElem)}>
+                    <Button onClick={() => this.setState({addEnabled: false})}>Cancel</Button>
+            </InventoryRow>);
         }
-        return <Table striped condensed hover style={{fontSize: "80%"}}>
+        return <Table striped condensed style={{fontSize: "80%"}}>
             <thead>
             <tr><th>Item</th><th>Location</th><th>Qty</th><th>Wt.</th><th style={weightStyle}>Total Wt.</th></tr>
             </thead>
