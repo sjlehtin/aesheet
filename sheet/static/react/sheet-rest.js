@@ -24,9 +24,16 @@ var exports = function () {
                     // TODO: should use more generic handling for the error values,
                     // see, e.g., fetch README.md.
                     if (response.status >= 200 && response.status < 300) {
-                        response.json().then((json) => {
-                            resolved(json);
-                        }).catch((err) => {rejected(err)});
+                        console.log("Got response: ", response);
+                        if (response.status !== 204) {
+                            response.json().then((json) => {
+                                resolved(json);
+                            }).catch((err) => {
+                                rejected(err)
+                            });
+                        } else {
+                            resolved();
+                        }
                     } else {
                         rejected({
                             status: response.status,
