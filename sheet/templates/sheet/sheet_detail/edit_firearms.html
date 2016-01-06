@@ -1,5 +1,9 @@
 {% if sheet.firearms %}
-    {% include "sheet/sheet_detail/ranged_attacks.html" with actions=sheet.firearm_actions weapons=sheet.firearms %}
+    <div class="row">
+        <div class="col-md-12">
+            {% include "sheet/sheet_detail/ranged_attacks.html" with actions=sheet.firearm_actions weapons=sheet.firearms %}
+        </div>
+    </div>
     {% if sweep_fire_available %}
         <h4>Sweep fire</h4>
         {% include "sheet/sheet_detail/firearm_sweep_fire.html" with weapons=sheet.firearms %}

@@ -190,19 +190,26 @@ perhaps Robot-system tests.
 {% endcomment %}
 
         <div class="row">
+            <div class="col-md-12">
+
 <h3>Close combat</h3>
 {% include "sheet/sheet_detail/melee_weapons.html" %}
+            </div>
 </div>
 
         <div class="row">
+            <div class="col-md-12">
 <h3>Ranged combat</h3>
 {% include "sheet/sheet_detail/ranged_weapons.html" %}
+            </div>
 </div>
 
 <div class="row">
 {% if sheet.campaign.has_firearms %}
+<div class="col-md-12">
 <h3>Firearms</h3>
 {% include "sheet/sheet_detail/edit_firearms.html" %}
+</div>
 {% endif %}
 </div>
 
@@ -268,6 +275,7 @@ perhaps Robot-system tests.
 
 <div class="row">
     <div class="col-sm-12">
+        <h3>Inventory</h3>
         <div id="inventory-container"></div>
     </div>
 </div>
