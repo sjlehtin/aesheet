@@ -50,7 +50,7 @@ class Inventory extends React.Component {
         var elem = this.state.inventory[idx];
         rest.delete(`${this.props.url}${elem.id}/`,
             this.state.inventory[idx])
-            .then((json) => { console.log(json);
+            .then((json) => {
                 var removed = this.state.inventory.splice(idx, 1);
                 console.log("removed:", idx, removed, this.state.inventory);
                 this.setState({inventory: this.state.inventory});
@@ -59,7 +59,7 @@ class Inventory extends React.Component {
     }
 
     handleEdit(idx, newElem) {
-        console.log("Updated", idx, newElem);
+        console.log(`Updated ${idx}:`, newElem);
         var newInventory = this.state.inventory;
         newInventory[idx] = newElem;
 
