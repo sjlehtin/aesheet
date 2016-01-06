@@ -25,6 +25,7 @@ class InventoryRow extends React.Component {
 
         if (this.props.initialEntry) {
             initial = {
+                old: {},
                 description: this.props.initialEntry.description,
                 unitWeight: this.props.initialEntry.unit_weight,
                 location: this.props.initialEntry.location,
@@ -38,13 +39,38 @@ class InventoryRow extends React.Component {
             showLocationEdit: true,
             showQuantityEdit: true,
             showUnitWeightEdit: true};
+            edits.show = {description: true,
+                location: true,
+                quantity: true,
+                unitWeight: true
+            }
         } else {
             edits = {showDescriptionEdit: false,
             showLocationEdit: false,
             showQuantityEdit: false,
             showUnitWeightEdit: false};
+            edits.show = {description: false,
+            location: false,
+            quantity: false,
+            unitWeight: false}
         }
         this.state = Object.assign(edits, initial);
+    }
+
+    startEdit(field) {
+        var update = {};
+        this.state.show[field] = true;
+        this.state.old[field] = this.state[field]
+        this.setState({show: this.state.show,
+            old: this.state.old
+        });
+    }
+
+    cancelEdit(field) {
+        var update = {};
+        update[field] = this.state.old[field];
+        this.state.show[field] = false;
+        this.setState(Object.assign(update, {show: this.state.show}));
     }
 
     handleDescriptionChange(e) {
@@ -110,15 +136,17 @@ class InventoryRow extends React.Component {
             ));
         }
 
-        this.setState({showDescriptionEdit: false,
-            showLocationEdit: false,
-            showQuantityEdit: false,
-            showUnitWeightEdit: false});
+        this.setState({show: {description: false, location: false,
+            unitWeight: false, quantity: false}});
     }
 
-    handleKeyDown(e) {
+    handleKeyDown(e, field) {
         if (e.keyCode === 13) {
+            /* Enter. */
             this.submit();
+        } else if (e.keyCode === 27) {
+            /* Escape. */
+            this.cancelEdit(field);
         }
     }
 
@@ -132,51 +160,55 @@ class InventoryRow extends React.Component {
     render () {
         var description, unitWeight, quantity, location;
 
-        if (this.state.showDescriptionEdit) {
+        if (this.state.show.description) {
             description = <Input type="text"
                            ref={(c) => { this._descriptionInputField = c ?
                            c.getInputDOMNode() : undefined}}
                            bsStyle={this.descriptionValidationState()}
                            hasFeedback
                            onChange={(e) => this.handleDescriptionChange(e)}
-                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           onKeyDown={(e) =>
+                             this.handleKeyDown(e, "description")}
                            value={this.state.description} />;
         } else {
             description = this.state.description;
         }
 
-        if (this.state.showQuantityEdit) {
+        if (this.state.show.quantity) {
             quantity = <Input type="text"
                            ref={(c) => { this._quantityInputField = c ?
                            c.getInputDOMNode() : undefined}}
                            bsStyle={this.quantityValidationState()}
                            hasFeedback
                            onChange={(e) => this.handleQuantityChange(e)}
-                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           onKeyDown={(e) =>
+                             this.handleKeyDown(e, "quantity")}
                            value={this.state.quantity} />;
         } else {
             quantity = this.state.quantity;
         }
 
-        if (this.state.showLocationEdit) {
+        if (this.state.show.location) {
             location = <Input type="text"
                            ref={(c) => { this._locationInputField = c ?
                            c.getInputDOMNode() : undefined}}
                            onChange={(e) => this.handleLocationChange(e)}
-                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           onKeyDown={(e) =>
+                             this.handleKeyDown(e, "location")}
                            value={this.state.location} />;
         } else {
             location = this.state.location;
         }
         
-        if (this.state.showUnitWeightEdit) {
+        if (this.state.show.unitWeight) {
             unitWeight = <Input type="text"
                            ref={(c) => { this._unitWeightInputField = c ?
                            c.getInputDOMNode() : undefined}}
                            bsStyle={this.unitWeightValidationState()}
                            hasFeedback
                            onChange={(e) => this.handleUnitWeightChange(e)}
-                           onKeyDown={(e) => this.handleKeyDown(e)}
+                           onKeyDown={(e) =>
+                             this.handleKeyDown(e, "unitWeight")}
                            value={this.state.unitWeight} />;
         } else {
             unitWeight = this.state.unitWeight;
@@ -195,27 +227,22 @@ class InventoryRow extends React.Component {
         }
         return (<tr>
             <td ref={(c) => this._descriptionField = c}
-                onClick={(e) => this.setState({
-                       showDescriptionEdit: true})}>
+                onClick={(e) => this.startEdit("description")}>
                 {description}
                 {removeButton}
                 {this.props.children}
             </td>
 
             <td ref={(c) => this._locationField = c}
-                onClick={(e) => this.setState({
-                       showLocationEdit: true})}>
+                onClick={(e) => this.startEdit("location")}>
                 {location}</td>
 
             <td ref={(c) => this._quantityField = c}
-                onClick={(e) => this.setState({
-                       showQuantityEdit: true})}>
+                onClick={(e) => this.startEdit("quantity")}>
                 {quantity}</td>
 
             <td ref={(c) => this._unitWeightField = c}
-                onClick={(e) => this.setState({
-                       showUnitWeightEdit: true})}
-                >
+                onClick={(e) => this.startEdit("unitWeight")}>
                 {unitWeight}</td>
 
             <td className="weight">{ parseFloat(this.state.unitWeight) * parseInt(this.state.quantity) }</td>

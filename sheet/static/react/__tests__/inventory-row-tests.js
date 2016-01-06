@@ -72,22 +72,44 @@ describe('InventoryRow', function() {
         expect(row.isValid()).toBe(true);
     });
 
+    it('allows canceling edit', function (done) {
+        var row = inventoryRowFactory();
+
+        Promise.all(promises).then(function () {
+            TestUtils.Simulate.click(row._descriptionField);
+
+            expect(row.state.description).toEqual("Item");
+
+            TestUtils.Simulate.change(row._descriptionInputField,
+                {target: {value: "Foofaafom"}});
+
+            expect(row.state.description).toEqual("Foofaafom");
+
+            TestUtils.Simulate.keyDown(row._descriptionInputField,
+                {key: "Esc", keyCode: 27, which: 27});
+
+            expect(row.state.description).toEqual("Item");
+            done();
+        }).catch((err) => fail(err));
+
+    });
+
     it('validates unit weight field', function () {
         var row = inventoryRowFactory();
 
-        TestUtils.Simulate.click(row._unitWeightField);
+            TestUtils.Simulate.click(row._unitWeightField);
 
-        TestUtils.Simulate.change(row._unitWeightInputField,
-            {target: {value: "a2.1"}});
+            TestUtils.Simulate.change(row._unitWeightInputField,
+                {target: {value: "a2.1"}});
 
-        expect(row.unitWeightValidationState()).toEqual("error");
-        expect(row.isValid()).toBe(false);
+            expect(row.unitWeightValidationState()).toEqual("error");
+            expect(row.isValid()).toBe(false);
 
-        TestUtils.Simulate.change(row._unitWeightInputField,
-            {target: {value: "2.1"}});
+            TestUtils.Simulate.change(row._unitWeightInputField,
+                {target: {value: "2.1"}});
 
-        expect(row.unitWeightValidationState()).toEqual("success");
-        expect(row.isValid()).toBe(true);
+            expect(row.unitWeightValidationState()).toEqual("success");
+            expect(row.isValid()).toBe(true);
     });
 
     it('validates quantity field', function () {
@@ -153,7 +175,7 @@ describe('InventoryRow', function() {
         expect(spy).toHaveBeenCalledWith(Object.assign(
             inventoryEntryFactory(), {unit_weight: "2.1"}));
 
-        expect(row.state.showUnitWeightEdit).toBe(false);
+        expect(row.state.show.unitWeight).toBe(false);
     });
 
 
@@ -174,10 +196,10 @@ describe('InventoryRow', function() {
 
     it ('enables all fields when creating new entry', function (){
         var row = inventoryRowFactory({createNew: true});
-        expect(row.state.showDescriptionEdit).toBe(true);
-        expect(row.state.showUnitWeightEdit).toBe(true);
-        expect(row.state.showLocationEdit).toBe(true);
-        expect(row.state.showQuantityEdit).toBe(true);
+        expect(row.state.show.description).toBe(true);
+        expect(row.state.show.location).toBe(true);
+        expect(row.state.show.quantity).toBe(true);
+        expect(row.state.show.unitWeight).toBe(true);
     });
 
     it ('allows submit on creating new entry', function () {
