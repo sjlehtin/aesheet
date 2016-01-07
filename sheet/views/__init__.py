@@ -22,6 +22,8 @@ Priority list by JW:
 -- bleeding damage, retain original wound, but incurs AA etc penalties
    as per bleeding.
 
+- notes changes should not be logged.
+
 - suspended weight
 - marking weapons as having no weight; useful for alternate weapons, or
   weapons with larger sizes (Martel enlarged).
@@ -506,6 +508,7 @@ class SheetView(object):
         except TypeError:
             return 0
 
+    # TODO: Remove.
     def base_stats(self):
         ll = []
         for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
@@ -530,6 +533,7 @@ class SheetView(object):
             ll.append(stat)
         return ll
 
+    # TODO: Remove.
     def derived_stats(self):
         ll = []
         for st in ["mov", "dex", "imm"]:
@@ -617,6 +621,7 @@ class SheetView(object):
     def miscellaneous_items(self):
         return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
 
+    # TODO: Remove.
     def advancing_initiative_penalties(self):
         distances = [30, 20, 10, 5, 2]
         def initiatives(multiplier):
@@ -703,18 +708,6 @@ def process_sheet_change_request(request, sheet):
     return False
 
 
-Notes = namedtuple("Notes", ["positive", "negative"])
-
-
-def get_notes(character, filter_kwargs):
-    args = {'character': character}
-    args.update(filter_kwargs)
-    positive = CharacterEdge.objects.filter(**args).exclude(
-        edge__notes=u'').values_list('edge__edge__name',
-                                     'edge__notes')
-    return positive
-
-
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.select_related()
                               .select_related('armor__base',
@@ -732,17 +725,12 @@ def sheet_detail(request, sheet_id=None):
         'character__skills__skill',
         'character__skills__skill__required_skills',
         'character__skills__skill__edgeskillbonus_set',
-        'character__edges',
-        'character__edges__edge__skill_bonuses'),
+        'character__edges'),
                               pk=sheet_id)
     if not sheet.character.access_allowed(request.user):
         raise PermissionDenied
 
     forms = {}
-
-    positive = get_notes(sheet.character, {'edge__cost__gt': 0})
-    negative = get_notes(sheet.character, {'edge__cost__lte': 0})
-    notes = Notes(positive=positive, negative=negative)
 
     if request.method == "POST":
         data = request.POST
@@ -760,8 +748,11 @@ def sheet_detail(request, sheet_id=None):
                                 request=request,
                                 prefix=prefix, **kwargs)
 
+    # TODO: Remove.
     add_form(StatModifyForm, "stat-modify", instance=sheet.character)
     add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
+    add_form(AddXPForm, "add-xp", instance=sheet.character)
+
     add_form(AddSkillForm, "add-skill", instance=sheet.character)
     add_form(AddLanguageForm, "add-lang", instance=sheet.character)
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
@@ -780,7 +771,6 @@ def sheet_detail(request, sheet_id=None):
     add_form(HelmForm, "new-helm")
 
     add_form(AddFirearmForm, "add-firearm", instance=sheet)
-    add_form(AddXPForm, "add-xp", instance=sheet.character)
 
     if request.method == "POST":
         should_change = False
@@ -816,7 +806,6 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = {'sheet': SheetView(sheet),
-         'notes': notes,
          'sweep_fire_available': any([wpn.has_sweep_fire()
                                       for wpn in sheet.firearms.all()]),
          }

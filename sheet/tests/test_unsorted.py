@@ -999,9 +999,9 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.assertRedirects(response, self.sheet_url)
         response = self.client.get(self.sheet_url)
         self.assertNotContains(response, "No edges.")
-        ce = response.context['sheet'].edges()[0]
-        self.assertEquals(ce.edge.edge.name, 'Toughness')
-        self.assertEquals(ce.edge.level, 2)
+        edge_level = response.context['sheet'].edges()[0]
+        self.assertEquals(edge_level.edge.name, 'Toughness')
+        self.assertEquals(edge_level.level, 2)
 
         self.assertEqual(response.context['sheet'].character
                          .edge_level("Toughness"), 2)
@@ -1009,7 +1009,7 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         # Remove edge.
         req_data = { 'remove-form_id' : 'RemoveGeneric',
                      'remove-item_type' : 'CharacterEdge',
-                     'remove-item' : ce.pk }
+                     'remove-item' : edge_level.pk }
         response = self.client.post(self.sheet_url, req_data)
 
         self.assertRedirects(response, self.sheet_url)
@@ -1069,16 +1069,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         sheet = Sheet.objects.get(pk=self.sheet.pk)
         self.assertEqual(sheet.edge_sp, 10)
         self.assertEqual(original + 10, sheet.character.total_sp)
-
-    def test_edge_notes(self):
-        factories.EdgeLevelFactory(edge__name="Superior Endurance", level=1,
-                                   notes="Recover AC penalty")
-
-        self.add_edge(self.sheet.character, "Superior Endurance")
-
-        response = self.client.get(reverse(views.sheet_detail,
-                                           args=[self.sheet.pk]))
-        self.assertContains(response, "Recover AC penalty")
 
     def test_increase_skill_level(self):
         cs = factories.CharacterSkillFactory(
@@ -1480,9 +1470,9 @@ class SheetCopyTestCase(TestCase):
                 for skill in character.skills.all()]
 
     def get_edge_list(self, character):
-        return ["{edge} {level}".format(edge=ce.edge.edge.name,
-                                        level=ce.edge.level)
-                for ce in character.edges.all()]
+        return ["{edge} {level}".format(edge=edge.edge.name,
+                                        level=edge.level)
+                for edge in character.edges.all()]
 
     def get_item_list(self, sheet, accessor):
         return ["{item}".format(item=unicode(item))

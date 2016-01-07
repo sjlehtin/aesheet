@@ -121,13 +121,6 @@ class CampaignItem(object):
         self.objects = []
 
 
-def _filter_out_private(char, user):
-    if char.private and char.owner != user:
-        return False
-    else:
-        return True
-
-
 def get_characters(user):
     return Character.objects.filter(Q(private=False) | Q(owner=user))
 
@@ -165,19 +158,21 @@ class Character(models.Model):
     basic character will immediately affect all sheets based on the
     character.
     """
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, unique=True)
     owner = models.ForeignKey(auth.models.User,
                               related_name="characters")
-    private = models.BooleanField(default=False,
-                                  help_text="If set, access to the character "
-                                            "will be denied for other users.  "
-                                            "The character will also be hidden "
-                                            "in lists.  As a rule of thumb, "
-                                            "only the GM should mark characters"
-                                            " as private.")
+    private = models.BooleanField(
+            default=False,
+            help_text="If set, access to the character "
+            "will be denied for other users. "
+            "The character will also be hidden "
+            "in lists.  As a rule of thumb, "
+            "only the GM should mark characters"
+            " as private.")
 
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
+
 
     portrait = models.ImageField(blank=True, upload_to='portraits')
 
@@ -246,6 +241,8 @@ class Character(models.Model):
 
     free_edges = models.IntegerField(default=2)
 
+    edges = models.ManyToManyField('EdgeLevel', through='CharacterEdge',
+                                   blank=True)
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
@@ -256,6 +253,8 @@ class Character(models.Model):
         self.skill_lookup = SkillLookup(self)
 
     BASE_STATS = ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]
+    DERIVED_STATS = ["mov", "dex", "imm"]
+    ALL_STATS = BASE_STATS + DERIVED_STATS
 
     def get_ability(self, abilities, ability, accessor):
         """
@@ -275,13 +274,9 @@ class Character(models.Model):
 
         return None
 
-    def get_edge(self, edge):
-        ce = self.get_ability(self.edges, edge,
-                              accessor=lambda xx: xx.edge.edge)
-        if ce:
-            return ce.edge
-        else:
-            return None
+    def get_edge(self, edge_name):
+        return self.get_ability(self.edges, edge_name,
+                              accessor=lambda xx: xx.edge)
 
     def has_edge(self, edge):
         if edge is None:
@@ -327,7 +322,7 @@ class Character(models.Model):
 
         edges = self.edges.all() # prefetched.
         if edges:
-            mod += sum([getattr(ee.edge, stat) for ee in edges])
+            mod += sum([getattr(ee, stat) for ee in edges])
 
         mod += getattr(self, 'base_mod_' + stat)
         return mod
@@ -342,46 +337,57 @@ class Character(models.Model):
                 base += extra
             return base + o._mod_stat(func.func_name[4:])
         return _pass_name
+
     @property
     @_stat_wrapper
     def mod_fit(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_ref(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_lrn(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_int(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_psy(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_wil(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_cha(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_pos(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_mov(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_dex(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_imm(self):
@@ -579,11 +585,9 @@ SKILL_TYPES = [
 SKILL_TYPES = zip(SKILL_TYPES, SKILL_TYPES)
 
 BASE_STATS = Character.BASE_STATS
-STAT_TYPES = [st.upper() for st in BASE_STATS] + [
-    "DEX",
-    "MOV",
-    "IMM",
-    ]
+DERIVED_STATS = Character.DERIVED_STATS
+ALL_STATS = Character.ALL_STATS
+STAT_TYPES = [st.upper() for st in ALL_STATS]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
 
@@ -681,7 +685,7 @@ class CharacterSkill(models.Model):
         # out for that.
         for sk in self.skill.edgeskillbonus_set.all():
             for ee in self.character.edges.all():
-                if ee.edge == sk.edge_level:
+                if ee == sk.edge_level:
                     mod += sk.bonus
                     break
         # XXX armor modifiers
@@ -778,7 +782,7 @@ class EdgeSkillBonus(ExportedModel):
 
 
 class CharacterEdge(models.Model):
-    character = models.ForeignKey(Character, related_name='edges')
+    character = models.ForeignKey(Character)
     edge = models.ForeignKey(EdgeLevel)
 
     def __unicode__(self):
@@ -821,13 +825,12 @@ class WeaponQuality(BaseWeaponQuality):
     versus_missile_modifier = models.IntegerField(default=0)
     versus_area_save_modifier = models.IntegerField(default=0)
 
-    max_fit = models.IntegerField(default=90,
-                                  help_text="Applies for bows, this is the "
-                                            "maximum FIT "
-                                            "the weapon pull adjusts to.  This "
-                                            "caps the damage and range of the "
-                                            "weapon in case the character has "
-                                            "a higher FIT than this.")
+    max_fit = models.IntegerField(
+            default=90,
+            help_text="Applies for bows, this is the maximum FIT "
+            "the weapon pull adjusts to.  This caps the damage and range "
+            "of the weapon in case the character has a higher FIT than this.")
+
     @classmethod
     def dont_export(cls):
         return ['weapon', 'rangedweapon', 'rangedweaponammo_set']
@@ -1602,17 +1605,20 @@ Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 class Sheet(models.Model):
     character = models.ForeignKey(Character)
+    # TODO: Remove this.  It should be determined from the Character.owner.
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
     description = models.TextField(blank=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
     # TODO: These relations would need to go through separate tables, e.g.,
-    # SheetWeapon, to allow adding parameters like "in_inventory", or "order".
+    #  SheetWeapon, to allow adding parameters like "in_inventory",
+    # or "order".
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
     firearms = models.ManyToManyField(Firearm, blank=True)
 
-    miscellaneous_items = models.ManyToManyField(MiscellaneousItem, blank=True)
+    miscellaneous_items = models.ManyToManyField(MiscellaneousItem,
+                                                 blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
@@ -1701,8 +1707,8 @@ class Sheet(models.Model):
 
     @property
     def base_initiative(self):
-        return self.eff_ref / 10.0 + self.eff_int / 20.0 + \
-            self.eff_psy / 20.0
+        return (self.eff_ref / 10.0 + self.eff_int / 20.0 +
+                self.eff_psy / 20.0)
 
     def _initiatives(self, roa, actions=None, readied_base_i=-3,
                      target_i=0):
@@ -2141,27 +2147,33 @@ class Sheet(models.Model):
     @_stat_wrapper
     def mod_wil(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_cha(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_pos(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_mov(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_dex(self):
         pass
+
     @property
     @_stat_wrapper
     def mod_imm(self):
         pass
 
+    # TODO: Remove.
     @property
     def body(self):
         """
@@ -2181,6 +2193,7 @@ class Sheet(models.Model):
                  'recovery_rate' : "",
                  }
 
+    # TODO: Remove.
     def _format_recovery(self, level, extra_recovery):
         rate = ""
         if level:
@@ -2195,6 +2208,7 @@ class Sheet(models.Model):
             rate += "/8h"
         return rate
 
+    # TODO: Remove.
     @property
     def stamina(self):
         """
@@ -2202,7 +2216,7 @@ class Sheet(models.Model):
         """
 
         # Stamina recovery modifier = ROUNDDOWN((IMM-45)/15;0)
-        lvl = self.character.edge_level('Fast healing')
+        lvl = self.character.edge_level('Fast Healing')
         extra_recovery = rounddown((self.eff_imm - 45) / 15)
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.ref + self.wil) / 4.0) +
@@ -2210,13 +2224,14 @@ class Sheet(models.Model):
                  'mod': 0,
                  'recovery_rate' : rate }
 
+    # TODO: Remove.
     @property
     def mana(self):
         """
         Return amount of mana as a dict (see "body").
         """
         # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
-        lvl = self.character.edge_level('Fast mana recovery')
+        lvl = self.character.edge_level('Fast Mana Recovery')
         extra_recovery = rounddown(2 * ((self.eff_cha - 45) / 15))
         rate = self._format_recovery(lvl, extra_recovery)
         return { 'base': (roundup((self.psy + self.wil) / 4.0) +
@@ -2245,7 +2260,7 @@ class Sheet(models.Model):
         """
         Iterate over all innate effects.
         """
-        return  [edge.edge for edge in self.character.edges.all()]
+        return self.character.edges.all()
 
     def _special_effects(self):
         """
@@ -2346,6 +2361,25 @@ class Sheet(models.Model):
 
     class Meta:
         ordering = ('character__name', )
+
+
+class InventoryEntry(models.Model):
+    sheet = models.ForeignKey(Sheet, related_name='inventory_entries')
+
+    quantity = models.PositiveIntegerField(default=1)
+    description = models.CharField(max_length=100)
+    location = models.CharField(max_length=30, blank=True,
+                                help_text="Indicate where the item(s) is "
+                                          "stored")
+    unit_weight = models.DecimalField(max_digits=6, decimal_places=3,
+                                      default=1, help_text="Item weight in "
+                                                           "kilograms")
+
+    order = models.IntegerField(help_text="explicit ordering for the "
+                                          "entries", default=0)
+
+    class Meta:
+        ordering = ('order', )
 
 
 class CharacterLogEntry(models.Model):

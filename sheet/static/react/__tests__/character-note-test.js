@@ -64,7 +64,7 @@ describe('character note tests', function (){
 
     it('can start in editing mode', function () {
         var character = TestUtils.renderIntoDocument(
-            <CharacterNotes editing={true} />
+            <CharacterNotes initialEditing={true} />
         );
         var characterNode = ReactDOM.findDOMNode(character);
         expect(characterNode.textContent).not.toContain('Edit');
@@ -72,7 +72,7 @@ describe('character note tests', function (){
 
     it('updates state on textarea edit', function () {
         var character = TestUtils.renderIntoDocument(
-            <CharacterNotes editing={true} />
+            <CharacterNotes initialEditing={true} />
         );
         var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
             "textarea");
@@ -84,7 +84,7 @@ describe('character note tests', function (){
 
     it('reverts value on cancel', function () {
         var character = TestUtils.renderIntoDocument(
-            <CharacterNotes editing={true} />
+            <CharacterNotes initialEditing={true} />
         );
         var characterNode = ReactDOM.findDOMNode(character);
         var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
@@ -122,7 +122,7 @@ describe('character note tests', function (){
         var character;
 
         character = TestUtils.renderIntoDocument(
-            <CharacterNotes url="/rest/characters/42" editing={true} />
+            <CharacterNotes url="/rest/characters/42" initialEditing={true} />
         );
 
         // TODO: seems to work without this, probably because no asserts

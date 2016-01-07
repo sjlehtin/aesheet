@@ -152,26 +152,20 @@ class ImportExport(TestCase):
 
 
 class ImportExportDependencies(TestCase):
-    csv_data = """\
-Skill
-name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
-Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
-Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
-Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
-Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
-"""
-
-    self_loop = """\
-Skill
-name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
-Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
-"""
 
     def setUp(self):
         factories.TechLevelFactory(name="all")
 
     def test_import_with_deps(self):
-        marshal.import_text(self.csv_data)
+        csv_data = """\
+Skill
+name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
+Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
+Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
+"""
+        marshal.import_text(csv_data)
         self.assertListEqual(
             sorted([sk.name for sk in sheet.models.Skill.objects.all()]),
             sorted(["Nutcasing", "Throw", "Unarmed combat", "Jackadeering"]))
@@ -180,12 +174,36 @@ Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
         """
         Verify that importing with selfloops works.
         """
-        marshal.import_text(self.self_loop)
+        self_loop = """\
+Skill
+name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+"""
+        marshal.import_text(self_loop)
         self.assertListEqual(
             [sk.name for sk in sheet.models.Skill.objects.all()],
             ["Nutcasing"])
         skill = sheet.models.Skill.objects.get(name="Nutcasing")
         self.assertEqual(len(skill.required_skills.all()), 0)
+
+    def test_import_with_deps_with_self_loops(self):
+        csv_data = """\
+Skill
+name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
+Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
+Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+"""
+        marshal.import_text(csv_data)
+        self.assertListEqual(
+            sorted([sk.name for sk in sheet.models.Skill.objects.all()]),
+            sorted(["Nutcasing", "Throw", "Unarmed combat", "Jackadeering"]))
+        skill = sheet.models.Skill.objects.get(name="Nutcasing")
+        self.assertEqual(len(skill.required_skills.all()), 0)
+        skill = sheet.models.Skill.objects.get(name="Jackadeering")
+        required = skill.required_skills.all()
+        self.assertEqual([sk.name for sk in required], ["Nutcasing"])
 
 
 class ImportExportPostgresSupport(TestCase):

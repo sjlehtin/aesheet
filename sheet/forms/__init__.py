@@ -436,6 +436,7 @@ def log_stat_change(character, request, field, change):
         entry.delete()
 
 
+# TODO: Remove.
 class StatModifyForm(RequestForm):
     stat = forms.CharField(max_length=64, widget=widgets.HiddenInput)
     function = forms.CharField(max_length=64, widget=widgets.HiddenInput)
@@ -578,7 +579,7 @@ class BaseEditCharacterForm(RequestForm):
 
     class Meta:
         model = sheet.models.Character
-        exclude = ('owner', )
+        exclude = ('owner', 'edges')
 
 
 class AddCharacterForm(SetOwnerMixin, BaseEditCharacterForm):
@@ -613,6 +614,7 @@ class EditCharacterForm(BaseEditCharacterForm):
         return super(EditCharacterForm, self).save(commit=commit)
 
 
+# TODO: Remove.
 class AddXPForm(RequestForm):
     add_xp = forms.IntegerField()
 
@@ -707,8 +709,9 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             new_char.skills.create(skill=skill.skill,
                                    level=skill.level)
 
-        for ce in edges:
-            new_char.edges.create(edge=ce.edge)
+        for edge in edges:
+            sheet.models.CharacterEdge.objects.create(character=new_char,
+                                                      edge=edge)
 
         sheet.models.CharacterLogEntry.objects.create(
             character=new_char,

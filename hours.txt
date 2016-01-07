@@ -81,3 +81,11 @@ thu 12.12.2015 1h Upgrading django (to 1.9) and other software components.
 sat 12.12.2015 1h Upgrading django (to 1.9) and other software components.
 sun 13.12.2015 1h Upgrading django (to 1.9) and other software components.
 sat 26.12.2015 2h Character note with JS.  Learning React time not included (around 10 hours)
+tue 29.12.2015 6h Character note, character stats.
+wed 30.12.2015 10h Derived statistics and cleanup.
+thu 31.12.2015 8h Recovery rates and edges.
+fri 1.1.2016 12h XP Control.
+sun 3.1.2016 4h Inventory REST API.
+mon 4.1.2016 4h Inventory UI.
+tue 5.1.2016 4h Inventory UI.
+wed 6.1.2016 4h Inventory UI, initiatives.

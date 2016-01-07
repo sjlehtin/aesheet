@@ -6,7 +6,9 @@ import sheet.models as models
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
-import json
+from django.db import transaction
+from sheet.forms import log_stat_change
+
 
 class WeaponAmmunitionList(generics.ListAPIView):
     serializer_class = serializers.AmmunitionSerializer
@@ -27,12 +29,18 @@ class WeaponAmmunitionList(generics.ListAPIView):
             label__in=weapon.get_ammunition_types())
 
 
-class IsOwner(BasePermission):
+def character_accessible(character, user):
+    if not character.private:
+        return True
+    if character.owner == user:
+        return True
+    else:
+        return False
+
+
+class IsAccessible(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if obj.owner == request.user:
-            return True
-        else:
-            return False
+        return character_accessible(obj, request.user)
 
 
 class SheetViewSet(mixins.RetrieveModelMixin,
@@ -41,7 +49,19 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     queryset = sheet.models.Sheet.objects.all()
     serializer_class = serializers.SheetSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsAccessible]
+
+    def get_queryset(self):
+        return models.Sheet.objects.prefetch_related('character__edges',
+                                                     'character__edges__edge',
+                                                     'spell_effects',
+                                                     'weapons__base',
+                                                     'weapons__quality',
+                                                     'ranged_weapons__base',
+                                                     'ranged_weapons__quality',
+                                                     'miscellaneous_items',
+                                                     'character__campaign',
+                                                     ).all()
 
     @detail_route(methods=['get'])
     def movement_rates(self, request, pk=None):
@@ -62,4 +82,58 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
     queryset = sheet.models.Character.objects.all()
     serializer_class = serializers.CharacterSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwner]
+    permission_classes = [permissions.IsAuthenticated, IsAccessible]
+
+    def get_queryset(self):
+        return models.Character.objects.prefetch_related('edges',
+                                                         'edges__edge',).all()
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            for field, new_value in serializer.validated_data.items():
+                old_value = getattr(instance, field)
+                if isinstance(old_value, int):
+                    change = new_value - old_value
+                else:
+                    change = 0
+                log_stat_change(instance, request, field, change)
+            self.perform_update(serializer)
+        return Response(serializer.data)
+
+
+class EdgeLevelViewSet(viewsets.ModelViewSet):
+    queryset = sheet.models.EdgeLevel.objects.all()
+    serializer_class = serializers.EdgeLevelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class IsInventoryItemAccessible(BasePermission):
+    def has_permission(self, request, view):
+        return character_accessible(view.sheet.character, request.user)
+
+
+class InventoryEntryViewSet(viewsets.ModelViewSet):
+    """
+    Inventory for a sheet.
+
+    Requires sheet_pk argument from, e.g., urlconf.
+    """
+    serializer_class = serializers.InventoryEntrySerializer
+    permission_classes = [permissions.IsAuthenticated, IsInventoryItemAccessible]
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.select_related(
+                'character__owner').get(pk=self.kwargs['sheet_pk'])
+        return super(InventoryEntryViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        return models.InventoryEntry.objects.select_related(
+            'sheet__character__owner').filter(sheet=self.sheet)
+
+    def perform_create(self, serializer):
+        serializer.save(sheet=self.sheet)

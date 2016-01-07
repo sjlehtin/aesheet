@@ -27,10 +27,20 @@ perhaps Robot-system tests.
 
 {% block content %}
     <div class="row">
+    <div class="col-md-9">
+
+    <div class="row">
     <div class="col-md-3">
 <h1>{{ sheet.name }}</h1>
 {{ sheet.race }}
 {{ sheet.occupation }}
+        <p title="Character description">
+            {{ sheet.character.description }}
+        </p>
+        <p title="Sheet description">
+            {{ sheet.description }}
+        </p>
+
     </div>
     <div class="col-md-2">
         <div class="edit-control">
@@ -50,62 +60,55 @@ perhaps Robot-system tests.
       Copy this sheet</a>
         </div>
     </div>
-    <div class="col-md-3 no-print">
-    <div class="panel panel-default">
-        <div class="panel-heading">Owner</div>
-        <div class="panel-body">{{ sheet.owner }}
-            {% if sheet.private %}
-                <span class="label label-danger">Private</span>
-            {% endif %}</div>
     </div>
-    </div>
-    </div>
+
     <div class="row">
-<div class="col-md-9">
-<div class="row">
-<div class="col-md-4">
-<p>
-{{ sheet.character.description }}
-</p>
-<p>
-{{ sheet.description }}
-</p>
 
-<div class="stats">
+        <div class="col-md-12">
+                <div id="stat-block-container">Loading...</div>
+{#            <div class="row">#}
+{#                <div class="col-md-4">#}
+{#            {% comment %}#}
+{#                    <div class="stats">#}
+{#                        {% url "sheet_detail" sheet.id as act %}#}
+{#                        <table class="base">#}
+{#                        {% for stat in sheet.base_stats %}#}
+{#                            {% include "sheet/sheet_detail/stat.html" %}#}
+{#                        {% endfor %}#}
+{#                        </table>#}
+{##}
+{#                    </div>#}
+{#            {% endcomment %}#}
+{#                <div id="stat-block-container">Loading...</div>#}
+{##}
+{#                </div>#}
+{#                <div class="col-md-8">#}
+{#                    <div>#}
+{#                        {% if sheet.character.portrait %}#}
+{#                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"#}
+{#                             class="img-rounded">#}
+{#                        {% else %}#}
+{#                            <div class="edit-control">You can add a portrait for your character in#}
+{#                                the <a href="{% url "edit_character" sheet.character.id %}">#}
+{#                                    base character edit</a>.</div>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+        </div>
+    </div>
 
-{% url "sheet_detail" sheet.id as act %}
-
-<table class="base">
-{% for stat in sheet.base_stats %}
-    {% include "sheet/sheet_detail/stat.html" %}
-{% endfor %}
-</table>
-
-</div>
-</div>
-<div class="col-md-8">
-<div>
-    {% if sheet.character.portrait %}
-    <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"
-         class="img-rounded">
-    {% else %}
-        <div class="edit-control">You can add a portrait for your character in
-            the <a href="{% url "edit_character" sheet.character.id %}">
-                base character edit</a>.</div>
-    {% endif %}
-</div>
-</div>
-</div>
-
-<div class="row">
-<div class="col-md-4">
-
+{#        <div class="row">#}
+{#<div class="col-md-6">#}
+{% comment %}
 <table class="derived">
 {% for stat in sheet.derived_stats %}
     {% include "sheet/sheet_detail/stat.html" %}
 {% endfor %}
 </table>
+{% endcomment %}
 
+{% comment %}
 <div class="xp">
 <label>XP:</label> {{ sheet.xp_used_stats }} +
 {% if sheet.hero %}
@@ -124,6 +127,9 @@ perhaps Robot-system tests.
 </div>
 </div>
 
+{% endcomment %}
+
+{% comment %}
 <div class="col-md-2">
     <table class="derived">
 {% with b=sheet.body sta=sheet.stamina mana=sheet.mana %}
@@ -145,12 +151,15 @@ perhaps Robot-system tests.
   </tr>
 {% endwith %}
 </table>
-</div>
+{% endcomment %}
+{#</div>#}
 
-<div class="col-md-6">
+    {% comment %}
+<div class="col-md-12">
     {% include "sheet/sheet_detail/advancing_initiatives.html" %}
 </div>
-</div>
+{% endcomment %}
+{#</div>#}
 
 <div class="row">
 <div class="col-md-4">
@@ -167,7 +176,8 @@ perhaps Robot-system tests.
     </div>
 </div>
 
-
+    {% comment %}
+<div class="row">
 <h3>Notes</h3>
 <ul class="note positive">
     {% for note in notes.positive %}
@@ -179,17 +189,32 @@ perhaps Robot-system tests.
         <li>{{ note|join:": " }}</li>
     {% endfor %}
 </ul>
+</div>
+{% endcomment %}
+
+        <div class="row">
+            <div class="col-md-12">
 
 <h3>Close combat</h3>
 {% include "sheet/sheet_detail/melee_weapons.html" %}
+            </div>
+</div>
 
+        <div class="row">
+            <div class="col-md-12">
 <h3>Ranged combat</h3>
 {% include "sheet/sheet_detail/ranged_weapons.html" %}
+            </div>
+</div>
 
+<div class="row">
 {% if sheet.campaign.has_firearms %}
+<div class="col-md-12">
 <h3>Firearms</h3>
 {% include "sheet/sheet_detail/edit_firearms.html" %}
+</div>
 {% endif %}
+</div>
 
 <div class="row">
     {% if sheet.campaign.has_spells %}
@@ -253,12 +278,27 @@ perhaps Robot-system tests.
 
 <div class="row">
     <div class="col-sm-12">
+        <h3>Inventory</h3>
+        <div id="inventory-container"></div>
+    </div>
+</div>
+
+        <div class="row">
+    <div class="col-sm-12">
         <div id="character-notes-container"></div>
     </div>
 </div>
 </div>
 
     <div id="skill-pane" class="col-md-3">
+    <div class="panel panel-default">
+        <div class="panel-heading">Owner</div>
+        <div class="panel-body">{{ sheet.owner }}
+            {% if sheet.private %}
+                <span class="label label-danger">Private</span>
+            {% endif %}</div>
+    </div>
+
         <div class="skills panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Skills</h3>
@@ -322,6 +362,7 @@ perhaps Robot-system tests.
         </div>
     </div>
 </div>
+{#    </div>#}
 {% endblock %}
 
 {% block script %}
@@ -359,6 +400,13 @@ $(document).ready(function () {
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes,
             {url: '/rest/characters/{{ sheet.character.pk }}/'});
     SheetApp.render(node, document.getElementById('character-notes-container'));
+    var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,
+            {url: '/rest/sheets/{{ sheet.pk }}/'});
+    SheetApp.render(statBlock, document.getElementById('stat-block-container'));
+    var inventory = SheetApp.React.createElement(SheetApp.Inventory,
+            {url: '/rest/sheets/{{ sheet.pk }}/inventory/'});
+    SheetApp.render(inventory, document.getElementById
+    ('inventory-container'));
 </script>
 
 {% endblock %}
