@@ -16,12 +16,20 @@ class StatRow extends React.Component {
             cur: this.props.initialChar["cur_" + stat],
             hard_mod: this.props.initialChar["mod_" + stat],
             soft_mod: this.props.initialSheet["mod_" + stat],
-            showEditControls: false
+            showEditControls: false,
+            updating: false
         };
     }
 
     handleModification(event, amount) {
         event.stopPropagation();
+
+        if (this.state.updating) {
+            console.log("waiting server to respond to last event...")
+            return;
+        }
+        this.setState({updating: true})
+
         var oldValue = this.state.cur;
         var newValue = this.state.cur + amount;
 
@@ -40,11 +48,12 @@ class StatRow extends React.Component {
         data['cur_' + this.state.stat] = newValue;
 
         rest.patch(this.props.url, data).then((response) => {
+            this.setState({updating: false})
             if (typeof(this.props.onMod) !== "undefined") {
                 this.props.onMod(this.state.stat, oldValue, newValue);
             }
         }).catch((reason) => {
-            this.setState({cur: oldValue});
+            this.setState({cur: oldValue, updating: false});
         });
     }
 
