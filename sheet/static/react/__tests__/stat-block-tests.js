@@ -410,6 +410,25 @@ describe('stat block', function() {
             expect(TestUtils.isCompositeComponent(noteBlock)).toBe(true);
             done();
         });
-
     });
+
+    it('calculate runMultiplier with an edge', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            block.handleEdgeAdded(edgeFactory({edge: "Natural Runner",
+                level: 1, run_multiplier: 1.5}));
+
+            expect(block.runMultiplier()).toEqual(1.5);
+            done();
+        });
+    });
+
+    it('have a decent default for runMultiplier', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            expect(block.runMultiplier()).toEqual(1);
+            done();
+        });
+    });
+
 });

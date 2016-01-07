@@ -192,7 +192,7 @@ class StatBlock extends React.Component {
         }
     }
 
-    getRunMultiplier() {
+    runMultiplier() {
         /* TODO: Tests for run multiplier. */
         /* TODO: run multiplier from effects. */
         var total = 0;
@@ -337,7 +337,7 @@ class StatBlock extends React.Component {
 
             initiativeBlock =
                 <InitiativeBlock style={{fontSize: "80%"}} effMOV={this.effMOV()}
-                                 runMultiplier={this.getRunMultiplier()} />;
+                                 runMultiplier={this.runMultiplier()} />;
 
         }
 
