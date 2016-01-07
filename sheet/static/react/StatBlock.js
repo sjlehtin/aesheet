@@ -192,6 +192,22 @@ class StatBlock extends React.Component {
         }
     }
 
+    getRunMultiplier() {
+        /* TODO: Tests for run multiplier. */
+        /* TODO: run multiplier from effects. */
+        var total = 0;
+
+        this.state.edgeList.forEach((elem, ii) =>
+        total += parseFloat(elem.run_multiplier ));
+
+        if (total > 0) {
+            console.log("run multiplier:", total);
+            return total;
+        } else {
+            return 1.0;
+        }
+    }
+
     handleEdgeAdded(data) {
         /* This assumes that characters will only have a single edgelevel of
            an edge.  I think this is an invariant.
@@ -227,12 +243,14 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var rows, derivedRows, usableRows, xpcontrol, portrait, notes;
+        var rows, derivedRows, usableRows, xpcontrol, portrait, notes,
+            initiativeBlock;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
             usableRows = <tr><td>Loading...</td></tr>;
             xpcontrol = <div>Loading</div>
+            initiativeBlock = '';
         } else {
             var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
@@ -316,6 +334,11 @@ class StatBlock extends React.Component {
             } else {
                 notes = '';
             }
+
+            initiativeBlock =
+                <InitiativeBlock style={{fontSize: "80%"}} effMOV={this.effMOV()}
+                                 runMultiplier={this.getRunMultiplier()} />;
+
         }
 
         var statsStyle = {verticalAlign: "center", border: 1};
@@ -349,6 +372,9 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         {notes}
+                    </Row>
+                    <Row>
+                        {initiativeBlock}
                     </Row>
                 </Col>
             </Row>
