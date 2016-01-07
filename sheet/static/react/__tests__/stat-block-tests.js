@@ -2,6 +2,7 @@ jest.dontMock('../StatBlock');
 jest.dontMock('../StatRow');
 jest.dontMock('../XPControl');
 jest.dontMock('../NoteBlock');
+jest.dontMock('../sheet-util');
 
 import React from 'react';
 import ReactDOM from 'react-dom';

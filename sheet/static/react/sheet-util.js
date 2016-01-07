@@ -34,6 +34,25 @@ var exports = function () {
                 return true;
             }
             return false;
+        },
+        /* Like excel roundup, rounds away from zero. */
+        roundup: function (value) {
+            "use strict";
+            if (value < 0) {
+                return Math.floor(value);
+            } else {
+                return Math.ceil(value);
+            }
+        },
+
+        /* Like excel roundup, rounds away from zero. */
+        rounddown: function (value) {
+            "use strict";
+            if (value < 0) {
+                return Math.ceil(value);
+            } else {
+                return Math.floor(value);
+            }
         }
     }
 }();

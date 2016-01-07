@@ -3,34 +3,16 @@ import React from 'react';
 import StatRow from 'StatRow';
 import XPControl from 'XPControl';
 import NoteBlock from 'NoteBlock';
+import InitiativeBlock from 'InitiativeBlock';
 
 import {Row, Col, Image, Panel} from 'react-bootstrap';
 
 var rest = require('sheet-rest');
+var util = require('sheet-util');
 
 /**
  * TODO: controls to add bought_mana, bought_stamina.
  */
-/* Like excel roundup, rounds away from zero. */
-var roundup = function (value) {
-    "use strict";
-    if (value < 0) {
-        return Math.floor(value);
-    } else {
-        return Math.ceil(value);
-    }
-};
-
-/* Like excel roundup, rounds away from zero. */
-var rounddown = function (value) {
-    "use strict";
-    if (value < 0) {
-        return Math.ceil(value);
-    } else {
-        return Math.floor(value);
-    }
-};
-
 class StatBlock extends React.Component {
     constructor(props) {
         super(props);
@@ -119,7 +101,7 @@ class StatBlock extends React.Component {
     }
 
     baseBody() {
-        return roundup(this.baseStat("fit") / 4);
+        return util.roundup(this.baseStat("fit") / 4);
     }
 
     toughness() {
@@ -127,12 +109,12 @@ class StatBlock extends React.Component {
     }
 
     stamina() {
-        return roundup((this.baseStat("ref") + this.baseStat("wil"))/ 4)
+        return util.roundup((this.baseStat("ref") + this.baseStat("wil"))/ 4)
             + this.state.char.bought_stamina;
     }
 
     mana() {
-        return roundup((this.baseStat("psy") + this.baseStat("wil"))/ 4)
+        return util.roundup((this.baseStat("psy") + this.baseStat("wil"))/ 4)
             + this.state.char.bought_mana;
     }
 
@@ -156,7 +138,7 @@ class StatBlock extends React.Component {
 
     staminaRecovery() {
         /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
-        var highStat = rounddown((this.effIMM() - 45)/15);
+        var highStat = util.rounddown((this.effIMM() - 45)/15);
         var level = this.getEdgeLevel("Fast Healing");
 
         var rates = [];
@@ -184,7 +166,7 @@ class StatBlock extends React.Component {
 
     manaRecovery() {
         /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
-        var highStat = 2*rounddown((this.effStat("cha") - 45)/15);
+        var highStat = 2*util.rounddown((this.effStat("cha") - 45)/15);
         var level = this.getEdgeLevel("Fast Mana Recovery");
 
         var rates = [];
