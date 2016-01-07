@@ -412,6 +412,30 @@ describe('stat block', function() {
         });
     });
 
+    it('should not contain a NoteBlock without edges', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+
+            var noteBlocks = TestUtils.scryRenderedComponentsWithType(
+                block, NoteBlock);
+            expect(noteBlocks.length).toEqual(0);
+            done();
+        });
+    });
+
+    it('should not contain a NoteBlock with only edges without notes', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+                level: 1, notes: ""}));
+
+            var noteBlocks = TestUtils.scryRenderedComponentsWithType(
+                block, NoteBlock);
+            expect(noteBlocks.length).toEqual(0);
+            done();
+        });
+    });
+
     it('calculate runMultiplier with an edge', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {

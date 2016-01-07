@@ -328,7 +328,17 @@ class StatBlock extends React.Component {
                         this.state.char}/`"> base character edit</a>.
                 </div>);
             }
-            if (this.state.edgeList.length > 0) {
+
+            var hasNotes = function (edgeList) {
+                for (var ii = 0; ii < edgeList.length; ii++) {
+                    if (edgeList[ii].notes.length > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            if (hasNotes(this.state.edgeList)) {
                 notes =
                     <Panel><NoteBlock edges={this.state.edgeList}/></Panel>;
             } else {
