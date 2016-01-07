@@ -621,6 +621,7 @@ class SheetView(object):
     def miscellaneous_items(self):
         return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
 
+    # TODO: Remove.
     def advancing_initiative_penalties(self):
         distances = [30, 20, 10, 5, 2]
         def initiatives(multiplier):
