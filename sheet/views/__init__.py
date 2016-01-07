@@ -750,6 +750,8 @@ def sheet_detail(request, sheet_id=None):
     # TODO: Remove.
     add_form(StatModifyForm, "stat-modify", instance=sheet.character)
     add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
+    add_form(AddXPForm, "add-xp", instance=sheet.character)
+
     add_form(AddSkillForm, "add-skill", instance=sheet.character)
     add_form(AddLanguageForm, "add-lang", instance=sheet.character)
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
@@ -768,7 +770,6 @@ def sheet_detail(request, sheet_id=None):
     add_form(HelmForm, "new-helm")
 
     add_form(AddFirearmForm, "add-firearm", instance=sheet)
-    add_form(AddXPForm, "add-xp", instance=sheet.character)
 
     if request.method == "POST":
         should_change = False
