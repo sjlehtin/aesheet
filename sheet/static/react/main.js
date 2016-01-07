@@ -6,6 +6,7 @@ import { render } from 'react-dom'
 import CharacterNotes from "CharacterNotes"
 import StatBlock from "StatBlock"
 import Inventory from "Inventory"
+import InitiativeBlock from "InitiativeBlock"
 
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -30,5 +31,6 @@ module.exports = {
     "CharacterNotes": CharacterNotes,
     "StatBlock": StatBlock,
     "Inventory": Inventory,
+    "InitiativeBlock": InitiativeBlock,
     "render": render
 }

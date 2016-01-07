@@ -4,6 +4,8 @@
 <div id="stat-block">Loading...</div>
 <div id="inventory">Loading...</div>
 <div id="character-container">Loading...</div>
+<div id="initiative-block">Loading...</div>
+
 <script src="bundle.js">
 </script>
 <script type="application/javascript">
@@ -27,6 +29,9 @@
             '/rest/sheets/1/inventory/'});
     SheetApp.render(inventory, document.getElementById('inventory'));
 
+    var initBlock = SheetApp.React.createElement(SheetApp.InitiativeBlock,
+            {effMOV: 52, runMultiplier: 1.0});
+    SheetApp.render(initBlock, document.getElementById('initiative-block'));
 
 </script>
 </body>
