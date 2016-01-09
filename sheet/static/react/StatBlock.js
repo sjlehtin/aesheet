@@ -244,14 +244,27 @@ class StatBlock extends React.Component {
 
     render() {
         var rows, derivedRows, usableRows, xpcontrol, portrait, notes,
-            initiativeBlock;
+            initiativeBlock, description;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
             usableRows = <tr><td>Loading...</td></tr>;
-            xpcontrol = <div>Loading</div>
+            xpcontrol = <div>Loading</div>;
             initiativeBlock = '';
+            description = '';
         } else {
+            description = <div>
+                { this.state.char.race }
+                { this.state.char.occupation }
+            <p title="Character description">
+                { this.state.char.description }
+            </p>
+            <p title="Sheet description">
+                { this.state.sheet.description }
+            </p>
+
+            </div>;
+
             var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
             rows = stats.map(function(st, ii) {
@@ -356,26 +369,31 @@ class StatBlock extends React.Component {
         return (
             <Row>
                 <Col md={5}>
-                <div style={{position: "relative", width: "18em"}}>
-                <h4>Stats</h4>
-                <table style={statsStyle}>
-                    <tbody>
-                    {rows}
-                    </tbody>
-                    <tbody>
-                    {derivedRows}
-                    </tbody>
-                </table>
-                <div style={{position: "absolute", bottom: 0, right:0}}>
-                    <table>
-                        <tbody>
-                        {usableRows}
-                        </tbody>
-                    </table>
-                </div>
-                </div>
-                {xpcontrol}
-                    </Col>
+                    <Row>
+                        {description}
+                    </Row>
+                    <Row>
+                        <div style={{position: "relative", width: "18em"}}>
+                        <h4>Stats</h4>
+                        <table style={statsStyle}>
+                            <tbody>
+                            {rows}
+                            </tbody>
+                            <tbody>
+                            {derivedRows}
+                            </tbody>
+                        </table>
+                        <div style={{position: "absolute", bottom: 0, right:0}}>
+                            <table>
+                                <tbody>
+                                {usableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                        {xpcontrol}
+                    </Row>
+                </Col>
                 <Col md={7}>
                     <Row style={{paddingBottom: 5}}>
                         {portrait}

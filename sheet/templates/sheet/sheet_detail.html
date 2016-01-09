@@ -30,36 +30,40 @@ perhaps Robot-system tests.
     <div class="col-md-9">
 
     <div class="row">
-    <div class="col-md-3">
-<h1>{{ sheet.name }}</h1>
-{{ sheet.race }}
-{{ sheet.occupation }}
-        <p title="Character description">
-            {{ sheet.character.description }}
-        </p>
-        <p title="Sheet description">
-            {{ sheet.description }}
-        </p>
+        <div class="col-md-3">
+            <h1>{{ sheet.name }}</h1>
+            {% comment %}
+            {{ sheet.race }}
+            {{ sheet.occupation }}
+            <p title="Character description">
+                {{ sheet.character.description }}
+            </p>
+            <p title="Sheet description">
+                {{ sheet.description }}
+            </p>
+            {% endcomment %}
+        </div>
 
-    </div>
-    <div class="col-md-2">
-        <div class="edit-control">
-        <a href="{% url "edit_character" sheet.character.id %}">
-      Edit base character</a>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <div class="edit-control">
-    <a href="{% url "edit_sheet" sheet.id %}">
-      Edit base sheet</a>
+        <div class="col-md-3">
+            <div class="edit-control">
+                <a href="{% url "edit_character" sheet.character.id %}">
+                    Edit base character</a>
             </div>
-    </div>
-    <div class="col-md-2">
-        <div class="edit-control">
-    <a href="{% url "copy_sheet" sheet_id=sheet.id %}">
-      Copy this sheet</a>
         </div>
-    </div>
+
+        <div class="col-md-3">
+            <div class="edit-control">
+                <a href="{% url "edit_sheet" sheet.id %}">
+                    Edit base sheet</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="edit-control">
+                <a href="{% url "copy_sheet" sheet_id=sheet.id %}">
+                    Copy this sheet</a>
+            </div>
+        </div>
     </div>
 
     <div class="row">
