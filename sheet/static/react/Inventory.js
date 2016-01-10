@@ -18,8 +18,28 @@ class Inventory extends React.Component {
 
     componentDidMount() {
         rest.getData(this.props.url).then((json) => {
-            this.setState({inventory: json});
+            this.updateInventory(json);
         });
+    }
+
+    notifyWeightChange() {
+        if (typeof(this.props.onWeightChange) !== "undefined") {
+            this.props.onWeightChange(this.totalWeight());
+        }
+    }
+
+    updateInventory(newInventory) {
+        this.setState({inventory: newInventory});
+        this.notifyWeightChange();
+    }
+
+    totalWeight() {
+        var total = 0;
+        this.state.inventory.forEach((elem, ii) => {
+            total += parseFloat(elem.unit_weight)
+                * parseInt(elem.quantity);
+        });
+        return total;
     }
 
     handleAddButtonClick(e) {
@@ -41,7 +61,8 @@ class Inventory extends React.Component {
 
                 newInventory.push(data);
 
-                this.setState({inventory: newInventory, addEnabled: false});
+                this.setState({addEnabled: false});
+                this.updateInventory(newInventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); });
     }
@@ -52,8 +73,9 @@ class Inventory extends React.Component {
             this.state.inventory[idx])
             .then((json) => {
                 var removed = this.state.inventory.splice(idx, 1);
-                console.log("removed:", idx, removed, this.state.inventory);
-                this.setState({inventory: this.state.inventory});
+                console.log("removed:", idx, removed);
+                console.log("new inventory:", this.state.inventory);
+                this.updateInventory(this.state.inventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); })
     }
@@ -66,9 +88,9 @@ class Inventory extends React.Component {
         rest.put(`${this.props.url}${newElem.id}/`,
             newElem)
             .then((json) => {
-                this.setState({inventory: newInventory}) })
+                this.updateInventory(newInventory);
+            })
             .catch((err) => {console.log("Failed to update: ", err); });
-
     }
 
     render() {
@@ -115,7 +137,8 @@ class Inventory extends React.Component {
 }
 
 Inventory.propTypes = {
-    url: React.PropTypes.string.isRequired
+    url: React.PropTypes.string.isRequired,
+    onWeightChange: React.PropTypes.func
 };
 
 export default Inventory;

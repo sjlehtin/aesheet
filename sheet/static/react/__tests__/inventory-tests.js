@@ -40,8 +40,12 @@ describe('Inventory', function() {
         promises = [];
     });
 
-    var getInventory = function () {
-        var inventory = <Inventory url="/rest/sheets/1/inventory/" />;
+    var getInventory = function (givenProps) {
+        var props = {url: "/rest/sheets/1/inventory/"};
+        if (typeof(givenProps) !== "undefined") {
+            props = Object.assign(props, givenProps);
+        }
+        var inventory = <Inventory {...props} />;
         var node = TestUtils.renderIntoDocument(inventory);
         return TestUtils.findRenderedComponentWithType(node, Inventory);
     };
@@ -181,4 +185,66 @@ describe('Inventory', function() {
         }).catch((err) => fail(err));
     });
 
+    it('reports total weight', function (done) {
+        var callback = jasmine.createSpy("callback");
+
+        rest.getData.mockReturnValue(jsonResponse([
+            inventoryEntryFactory({id: 2, quantity: 5, unit_weight: 2.3}),
+            inventoryEntryFactory({id: 3, quantity: 1, unit_weight: 2.7})
+        ]));
+
+        var inventory = getInventory({onWeightChange: callback});
+
+        Promise.all(promises).then((data) => {
+            expect(callback).toHaveBeenCalledWith(5 * 2.3 + 2.7);
+            done();
+        }).catch((err) => fail(err));
+    });
+
+    it('reports total weight after removal', function (done) {
+        var callback = jasmine.createSpy("callback");
+
+        rest.getData.mockReturnValue(jsonResponse([
+            inventoryEntryFactory({id: 2, quantity: 5, unit_weight: 2.3}),
+            inventoryEntryFactory({id: 3, quantity: 1, unit_weight: 2.7})
+        ]));
+
+        var inventory = getInventory({onWeightChange: callback});
+
+        Promise.all(promises).then((data) => {
+            rest.delete.mockReturnValue(jsonResponse());
+
+            inventory.handleRemove(0);
+
+            Promise.all(promises).then((data) => {
+                expect(callback).toHaveBeenCalledWith(2.7);
+                done();
+            }).catch((err) => fail(err));
+
+        }).catch((err) => fail(err));
+    });
+
+
+    it('reports total weight after edit', function (done) {
+        var callback = jasmine.createSpy("callback");
+
+        var initialElem = {id: 1, quantity: 1, unit_weight: 2.7};
+        rest.getData.mockReturnValue(jsonResponse([
+            inventoryEntryFactory(initialElem)]));
+        var inventory = getInventory({onWeightChange: callback});
+
+        Promise.all(promises).then((data) => {
+
+            var newElem = Object.assign({}, initialElem);
+            newElem.quantity = 5;
+            rest.put.mockReturnValue(jsonResponse(newElem));
+
+            inventory.handleEdit(0, newElem);
+
+            Promise.all(promises).then((data) => {
+                expect(callback).toHaveBeenCalledWith(5 * 2.7);
+                done();
+            }).catch((err) => fail(err));
+        }).catch((err) => fail(err));
+    });
 });
