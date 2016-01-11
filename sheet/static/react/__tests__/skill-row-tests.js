@@ -1,56 +1,21 @@
 jest.dontMock('../SkillRow');
 jest.dontMock('../sheet-util');
+jest.dontMock('./factories')
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
+var factories = require('./factories');
+
+var characterSkillFactory = factories.characterSkillFactory;
+var skillFactory = factories.skillFactory;
+var statsFactory = factories.statsFactory;
+
 const SkillRow = require('../SkillRow').default;
 
 describe('SkillRow', function() {
     "use strict";
-
-    var nextSkillID = 0;
-
-    var statsFactory = function (overrideStats) {
-        var _baseStats = {
-            cha: 45
-        };
-        return Object.assign(_baseStats, overrideStats);
-    };
-
-    var skillFactory = function (overrideFields) {
-        var _baseSkill = {
-            "name": "Acting / Bluff",
-            "description": "",
-            "notes": "",
-            "can_be_defaulted": true,
-            "is_specialization": false,
-            "skill_cost_0": 2,
-            "skill_cost_1": 2,
-            "skill_cost_2": 3,
-            "skill_cost_3": 4,
-            "type": "Social",
-            "stat": "CHA",
-            "tech_level": 1,
-            "required_skills": [],
-            "required_edges": []
-        };
-        return Object.assign(_baseSkill, overrideFields);
-    };
-
-    var characterSkillFactory = function (overrideFields) {
-        var _baseCS = {
-            "id": nextSkillID,
-            "level": 1,
-            "character": 1,
-            "skill": "Acting / Bluff"
-        };
-        var newSkill = Object.assign(_baseCS, overrideFields);
-        /* Overriding ID is possible. */
-        nextSkillID = newSkill.id + 1;
-        return newSkill
-    };
 
     var getSkillRow = function (givenProps) {
         var props = {skill: "Unarmed Combat"};
@@ -75,10 +40,6 @@ describe('SkillRow', function() {
         return TestUtils.findRenderedComponentWithType(table,
             SkillRow);
     };
-
-    beforeEach(function () {
-        nextSkillID = 0;
-    });
 
     it('finds skill', function () {
         var skill = skillFactory();
