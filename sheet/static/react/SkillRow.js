@@ -32,7 +32,7 @@ class SkillRow extends React.Component {
     }
 
     skillCheck(stat) {
-        var skill = this.findSkill();
+        var skill = this.props.skill;
 
         if (this.isBaseSkill(skill)) {
             return null;
@@ -42,10 +42,11 @@ class SkillRow extends React.Component {
             stat = skill.stat;
         }
         var ability = this.props.stats[stat.toLowerCase()];
-        if (!this.props.characterSkill) {
+        var level = this.skillLevel();
+        if (level === "B") {
             return Math.round(ability / 2)
         } else {
-            return ability + this.props.characterSkill.level * 5;
+            return ability + level * 5;
         }
     }
 
@@ -59,19 +60,13 @@ class SkillRow extends React.Component {
 
     skillLevel() {
         if (!this.props.characterSkill) {
-            return 'B';
+            if (this.props.skill.skill_cost_0 > 0) {
+                return 'B';
+            } else {
+                return 0;
+            }
         } else {
             return this.props.characterSkill.level;
-        }
-    }
-
-    findSkill() {
-        var skillName = this.skillName();
-        for (var ii = 0; this.props.allSkills.length; ii++) {
-            var skill = this.props.allSkills[ii];
-            if (skill.name == skillName) {
-                return skill;
-            }
         }
     }
 
@@ -86,7 +81,7 @@ class SkillRow extends React.Component {
             }
             checks = checkList.join(' ');
         } else {
-            var skill = this.findSkill();
+            var skill = this.props.skill;
             checks = <span title={skill.stat}>{this.skillCheck(skill.stat)}</span>
         }
         return <tr><td>{this.skillName()}</td><td>{this.skillLevel()}</td><td className="skill-check">{checks}</td></tr>;
@@ -102,7 +97,7 @@ SkillRow.propTypes = {
 
     stats: React.PropTypes.object.isRequired,
 
-    allSkills: React.PropTypes.array.isRequired,
+    skill: React.PropTypes.object.isRequired,
 
     /* Defaults to stat in the skill, but can be overridden for
        special cases. */

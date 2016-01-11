@@ -41,23 +41,11 @@ describe('SkillRow', function() {
             SkillRow);
     };
 
-    it('finds skill', function () {
-        var skill = skillFactory();
-        var row = getSkillRow({
-            characterSkill: characterSkillFactory(),
-            stats: statsFactory(),
-            allSkills: [skillFactory({name: "Unarmed Combat"}), skill,
-            skillFactory({name: "Tracking"})]
-        });
-        expect(typeof(row)).not.toEqual("undefined");
-        expect(row.findSkill()).toEqual(skill);
-    });
-
     it('calculates skill check', function () {
         var row = getSkillRow({
             characterSkill: characterSkillFactory({level: 1}),
             stats: statsFactory({cha: 55}),
-            allSkills: [skillFactory({stat: "CHA"})]});
+            skill: skillFactory({stat: "CHA"})});
         expect(row.skillCheck()).toEqual(60);
     });
 
@@ -66,42 +54,46 @@ describe('SkillRow', function() {
         var row = getSkillRow({
             characterSkill: characterSkillFactory({level: 0}),
             stats: statsFactory({cha: 55}),
-            allSkills: [skillFactory({stat: "CHA",
+            skill: skillFactory({stat: "CHA",
             skill_cost_1: null,
                 skill_cost_2: null,
                 skill_cost_3: null
-            })]});
+            })});
         expect(row.skillCheck()).toEqual(null);
     });
 
     it('can render defaulted skills', function () {
-        // i.e., does not render the skill check.
         var row = getSkillRow({
             skillName: "Acting / Bluff",
             stats: statsFactory({cha: 55}),
-            allSkills: [skillFactory({stat: "CHA"})]});
+            skill: skillFactory({stat: "CHA"})});
         expect(row.skillCheck()).toEqual(28);
     });
 
+    it('can render skills which are available without cost', function () {
+        var row = getSkillRow({
+            skillName: "Acting / Bluff",
+            stats: statsFactory({cha: 55}),
+            skill: skillFactory({stat: "CHA", skill_cost_0: 0})});
+        expect(row.skillCheck()).toEqual(55);
+    });
+
     it('can find a skill check for a different stat', function () {
-        // i.e., does not render the skill check.
         var row = getSkillRow({
             characterSkill: characterSkillFactory({level: 1}),
             stats: statsFactory({cha: 45, wil: 60}),
-            allSkills: [skillFactory({stat: "CHA"})],
-
+            skill: skillFactory({stat: "CHA"})
         });
         expect(row.skillCheck("wil")).toEqual(65);
     });
 
     it('can render skill checks for multiple stats', function () {
-        // i.e., does not render the skill check.
         var row = getSkillRow({
             characterSkill: characterSkillFactory({
                 skill: "Balance",
                 level: 1}),
             stats: statsFactory({mov: 45, ref: 60}),
-            allSkills: [skillFactory({name: "Balance", stat: "MOV"})],
+            skill: skillFactory({name: "Balance", stat: "MOV"}),
             renderForStats: ["mov", "ref"]
         });
         console.log("foo");
