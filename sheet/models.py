@@ -76,6 +76,17 @@ class NameManager(models.Manager):
         return self.get(name=name)
 
 
+class PrivateMixin(object):
+    def access_allowed(self, user):
+        """
+        This checks that the resource is accessible by the user.
+
+        :param user: the user accessing the resource
+        :return: True if access is granted, false otherwise.
+        """
+        raise RuntimeError("not implemented")
+
+
 class TechLevel(ExportedModel):
     """
     Different periods have different kinds of technologies available.
@@ -152,7 +163,7 @@ class SkillLookup(object):
         return self.character.get_skill(skill)
 
 
-class Character(models.Model):
+class Character(PrivateMixin, models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
     basic character will immediately affect all sheets based on the
@@ -664,7 +675,7 @@ class Skill(ExportedModel):
         return u"%s" % (self.name)
 
 
-class CharacterSkill(models.Model):
+class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
     level = models.IntegerField(default=0)
@@ -694,6 +705,9 @@ class CharacterSkill(models.Model):
             stat = self.skill.stat.lower()
         return mod + self.level * 5 + \
             getattr(sheet, "eff_" + stat)
+
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
 
     def __unicode__(self):
         return u"%s: %s %s" % (self.character, self.skill, self.level)
@@ -781,7 +795,7 @@ class EdgeSkillBonus(ExportedModel):
         return u"%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
 
-class CharacterEdge(models.Model):
+class CharacterEdge(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     edge = models.ForeignKey(EdgeLevel)
 
@@ -1603,7 +1617,7 @@ class MovementRates(object):
 Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 
-class Sheet(models.Model):
+class Sheet(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     # TODO: Remove this.  It should be determined from the Character.owner.
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
@@ -2343,6 +2357,9 @@ class Sheet(models.Model):
         else:
             return 0
 
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
+
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_sheets(user), lambda sheet: sheet.character)
@@ -2363,7 +2380,7 @@ class Sheet(models.Model):
         ordering = ('character__name', )
 
 
-class InventoryEntry(models.Model):
+class InventoryEntry(PrivateMixin, models.Model):
     sheet = models.ForeignKey(Sheet, related_name='inventory_entries')
 
     quantity = models.PositiveIntegerField(default=1)
@@ -2377,6 +2394,9 @@ class InventoryEntry(models.Model):
 
     order = models.IntegerField(help_text="explicit ordering for the "
                                           "entries", default=0)
+
+    def access_allowed(self, user):
+        return self.sheet.access_allowed(user)
 
     class Meta:
         ordering = ('order', )
