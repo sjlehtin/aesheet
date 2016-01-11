@@ -7,6 +7,7 @@ import CharacterNotes from "CharacterNotes"
 import StatBlock from "StatBlock"
 import Inventory from "Inventory"
 import InitiativeBlock from "InitiativeBlock"
+import SkillTable from "SkillTable"
 
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -32,5 +33,6 @@ module.exports = {
     "StatBlock": StatBlock,
     "Inventory": Inventory,
     "InitiativeBlock": InitiativeBlock,
+    "SkillTable": SkillTable,
     "render": render
 }
