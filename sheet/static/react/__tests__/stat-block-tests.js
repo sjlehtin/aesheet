@@ -455,4 +455,17 @@ describe('stat block', function() {
         });
     });
 
+    it('can calculate all effective stats', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+            "pos", "mov", "dex", "imm"];
+            for (var ii = 0; ii < stats.length; ii++) {
+                expect(typeof(block.getEffStats().ref)).toEqual("number");
+            }
+            expect(block.getEffStats().ref).toEqual(60);
+            done();
+        });
+    });
+
 });

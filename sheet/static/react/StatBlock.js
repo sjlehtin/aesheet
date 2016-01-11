@@ -58,6 +58,13 @@ class StatBlock extends React.Component {
     }
 
     effStat(stat) {
+        if (stat === "mov") {
+            return this.effMOV();
+        } else if (stat === "dex") {
+            return this.effDEX();
+        } else if (stat === "imm") {
+            return this.effIMM();
+        }
         return this.baseStat(stat) + this.state.sheet['mod_' + stat];
     }
 
@@ -98,6 +105,16 @@ class StatBlock extends React.Component {
         } else {
             return 0;
         }
+    }
+
+    getEffStats() {
+        var block = {}
+        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+                "pos", "mov", "dex", "imm"];
+        for (var ii = 0; ii < stats.length; ii++) {
+            block[stats[ii]] = this.effStat(stats[ii]);
+        }
+        return block;
     }
 
     baseBody() {
