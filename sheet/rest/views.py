@@ -8,6 +8,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 from django.db import transaction
 from sheet.forms import log_stat_change
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class IsAccessible(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.access_allowed(request.user)
 
 
 class WeaponAmmunitionList(generics.ListAPIView):
@@ -27,20 +35,6 @@ class WeaponAmmunitionList(generics.ListAPIView):
 
         return sheet.models.Ammunition.objects.filter(
             label__in=weapon.get_ammunition_types())
-
-
-def character_accessible(character, user):
-    if not character.private:
-        return True
-    if character.owner == user:
-        return True
-    else:
-        return False
-
-
-class IsAccessible(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return character_accessible(obj, request.user)
 
 
 class SheetViewSet(mixins.RetrieveModelMixin,
@@ -111,23 +105,79 @@ class EdgeLevelViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class IsInventoryItemAccessible(BasePermission):
-    def has_permission(self, request, view):
-        return character_accessible(view.sheet.character, request.user)
+class SkillViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.SkillSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def initialize_request(self, request, *args, **kwargs):
+        if 'campaign_pk' in self.kwargs:
+            campaign = models.Campaign.objects.get(pk=self.kwargs[
+                'campaign_pk'])
+            self.tech_levels = [tl['id'] for tl in
+                                campaign.tech_levels.values('id')]
+        else:
+            self.tech_levels = []
+        return super(SkillViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = models.Skill.objects.prefetch_related('required_skills',
+                                                   'required_edges').all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                    self.tech_levels))
+            qs = qs.filter(tech_level__in=self.tech_levels)
+        return qs
 
 
-class InventoryEntryViewSet(viewsets.ModelViewSet):
+class ListPermissionMixin(object):
+    """
+    The `list` method of ListModelMixin does not check object
+    permissions.  I am unsure whether it is a bug or an optimization,
+    and therefore intended, but for situations like here, where the
+    intention is to hide a private character from other users,
+    the mixin does not work in the desired manner.
+
+    This mixin implements the required permission checks.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAccessible]
+
+    def list(self, request, *args, **kwargs):
+        if not self.containing_object.access_allowed(request.user):
+            return Response(data={"detail": "You do not have permission to "
+                                           "list these objects."},
+                                           status=403)
+        else:
+            return super(ListPermissionMixin, self).list(request, *args,
+                                                         **kwargs)
+
+
+class CharacterSkillViewSet(ListPermissionMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.CharacterSkillSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.character = models.Character.objects.get(
+                pk=self.kwargs['character_pk'])
+        self.containing_object = self.character
+        return super(CharacterSkillViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.character.skills.all()
+
+
+class InventoryEntryViewSet(ListPermissionMixin, viewsets.ModelViewSet):
     """
     Inventory for a sheet.
 
     Requires sheet_pk argument from, e.g., urlconf.
     """
     serializer_class = serializers.InventoryEntrySerializer
-    permission_classes = [permissions.IsAuthenticated, IsInventoryItemAccessible]
 
     def initialize_request(self, request, *args, **kwargs):
         self.sheet = models.Sheet.objects.select_related(
                 'character__owner').get(pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
         return super(InventoryEntryViewSet, self).initialize_request(
                 request, *args, **kwargs)
 

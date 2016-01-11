@@ -31,6 +31,18 @@ class EdgeLevelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Skill
+        fields = "__all__"
+
+
+class CharacterSkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.CharacterSkill
+        fields = "__all__"
+
+
 class CharacterSerializer(serializers.ModelSerializer):
     mod_fit = serializers.IntegerField(read_only=True)
     mod_ref = serializers.IntegerField(read_only=True)

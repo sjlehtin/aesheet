@@ -389,3 +389,72 @@ class InventoryMultipleSheetsTestCase(TestCase):
         self.assertEqual(len(response.data), 1)
 
         self.assertEqual(response.data[0]['description'], "potion of flying")
+
+
+class CharacterSkillTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.other_user = factories.UserFactory(username="leia")
+        self.char = factories.CharacterFactory(owner=self.owner, private=True)
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        factories.CharacterSkillFactory(character=self.char,
+                                        skill__name="Ice Dancing",
+                                        level=3)
+
+    def test_character_url(self):
+        url = '/rest/characters/{}/characterskills/'.format(
+                self.char.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['skill'], 'Ice Dancing')
+        self.assertEqual(response.data[0]['level'], 3)
+
+    def test_url_invalid_user(self):
+        self.assertTrue(
+            self.client.login(username="leia", password="foobar"))
+        url = '/rest/characters/{}/characterskills/'.format(self.char.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 403)
+
+
+class SkillTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_onek = factories.TechLevelFactory(name="OneK")
+        self.tech_frp = factories.TechLevelFactory(name="Magic")
+        self.onek = factories.CampaignFactory(name='1K',
+                                              tech_levels=["OneK"])
+        self.frp = factories.CampaignFactory(name='FRP',
+                                             tech_levels=["OneK", "Magic"])
+
+        factories.SkillFactory(name="Sword", tech_level=self.tech_onek)
+        factories.SkillFactory(name="Kordism", tech_level=self.tech_frp)
+
+    def test_main_url(self):
+        url = '/rest/skills/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_1k_campaign_url(self):
+        url = '/rest/skills/campaign/{}/'.format(self.onek.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['name'], "Sword")
+
+    def test_frp_campaign_url(self):
+        url = '/rest/skills/campaign/{}/'.format(self.frp.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(sorted([skill['name'] for skill in response.data]),
+                         ["Kordism", "Sword"])
+
