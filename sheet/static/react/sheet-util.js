@@ -53,6 +53,14 @@ var exports = function () {
             } else {
                 return Math.floor(value);
             }
+        },
+
+        toObject: function (array) {
+            var map = {};
+            for (let obj of array) {
+                map[obj] = 1;
+            }
+            return map;
         }
     }
 }();
