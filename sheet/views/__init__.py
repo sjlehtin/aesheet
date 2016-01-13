@@ -609,6 +609,7 @@ class SheetView(object):
         logger.debug("New skill list length: %d", len(skill_list))
         return skill_list[1:] # Skip root node.
 
+    # TODO: Remove.
     def edges(self):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
@@ -750,9 +751,9 @@ def sheet_detail(request, sheet_id=None):
 
     # TODO: Remove.
     add_form(StatModifyForm, "stat-modify", instance=sheet.character)
-    add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
     add_form(AddXPForm, "add-xp", instance=sheet.character)
 
+    add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
     add_form(AddSkillForm, "add-skill", instance=sheet.character)
     add_form(AddLanguageForm, "add-lang", instance=sheet.character)
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
