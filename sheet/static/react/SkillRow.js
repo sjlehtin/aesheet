@@ -84,7 +84,11 @@ class SkillRow extends React.Component {
             var skill = this.props.skill;
             checks = <span title={skill.stat}>{this.skillCheck(skill.stat)}</span>
         }
-        return <tr><td>{this.skillName()}</td><td>{this.skillLevel()}</td><td className="skill-check">{checks}</td></tr>;
+        var indent = 0;
+        if (this.props.indent > 0) {
+            indent = `${this.props.indent}em`;
+        }
+        return <tr><td><span style={{paddingLeft: indent}}>{this.skillName()}</span></td><td>{this.skillLevel()}</td><td className="skill-check">{checks}</td></tr>;
     }
 }
 
@@ -101,8 +105,12 @@ SkillRow.propTypes = {
 
     /* Defaults to stat in the skill, but can be overridden for
        special cases. */
-    renderForStats: React.PropTypes.array
+    renderForStats: React.PropTypes.array,
+
+    indent: React.PropTypes.number
 };
+
+SkillRow.defaultProps = {indent: 0}
 
 export default SkillRow;
 
