@@ -253,7 +253,35 @@ describe('SkillTable', function() {
         expect(newList[2].indent).toEqual(2);
     });
 
-    xit("renders the skills with children skills following their parents");
+    it("does not choke on multiple required skills", function () {
+        var skillList = [
+            factories.characterSkillFactory(
+                {skill: "Florism", level: 1}),
+            factories.characterSkillFactory(
+                {skill: "Aesthetism", level: 0}),
+            factories.characterSkillFactory(
+                {skill: "Gardening", level: 0}),
+            factories.characterSkillFactory(
+                {skill: "Agriculture", level: 3})
+        ];
+        var allSkills = [factories.skillFactory({name: "Agriculture"}),
+            factories.skillFactory({name: "Gardening",
+                required_skills: ["Agriculture"]}),
+            factories.skillFactory({name: "Florism",
+                required_skills: ["Gardening", "Aesthetism"]}),
+            factories.skillFactory({name: "Aesthetism"})
+        ];
+
+        var newList = SkillTable.mangleSkillList(skillList, allSkills);
+        expect(newList[0].skill).toEqual("Aesthetism");
+        expect(newList[0].indent).toEqual(0);
+        expect(newList[1].skill).toEqual("Agriculture");
+        expect(newList[1].indent).toEqual(0);
+        expect(newList[2].indent).toEqual(1);
+        expect(newList[3].skill).toEqual("Florism");
+        expect(newList[3].indent).toEqual(2);
+    });
+
     xit("does not choke on multiple required skills");
 
     xit("allows adding a physical skill level from the start set");
