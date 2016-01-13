@@ -459,7 +459,7 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {
             var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
-            "pos", "mov", "dex", "imm"];
+                "pos", "mov", "dex", "imm"];
             for (var ii = 0; ii < stats.length; ii++) {
                 expect(typeof(block.getEffStats().ref)).toEqual("number");
             }
