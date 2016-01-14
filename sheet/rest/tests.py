@@ -403,11 +403,11 @@ class CharacterSkillTestCase(TestCase):
         factories.CharacterSkillFactory(character=self.char,
                                         skill__name="Ice Dancing",
                                         level=3)
+        self.url = '/rest/characters/{}/characterskills/'.format(
+                self.char.pk)
 
     def test_character_url(self):
-        url = '/rest/characters/{}/characterskills/'.format(
-                self.char.pk)
-        response = self.client.get(url, format='json')
+        response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['skill'], 'Ice Dancing')
@@ -416,9 +416,66 @@ class CharacterSkillTestCase(TestCase):
     def test_url_invalid_user(self):
         self.assertTrue(
             self.client.login(username="leia", password="foobar"))
-        url = '/rest/characters/{}/characterskills/'.format(self.char.pk)
-        response = self.client.get(url, format='json')
+        response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 403)
+
+    def test_verify_skill_level(self):
+        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=None)
+
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 0}, format="json")
+        self.assertEqual(response.status_code, 400)
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 3}, format="json")
+        self.assertEqual(response.status_code, 400)
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 2}, format="json")
+        self.assertEqual(response.status_code, 201)
+        cs = models.CharacterSkill.objects.get(character=self.char,
+                                               skill="Lightsaber")
+        self.assertEqual(cs.level, 2)
+
+    def test_verify_skill_level_5(self):
+        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=4)
+
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 5}, format="json")
+        self.assertEqual(response.status_code, 201)
+        cs = models.CharacterSkill.objects.get(character=self.char,
+                                               skill="Lightsaber")
+        self.assertEqual(cs.level, 5)
+
+    def test_verify_skill_level_modification(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        cs = factories.CharacterSkillFactory(character=self.char,
+                                             skill=skill, level=2)
+
+        url = "{}{}/".format(self.url, cs.pk)
+
+
+        response = self.client.patch(url, {"skill": "Lightsaber",
+                                           "level": 5}, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        cs = models.CharacterSkill.objects.get(character=self.char,
+                                               skill="Lightsaber")
+        self.assertEqual(cs.level, 5)
+
+    def test_skill_remove(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
+                                             level=2)
+        url = "{}{}/".format(self.url, cs.pk)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
 
 
 class SkillTestCase(TestCase):

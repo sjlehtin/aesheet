@@ -162,6 +162,13 @@ class CharacterSkillViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         return super(CharacterSkillViewSet, self).initialize_request(
                 request, *args, **kwargs)
 
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(CharacterSkillViewSet, self).get_serializer(*args, **kwargs)
+        if isinstance(serializer, serializers.CharacterSkillSerializer):
+            serializer.fields['character'].default = self.character
+            serializer.fields['character'].read_only = True
+        return serializer
+
     def get_queryset(self):
         return self.character.skills.all()
 

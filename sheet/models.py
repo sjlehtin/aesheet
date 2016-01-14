@@ -637,6 +637,25 @@ class Skill(ExportedModel):
         self.stat = self.stat.upper()
         super(Skill, self).clean_fields(exclude=exclude)
 
+    def get_minimum_level(self):
+        levels = [0, 1, 2, 3]
+        for lvl in levels:
+            cost = getattr(self, 'skill_cost_{}'.format(lvl))
+            if cost is not None:
+                return lvl
+        raise ValueError("Skill is invalid")
+
+    def get_maximum_level(self):
+        if self.skill_cost_3 is not None:
+            return 8
+
+        levels = [2, 1, 0]
+        for lvl in levels:
+            cost = getattr(self, 'skill_cost_{}'.format(lvl))
+            if cost is not None:
+                return lvl
+        raise ValueError("Skill is invalid")
+
     def cost(self, level):
         if level == 0:
             if not self.skill_cost_0:

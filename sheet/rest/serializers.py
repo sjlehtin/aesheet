@@ -38,6 +38,23 @@ class SkillSerializer(serializers.ModelSerializer):
 
 
 class CharacterSkillSerializer(serializers.ModelSerializer):
+
+    def validate(self, data):
+        skill = data['skill']
+        minimum = skill.get_minimum_level()
+        maximum = skill.get_maximum_level()
+        level = data['level']
+        if level < minimum:
+            raise serializers.ValidationError("Skill {skill} has minimum "
+                                              "level {minimum}".format(
+                    skill=skill, minimum=minimum))
+        if level > maximum:
+            raise serializers.ValidationError("Skill {skill} has maximum "
+                                              "level {maximum}".format(
+                    skill=skill, maximum=maximum))
+
+        return data
+
     class Meta:
         model = sheet.models.CharacterSkill
         fields = "__all__"
