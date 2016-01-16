@@ -28,7 +28,7 @@ class InitiativeBlock extends React.Component {
             return initiatives.map((init, ii) => { return <td key={ii}>{init}</td>; });
         }
         return <Panel style={this.props.style} header={<h4>Initiative penalty for advancing in combat</h4>}>
-            <Table fill>
+            <Table style={{fontSize: "inherit"}} fill>
                 <thead>
                     <tr><th>Distance</th>{distances.map((elem, ii) => { return <th key={ii}>{elem} m</th>})}</tr>
                 </thead>
