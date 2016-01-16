@@ -283,6 +283,38 @@ class StatBlock extends React.Component {
         this.setState({char: data});
     }
 
+
+    handleCharacterSkillAdd(skill) {
+        var skillList = this.state.characterSkills;
+        skillList.push(skill);
+        this.setState({characterSkills: skillList});
+    }
+
+    static findCharacterSkillIndex(skillList, skill) {
+        for (var ii = 0; ii < skillList.length; ii++) {
+            var item = skillList[ii];
+            if (item.id === skill.id) {
+                return ii;
+            }
+        }
+        throw Error("No such skill: " + skill);
+    }
+
+    handleCharacterSkillRemove(skill) {
+        console.log("Removed: ", skill);
+        var index = StatBlock.findCharacterSkillIndex(
+            this.state.characterSkills, skill);
+        this.state.characterSkills.splice(index, 1);
+        this.setState({characterSkills: this.state.characterSkills});
+    }
+
+    handleCharacterSkillModify(skill) {
+        var index = StatBlock.findCharacterSkillIndex(
+            this.state.characterSkills, skill);
+        this.state.characterSkills[index] = skill;
+        this.setState({characterSkills: this.state.characterSkills});
+    }
+
     render() {
         var rows, derivedRows, usableRows, xpcontrol, portrait, notes,
             initiativeBlock, description, skillTable;
@@ -416,6 +448,8 @@ class StatBlock extends React.Component {
                         style={{fontSize: "90%"}}
                         characterSkills={this.state.characterSkills}
                         allSkills={this.state.allSkills}
+                        onCharacterSkillRemove={
+                      (skill) => this.handleCharacterSkillRemove(skill)}
                         stats={this.getEffStats()}/>
                 }
             }
@@ -475,7 +509,10 @@ class StatBlock extends React.Component {
 }
 
 StatBlock.propTypes = {
-    url: React.PropTypes.string.isRequired
+    url: React.PropTypes.string.isRequired,
+    onCharacterSkillAdd: React.PropTypes.func,
+    onCharacterSkillRemove: React.PropTypes.func,
+    onCharacterSkillModify: React.PropTypes.func
 };
 
 export default StatBlock;

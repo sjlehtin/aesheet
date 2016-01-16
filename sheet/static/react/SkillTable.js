@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 var rest = require('sheet-rest');
 var util = require('sheet-util');
 
-import {Table} from 'react-bootstrap';
+import {Panel, Table} from 'react-bootstrap';
 import SkillRow from 'SkillRow';
 
 class SkillTable extends React.Component {
@@ -14,8 +14,23 @@ class SkillTable extends React.Component {
         this.state = { };
     }
 
-    componentDidMount() {
-        //rest.getData('skills')
+    handleCharacterSkillAdd(skill) {
+        if (typeof(this.props.onCharacterSkillAdd) != "undefined") {
+            this.props.onCharacterSkillAdd(skill);
+        }
+    }
+
+    handleCharacterSkillRemove(skill) {
+        console.log("Removed: ", skill);
+        if (typeof(this.props.onCharacterSkillRemove) != "undefined") {
+            this.props.onCharacterSkillRemove(skill);
+        }
+    }
+
+    handleCharacterSkillModify(skill) {
+        if (typeof(this.props.onCharacterSkillModify) != "undefined") {
+            this.props.onCharacterSkillModify(skill);
+        }
     }
 
     findSkill(skillName) {
@@ -136,10 +151,10 @@ class SkillTable extends React.Component {
                           stats={this.props.stats}
                           characterSkill={csMap[skill]}
                           skillName={skill}
+                          onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                           skill={skillMap[skill]} />);
         }
 
-        //var skills = this.sortSkills(this.props.characterSkills);
         var skillList = SkillTable.mangleSkillList(this.props.characterSkills,
             this.props.allSkills);
 
@@ -148,17 +163,25 @@ class SkillTable extends React.Component {
             rows.push(<SkillRow key={cs.id}
                                 stats={this.props.stats}
                                 characterSkill={cs}
+                                onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                                 indent={cs.indent}
                                 skill={skillMap[cs.skill]} />);
         }
-        return <Table striped><tbody>{rows}</tbody></Table>;
+        return <Panel style={this.props.style} header={<h4>Skills</h4>}><Table style={{fontSize: "inherit"}} striped fill>
+            <thead>
+            <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
+            </thead>
+            <tbody>{rows}</tbody></Table></Panel>;
     }
 }
 
 SkillTable.propTypes = {
     characterSkills: React.PropTypes.array.isRequired,
     allSkills: React.PropTypes.array.isRequired,
-    stats: React.PropTypes.object.isRequired
+    stats: React.PropTypes.object.isRequired,
+    onCharacterSkillAdd: React.PropTypes.func,
+    onCharacterSkillRemove: React.PropTypes.func,
+    onCharacterSkillModify: React.PropTypes.func
 };
 
 SkillTable.prefilledPhysicalSkills = ["Endurance / run",

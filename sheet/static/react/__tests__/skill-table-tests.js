@@ -53,7 +53,7 @@ describe('SkillTable', function() {
     var getSkillList = function (skillTable) {
         var rows = Array.prototype.slice.call(ReactDOM.findDOMNode(skillTable).querySelectorAll('tr'));
         return rows.map((row) => {
-            return row.querySelectorAll('td')[0].textContent; })
+            return row.querySelectorAll('td span')[0].textContent; })
     };
 
     var findSkillRows = function (skillTable, skillName) {
@@ -282,13 +282,44 @@ describe('SkillTable', function() {
         expect(newList[3].indent).toEqual(2);
     });
 
-    xit("does not choke on multiple required skills");
-
+    // -> to statrow.  Here we just pass the callbacks forward.
     xit("allows adding a physical skill level from the start set");
     xit("allows increasing a skill level from the start set");
     xit("allows removing skills");
+
     xit("allows adding a new skill");
+
+
+    it("calls the passed onCharacterSkillModify handler", function () {
+        var spy = jasmine.createSpy("callback");
+        var table = getSkillTable({
+            onCharacterSkillModify: spy
+        });
+        var data = {id: 2, level: 3, skill: "Gardening", character: 1};
+        table.handleCharacterSkillModify(Object.assign({}, data));
+        expect(spy).toHaveBeenCalledWith(data);
+    });
+
+    it("calls the passed onCharacterSkillRemove handler", function () {
+        var spy = jasmine.createSpy("callback");
+        var table = getSkillTable({
+            onCharacterSkillRemove: spy
+        });
+        var data = {id: 2};
+        table.handleCharacterSkillRemove(Object.assign({}, data));
+        expect(spy).toHaveBeenCalledWith(data);
+    });
+
+    it("calls the passed onCharacterSkillAdd handler", function () {
+        var spy = jasmine.createSpy("callback");
+        var table = getSkillTable({
+            onCharacterSkillAdd: spy
+        });
+        var data = {level: 3, skill: "Gardening", character: 1};
+        table.handleCharacterSkillAdd(Object.assign({}, data));
+        expect(spy).toHaveBeenCalledWith(data);
+    });
+
     xit("allows browsing through non-language and language skills" +
         " separately");
-
 });

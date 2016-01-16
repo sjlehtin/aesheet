@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import {Button} from 'react-bootstrap';
+
 /*
  * This component handles display of a skill, level, checks.  If the
  * skill in question has levels lower than the current, allow lowering the
@@ -88,7 +90,19 @@ class SkillRow extends React.Component {
         if (this.props.indent > 0) {
             indent = `${this.props.indent}em`;
         }
-        return <tr><td><span style={{paddingLeft: indent}}>{this.skillName()}</span></td><td>{this.skillLevel()}</td><td className="skill-check">{checks}</td></tr>;
+
+        var remove;
+        if (this.props.characterSkill && this.props.onCharacterSkillRemove) {
+            remove = <Button bsSize="xsmall"
+                    onClick={(e) => {this.props.onCharacterSkillRemove(this.props.characterSkill)}}
+                    >Remove</Button>;
+        } else {
+            remove = '';
+        }
+        return <tr><td><span style={{paddingLeft: indent}}>
+            {this.skillName()}</span>{remove}</td><td>{this.skillLevel()}</td>
+            {/* <td>{this.props.skillPoints}</td> */}
+            <td className="skill-check">{checks}</td></tr>;
     }
 }
 
@@ -107,7 +121,10 @@ SkillRow.propTypes = {
        special cases. */
     renderForStats: React.PropTypes.array,
 
-    indent: React.PropTypes.number
+    indent: React.PropTypes.number,
+
+    onCharacterSkillRemove: React.PropTypes.func,
+    onCharacterSkillModify: React.PropTypes.func
 };
 
 SkillRow.defaultProps = {indent: 0}

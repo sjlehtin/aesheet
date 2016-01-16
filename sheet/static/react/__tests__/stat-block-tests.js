@@ -479,4 +479,50 @@ describe('stat block', function() {
         });
     });
 
+    it("handles skill removal", function () {
+        var skill = factories.characterSkillFactory({
+            id: 2, skill: "Weaponsmithing", level: 1 });
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        block.handleSkillsLoaded([skill,
+            factories.characterSkillFactory({id: 1, skill: "Gardening",
+                level: 3})
+        ]);
+
+        block.handleCharacterSkillRemove({id: 1});
+
+        expect(block.state.characterSkills).toEqual([skill]);
+    });
+
+    it("handles skill addition", function () {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        block.handleSkillsLoaded([], []);
+
+        var skill = {id: 1, skill: "Gardening",
+            level: 3};
+        block.handleCharacterSkillAdd(skill);
+        expect(block.state.characterSkills).toEqual([skill]);
+    });
+
+    it("handles skill level changes", function () {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        var skillList = [
+            factories.characterSkillFactory({
+                id: 2, skill: "Weaponsmithing",
+                level: 1
+            }),
+            factories.characterSkillFactory({id: 1, skill: "Gardening",
+                level: 3})
+        ];
+        block.handleSkillsLoaded(skillList);
+
+        block.handleCharacterSkillModify({id: 1, skill: "Gardening",
+            level: 2});
+        var listCopy = skillList.map((elem) => {
+            return Object.assign({}, elem)});
+        listCopy[1].level = 2;
+        expect(block.state.characterSkills).toEqual(listCopy);
+    });
+
+    // TODO: Add system tests to check integration through this up till
+    // SkillRow.
 });
