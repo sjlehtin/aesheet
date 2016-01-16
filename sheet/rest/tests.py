@@ -515,3 +515,26 @@ class SkillTestCase(TestCase):
         self.assertEqual(sorted([skill['name'] for skill in response.data]),
                          ["Kordism", "Sword"])
 
+    def test_verify_skill_level_max_min(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        url = "/rest/skills/{}/".format(skill.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('max_level', response.data)
+        self.assertIn('min_level', response.data)
+        self.assertEqual(response.data['max_level'], 8)
+        self.assertEqual(response.data['min_level'], 1)
+
+    def test_verify_skill_level_max_min_2(self):
+        skill = factories.SkillFactory(name="Gardening", skill_cost_0=1,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=None)
+        url = "/rest/skills/{}/".format(skill.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('max_level', response.data)
+        self.assertIn('min_level', response.data)
+        self.assertEqual(response.data['max_level'], 2)
+        self.assertEqual(response.data['min_level'], 0)
