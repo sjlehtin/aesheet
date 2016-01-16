@@ -89,3 +89,9 @@ sun 3.1.2016 4h Inventory REST API.
 mon 4.1.2016 4h Inventory UI.
 tue 5.1.2016 4h Inventory UI.
 wed 6.1.2016 4h Inventory UI, initiatives.
+thu 7.1.2016 1h Taking inventory into production use.
+mon 11.1.2016 4h Skills.
+tue 12.1.2016 2h Skills.
+wed 13.1.2016 2h Skills.
+thu 14.1.2016 1h Skills.
+fri 15.1.2016 2h Skills.
