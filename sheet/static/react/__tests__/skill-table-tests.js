@@ -51,17 +51,20 @@ describe('SkillTable', function() {
     });
 
     var getSkillList = function (skillTable) {
-        var rows = Array.prototype.slice.call(ReactDOM.findDOMNode(skillTable).querySelectorAll('tr'));
+        var rows = Array.prototype.slice.call(ReactDOM.findDOMNode(skillTable).querySelector('tbody').querySelectorAll('tr'));
         return rows.map((row) => {
-            return row.querySelectorAll('td span')[0].textContent; })
+            var node = row.querySelectorAll('td span')[0];
+
+            return node.textContent;
+        })
     };
 
     var findSkillRows = function (skillTable, skillName) {
         var returnRows = [];
-        var rows = ReactDOM.findDOMNode(skillTable).querySelectorAll('tr');
+        var rows = ReactDOM.findDOMNode(skillTable).querySelector('tbody').querySelectorAll('tr');
         for (var ii = 0; ii < rows.length; ii++) {
             var row = rows[ii];
-            if (row.querySelectorAll('td')[0].textContent === skillName) {
+            if (row.querySelectorAll('td span')[0].textContent === skillName) {
                 returnRows.push(row)
             }
         }
@@ -79,7 +82,7 @@ describe('SkillTable', function() {
     };
     
     var getSkillCheck = function (cells) {
-        return cells[2].textContent;
+        return cells[3].textContent;
     };
     
     it("starts with a good set of physical skills", function () {
@@ -102,17 +105,6 @@ describe('SkillTable', function() {
         expect(getSkillLevel(cells)).toEqual('0');
         expect(getSkillCheck(cells)).toEqual('50');
     });
-
-    //it('finds skill', function () {
-    //    var skill = skillFactory();
-    //    var row = getSkillRow({
-    //        characterSkill: characterSkillFactory(),
-    //        stats: statsFactory(),
-    //        skill: skill
-    //    });
-    //    expect(typeof(row)).not.toEqual("undefined");
-    //    expect(row.findSkill()).toEqual(skill);
-    //});
 
     it("does render all skills", function (){
         var table = getSkillTable({stats:
@@ -282,7 +274,7 @@ describe('SkillTable', function() {
         expect(newList[3].indent).toEqual(2);
     });
 
-    // -> to statrow.  Here we just pass the callbacks forward.
+    // -> to skillrow.  Here we just pass the callbacks forward.
     xit("allows adding a physical skill level from the start set");
     xit("allows increasing a skill level from the start set");
     xit("allows removing skills");
@@ -318,6 +310,22 @@ describe('SkillTable', function() {
         var data = {level: 3, skill: "Gardening", character: 1};
         table.handleCharacterSkillAdd(Object.assign({}, data));
         expect(spy).toHaveBeenCalledWith(data);
+    });
+
+    it("can calculate sp costs", function () {
+        var skill = factories.skillFactory({name: "Gardening", skill_cost_0: 1,
+        skill_cost_1: 1, skill_cost_2: 2, skill_cost_3: 3});
+        var cs = factories.characterSkillFactory({skill: "Gardening",
+            level: 3});
+
+        expect(SkillTable.spCost(cs, skill)).toEqual(7);
+        expect(SkillTable.spCost(
+            Object.assign(cs, {level: 4}), skill)).toEqual(12);
+        expect(SkillTable.spCost(
+            Object.assign(cs, {level: 5}), skill)).toEqual(17);
+        expect(SkillTable.spCost(
+            Object.assign(cs, {level: 0}), skill)).toEqual(1);
+        expect(SkillTable.spCost(undefined, skill)).toEqual(0);
     });
 
     xit("allows browsing through non-language and language skills" +

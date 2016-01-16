@@ -11,8 +11,8 @@ import {Button} from 'react-bootstrap';
  * The modification will be communicated to the containing component,
  * which will then signal a re-render of this component.
  *
- * This component requires the sheet effective stats to render the
- * skill levels correctly.  Also, the skill is required, as it contains
+ * This component requires the effective stats from the sheet to render the
+ * skill checks correctly.  Also, the skill is required, as it contains
  * the information about specialization and skill costs per level.
  *
  */
@@ -94,14 +94,15 @@ class SkillRow extends React.Component {
         var remove;
         if (this.props.characterSkill && this.props.onCharacterSkillRemove) {
             remove = <Button bsSize="xsmall"
-                    onClick={(e) => {this.props.onCharacterSkillRemove(this.props.characterSkill)}}
+                    onClick={(e) => {this.props.onCharacterSkillRemove(
+                      this.props.characterSkill)}}
                     >Remove</Button>;
         } else {
             remove = '';
         }
-        return <tr><td><span style={{paddingLeft: indent}}>
-            {this.skillName()}</span>{remove}</td><td>{this.skillLevel()}</td>
-            {/* <td>{this.props.skillPoints}</td> */}
+        return <tr><td><span style={{paddingLeft: indent}}
+        >{this.skillName()}</span>{remove}</td><td>{this.skillLevel()}</td>
+            <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
             <td className="skill-check">{checks}</td></tr>;
     }
 }
@@ -117,6 +118,8 @@ SkillRow.propTypes = {
 
     skill: React.PropTypes.object.isRequired,
 
+    skillPoints: React.PropTypes.number,
+
     /* Defaults to stat in the skill, but can be overridden for
        special cases. */
     renderForStats: React.PropTypes.array,
@@ -127,7 +130,7 @@ SkillRow.propTypes = {
     onCharacterSkillModify: React.PropTypes.func
 };
 
-SkillRow.defaultProps = {indent: 0}
+SkillRow.defaultProps = {indent: 0, skillPoints: 0}
 
 export default SkillRow;
 

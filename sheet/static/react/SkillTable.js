@@ -137,22 +137,50 @@ class SkillTable extends React.Component {
         return skillMap;
     }
 
+    static spCost(cs, skill) {
+        if (!cs) {
+            return 0;
+        }
+        var cost = 0;
+        var level = cs.level;
+        if (level > 3) {
+            cost += (level - 3) * (skill.skill_cost_3 + 2);
+        }
+        if (level >= 3){
+            cost += skill.skill_cost_3;
+        }
+        if (level >= 2){
+            cost += skill.skill_cost_2;
+        }
+        if (level >= 1){
+            cost += skill.skill_cost_1;
+        }
+        if (level >= 0){
+            cost += skill.skill_cost_0;
+        }
+        return cost
+    }
+
     render () {
         var rows = [];
         var ii;
         var csMap = SkillTable.getCharacterSkillMap(
             this.props.characterSkills);
         var skillMap = SkillTable.getSkillMap(this.props.allSkills);
+        var totalSP = 0, spCost;
 
         for (ii = 0; ii < SkillTable.prefilledPhysicalSkills.length; ii++) {
             var skill = SkillTable.prefilledPhysicalSkills[ii];
+            spCost = SkillTable.spCost(csMap[skill], skillMap[skill]);
             rows.push(
                 <SkillRow key={`${skill}-${ii}`}
                           stats={this.props.stats}
                           characterSkill={csMap[skill]}
                           skillName={skill}
                           onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
+                          skillPoints={spCost}
                           skill={skillMap[skill]} />);
+            totalSP += spCost;
         }
 
         var skillList = SkillTable.mangleSkillList(this.props.characterSkills,
@@ -160,12 +188,16 @@ class SkillTable extends React.Component {
 
         for (ii = 0; ii < skillList.length; ii++) {
             var cs = skillList[ii];
+            spCost = SkillTable.spCost(cs, skillMap[cs.skill]);
+
             rows.push(<SkillRow key={cs.id}
                                 stats={this.props.stats}
                                 characterSkill={cs}
                                 onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                                 indent={cs.indent}
+                                skillPoints={spCost}
                                 skill={skillMap[cs.skill]} />);
+            totalSP += spCost;
         }
         return <Panel style={this.props.style} header={<h4>Skills</h4>}><Table style={{fontSize: "inherit"}} striped fill>
             <thead>
