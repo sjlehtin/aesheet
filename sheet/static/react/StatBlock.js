@@ -4,14 +4,17 @@ import StatRow from 'StatRow';
 import XPControl from 'XPControl';
 import NoteBlock from 'NoteBlock';
 import InitiativeBlock from 'InitiativeBlock';
+import SkillTable from 'SkillTable';
+import Loading from 'Loading';
 
-import {Row, Col, Image, Panel} from 'react-bootstrap';
+import {Grid, Row, Col, Image, Panel} from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 var util = require('sheet-util');
 
 /**
- * TODO: controls to add bought_mana, bought_stamina.
+ * TODO: controls to add bought_mana, bought_stamina, age sp, change
+ * portrait, adventures, times wounded.
  */
 class StatBlock extends React.Component {
     constructor(props) {
@@ -25,8 +28,14 @@ class StatBlock extends React.Component {
             edges: {},
             edgeList: [],
             /* Running total of edge cost. */
-            edgesBought: 0
+            edgesBought: 0,
+            characterSkills: undefined
         };
+    }
+
+    handleSkillsLoaded(skillList, allSkills) {
+        this.setState({characterSkills: skillList,
+        allSkills: allSkills});
     }
 
     componentDidMount() {
@@ -39,7 +48,21 @@ class StatBlock extends React.Component {
             rest.getData(this.state.url)
                 .then((json) => {
                     this.setState({char: json});
-                    /* TODO: until we have the EdgeComponent. */
+
+                    rest.getData(this.state.url + 'characterskills/').then(
+                        (characterSkills) => {
+                            rest.getData(
+                                `/rest/skills/campaign/${json.campaign}/`)
+                                .then((allSkills) => {
+                                    this.handleSkillsLoaded(characterSkills,
+                                    allSkills);
+                                }).catch((err) => {
+                                console.log("Failed load: ", err)});
+                        }).catch(function (err) {console.log(err)});
+
+                    /* TODO: would be better to have the edges with
+                       contents from under the character URL, see
+                       characterskills. */
                     Promise.all(json.edges.map(
                     (edge_id) => {
                         return rest.getData(`/rest/edgelevels/${edge_id}/`)
@@ -50,6 +73,7 @@ class StatBlock extends React.Component {
                         .catch((err) => { console.log("There was an error:",
                             err)});
                 });
+
         });
     }
 
@@ -261,7 +285,8 @@ class StatBlock extends React.Component {
 
     render() {
         var rows, derivedRows, usableRows, xpcontrol, portrait, notes,
-            initiativeBlock, description;
+            initiativeBlock, description, skillTable;
+        skillTable = <Loading />;
         if (typeof(this.state.char) === "undefined") {
             rows = <tr><td>Loading...</td></tr>;
             derivedRows = <tr><td>Loading...</td></tr>;
@@ -376,16 +401,33 @@ class StatBlock extends React.Component {
             }
 
             initiativeBlock =
-                <InitiativeBlock style={{fontSize: "80%"}} effMOV={this.effMOV()}
+                <InitiativeBlock style={{fontSize: "80%"}}
+                                 effMOV={this.effMOV()}
                                  runMultiplier={this.runMultiplier()} />;
 
+            if (typeof(this.state.characterSkills) !== "undefined") {
+                if (!this.state.allSkills ||
+                    this.state.allSkills.length === 0) {
+                    /* Mostly to get tests that do not need skills to not
+                     care about the skilltable. */
+                    skillTable = <div>No skills.</div>
+                } else {
+                    skillTable = <SkillTable
+                        style={{fontSize: "90%"}}
+                        characterSkills={this.state.characterSkills}
+                        allSkills={this.state.allSkills}
+                        stats={this.getEffStats()}/>
+                }
+            }
         }
+
 
         var statsStyle = {verticalAlign: "center", border: 1};
 
         return (
+            <Grid>
             <Row>
-                <Col md={5}>
+                <Col md={4}>
                     <Row>
                         {description}
                     </Row>
@@ -411,7 +453,7 @@ class StatBlock extends React.Component {
                         {xpcontrol}
                     </Row>
                 </Col>
-                <Col md={7}>
+                <Col md={4}>
                     <Row style={{paddingBottom: 5}}>
                         {portrait}
                     </Row>
@@ -422,7 +464,12 @@ class StatBlock extends React.Component {
                         {initiativeBlock}
                     </Row>
                 </Col>
+                <Col md={4}>
+                    {skillTable}
+                </Col>
             </Row>
+
+                </Grid>
         )
     }
 }

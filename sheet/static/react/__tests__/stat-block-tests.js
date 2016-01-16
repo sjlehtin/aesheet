@@ -3,13 +3,19 @@ jest.dontMock('../StatRow');
 jest.dontMock('../XPControl');
 jest.dontMock('../NoteBlock');
 jest.dontMock('../InitiativeBlock');
+jest.dontMock('../Loading');
+jest.dontMock('../SkillTable');
+jest.dontMock('../SkillRow');
 jest.dontMock('../sheet-util');
+jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 var rest = require('sheet-rest');
+
+var factories = require('./factories');
 
 const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
@@ -45,7 +51,8 @@ describe('stat block', function() {
             "mod_imm": 0,
             bought_mana: 0,
             bought_stamina: 0,
-            edges: []
+            edges: [],
+            "campaign": 2
         };
 
         return Object.assign(_charData, statOverrides);
@@ -118,6 +125,10 @@ describe('stat block', function() {
                 return jsonResponse(sheetData);
             } else if (url === "/rest/characters/2/") {
                 return jsonResponse(charData);
+            } else if (url === "/rest/characters/2/characterskills/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/skills/campaign/2/") {
+                return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */
                 fail("this is an unsupported url:" + url);
