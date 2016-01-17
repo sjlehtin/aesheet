@@ -47,6 +47,8 @@ class CharacterSkillSerializer(serializers.ModelSerializer):
         skill = data['skill']
         minimum = skill.get_minimum_level()
         maximum = skill.get_maximum_level()
+        if 'level' not in data:
+            raise serializers.ValidationError("Level is required")
         level = data['level']
         if level < minimum:
             raise serializers.ValidationError("Skill {skill} has minimum "
@@ -56,7 +58,6 @@ class CharacterSkillSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Skill {skill} has maximum "
                                               "level {maximum}".format(
                     skill=skill, maximum=maximum))
-
         return data
 
     class Meta:
