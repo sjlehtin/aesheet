@@ -614,7 +614,8 @@ class Skill(ExportedModel):
         levels = [0, 1, 2, 3]
         for lvl in levels:
             cost = getattr(self, 'skill_cost_{}'.format(lvl))
-            if cost is not None:
+            if cost is not None and not (
+                            cost == 0 and self.is_specialization):
                 return lvl
         raise ValueError("Skill is invalid")
 
