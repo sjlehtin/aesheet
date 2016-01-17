@@ -449,34 +449,6 @@ class Character(PrivateMixin, models.Model):
     def imm(self):
         return roundup((self.fit + self.psy)/2.0) + self.mod_imm
 
-    @property
-    def xp_used_stats(self):
-        xp_used_stats = 0
-        for st in self.BASE_STATS:
-            xp_used_stats += (getattr(self, "cur_" + st) -
-                              getattr(self, "start_" + st))
-        xp_used_stats += self.bought_stamina
-        xp_used_stats += self.bought_mana
-        xp_used_stats *= 5
-        return xp_used_stats
-
-    @property
-    def xp_used_edges(self):
-        # XXX this should be changed in the future to just count the
-        # cost from the actual edges obtained by the character.
-        return 25 * self.edges_bought
-        # sum([ee.edge.cost for ee in self.edges.all()])
-
-    @property
-    def xp_used_hero(self):
-        if self.hero:
-            return 100
-        return 0
-
-    def xp_used(self):
-        return self.xp_used_edges + self.xp_used_ingame + \
-            self.xp_used_stats + self.xp_used_hero
-
     def __unicode__(self):
         return u"%s: %s %s" % (self.name, self.race, self.occupation)
 
