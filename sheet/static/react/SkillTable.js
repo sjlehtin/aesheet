@@ -16,20 +16,34 @@ class SkillTable extends React.Component {
 
     handleCharacterSkillAdd(skill) {
         if (typeof(this.props.onCharacterSkillAdd) != "undefined") {
-            this.props.onCharacterSkillAdd(skill);
+            this.props.onCharacterSkillAdd(SkillTable.sanitizeSkillObject(skill));
         }
+    }
+
+    static sanitizeSkillObject(skill) {
+        var obj = Object.assign({}, skill);
+        var toRemove = [];
+        for (var field in obj) {
+            if (field[0] === '_') {
+                toRemove.push(field);
+            }
+        }
+        for (field of toRemove) {
+            delete obj[field];
+        }
+        return obj;
     }
 
     handleCharacterSkillRemove(skill) {
         console.log("Removed: ", skill);
         if (typeof(this.props.onCharacterSkillRemove) != "undefined") {
-            this.props.onCharacterSkillRemove(skill);
+            this.props.onCharacterSkillRemove(SkillTable.sanitizeSkillObject(skill));
         }
     }
 
     handleCharacterSkillModify(skill) {
         if (typeof(this.props.onCharacterSkillModify) != "undefined") {
-            this.props.onCharacterSkillModify(skill);
+            this.props.onCharacterSkillModify(SkillTable.sanitizeSkillObject(skill));
         }
     }
 
@@ -57,7 +71,9 @@ class SkillTable extends React.Component {
 
         // Make a deep copy of the list so as not accidentally mangle
         // parent copy of the props.
-        skillList = skillList.map((elem) => {return Object.assign({}, elem)});
+        skillList = skillList.map((elem) => {var obj = Object.assign({}, elem);
+        obj._children = [];
+        return obj; });
 
         var csMap = SkillTable.getCharacterSkillMap(skillList);
         var skillMap = SkillTable.getSkillMap(allSkills);
@@ -70,25 +86,22 @@ class SkillTable extends React.Component {
         }
 
         var addChild = function (parent, child) {
-            if (!('children' in parent)) {
-                parent.children = [];
-            }
-            parent.children.push(child);
+            parent._children.push(child);
         };
 
         var root = [];
         for (cs of newList) {
             var skill = skillMap[cs.skill];
             if (!skill) {
-                cs.unknownSkill = true;
+                cs._unknownSkill = true;
                 root.push(cs);
             } else {
                 if (skill.required_skills.length > 0) {
                     var parent = skill.required_skills[0];
-                    cs.missingRequired = [];
+                    cs._missingRequired = [];
                     for (let sk of skill.required_skills) {
                         if (!(sk in csMap)) {
-                            cs.missingRequired.push(sk);
+                            cs._missingRequired.push(sk);
                         }
                     }
                     if (parent in csMap) {
@@ -109,10 +122,8 @@ class SkillTable extends React.Component {
         var depthFirst = function (cs, indent) {
             cs.indent = indent;
             finalList.push(cs);
-            if ('children' in cs) {
-                for (let child of cs.children.sort(compare)) {
-                    depthFirst(child, indent + 1);
-                }
+            for (let child of cs._children.sort(compare)) {
+                depthFirst(child, indent + 1);
             }
         };
         for (cs of root.sort(compare)) {
@@ -190,8 +201,8 @@ class SkillTable extends React.Component {
         for (ii = 0; ii < skillList.length; ii++) {
             var cs = skillList[ii];
             spCost = SkillTable.spCost(cs, skillMap[cs.skill]);
-
-            rows.push(<SkillRow key={cs.id}
+            var idx = SkillTable.prefilledPhysicalSkills.length + ii;
+            rows.push(<SkillRow key={`${cs.skill}-${idx}`}
                                 stats={this.props.stats}
                                 characterSkill={cs}
                                 onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
@@ -205,7 +216,9 @@ class SkillTable extends React.Component {
             <thead>
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
             </thead>
-            <tbody>{rows}</tbody></Table></Panel>;
+            <tbody>{rows}</tbody>
+            <tfoot><tr><td colSpan="2">Total SP</td><td>{totalSP}</td><td></td></tr></tfoot>
+        </Table></Panel>;
     }
 }
 

@@ -198,7 +198,7 @@ describe('SkillTable', function() {
 
         var newList = SkillTable.mangleSkillList(skillList, allSkills);
         expect(newList[2].skill).toEqual("Naval Gunnery");
-        expect(newList[2].missingRequired).toEqual(["Gardening"]);
+        expect(newList[2]._missingRequired).toEqual(["Gardening"]);
     });
 
     it("finds missing skills while mangling", function () {
@@ -218,7 +218,7 @@ describe('SkillTable', function() {
 
         var newList = SkillTable.mangleSkillList(skillList, allSkills);
         expect(newList[2].skill).toEqual("Florism");
-        expect(newList[2].missingRequired).toEqual(["Gardening"]);
+        expect(newList[2]._missingRequired).toEqual(["Gardening"]);
     });
 
     it("calculates indent for nested required skills while mangling", function () {
@@ -328,6 +328,10 @@ describe('SkillTable', function() {
         expect(SkillTable.spCost(undefined, skill)).toEqual(0);
     });
 
+    // if the parent stores the passed object directly, state should not
+    // get passed over.  TODO: test for sanitizeSkillObject usage in
+    // handleCharacterSkillModify
+    xit("should clean away internal fields from parent notifications")
     xit("allows browsing through non-language and language skills" +
         " separately");
     xit("filters out skills that the character already has");

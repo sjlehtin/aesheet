@@ -316,7 +316,7 @@ class StatBlock extends React.Component {
         rest.patch(this.getCharacterSkillURL(skill), skill).then(() => {
             var index = StatBlock.findCharacterSkillIndex(
                 this.state.characterSkills, skill);
-            this.state.characterSkills[index] = skill;
+            this.state.characterSkills.splice(index, 1, skill);
             this.setState({characterSkills: this.state.characterSkills});
         }).catch((err) => console.log(err));
     }
