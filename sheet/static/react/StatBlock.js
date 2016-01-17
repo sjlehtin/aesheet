@@ -285,9 +285,14 @@ class StatBlock extends React.Component {
 
 
     handleCharacterSkillAdd(skill) {
-        var skillList = this.state.characterSkills;
-        skillList.push(skill);
-        this.setState({characterSkills: skillList});
+        rest.post(this.getCharacterSkillURL(), skill).then((json) => {
+            if (!("skill" in json) || !("id" in json)) {
+                throw Error("Got invalid reply", json);
+            }
+            var skillList = this.state.characterSkills;
+            skillList.push(json);
+            this.setState({characterSkills: skillList});
+        }).then((err) => console.log(err));
     }
 
     static findCharacterSkillIndex(skillList, skill) {
@@ -302,14 +307,21 @@ class StatBlock extends React.Component {
 
     handleCharacterSkillRemove(skill) {
         console.log("Removed: ", skill);
-        var index = StatBlock.findCharacterSkillIndex(
-            this.state.characterSkills, skill);
-        this.state.characterSkills.splice(index, 1);
-        this.setState({characterSkills: this.state.characterSkills});
+        rest.delete(this.getCharacterSkillURL(skill)).then((json) => {
+            var index = StatBlock.findCharacterSkillIndex(
+                this.state.characterSkills, skill);
+            this.state.characterSkills.splice(index, 1);
+            this.setState({characterSkills: this.state.characterSkills});
+        }).catch((err) => console.log(err));
     }
 
     getCharacterSkillURL(cs) {
-        return this.state.url + 'characterskills/' + cs.id + '/';
+        var baseURL = this.state.url + 'characterskills/';
+        if (cs) {
+            return baseURL + cs.id + '/';
+        } else {
+            return baseURL;
+        }
     }
 
     handleCharacterSkillModify(skill) {
@@ -458,6 +470,8 @@ class StatBlock extends React.Component {
                       (skill) => this.handleCharacterSkillRemove(skill)}
                         onCharacterSkillModify={
                       (skill) => this.handleCharacterSkillModify(skill)}
+                        onCharacterSkillAdd={
+                      (skill) => this.handleCharacterSkillAdd(skill)}
                         effStats={this.getEffStats()}
                         baseStats={this.getEffStats()}
                     />

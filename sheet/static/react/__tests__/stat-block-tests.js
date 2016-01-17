@@ -479,28 +479,63 @@ describe('stat block', function() {
         });
     });
 
-    it("handles skill removal", function () {
+    it("handles skill removal", function (done) {
         var skill = factories.characterSkillFactory({
             id: 2, skill: "Weaponsmithing", level: 1 });
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
-        block.handleSkillsLoaded([skill,
-            factories.characterSkillFactory({id: 1, skill: "Gardening",
-                level: 3})
-        ]);
+        afterLoad(function () {
+            block.handleSkillsLoaded([skill,
+                factories.characterSkillFactory({
+                    id: 1, skill: "Gardening",
+                    level: 3
+                })
+            ]);
 
-        block.handleCharacterSkillRemove({id: 1});
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
 
-        expect(block.state.characterSkills).toEqual([skill]);
+            block.handleCharacterSkillRemove({id: 1});
+
+            expect(rest.delete.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/characterskills/1/');
+
+            promise.then(() => {
+                expect(block.state.characterSkills).toEqual([skill]);
+                done();
+            }).catch((err) => fail(err));
+        });
     });
 
-    it("handles skill addition", function () {
+    it("handles skill addition", function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
-        block.handleSkillsLoaded([], []);
+        afterLoad(function () {
+            block.handleSkillsLoaded([], []);
 
-        var skill = {id: 1, skill: "Gardening",
-            level: 3};
-        block.handleCharacterSkillAdd(skill);
-        expect(block.state.characterSkills).toEqual([skill]);
+            var expectedSkill = {
+                id: 1, skill: "Gardening",
+                level: 3
+            };
+            var promise = Promise.resolve(expectedSkill);
+            rest.post.mockReturnValue(promise);
+
+            var skill = {
+                skill: "Gardening",
+                level: 3
+            };
+            block.handleCharacterSkillAdd(skill);
+
+            expect(rest.post.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/characterskills/');
+            expect(rest.post.mock.calls[0][1]).toEqual({
+                skill: "Gardening",
+                level: 3
+            });
+
+            promise.then(() => {
+                expect(block.state.characterSkills).toEqual([expectedSkill]);
+                done();
+            }).catch((err) => fail(err));
+        });
     });
 
     it("handles skill level changes", function (done) {
