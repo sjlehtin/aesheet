@@ -13,7 +13,7 @@ Priority list by JW:
 + 4) overland
 - 5) spell skill cheks
 
-- inventory
++ inventory
 - damage taken
 -- stamina
 -- lethal
@@ -42,9 +42,7 @@ Priority list by JW:
 - bootstrap data pop-up links for armor, effects in edit area
 -- show basic info.
 - reordering weapons.  possible to do with ajax, so it would be faster.
--- removing weapons etc to use REST API.  If removed item has repercussions on
-   character stats, the character sheet should be refreshed (maybe add a
-   notification on top of the page to notify user of this?)
+-- removing weapons etc to use REST API.
 
 + possibility to copy characters and sheets (mainly sheets), which will copy
   also the underlying character.
@@ -62,7 +60,7 @@ Priority list by JW:
 
 + character mugshot upload (SM)
 - senses (SM)
-- movement chart (SM)
++ movement chart (SM)
 - spell skill checks (SM)
 
 + weapon maximum damage based on durability.
@@ -84,15 +82,15 @@ Priority list by JW:
 + wondrous items
 - magic item location (only one item to each location)
 + change log for sheet (stat modifications etc)
--- skills
+++ skills
 -- edges
 - nicer fast edit of basic stats
 + stamina
--- recovery
+++ recovery
 + mana
--- recovery
+++ recovery
 + body
--- recovery
+++ recovery
 
 - code simplification; sheet detail form handling mainly.
 
@@ -187,7 +185,6 @@ import subprocess
 from django.views.generic import TemplateView
 from django.forms.models import modelform_factory
 import logging
-from collections import namedtuple
 from django.contrib import messages
 
 logger = logging.getLogger(__name__)
@@ -339,29 +336,6 @@ class RangedWeaponWrap(FirearmWrap):
         return self.sheet.damage(self.item, use_type=Sheet.PRI)
 
 
-class SkillWrap(RemoveWrap):
-    def __init__(self, item, sheet):
-        super(SkillWrap, self).__init__(item)
-        self.sheet = sheet
-        self.children = []
-
-    def add_level_form(self):
-        return CharacterSkillLevelModifyForm(instance=self.item,
-                                             initial={'function': 'add'},
-                                             prefix="skill-level-modify")
-
-    def dec_level_form(self):
-        return CharacterSkillLevelModifyForm(instance=self.item,
-                                             initial={'function': 'dec'},
-                                             prefix="skill-level-modify")
-
-    def skill_check(self):
-        return self.item.skill_check(self.sheet)
-
-    def __unicode__(self):
-        return unicode(self.item.skill)
-
-
 class ArmorWrap(RemoveWrap):
     def __init__(self, item, sheet, type):
         super(ArmorWrap, self).__init__(item, type)
@@ -397,109 +371,9 @@ class ArmorWrap(RemoveWrap):
             return getattr(self.item, v)
 
 
-class PhysicalSkill(SkillWrap):
-    """
-    If character has the skill, use the check directly.
-
-    If character does not have the skill, but the skill level 0
-    has cost of 0, use level 0 check.  This should use the normal
-    skill check calculation, as the character may have armor
-    or edges which modify the skill check.
-
-    If character doesn't have the skill, and the skill level 0 has
-    a non-zero cost, calculate check defaulted to half-ability
-    (maybe check default-attribute).
-    """
-
-    sm = sheet.models
-    def __init__(self, skill_name, sheet, stats=None):
-        self.skill_name = skill_name
-        self.sheet = sheet
-        self.char_skill = sheet.character.get_skill(skill_name)
-        # for SkillWrap functions.
-        self.item = self.char_skill
-        self.stats = stats
-        try:
-            self.base_skill = self.sm.Skill.objects.get(name=skill_name)
-        except self.sm.Skill.DoesNotExist:
-            self.base_skill = None
-
-        if self.char_skill:
-            skill = self.char_skill
-        else:
-            if self.base_skill is not None and \
-                            self.base_skill.skill_cost_0 == 0:
-                skill = self.sm.CharacterSkill(
-                    character=self.sheet.character,
-                    skill=self.base_skill)
-            else:
-                class BaseCheck(object):
-                    def __init__(self, sheet, base_skill):
-                        self.sheet = sheet
-                        self.base_skill = base_skill
-
-                    def skill_check(self, sheet, stat=None):
-                        if not stat:
-                            if self.base_skill:
-                                stat = self.base_skill.stat.lower()
-                            else:
-                                stat = "mov"
-                        return int(round(getattr(sheet,
-                                                 "eff_" + stat)/2))
-
-                    @property
-                    def level(self):
-                        return None
-
-                skill = BaseCheck(self.sheet, self.base_skill)
-        self.skill = skill
-        super(PhysicalSkill, self).__init__(self.item, sheet=self.sheet)
-
-    def level(self):
-        return self.skill.level
-
-    def skill_check(self):
-        if self.stats:
-            checks = {}
-            for st in self.stats:
-                checks[st] = self.skill.skill_check(self.sheet, stat=st)
-        else:
-            checks = self.skill.skill_check(self.sheet)
-        return checks
-
-    def formatted_checks(self):
-        check = self.skill_check()
-        if isinstance(check, dict):
-            return ["{key}: {value}".format(key=key.upper(), value=value)
-                    for (key, value) in check.items()]
-
-    def cost(self):
-        return self.char_skill.cost() if self.char_skill else 0
-
-    def __unicode__(self):
-        return unicode(self.skill_name)
-
-
 class SheetView(object):
-    _base_physical = ["Stealth",
-                      "Concealment",
-                      "Search",
-                      "Climbing",
-                      "Swimming",
-                      "Jump",
-                      "Sleight of hand"]
-    _all_physical = ["Endurance / run",
-                      "Balance"] + _base_physical
-
     def __init__(self, char_sheet):
         self.sheet = char_sheet
-        self._skills = self.sheet.skills.all()
-        self.all_physical_skills = sheet.models.Skill.objects.filter(
-            name__in=self._all_physical)
-
-        self._wrapped_physical = dict([(sk,
-                                        PhysicalSkill(sk, sheet=self.sheet)) for sk in
-                                        self._all_physical])
 
     def used_sp(self):
         try:
@@ -507,42 +381,6 @@ class SheetView(object):
         # Invalid skill level.
         except TypeError:
             return 0
-
-    # TODO: Remove.
-    def base_stats(self):
-        ll = []
-        for st in ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]:
-            stat = {'name': st,
-                    'base': getattr(self.sheet, st),
-                    'eff': getattr(self.sheet, "eff_" + st),
-            }
-            stat.update({
-                'add_form': StatModifyForm(
-                    instance=self.sheet.character,
-                    initial={'stat': "cur_" + st,
-                             'function': "add"},
-                    prefix='stat-modify'),
-                'dec_form': StatModifyForm(
-                    instance=self.sheet.character,
-                    initial={'stat': "cur_" + st,
-                             'function': "dec"},
-                    prefix='stat-modify'),
-                'change': getattr(self.sheet, "cur_" + st) -
-                          getattr(self.sheet, "start_" + st),
-            })
-            ll.append(stat)
-        return ll
-
-    # TODO: Remove.
-    def derived_stats(self):
-        ll = []
-        for st in ["mov", "dex", "imm"]:
-            stat = {'name': st,
-                    'base': getattr(self.sheet, st),
-                    'eff': getattr(self.sheet, "eff_" + st),
-            }
-            ll.append(stat)
-        return ll
 
     def weapons(self):
         return [WeaponWrap(xx, self.sheet)
@@ -559,57 +397,7 @@ class SheetView(object):
     def spell_effects(self):
         return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
 
-    def endurance(self):
-        return PhysicalSkill("Endurance / run", stats=["fit", "wil"],
-                             sheet=self.sheet)
 
-    def balance(self):
-        return PhysicalSkill("Balance", stats=["ref", "mov"],
-                             sheet=self.sheet)
-
-    def physical_skills(self):
-        return [self._wrapped_physical[sk]
-                for sk in self._base_physical]
-
-    def skills(self):
-        char_skills = filter(
-            lambda cs: cs.skill not in self.all_physical_skills,
-            self._skills)
-
-        char_skills = [SkillWrap(xx, self.sheet) for xx in char_skills]
-        
-        skills = dict()
-        skills.update([(sk.skill.name, sk) for sk in char_skills])
-
-        class Node(object):
-            def __init__(self):
-                self.children = []
-
-        root = Node()
-
-        for sk in char_skills:
-            # Assign as child of first required skill.
-            reqd = sk.skill.required_skills.all()
-            if len(reqd) and reqd[0].name in skills:
-                skills[reqd[0].name].children.append(sk)
-            else:
-                root.children.append(sk)
-        logger.debug("Original skill list length: %d", len(char_skills))
-
-        def depthfirst(node, indent):
-            yield node, indent
-            for cc in node.children:
-                for nn in depthfirst(cc, indent + 1):
-                    yield nn
-
-        skill_list = []
-        for nn, indent in depthfirst(root, 0):
-            nn.indent = indent
-            skill_list.append(nn)
-        logger.debug("New skill list length: %d", len(skill_list))
-        return skill_list[1:] # Skip root node.
-
-    # TODO: Remove.
     def edges(self):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
@@ -621,22 +409,6 @@ class SheetView(object):
 
     def miscellaneous_items(self):
         return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
-
-    # TODO: Remove.
-    def advancing_initiative_penalties(self):
-        distances = [30, 20, 10, 5, 2]
-        def initiatives(multiplier):
-            return [-roundup((dist*multiplier)/
-                             (self.sheet.eff_mov *
-                              self.sheet.run_multiplier()))
-                    for dist in distances]
-        charging = initiatives(20)
-        melee = initiatives(30)
-        ranged = initiatives(60)
-        return dict(distances=distances,
-                    charge_initiatives=charging,
-                    melee_initiatives=melee,
-                    ranged_initiatives=ranged)
 
     def overland_movement(self):
         overland_mov = self.sheet.eff_mov * self.sheet.run_multiplier()
@@ -689,13 +461,6 @@ def process_sheet_change_request(request, sheet):
         elif item_type == "MiscellaneousItem":
             item = get_object_or_404(MiscellaneousItem, pk=item)
             sheet.miscellaneous_items.remove(item)
-        elif item_type == "CharacterSkill":
-            item = get_object_or_404(CharacterSkill, pk=item)
-            sheet.character.add_skill_log_entry(item.skill,
-                                                item.level,
-                                                request=request,
-                                                removed=True)
-            item.delete()
         elif item_type == "CharacterEdge":
             item = get_object_or_404(CharacterEdge, pk=item)
             item.delete()
@@ -749,13 +514,6 @@ def sheet_detail(request, sheet_id=None):
                                 request=request,
                                 prefix=prefix, **kwargs)
 
-    # TODO: Remove.
-    add_form(StatModifyForm, "stat-modify", instance=sheet.character)
-    add_form(AddXPForm, "add-xp", instance=sheet.character)
-
-    add_form(CharacterSkillLevelModifyForm, "skill-level-modify")
-    add_form(AddSkillForm, "add-skill", instance=sheet.character)
-    add_form(AddLanguageForm, "add-lang", instance=sheet.character)
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
     add_form(AddSpellEffectForm, "add-spell-effect", instance=sheet)
     add_form(AddExistingHelmForm, "add-existing-helm", instance=sheet)

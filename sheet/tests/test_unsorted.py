@@ -13,7 +13,6 @@ from django.core.urlresolvers import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 from sheet.models import CharacterLogEntry
-from sheet.forms import AddSkillForm, AddXPForm
 import sheet.forms as forms
 import sheet.views as views
 import sheet.models
@@ -945,50 +944,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         post.user = self.admin
         return post
 
-    def test_adding_skill(self):
-        skill = factories.SkillFactory(name="Weapon combat")
-        req_data = { 'add-skill-skill' : skill.pk,
-                     'add-skill-level' : '5'}
-        response = self.client.post(self.sheet_url, req_data)
-        self.assertRedirects(response, self.sheet_url)
-        response = self.client.get(self.sheet_url)
-        self.assertContains(response, "Weapon combat")
-        skills = response.context['sheet'].skills()[0]
-        self.assertEquals(skills.skill.name, 'Weapon combat')
-        self.assertEquals(skills.level, 5)
-
-    def test_required_skills_present(self):
-        factories.CharacterSkillFactory(character=self.sheet.character,
-                                        skill__name="Weapon combat")
-        factories.CharacterSkillFactory(character=self.sheet.character,
-                                        skill__name="Sword")
-        response = self.client.get(self.sheet_url)
-        self.assertNotContains(response, "Required skill Weapon "
-                               "combat missing.")
-
-    def test_required_skills_missing(self):
-        factories.CharacterSkillFactory(character=self.sheet.character,
-                                        skill__name="Martial arts expertise",
-                                        level=4)
-        response = self.client.get(self.sheet_url)
-        self.assertTrue('Unarmed combat' in
-                        response.context['sheet'].missing_skills.values())
-
-        skills = response.context['sheet'].skills()
-        self.assertEquals(skills[0].skill.name, 'Martial arts expertise')
-        self.assertEquals(skills[0].level, 4)
-
-        factories.CharacterSkillFactory(character=self.sheet.character,
-                                        skill__name="Unarmed combat",
-                                        level=4)
-        response = self.client.get(self.sheet_url)
-        self.assertTrue('Unarmed combat' not in
-                        response.context['sheet'].missing_skills.values())
-        unarmed = filter(lambda xx: xx.skill.name == "Unarmed combat",
-                        response.context['sheet'].skills())
-        self.assertEqual([sk.skill.name for sk in unarmed],
-                         ["Unarmed combat"])
-
     def test_add_remove_edge(self):
         edge_level = factories.EdgeLevelFactory(edge__name="Toughness",
                                                 level=2)
@@ -1070,106 +1025,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         self.assertEqual(sheet.edge_sp, 10)
         self.assertEqual(original + 10, sheet.character.total_sp)
 
-    def test_increase_skill_level(self):
-        cs = factories.CharacterSkillFactory(
-            skill__name="Unarmed combat",
-            character__name=self.sheet.character.name,
-            level=4)
-        req_data = { 'skill-level-modify-skill_id' : cs.pk,
-                     'skill-level-modify-function' : 'add' }
-        response = self.client.post(self.sheet_url, req_data)
-        self.assertRedirects(response, self.sheet_url)
-        cs = CharacterSkill.objects.get(
-            skill__name="Unarmed combat",
-            character__name=self.sheet.character.name)
-        self.assertEqual(cs.level, 5)
-
-    def test_decrease_skill_level(self):
-        cs = factories.CharacterSkillFactory(
-            skill__name="Unarmed combat",
-            character__name=self.sheet.character.name,
-            level=4)
-        req_data = { 'skill-level-modify-skill_id' : cs.pk,
-                     'skill-level-modify-function' : 'dec' }
-        response = self.client.post(self.sheet_url, req_data)
-        self.assertRedirects(response, self.sheet_url)
-        cs = CharacterSkill.objects.get(
-            skill__name="Unarmed combat",
-            character__name=self.sheet.character.name)
-        self.assertEqual(cs.level, 3)
-
-    def test_decreasing_skill_level_for_specializations(self):
-        """
-        Skill level should not decrease if the lower skill levels do not have
-        a cost (like Sword: -/2/-/-).
-        """
-        cs = factories.CharacterSkillFactory(
-            skill__name="FooSword",
-            skill__is_specialization=True,
-            skill__skill_cost_0=0,
-            character__name=self.sheet.character.name,
-            level=1)
-        req_data = { 'skill-level-modify-skill_id' : cs.pk,
-                     'skill-level-modify-function' : 'dec' }
-        response = self.client.post(self.sheet_url, req_data)
-        self.assertRedirects(response, self.sheet_url)
-        cs = CharacterSkill.objects.get(
-            skill__name="FooSword",
-            character__name=self.sheet.character.name)
-        self.assertEqual(cs.level, 1)
-
-    def test_obsoleted_skill_level(self):
-        skill = factories.SkillFactory(name="FooSword",
-                                       skill_cost_2=None,
-                                       skill_cost_3=None)
-        # Add a skill with a known invalid level.
-        self.add_skill(self.sheet.character, skill.name, 2)
-
-        response = self.client.get(reverse(views.sheet_detail,
-                                           args=[self.sheet.pk]))
-        self.assertContains(response, "invalid skill level")
-
-    def test_duplicated_skill_level(self):
-        # skill = factories.SkillFactory(name="Sword")
-        skills = sheet.models.Skill.objects.all()
-        form = sheet.forms.AddSkillForm(
-            instance=self.sheet.character,
-            request=self._get_request(),
-            data={ 'skill': self.sword_skill.pk, 'level': 1 })
-        self.assertTrue(form.is_valid(),
-                        "Adding a new skill should be ok")
-        form.save()
-        form = AddSkillForm(
-            instance=self.sheet.character,
-            request=self._get_request(),
-            data={ 'skill': self.sword_skill, 'level': 1 })
-        self.assertFalse(form.is_valid(),
-                        "Adding an existing skill should result in an error")
-        self.assertIn("__all__", form.errors)
-
-
-class AddXpTestCase(TestCase):
-    def setUp(self):
-        self.request_factory = django.test.RequestFactory()
-        self.admin = factories.UserFactory(username="admin")
-
-    def _get_request(self):
-        get = self.request_factory.post('/copy/')
-        get.user = self.admin
-        return get
-
-    def test_added_xp(self):
-        ch = factories.CharacterFactory(name="John Doe",
-                                        owner=self.admin)
-        form = AddXPForm({'add_xp': '15'},
-                         request=self._get_request(),
-                         instance=ch)
-        self.assertTrue(form.is_valid())
-        form.save()
-        entry = CharacterLogEntry.objects.latest()
-        self.assertEqual(entry.amount, 15)
-        self.assertEqual(entry.field, "total_xp")
-
 
 class Views(WebTest):
     def setUp(self):
@@ -1206,13 +1061,6 @@ class TechLevelTestCase(TestCase):
                          twok_items, threek_items):
         response = self.client.get(reverse(views.sheet_detail,
                                            args=[sheet_id]))
-        add_skill = response.context['add_skill_form']
-        self.assertEqual(add_skill.fields['skill'].queryset.filter(
-            name="Active priest").exists(), frp_items)
-        self.assertEqual(add_skill.fields['skill'].queryset.filter(
-            name="Electronics").exists(), twok_items)
-        self.assertEqual(add_skill.fields['skill'].queryset.filter(
-            name="Machine empathy").exists(), threek_items)
 
         add_weapon = response.context['add_weapon_form']
         self.assertEqual(add_weapon.fields['item_template'].queryset.filter(
@@ -1787,65 +1635,3 @@ class WeaponSizeTestCase(DamageMixin, TestCase):
                                                 quality__name="L3",
                                                 size=2)
         self.assertEqual(weapon.roa(), 0.73)
-
-
-class SheetViewTestCase(TestCase):
-    def test_sheet_view(self):
-        char_sheet = factories.SheetFactory()
-        factories.CharacterSkillFactory(character=char_sheet.character,
-                                        skill__name="Endurance / run",
-                                        skill__skill_cost_0=0,
-                                        level=2)
-        factories.SkillFactory(name="Balance", skill_cost_0=0)
-
-        factories.CharacterSkillFactory(character=char_sheet.character,
-                                        skill__name="Concealment")
-        factories.CharacterSkillFactory(character=char_sheet.character,
-                                        skill__name="Handguns")
-        factories.CharacterSkillFactory(character=char_sheet.character,
-                                        skill__name="Liberal arts")
-        sheet_view = views.SheetView(char_sheet)
-
-        costs = sum([skill.cost() for skill in sheet_view.skills()])
-        costs += sum([skill.cost() for skill in sheet_view.physical_skills()])
-        costs += sheet_view.endurance().cost()
-        costs += sheet_view.balance().cost()
-
-        # Skill lists should have skills with total cost equal to the total
-        # amount of skill points used.
-        self.assertEqual(sheet_view.used_sp(), costs)
-
-        skills = dict([(sk.skill_name, sk)
-                       for sk in sheet_view.physical_skills()])
-
-        self.assertEqual(skills['Stealth'].skill_check(), 22)
-        self.assertIsNone(skills['Stealth'].level())
-        self.assertEqual(skills['Stealth'].cost(), 0)
-
-        self.assertEqual(skills['Concealment'].skill_check(), 43)
-        self.assertEqual(skills['Concealment'].level(), 0)
-        self.assertEqual(skills['Concealment'].cost(), 2)
-        self.assertIsInstance(skills['Concealment'].remove_form(),
-                              sheet.forms.RemoveGenericForm)
-        self.assertIsInstance(skills['Concealment'].add_level_form(),
-                              sheet.forms.CharacterSkillLevelModifyForm)
-        self.assertIsInstance(skills['Concealment'].dec_level_form(),
-                              sheet.forms.CharacterSkillLevelModifyForm)
-
-        endurance = sheet_view.endurance()
-        self.assertEqual(endurance.skill_check()['wil'], 53)
-        self.assertEqual(endurance.skill_check()['fit'], 53)
-        self.assertEqual(endurance.level(), 2)
-        self.assertEqual(endurance.cost(), 3)
-        self.assertIsInstance(endurance.remove_form(),
-                              sheet.forms.RemoveGenericForm)
-        self.assertIsInstance(endurance.add_level_form(),
-                              sheet.forms.CharacterSkillLevelModifyForm)
-        self.assertIsInstance(endurance.dec_level_form(),
-                              sheet.forms.CharacterSkillLevelModifyForm)
-
-        balance = sheet_view.balance()
-        self.assertEqual(balance.skill_check()['ref'], 43)
-        self.assertEqual(balance.skill_check()['mov'], 43)
-        self.assertEqual(balance.level(), 0)
-        self.assertEqual(balance.cost(), 0)
