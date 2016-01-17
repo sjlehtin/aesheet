@@ -6,6 +6,7 @@ var util = require('sheet-util');
 
 import {Panel, Table} from 'react-bootstrap';
 import SkillRow from 'SkillRow';
+import AddSkill from 'AddSkill';
 
 class SkillTable extends React.Component {
     handleCharacterSkillAdd(skill) {
@@ -212,7 +213,11 @@ class SkillTable extends React.Component {
             </thead>
             <tbody>{rows}</tbody>
             <tfoot><tr><td colSpan="2">Total SP</td><td>{totalSP}</td><td></td></tr></tfoot>
-        </Table></Panel>;
+        </Table>
+            <AddSkill characterSkillMap={csMap}
+                      allSkills={this.props.allSkills}
+                      onCharacterSkillAdd={this.props.onCharacterSkillAdd} />
+        </Panel>;
     }
 }
 
