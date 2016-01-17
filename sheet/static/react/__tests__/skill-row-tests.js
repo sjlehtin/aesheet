@@ -96,13 +96,40 @@ describe('SkillRow', function() {
             skill: skillFactory({name: "Balance", stat: "MOV"}),
             renderForStats: ["mov", "ref"]
         });
-        console.log("foo");
         var cell = TestUtils.findRenderedDOMComponentWithClass(row,
             "skill-check");
-        console.log("bar");
 
         expect(cell.textContent).toContain("REF: 65");
         expect(cell.textContent).toContain("MOV: 50");
+    });
+
+    xit("shows skill with obsoleted skill level");
+    xit("highlight skill with missing required skills");
+
+    it('has controls to increase skill levels', function () {
+        var spy = jasmine.createSpy("callback");
+        var cs = characterSkillFactory({level: 1});
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA"}),
+            onCharacterSkillModify: spy
+        });
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(row._increaseButton))
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+    });
+
+    it('has controls to decrease skill levels', function () {
+        var spy = jasmine.createSpy("callback");
+        var cs = characterSkillFactory({level: 1});
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA"}),
+            onCharacterSkillModify: spy
+        });
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(row._decreaseButton))
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
     });
 
 });

@@ -308,11 +308,17 @@ class StatBlock extends React.Component {
         this.setState({characterSkills: this.state.characterSkills});
     }
 
+    getCharacterSkillURL(cs) {
+        return this.state.url + 'characterskills/' + cs.id + '/';
+    }
+
     handleCharacterSkillModify(skill) {
-        var index = StatBlock.findCharacterSkillIndex(
-            this.state.characterSkills, skill);
-        this.state.characterSkills[index] = skill;
-        this.setState({characterSkills: this.state.characterSkills});
+        rest.patch(this.getCharacterSkillURL(skill), skill).then(() => {
+            var index = StatBlock.findCharacterSkillIndex(
+                this.state.characterSkills, skill);
+            this.state.characterSkills[index] = skill;
+            this.setState({characterSkills: this.state.characterSkills});
+        }).catch((err) => console.log(err));
     }
 
     render() {
@@ -450,6 +456,8 @@ class StatBlock extends React.Component {
                         allSkills={this.state.allSkills}
                         onCharacterSkillRemove={
                       (skill) => this.handleCharacterSkillRemove(skill)}
+                        onCharacterSkillModify={
+                      (skill) => this.handleCharacterSkillModify(skill)}
                         stats={this.getEffStats()}/>
                 }
             }

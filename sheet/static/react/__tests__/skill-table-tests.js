@@ -78,7 +78,7 @@ describe('SkillTable', function() {
     };
 
     var getSkillLevel = function (cells) {
-        return cells[1].textContent;
+        return cells[1].querySelector('span').textContent;
     };
     
     var getSkillCheck = function (cells) {
@@ -330,4 +330,7 @@ describe('SkillTable', function() {
 
     xit("allows browsing through non-language and language skills" +
         " separately");
+    xit("filters out skills that the character already has");
+    xit("calculates edge skill bonuses correctly and passes them to" +
+        " skillrows")
 });

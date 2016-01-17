@@ -178,6 +178,7 @@ class SkillTable extends React.Component {
                           characterSkill={csMap[skill]}
                           skillName={skill}
                           onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
+                          onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
                           skillPoints={spCost}
                           skill={skillMap[skill]} />);
             totalSP += spCost;
@@ -194,6 +195,7 @@ class SkillTable extends React.Component {
                                 stats={this.props.stats}
                                 characterSkill={cs}
                                 onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
+                                onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
                                 indent={cs.indent}
                                 skillPoints={spCost}
                                 skill={skillMap[cs.skill]} />);

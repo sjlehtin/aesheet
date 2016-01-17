@@ -503,24 +503,49 @@ describe('stat block', function() {
         expect(block.state.characterSkills).toEqual([skill]);
     });
 
-    it("handles skill level changes", function () {
+    it("handles skill level changes", function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
-        var skillList = [
-            factories.characterSkillFactory({
-                id: 2, skill: "Weaponsmithing",
-                level: 1
-            }),
-            factories.characterSkillFactory({id: 1, skill: "Gardening",
-                level: 3})
-        ];
-        block.handleSkillsLoaded(skillList);
+        afterLoad(function () {
 
-        block.handleCharacterSkillModify({id: 1, skill: "Gardening",
-            level: 2});
-        var listCopy = skillList.map((elem) => {
-            return Object.assign({}, elem)});
-        listCopy[1].level = 2;
-        expect(block.state.characterSkills).toEqual(listCopy);
+            var skillList = [
+                factories.characterSkillFactory({
+                    id: 2, skill: "Weaponsmithing",
+                    level: 1
+                }),
+                factories.characterSkillFactory({
+                    id: 1, skill: "Gardening",
+                    level: 3
+                })
+            ];
+            block.handleSkillsLoaded(skillList);
+
+            var promise = Promise.resolve({
+                id: 1, skill: "Gardening",
+                level: 2
+            });
+            rest.patch.mockReturnValue(promise);
+            block.handleCharacterSkillModify({
+                id: 1, skill: "Gardening",
+                level: 2
+            });
+            expect(rest.patch.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/characterskills/1/');
+            expect(rest.patch.mock.calls[0][1]).toEqual({
+                id: 1, skill: "Gardening",
+                level: 2
+            });
+
+            promise.then(() => {
+                var listCopy = skillList.map((elem) => {
+                    return Object.assign({}, elem)
+                });
+                listCopy[1].level = 2;
+                expect(block.state.characterSkills).toEqual(listCopy);
+                done();
+            }).catch((err) => {
+                fail(err)
+            });
+        });
     });
 
     // TODO: Add system tests to check integration through this up till

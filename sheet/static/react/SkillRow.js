@@ -33,6 +33,17 @@ class SkillRow extends React.Component {
         }
     }
 
+    /*
+     * If character has the skill, use the check directly.
+     *
+     * If character does not have the skill, but the skill level 0
+     * has cost of 0, use level 0 check.  This should use the normal
+     * skill check calculation, as the character may have armor
+     * or edges which modify the skill check.
+     *
+     * If character doesn't have the skill, and the skill level 0 has
+     * a non-zero cost, calculate check defaulted to half-ability.
+     */
     skillCheck(stat) {
         var skill = this.props.skill;
 
@@ -72,6 +83,22 @@ class SkillRow extends React.Component {
         }
     }
 
+    handleIncrease() {
+        if (typeof(this.props.onCharacterSkillModify) !== "undefined") {
+            var cs = Object.assign({}, this.props.characterSkill);
+            cs.level += 1;
+            this.props.onCharacterSkillModify(cs);
+        }
+    }
+
+    handleDecrease() {
+        if (typeof(this.props.onCharacterSkillModify) !== "undefined") {
+            var cs = Object.assign({}, this.props.characterSkill);
+            cs.level -= 1;
+            this.props.onCharacterSkillModify(cs);
+        }
+    }
+
     render () {
         var checks;
         if (this.props.renderForStats) {
@@ -100,8 +127,19 @@ class SkillRow extends React.Component {
         } else {
             remove = '';
         }
-        return <tr><td><span style={{paddingLeft: indent}}
-        >{this.skillName()}</span>{remove}</td><td>{this.skillLevel()}</td>
+
+        var increaseButton = <Button ref={(c) => this._increaseButton = c}
+                                     onClick={() => this.handleIncrease()}
+                                     bsSize="xsmall"
+                                     >+</Button>;
+        var decreaseButton = <Button ref={(c) => this._decreaseButton = c}
+                                     onClick={() => this.handleDecrease()}
+                                     bsSize="xsmall"
+                                     >-</Button>;
+
+        return <tr><td><span style={{paddingLeft: indent}}>{
+              this.skillName()}</span>{remove}</td>
+            <td>{this.skillLevel()}{increaseButton}{decreaseButton}</td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
             <td className="skill-check">{checks}</td></tr>;
     }
