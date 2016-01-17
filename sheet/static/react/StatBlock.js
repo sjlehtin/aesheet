@@ -458,7 +458,9 @@ class StatBlock extends React.Component {
                       (skill) => this.handleCharacterSkillRemove(skill)}
                         onCharacterSkillModify={
                       (skill) => this.handleCharacterSkillModify(skill)}
-                        stats={this.getEffStats()}/>
+                        effStats={this.getEffStats()}
+                        baseStats={this.getEffStats()}
+                    />
                 }
             }
         }

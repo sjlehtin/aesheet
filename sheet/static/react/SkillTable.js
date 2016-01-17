@@ -8,12 +8,6 @@ import {Panel, Table} from 'react-bootstrap';
 import SkillRow from 'SkillRow';
 
 class SkillTable extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = { };
-    }
-
     handleCharacterSkillAdd(skill) {
         if (typeof(this.props.onCharacterSkillAdd) != "undefined") {
             this.props.onCharacterSkillAdd(SkillTable.sanitizeSkillObject(skill));
@@ -185,7 +179,7 @@ class SkillTable extends React.Component {
             spCost = SkillTable.spCost(csMap[skill], skillMap[skill]);
             rows.push(
                 <SkillRow key={`${skill}-${ii}`}
-                          stats={this.props.stats}
+                          stats={this.props.effStats}
                           characterSkill={csMap[skill]}
                           skillName={skill}
                           onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
@@ -203,7 +197,7 @@ class SkillTable extends React.Component {
             spCost = SkillTable.spCost(cs, skillMap[cs.skill]);
             var idx = SkillTable.prefilledPhysicalSkills.length + ii;
             rows.push(<SkillRow key={`${cs.skill}-${idx}`}
-                                stats={this.props.stats}
+                                stats={this.props.effStats}
                                 characterSkill={cs}
                                 onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                                 onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
@@ -225,7 +219,8 @@ class SkillTable extends React.Component {
 SkillTable.propTypes = {
     characterSkills: React.PropTypes.array.isRequired,
     allSkills: React.PropTypes.array.isRequired,
-    stats: React.PropTypes.object.isRequired,
+    effStats: React.PropTypes.object.isRequired,
+    baseStats: React.PropTypes.object.isRequired,
     onCharacterSkillAdd: React.PropTypes.func,
     onCharacterSkillRemove: React.PropTypes.func,
     onCharacterSkillModify: React.PropTypes.func

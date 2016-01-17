@@ -32,7 +32,7 @@ describe('SkillTable', function() {
     var getSkillTable = function (givenProps) {
         var props = {allSkills: _basicPhysical,
             characterSkills: [],
-            stats: factories.statsFactory()
+            effStats: factories.statsFactory()
         };
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);
@@ -87,7 +87,7 @@ describe('SkillTable', function() {
     
     it("starts with a good set of physical skills", function () {
         var table = getSkillTable({
-            stats: factories.statsFactory({"int": 50})});
+            effStats: factories.statsFactory({"int": 50})});
         var expectedSkills = ["Endurance / run",
             "Balance",
             "Stealth",
@@ -107,7 +107,7 @@ describe('SkillTable', function() {
     });
 
     it("does render all skills", function (){
-        var table = getSkillTable({stats:
+        var table = getSkillTable({effStats:
             factories.statsFactory({"int": 50}),
             allSkills: _basicPhysical.concat([
                 factories.skillFactory({name: "Agriculture"})]),
@@ -145,7 +145,7 @@ describe('SkillTable', function() {
     });
 
     it("does not render same skill twice", function () {
-        var table = getSkillTable({stats:
+        var table = getSkillTable({effStats:
             factories.statsFactory({"int": 50}),
             allSkills: _basicPhysical.concat([
                 factories.skillFactory({name: "Agriculture"})]),
