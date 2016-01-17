@@ -11,6 +11,8 @@ import SkillTable from "SkillTable"
 
 import 'bootstrap/dist/css/bootstrap.css';
 
+import 'react-widgets/lib/less/react-widgets.less';
+
 var rest = require('sheet-rest');
 
 /* This is what this would look like in JSX.  We cannot use this directly, or
