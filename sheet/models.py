@@ -485,30 +485,6 @@ class Character(PrivateMixin, models.Model):
         int = roundup((diff - lrn/15.0)*25)
         return {"lrn": lrn, "int": int, "psy": 0}
 
-    @property
-    def missing_skills(self):
-
-        from django.db import connection, transaction
-        cursor = connection.cursor()
-
-        # # Get all skill the character has prerequisites for.
-        cursor.execute(
-            # First get all the skills that are required for the
-            # characters skills.
-            """SELECT cs.skill_id, rs.to_skill_id FROM
-               sheet_skill_required_skills rs, sheet_characterskill cs WHERE
-               cs.character_id = %s and cs.skill_id = rs.from_skill_id
-
-               EXCEPT
-            """
-            # Then take out all skills the character has the skills for.
-            """
-               SELECT rs.from_skill_id, cs.skill_id FROM
-               sheet_skill_required_skills rs, sheet_characterskill cs WHERE
-               cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
-            [self.id, self.id])
-        return dict(cursor.fetchall())
-
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_characters(user))
