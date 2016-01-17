@@ -2,7 +2,6 @@
 <title>React Test</title>
 <body>
 <div id="stat-block">Loading...</div>
-<div id="skill-table">Loading...</div>
 <div id="inventory">Loading...</div>
 <div id="character-container">Loading...</div>
 <div id="initiative-block">Loading...</div>
@@ -26,6 +25,7 @@
             {effMOV: 52, runMultiplier: 1.0});
     SheetApp.render(initBlock, document.getElementById('initiative-block'));
 
+    /*
     SheetApp.rest.getData('/rest/sheets/1/').then(function (sheet) {
         var charURL = `/rest/characters/${sheet.character}/`;
         SheetApp.rest.getData(charURL).then(function (char) {
@@ -46,7 +46,7 @@
                 }).catch(function (err) {console.log(err)});
         }).catch(function (err) {console.log(err)});
     }).catch(function (err) {console.log(err)});
-
+*/
 </script>
 </body>
 </html>
