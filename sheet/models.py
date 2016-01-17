@@ -461,6 +461,7 @@ class Character(PrivateMixin, models.Model):
     def age_sp(self):
         return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
 
+    # TODO: EdgeLevel setting for skill points.
     @property
     def edge_sp(self):
         extra_sp = 0
