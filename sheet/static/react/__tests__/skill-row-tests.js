@@ -156,4 +156,28 @@ describe('SkillRow', function() {
         expect('_decreaseButton' in row).toEqual(false);
     });
 
+    it('should not have a increase control without a skill', function () {
+        var spy = jasmine.createSpy("callback");
+        var row = getSkillRow({
+            characterSkill: undefined,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA"}),
+            onCharacterSkillModify: spy
+        });
+        expect('_increaseButton' in row).toEqual(false);
+    });
+
+    it('should not have a increase control if skill at maximum level',
+        function () {
+        var spy = jasmine.createSpy("callback");
+        var cs = characterSkillFactory({level: 3});
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA", max_level: 3}),
+            onCharacterSkillModify: spy
+        });
+        expect('_increaseButton' in row).toEqual(false);
+    });
+
 });

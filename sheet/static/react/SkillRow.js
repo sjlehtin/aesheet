@@ -106,6 +106,13 @@ class SkillRow extends React.Component {
         return this.props.characterSkill.level > this.props.skill.min_level;
     }
 
+    canIncrease() {
+        if (!this.props.characterSkill) {
+            return false;
+        }
+        return this.props.characterSkill.level < this.props.skill.max_level;
+    }
+
     render () {
         var checks;
         if (this.props.renderForStats) {
@@ -135,12 +142,17 @@ class SkillRow extends React.Component {
             remove = '';
         }
 
-        var increaseButton = <Button ref={(c) => this._increaseButton = c}
-                                     onClick={() => this.handleIncrease()}
-                                     bsSize="xsmall"
-                                     >+</Button>;
+        var increaseButton, decreaseButton;
+        if (this.canIncrease()) {
+            increaseButton = <Button ref={(c) => this._increaseButton = c}
+                                         onClick={() => this.handleIncrease()}
+                                         bsSize="xsmall"
+            >+</Button>;
+        } else {
+            increaseButton = '';
+        }
         if (this.canDecrease()) {
-            var decreaseButton = <Button ref={(c) => this._decreaseButton = c}
+            decreaseButton = <Button ref={(c) => this._decreaseButton = c}
                                          onClick={() => this.handleDecrease()}
                                          bsSize="xsmall"
             >-</Button>;
