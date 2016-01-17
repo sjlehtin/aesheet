@@ -32,16 +32,6 @@ perhaps Robot-system tests.
     <div class="row">
         <div class="col-md-3">
             <h1>{{ sheet.name }}</h1>
-            {% comment %}
-            {{ sheet.race }}
-            {{ sheet.occupation }}
-            <p title="Character description">
-                {{ sheet.character.description }}
-            </p>
-            <p title="Sheet description">
-                {{ sheet.description }}
-            </p>
-            {% endcomment %}
         </div>
 
         <div class="col-md-2">
@@ -80,102 +70,10 @@ perhaps Robot-system tests.
 
         <div class="col-md-12">
                 <div id="stat-block-container">Loading...</div>
-{#            <div class="row">#}
-{#                <div class="col-md-4">#}
-{#            {% comment %}#}
-{#                    <div class="stats">#}
-{#                        {% url "sheet_detail" sheet.id as act %}#}
-{#                        <table class="base">#}
-{#                        {% for stat in sheet.base_stats %}#}
-{#                            {% include "sheet/sheet_detail/stat.html" %}#}
-{#                        {% endfor %}#}
-{#                        </table>#}
-{##}
-{#                    </div>#}
-{#            {% endcomment %}#}
-{#                <div id="stat-block-container">Loading...</div>#}
-{##}
-{#                </div>#}
-{#                <div class="col-md-8">#}
-{#                    <div>#}
-{#                        {% if sheet.character.portrait %}#}
-{#                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"#}
-{#                             class="img-rounded">#}
-{#                        {% else %}#}
-{#                            <div class="edit-control">You can add a portrait for your character in#}
-{#                                the <a href="{% url "edit_character" sheet.character.id %}">#}
-{#                                    base character edit</a>.</div>#}
-{#                        {% endif %}#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
         </div>
     </div>
     </div>
         <div class="col-md-9">
-
-{#        <div class="row">#}
-{#<div class="col-md-6">#}
-{% comment %}
-<table class="derived">
-{% for stat in sheet.derived_stats %}
-    {% include "sheet/sheet_detail/stat.html" %}
-{% endfor %}
-</table>
-{% endcomment %}
-
-{% comment %}
-<div class="xp">
-<label>XP:</label> {{ sheet.xp_used_stats }} +
-{% if sheet.hero %}
-{{ sheet.xp_used_hero }} +
-{% endif %}
-{{ sheet.xp_used_edges }} +
-{{ sheet.xp_used_ingame }} = {{ sheet.xp_used }} / {{ sheet.total_xp}}
-
-<div class="edit-control">
-    <form action="{{ act }}" method="post">
-        {% csrf_token %}
-        {{ add_xp_form }}
-        <input type="submit" value="Add XP" />
-    </form>
-</div>
-</div>
-</div>
-
-{% endcomment %}
-
-{% comment %}
-<div class="col-md-2">
-    <table class="derived">
-{% with b=sheet.body sta=sheet.stamina mana=sheet.mana %}
-{# XXX Temporary stamina and body #}
-  <tr class="body">
-    <td>B</td><td>{{ b.base}}</td>
-    <td>{{ b.mod|default:""}}</td>
-    <td>{{ b.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="stamina">
-    <td>S</td><td>{{ sta.base}}</td>
-    <td>{{ sta.mod|default:""}}</td>
-    <td>{{sta.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="mana">
-    <td>M</td><td>{{ mana.base}}</td>
-    <td>{{ mana.mod|default:""}}</td>
-    <td>{{mana.recovery_rate|default:"" }}</td>
-  </tr>
-{% endwith %}
-</table>
-{% endcomment %}
-{#</div>#}
-
-    {% comment %}
-<div class="col-md-12">
-    {% include "sheet/sheet_detail/advancing_initiatives.html" %}
-</div>
-{% endcomment %}
-{#</div>#}
 
 <div class="row">
 <div class="col-md-4">
@@ -191,22 +89,6 @@ perhaps Robot-system tests.
         {% include "sheet/sheet_detail/movement.html" %}
     </div>
 </div>
-
-    {% comment %}
-<div class="row">
-<h3>Notes</h3>
-<ul class="note positive">
-    {% for note in notes.positive %}
-        <li>{{ note|join:": " }}</li>
-    {% endfor %}
-</ul>
-<ul class="note negative">
-    {% for note in notes.negative %}
-        <li>{{ note|join:": " }}</li>
-    {% endfor %}
-</ul>
-</div>
-{% endcomment %}
 
         <div class="row">
             <div class="col-md-12">
