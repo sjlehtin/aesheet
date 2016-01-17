@@ -449,7 +449,7 @@ class CharacterSkillTestCase(TestCase):
                                                skill="Lightsaber")
         self.assertEqual(cs.level, 5)
 
-    def test_verify_skill_level_modification(self):
+    def test_verify_skill_level_modification_logged(self):
         skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
                                        skill_cost_1=2, skill_cost_2=3,
                                        skill_cost_3=4)
@@ -457,7 +457,6 @@ class CharacterSkillTestCase(TestCase):
                                              skill=skill, level=2)
 
         url = "{}{}/".format(self.url, cs.pk)
-
 
         response = self.client.patch(url, {"skill": "Lightsaber",
                                            "level": 5}, format="json")
@@ -467,7 +466,7 @@ class CharacterSkillTestCase(TestCase):
                                                skill="Lightsaber")
         self.assertEqual(cs.level, 5)
 
-    def test_skill_remove(self):
+    def test_skill_remove_logged(self):
         skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
                                        skill_cost_1=2, skill_cost_2=3,
                                        skill_cost_3=4)
@@ -476,6 +475,55 @@ class CharacterSkillTestCase(TestCase):
         url = "{}{}/".format(self.url, cs.pk)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
+
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Removed skill Lightsaber 2", str(log))
+
+    def test_skill_decrease_logged(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
+                                             level=2)
+        url = "{}{}/".format(self.url, cs.pk)
+        response = self.client.patch(url, {'level': 1})
+        self.assertEqual(response.status_code, 200)
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Skill Lightsaber decreased to level 1",
+                      str(log))
+
+    def test_skill_add_logged(self):
+        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=4)
+
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 5}, format="json")
+        self.assertEqual(response.status_code, 201)
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Added skill Lightsaber 5",
+                      str(log))
+
+    def test_skill_invariant(self):
+        factories.SkillFactory(name="Unarmed Combat",
+                               skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=4)
+
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+
+        cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
+                                             level=2)
+        url = "{}{}/".format(self.url, cs.pk)
+        response = self.client.patch(url, {'skill': "Unarmed Combat"})
+        self.assertEqual(response.status_code, 400)
+        response = self.client.patch(url, {'skill': "Unarmed Combat",
+                                           'level': 2})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['skill'], "Lightsaber")
+
 
 
 class SkillTestCase(TestCase):

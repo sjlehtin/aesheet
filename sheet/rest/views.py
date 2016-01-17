@@ -82,11 +82,8 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
         return models.Character.objects.prefetch_related('edges',
                                                          'edges__edge',).all()
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+    def perform_update(self, serializer):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
         with transaction.atomic():
             for field, new_value in serializer.validated_data.items():
                 old_value = getattr(instance, field)
@@ -94,9 +91,8 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
                     change = new_value - old_value
                 else:
                     change = 0
-                log_stat_change(instance, request, field, change)
-            self.perform_update(serializer)
-        return Response(serializer.data)
+                log_stat_change(instance, self.request, field, change)
+            super(CharacterViewSet, self).perform_update(serializer)
 
 
 class EdgeLevelViewSet(viewsets.ModelViewSet):
@@ -167,10 +163,44 @@ class CharacterSkillViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         if isinstance(serializer, serializers.CharacterSkillSerializer):
             serializer.fields['character'].default = self.character
             serializer.fields['character'].read_only = True
+            # The skill will not be changed with this API after creation.
+            if serializer.instance is not None:
+                serializer.fields['skill'].read_only = True
+
         return serializer
 
     def get_queryset(self):
         return self.character.skills.all()
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        with transaction.atomic():
+            if 'level' in serializer.validated_data:
+                new_level = serializer.validated_data['level']
+                self.character.add_skill_log_entry(
+                        instance.skill,
+                        new_level,
+                        request=self.request,
+                        amount=new_level - instance.level)
+
+            super(CharacterSkillViewSet, self).perform_update(serializer)
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            self.character.add_skill_log_entry(serializer.validated_data[
+                                                   'skill'],
+                                               serializer.validated_data[
+                                                   'level'],
+                                               request=self.request)
+            super(CharacterSkillViewSet, self).perform_create(serializer)
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            self.character.add_skill_log_entry(instance.skill,
+                                               instance.level,
+                                               request=self.request,
+                                               removed=True)
+            super(CharacterSkillViewSet, self).perform_destroy(instance)
 
 
 class InventoryEntryViewSet(ListPermissionMixin, viewsets.ModelViewSet):
