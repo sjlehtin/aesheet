@@ -20,7 +20,9 @@ var skillFactory = function (overrideFields) {
         "stat": "CHA",
         "tech_level": 1,
         "required_skills": [],
-        "required_edges": []
+        "required_edges": [],
+        "min_level": 0,
+        "max_level": 8
     };
     return Object.assign(_baseSkill, overrideFields);
 };

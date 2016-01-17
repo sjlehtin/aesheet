@@ -132,4 +132,28 @@ describe('SkillRow', function() {
         expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
     });
 
+    it('should not have a decrease control without a skill', function () {
+        var spy = jasmine.createSpy("callback");
+        var row = getSkillRow({
+            characterSkill: undefined,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA"}),
+            onCharacterSkillModify: spy
+        });
+        expect('_decreaseButton' in row).toEqual(false);
+    });
+
+    it('should not have a decrease control if skill at minimum level',
+        function () {
+        var spy = jasmine.createSpy("callback");
+        var cs = characterSkillFactory({level: 1});
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA", min_level: 1}),
+            onCharacterSkillModify: spy
+        });
+        expect('_decreaseButton' in row).toEqual(false);
+    });
+
 });
