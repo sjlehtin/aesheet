@@ -12,11 +12,14 @@
     "bootstrap": "^3.3.6",
     "exports-loader": "^0.6.2",
     "imports-loader": "^0.6.5",
+    "less": "^2.5.3",
+    "less-loader": "^2.2.2",
     "react": "^0.14.5",
     "react-addons-css-transition-group": "^0.14.5",
     "react-bootstrap": "^0.28.1",
     "react-cookie": "^0.4.3",
     "react-dom": "^0.14.5",
+    "react-widgets": "^3.1.6",
     "whatwg-fetch": "^0.10.1"
   },
   "devDependencies": {
@@ -42,7 +45,6 @@
       "<rootDir>/node_modules/react-dom",
       "<rootDir>/node_modules/react-addons-test-utils",
       "<rootDir>/node_modules/fbjs",
-
       "<rootDir>/node_modules/react-bootstrap",
       "<rootDir>/node_modules/react-overlays",
       "<rootDir>/node_modules/react-prop-types",
@@ -54,7 +56,6 @@
       "<rootDir>/node_modules/uncontrollable",
       "<rootDir>/node_modules/warning",
       "<rootDir>/node_modules/babel-runtime",
-
       "<rootDir>/node_modules/core-js"
     ]
   }

@@ -40,6 +40,13 @@ module.exports = {
                 }
             },
             { test: /\.css$/, loader: 'style-loader!css-loader' },
+
+            // From React-widgets documentation.
+            { test: /\.less$/, loader: "style-loader!css-loader!less-loader" },
+            { test: /\.gif$/, loader: "url-loader?mimetype=image/png" },
+            { test: /\.woff(2)?(\?v=[0-9].[0-9].[0-9])?$/, loader: "url-loader?mimetype=application/font-woff" },
+            { test: /\.(ttf|eot|svg)(\?v=[0-9].[0-9].[0-9])?$/, loader: "file-loader?name=[name].[ext]" },
+
             { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
             { test: /\.(woff|woff2)$/, loader:"url?prefix=font/&limit=5000" },
             { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
