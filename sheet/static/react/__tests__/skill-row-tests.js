@@ -180,4 +180,40 @@ describe('SkillRow', function() {
         expect('_increaseButton' in row).toEqual(false);
     });
 
+    it("does not render missing skills if there are none", function () {
+        var cs = characterSkillFactory({level: 3});
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA", max_level: 3}),
+        });
+        var node = ReactDOM.findDOMNode(row);
+        expect(node.getAttribute('title')).toEqual('');
+    });
+
+    it("renders missing skills", function () {
+        var cs = characterSkillFactory({level: 3});
+        cs._missingRequired = ["Frozzling"];
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA", max_level: 3}),
+        });
+        var node = ReactDOM.findDOMNode(row);
+        expect(node.getAttribute('title')).toMatch("Missing skill Frozzling");
+    })
+
+    it("renders missing skills with correct grammar", function () {
+        var cs = characterSkillFactory({level: 3});
+        cs._missingRequired = ["Frozzling", "Foobying"];
+        var row = getSkillRow({
+            characterSkill: cs,
+            stats: statsFactory({cha: 45, wil: 60}),
+            skill: skillFactory({stat: "CHA", max_level: 3}),
+        });
+        var node = ReactDOM.findDOMNode(row);
+        expect(node.getAttribute('title')).toMatch("Missing skills" +
+            " Frozzling, Foobying");
+    })
+
 });

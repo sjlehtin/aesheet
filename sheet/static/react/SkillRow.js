@@ -160,7 +160,16 @@ class SkillRow extends React.Component {
             decreaseButton = '';
         }
 
-        return <tr><td><span style={{paddingLeft: indent}}>{
+        var skillStyle = {};
+        var missing = '';
+        var cs = this.props.characterSkill;
+        if (cs && cs._missingRequired && (cs._missingRequired.length > 0)) {
+            var pluralize = cs._missingRequired.length === 1 ? "" : "s";
+            missing = `Missing skill${pluralize} ${
+                cs._missingRequired.join(", ")}`;
+            skillStyle.color = 'red';
+        }
+        return <tr style={skillStyle} title={missing}><td><span style={{paddingLeft: indent}}>{
               this.skillName()}</span>{remove}</td>
             <td>{this.skillLevel()}{increaseButton}{decreaseButton}</td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
