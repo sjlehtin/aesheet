@@ -207,6 +207,19 @@ class SkillTable extends React.Component {
                                 skill={skillMap[cs.skill]} />);
             totalSP += spCost;
         }
+
+        /* TODO:
+         * Displaying SP, along with SP from edges, correctly.  This
+         * includes a small tweak to how the edge sp is generated (moved
+         * to be an edgelevel attribute).
+         * SP: 29 + 0 + 13 = 42 / 60
+         * Calculate age sp, and add a button to assign it.  If no
+         * reversal, add a confirmation dialog.
+         * Age SP: 7
+         * Add "optimal stat raises back".
+         * Munch munch: +14 LRN, + 1 INT
+         * */
+
         return <Panel style={this.props.style} header={<h4>Skills</h4>}><Table style={{fontSize: "inherit"}} striped fill>
             <thead>
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
