@@ -1611,6 +1611,7 @@ class Sheet(PrivateMixin, models.Model):
                              related_name='helm_for',
                              on_delete=models.SET_NULL)
 
+    # TODO: to remove.  This will come from the inventory.
     extra_weight_carried = models.IntegerField(
         default=0,
         help_text="Extra encumbrance the character is carrying")
@@ -1788,9 +1789,10 @@ class Sheet(PrivateMixin, models.Model):
         logger.debug("total modifiers: %d" % modifiers)
 
         checks = [check_mod_from_action_index(act)
-                           # cap number of actions.
-                           for act in filter(lambda act: act < roa * 2,
-                                             self.actions)]
+                  # cap number of actions.
+                  for act in filter(lambda act: act < roa * 2,
+                      self.actions)]
+
         def counter_penalty(penalty):
             return self._counter_penalty(penalty, self.eff_int)
 
@@ -2155,72 +2157,6 @@ class Sheet(PrivateMixin, models.Model):
     @_stat_wrapper
     def mod_imm(self):
         pass
-
-    # TODO: Remove.
-    @property
-    def body(self):
-        """
-        Return amount of body as a dict, {'base', 'bonus',
-        'recovery_rate'}.  The recovery_rate indicates the amount the
-        body recovered when not resting.
-        """
-
-        sizes = {"M" : 0,
-                 "S" : -1,
-                 "L" : 1 }
-        toughness = self.character.edge_level('Toughness')
-        body = roundup(self.fit / 4.0) + (1 + sizes[self.size]) * toughness
-
-        return { 'base': body,
-                 'mod': toughness,
-                 'recovery_rate' : "",
-                 }
-
-    # TODO: Remove.
-    def _format_recovery(self, level, extra_recovery):
-        rate = ""
-        if level:
-            # XXX Higher levels.
-            rate = "%d" % pow(2, (level - 1))
-        if extra_recovery:
-            if rate:
-                rate = "%s%+d" % (rate, extra_recovery)
-            else:
-                rate = "%d" % extra_recovery
-        if rate:
-            rate += "/8h"
-        return rate
-
-    # TODO: Remove.
-    @property
-    def stamina(self):
-        """
-        Return amount of stamina as a dict (see "body").
-        """
-
-        # Stamina recovery modifier = ROUNDDOWN((IMM-45)/15;0)
-        lvl = self.character.edge_level('Fast Healing')
-        extra_recovery = rounddown((self.eff_imm - 45) / 15)
-        rate = self._format_recovery(lvl, extra_recovery)
-        return { 'base': (roundup((self.ref + self.wil) / 4.0) +
-                          self.bought_stamina),
-                 'mod': 0,
-                 'recovery_rate' : rate }
-
-    # TODO: Remove.
-    @property
-    def mana(self):
-        """
-        Return amount of mana as a dict (see "body").
-        """
-        # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
-        lvl = self.character.edge_level('Fast Mana Recovery')
-        extra_recovery = rounddown(2 * ((self.eff_cha - 45) / 15))
-        rate = self._format_recovery(lvl, extra_recovery)
-        return { 'base': (roundup((self.psy + self.wil) / 4.0) +
-                          self.bought_mana),
-                 'mod': 0,
-                 'recovery_rate' : rate }
 
     @property
     def weight_carried(self):
