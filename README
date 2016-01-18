@@ -19,3 +19,10 @@ Running test:
 python manage.py test  # or in PyCharm
 cd sheet/static/react && npm test
 cd sheet/tests && pybot tests.robot  # not functional yet.
+
+When updating to new edge skillpoint system:
+
+* Check edges Childhood Education, Specialist Training, Specialist Training
+ (Tome), and their levels:  make sure the amount of granted SP is correct.
+
+ Here a data migration action might be useful.
