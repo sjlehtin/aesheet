@@ -1,4 +1,4 @@
-jest.dontMock('../AddSkill');
+jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillRow');
 jest.dontMock('../SkillTable');
 jest.dontMock('./factories');
@@ -7,13 +7,13 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 const SkillTable = require('../SkillTable').default;
-const AddSkill = require('../AddSkill').default;
+const AddSkillControl = require('../AddSkillControl').default;
 
 var rest = require('sheet-rest');
 
 var factories = require('./factories');
 
-describe('AddSkill', function() {
+describe('AddSkillControl', function() {
     "use strict";
 
     var _basicSkills = [
@@ -32,7 +32,7 @@ describe('AddSkill', function() {
         throw Error("skill " + skillName + " not found");
     };
 
-    var getAddSkill = function (givenProps) {
+    var getAddSkillControl = function (givenProps) {
         var props = {allSkills: _basicSkills,
             characterSkillMap: {}
         };
@@ -40,15 +40,15 @@ describe('AddSkill', function() {
             props = Object.assign(props, givenProps);
         }
         var table = TestUtils.renderIntoDocument(
-            <AddSkill {...props}/>
+            <AddSkillControl {...props}/>
         );
 
         return TestUtils.findRenderedComponentWithType(table,
-            AddSkill);
+            AddSkillControl);
     };
 
     it("can filter skills the user already has", function () {
-        var filteredList = AddSkill.filterSkills(_basicSkills,
+        var filteredList = AddSkillControl.filterSkills(_basicSkills,
             SkillTable.getCharacterSkillMap([factories.characterSkillFactory({skill: "Persuasion"})]));
         var names = filteredList.map((elem) => { return elem.name} );
         expect(names).toEqual(["Endurance / run", "Mental Fortitude"]);
@@ -60,7 +60,7 @@ describe('AddSkill', function() {
             min_level: 1, max_level: 4 })],
             _basicSkills);
 
-        var control = getAddSkill({allSkills: skillList});
+        var control = getAddSkillControl({allSkills: skillList});
         expect(control.getLevelChoices()).toEqual([]);
 
         control.handleSkillChange(findSkill(skillList,
@@ -69,7 +69,7 @@ describe('AddSkill', function() {
     });
 
     it("will not barf if skill value is not found", function () {
-        var control = getAddSkill();
+        var control = getAddSkillControl();
         expect(control.getLevelChoices()).toEqual([]);
         control.handleSkillChange("foobar");
         expect(control.getLevelChoices()).toEqual([]);
@@ -80,12 +80,12 @@ describe('AddSkill', function() {
     });
 
     it("starts with the add button disabled", function () {
-        var control = getAddSkill();
+        var control = getAddSkillControl();
         expect(control.skillValid()).toEqual(false);
     });
 
     it("enables the addition button with valid input", function () {
-        var control = getAddSkill();
+        var control = getAddSkillControl();
         control.handleSkillChange(findSkill(_basicSkills, "Persuasion"));
         control.handleLevelChange("foo");
         expect(control.skillValid()).toEqual(false);
@@ -95,7 +95,7 @@ describe('AddSkill', function() {
 
     it("calls the skill addition callback on skill add", function () {
         var spy = jasmine.createSpy("callback");
-        var control = getAddSkill({onCharacterSkillAdd: spy});
+        var control = getAddSkillControl({onCharacterSkillAdd: spy});
         control.handleSkillChange(findSkill(_basicSkills, "Persuasion"));
         control.handleLevelChange(2);
         TestUtils.Simulate.click(ReactDOM.findDOMNode(control._addButton));

@@ -5,7 +5,7 @@ import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 
-class AddSkill extends React.Component {
+class AddSkillControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -84,7 +84,7 @@ class AddSkill extends React.Component {
                         </Col>
                         <Col md={10}>
                 <Combobox data={
-              AddSkill.filterSkills(this.props.allSkills,
+              AddSkillControl.filterSkills(this.props.allSkills,
                 this.props.characterSkillMap)} textField='name' suggest
                       filter="contains" groupBy="type"
                           value={this.state.skillValue}
@@ -117,10 +117,10 @@ class AddSkill extends React.Component {
     }
 }
 
-AddSkill.propTypes = {
+AddSkillControl.propTypes = {
     characterSkillMap: React.PropTypes.object.isRequired,
     allSkills: React.PropTypes.array.isRequired,
     onCharacterSkillAdd: React.PropTypes.func
 };
 
-export default AddSkill;
+export default AddSkillControl;
