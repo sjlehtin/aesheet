@@ -225,11 +225,12 @@ class SkillTable extends React.Component {
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
             </thead>
             <tbody>{rows}</tbody>
-            <tfoot><tr><td colSpan="2">Total SP</td><td>{totalSP}</td><td></td></tr></tfoot>
+            <tfoot><tr><td colSpan="2" style={{ fontWeight: 'bold'}}>Total SP</td><td>{totalSP}</td><td></td></tr></tfoot>
         </Table>
             <AddSkillControl characterSkillMap={csMap}
                              allSkills={this.props.allSkills}
-                             onCharacterSkillAdd={this.props.onCharacterSkillAdd} />
+                             onCharacterSkillAdd={this.props.onCharacterSkillAdd}
+                             style={this.props.style}/>
         </Panel>;
     }
 }
