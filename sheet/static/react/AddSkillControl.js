@@ -77,42 +77,34 @@ class AddSkillControl extends React.Component {
     render () {
         var levelChoices = this.getLevelChoices();
 
-        return <div style={{verticalAlign: "center"}}>
-                    <Row>
-                        <Col md={2}>
-                        <Label>Skill</Label>
-                        </Col>
-                        <Col md={10}>
-                <Combobox data={
+        return <div>
+            <table >
+                <tbody>
+                <tr>
+                    <td><label>Skill</label></td>
+                    <td><Combobox data={
               AddSkillControl.filterSkills(this.props.allSkills,
                 this.props.characterSkillMap)} textField='name' suggest
                       filter="contains" groupBy="type"
                           value={this.state.skillValue}
                           onChange={(value) => this.handleSkillChange(value) }
-                />
-                </Col>
-                    </Row>
-
-            <Row>
-                        <Col md={2}>
-                        <Label>Level</Label>
-                            </Col>
-                    <Col md={10}>
+                /></td>
+                </tr>
+                <tr>
+                    <td><label>Level</label></td>
+                    <td>
                         <Combobox data={levelChoices}
                                   value={this.state.selectedLevel}
                                   onChange={
-                                  (value) => this.handleLevelChange(value)}
-                        />
-                    </Col>
-            </Row>
-            <Row>
-                <Col md={3}>
+                                  (value) => this.handleLevelChange(value)} />
+                    </td>
+                </tr>
+                </tbody>
+            </table>
             <Button bsSize="small" disabled={!this.skillValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Skill</Button>
-                    </Col>
-            </Row>
         </div>
     }
 }
