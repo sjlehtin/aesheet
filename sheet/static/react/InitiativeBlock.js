@@ -45,7 +45,7 @@ class InitiativeBlock extends React.Component {
                                    //  this._inputNode = c.getInputDOMNode()}}}
                                 ref={(c) => { this._inputNode = c }}
                                    onChange={(e) => {this.setState({distance: e.target.value})}}
-                        /> m
+                            /> m
                         </th>
                         {distances.slice(1).map((elem, ii) => {
                             return <th key={ii}>{elem} m</th>})}</tr>
