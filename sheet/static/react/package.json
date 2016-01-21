@@ -19,6 +19,7 @@
     "react-bootstrap": "^0.28.1",
     "react-cookie": "^0.4.3",
     "react-dom": "^0.14.5",
+    "react-octicon": "^2.0.0",
     "react-widgets": "^3.1.6",
     "whatwg-fetch": "^0.10.1"
   },
@@ -56,7 +57,9 @@
       "<rootDir>/node_modules/uncontrollable",
       "<rootDir>/node_modules/warning",
       "<rootDir>/node_modules/babel-runtime",
-      "<rootDir>/node_modules/core-js"
+      "<rootDir>/node_modules/core-js",
+      "<rootDir>/node_modules/react-octicon",
+      "<rootDir>/node_modules/octicons"
     ]
   }
 }
