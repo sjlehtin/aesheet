@@ -1,4 +1,5 @@
 import React from 'react';
+import Octicon from 'react-octicon';
 
 var rest = require('sheet-rest');
 
@@ -101,23 +102,21 @@ class StatRow extends React.Component {
 
         var controlStyle = {
             visibility: this.state.showEditControls ? "visible" : "hidden",
-            fontWeight: "bold"
+            fontWeight: "bold",
+            position: "relative",
+            width: "3em"
         };
 
         var incStyle = {
-            color: "green",
-            paddingLeft: 5,
-            cursor: "pointer",
-            //fontSize: "150%",
+            color: "green", position: "absolute", left: 8, bottom: -5, cursor: "pointer",
 
             // No selection of the text on double click.
             MozUserSelect: "none",
             WebkitUserSelect: "none",
             msUserSelect: "none"
         };
-        var decStyle = {};
-        decStyle = Object.assign(decStyle, incStyle);
-        decStyle.color = "red";
+        var decStyle = Object.assign({}, incStyle);
+        decStyle = Object.assign(decStyle, {color: "red", left: 19, bottom: -9});
 
         var change = this.state.cur
             - this.props.initialChar["start_" + this.state.stat];
@@ -136,12 +135,14 @@ class StatRow extends React.Component {
                 {/* Tap here should not make the controls disappear. */}
                 <td onTouchEnd={(e) => e.stopPropagation()}>
                     <div style={controlStyle}>
-                        <span ref={(c) => this._increaseButton = c }
-                              style={incStyle}
-                              onClick={this.handleIncrease.bind(this)}>+</span>
-                        <span ref={(c) => this._decreaseButton = c }
-                              style={decStyle}
-                              onClick={this.handleDecrease.bind(this)}>-</span>
+                        <span style={incStyle}
+                              ref={(c) => this._increaseButton = c}
+                              onClick={(e) => this.handleIncrease(e)}
+                        ><Octicon name="arrow-up" /></span>
+                        <span style={decStyle}
+                              ref={(c) => this._decreaseButton = c}
+                              onClick={(e) => this.handleDecrease(e)}
+                        ><Octicon name="arrow-down" /></span>
                     </div>
                 </td>
             </tr>)
