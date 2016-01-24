@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 
 import {Button} from 'react-bootstrap';
 
+import Octicon from 'react-octicon';
+
 /*
  * This component handles display of a skill, level, checks.  If the
  * skill in question has levels lower than the current, allow lowering the
@@ -134,28 +136,28 @@ class SkillRow extends React.Component {
 
         var remove;
         if (this.props.characterSkill && this.props.onCharacterSkillRemove) {
-            remove = <Button bsSize="xsmall"
+            remove = <span style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
                     onClick={(e) => {this.props.onCharacterSkillRemove(
                       this.props.characterSkill)}}
-                    >Remove</Button>;
+                    ><Octicon name="x" /></span>;
         } else {
             remove = '';
         }
 
         var increaseButton, decreaseButton;
         if (this.canIncrease()) {
-            increaseButton = <Button ref={(c) => this._increaseButton = c}
+            increaseButton = <span style={{color: "green", position: "absolute", left: 10, bottom: 1, cursor: "pointer"}} ref={(c) => this._increaseButton = c}
                                          onClick={() => this.handleIncrease()}
-                                         bsSize="xsmall"
-            >+</Button>;
+
+            ><Octicon name="arrow-up" /></span>;
         } else {
             increaseButton = '';
         }
         if (this.canDecrease()) {
-            decreaseButton = <Button ref={(c) => this._decreaseButton = c}
+            decreaseButton = <span style={{color: "red", position: "absolute", left: 22, bottom: -3, cursor: "pointer"}} ref={(c) => this._decreaseButton = c}
                                          onClick={() => this.handleDecrease()}
                                          bsSize="xsmall"
-            >-</Button>;
+            ><Octicon name="arrow-down" /></span>;
         } else {
             decreaseButton = '';
         }
@@ -170,8 +172,8 @@ class SkillRow extends React.Component {
             skillStyle.color = 'red';
         }
         return <tr style={skillStyle} title={missing}><td><span style={{paddingLeft: indent}}>{
-              this.skillName()}</span>{remove}</td>
-            <td>{this.skillLevel()}{increaseButton}{decreaseButton}</td>
+              this.skillName()}</span><span style={{position: "relative"}}>{remove}</span></td>
+            <td>{this.skillLevel()}<span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
             <td className="skill-check">{checks}</td></tr>;
     }
