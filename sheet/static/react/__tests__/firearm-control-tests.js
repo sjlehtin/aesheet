@@ -22,17 +22,28 @@ describe('FirearmControl', function() {
             characterSkills: [],
             allSkills: [
                 factories.skillFactory({
-                    name: "Pistol", stat: "DEX",
+                    name: "Pistol", stat: "dex",
                     required_skills: ["Basic Firearms"]
                 }),
                 factories.skillFactory({
                     name: "Basic Firearms",
-                    stat: "DEX"
+                    stat: "dex"
                 }),
                 factories.skillFactory({
                     name: "Wheeled",
-                    stat: "DEX"
+                    stat: "dex"
+                }),
+                factories.skillFactory({
+                    name: "Handguns",
+                    stat: "dex",
+                    required_skills: ["Basic Firearms"]
+                }),
+                factories.skillFactory({
+                    name: "Long guns",
+                    stat: "dex",
+                    required_skills: ["Basic Firearms"]
                 })
+
             ],
             stats: {dex: 45}
         };
@@ -68,11 +79,11 @@ describe('FirearmControl', function() {
         var firearm = getFirearmControl({
             handlerProps: {
                 characterSkills: [factories.characterSkillFactory({
-                    skill: "Pistol",
+                    skill: "Handguns",
                     level: 1
                 })]
             },
-            weapon: factories.firearmFactory({base: {base_skill: "Pistol", skill: "Wheeled"}})});
+            weapon: factories.firearmFactory({base: {base_skill: "Handguns", skill: "Pistol"}})});
         expect(firearm.skillCheck()).toEqual(40);
     });
 
@@ -84,11 +95,11 @@ describe('FirearmControl', function() {
                     level: 1
                 }),
                     factories.characterSkillFactory({
-                        skill: "Wheeled",
+                        skill: "Handguns",
                         level: 1
                     })]
             },
-            weapon: factories.firearmFactory({base: {base_skill: "Pistol", skill: "Wheeled"}})});
+            weapon: factories.firearmFactory({base: {base_skill: "Handguns", skill: "Pistol"}})});
         expect(firearm.skillCheck()).toEqual(50);
     });
 
@@ -169,4 +180,92 @@ describe('FirearmControl', function() {
         expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
             .textContent).toEqual("2d6+3/6 (-1)");
     });
+
+    it ("can calculate burst fire checks", function () {
+        var firearm = getFirearmControl({
+            handlerProps: {
+                characterSkills: [factories.characterSkillFactory({
+                    skill: "Long guns",
+                    level: 0
+                }),
+                    factories.characterSkillFactory({
+                        skill: "Autofire",
+                        level: 0
+                    })
+                ],
+                stats: {dex: 45, fit: 45}
+            },
+            weapon: factories.firearmFactory({
+            base: {name: "Invented",
+                autofire_rpm: 600,
+                autofire_class: "B",
+                sweep_fire_disabled: false,
+                restricted_burst_rounds: 0,
+                base_skill: "Long guns"
+            }
+        })});
+        var checks = firearm.burstChecks([2]);
+        expect(checks.length).toEqual(1);
+        expect(checks[0].length).toEqual(5);
+        expect(checks[0]).toEqual([39, 37, 33, 27, 19]);
+    });
+
+    it ("can calculate burst fire checks for high FIT", function () {
+        var firearm = getFirearmControl({
+            handlerProps: {
+                characterSkills: [factories.characterSkillFactory({
+                    skill: "Long guns",
+                    level: 0
+                }),
+                    factories.characterSkillFactory({
+                        skill: "Autofire",
+                        level: 0
+                    })
+                ],
+                stats: {dex: 45, fit: 66}
+            },
+            weapon: factories.firearmFactory({
+            base: {name: "Invented",
+                autofire_rpm: 600,
+                autofire_class: "B",
+                sweep_fire_disabled: false,
+                restricted_burst_rounds: 0,
+                base_skill: "Long guns"
+            }
+        })});
+        var checks = firearm.burstChecks([2]);
+        expect(checks.length).toEqual(1);
+        expect(checks[0].length).toEqual(5);
+        expect(checks[0]).toEqual([45, 44, 40, 34, 26]);
+    });
+
+    it ("does not negate bonus from low action count in bursts", function () {
+        var firearm = getFirearmControl({
+            handlerProps: {
+                characterSkills: [factories.characterSkillFactory({
+                    skill: "Long guns",
+                    level: 0
+                }),
+                    factories.characterSkillFactory({
+                        skill: "Autofire",
+                        level: 0
+                    })
+                ],
+                // Counters 7 penalty.
+                stats: {dex: 45, fit: 66}
+            },
+            weapon: factories.firearmFactory({
+            base: {name: "Invented",
+                autofire_rpm: 600,
+                autofire_class: "B",
+                sweep_fire_disabled: false,
+                restricted_burst_rounds: 0,
+                base_skill: "Long guns"
+            }
+        })});
+        var checks = firearm.burstChecks([1]);
+        expect(checks.length).toEqual(1);
+        expect(checks[0].length).toEqual(5);
+        expect(checks[0]).toEqual([48, 48, 48, 43, 35]);
+    })
 });

@@ -82,24 +82,89 @@ class FirearmControl extends React.Component {
         return this.props.skillHandler.getStat(stat);
     }
 
-    skillChecks(actions) {
+    skillChecks(actions, counterPenalty) {
         var rof = this.rof();
         var baseCheck = this.skillCheck();
 
         var checks = [];
 
+        if (counterPenalty === undefined) {
+            counterPenalty = true;
+        }
+
         for (let act of actions) {
             if (act > 2 * rof) {
                 checks.push(null);
             } else {
-                checks.push(
-                    FirearmControl.counterPenalty(
-                        Math.round(FirearmControl.checkMod(rof, act, 10, 15)),
-                        this.getStat("FIT")) +
-                    baseCheck);
+                var mod = Math.round(FirearmControl.checkMod(rof, act, 10,
+                    15));
+
+                if (counterPenalty) {
+                    mod = FirearmControl.counterPenalty(mod,
+                        this.getStat("FIT"));
+                }
+                checks.push(mod + baseCheck);
             }
         }
         return checks;
+    }
+
+    singleBurstChecks(check) {
+        var base = this.props.weapon.base;
+        var checks = [];
+        var maxHits = 5;
+
+        var baseSkillCheck = this.skillCheck();
+
+        var burstMultipliers = [0, 1, 3, 6, 10];
+        var autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
+
+        for (var ii = 0; ii < 5; ii++) {
+            if (ii >= maxHits) {
+                checks.push(null);
+            } else {
+                // The modifier might be positive at this point, and penalty
+                // countering could leave the overall mod as positive.
+                var mod = check - baseSkillCheck;
+
+                var bonus = 0;
+                if (mod > 0) {
+                    bonus = mod;
+                    mod = 0;
+                }
+
+                mod += burstMultipliers[ii] *
+                    autofireClasses[base.autofire_class];
+
+                mod = FirearmControl.counterPenalty(mod,
+                        this.getStat("FIT"));
+
+                checks.push(baseSkillCheck + bonus + mod);
+            }
+        }
+        return checks;
+    }
+
+    /* Maps a burst action to normal action for initiative and skill check
+       calculation. */
+    mapBurstActions(actions) {
+        return actions.map((act) => {
+            if (act >= 1) {
+                act = act * 2 - 1;
+            }
+            return act;
+        });
+    }
+
+    burstChecks(actions) {
+        var base = this.props.weapon.base;
+        if (!base.autofire_rpm) {
+            /* No burst fire with this weapon. */
+            return null;
+        }
+
+        var checks = this.skillChecks(this.mapBurstActions(actions), false);
+        return checks.map((chk) => {return this.singleBurstChecks(chk);});
     }
 
     initiatives(actions) {
