@@ -13,7 +13,8 @@ bundle.js
 bundle.js.map
 node_modules
 sheet/tests/log.html
-sheet/tests/npm-debug.log
 sheet/tests/output.xml
 sheet/tests/report.html
 sheet/tests/selenium-screenshot-*.png
+npm-debug.log
+/upload
