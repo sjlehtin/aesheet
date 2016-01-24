@@ -29,7 +29,8 @@ class StatBlock extends React.Component {
             edgeList: [],
             /* Running total of edge cost. */
             edgesBought: 0,
-            characterSkills: undefined
+            characterSkills: undefined,
+            allSkills: undefined
         };
     }
 
@@ -346,72 +347,108 @@ class StatBlock extends React.Component {
         }).catch((err) => console.log(err));
     }
 
-    render() {
-        var rows, derivedRows, usableRows, xpcontrol, portrait, notes,
-            initiativeBlock, description, skillTable;
-        skillTable = <Loading />;
-        if (typeof(this.state.char) === "undefined") {
-            rows = <tr><td>Loading...</td></tr>;
-            derivedRows = <tr><td>Loading...</td></tr>;
-            usableRows = <tr><td>Loading...</td></tr>;
-            xpcontrol = <div>Loading</div>;
-            initiativeBlock = '';
-            description = '';
-        } else {
-            description = <div>
-                { this.state.char.race }
-                { this.state.char.occupation }
+    renderDescription() {
+        if (!this.state.char || !this.state.sheet) {
+            return <Loading/>;
+        }
+
+        return <div>
+            { this.state.char.race }
+            { this.state.char.occupation }
             <p title="Character description">
                 { this.state.char.description }
             </p>
             <p title="Sheet description">
                 { this.state.sheet.description }
             </p>
+        </div>;
+    }
 
-            </div>;
+    renderNotes() {
+        if (!this.state.edgeList) {
+            return <Loading>Notes</Loading>;
+        }
 
-            var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
-                "pos"];
-            rows = stats.map(function(st, ii) {
-                return <StatRow stat={st}
-                                key={ii}
-                                initialChar={this.state.char}
-                                initialSheet={this.state.sheet}
-                                onMod={this.handleModification.bind(this)}
-                                url={this.state.url} />;
-            }.bind(this));
+        var hasNotes = function (edgeList) {
+            for (var ii = 0; ii < edgeList.length; ii++) {
+                if (edgeList[ii].notes.length > 0) {
+                    return true;
+                }
+            }
+            return false;
+        };
 
-            var baseStyle = {
-                textAlign: "right",
-                paddingLeft: 5,
-                minWidth: "2em"
-            };
-            var effStyle = { fontWeight: "bold" };
-            effStyle = Object.assign(effStyle, baseStyle);
-            var statStyle = { fontWeight: "bold" };
+        if (hasNotes(this.state.edgeList)) {
+            return <Panel><NoteBlock edges={this.state.edgeList}/></Panel>;
+        } else {
+            return '';
+        }
+    }
 
-            derivedRows =[
-                (<tr key="mov">
-                        <td style={statStyle}>MOV</td>
-                        <td style={baseStyle}>{this.baseMOV()}</td>
-                        <td style={effStyle}>{this.effMOV()}</td>
-                    </tr>),
-                (<tr key="dex">
-                        <td style={statStyle}>DEX</td>
-                        <td style={baseStyle}>{this.baseDEX()}</td>
-                        <td style={effStyle}>{this.effDEX()}</td>
-                    </tr>),
-                (<tr key="imm">
-                        <td style={statStyle}>IMM</td>
-                        <td style={baseStyle}>{this.baseIMM()}</td>
-                        <td style={effStyle}>{this.effIMM()}</td>
-                    </tr>)
-                ];
+    renderSkills() {
+        if (!this.state.characterSkills || !this.state.allSkills) {
+            return <Loading>Skills</Loading>
+        }
+        return <SkillTable
+            style={{fontSize: "90%"}}
+            characterSkills={this.state.characterSkills}
+            allSkills={this.state.allSkills}
+            onCharacterSkillRemove={
+                      (skill) => this.handleCharacterSkillRemove(skill)}
+            onCharacterSkillModify={
+                      (skill) => this.handleCharacterSkillModify(skill)}
+            onCharacterSkillAdd={
+                      (skill) => this.handleCharacterSkillAdd(skill)}
+            effStats={this.getEffStats()}
+            baseStats={this.getEffStats()}
+        />
+    }
 
-            xpcontrol = <XPControl
-                url={this.state.url} edgesBought={this.state.edgesBought}
-                initialChar={this.state.char}
-                onMod={this.handleXPMod.bind(this)} />;
+    renderStats() {
+        if (!this.state.char|| !this.state.sheet) {
+            return <Loading>Stats</Loading>;
+        }
+
+        var baseStyle = {
+            textAlign: "right",
+            paddingLeft: 5,
+            minWidth: "2em"
+        };
+        var effStyle = { fontWeight: "bold" };
+        effStyle = Object.assign(effStyle, baseStyle);
+        var statStyle = { fontWeight: "bold" };
+
+        var rows, derivedRows, expendable;
+
+        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+            "pos"];
+        rows = stats.map((st, ii) => {
+            return <StatRow stat={st}
+                            key={ii}
+                            initialChar={this.state.char}
+                            initialSheet={this.state.sheet}
+                            onMod={this.handleModification.bind(this)}
+                            url={this.state.url} />;
+        });
+
+
+        derivedRows = <tbody>
+            <tr>
+                <td style={statStyle}>MOV</td>
+                <td style={baseStyle}>{this.baseMOV()}</td>
+                <td style={effStyle}>{this.effMOV()}</td>
+            </tr>
+            <tr>
+                <td style={statStyle}>DEX</td>
+                <td style={baseStyle}>{this.baseDEX()}</td>
+                <td style={effStyle}>{this.effDEX()}</td>
+            </tr>
+            <tr>
+                <td style={statStyle}>IMM</td>
+                <td style={baseStyle}>{this.baseIMM()}</td>
+                <td style={effStyle}>{this.effIMM()}</td>
+            </tr>
+        </tbody>;
 
             var toughness = this.toughness();
             if (toughness) {
@@ -425,75 +462,80 @@ class StatBlock extends React.Component {
                 color: "grey",
                 paddingLeft: 5
             };
-            usableRows = [
-                (<tr key="body"><td style={statStyle}>B</td>
+
+            expendable = <tbody>
+                <tr><td style={statStyle}>B</td>
                     <td style={baseStyle}>{this.baseBody()}{toughness}</td>
-                    <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>),
-                (<tr key="stamina"><td style={statStyle}>S</td>
+                    <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>
+                <tr><td style={statStyle}>S</td>
                     <td style={baseStyle}>{this.stamina()}</td>
-                    <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>),
-                (<tr key="mana"><td style={statStyle}>M</td>
+                    <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>
+                <tr><td style={statStyle}>M</td>
                     <td style={baseStyle}>{this.mana()}</td>
-                    <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>)
-            ];
+                    <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>
+            </tbody>;
 
-            if (this.state.char.portrait) {
-                portrait = <Image style={{maxWidth: 300}} src={this.state.char.portrait} rounded />;
-            } else {
-                portrait = (
-                    <div className="edit-control">You can add a portrait for
-                        your character in the <a href="`/characters/edit_char/${
-                        this.state.char}/`"> base character edit</a>.
-                </div>);
-            }
+        return <div style={{position: "relative", width: "18em"}}>
+            <h4>Stats</h4>
+            <table>
+                <tbody>
+                {rows}
+                </tbody>
+                {derivedRows}
+            </table>
+            <div style={{position: "absolute", bottom: 0, right:0}}>
+                <table>
+                    {expendable}
+                </table>
+            </div>
+        </div>;
+    }
 
-            var hasNotes = function (edgeList) {
-                for (var ii = 0; ii < edgeList.length; ii++) {
-                    if (edgeList[ii].notes.length > 0) {
-                        return true;
-                    }
-                }
-                return false;
-            };
+    renderAdvancingInitiatives () {
+        if (!this.state.char|| !this.state.sheet) {
+            return <Loading>Advancing initiatives</Loading>;
+        }
+        return <InitiativeBlock style={{fontSize: "80%"}}
+                                effMOV={this.effMOV()}
+                                runMultiplier={this.runMultiplier()} />;
+    }
 
-            if (hasNotes(this.state.edgeList)) {
-                notes =
-                    <Panel><NoteBlock edges={this.state.edgeList}/></Panel>;
-            } else {
-                notes = '';
-            }
-
-            initiativeBlock =
-                <InitiativeBlock style={{fontSize: "80%"}}
-                                 effMOV={this.effMOV()}
-                                 runMultiplier={this.runMultiplier()} />;
-
-            if (typeof(this.state.characterSkills) !== "undefined") {
-                if (!this.state.allSkills ||
-                    this.state.allSkills.length === 0) {
-                    /* Mostly to get tests that do not need skills to not
-                     care about the skilltable. */
-                    skillTable = <div>No skills.</div>
-                } else {
-                    skillTable = <SkillTable
-                        style={{fontSize: "90%"}}
-                        characterSkills={this.state.characterSkills}
-                        allSkills={this.state.allSkills}
-                        onCharacterSkillRemove={
-                      (skill) => this.handleCharacterSkillRemove(skill)}
-                        onCharacterSkillModify={
-                      (skill) => this.handleCharacterSkillModify(skill)}
-                        onCharacterSkillAdd={
-                      (skill) => this.handleCharacterSkillAdd(skill)}
-                        effStats={this.getEffStats()}
-                        baseStats={this.getEffStats()}
-                    />
-                }
-            }
+    renderPortrait () {
+        if (!this.state.char) {
+            return <Loading>Portrait</Loading>;
         }
 
+        if (this.state.char.portrait) {
+            return <Image style={{maxWidth: 300}}
+                                  src={this.state.char.portrait} rounded />;
+        } else {
+            return <div className="edit-control">
+                You can add a portrait for
+                your character in the <a href="`/characters/edit_char/${
+                        this.state.char}/`"> base character edit</a>.
+            </div>;
+        }
+    }
 
-        var statsStyle = {verticalAlign: "center", border: 1};
+    renderXPControl() {
+        if (!this.state.char || !this.state.edgeList) {
+            return <Loading>XP</Loading>
+        }
+
+        return <XPControl
+            url={this.state.url} edgesBought={this.state.edgesBought}
+            initialChar={this.state.char}
+            onMod={this.handleXPMod.bind(this)} />;
+    }
+
+    render() {
+        var description = this.renderDescription(),
+            skillTable = this.renderSkills(),
+            notes = this.renderNotes(),
+            stats = this.renderStats(),
+            initiativeBlock = this.renderAdvancingInitiatives(),
+            portrait = this.renderPortrait(),
+            xpcontrol = this.renderXPControl();
 
         return (
             <Grid>
@@ -503,24 +545,7 @@ class StatBlock extends React.Component {
                         {description}
                     </Row>
                     <Row>
-                        <div style={{position: "relative", width: "18em"}}>
-                        <h4>Stats</h4>
-                        <table style={statsStyle}>
-                            <tbody>
-                            {rows}
-                            </tbody>
-                            <tbody>
-                            {derivedRows}
-                            </tbody>
-                        </table>
-                        <div style={{position: "absolute", bottom: 0, right:0}}>
-                            <table>
-                                <tbody>
-                                {usableRows}
-                                </tbody>
-                            </table>
-                        </div>
-                        </div>
+                        {stats}
                         {xpcontrol}
                     </Row>
                 </Col>
@@ -539,8 +564,7 @@ class StatBlock extends React.Component {
                     {skillTable}
                 </Col>
             </Row>
-
-                </Grid>
+            </Grid>
         )
     }
 }
