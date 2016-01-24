@@ -126,6 +126,9 @@ class SkillTable extends React.Component {
     }
 
     static spCost(cs, skill) {
+        if (!skill) {
+            return null;
+        }
         if (!cs) {
             return 0;
         }
@@ -156,20 +159,28 @@ class SkillTable extends React.Component {
             this.props.characterSkills);
         var skillMap = SkillTable.getSkillMap(this.props.allSkills);
         var totalSP = 0, spCost;
+        var skill;
 
         for (ii = 0; ii < SkillTable.prefilledPhysicalSkills.length; ii++) {
-            var skill = SkillTable.prefilledPhysicalSkills[ii];
-            spCost = SkillTable.spCost(csMap[skill], skillMap[skill]);
-            rows.push(
-                <SkillRow key={`${skill}-${ii}`}
-                          stats={this.props.effStats}
-                          characterSkill={csMap[skill]}
-                          skillName={skill}
-                          onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
-                          onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
-                          skillPoints={spCost}
-                          skill={skillMap[skill]} />);
-            totalSP += spCost;
+            var skillName = SkillTable.prefilledPhysicalSkills[ii];
+            skill = skillMap[skillName];
+            if (skill) {
+                spCost = SkillTable.spCost(csMap[skillName], skill);
+                rows.push(
+                    <SkillRow key={`${skillName}-${ii}`}
+                              stats={this.props.effStats}
+                              characterSkill={csMap[skillName]}
+                              skillName={skillName}
+                              onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
+                              onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
+                              skillPoints={spCost}
+                              skill={skill}/>);
+                totalSP += spCost;
+            } else {
+                rows.push(<tr key={`${skillName}-${ii}`}>
+                    <td style={{color: "red"}}
+                    >Real skill missing for {skillName}.</td></tr>);
+            }
         }
 
         var skillList = SkillTable.mangleSkillList(this.props.characterSkills,
@@ -177,17 +188,24 @@ class SkillTable extends React.Component {
 
         for (ii = 0; ii < skillList.length; ii++) {
             var cs = skillList[ii];
-            spCost = SkillTable.spCost(cs, skillMap[cs.skill]);
-            var idx = SkillTable.prefilledPhysicalSkills.length + ii;
-            rows.push(<SkillRow key={`${cs.skill}-${idx}`}
-                                stats={this.props.effStats}
-                                characterSkill={cs}
-                                onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
-                                onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
-                                indent={cs.indent}
-                                skillPoints={spCost}
-                                skill={skillMap[cs.skill]} />);
-            totalSP += spCost;
+            skill = skillMap[cs.skill];
+            if (skill) {
+                spCost = SkillTable.spCost(cs, skill);
+                var idx = SkillTable.prefilledPhysicalSkills.length + ii;
+                rows.push(<SkillRow key={`${cs.skill}-${idx}`}
+                                    stats={this.props.effStats}
+                                    characterSkill={cs}
+                                    onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
+                                    onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
+                                    indent={cs.indent}
+                                    skillPoints={spCost}
+                                    skill={skill}/>);
+                totalSP += spCost;
+            } else {
+                rows.push(<tr key={`${cs.skill}-${idx}`}>
+                    <td style={{color: "red"}}
+                    >Real skill missing for {cs.skill}.</td></tr>);
+            }
         }
 
         /* TODO:

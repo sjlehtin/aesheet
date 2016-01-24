@@ -48,7 +48,7 @@ describe('SkillTable', function() {
 
     it('renders as empty', function () {
         var table = getSkillTable();
-        expect(typeof(table)).not.toEqual("undefined");
+        expect(typeof(table)).toEqual("object");
     });
 
     var getSkillList = function (skillTable) {
@@ -329,12 +329,39 @@ describe('SkillTable', function() {
         expect(SkillTable.spCost(undefined, skill)).toEqual(0);
     });
 
+    it("does not choke on real missing skills", function () {
+        // This is mainly for testing purposes, as the underlying DB
+        // mechanism should remove CharacterSkills if a Skill is removed,
+        // and not allow adding a CharacterSkill without a skill to match
+        // it with.
+        var skillList = [
+            factories.characterSkillFactory(
+                {skill: "Florism", level: 1}),
+            factories.characterSkillFactory(
+                {skill: "Aesthetism", level: 0}),
+            factories.characterSkillFactory(
+                {skill: "Gardening", level: 0}),
+            factories.characterSkillFactory(
+                {skill: "Agriculture", level: 3})
+        ];
+        var allSkills = [factories.skillFactory({name: "Agriculture"}),
+            factories.skillFactory({
+                name: "Gardening",
+                required_skills: ["Agriculture"]
+            }),
+            factories.skillFactory({name: "Aesthetism"})
+        ];
+        var table = getSkillTable({
+            effStats: factories.statsFactory({"int": 50}),
+            characterSkills: skillList,
+            allSkills: allSkills
+        });
+
+    });
     // if the parent stores the passed object directly, state should not
     // get passed over.  TODO: test for sanitizeSkillObject usage in
     // handleCharacterSkillModify
     xit("should clean away internal fields from parent notifications")
-    xit("allows browsing through non-language and language skills" +
-        " separately");
     xit("filters out skills that the character already has");
     xit("calculates edge skill bonuses correctly and passes them to" +
         " skillrows")
