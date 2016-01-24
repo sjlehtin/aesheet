@@ -7,6 +7,8 @@ jest.dontMock('../Loading');
 jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
+jest.dontMock('../SkillHandler')
+jest.dontMock('../FirearmControl')
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 

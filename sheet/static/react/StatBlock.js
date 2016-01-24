@@ -6,6 +6,9 @@ import NoteBlock from 'NoteBlock';
 import InitiativeBlock from 'InitiativeBlock';
 import SkillTable from 'SkillTable';
 import Loading from 'Loading';
+import FirearmControl from 'FirearmControl';
+
+const SkillHandler = require('SkillHandler').default;
 
 import {Grid, Row, Col, Image, Panel} from 'react-bootstrap';
 
@@ -30,7 +33,9 @@ class StatBlock extends React.Component {
             /* Running total of edge cost. */
             edgesBought: 0,
             characterSkills: undefined,
-            allSkills: undefined
+            allSkills: undefined,
+
+            firearmList: undefined
         };
     }
 
@@ -40,6 +45,15 @@ class StatBlock extends React.Component {
     }
 
     componentDidMount() {
+        /* Failures to load objects from the server should be indicated
+           visually to the users, as well as failures to save etc.  Use a
+           error-handling control for this purpose. */
+
+        rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
+            console.log("Firearms loaded");
+            this.setState({firearmList: json});
+        }).catch((err) => {console.log("Failed to load firearms:", err)});
+
         rest.getData(this.props.url).then((json) => {
             this.setState({
                 sheet: json,
@@ -390,7 +404,7 @@ class StatBlock extends React.Component {
             return <Loading>Skills</Loading>
         }
         return <SkillTable
-            style={{fontSize: "90%"}}
+            style={{fontSize: "80%"}}
             characterSkills={this.state.characterSkills}
             allSkills={this.state.allSkills}
             onCharacterSkillRemove={
@@ -528,6 +542,36 @@ class StatBlock extends React.Component {
             onMod={this.handleXPMod.bind(this)} />;
     }
 
+    getSkillHandler() {
+        if (!this.state.characterSkills || !this.state.allSkills) {
+            return null;
+        }
+        return new SkillHandler({
+            characterSkills: this.state.characterSkills,
+            allSkills: this.state.allSkills,
+            stats: this.getEffStats()});
+    }
+
+    renderFirearms() {
+        var skillHandler = this.getSkillHandler();
+        if (!this.state.firearmList || !skillHandler) {
+            return <Loading>Firearms</Loading>;
+        }
+        var rows = [];
+
+        var idx = 0;
+        for (let fa of this.state.firearmList) {
+            rows.push(<FirearmControl key={idx++} weapon={fa}
+                                      skillHandler={skillHandler}
+                                      style={{fontSize: "80%"}}
+            />);
+        }
+
+        return <Panel header={<h4>Firearms</h4>}>
+            {rows}
+        </Panel>;
+    }
+
     render() {
         var description = this.renderDescription(),
             skillTable = this.renderSkills(),
@@ -539,31 +583,36 @@ class StatBlock extends React.Component {
 
         return (
             <Grid>
-            <Row>
-                <Col md={4}>
+                <Col md={8}>
                     <Row>
-                        {description}
+                        <Col md={6}>
+                            <Row>
+                                {description}
+                            </Row>
+                            <Row>
+                                {stats}
+                                {xpcontrol}
+                            </Row>
+                        </Col>
+                        <Col md={6}>
+                            <Row style={{paddingBottom: 5}}>
+                                {portrait}
+                            </Row>
+                            <Row>
+                                {notes}
+                            </Row>
+                            <Row>
+                                {initiativeBlock}
+                            </Row>
+                        </Col>
                     </Row>
                     <Row>
-                        {stats}
-                        {xpcontrol}
-                    </Row>
-                </Col>
-                <Col md={4}>
-                    <Row style={{paddingBottom: 5}}>
-                        {portrait}
-                    </Row>
-                    <Row>
-                        {notes}
-                    </Row>
-                    <Row>
-                        {initiativeBlock}
+                        {this.renderFirearms()}
                     </Row>
                 </Col>
                 <Col md={4}>
                     {skillTable}
                 </Col>
-            </Row>
             </Grid>
         )
     }
