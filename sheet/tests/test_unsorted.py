@@ -360,31 +360,6 @@ class FirearmTestCase(TestCase):
             level=0,
             expected=[(0.5, 53), (1, 46), (2, 43), (3, 43), (4, 43), (5, 38)])
 
-    def test_weapon_class_matters(self):
-        factories.BaseFirearmFactory(name="Foo",
-                                            duration=0.11,
-                                            stock=1,
-                                            weight=0.6,
-                                            weapon_class_modifier=6,
-                                            ammunition_types=('9Pb', '9Pb+'))
-        factories.BaseFirearmFactory(name="Bar",
-                                            duration=0.11,
-                                            stock=1,
-                                            weight=0.6,
-                                            weapon_class_modifier=15,
-                                            ammunition_types=('9Pb', '9Pb+'))
-        wpn1 = factories.FirearmFactory(base__name="Foo",
-                                        ammo__label='9Pb',
-                                        ammo__bullet_type='FMJ')
-        wpn2 = factories.FirearmFactory(base__name="Bar",
-                                        ammo__label='9Pb',
-                                        ammo__bullet_type='FMJ')
-        checks = filter(lambda check: check.check,
-                        self.sheet.firearm_skill_checks(wpn1))
-        idx = len(checks) - 1
-        self.assertNotEqual(checks[idx].check,
-                            self.sheet.firearm_skill_checks(wpn2)[idx].check)
-
 
 class AutofireTestCase(TestCase):
     def setUp(self):
