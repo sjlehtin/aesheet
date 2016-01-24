@@ -181,19 +181,29 @@ describe('FirearmControl', function() {
             .textContent).toEqual("2d6+3/6 (-1)");
     });
 
-    it ("can calculate burst fire checks", function () {
-        var firearm = getFirearmControl({
-            handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
-                    skill: "Long guns",
-                    level: 0
-                }),
-                    factories.characterSkillFactory({
+    var getBurstController = function (givenProps) {
+        var props = {
+            fit: 45,
+            hasAutofireSkill: true
+        };
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+        var skills = [
+            factories.characterSkillFactory({
+                skill: "Long guns",
+                level: 0})
+        ];
+
+        if (props.hasAutofireSkill) {
+            skills.push(factories.characterSkillFactory({
                         skill: "Autofire",
-                        level: 0
-                    })
-                ],
-                stats: {dex: 45, fit: 45}
+                        level: 0}));
+        }
+        return getFirearmControl({
+            handlerProps: {
+                characterSkills: skills,
+                stats: {dex: 45, fit: props.fit}
             },
             weapon: factories.firearmFactory({
             base: {name: "Invented",
@@ -204,6 +214,10 @@ describe('FirearmControl', function() {
                 base_skill: "Long guns"
             }
         })});
+    };
+
+    it ("can calculate burst fire checks", function () {
+        var firearm = getBurstController();
         var checks = firearm.burstChecks([2]);
         expect(checks.length).toEqual(1);
         expect(checks[0].length).toEqual(5);
@@ -211,28 +225,7 @@ describe('FirearmControl', function() {
     });
 
     it ("can calculate burst fire checks for high FIT", function () {
-        var firearm = getFirearmControl({
-            handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
-                    skill: "Long guns",
-                    level: 0
-                }),
-                    factories.characterSkillFactory({
-                        skill: "Autofire",
-                        level: 0
-                    })
-                ],
-                stats: {dex: 45, fit: 66}
-            },
-            weapon: factories.firearmFactory({
-            base: {name: "Invented",
-                autofire_rpm: 600,
-                autofire_class: "B",
-                sweep_fire_disabled: false,
-                restricted_burst_rounds: 0,
-                base_skill: "Long guns"
-            }
-        })});
+        var firearm =  getBurstController({fit: 66});
         var checks = firearm.burstChecks([2]);
         expect(checks.length).toEqual(1);
         expect(checks[0].length).toEqual(5);
@@ -240,29 +233,7 @@ describe('FirearmControl', function() {
     });
 
     it ("does not negate bonus from low action count in bursts", function () {
-        var firearm = getFirearmControl({
-            handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
-                    skill: "Long guns",
-                    level: 0
-                }),
-                    factories.characterSkillFactory({
-                        skill: "Autofire",
-                        level: 0
-                    })
-                ],
-                // Counters 7 penalty.
-                stats: {dex: 45, fit: 66}
-            },
-            weapon: factories.firearmFactory({
-            base: {name: "Invented",
-                autofire_rpm: 600,
-                autofire_class: "B",
-                sweep_fire_disabled: false,
-                restricted_burst_rounds: 0,
-                base_skill: "Long guns"
-            }
-        })});
+        var firearm =  getBurstController({fit: 66});
         var checks = firearm.burstChecks([1]);
         expect(checks.length).toEqual(1);
         expect(checks[0].length).toEqual(5);
