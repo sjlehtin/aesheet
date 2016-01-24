@@ -34,6 +34,10 @@ class SkillHandler {
         }
     }
 
+    getStat(stat) {
+        return this.props.stats[stat.toLowerCase()];
+    }
+
     /*
      * If character has the skill, use the check directly.
      *
