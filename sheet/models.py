@@ -1664,6 +1664,7 @@ class Sheet(PrivateMixin, models.Model):
         roa = float(weapon.roa())
         level = self.character.skill_level(weapon.base.base_skill)
         spec_level = 0
+        # TODO: missing from React.
         if isinstance(weapon, RangedWeapon):
             if weapon.base.weapon_type == weapon.base.BOW:
                 spec_level = self.character.skill_level("Rapid archery")
