@@ -97,6 +97,9 @@ class SkillHandler {
         }
     }
 
+    hasSkill(skillName) {
+        return skillName in this.state.characterSkillMap;
+    }
 }
 
 export default SkillHandler;
