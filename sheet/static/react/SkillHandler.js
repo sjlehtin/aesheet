@@ -76,6 +76,9 @@ class SkillHandler {
     skillLevel(skillName) {
         var cs = this.state.characterSkillMap[skillName];
         var skill = this.state.skillMap[skillName];
+        if (!skill) {
+            return null;
+        }
         if (!cs) {
             if (skill.required_skills.length > 0) {
                 for (let reqd of skill.required_skills) {
