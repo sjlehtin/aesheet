@@ -164,7 +164,87 @@ class FirearmControl extends React.Component {
     }
 
     render () {
-        return <div>{this.renderDamage()}</div>;
+        var weapon = this.props.weapon.base;
+        var ammo = this.props.weapon.ammo;
+        var unskilled = this.skillLevel() >= 0 ?
+            "" : <div style={{color:"red"}}>unskilled</div>;
+        var ammoIdentifier = <div>{ammo.label} {ammo.bullet_type}</div>;
+
+        var actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        var headerStyle = {paddingRight: 5, paddingBottom: 5};
+        var actionCells = actions.map((act, ii) =>
+        {return <th key={`act-${ii}`} style={headerStyle}>{act}</th>});
+
+        var renderInit = function (init) {
+            if (init !== null) {
+                if (init >= 0) {
+                    return "+" + init;
+                } else {
+                    return init;
+                }
+            } else {
+                return '';
+            }
+        };
+        var cellStyle = {paddingRight: 5, paddingBottom: 5};
+        var helpStyle = Object.assign({color: "hotpink"}, cellStyle);
+        var initStyle = Object.assign({color: "red"}, cellStyle);
+
+        var initiatives = this.initiatives(actions).map((init, ii) => {
+            return <td key={`init-${ii}`} style={initStyle}>{
+                renderInit(init)}</td>
+        });
+        var skillChecks = this.skillChecks(actions).map((chk, ii) =>
+        {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
+
+        return <div style={this.props.style}>
+            <table style={{fontSize: 'inherit'}}>
+                <thead>
+                  <tr>
+                    <th style={headerStyle}>Weapon</th>
+                    <th style={headerStyle}>Lvl</th>
+                    <th style={headerStyle}>ROF</th>
+                      {actionCells}
+                    <th style={headerStyle}>TI</th>
+                    <th style={headerStyle}>DI</th>
+                    <th style={headerStyle}>Damage</th>
+                    <th style={headerStyle}>S/M/L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td rowSpan="2" style={cellStyle}>
+                        <div>
+                            {weapon.name}
+                            {ammoIdentifier}
+                            {unskilled}
+                        </div>
+                    </td>
+                    <td style={cellStyle}>{this.skillLevel()}</td>
+                    <td style={cellStyle}>{ this.rof().toFixed(2) }</td>
+                    {skillChecks}
+                    <td style={cellStyle}>{ weapon.target_initiative }</td>
+                    <td style={cellStyle}>{ weapon.draw_initiative }</td>
+                    <td style={cellStyle} rowSpan="2">{ this.renderDamage() } {ammo.type}
+                        <div>{ ammoIdentifier }</div></td>
+                    <td style={cellStyle} rowSpan="2">
+                        {weapon.range_s } / {weapon.range_m } / {weapon.range_l }
+                    </td>
+                </tr>
+      <tr>
+      <td style={helpStyle} colSpan={2}>
+          I vs. 1 target
+      </td>
+          {initiatives}
+      <td></td>
+      <td></td>
+      </tr>
+      </tbody>
+</table>
+            <div className="durability"><label>Durability:</label>{weapon.durability}</div>
+
+        </div>;
     }
 }
 
