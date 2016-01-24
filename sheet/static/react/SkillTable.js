@@ -42,24 +42,6 @@ class SkillTable extends React.Component {
         }
     }
 
-    findSkill(skillName) {
-        for (var ii = 0; ii < this.props.allSkills.length; ii++) {
-            var skill = this.props.allSkills[ii];
-            if (skill.name === skillName) {
-                return skill;
-            }
-        }
-    }
-
-    findCharacterSkill(skillName) {
-        for (var ii = 0; ii < this.props.characterSkills.length; ii++) {
-            var cs = this.props.characterSkills[ii];
-            if (cs.skill === skillName) {
-                return cs;
-            }
-        }
-    }
-
     static mangleSkillList(skillList, allSkills) {
         var newList = [];
         var cs;
