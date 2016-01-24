@@ -104,6 +104,18 @@ describe('FirearmControl', function() {
         expect(firearm.rof()).toBeCloseTo(2.86, 2);
     });
 
+    it ("calculates correct ROF for higher skill level", function() {
+        var firearm = getFirearmControl({
+            handlerProps: {
+                characterSkills: [factories.characterSkillFactory({
+                    skill: "Pistol",
+                    level: 3
+                })]},
+            weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
+        });
+        expect(firearm.rof()).toBeCloseTo(3.72, 2);
+    });
+
     it ("can calculate a row of checks", function() {
         var firearm = getFirearmControl({
             handlerProps: {

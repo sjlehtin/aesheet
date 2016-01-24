@@ -2,6 +2,11 @@ import React from 'react';
 var util = require('sheet-util');
 
 class FirearmControl extends React.Component {
+    skillLevel() {
+        return this.props.skillHandler.skillLevel(
+            this.props.weapon.base.base_skill);
+    }
+
     skillCheck () {
         var check = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
@@ -39,7 +44,14 @@ class FirearmControl extends React.Component {
         var recoil = impulse / (parseFloat(base.duration) *
             parseFloat(base.stock) *
             (parseFloat(base.weight) + 6));
-        return 30 / (recoil + parseFloat(base.weapon_class_modifier));
+
+        var skillLevel = this.skillLevel();
+        var rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
+
+        if (skillLevel > 0) {
+            rof *= 1 + 0.1 * skillLevel;
+        }
+        return rof;
     }
 
     static checkMod(roa, act, baseBonus, extraActionModifier) {
