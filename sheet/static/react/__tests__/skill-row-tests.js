@@ -201,7 +201,7 @@ describe('SkillRow', function() {
         });
         var node = ReactDOM.findDOMNode(row);
         expect(node.getAttribute('title')).toMatch("Missing skill Frozzling");
-    })
+    });
 
     it("renders missing skills with correct grammar", function () {
         var cs = characterSkillFactory({level: 3});
