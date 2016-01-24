@@ -184,7 +184,8 @@ describe('FirearmControl', function() {
     var getBurstController = function (givenProps) {
         var props = {
             fit: 45,
-            hasAutofireSkill: true
+            hasAutofireSkill: true,
+            autofireRPM: 600
         };
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -207,10 +208,10 @@ describe('FirearmControl', function() {
             },
             weapon: factories.firearmFactory({
             base: {name: "Invented",
-                autofire_rpm: 600,
+                autofire_rpm: props.autofireRPM,
                 autofire_class: "B",
                 sweep_fire_disabled: false,
-                restricted_burst_rounds: 0,
+                restricted_burst_rounds: props.restrictedBurstRounds,
                 base_skill: "Long guns"
             }
         })});
@@ -238,5 +239,30 @@ describe('FirearmControl', function() {
         expect(checks.length).toEqual(1);
         expect(checks[0].length).toEqual(5);
         expect(checks[0]).toEqual([48, 48, 48, 43, 35]);
-    })
+    });
+
+    it ("takes missing Autofire skill into account", function () {
+        var firearm =  getBurstController({fit: 66, hasAutofireSkill: false});
+        var checks = firearm.burstChecks([1]);
+        expect(checks.length).toEqual(1);
+        expect(checks[0].length).toEqual(5);
+        expect(checks[0]).toEqual([38, 38, 38, 33, 25]);
+    });
+
+    it ("take low RPM into account", function () {
+        var firearm = getBurstController({autofireRPM: 400});
+        var checks = firearm.burstChecks([2]);
+        expect(checks.length).toEqual(1);
+        expect(checks[0].length).toEqual(5);
+        expect(checks[0]).toEqual([39, 37, 33, null, null]);
+    });
+
+    it ("take restricted bursts into account", function () {
+        var firearm = getBurstController({restrictedBurstRounds: 3});
+        var checks = firearm.burstChecks([2]);
+        expect(checks.length).toEqual(1);
+        expect(checks[0].length).toEqual(5);
+        expect(checks[0]).toEqual([39, 37, 33, null, null]);
+    });
+
 });

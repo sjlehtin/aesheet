@@ -112,13 +112,21 @@ class FirearmControl extends React.Component {
     singleBurstChecks(check) {
         var base = this.props.weapon.base;
         var checks = [];
-        var maxHits = 5;
 
+        var maxHits = Math.min(util.rounddown(base.autofire_rpm/120), 5);
+
+        if (base.restricted_burst_rounds > 0) {
+            maxHits = Math.min(maxHits, base.restricted_burst_rounds);
+        }
         var baseSkillCheck = this.skillCheck();
 
         var burstMultipliers = [0, 1, 3, 6, 10];
         var autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
+        var autofirePenalty = 0;
+        if (!this.props.skillHandler.hasSkill("Autofire")) {
+            autofirePenalty = -10;
+        }
         for (var ii = 0; ii < 5; ii++) {
             if (ii >= maxHits) {
                 checks.push(null);
@@ -139,7 +147,7 @@ class FirearmControl extends React.Component {
                 mod = FirearmControl.counterPenalty(mod,
                         this.getStat("FIT"));
 
-                checks.push(baseSkillCheck + bonus + mod);
+                checks.push(baseSkillCheck + bonus + mod + autofirePenalty);
             }
         }
         return checks;
