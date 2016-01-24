@@ -213,9 +213,11 @@ class SkillTable extends React.Component {
          * includes a small tweak to how the edge sp is generated (moved
          * to be an edgelevel attribute).
          * SP: 29 + 0 + 13 = 42 / 60
+         *
          * Calculate age sp, and add a button to assign it.  If no
          * reversal, add a confirmation dialog.
          * Age SP: 7
+         *
          * Add "optimal stat raises back".
          * Munch munch: +14 LRN, + 1 INT
          * */
