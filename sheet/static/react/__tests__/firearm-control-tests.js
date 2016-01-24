@@ -145,4 +145,16 @@ describe('FirearmControl', function() {
             .toEqual([8, 6, 1, -4, 5, -1, null, null, null, null]);
     });
 
+
+    it ("can render damage", function() {
+        var firearm = getFirearmControl({
+            weapon: factories.firearmFactory({ammo: {num_dice: 2,
+                dice: 6,
+                leth: 6,
+                extra_damage: 3,
+                plus_leth: -1}})
+        });
+        expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
+            .textContent).toEqual("2d6+3/6 (-1)");
+    });
 });
