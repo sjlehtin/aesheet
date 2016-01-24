@@ -3,7 +3,13 @@ import Octicon from 'react-octicon'
 
 class Loading extends React.Component {
     render () {
-        return <div><Octicon mega spin name="sync"/> Loading...</div>;
+        var content;
+        if (this.props.children) {
+            content = this.props.children;
+        } else {
+            content = 'Loading...';
+        }
+        return <div><Octicon mega spin name="sync"/>{content}</div>;
     }
 }
 
