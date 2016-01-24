@@ -81,6 +81,15 @@ class StatBlock extends React.Component {
         return this.state.char['cur_' + stat] + this.state.char['mod_' + stat];
     }
 
+    /*
+     * TODO:  Effects from SpellEffects, ArmorSpecialQualities,
+     * WeaponSpecialQualities, MiscellanousItems, and Edges should be
+     * combined and added to stats, skill levels, movement etc.
+     *
+     * Edges affect base stats ("hard" modifier) and the rest are
+     * modifiers for the effective stats ("soft" modifier).
+     */
+
     effStat(stat) {
         if (stat === "mov") {
             return this.effMOV();
@@ -89,7 +98,11 @@ class StatBlock extends React.Component {
         } else if (stat === "imm") {
             return this.effIMM();
         }
-        return this.baseStat(stat) + this.state.sheet['mod_' + stat];
+        return this.baseStat(stat) +
+                // TODO:  this should be discarded, and the mods from
+                // effects (see above) calculated, with the addition of
+                // fit/ref penalties from armor and weight carried.
+            this.state.sheet['mod_' + stat];
     }
 
     baseMOV() {
