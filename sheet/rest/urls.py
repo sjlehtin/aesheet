@@ -19,6 +19,10 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,
                 base_name='sheet-inventory-item')
 
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetfirearms',
+                views.SheetFirearmViewSet,
+                base_name='sheet-firearm')
+
 urlpatterns = router.urls + [
     url(r'^ammunition/firearm/(?P<firearm>.+)/$',
         views.WeaponAmmunitionList.as_view()),

@@ -89,3 +89,17 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
         model = sheet.models.InventoryEntry
         fields = "__all__"
         read_only_fields = ("sheet", )
+
+
+class SheetFirearmListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = sheet.models.Firearm
+        fields = "__all__"
+        depth = 1
+
+class SheetFirearmCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = sheet.models.Firearm
+        fields = "__all__"

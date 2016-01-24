@@ -6,6 +6,7 @@ import sheet.models as models
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
+from rest_framework import exceptions
 from django.db import transaction
 from sheet.forms import log_stat_change
 import logging
@@ -224,3 +225,37 @@ class InventoryEntryViewSet(ListPermissionMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sheet=self.sheet)
+
+
+class SheetFirearmViewSet(viewsets.ModelViewSet):
+    #serializer_class = serializers.SheetFirearmListSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
+        return super(SheetFirearmViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetFirearmCreateSerializer
+        else:
+            return serializers.SheetFirearmListSerializer
+
+    def get_queryset(self):
+        return self.sheet.firearms.all()
+
+    def perform_update(self, serializer):
+        # TODO: not supported for Firearm.  Will be supported for
+        # SheetFirearm.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetFirearmViewSet, self).perform_create(serializer)
+        self.sheet.firearms.add(serializer.instance)
+
+    def perform_destroy(self, instance):
+        self.sheet.firearms.remove(instance)

@@ -263,8 +263,8 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
 
 
 class FirearmFactory(factory.DjangoModelFactory):
-    base = factory.SubFactory(BaseFirearmFactory)
-    ammo = factory.SubFactory(AmmunitionFactory)
+    base = factory.SubFactory(BaseFirearmFactory, name="Glock 19")
+    ammo = factory.SubFactory(AmmunitionFactory, label="9x19+")
 
     class Meta:
         model = models.Firearm

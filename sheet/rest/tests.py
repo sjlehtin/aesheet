@@ -225,6 +225,10 @@ class CharacterTestCase(TestCase):
         self.assertEqual(deity_entry.amount, 0)
         self.assertEqual(deity_entry.field, "deity")
 
+# TODO: add test case to verify that private characters and sheets do not
+# show to other users form the /rest/characters/ and /rest/sheets/ API
+# endpoints.
+
 
 class EdgeTestCase(TestCase):
     def setUp(self):
@@ -586,3 +590,56 @@ class SkillTestCase(TestCase):
         self.assertIn('min_level', response.data)
         self.assertEqual(response.data['max_level'], 2)
         self.assertEqual(response.data['min_level'], 0)
+
+
+class FirearmTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetfirearms/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_firearms(self):
+        self.sheet.firearms.add(factories.FirearmFactory())
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['ammo'], dict)
+
+    def test_adding_items(self):
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(label="7.62x39")
+
+        response = self.client.post(
+                self.url,
+                data={'ammo': ammo.pk,
+                      'base': firearm.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
+
+    def test_deleting_items(self):
+        firearm = factories.FirearmFactory()
+        self.sheet.firearms.add(firearm)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, firearm.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Firearm.objects.get(pk=firearm.pk)
+        self.assertEqual(len(self.sheet.firearms.all()), 0)
+
+    # TODO: With SheetFirearms, modifications make sense.
+
+# TODO: add test for checking private sheets restrict access to
+# sheetfirearms correctly.
