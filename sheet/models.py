@@ -1864,6 +1864,7 @@ class Sheet(PrivateMixin, models.Model):
 
     _autofire_classes = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5}
 
+    # TODO: Remove.
     def firearm_burst_fire_skill_checks(self, weapon):
         if not weapon.base.autofire_rpm:
             # no burst fire with this weapon.
