@@ -1,5 +1,6 @@
 import React from 'react';
 var util = require('sheet-util');
+import {Col} from 'react-bootstrap';
 
 class FirearmControl extends React.Component {
     skillLevel() {
@@ -128,7 +129,7 @@ class FirearmControl extends React.Component {
             autofirePenalty = -10;
         }
         for (var ii = 0; ii < 5; ii++) {
-            if (ii >= maxHits) {
+            if (ii >= maxHits || check === null) {
                 checks.push(null);
             } else {
                 // The modifier might be positive at this point, and penalty
@@ -173,6 +174,15 @@ class FirearmControl extends React.Component {
 
         var checks = this.skillChecks(this.mapBurstActions(actions), false);
         return checks.map((chk) => {return this.singleBurstChecks(chk);});
+    }
+
+    burstInitiatives(actions) {
+        var base = this.props.weapon.base;
+        if (!base.autofire_rpm) {
+            /* No burst fire with this weapon. */
+            return null;
+        }
+        return this.initiatives(this.mapBurstActions(actions));
     }
 
     initiatives(actions) {
@@ -236,6 +246,76 @@ class FirearmControl extends React.Component {
             extraDamage}/{ammo.leth}{plusLeth}</span>;
     }
 
+    renderInt(value) {
+        if (value !== null) {
+            if (value >= 0) {
+                return "+" + value;
+            } else {
+                return value;
+            }
+        } else {
+            return '';
+        }
+    }
+
+    renderBurstTable() {
+        if (!this.props.weapon.base.autofire_rpm) {
+            return '';
+        }
+        var actions = [0.5, 1, 2, 3, 4];
+        var burstChecks = this.burstChecks(actions);
+        var lethalities = [0, -2, 2, 0, -2];
+        var hitLocations = [0, 0, 0, -1, -1];
+        var burstRows = [];
+
+        var baseStyle = {padding: 2, borderWidth: 1, minWidth: "2em",
+        textAlign: "center"};
+        var cellStyle = Object.assign({borderStyle: "dotted"}, baseStyle);
+
+        var idx = 0;
+        var actionCells = actions.map((act) => {
+            return <th key={idx++} style={baseStyle}>{act}</th>;});
+
+        for (var ii = 0; ii < 5; ii++) {
+            var checkCells = [];
+            for (var jj = 0; jj < burstChecks.length; jj++) {
+                var burst = burstChecks[jj];
+                checkCells.push(<td key={jj} style={cellStyle}
+                >{burst[ii]}</td>);
+            }
+            burstRows.push(<tr key={`chk-${ii}-${jj}`}>
+                <td style={cellStyle}>{lethalities[ii]}</td>
+                <td style={cellStyle}>{hitLocations[ii]}</td>
+                {checkCells}
+            </tr>)
+        }
+        idx = 0;
+        var inits = this.burstInitiatives(actions).map((init) => {
+            return <th key={"init-" + idx++}>
+                {this.renderInt(init)}
+            </th>});
+
+        return <table style={{fontSize: 'inherit'}}>
+            <thead>
+            <tr>
+                <th style={baseStyle}>Leth</th>
+                <th style={baseStyle}>Loc</th>
+                {actionCells}
+            </tr>
+            </thead>
+            <tbody>
+            {burstRows}
+            </tbody>
+            <tfoot>
+            <tr>
+                <th></th>
+                <th></th>
+                {inits}
+            </tr>
+            </tfoot>
+        </table>;
+    }
+
     render () {
         var weapon = this.props.weapon.base;
         var ammo = this.props.weapon.ammo;
@@ -249,16 +329,8 @@ class FirearmControl extends React.Component {
         var actionCells = actions.map((act, ii) =>
         {return <th key={`act-${ii}`} style={headerStyle}>{act}</th>});
 
-        var renderInit = function (init) {
-            if (init !== null) {
-                if (init >= 0) {
-                    return "+" + init;
-                } else {
-                    return init;
-                }
-            } else {
-                return '';
-            }
+        var renderInit = (init) => {
+            return this.renderInt(init);
         };
         var cellStyle = {paddingRight: 5, paddingBottom: 5};
         var helpStyle = Object.assign({color: "hotpink"}, cellStyle);
@@ -272,6 +344,7 @@ class FirearmControl extends React.Component {
         {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
 
         return <div style={this.props.style}>
+            <Col md={9}>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
                   <tr>
@@ -316,7 +389,10 @@ class FirearmControl extends React.Component {
       </tbody>
 </table>
             <div className="durability"><label>Durability:</label>{weapon.durability}</div>
-
+            </Col>
+            <Col md={3}>
+                {this.renderBurstTable()}
+            </Col>
         </div>;
     }
 }
