@@ -8,6 +8,21 @@ class FirearmControl extends React.Component {
             this.props.weapon.base.base_skill);
     }
 
+    missingSkills() {
+        var missing = [];
+        var checkSkill = (skillName) => {
+            if (skillName) {
+                if (!this.props.skillHandler.hasSkill(skillName)) {
+                    missing.push(skillName);
+                }
+            }
+        };
+        checkSkill(this.props.weapon.base.base_skill);
+        checkSkill(this.props.weapon.base.skill);
+        checkSkill(this.props.weapon.base.skill2);
+        return missing;
+    }
+
     skillCheck () {
         var check = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
@@ -16,20 +31,14 @@ class FirearmControl extends React.Component {
            weapons (CCV on unskilled).  Might need a slightly more intricate
            system to handle this. */
         if (this.props.weapon.base.skill) {
-            /* Note that the check cannot be inverted here, as the > 0
-               will return false also if skill is null, undefined or a
-               string, which would also apply if the comparison was < 0. */
-            if (!(this.props.skillHandler.skillLevel(
-                    this.props.weapon.base.skill) > 0)) {
+            if (!this.props.skillHandler.hasSkill(
+                    this.props.weapon.base.skill)) {
                 check -= 10;
             }
         }
         if (this.props.weapon.base.skill2) {
-            /* Note that the check cannot be inverted here, as the > 0
-               will return false also if skill is null, undefined or a
-               string, which would also apply if the comparison was < 0. */
-            if (!(this.props.skillHandler.skillLevel(
-                    this.props.weapon.base.skill2)> 0)) {
+            if (!this.props.skillHandler.hasSkill(
+                    this.props.weapon.base.skill2)) {
                 check -= 10;
             }
         }
@@ -371,7 +380,7 @@ class FirearmControl extends React.Component {
             sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{" "}</td>{checkCells}</tr>);
         }
 
-        return <table>
+        return <table style={{fontSize: "inherit"}}>
             <thead>
             <tr><th colSpan={4}>Sweep fire</th></tr>
             <tr><th>RPT</th><th>TGT</th></tr></thead>
@@ -395,11 +404,21 @@ class FirearmControl extends React.Component {
         </table>;
     }
     render () {
-        // TODO: Marking unskilled for weapon and autofire.
         var weapon = this.props.weapon.base;
         var ammo = this.props.weapon.ammo;
-        var unskilled = this.skillLevel() >= 0 ?
-            "" : <div style={{color:"red"}}>unskilled</div>;
+        var missing = this.missingSkills();
+        var unskilled = '';
+        if (missing.length > 0) {
+            unskilled = <div style={{color:"red"}}
+                             title={`Missing skills: ${missing.join(' ,')}`}>
+                Unskilled</div>;
+        }
+        var autoUnskilled = '';
+        if (!this.props.skillHandler.hasSkill("Autofire")) {
+            autoUnskilled = <div style={{color:"red"}}
+                             title="Missing skill Autofire">
+                Unskilled</div>;
+        }
         var ammoIdentifier = <div>{ammo.label} {ammo.bullet_type}</div>;
 
         var actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -473,6 +492,8 @@ class FirearmControl extends React.Component {
             </Col>
             <Col md={3}>
                 {this.renderBurstTable()}
+
+                {autoUnskilled}
             </Col>
         </div>;
     }
