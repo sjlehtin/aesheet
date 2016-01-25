@@ -1924,6 +1924,7 @@ class Sheet(PrivateMixin, models.Model):
                                     0, 5))))
         return bursts
 
+    # TODO: Remove.
     def firearm_sweep_fire_skill_checks(self, weapon):
         if not weapon.base.autofire_rpm:
             # no sweep fire with this weapon.
