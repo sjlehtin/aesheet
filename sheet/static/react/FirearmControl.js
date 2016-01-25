@@ -352,7 +352,47 @@ class FirearmControl extends React.Component {
     }
 
     renderSweepTable() {
-        return '';
+        var sweepRows = [];
+
+        var baseStyle = {padding: 2, borderWidth: 1, minWidth: "2em",
+        textAlign: "center"};
+        var cellStyle = Object.assign({borderStyle: "dotted"}, baseStyle);
+
+        for (let sweep of [5, 10, 15, 20]) {
+            var checks = this.sweepChecks(sweep);
+            for (var ii = checks.length; ii < 16; ii++) {
+                checks[ii] = null;
+            }
+            checks.reverse();
+            ii = 0;
+            var checkCells = checks.map((chk) => {
+                return <td style={cellStyle} key={ii++}>{chk}</td>;
+            });
+            sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{" "}</td>{checkCells}</tr>);
+        }
+
+        return <table>
+            <thead>
+            <tr><th colSpan={4}>Sweep fire</th></tr>
+            <tr><th>RPT</th><th>TGT</th></tr></thead>
+            <tbody>
+            {sweepRows}
+            </tbody>
+            <tfoot>
+            <tr><th colSpan={2}>Lethality</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th>
+        <th>+2</th><th>-2</th><th>0</th></tr>
+            <tr><th colSpan={2}>Location</th><th>0</th>
+        <th>+2</th><th>+2</th><th>+2</th>
+        <th>-2</th><th>-2</th><th>-2</th>
+        <th>+1</th><th>+1</th><th>+1</th>
+        <th>-1</th><th>-1</th><th>-1</th>
+        <th>0</th><th>0</th><th>0</th></tr>
+            </tfoot>
+        </table>;
     }
     render () {
         // TODO: Marking unskilled for weapon and autofire.
