@@ -316,7 +316,46 @@ class FirearmControl extends React.Component {
         </table>;
     }
 
+    sweepChecks(sweepType) {
+        var sweeps = {
+            5: [0, 2, 5, 10],
+            10: [0, 1, 2, 2, 5, 5, 10, 10],
+            15: [0, 1, 1, 2, 2, 2, 5, 5, 5, 10, 10, 10],
+            20: [0, 1, 1, 1, 2, 2, 2, 2, 5, 5, 5, 5, 10, 10, 10, 10]
+        };
+        if (!(sweepType in sweeps)) {
+            throw Error("Invalid sweep type: " + sweepType);
+        }
+        var autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
+
+        var klass = autofireClasses[this.props.weapon.base.autofire_class];
+
+        var autofirePenalty = -10;
+        if (!this.props.skillHandler.hasSkill("Autofire")) {
+            autofirePenalty = -20;
+        }
+
+        var baseSkillCheck = this.skillCheck();
+        var checks = [];
+        var penaltyMultiplier = 0;
+        for (let multiplier of sweeps[sweepType]) {
+            penaltyMultiplier += multiplier;
+            checks.push(
+                baseSkillCheck +
+                sweepType +
+                FirearmControl.counterPenalty(
+                    penaltyMultiplier * klass, this.getStat("fit")) +
+                autofirePenalty
+            );
+        }
+        return checks;
+    }
+
+    renderSweepTable() {
+        return '';
+    }
     render () {
+        // TODO: Marking unskilled for weapon and autofire.
         var weapon = this.props.weapon.base;
         var ammo = this.props.weapon.ammo;
         var unskilled = this.skillLevel() >= 0 ?
@@ -389,6 +428,8 @@ class FirearmControl extends React.Component {
       </tbody>
 </table>
             <div className="durability"><label>Durability:</label>{weapon.durability}</div>
+
+                {this.renderSweepTable()}
             </Col>
             <Col md={3}>
                 {this.renderBurstTable()}

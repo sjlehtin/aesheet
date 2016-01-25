@@ -249,7 +249,7 @@ describe('FirearmControl', function() {
         expect(checks[0]).toEqual([38, 38, 38, 33, 25]);
     });
 
-    it ("take low RPM into account", function () {
+    it ("takes low RPM into account", function () {
         var firearm = getBurstController({autofireRPM: 400});
         var checks = firearm.burstChecks([2]);
         expect(checks.length).toEqual(1);
@@ -257,12 +257,35 @@ describe('FirearmControl', function() {
         expect(checks[0]).toEqual([39, 37, 33, null, null]);
     });
 
-    it ("take restricted bursts into account", function () {
+    it ("takes restricted bursts into account", function () {
         var firearm = getBurstController({restrictedBurstRounds: 3});
         var checks = firearm.burstChecks([2]);
         expect(checks.length).toEqual(1);
         expect(checks[0].length).toEqual(5);
         expect(checks[0]).toEqual([39, 37, 33, null, null]);
+    });
+
+    it ("can render sweep fire", function () {
+        var firearm = getBurstController();
+        var checks = firearm.sweepChecks(20);
+        expect(checks.length).toEqual(16);
+        expect(checks).toEqual([55, 53, 51, 49, 45, 41, 37, 33, 23, 13, 3,
+            -7, -27, -47, -67, -87]);
+    });
+
+    it ("takes missing Autofire skill into account in sweep fire", function () {
+        var firearm = getBurstController({hasAutofireSkill: false});
+        var checks = firearm.sweepChecks(20);
+        expect(checks.length).toEqual(16);
+        expect(checks).toEqual([45, 43, 41, 39, 35, 31, 27, 23, 13, 3, -7,
+            -17, -37, -57, -77, -97]);
+    });
+
+    it ("counters sweep fire penalties with high FIT", function () {
+        var firearm = getBurstController({fit: 72});
+        var checks = firearm.sweepChecks(10);
+        expect(checks.length).toEqual(8);
+        expect(checks).toEqual([45, 45, 45, 44, 34, 24, 4, -16]);
     });
 
 });
