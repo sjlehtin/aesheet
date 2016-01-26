@@ -45,19 +45,25 @@ module.exports = {
             // From React-widgets documentation.
             { test: /\.less$/, loader: "style-loader!css-loader!less-loader" },
             { test: /\.gif$/, loader: "url-loader?mimetype=image/png" },
-            //{ test: /\.(otf|eot|svg|ttf|woff|woff2).*$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
-            //{ test: /\.woff(2)?(\?v=[0-9].[0-9].[0-9])?$/, loader: "url-loader?mimetype=application/font-woff" },
-            //{ test: /\.(ttf|eot|svg)(\?v=[0-9].[0-9].[0-9])?$/, loader: "file-loader?name=[name].[ext]" },
 
-            { test: /.(png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+|#[a-z]+)?$/, loader: 'url-loader?limit=100000' },
-            { test: /.(png|woff(2)?|eot|ttf|svg).*$/, loader: 'url-loader?limit=100000' },
-            //{ test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
-            { test: /\.(woff|woff2)$/, loader:"url?prefix=font/&limit=5000" },
-            { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
-            //{ test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" },
+            {test: /\.woff(2)?(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/font-woff" },
+            {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
+            {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
+            {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" }
 
-            //{ test: /\.css$/, loader: 'style!css'},
-            //{ test: /\.(otf|eot|svg|ttf|woff|woff2).*$/, loader: 'url?limit=8192' }
+//            //{ test: /\.(otf|eot|svg|ttf|woff|woff2).*$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+//            { test: /\.woff(2)?(\?v=[0-9].[0-9].[0-9])?$/, loader: "url-loader?mimetype=application/font-woff" },
+//            //{ test: /\.(ttf|eot|svg)(\?v=[0-9].[0-9].[0-9])?$/, loader: "file-loader?name=[name].[ext]" },
+//
+//            { test: /.(png|woff(2)?|eot|ttf|svg)(\?[a-z0-9=\.]+|#[a-z]+)?$/, loader: 'url-loader?limit=100000&mimetype=application/octet-stream' },
+//            { test: /.(png|woff(2)?|eot|ttf|svg).*$/, loader: 'url-loader?limit=100000&mimetype=application/octet-stream' },
+//            //{ test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
+////            { test: /\.(woff|woff2)$/, loader:"url?prefix=font/&limit=5000" },
+//            { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
+//            //{ test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" },
+//
+//            //{ test: /\.css$/, loader: 'style!css'},
+//            //{ test: /\.(otf|eot|svg|ttf|woff|woff2).*$/, loader: 'url?limit=8192' }
         ]
     }
 };
