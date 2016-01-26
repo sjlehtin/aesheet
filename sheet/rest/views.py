@@ -127,6 +127,30 @@ class SkillViewSet(viewsets.ModelViewSet):
         return qs
 
 
+class FirearmViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.BaseFirearmSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def initialize_request(self, request, *args, **kwargs):
+        if 'campaign_pk' in self.kwargs:
+            campaign = models.Campaign.objects.get(pk=self.kwargs[
+                'campaign_pk'])
+            self.tech_levels = [tl['id'] for tl in
+                                campaign.tech_levels.values('id')]
+        else:
+            self.tech_levels = []
+        return super(FirearmViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = models.BaseFirearm.objects.all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                    self.tech_levels))
+            qs = qs.filter(tech_level__in=self.tech_levels)
+        return qs
+
+
 class ListPermissionMixin(object):
     """
     The `list` method of ListModelMixin does not check object

@@ -529,7 +529,6 @@ class CharacterSkillTestCase(TestCase):
         self.assertEqual(response.data['skill'], "Lightsaber")
 
 
-
 class SkillTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -593,6 +592,50 @@ class SkillTestCase(TestCase):
 
 
 class FirearmTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_onek = factories.TechLevelFactory(name="OneK")
+        self.tech_frp = factories.TechLevelFactory(name="Magic")
+        self.onek = factories.CampaignFactory(name='1K',
+                                              tech_levels=["OneK"])
+        self.frp = factories.CampaignFactory(name='FRP',
+                                             tech_levels=["OneK", "Magic"])
+
+        factories.BaseFirearmFactory(name="Catapult",
+                                     tech_level=self.tech_onek)
+        factories.BaseFirearmFactory(name="Magic Catapult",
+                                     tech_level=self.tech_frp)
+
+    def test_main_url(self):
+        url = '/rest/firearms/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_frp_campaign_url(self):
+        url = '/rest/firearms/campaign/{}/'.format(self.frp.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([weapon['name']
+                                 for weapon in response.data]),
+                         ["Catapult", "Magic Catapult"])
+
+    def test_1k_campaign_url(self):
+        url = '/rest/firearms/campaign/{}/'.format(self.onek.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['name'], "Catapult"),
+
+
+
+class SheetFirearmTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.request_factory = APIRequestFactory()

@@ -41,6 +41,12 @@ class SkillSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BaseFirearmSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.BaseFirearm
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
