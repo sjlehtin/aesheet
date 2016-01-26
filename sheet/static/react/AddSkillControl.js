@@ -78,7 +78,7 @@ class AddSkillControl extends React.Component {
         var levelChoices = this.getLevelChoices();
 
         return <div>
-            <table >
+            <table>
                 <tbody>
                 <tr>
                     <td><label>Skill</label></td>
