@@ -288,4 +288,14 @@ describe('FirearmControl', function() {
         expect(checks).toEqual([45, 45, 45, 44, 34, 24, 4, -16]);
     });
 
+    it ("allows removal of the firearm", function () {
+        var spy = jasmine.createSpy("callback");
+        var firearm = getFirearmControl({
+            weapon: factories.firearmFactory({id: 5}),
+            onRemove: spy
+        });
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(firearm._removeButton));
+        expect(spy).toHaveBeenCalledWith({id: 5});
+    });
+
 });

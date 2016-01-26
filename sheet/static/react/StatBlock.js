@@ -7,6 +7,7 @@ import InitiativeBlock from 'InitiativeBlock';
 import SkillTable from 'SkillTable';
 import Loading from 'Loading';
 import FirearmControl from 'FirearmControl';
+import AddFirearmControl from 'AddFirearmControl';
 
 const SkillHandler = require('SkillHandler').default;
 
@@ -39,6 +40,11 @@ class StatBlock extends React.Component {
         };
     }
 
+    handleFirearmsLoaded(firearmList) {
+        console.log("Firearms loaded");
+        this.setState({firearmList: firearmList});
+    }
+
     handleSkillsLoaded(skillList, allSkills) {
         this.setState({characterSkills: skillList,
         allSkills: allSkills});
@@ -50,8 +56,7 @@ class StatBlock extends React.Component {
            error-handling control for this purpose. */
 
         rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
-            console.log("Firearms loaded");
-            this.setState({firearmList: json});
+            this.handleFirearmsLoaded(json);
         }).catch((err) => {console.log("Failed to load firearms:", err)});
 
         rest.getData(this.props.url).then((json) => {
@@ -361,6 +366,36 @@ class StatBlock extends React.Component {
         }).catch((err) => console.log(err));
     }
 
+    getFirearmURL(fa) {
+        var baseURL = this.props.url + 'sheetfirearms/';
+        if (fa) {
+            return baseURL + fa.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleFirearmAdded(firearm) {
+        rest.post(this.props.url + 'sheetfirearms/', {base: firearm.base.name,
+        ammo: firearm.ammo.id}).then((json) => {
+            console.log("POST success", json);
+            firearm.id = json.id;
+            var newList = this.state.firearmList;
+            newList.push(firearm);
+            this.setState({firearmList: newList});
+        }).catch((err) => {console.log("error", err)});
+    }
+
+    handleFirearmRemoved(firearm) {
+        rest.delete(this.getFirearmURL(firearm), firearm).then(
+            (json) => {
+                var index = StatBlock.findCharacterSkillIndex(
+                    this.state.firearmList, firearm);
+                this.state.firearmList.splice(index, 1);
+                this.setState({firearmList: this.state.firearmList});
+            }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
     renderDescription() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading/>;
@@ -561,14 +596,24 @@ class StatBlock extends React.Component {
 
         var idx = 0;
         for (let fa of this.state.firearmList) {
-            rows.push(<FirearmControl key={idx++} weapon={fa}
-                                      skillHandler={skillHandler}
-                                      style={{fontSize: "80%"}}
+            if (idx % 2 === 0) {
+                var bgColor = "transparent";
+            } else {
+                bgColor = "rgb(245, 245, 255)";
+            }
+            rows.push(<FirearmControl
+                key={idx++} weapon={fa}
+                skillHandler={skillHandler}
+                onRemove={(fa) => this.handleFirearmRemoved(fa) }
+                style={{fontSize: "80%", backgroundColor: bgColor}}
             />);
         }
 
         return <Panel header={<h4>Firearms</h4>}>
             {rows}
+
+            <AddFirearmControl campaign={this.state.char.campaign}
+            onFirearmAdd={(fa) => this.handleFirearmAdded(fa) }/>
         </Panel>;
     }
 

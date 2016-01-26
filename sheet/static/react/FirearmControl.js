@@ -1,6 +1,6 @@
 import React from 'react';
 var util = require('sheet-util');
-import {Col} from 'react-bootstrap';
+import {Col, Row, Button} from 'react-bootstrap';
 
 class FirearmControl extends React.Component {
     skillLevel() {
@@ -304,7 +304,16 @@ class FirearmControl extends React.Component {
                 {this.renderInt(init)}
             </th>});
 
-        return <table style={{fontSize: 'inherit'}}>
+        var autoUnskilled = '';
+        if (!this.props.skillHandler.hasSkill("Autofire")) {
+            autoUnskilled = <div style={{color:"red"}}
+                             title="Missing skill Autofire">
+                Unskilled</div>;
+        }
+
+        return <div>
+
+        <table style={{fontSize: 'inherit'}}>
             <thead>
             <tr>
                 <th style={baseStyle}>Leth</th>
@@ -322,7 +331,10 @@ class FirearmControl extends React.Component {
                 {inits}
             </tr>
             </tfoot>
-        </table>;
+        </table>
+            {autoUnskilled}
+
+        </div>;
     }
 
     sweepChecks(sweepType) {
@@ -360,7 +372,17 @@ class FirearmControl extends React.Component {
         return checks;
     }
 
+    handleRemove() {
+        if (this.props.onRemove) {
+            this.props.onRemove({id: this.props.weapon.id});
+        }
+    }
+
     renderSweepTable() {
+        if (!this.props.weapon.base.autofire_rpm) {
+            return '';
+        }
+
         var sweepRows = [];
 
         var baseStyle = {padding: 2, borderWidth: 1, minWidth: "2em",
@@ -380,7 +402,8 @@ class FirearmControl extends React.Component {
             sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{" "}</td>{checkCells}</tr>);
         }
 
-        return <table style={{fontSize: "inherit"}}>
+        return <div>
+        <table style={{fontSize: "inherit"}}>
             <thead>
             <tr><th colSpan={4}>Sweep fire</th></tr>
             <tr><th>RPT</th><th>TGT</th></tr></thead>
@@ -401,8 +424,22 @@ class FirearmControl extends React.Component {
         <th>-1</th><th>-1</th><th>-1</th>
         <th>0</th><th>0</th><th>0</th></tr>
             </tfoot>
-        </table>;
+        </table>
+
+            <div style={{color: "hotpink"}}>
+                <p>
+                    The distance between sweep targets may be up to
+                    1 m (-5 penalty / target), or up to 2 m
+                    (-10 penalty / target).
+                </p>
+                <p>
+                    All range penalties are doubled in sweep fire
+                    (i.e. M -20, L -40, XL -60, E -80)
+                </p>
+            </div>
+        </div>;
     }
+
     render () {
         var weapon = this.props.weapon.base;
         var ammo = this.props.weapon.ammo;
@@ -411,12 +448,6 @@ class FirearmControl extends React.Component {
         if (missing.length > 0) {
             unskilled = <div style={{color:"red"}}
                              title={`Missing skills: ${missing.join(' ,')}`}>
-                Unskilled</div>;
-        }
-        var autoUnskilled = '';
-        if (!this.props.skillHandler.hasSkill("Autofire")) {
-            autoUnskilled = <div style={{color:"red"}}
-                             title="Missing skill Autofire">
                 Unskilled</div>;
         }
         var ammoIdentifier = <div>{ammo.label} {ammo.bullet_type}</div>;
@@ -442,7 +473,9 @@ class FirearmControl extends React.Component {
         {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
 
         return <div style={this.props.style}>
+            <Row>
             <Col md={9}>
+                <Row>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
                   <tr>
@@ -486,22 +519,29 @@ class FirearmControl extends React.Component {
       </tr>
       </tbody>
 </table>
-            <div className="durability"><label>Durability:</label>{weapon.durability}</div>
-
-                {this.renderSweepTable()}
+            <div className="durability">
+                <label>Durability:</label>{weapon.durability}</div>
+                    <Button onClick={(e) => this.handleRemove()}
+                            ref={(c) => this._removeButton = c}
+                            bsSize="xsmall"
+                    >Remove</Button>
+                </Row>
+                <Row>
+                    {this.renderSweepTable()}
+                </Row>
             </Col>
             <Col md={3}>
                 {this.renderBurstTable()}
-
-                {autoUnskilled}
             </Col>
+            </Row>
         </div>;
     }
 }
 
 FirearmControl.props = {
     skillHandler: React.PropTypes.object.isRequired,
-    weapon: React.PropTypes.object.isRequired
+    weapon: React.PropTypes.object.isRequired,
+    onRemove: React.PropTypes.func
 };
 
 export default FirearmControl;

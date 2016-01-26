@@ -7,8 +7,9 @@ jest.dontMock('../Loading');
 jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
-jest.dontMock('../SkillHandler')
-jest.dontMock('../FirearmControl')
+jest.dontMock('../SkillHandler');
+jest.dontMock('../FirearmControl');
+jest.dontMock('../AddFirearmControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -132,6 +133,8 @@ describe('stat block', function() {
                 return jsonResponse([]);
             } else if (url === "/rest/skills/campaign/2/") {
                 return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheetfirearms/") {
+                return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */
                 fail("this is an unsupported url:" + url);
@@ -151,6 +154,14 @@ describe('stat block', function() {
         promises = [];
     });
 
+    var getAllArgsByIndex = function (mockCalls, ind) {
+        var list = [];
+        for (let call of mockCalls) {
+            list.push(call[ind]);
+        }
+        return list;
+    }
+
     it('fetched initial data', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         expect(block.state.char).toBe(undefined);
@@ -158,11 +169,11 @@ describe('stat block', function() {
         Promise.all(promises).then(function () {
             expect(block.state.sheet).not.toBe(undefined);
             expect(block.state.url).not.toBe(undefined);
-            expect(rest.getData.mock.calls[0][0]).toEqual('/rest/sheets/1/');
+            expect(getAllArgsByIndex(rest.getData.mock.calls, 0)).toContain('/rest/sheets/1/');
 
             Promise.all(promises).then(function () {
-                expect(rest.getData.mock.calls[1][0])
-                    .toEqual('/rest/characters/2/');
+                expect(getAllArgsByIndex(rest.getData.mock.calls, 0))
+                    .toContain('/rest/characters/2/');
 
                 Promise.all(promises).then(function () {
                     /* TODO: Ridiculoso! */
@@ -583,6 +594,39 @@ describe('stat block', function() {
             }).catch((err) => {
                 fail(err)
             });
+        });
+    });
+
+    it ("can add firearms", function (done) {
+        // TODO
+    });
+
+    it ("can remove firearms", function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            var skillList = [
+                factories.characterSkillFactory({
+                    id: 1, skill: "Handguns",
+                    level: 1
+                })
+            ];
+            block.handleSkillsLoaded(skillList);
+            block.handleFirearmsLoaded([factories.firearmFactory({id: 3}),
+            factories.firearmFactory({id: 5})]);
+
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
+
+            block.handleFirearmRemoved({id: 3});
+
+            promise.then(() => {
+                expect(block.state.firearmList.length).toEqual(1);
+                expect(block.state.firearmList[0].id).toEqual(5);
+
+                expect(getAllArgsByIndex(rest.delete.mock.calls, 0)).toContain(
+                    '/rest/sheets/1/sheetfirearms/3/');
+                done();
+            }).catch((err) => {fail(err)});
         });
     });
 
