@@ -189,61 +189,6 @@ perhaps Robot-system tests.
 </div>
 
     <div id="skill-pane" class="col-md-3">
-    {% comment %}
-
-        <div class="skills panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Skills</h3>
-        </div>
-        <div class="panel-body">
-                    <table>
-                        {% include "sheet/sheet_detail/skill.html" with skill=sheet.endurance %}
-                        {% include "sheet/sheet_detail/skill.html" with skill=sheet.balance %}
-                        {% for skill in sheet.physical_skills %}
-                            {% include "sheet/sheet_detail/skill.html" %}
-                        {% endfor %}
-                        {% for skill in sheet.skills %}
-                            {% include "sheet/sheet_detail/skill.html" %}
-                        {% endfor %}
-                    </table>
-                    <div>
-                        SP: {{ sheet.initial_sp }} + {{ sheet.edge_sp }}
-                        + {{ sheet.gained_sp }} =
-                        {{ sheet.total_sp }} / {{ sheet.used_sp }}
-                    </div>
-                    <div>Age SP: {{ sheet.age_sp }} </div>
-                    {% with sheet.optimized_age_sp as opt %}
-                        <div>Munch munch: +{{ opt.lrn }} LRN, + {{ opt.int }}
-                            INT
-                        </div>
-                    {% endwith %}
-
-            <div id="add_skill" class="edit-control">
-                <label for="add_skill_form"><strong>Add a skill</strong></label>
-
-                <form action="{{ act }}" method="post"
-                      id="add_skill_form">{% csrf_token %}
-                    <table>
-                        {{ add_skill_form.as_table }}
-                    </table>
-                    <input type="submit" value="Add"/>
-                </form>
-            </div>
-            <div id="add_lang" class="edit-control">
-                <label for="add_lang_form"><strong>Add a language skill</strong></label>
-
-                <form action="{{ act }}" method="post"
-                      id="add_lang_form">{% csrf_token %}
-                    <table>
-                        {{ add_lang_form.as_table }}
-                    </table>
-                    <input type="submit" value="Add"/>
-                </form>
-            </div>
-        </div>
-        </div>
-        <div>Missing skills: {{ sheet.missing_skills }}</div>
-    {% endcomment %}
 
 
         <div id="log-entries">
