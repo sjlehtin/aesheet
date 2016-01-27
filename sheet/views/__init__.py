@@ -375,13 +375,6 @@ class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
 
-    def used_sp(self):
-        try:
-            return sum([cs.cost() for cs in self._skills])
-        # Invalid skill level.
-        except TypeError:
-            return 0
-
     def weapons(self):
         return [WeaponWrap(xx, self.sheet)
                 for xx in self.sheet.weapons.all()]
