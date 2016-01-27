@@ -975,11 +975,14 @@ class Ammunition(ExportedModel, BaseDamager):
     velocity = models.IntegerField(help_text="Velocity of the bullet at muzzle "
                                              "in meters per second.  Used to "
                                              "calculate recoil.")
+
+    # TODO: Remove.
     @property
     def damage(self):
         return format_damage(self.num_dice, self.dice, self.extra_damage,
                              self.leth, self.plus_leth)
 
+    # TODO: Remove.
     def impulse(self):
         return (float(self.weight)* self.velocity)/1000
 
@@ -1006,6 +1009,7 @@ class Firearm(models.Model):
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
 
+    # TODO: Remove.
     def roa(self):
         """
         Calculated based on ammo and base.
@@ -1020,15 +1024,19 @@ class Firearm(models.Model):
         logger.debug("rof: {rof}".format(rof=rof))
         return rof
 
+    # TODO: Remove.
     def ranges(self, sheet):
         return self.base.ranges(sheet)
 
+    # TODO: Remove.
     def damage(self):
         return self.ammo.damage
 
+    # TODO: Remove.
     def has_sweep_fire(self):
         return not self.base.sweep_fire_disabled and bool(self.base.autofire_rpm)
 
+    # TODO: Remove.
     @property
     def to_hit(self):
         # XXX scopes etc
@@ -1853,6 +1861,7 @@ class Sheet(PrivateMixin, models.Model):
                     readied_base_i=-1,
                     target_i=weapon.base.target_initiative))]
 
+    # TODO: Remove.
     def firearm_skill_checks(self, weapon, actions=None,
                              counter_penalties=True):
         if actions is None:

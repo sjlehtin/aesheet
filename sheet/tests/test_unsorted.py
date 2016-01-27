@@ -361,6 +361,7 @@ class FirearmTestCase(TestCase):
             expected=[(0.5, 53), (1, 46), (2, 43), (3, 43), (4, 43), (5, 38)])
 
 
+# TODO: Remove.
 class AutofireTestCase(TestCase):
     def setUp(self):
         factories.CampaignFactory(name="MR", tech_levels=("all", "2K"))
