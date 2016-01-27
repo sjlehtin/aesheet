@@ -8,6 +8,7 @@ jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
+jest.dontMock('../WeaponRow');
 jest.dontMock('../FirearmControl');
 jest.dontMock('../AddFirearmControl');
 jest.dontMock('../sheet-util');
@@ -597,7 +598,7 @@ describe('stat block', function() {
         });
     });
 
-    it ("can add firearms", function (done) {
+    it ("can add firearms", function () {
         // TODO
     });
 

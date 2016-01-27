@@ -1,26 +1,11 @@
 import React from 'react';
+import WeaponRow from 'WeaponRow';
 var util = require('sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
-class FirearmControl extends React.Component {
-    skillLevel() {
-        return this.props.skillHandler.skillLevel(
-            this.props.weapon.base.base_skill);
-    }
-
-    missingSkills() {
-        var missing = [];
-        var checkSkill = (skillName) => {
-            if (skillName) {
-                if (!this.props.skillHandler.hasSkill(skillName)) {
-                    missing.push(skillName);
-                }
-            }
-        };
-        checkSkill(this.props.weapon.base.base_skill);
-        checkSkill(this.props.weapon.base.skill);
-        checkSkill(this.props.weapon.base.skill2);
-        return missing;
+class FirearmControl extends WeaponRow {
+    constructor(props) {
+        super(props);
     }
 
     skillCheck () {
@@ -62,61 +47,6 @@ class FirearmControl extends React.Component {
             rof *= 1 + 0.1 * skillLevel;
         }
         return rof;
-    }
-
-    static checkMod(roa, act, baseBonus, extraActionModifier) {
-        if (1/act >= 1/roa + 1) {
-            return baseBonus;
-        }
-        if (act < 0.5 * roa) {
-            return roa / act;
-        }
-        /* Gap.*/
-        if (act > roa) {
-            return - act/roa * 20 + extraActionModifier;
-        }
-
-        // Value in the gap.
-        return 0;
-    }
-
-    static counterPenalty(modifier, stat) {
-        if (modifier > 0) {
-            /* Not a penalty, a bonus. */
-            return modifier;
-        }
-        return Math.min(0, modifier + util.rounddown((stat - 45)/3))
-    }
-
-    getStat(stat) {
-        return this.props.skillHandler.getStat(stat);
-    }
-
-    skillChecks(actions, counterPenalty) {
-        var rof = this.rof();
-        var baseCheck = this.skillCheck();
-
-        var checks = [];
-
-        if (counterPenalty === undefined) {
-            counterPenalty = true;
-        }
-
-        for (let act of actions) {
-            if (act > 2 * rof) {
-                checks.push(null);
-            } else {
-                var mod = Math.round(FirearmControl.checkMod(rof, act, 10,
-                    15));
-
-                if (counterPenalty) {
-                    mod = FirearmControl.counterPenalty(mod,
-                        this.getStat("FIT"));
-                }
-                checks.push(mod + baseCheck);
-            }
-        }
-        return checks;
     }
 
     singleBurstChecks(check) {
@@ -194,49 +124,6 @@ class FirearmControl extends React.Component {
         return this.initiatives(this.mapBurstActions(actions));
     }
 
-    initiatives(actions) {
-        var baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9];
-        var rof = this.rof();
-        var baseI = -5 / rof;
-        var readiedBaseI = -1;
-        var base = this.props.weapon.base;
-        var targetI = base.target_initiative;
-        var initiative = this.getStat('ref') / 10 +
-            this.getStat('int') / 20 +
-            this.getStat('psy') / 20;
-
-        var initiatives = [];
-        for (let act of actions) {
-            if (act > 2 * rof) {
-                initiatives.push(null);
-            } else {
-                if (rof > 2 * act && act < 1) {
-                    /* Assuming multi-turn action, where readying of the
-                       weapon is possible and target has already been
-                       acquired.  House Rules, initiative, p. 8. */
-                    initiatives.push(
-                        Math.max(readiedBaseI, baseI) +
-                        Math.min(targetI + 3, 0));
-                } else {
-                    /* One target acquire is assumed for the rest of the
-                       initiatives.  If target is changed, target-I should
-                       be added to the rest of the initiatives.
-
-                       TODO: add note to sheet about this.
-                     */
-                    initiatives.push(
-                        baseIMultipliers[Math.ceil(act) - 1] * baseI +
-                        targetI);
-                }
-            }
-        }
-        return initiatives.map(function (el) {
-            if (el !== null) {
-                return Math.round(el + initiative);}
-            else { return null }
-        });
-    }
-
     renderDamage() {
         var ammo = this.props.weapon.ammo;
         var extraDamage;
@@ -253,18 +140,6 @@ class FirearmControl extends React.Component {
         }
         return <span className="damage">{ammo.num_dice}d{ammo.dice}{
             extraDamage}/{ammo.leth}{plusLeth}</span>;
-    }
-
-    renderInt(value) {
-        if (value !== null) {
-            if (value >= 0) {
-                return "+" + value;
-            } else {
-                return value;
-            }
-        } else {
-            return '';
-        }
     }
 
     renderBurstTable() {
@@ -370,12 +245,6 @@ class FirearmControl extends React.Component {
             );
         }
         return checks;
-    }
-
-    handleRemove() {
-        if (this.props.onRemove) {
-            this.props.onRemove({id: this.props.weapon.id});
-        }
     }
 
     renderSweepTable() {

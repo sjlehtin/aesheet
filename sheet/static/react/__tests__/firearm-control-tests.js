@@ -1,4 +1,5 @@
 jest.dontMock('../FirearmControl');
+jest.dontMock('../WeaponRow');
 jest.dontMock('../SkillHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
