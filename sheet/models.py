@@ -200,8 +200,8 @@ class Character(PrivateMixin, models.Model):
 
     notes = models.TextField(blank=True,
                              help_text="Freeform notes for the character, "
-                                       "intended for quick notes across gaming "
-                                       "sessions.")
+                                       "intended for quick notes across "
+                                       "gaming sessions.")
 
     hero = models.BooleanField(default=False)
 
@@ -473,17 +473,6 @@ class Character(PrivateMixin, models.Model):
         elif specialist_training_level == 2:
             extra_sp += 10
         return extra_sp
-
-    @property
-    def total_sp(self):
-        return self.initial_sp + self.edge_sp + self.gained_sp
-
-    def optimized_age_sp(self):
-        diff = self.age_sp + 0.00001 - (self.lrn/15.0 + self.int/25.0 +
-                                        self.psy/50.0)
-        lrn = rounddown(diff * 15)
-        int = roundup((diff - lrn/15.0)*25)
-        return {"lrn": lrn, "int": int, "psy": 0}
 
     @classmethod
     def get_by_campaign(cls, user):
