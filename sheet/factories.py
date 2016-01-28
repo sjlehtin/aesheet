@@ -320,6 +320,7 @@ class HelmFactory(ArmorFactory):
 
 
 class WeaponTemplateFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "weapon-%03d" % n)
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
     base_skill = factory.SubFactory(SkillFactory)
