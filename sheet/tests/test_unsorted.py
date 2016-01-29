@@ -239,6 +239,7 @@ class ItemHandlingTestCase(TestCase):
         self.assertEqual(response.context['sheet'].armor().armor_t_pl, 3)
         self.assertEqual(response.context['sheet'].helm().armor_h_pl, 2)
 
+    # TODO: Remove.
     def test_add_firearm(self):
         ammo = factories.AmmunitionFactory(label="9Pb",
                                            weight=7.5,
@@ -267,6 +268,7 @@ class ItemHandlingTestCase(TestCase):
                                     "Glock 19 w/ 9Pb FMJ (3.30)")
 
 
+# TODO: Remove.
 class FirearmTestCase(TestCase):
     def setUp(self):
         factories.CampaignFactory(name="MR", tech_levels=("all", "2K"))

@@ -294,6 +294,7 @@ class WeaponWrap(RemoveWrap, SkilledMixin):
         self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
 
 
+# TODO: Remove.
 class FirearmWrap(RemoveWrap, SkilledMixin):
     def __init__(self, item, sheet):
         super(FirearmWrap, self).__init__(item)
@@ -383,6 +384,7 @@ class SheetView(object):
         return [RangedWeaponWrap(xx, self.sheet)
                 for xx in self.sheet.ranged_weapons.all()]
 
+    # TODO: Remove.
     def firearms(self):
         return [FirearmWrap(xx, self.sheet)
                 for xx in self.sheet.firearms.all()]
@@ -441,6 +443,7 @@ def process_sheet_change_request(request, sheet):
         elif item_type == "RangedWeapon":
             item = get_object_or_404(RangedWeapon, pk=item)
             sheet.ranged_weapons.remove(item)
+        # TODO: Remove.
         elif item_type == "Firearm":
             item = get_object_or_404(Firearm, pk=item)
             sheet.firearms.remove(item)
@@ -522,6 +525,7 @@ def sheet_detail(request, sheet_id=None):
              "add-existing-miscellaneous-item", instance=sheet)
     add_form(HelmForm, "new-helm")
 
+    # TODO: Remove.
     add_form(AddFirearmForm, "add-firearm", instance=sheet)
 
     if request.method == "POST":
@@ -558,6 +562,7 @@ def sheet_detail(request, sheet_id=None):
                                         sheet.id)
 
     c = {'sheet': SheetView(sheet),
+         # TODO: Remove.
          'sweep_fire_available': any([wpn.has_sweep_fire()
                                       for wpn in sheet.firearms.all()]),
          }
