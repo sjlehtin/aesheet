@@ -75,7 +75,7 @@ describe('FirearmControl', function() {
         expect(firearm.skillCheck()).toEqual(11);
     });
 
-    it("can calculate effect of missing specialization fire skill checks",
+    it("can calculate effect of missing specialization skill checks",
         function () {
         var firearm = getFirearmControl({
             handlerProps: {
