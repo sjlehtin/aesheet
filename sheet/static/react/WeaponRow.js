@@ -5,6 +5,10 @@ import {Col, Row, Button} from 'react-bootstrap';
 class WeaponRow extends React.Component {
     constructor(props) {
         super(props);
+        this.readiedBaseI = -3;
+        this.baseCheckBonusForSlowActions = 5;
+        this.extraActionModifier = 10;
+        this.penaltyCounterStat = "INT";
     }
 
     skillLevel() {
@@ -27,45 +31,34 @@ class WeaponRow extends React.Component {
         return missing;
     }
 
+    isSkilled() {
+        return this.missingSkills().length === 0;
+    }
+
+    roa() {
+        var roa = parseFloat(this.props.weapon.base.roa) +
+            (-0.15) * (this.props.weapon.size - 1) +
+            parseFloat(this.props.weapon.quality.roa);
+
+        var level = this.props.skillHandler.skillLevel(
+            this.props.weapon.base.base_skill);
+        if (level > 0) {
+            roa *= (1 + 0.1 * level);
+        }
+
+        return roa;
+    }
+
     skillCheck() {
         var check = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
 
-        /* TODO: This works differently with ranged and close-combat
-         weapons (CCV on unskilled).  Might need a slightly more intricate
-         system to handle this. */
-        if (this.props.weapon.base.skill) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill)) {
-                check -= 10;
-            }
-        }
-        if (this.props.weapon.base.skill2) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill2)) {
-                check -= 10;
-            }
+        check += this.props.weapon.base.ccv + this.props.weapon.quality.ccv;
+
+        if (!this.isSkilled()) {
+            check += this.props.weapon.base.ccv_unskilled_modifier;
         }
         return check;
-    }
-
-    rof() {
-        var ammo = this.props.weapon.ammo;
-        var base = this.props.weapon.base;
-        var impulse = (parseFloat(ammo.weight) *
-            parseFloat(ammo.velocity)) / 1000;
-
-        var recoil = impulse / (parseFloat(base.duration) *
-            parseFloat(base.stock) *
-            (parseFloat(base.weight) + 6));
-
-        var skillLevel = this.skillLevel();
-        var rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
-
-        if (skillLevel > 0) {
-            rof *= 1 + 0.1 * skillLevel;
-        }
-        return rof;
     }
 
     static checkMod(roa, act, baseBonus, extraActionModifier) {
@@ -110,12 +103,13 @@ class WeaponRow extends React.Component {
             if (act > 2 * rof) {
                 checks.push(null);
             } else {
-                var mod = Math.round(WeaponRow.checkMod(rof, act, 10,
-                    15));
+                var mod = Math.round(WeaponRow.checkMod(rof, act,
+                    this.baseCheckBonusForSlowActions,
+                    this.extraActionModifier));
 
                 if (counterPenalty) {
                     mod = WeaponRow.counterPenalty(mod,
-                        this.getStat("FIT"));
+                        this.getStat(this.penaltyCounterStat));
                 }
                 checks.push(mod + baseCheck);
             }
@@ -127,7 +121,7 @@ class WeaponRow extends React.Component {
         var baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9];
         var rof = this.rof();
         var baseI = -5 / rof;
-        var readiedBaseI = -1;
+        var readiedBaseI = this.readiedBaseI;
         var base = this.props.weapon.base;
         var targetI = base.target_initiative;
         var initiative = this.getStat('ref') / 10 +
@@ -150,8 +144,6 @@ class WeaponRow extends React.Component {
                     /* One target acquire is assumed for the rest of the
                      initiatives.  If target is changed, target-I should
                      be added to the rest of the initiatives.
-
-                     TODO: add note to sheet about this.
                      */
                     initiatives.push(
                         baseIMultipliers[Math.ceil(act) - 1] * baseI +
@@ -206,7 +198,7 @@ class WeaponRow extends React.Component {
     }
 
     render() {
-
+        return <div></div>
     }
 }
 

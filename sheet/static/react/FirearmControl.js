@@ -6,6 +6,11 @@ import {Col, Row, Button} from 'react-bootstrap';
 class FirearmControl extends WeaponRow {
     constructor(props) {
         super(props);
+
+        this.readiedBaseI = -1;
+        this.baseCheckBonusForSlowActions = 10;
+        this.extraActionModifier = 15;
+        this.penaltyCounterStat = "FIT";
     }
 
     skillCheck () {
