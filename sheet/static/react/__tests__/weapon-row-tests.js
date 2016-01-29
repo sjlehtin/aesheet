@@ -77,7 +77,7 @@ describe('WeaponRow', function() {
         });
 
     it("notices specializations", function () {
-        var firearm = getWeaponRow({
+        var weapon = getWeaponRow({
             handlerProps: {
                 characterSkills: [factories.characterSkillFactory({
                     skill: "Greatsword",
@@ -97,11 +97,11 @@ describe('WeaponRow', function() {
                 }
             })
         });
-        expect(firearm.skillCheck()).toEqual(65);
+        expect(weapon.skillCheck()).toEqual(65);
     });
 
     it("calculates correct ROA for full", function () {
-        var firearm = getWeaponRow({
+        var weapon = getWeaponRow({
             handlerProps: {
                 characterSkills: [factories.characterSkillFactory({
                     skill: "Weapon combat",
@@ -111,11 +111,11 @@ describe('WeaponRow', function() {
             weapon: factories.weaponFactory({
                 base: {base_skill: "Weapon combat", roa: "1.5"}})
         });
-        expect(firearm.roa()).toBeCloseTo(1.95, 2);
+        expect(weapon.roa()).toBeCloseTo(1.95, 2);
     });
 
     it("calculates correct ROA for a large weapon", function () {
-        var firearm = getWeaponRow({
+        var weapon = getWeaponRow({
             handlerProps: {
                 characterSkills: [factories.characterSkillFactory({
                     skill: "Weapon combat",
@@ -126,7 +126,21 @@ describe('WeaponRow', function() {
                 base: {base_skill: "Weapon combat", roa: "1.5"},
                 size: 2})
         });
-        expect(firearm.roa()).toBeCloseTo(1.35, 2);
+        expect(weapon.roa()).toBeCloseTo(1.35, 2);
+    });
+
+    it("calculates skill checks for full use", function () {
+        var weapon = getWeaponRow({
+            handlerProps: {
+                characterSkills: [factories.characterSkillFactory({
+                    skill: "Weapon combat",
+                    level: 0
+                })]
+            },
+            weapon: factories.weaponFactory({
+                base: {base_skill: "Weapon combat", roa: "1.5", ccv:10}})
+        });
+        expect(weapon.skillChecks([0.5, 1, 2, 3])).toEqual([60, 55, 38, 25]);
     });
 
     it("calculates very high two-weapon style effect correctly", function () {
