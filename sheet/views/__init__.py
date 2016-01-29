@@ -487,7 +487,10 @@ def sheet_detail(request, sheet_id=None):
         'character__skills__skill',
         'character__skills__skill__required_skills',
         'character__skills__skill__edgeskillbonus_set',
-        'character__edges'),
+        'character__edges',
+        'character__edges__edge',
+        'character__characterlogentry_set__skill',
+    ),
                               pk=sheet_id)
     if not sheet.character.access_allowed(request.user):
         raise PermissionDenied
