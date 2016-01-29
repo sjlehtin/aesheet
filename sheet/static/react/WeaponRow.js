@@ -90,7 +90,7 @@ class WeaponRow extends React.Component {
     }
 
     skillChecks(actions, counterPenalty) {
-        var rof = this.rof();
+        var roa = this.roa();
         var baseCheck = this.skillCheck();
 
         var checks = [];
@@ -100,10 +100,10 @@ class WeaponRow extends React.Component {
         }
 
         for (let act of actions) {
-            if (act > 2 * rof) {
+            if (act > 2 * roa) {
                 checks.push(null);
             } else {
-                var mod = Math.round(WeaponRow.checkMod(rof, act,
+                var mod = Math.round(WeaponRow.checkMod(roa, act,
                     this.baseCheckBonusForSlowActions,
                     this.extraActionModifier));
 

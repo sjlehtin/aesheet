@@ -35,7 +35,7 @@ class FirearmControl extends WeaponRow {
         return check;
     }
 
-    rof() {
+    roa() {
         var ammo = this.props.weapon.ammo;
         var base = this.props.weapon.base;
         var impulse = (parseFloat(ammo.weight) *
@@ -52,6 +52,10 @@ class FirearmControl extends WeaponRow {
             rof *= 1 + 0.1 * skillLevel;
         }
         return rof;
+    }
+
+    rof() {
+        return this.roa();
     }
 
     singleBurstChecks(check) {
