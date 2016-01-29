@@ -65,64 +65,64 @@ class SheetTestCase(TestCase):
         self.assertIn('weight_carried', serializer.data)
 
 
-class SheetWeaponTestCase(TestCase):
-    def setUp(self):
-        self.update_view = views.SheetViewSet.as_view(
-                {'patch': 'partial_update'})
-
-        self.sword = factories.WeaponFactory(base__name="Sword")
-        self.plate = factories.ArmorFactory(base__name="Plate mail")
-        self.spear = factories.WeaponFactory(base__name="Spear")
-        self.request_factory = APIRequestFactory()
-        self.user = factories.UserFactory(username="leia")
-        self.owner = factories.UserFactory(username="luke")
-        self.sheet = factories.SheetFactory(character__owner=self.owner,
-                                            character__private=True)
-        self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
-
-    def _make_verify_patch(self, query_data):
-        req = self.request_factory.patch(self.url, query_data)
-        force_authenticate(req, user=self.owner)
-        response = self.update_view(req, pk=self.sheet.pk)
-        self.assertEqual(response.status_code, 200)
-
-    def test_remove_weapon(self):
-        self.sheet.weapons.add(self.spear)
-        self.sheet.weapons.add(self.sword)
-        self.sheet.armor = self.plate
-        self.sheet.save()
-
-        updated_weapons = [self.spear.pk]
-        self._make_verify_patch({'weapons': updated_weapons})
-
-        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-        self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
-                         updated_weapons)
-        self.assertEqual(sheet.armor, self.plate,
-                         "Other aspects should not change")
-
-    def test_add_armor(self):
-        self.sheet.weapons.add(self.spear)
-        armor = {'armor': self.plate.pk}
-        self._make_verify_patch(armor)
-
-        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-        self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
-                         [self.spear.pk], "Other aspects should not change")
-
-    def test_add_weapon(self):
-        self.sheet.weapons.add(self.spear)
-        self.sheet.armor = self.plate
-        self.sheet.save()
-
-        updated_weapons = [self.spear.pk, self.sword.pk]
-        self._make_verify_patch({'weapons': updated_weapons})
-
-        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-        self.assertEqual(sorted([wpn.pk for wpn in sheet.weapons.all()]),
-                         sorted(updated_weapons))
-        self.assertEqual(sheet.armor, self.plate,
-                         "Other aspects should not change")
+# class SheetWeaponTestCase(TestCase):
+#     def setUp(self):
+#         self.update_view = views.SheetViewSet.as_view(
+#                 {'patch': 'partial_update'})
+#
+#         self.sword = factories.WeaponFactory(base__name="Sword")
+#         self.plate = factories.ArmorFactory(base__name="Plate mail")
+#         self.spear = factories.WeaponFactory(base__name="Spear")
+#         self.request_factory = APIRequestFactory()
+#         self.user = factories.UserFactory(username="leia")
+#         self.owner = factories.UserFactory(username="luke")
+#         self.sheet = factories.SheetFactory(character__owner=self.owner,
+#                                             character__private=True)
+#         self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
+#
+#     def _make_verify_patch(self, query_data):
+#         req = self.request_factory.patch(self.url, query_data)
+#         force_authenticate(req, user=self.owner)
+#         response = self.update_view(req, pk=self.sheet.pk)
+#         self.assertEqual(response.status_code, 200)
+#
+#     def test_remove_weapon(self):
+#         self.sheet.weapons.add(self.spear)
+#         self.sheet.weapons.add(self.sword)
+#         self.sheet.armor = self.plate
+#         self.sheet.save()
+#
+#         updated_weapons = [self.spear.pk]
+#         self._make_verify_patch({'weapons': updated_weapons})
+#
+#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+#         self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
+#                          updated_weapons)
+#         self.assertEqual(sheet.armor, self.plate,
+#                          "Other aspects should not change")
+#
+#     def test_add_armor(self):
+#         self.sheet.weapons.add(self.spear)
+#         armor = {'armor': self.plate.pk}
+#         self._make_verify_patch(armor)
+#
+#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+#         self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
+#                          [self.spear.pk], "Other aspects should not change")
+#
+#     def test_add_weapon(self):
+#         self.sheet.weapons.add(self.spear)
+#         self.sheet.armor = self.plate
+#         self.sheet.save()
+#
+#         updated_weapons = [self.spear.pk, self.sword.pk]
+#         self._make_verify_patch({'weapons': updated_weapons})
+#
+#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+#         self.assertEqual(sorted([wpn.pk for wpn in sheet.weapons.all()]),
+#                          sorted(updated_weapons))
+#         self.assertEqual(sheet.armor, self.plate,
+#                          "Other aspects should not change")
 
 
 class CharacterTestCase(TestCase):
@@ -634,7 +634,6 @@ class FirearmTestCase(TestCase):
         self.assertEqual(weapon['name'], "Catapult"),
 
 
-
 class SheetFirearmTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -686,3 +685,53 @@ class SheetFirearmTestCase(TestCase):
 
 # TODO: add test for checking private sheets restrict access to
 # sheetfirearms correctly.
+
+
+class SheetWeaponTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetweapons/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_weapons(self):
+        self.sheet.weapons.add(factories.WeaponFactory())
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        weapon = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': weapon.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.weapons.all()[0].base.name, "Long sword")
+
+    def test_deleting_items(self):
+        weapon = factories.WeaponFactory()
+        self.sheet.weapons.add(weapon)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, weapon.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Weapon.objects.get(pk=weapon.pk)
+        self.assertEqual(len(self.sheet.weapons.all()), 0)
+
+    # TODO: With SheetFirearms, modifications make sense.

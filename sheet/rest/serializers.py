@@ -104,8 +104,24 @@ class SheetFirearmListSerializer(serializers.ModelSerializer):
         fields = "__all__"
         depth = 1
 
+
 class SheetFirearmCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = sheet.models.Firearm
+        fields = "__all__"
+
+
+class SheetWeaponListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = sheet.models.Weapon
+        fields = "__all__"
+        depth = 1
+
+
+class SheetWeaponCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = sheet.models.Weapon
         fields = "__all__"
