@@ -112,8 +112,78 @@ var firearmFactory = function (overrideFields) {
     return Object.assign(firearm, overrides);
 };
 
+var weaponFactory = function (overrideFields) {
+    "use strict";
+    var weapon ={
+        "id": 3,
+        "name": "Broadsword",
+        "description": "",
+        "size": 1,
+        "quality": {
+            "name": "normal",
+            "short_name": "",
+            "roa": "0.0000",
+            "ccv": 0,
+            "damage": 0,
+            "leth": 0,
+            "plus_leth": 0,
+            "bypass": 0,
+            "durability": 0,
+            "dp_multiplier": "1.0000",
+            "weight_multiplier": "1.0000",
+            "notes": "",
+            "defense_leth": 0,
+            "versus_missile_modifier": 0,
+            "versus_area_save_modifier": 0,
+            "max_fit": 90,
+            "tech_level": 1
+        },
+        "base": {
+            "name": "Broadsword",
+            "short_name": "Spatha",
+            "description": "",
+            "notes": "",
+            "draw_initiative": -4,
+            "durability": 7,
+            "dp": 7,
+            "weight": "1.4",
+            "num_dice": 1,
+            "dice": 8,
+            "extra_damage": 0,
+            "leth": 5,
+            "plus_leth": 0,
+            "roa": "1.000",
+            "bypass": -1,
+            "type": "S",
+            "ccv": 13,
+            "ccv_unskilled_modifier": -10,
+            "defense_leth": 5,
+            "is_lance": false,
+            "is_shield": false,
+            "tech_level": 3,
+            "base_skill": "Sword",
+            "skill": null,
+            "skill2": null
+        },
+        "special_qualities": []
+    };
+    
+    var overrides = Object.assign({}, overrideFields ? overrideFields : {});
+    if ('base' in overrides) {
+        weapon.base = Object.assign(weapon.base, overrideFields.base);
+        delete overrides.base;
+    }
+
+    if ('quality' in overrides) {
+        weapon.quality = Object.assign(weapon.quality, overrideFields.quality);
+        delete overrides.quality;
+    }
+    return Object.assign(weapon, overrides);
+};
+
 module.exports = {characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
     statsFactory: statsFactory,
-    firearmFactory: firearmFactory
+    firearmFactory: firearmFactory,
+    weaponFactory: weaponFactory,
 };
