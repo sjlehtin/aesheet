@@ -25,7 +25,6 @@ class SkillHandler {
     }
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
-    /* TODO: non-working at this point. */
     isBaseSkill(skill) {
         if (skill.skill_cost_1 === null) {
             return true;
