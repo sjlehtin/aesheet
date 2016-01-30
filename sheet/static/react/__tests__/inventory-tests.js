@@ -120,6 +120,35 @@ describe('Inventory', function() {
         }).catch((err) => fail(err));
     });
 
+    it('allows items to be added with button click', function (done) {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
+        var inventory = getInventory();
+
+        Promise.all(promises).then((data) => {
+            TestUtils.Simulate.click(inventory._addButton);
+
+            var node = ReactDOM.findDOMNode(inventory._inputRow)
+                .querySelector('td input');
+            expect(ReactDOM.findDOMNode(inventory._addButton)
+                .hasAttribute("disabled")).toEqual(true);
+
+            expect(inventory._inputRow.isValid()).toEqual(false);
+            node.value = "Foofaafom";
+            TestUtils.Simulate.change(node);
+            expect(inventory._inputRow.isValid()).toEqual(true);
+
+            expect(ReactDOM.findDOMNode(inventory._addButton)
+                .hasAttribute("disabled")).toEqual(false);
+            spyOn(inventory, 'handleNew');
+
+            TestUtils.Simulate.click(
+                ReactDOM.findDOMNode(inventory._addButton));
+
+            expect(inventory.handleNew).toHaveBeenCalled();
+            done();
+        }).catch((err) => fail(err));
+    });
+
     it('allows items to be removed', function (done) {
         var initialElem = inventoryEntryFactory({id: 1});
         rest.getData.mockReturnValue(jsonResponse([initialElem]));

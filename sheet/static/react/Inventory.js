@@ -13,7 +13,8 @@ class Inventory extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {inventory: [], addEnabled: false };
+        this.state = {inventory: [], addEnabled: false,
+        addButtonEnabled: true};
     }
 
     componentDidMount() {
@@ -62,6 +63,7 @@ class Inventory extends React.Component {
                 newInventory.push(data);
 
                 this.setState({addEnabled: false});
+                this.setState({addButtonEnabled: true});
                 this.updateInventory(newInventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); });
@@ -93,6 +95,22 @@ class Inventory extends React.Component {
             .catch((err) => {console.log("Failed to update: ", err); });
     }
 
+    handleInputRowChanged() {
+        console.log("Changed ", this._inputRow.isValid());
+        this.setState({addButtonEnabled: this._inputRow.isValid()});
+    }
+
+    handleAddButtonClick() {
+        if (!this.state.addEnabled) {
+            this.setState({addEnabled: true});
+            this.setState({addButtonEnabled: false});
+        } else {
+            if (this._inputRow.isValid()) {
+                this._inputRow.submit();
+            }
+        }
+    }
+
     render() {
         var total = 0;
         var weightStyle = {textAlign: "left", paddingLeft: 20};
@@ -106,10 +124,14 @@ class Inventory extends React.Component {
         });
 
         if (this.state.addEnabled) {
-            rows.push(
-                <InventoryRow key={-1} createNew={true}
-                              onMod={(newElem) => this.handleNew(newElem)}>
-                    <Button onClick={() => this.setState({addEnabled: false})}>Cancel</Button>
+            rows.push(<InventoryRow
+                ref={(c) => this._inputRow = c}
+                key={-1}
+                createNew={true}
+                onMod={(newElem) => this.handleNew(newElem)}
+                onChange={() => this.handleInputRowChanged()}>
+                <Button onClick={() => this.setState({addEnabled: false})}
+                >Cancel</Button>
             </InventoryRow>);
         }
         return <Table striped condensed style={{fontSize: "80%"}}>
@@ -125,6 +147,7 @@ class Inventory extends React.Component {
                     ref={(c) => {this._addButton =
                     c ? ReactDOM.findDOMNode(c) : undefined}}
                     style={{}}
+                    disabled={!this.state.addButtonEnabled}
                     onClick={(e) => this.handleAddButtonClick(e)}>
                     Add entry</Button></td>
                 <td colSpan="3" style={{
