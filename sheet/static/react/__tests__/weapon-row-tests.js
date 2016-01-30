@@ -20,16 +20,6 @@ describe('WeaponRow', function() {
     var getWeaponRow = function (givenProps) {
         var handlerProps = {
             characterSkills: [],
-            allSkills: [
-                factories.skillFactory({
-                    name: "Weapon combat",
-                    stat: "mov"
-                }),
-                factories.skillFactory({
-                    name: "Sword",
-                    stat: "mov"
-                })
-            ],
             stats: {mov: 45}
         };
         if (givenProps && 'handlerProps' in givenProps) {
@@ -37,7 +27,15 @@ describe('WeaponRow', function() {
                 givenProps.handlerProps);
             delete givenProps.handlerProps;
         }
+
+        var allSkills = [];
+        for (let skill of handlerProps.characterSkills) {
+            allSkills.push(factories.skillFactory({
+                name: skill.skill,
+                stat: "mov"}));
+        }
         handlerProps.stats = factories.statsFactory(handlerProps.stats);
+        handlerProps.allSkills = allSkills;
 
         var props = {
             weapon: factories.weaponFactory(
@@ -114,19 +112,63 @@ describe('WeaponRow', function() {
         expect(weapon.roa()).toBeCloseTo(1.95, 2);
     });
 
-    it("calculates correct ROA for a large weapon", function () {
-        var weapon = getWeaponRow({
+    var getWeapon = function (givenProps) {
+        var props = {roa: "1.5", size: 1, skillLevel: 0, extraSkills: []};
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+
+        var skills = [factories.characterSkillFactory({
+            skill: "Weapon combat",
+            level: props.skillLevel
+        })];
+
+        for (let skill of props.extraSkills) {
+            skills.push(factories.characterSkillFactory(skill));
+        }
+        return getWeaponRow({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
-                    skill: "Weapon combat",
-                    level: 0
-                })]
+                characterSkills: skills,
             },
             weapon: factories.weaponFactory({
-                base: {base_skill: "Weapon combat", roa: "1.5"},
-                size: 2})
+                base: {base_skill: "Weapon combat", roa: props.roa},
+                size: props.size})
         });
+    };
+
+    it("calculates correct ROA for a large weapon", function () {
+        var weapon = getWeapon({size: 2});
         expect(weapon.roa()).toBeCloseTo(1.35, 2);
+    });
+
+    it("calculates correct ROA for FULL use", function () {
+        var weapon = getWeapon();
+        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(1.5, 2);
+    });
+
+    it("calculates correct ROA for PRI use", function () {
+        var weapon = getWeapon();
+        expect(weapon.roa(WeaponRow.PRI)).toBeCloseTo(1.25, 2);
+    });
+
+    it("calculates correct ROA for SEC use", function () {
+        var weapon = getWeapon();
+        expect(weapon.roa(WeaponRow.SEC)).toBeCloseTo(1.0, 2);
+    });
+
+    it("calculates very high two-weapon style effect correctly", function () {
+        // Even 6th level TWS should only counter the PRI penalty,
+        // not give an actual bonus.
+        var weapon = getWeapon({
+            extraSkills: [{skill: "Two-weapon style", level: 6}]
+        });
+        expect(weapon.roa(WeaponRow.PRI)).toBeCloseTo(1.5, 2);
+        expect(weapon.roa(WeaponRow.SEC)).toBeCloseTo(1.3, 2);
+    });
+
+    it("caps roa", function () {
+        var weapon = getWeapon({skillLevel: 5, roa: 2.0});
+        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(2.5, 2);
     });
 
     it("calculates skill checks for full use", function () {
@@ -143,8 +185,4 @@ describe('WeaponRow', function() {
         expect(weapon.skillChecks([0.5, 1, 2, 3])).toEqual([60, 55, 38, 25]);
     });
 
-    it("calculates very high two-weapon style effect correctly", function () {
-        // TODO: Even 6th level TWS should only counter the PRI penalty,
-        // not give an actual bonus.
-    });
 });

@@ -35,18 +35,38 @@ class WeaponRow extends React.Component {
         return this.missingSkills().length === 0;
     }
 
-    roa() {
+    roa(useType) {
+        if (!useType) {
+            useType = WeaponRow.FULL;
+        }
         var roa = parseFloat(this.props.weapon.base.roa) +
             (-0.15) * (this.props.weapon.size - 1) +
             parseFloat(this.props.weapon.quality.roa);
 
+        if (useType === WeaponRow.SPECIAL || useType === WeaponRow.FULL) {
+        } else {
+            var specLevel = this.props.skillHandler.skillLevel(
+                "Two-weapon style");
+            if (!util.isInt(specLevel)) {
+                specLevel = 0;
+            }
+            var mod;
+            if (useType === WeaponRow.PRI) {
+                mod = -0.25;
+            } else if (useType === WeaponRow.SEC) {
+                mod = -0.5;
+            }
+            mod += specLevel * 0.05;
+
+            roa += Math.min(mod, 0);
+        }
         var level = this.props.skillHandler.skillLevel(
             this.props.weapon.base.base_skill);
         if (level > 0) {
             roa *= (1 + 0.1 * level);
         }
 
-        return roa;
+        return Math.min(roa, 2.5);
     }
 
     skillCheck() {
@@ -201,6 +221,11 @@ class WeaponRow extends React.Component {
         return <div></div>
     }
 }
+
+WeaponRow.SPECIAL = 1;
+WeaponRow.FULL = 2;
+WeaponRow.PRI = 3;
+WeaponRow.SEC = 4;
 
 WeaponRow.props = {
     skillHandler: React.PropTypes.object.isRequired,
