@@ -361,8 +361,10 @@ describe('SkillTable', function() {
     // if the parent stores the passed object directly, state should not
     // get passed over.  TODO: test for sanitizeSkillObject usage in
     // handleCharacterSkillModify
-    xit("should clean away internal fields from parent notifications")
+    xit("should clean away internal fields from parent notifications");
     xit("filters out skills that the character already has");
     xit("calculates edge skill bonuses correctly and passes them to" +
-        " skillrows")
+        " skillrows");
+
+    xit("calculates SPs from edges correctly");
 });
