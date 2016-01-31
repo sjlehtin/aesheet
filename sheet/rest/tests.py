@@ -781,4 +781,95 @@ class SheetWeaponTestCase(TestCase):
         models.Weapon.objects.get(pk=weapon.pk)
         self.assertEqual(len(self.sheet.weapons.all()), 0)
 
-    # TODO: With SheetFirearms, modifications make sense.
+
+class WeaponTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_twok = factories.TechLevelFactory(name="2K")
+        self.tech_threek = factories.TechLevelFactory(name="3K")
+        self.campaign_mr = factories.CampaignFactory(name='MR',
+                                                     tech_levels=["2K"])
+        self.campaign_gz = factories.CampaignFactory(name='GZ',
+                                                     tech_levels=["2K", "3K"])
+        normal = factories.WeaponQualityFactory(name="normal",
+                                                tech_level__name="2K")
+        nanotech = factories.WeaponQualityFactory(name="nanotech",
+                                                  tech_level__name="3K")
+        sword = factories.WeaponTemplateFactory(name="Sword",
+                                                 tech_level=self.tech_twok)
+        power = factories.WeaponTemplateFactory(name="Powersword",
+                                                tech_level=self.tech_threek)
+
+        factories.WeaponFactory(base=sword, quality=normal)
+        factories.WeaponFactory(base=sword, quality=nanotech)
+        factories.WeaponFactory(base=power, quality=normal)
+
+    def test_main_url_templates(self):
+        url = '/rest/weapontemplates/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_templates(self):
+        url = '/rest/weapontemplates/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([weapon['name']
+                                 for weapon in response.data]),
+                         ["Powersword", "Sword"])
+
+    def test_mr_campaign_url_templates(self):
+        url = '/rest/weapontemplates/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['name'], "Sword"),
+
+    def test_main_url_qualities(self):
+        url = '/rest/weaponqualities/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_qualities(self):
+        url = '/rest/weaponqualities/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([quality['name']
+                                 for quality in response.data]),
+                         ["nanotech", "normal"])
+
+    def test_mr_campaign_url_qualities(self):
+        url = '/rest/weaponqualities/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        quality = response.data[0]
+        self.assertEqual(quality['name'], "normal"),
+
+    def test_main_url_weapons(self):
+        url = '/rest/weapons/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_gz_campaign_url_for_weapons(self):
+        url = '/rest/weapons/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_mr_campaign_url_weapons(self):
+        url = '/rest/weapons/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['base'], "Sword"),

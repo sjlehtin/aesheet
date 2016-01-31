@@ -48,6 +48,24 @@ class BaseFirearmSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class WeaponTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.WeaponTemplate
+        fields = "__all__"
+
+
+class WeaponQualitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.WeaponQuality
+        fields = "__all__"
+
+
+class WeaponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Weapon
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):

@@ -102,10 +102,7 @@ class EdgeLevelViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class SkillViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.SkillSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
+class CampaignMixin(object):
     def initialize_request(self, request, *args, **kwargs):
         if 'campaign_pk' in self.kwargs:
             campaign = models.Campaign.objects.get(pk=self.kwargs[
@@ -114,12 +111,14 @@ class SkillViewSet(viewsets.ModelViewSet):
                                 campaign.tech_levels.values('id')]
         else:
             self.tech_levels = []
-        return super(SkillViewSet, self).initialize_request(
+        return super(CampaignMixin, self).initialize_request(
                 request, *args, **kwargs)
 
+    def get_base_queryset(self):
+        return self.serializer_class.Meta.model.objects.all()
+
     def get_queryset(self):
-        qs = models.Skill.objects.prefetch_related('required_skills',
-                                                   'required_edges').all()
+        qs = self.get_base_queryset()
         if self.tech_levels:
             logger.info("filtering with tech_levels: {}".format(
                     self.tech_levels))
@@ -127,27 +126,41 @@ class SkillViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class FirearmViewSet(viewsets.ModelViewSet):
+class SkillViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.SkillSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_base_queryset(self):
+        return models.Skill.objects.prefetch_related('required_skills',
+                                                     'required_edges').all()
+
+
+class FirearmViewSet(CampaignMixin, viewsets.ModelViewSet):
     serializer_class = serializers.BaseFirearmSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def initialize_request(self, request, *args, **kwargs):
-        if 'campaign_pk' in self.kwargs:
-            campaign = models.Campaign.objects.get(pk=self.kwargs[
-                'campaign_pk'])
-            self.tech_levels = [tl['id'] for tl in
-                                campaign.tech_levels.values('id')]
-        else:
-            self.tech_levels = []
-        return super(FirearmViewSet, self).initialize_request(
-                request, *args, **kwargs)
+
+class WeaponTemplateViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.WeaponTemplateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class WeaponQualityViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.WeaponQualitySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class WeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.WeaponSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        qs = models.BaseFirearm.objects.all()
+        qs = models.Weapon.objects.select_related().all()
         if self.tech_levels:
             logger.info("filtering with tech_levels: {}".format(
                     self.tech_levels))
-            qs = qs.filter(tech_level__in=self.tech_levels)
+            qs = qs.filter(base__tech_level__in=self.tech_levels)
+            qs = qs.filter(quality__tech_level__in=self.tech_levels)
         return qs
 
 
@@ -184,7 +197,8 @@ class CharacterSkillViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                 request, *args, **kwargs)
 
     def get_serializer(self, *args, **kwargs):
-        serializer = super(CharacterSkillViewSet, self).get_serializer(*args, **kwargs)
+        serializer = super(CharacterSkillViewSet, self).get_serializer(
+                *args, **kwargs)
         if isinstance(serializer, serializers.CharacterSkillSerializer):
             serializer.fields['character'].default = self.character
             serializer.fields['character'].read_only = True
@@ -286,7 +300,6 @@ class SheetFirearmViewSet(viewsets.ModelViewSet):
         
 
 class SheetWeaponViewSet(viewsets.ModelViewSet):
-    #serializer_class = serializers.SheetWeaponListSerializer
 
     def initialize_request(self, request, *args, **kwargs):
         self.sheet = models.Sheet.objects.get(
