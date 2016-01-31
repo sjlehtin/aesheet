@@ -273,6 +273,11 @@ describe('WeaponRow', function() {
         expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+2/5+1");
     });
 
+    it("calculates damage with odd number fit", function () {
+        var weapon = getWeapon({fit: 58});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+3/5+1");
+    });
+
     it("calculates damage with quality", function () {
         var weapon = getWeapon({quality: {damage: 3, leth: 1,
             plus_leth: 1}});
@@ -356,4 +361,6 @@ describe('WeaponRow', function() {
     // Special damage
 
     // TODO: Lance damage on charge.
+    // TODO: weapons requiring one-handed use cannot be used PRI or SEC
+    // without the skill.
 });

@@ -280,10 +280,10 @@ class WeaponRow extends React.Component {
             ccFITBonus += maeLevel * 5;
         }
 
-        var fitBonusDmg = ccFITBonus /
-            WeaponRow.damageFITModifiers[props.useType];
-        var fitLethBonus = ccFITBonus /
-            WeaponRow.lethalityFITModifiers[props.useType];
+        var fitBonusDmg = util.rounddown(ccFITBonus /
+            WeaponRow.damageFITModifiers[props.useType]);
+        var fitLethBonus = util.rounddown(ccFITBonus /
+            WeaponRow.lethalityFITModifiers[props.useType]);
 
         extraDamage += Math.min(fitBonusDmg, maxDmg);
         leth = Math.min(leth + fitLethBonus, this.durability() + 1);
@@ -370,14 +370,12 @@ class WeaponRow extends React.Component {
                 {this.renderUseType(WeaponRow.SEC)}
       </tbody>
 </table>
-            {/*
             <div className="durability">
-                <label>Durability:</label>{weapon.durability}</div>
+                <label>Durability:</label>{this.durability()}</div>
                     <Button onClick={(e) => this.handleRemove()}
                             ref={(c) => this._removeButton = c}
                             bsSize="xsmall"
                     >Remove</Button>
-                    */}
         </div>;
     }
 }
