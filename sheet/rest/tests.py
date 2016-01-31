@@ -770,6 +770,23 @@ class SheetWeaponTestCase(TestCase):
         self.assertEqual(self.sheet.weapons.all()[0].base.name,
                          "Long sword")
 
+    def test_should_be_possible_to_add_existing_unique_weapons(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.WeaponFactory(name="Dancing sword",
+                                         base=template,
+                                         quality=quality,
+                                         special_qualities=["Dancing"])
+
+        response = self.client.post(
+                self.url,
+                data={'weapon': weapon.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.weapons.all()[0].name,
+                         "Dancing sword")
+
     def test_deleting_items(self):
         weapon = factories.WeaponFactory()
         self.sheet.weapons.add(weapon)

@@ -151,8 +151,34 @@ class SheetWeaponListSerializer(serializers.ModelSerializer):
 
 
 class SheetWeaponCreateSerializer(serializers.ModelSerializer):
+    weapon = serializers.IntegerField(
+            required=False)
+
+    base = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.WeaponTemplate.objects.all(),
+            required=False)
+    quality = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.WeaponQuality.objects.all(),
+            required=False)
+
+    def validate_weapon(self, value):
+        return sheet.models.Weapon.objects.get(pk=value)
+
+    def validate(self, attrs):
+        if not attrs.get('weapon'):
+            if not attrs['base']:
+                raise serializers.ValidationError("weapon not passed, "
+                                                  "base is required")
+            if not attrs['quality']:
+                raise serializers.ValidationError("weapon not passed, "
+                                                  "quality is required")
+
+        return attrs
 
     def create(self, validated_data):
+        if 'weapon' in validated_data:
+            return validated_data['weapon']
+
         if set(validated_data.keys()) == {'base', 'quality'}:
             objs = sheet.models.Weapon.objects.filter(
                     base=validated_data['base'],
