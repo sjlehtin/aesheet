@@ -120,8 +120,8 @@ describe('WeaponRow', function() {
     });
 
     var getWeapon = function (givenProps) {
-        var props = {roa: "1.5", size: 1, ccv: 10, skillLevel: 0, int: 45,
-            extraSkills: [], edges: [], quality: {}};
+        var props = {roa: "1.5", size: 1, ccv: 10, skillLevel: 0, fit: 45,
+            int: 45, extraSkills: [], edges: [], quality: {}, base: {}};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
@@ -135,16 +135,20 @@ describe('WeaponRow', function() {
             skills.push(factories.characterSkillFactory(skill));
         }
 
+        var base = Object.assign({
+            base_skill: "Weapon combat", roa: props.roa,
+            ccv: props.ccv, num_dice: 2, dice: 6, extra_damage: 2,
+            leth: 5, plus_leth: 1, defense_leth: 6, durability: 7},
+            props.base);
+
         return getWeaponRow({
             handlerProps: {
                 characterSkills: skills,
                 edges: props.edges,
-                stats: {mov: 45, int: props.int}
+                stats: {mov: 45, int: props.int, fit: props.fit}
             },
             weapon: factories.weaponFactory({
-                base: {base_skill: "Weapon combat", roa: props.roa,
-                    ccv: props.ccv, num_dice: 2, dice: 6, extra_damage: 2,
-                leth: 5, plus_leth: 1, defense_leth: 6, durability: 7},
+                base: base,
                 quality: props.quality,
                 size: props.size})
         });
@@ -288,8 +292,24 @@ describe('WeaponRow', function() {
             .toEqual("2d6+5/7");
     });
 
-    // Size
     // Damage capping
     // Lethality capping
+    it("caps damage and lethality", function () {
+        var weapon = getWeapon({quality: {damage: 1}, base: {num_dice: 1}});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("1d6+3/5+1");
+        weapon = getWeapon({quality: {damage: 1}, base: {num_dice: 1},
+            fit: 180});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL}))
+            .toEqual("1d6+12/8+1");
+    });
+
+    it("takes martial arts expertise into account", function () {
+        var weapon = getWeapon({quality: {damage: 1}, base: {num_dice: 1},
+        extraSkills: [{skill: "Martial arts expertise", level: 6}]});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL}))
+            .toEqual("1d6+7/6+1");
+    });
+
+    // TODO:Size
     // Special damage
 });

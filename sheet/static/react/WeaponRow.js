@@ -219,14 +219,19 @@ class WeaponRow extends React.Component {
         });
     }
 
+    durability() {
+        return this.props.weapon.base.durability +
+            this.props.weapon.quality.durability;
+    }
+
     renderDamage(givenProps) {
-        var props = {defense: false};
+        var props = {defense: false, useType: WeaponRow.FULL};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
         var base = this.props.weapon.base;
         var quality = this.props.weapon.quality;
-        var num_dice = base.num_dice;
+        var numDice = base.num_dice;
 
         var extraDamage = base.extra_damage + quality.damage;
         var leth = base.leth + quality.leth;
@@ -235,7 +240,29 @@ class WeaponRow extends React.Component {
             plusLeth = null;
             leth = base.defense_leth + quality.defense_leth;
         }
-        return `${num_dice}d${base.dice}${
+
+        /* Damage is capped to twice the base damage of the weapon (incl.
+         size and quality). */
+        var maxDmg = numDice * base.dice + extraDamage;
+
+        /* Martial arts expertise skill grants a bonus to damage. */
+        var maeLevel = this.props.skillHandler.skillLevel("Martial arts" +
+            " expertise");
+
+        var ccFITBonus = this.getStat("fit") - 45;
+        if (maeLevel > 0) {
+            ccFITBonus += maeLevel * 5;
+        }
+
+        var fitBonusDmg = ccFITBonus /
+            WeaponRow.damageFITModifiers[props.useType];
+        var fitLethBonus = ccFITBonus /
+            WeaponRow.lethalityFITModifiers[props.useType];
+
+        extraDamage += Math.min(fitBonusDmg, maxDmg);
+        leth = Math.min(leth + fitLethBonus, this.durability() + 1);
+
+        return `${numDice}d${base.dice}${
             this.renderInt(extraDamage)}/${leth}${this.renderInt(plusLeth)}`;
     }
 
