@@ -219,22 +219,24 @@ class WeaponRow extends React.Component {
         });
     }
 
-    renderDamage() {
-        var ammo = this.props.weapon.ammo;
-        var extraDamage;
-        if (ammo.extra_damage) {
-            extraDamage = `${Math.sign(ammo.extra_damage) > 0 ?
-                "+" : ""}${ammo.extra_damage}`;
-        } else {
-            extraDamage = "";
+    renderDamage(givenProps) {
+        var props = {defense: false};
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
         }
-        var plusLeth;
-        if (ammo.plus_leth) {
-            plusLeth = ` (${Math.sign(ammo.plus_leth) > 0 ?
-                "+" : ""}${ammo.plus_leth})`
+        var base = this.props.weapon.base;
+        var quality = this.props.weapon.quality;
+        var num_dice = base.num_dice;
+
+        var extraDamage = base.extra_damage + quality.damage;
+        var leth = base.leth + quality.leth;
+        var plusLeth = base.plus_leth + quality.plus_leth;
+        if (props.defense) {
+            plusLeth = null;
+            leth = base.defense_leth + quality.defense_leth;
         }
-        return <span className="damage">{ammo.num_dice}d{ammo.dice}{
-            extraDamage}/{ammo.leth}{plusLeth}</span>;
+        return `${num_dice}d${base.dice}${
+            this.renderInt(extraDamage)}/${leth}${this.renderInt(plusLeth)}`;
     }
 
     renderInt(value) {
@@ -260,10 +262,24 @@ class WeaponRow extends React.Component {
     }
 }
 
-WeaponRow.SPECIAL = 1;
-WeaponRow.FULL = 2;
-WeaponRow.PRI = 3;
-WeaponRow.SEC = 4;
+WeaponRow.SPECIAL = "SPECIAL";
+WeaponRow.FULL = "FULL";
+WeaponRow.PRI = "PRI";
+WeaponRow.SEC = "SEC";
+
+WeaponRow.damageFITModifiers = {
+    SPECIAL: 5,
+    FULL: 7.5,
+    PRI: 10,
+    SEC: 15
+};
+
+WeaponRow.lethalityFITModifiers = {
+    SPECIAL : 20,
+    FULL : 30,
+    PRI : 40,
+    SEC : 60
+};
 
 WeaponRow.props = {
     skillHandler: React.PropTypes.object.isRequired,

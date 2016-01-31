@@ -121,7 +121,7 @@ describe('WeaponRow', function() {
 
     var getWeapon = function (givenProps) {
         var props = {roa: "1.5", size: 1, ccv: 10, skillLevel: 0, int: 45,
-            extraSkills: [], edges: []};
+            extraSkills: [], edges: [], quality: {}};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
@@ -143,7 +143,9 @@ describe('WeaponRow', function() {
             },
             weapon: factories.weaponFactory({
                 base: {base_skill: "Weapon combat", roa: props.roa,
-                    ccv: props.ccv},
+                    ccv: props.ccv, num_dice: 2, dice: 6, extra_damage: 2,
+                leth: 5, plus_leth: 1, defense_leth: 6, durability: 7},
+                quality: props.quality,
                 size: props.size})
         });
     };
@@ -262,4 +264,32 @@ describe('WeaponRow', function() {
             {useType: WeaponRow.SEC})).toEqual([9, -6, -21]);
     });
 
+    it("calculates damage", function () {
+        var weapon = getWeapon();
+        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+2/5+1");
+    });
+
+    it("calculates damage with quality", function () {
+        var weapon = getWeapon({quality: {damage: 3, leth: 1,
+            plus_leth: 1}});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+5/6+2");
+    });
+
+    it("calculates defense damage", function () {
+        var weapon = getWeapon();
+        expect(weapon.renderDamage({useType: WeaponRow.FULL,
+            defense: true})).toEqual("2d6+2/6");
+    });
+
+    it("calculates defense damage with quality", function () {
+        var weapon = getWeapon({quality: {damage: 3, leth: 1,
+            plus_leth: 1, defense_leth: 1}});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL, defense: true}))
+            .toEqual("2d6+5/7");
+    });
+
+    // Size
+    // Damage capping
+    // Lethality capping
+    // Special damage
 });
