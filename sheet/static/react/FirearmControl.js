@@ -136,17 +136,10 @@ class FirearmControl extends WeaponRow {
 
     renderDamage() {
         var ammo = this.props.weapon.ammo;
-        var extraDamage;
-        if (ammo.extra_damage) {
-            extraDamage = `${Math.sign(ammo.extra_damage) > 0 ?
-                "+": ""}${ammo.extra_damage}`;
-        } else {
-            extraDamage = "";
-        }
-        var plusLeth;
+        var extraDamage = this.renderInt(ammo.extra_damage);
+        var plusLeth = '';
         if (ammo.plus_leth) {
-            plusLeth = ` (${Math.sign(ammo.plus_leth) > 0 ?
-                "+": ""}${ammo.plus_leth})`
+            plusLeth = ` (${this.renderInt(ammo.plus_leth)})`;
         }
         return <span className="damage">{ammo.num_dice}d{ammo.dice}{
             extraDamage}/{ammo.leth}{plusLeth}</span>;
