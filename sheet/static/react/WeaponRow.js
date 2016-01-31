@@ -310,7 +310,22 @@ class WeaponRow extends React.Component {
         }
     }
 
+    oneHandedUseAvailable() {
+        if ([this.props.weapon.base.skill, this.props.weapon.base.skill2]
+                .indexOf("One-handed use") >= 0) {
+            return this.props.skillHandler.hasSkill("One-handed use");
+        } else {
+            return true;
+        }
+    }
     renderUseType(useType) {
+        if (useType === WeaponRow.PRI || useType === WeaponRow.SEC) {
+            if (!this.oneHandedUseAvailable()) {
+                return <tr colSpan={19}>
+                    <td style={{color: "red", textAlign: "left"}}
+                    >Unskilled for one-handed use</td></tr>
+            }
+        }
         var cellStyle = {paddingRight: 5, paddingBottom: 5};
         var initStyle = Object.assign({color: "red"}, cellStyle);
         var defenseInitStyle = Object.assign({color: "blue"}, cellStyle);

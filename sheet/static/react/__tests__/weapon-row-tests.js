@@ -358,9 +358,20 @@ describe('WeaponRow', function() {
         expect(weapon.bypass()).toEqual(-2);
     });
 
+    // Weapons requiring one-handed use cannot be used PRI or SEC
+    // without the skill.
+    it("observes weapon One-handed use requirement", function () {
+        var weapon = getWeapon({size: 2, base: {skill2: "One-handed use"}});
+
+        var rows = ReactDOM.findDOMNode(weapon).querySelectorAll('tbody tr');
+        expect(rows[0].textContent).not.toContain("Unskilled");
+        expect(rows[1].textContent).toContain("Unskilled");
+        expect(rows[2].textContent).toContain("Unskilled");
+    });
+
     // Special damage
 
     // TODO: Lance damage on charge.
-    // TODO: weapons requiring one-handed use cannot be used PRI or SEC
-    // without the skill.
+
+
 });
