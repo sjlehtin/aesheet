@@ -1226,18 +1226,20 @@ class BaseWeapon(ExportedModel):
                                                      (2, "double"),
                                                      (3, "triple"),
                                                      (4, "quadruple")))
-
+    # TODO: Remove.
     @property
     def bypass(self):
         size_mod = -1 * (self.size - 1)
         return self.base.bypass + size_mod + self.quality.bypass
 
+    # TODO: Remove.
     def roa(self):
         size_mod = 0
         if self.size > 1:
             size_mod = -0.15 * (self.size - 1)
         return float(self.base.roa) + size_mod + float(self.quality.roa)
 
+    # TODO: Remove.
     @property
     def draw_initiative(self):
         size_mod = 0
@@ -1245,6 +1247,7 @@ class BaseWeapon(ExportedModel):
             size_mod = -2 * (self.size - 1)
         return self.base.draw_initiative + size_mod
 
+    # TODO: Remove.
     @property
     def durability(self):
         size_mod = 0
@@ -1252,11 +1255,13 @@ class BaseWeapon(ExportedModel):
             size_mod = (self.size - 1) * 2
         return self.base.durability + size_mod + self.quality.durability
 
+    # TODO: Remove.
     @property
     def dp(self):
         size_mod = pow(2, (self.size - 1))
         return self.base.dp * size_mod * self.quality.dp_multiplier
 
+    # TODO: Remove.
     @property
     def weight(self):
         size_mod = pow(3, (self.size - 1))
