@@ -20,6 +20,7 @@ describe('WeaponRow', function() {
     var getWeaponRow = function (givenProps) {
         var handlerProps = {
             characterSkills: [],
+            edges: [],
             stats: {mov: 45}
         };
         if (givenProps && 'handlerProps' in givenProps) {
@@ -36,6 +37,12 @@ describe('WeaponRow', function() {
         }
         handlerProps.stats = factories.statsFactory(handlerProps.stats);
         handlerProps.allSkills = allSkills;
+
+        var edges = [];
+        for (let edge of handlerProps.edges) {
+            edges.push(factories.edgeFactory(edge));
+        }
+        handlerProps.edges = edges;
 
         var props = {
             weapon: factories.weaponFactory(
@@ -113,7 +120,8 @@ describe('WeaponRow', function() {
     });
 
     var getWeapon = function (givenProps) {
-        var props = {roa: "1.5", size: 1, skillLevel: 0, extraSkills: []};
+        var props = {roa: "1.5", size: 1, ccv: 10, skillLevel: 0, int: 45,
+            extraSkills: [], edges: []};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
@@ -126,12 +134,16 @@ describe('WeaponRow', function() {
         for (let skill of props.extraSkills) {
             skills.push(factories.characterSkillFactory(skill));
         }
+
         return getWeaponRow({
             handlerProps: {
                 characterSkills: skills,
+                edges: props.edges,
+                stats: {mov: 45, int: props.int}
             },
             weapon: factories.weaponFactory({
-                base: {base_skill: "Weapon combat", roa: props.roa},
+                base: {base_skill: "Weapon combat", roa: props.roa,
+                    ccv: props.ccv},
                 size: props.size})
         });
     };
@@ -171,18 +183,83 @@ describe('WeaponRow', function() {
         expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(2.5, 2);
     });
 
-    it("calculates skill checks for full use", function () {
-        var weapon = getWeaponRow({
-            handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
-                    skill: "Weapon combat",
-                    level: 0
-                })]
-            },
-            weapon: factories.weaponFactory({
-                base: {base_skill: "Weapon combat", roa: "1.5", ccv:10}})
+    it("takes Single-weapon style into account", function () {
+        var weapon = getWeapon({
+            extraSkills: [{skill: "Single-weapon style", level: 3}]
         });
+        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(1.65, 2);
+    });
+
+    it("stacks SWS and WC", function () {
+        var weapon = getWeapon({
+            skillLevel: 5,
+            extraSkills: [{skill: "Single-weapon style", level: 3}]
+        });
+        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(2.47, 2);
+    });
+
+    it("calculates skill checks for full use", function () {
+        var weapon = getWeapon();
         expect(weapon.skillChecks([0.5, 1, 2, 3])).toEqual([60, 55, 38, 25]);
+    });
+
+    it("calculates skill checks for primary use", function () {
+        var weapon = getWeapon();
+        expect(weapon.skillChecks([0.5, 1, 2, 3],
+            {useType: WeaponRow.PRI})).toEqual([60, 55, 33, null]);
+    });
+
+    it("calculates skill checks for secondary use", function () {
+        var weapon = getWeapon();
+        expect(weapon.skillChecks([0.5, 1, 2, 3],
+            {useType: WeaponRow.SEC})).toEqual([35, 30, 0, null]);
+    });
+
+    it("takes Ambidexterity into account in secondary skill checks", function () {
+        var weapon = getWeapon({edges: [{edge: "Ambidexterity", level: 3}]});
+        expect(weapon.skillChecks([0.5, 1, 2, 3],
+            {useType: WeaponRow.SEC})).toEqual([50, 45, 15, null]);
+    });
+
+    it("counters penalty for high INT", function () {
+        var weapon = getWeapon({int: 66});
+        expect(weapon.skillChecks([0.5, 1, 2, 3])).toEqual([60, 55, 45, 32]);
+    });
+
+    it("calculates initiatives for full use", function () {
+        var weapon = getWeapon();
+        expect(weapon.initiatives([0.5, 1, 2, 3],
+            {useType: WeaponRow.FULL})).toEqual([6, 6, -4, -14]);
+    });
+
+    it("calculates initiatives for primary use", function () {
+        var weapon = getWeapon();
+        expect(weapon.initiatives([0.5, 1, 2, 3],
+            {useType: WeaponRow.PRI})).toEqual([6, 5, -7, null]);
+    });
+
+    it("calculates initiatives for secondary use", function () {
+        var weapon = getWeapon();
+        expect(weapon.initiatives([0.33, 1, 2, 3],
+            {useType: WeaponRow.SEC})).toEqual([6, 4, -11, null]);
+    });
+
+    it("calculates defense initiatives for full use", function () {
+        var weapon = getWeapon();
+        expect(weapon.defenseInitiatives([1, 2, 3],
+            {useType: WeaponRow.FULL})).toEqual([9, -1, -11]);
+    });
+
+    it("calculates defense initiatives for primary use", function () {
+        var weapon = getWeapon();
+        expect(weapon.defenseInitiatives([1, 2, 3],
+            {useType: WeaponRow.PRI})).toEqual([9, -3, -15]);
+    });
+
+    it("calculates defense initiatives for secondary use", function () {
+        var weapon = getWeapon();
+        expect(weapon.defenseInitiatives([1, 2, 3],
+            {useType: WeaponRow.SEC})).toEqual([9, -6, -21]);
     });
 
 });

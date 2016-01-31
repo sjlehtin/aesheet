@@ -120,7 +120,8 @@ class FirearmControl extends WeaponRow {
             return null;
         }
 
-        var checks = this.skillChecks(this.mapBurstActions(actions), false);
+        var checks = this.skillChecks(this.mapBurstActions(actions),
+            {counterPenalty: false});
         return checks.map((chk) => {return this.singleBurstChecks(chk);});
     }
 

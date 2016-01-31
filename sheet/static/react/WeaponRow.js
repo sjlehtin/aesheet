@@ -43,9 +43,16 @@ class WeaponRow extends React.Component {
             (-0.15) * (this.props.weapon.size - 1) +
             parseFloat(this.props.weapon.quality.roa);
 
+        var specLevel;
         if (useType === WeaponRow.SPECIAL || useType === WeaponRow.FULL) {
+            specLevel = this.props.skillHandler.skillLevel(
+                "Single-weapon style");
+            if (!util.isInt(specLevel)) {
+                specLevel = 0;
+            }
+            roa += specLevel * 0.05;
         } else {
-            var specLevel = this.props.skillHandler.skillLevel(
+            specLevel = this.props.skillHandler.skillLevel(
                 "Two-weapon style");
             if (!util.isInt(specLevel)) {
                 specLevel = 0;
@@ -109,16 +116,24 @@ class WeaponRow extends React.Component {
         return this.props.skillHandler.getStat(stat);
     }
 
-    skillChecks(actions, counterPenalty) {
-        var roa = this.roa();
+    skillChecks(actions, givenProps) {
+        var props = {useType: WeaponRow.FULL, counterPenalty: true}
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+
+        var roa = this.roa(props.useType);
         var baseCheck = this.skillCheck();
 
         var checks = [];
 
-        if (counterPenalty === undefined) {
-            counterPenalty = true;
-        }
 
+        if (props.useType === WeaponRow.SEC) {
+            if (!this.props.weapon.base.is_shield) {
+                baseCheck += Math.min(-25 + this.props.skillHandler
+                        .edgeLevel("Ambidexterity") * 5, 0);
+            }
+        }
         for (let act of actions) {
             if (act > 2 * roa) {
                 checks.push(null);
@@ -127,7 +142,7 @@ class WeaponRow extends React.Component {
                     this.baseCheckBonusForSlowActions,
                     this.extraActionModifier));
 
-                if (counterPenalty) {
+                if (props.counterPenalty) {
                     mod = WeaponRow.counterPenalty(mod,
                         this.getStat(this.penaltyCounterStat));
                 }
@@ -137,23 +152,46 @@ class WeaponRow extends React.Component {
         return checks;
     }
 
-    initiatives(actions) {
-        var baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9];
-        var rof = this.rof();
+    defenseInitiatives(actions, givenProps) {
+        var props = {canReady: false,
+            maxActionMultiplier: 4,
+            baseIMultipliers: [0, 3, 6, 0, 3, 6, 0, 3, 6]};
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+        return this.initiatives(actions, props);
+    }
+
+    initiatives(actions, givenProps) {
+        var props = {
+            /* Whether the weapon can be readied with a multi-turn action. */
+            canReady: true,
+            /* 2 for attacks, 4 for defenses. */
+            maxActionMultiplier: 2,
+            baseIMultipliers: [1, 4, 7, 2, 5, 8, 3, 6, 9],
+            useType: WeaponRow.FULL
+        };
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+        var rof = this.roa(props.useType);
         var baseI = -5 / rof;
         var readiedBaseI = this.readiedBaseI;
         var base = this.props.weapon.base;
         var targetI = base.target_initiative;
+        if (!targetI) {
+            targetI = 0;
+        }
         var initiative = this.getStat('ref') / 10 +
             this.getStat('int') / 20 +
             this.getStat('psy') / 20;
 
         var initiatives = [];
         for (let act of actions) {
-            if (act > 2 * rof) {
+            if (act > props.maxActionMultiplier * rof) {
                 initiatives.push(null);
             } else {
-                if (rof > 2 * act && act < 1) {
+                if (props.canReady && rof > 2 * act && act < 1) {
                     /* Assuming multi-turn action, where readying of the
                      weapon is possible and target has already been
                      acquired.  House Rules, initiative, p. 8. */
@@ -166,7 +204,7 @@ class WeaponRow extends React.Component {
                      be added to the rest of the initiatives.
                      */
                     initiatives.push(
-                        baseIMultipliers[Math.ceil(act) - 1] * baseI +
+                        props.baseIMultipliers[Math.ceil(act) - 1] * baseI +
                         targetI);
                 }
             }
