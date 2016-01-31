@@ -136,6 +136,8 @@ describe('stat block', function() {
                 return jsonResponse([]);
             } else if (url === "/rest/sheets/1/sheetfirearms/") {
                 return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheetweapons/") {
+                return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */
                 fail("this is an unsupported url:" + url);
@@ -629,6 +631,14 @@ describe('stat block', function() {
                 done();
             }).catch((err) => {fail(err)});
         });
+    });
+
+    it ("can add weapons", function () {
+        // TODO
+    });
+
+    it ("can remove weapons", function () {
+        // TODO
     });
 
     // TODO: Add system tests to check integration through this up till

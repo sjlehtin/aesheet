@@ -8,6 +8,7 @@ import SkillTable from 'SkillTable';
 import Loading from 'Loading';
 import FirearmControl from 'FirearmControl';
 import AddFirearmControl from 'AddFirearmControl';
+import WeaponRow from 'WeaponRow';
 
 const SkillHandler = require('SkillHandler').default;
 
@@ -36,13 +37,19 @@ class StatBlock extends React.Component {
             characterSkills: undefined,
             allSkills: undefined,
 
-            firearmList: undefined
+            firearmList: undefined,
+            weaponList: undefined
         };
     }
 
     handleFirearmsLoaded(firearmList) {
         console.log("Firearms loaded");
         this.setState({firearmList: firearmList});
+    }
+
+    handleWeaponsLoaded(weapons) {
+        console.log("Weapons loaded");
+        this.setState({weaponList: weapons});
     }
 
     handleSkillsLoaded(skillList, allSkills) {
@@ -58,6 +65,10 @@ class StatBlock extends React.Component {
         rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
             this.handleFirearmsLoaded(json);
         }).catch((err) => {console.log("Failed to load firearms:", err)});
+
+        rest.getData(this.props.url + 'sheetweapons/').then((json) => {
+            this.handleWeaponsLoaded(json);
+        }).catch((err) => {console.log("Failed to load weapons:", err)});
 
         rest.getData(this.props.url).then((json) => {
             this.setState({
@@ -619,6 +630,38 @@ class StatBlock extends React.Component {
         </Panel>;
     }
 
+    renderCCWeapons() {
+        var skillHandler = this.getSkillHandler();
+        if (!this.state.weaponList || !skillHandler) {
+            return <Loading>Close-combat weapons</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let wpn of this.state.weaponList) {
+            if (idx % 2 === 0) {
+                var bgColor = "transparent";
+            } else {
+                bgColor = "rgb(245, 245, 255)";
+            }
+
+            rows.push(<WeaponRow
+                key={idx++} weapon={wpn}
+                skillHandler={skillHandler}
+                //onRemove={(fa) => this.handleFirearmRemoved(fa) }
+                style={{fontSize: "80%", backgroundColor: bgColor}}
+            />);
+        }
+
+        return <Panel header={<h4>Close combat</h4>}>
+            {rows}
+
+        </Panel>;
+
+    }
+
     render() {
         var description = this.renderDescription(),
             skillTable = this.renderSkills(),
@@ -652,6 +695,9 @@ class StatBlock extends React.Component {
                                 {initiativeBlock}
                             </Row>
                         </Col>
+                    </Row>
+                    <Row>
+                        {this.renderCCWeapons()}
                     </Row>
                     <Row>
                         {this.renderFirearms()}

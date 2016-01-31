@@ -310,8 +310,75 @@ class WeaponRow extends React.Component {
         }
     }
 
+    renderUseType(useType) {
+        var cellStyle = {paddingRight: 5, paddingBottom: 5};
+        var initStyle = Object.assign({color: "red"}, cellStyle);
+        var defenseInitStyle = Object.assign({color: "blue"}, cellStyle);
+        var attackDamageStyle = cellStyle;
+        var defenseDamageStyle = cellStyle;
+
+        var roa = this.roa(useType);
+        var checks = this.skillChecks([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5],
+            {useType: useType});
+        var checkCells = checks.map((el, ii) => {
+            return <td key={`chk-${ii}`} style={cellStyle}>{el}</td>;});
+        var attackInitiatives = this.initiatives([1, 2, 3, 4],
+            {useType: useType});
+        var attackInitiativeCells = attackInitiatives.map((el, ii) => {
+            return <td key={`ai-${ii}`} style={initStyle}
+            >{this.renderInt(el)}</td>;});
+        var defenseInitiatives = this.defenseInitiatives([1, 2, 3],
+            {useType: useType});
+        var defenseInitiativeCells = defenseInitiatives.map((el, ii) => {
+            return <td key={`ai-${ii}`} style={defenseInitStyle}
+            >{this.renderInt(el)}</td>;});
+
+        var damage = this.renderDamage({useType: useType});
+        var defenseDamage = this.renderDamage({useType: useType,
+            defense: true});
+
+        return <tr><td style={cellStyle}>{roa}</td>
+            {checkCells}
+            {attackInitiativeCells}
+            <td style={attackDamageStyle}>{damage}</td>
+            {defenseInitiativeCells}
+            <td style={defenseDamageStyle}>{defenseDamage}</td>
+        </tr>;
+    }
+
     render() {
-        return <div></div>
+        var headerStyle = {paddingRight: 5, paddingBottom: 5};
+        var cellStyle = {paddingRight: 5, paddingBottom: 5};
+        var actionCells = null;
+        return <div style={this.props.style}>
+            <table style={{fontSize: 'inherit'}}>
+                <thead>
+                  <tr>
+                    <th style={headerStyle}>Weapon</th>
+                    <th style={headerStyle}>Lvl</th>
+                    <th style={headerStyle}>ROF</th>
+                      {actionCells}
+                    <th style={headerStyle}>TI</th>
+                    <th style={headerStyle}>DI</th>
+                    <th style={headerStyle}>Damage</th>
+                    <th style={headerStyle}>S/M/L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {this.renderUseType(WeaponRow.FULL)}
+                {this.renderUseType(WeaponRow.PRI)}
+                {this.renderUseType(WeaponRow.SEC)}
+      </tbody>
+</table>
+            {/*
+            <div className="durability">
+                <label>Durability:</label>{weapon.durability}</div>
+                    <Button onClick={(e) => this.handleRemove()}
+                            ref={(c) => this._removeButton = c}
+                            bsSize="xsmall"
+                    >Remove</Button>
+                    */}
+        </div>;
     }
 }
 
