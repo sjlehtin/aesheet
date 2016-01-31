@@ -76,11 +76,33 @@ class WeaponRow extends React.Component {
         return Math.min(roa, 2.5);
     }
 
+    ccv() {
+        return this.props.weapon.base.ccv + this.props.weapon.quality.ccv +
+            (this.props.weapon.size - 1) * 5;
+    }
+
+    dp() {
+        return this.props.weapon.base.dp *
+            parseFloat(this.props.weapon.quality.dp_multiplier) *
+            Math.pow(2, (this.props.weapon.size - 1));
+    }
+
+    bypass() {
+        return this.props.weapon.base.bypass +
+                this.props.weapon.quality.bypass +
+            - (this.props.weapon.size - 1);
+    }
+
+    drawInitiative() {
+        return this.props.weapon.base.draw_initiative -
+            2 * (this.props.weapon.size - 1);
+    }
+
     skillCheck() {
         var check = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
 
-        check += this.props.weapon.base.ccv + this.props.weapon.quality.ccv;
+        check += this.ccv();
 
         if (!this.isSkilled()) {
             check += this.props.weapon.base.ccv_unskilled_modifier;
@@ -221,7 +243,8 @@ class WeaponRow extends React.Component {
 
     durability() {
         return this.props.weapon.base.durability +
-            this.props.weapon.quality.durability;
+            this.props.weapon.quality.durability +
+            2 * (this.props.weapon.size - 1);
     }
 
     renderDamage(givenProps) {
@@ -231,14 +254,17 @@ class WeaponRow extends React.Component {
         }
         var base = this.props.weapon.base;
         var quality = this.props.weapon.quality;
-        var numDice = base.num_dice;
+        var numDice = base.num_dice * this.props.weapon.size;
 
-        var extraDamage = base.extra_damage + quality.damage;
-        var leth = base.leth + quality.leth;
+        var extraDamage = base.extra_damage * this.props.weapon.size
+            + quality.damage;
+
+        var leth = base.leth + (this.props.weapon.size - 1) + quality.leth;
         var plusLeth = base.plus_leth + quality.plus_leth;
         if (props.defense) {
             plusLeth = null;
-            leth = base.defense_leth + quality.defense_leth;
+            leth = base.defense_leth + (this.props.weapon.size - 1) +
+                quality.defense_leth;
         }
 
         /* Damage is capped to twice the base damage of the weapon (incl.

@@ -138,8 +138,8 @@ describe('WeaponRow', function() {
         var base = Object.assign({
             base_skill: "Weapon combat", roa: props.roa,
             ccv: props.ccv, num_dice: 2, dice: 6, extra_damage: 2,
-            leth: 5, plus_leth: 1, defense_leth: 6, durability: 7},
-            props.base);
+            leth: 5, plus_leth: 1, defense_leth: 6, durability: 7,
+            draw_initiative: -3, dp: 7}, props.base);
 
         return getWeaponRow({
             handlerProps: {
@@ -310,6 +310,50 @@ describe('WeaponRow', function() {
             .toEqual("1d6+7/6+1");
     });
 
-    // TODO:Size
+    // Size
+
+    it("takes size into account with damage", function () {
+        var weapon = getWeapon({size: 2, quality: {damage: 1}});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("4d6+5/6+1");
+    });
+
+    it("takes size into account with defense damage", function () {
+        var weapon = getWeapon({size: 2, base: {defense_leth: 6},
+            quality: {damage: 1}});
+        expect(weapon.renderDamage({useType: WeaponRow.FULL,
+            defense: true})).toEqual("4d6+5/7");
+    });
+
+    it("takes size into account with durability", function () {
+        var weapon = getWeapon({size: 2});
+        expect(weapon.durability()).toEqual(9);
+    });
+
+    it("takes size into account with damage points", function () {
+        var weapon = getWeapon({size: 2});
+        expect(weapon.dp()).toEqual(14);
+        weapon = getWeapon({size: 3});
+        expect(weapon.dp()).toEqual(28);
+    });
+
+    it("takes size into account with draw initiative", function () {
+        var weapon = getWeapon({size: 2});
+        expect(weapon.drawInitiative()).toEqual(-5);
+    });
+
+    it("takes size into account with ccv", function () {
+        var weapon = getWeapon({size: 2});
+        expect(weapon.ccv()).toEqual(15);
+        weapon = getWeapon({size: 3});
+        expect(weapon.ccv()).toEqual(20);
+    });
+
+    it("takes size into account with bypass", function () {
+        var weapon = getWeapon({size: 2});
+        expect(weapon.bypass()).toEqual(-2);
+    });
+
     // Special damage
+
+    // TODO: Lance damage on charge.
 });
