@@ -326,14 +326,15 @@ class WeaponRow extends React.Component {
                     >Unskilled for one-handed use</td></tr>
             }
         }
-        var cellStyle = {paddingRight: 5, paddingBottom: 5};
+        var cellStyle = {padding: 2, borderStyle: "dotted", borderWidth: 1, minWidth: "2em",
+            textAlign: "center"};
         var initStyle = Object.assign({color: "red"}, cellStyle);
         var defenseInitStyle = Object.assign({color: "blue"}, cellStyle);
-        var attackDamageStyle = cellStyle;
-        var defenseDamageStyle = cellStyle;
+        var attackDamageStyle = initStyle;
+        var defenseDamageStyle = defenseInitStyle;
 
         var roa = this.roa(useType);
-        var checks = this.skillChecks([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5],
+        var checks = this.skillChecks(WeaponRow.ccActions,
             {useType: useType});
         var checkCells = checks.map((el, ii) => {
             return <td key={`chk-${ii}`} style={cellStyle}>{el}</td>;});
@@ -352,7 +353,7 @@ class WeaponRow extends React.Component {
         var defenseDamage = this.renderDamage({useType: useType,
             defense: true});
 
-        return <tr><td style={cellStyle}>{roa}</td>
+        return <tr><td style={cellStyle}>{roa.toFixed(2)}</td>
             {checkCells}
             {attackInitiativeCells}
             <td style={attackDamageStyle}>{damage}</td>
@@ -362,35 +363,48 @@ class WeaponRow extends React.Component {
     }
 
     render() {
-        var headerStyle = {paddingRight: 5, paddingBottom: 5};
-        var cellStyle = {paddingRight: 5, paddingBottom: 5};
-        var actionCells = null;
+        var headerStyle = {padding: 2};
+        var cellStyle = {padding: 2};
+        var infoStyle = {marginRight: 5};
+        var actionCells = WeaponRow.ccActions.map((el, ii) => {
+            return <th style={headerStyle} key={`act-${ii}`}>{el.toFixed(1)}</th>;
+        });
+
         return <div style={this.props.style}>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
                   <tr>
                     <th style={headerStyle}>Weapon</th>
                     <th style={headerStyle}>Lvl</th>
-                    <th style={headerStyle}>ROF</th>
+                    <th style={headerStyle}>ROA</th>
                       {actionCells}
-                    <th style={headerStyle}>TI</th>
-                    <th style={headerStyle}>DI</th>
-                    <th style={headerStyle}>Damage</th>
-                    <th style={headerStyle}>S/M/L</th>
+                    <th style={headerStyle} colSpan={5}>Attacks</th>
+                    <th style={headerStyle} colSpan={4}>Defenses</th>
                   </tr>
                 </thead>
                 <tbody>
+                <tr>
+                    <td style={cellStyle} rowSpan={4}>{
+                        this.props.weapon.name}</td>
+                    <td style={cellStyle} rowSpan={4}>{this.skillLevel()}</td>
+                </tr>
                 {this.renderUseType(WeaponRow.FULL)}
                 {this.renderUseType(WeaponRow.PRI)}
                 {this.renderUseType(WeaponRow.SEC)}
       </tbody>
 </table>
-            <div className="durability">
-                <label>Durability:</label>{this.durability()}</div>
+            <div>
+            <span style={infoStyle}><label>Draw-I:</label> {this.drawInitiative()}</span>
+            <span style={infoStyle} className="durability">
+                <label>Durability:</label>{this.durability()}</span>
+            <span style={infoStyle}><label>Size:</label> {this.props.weapon.size}</span>
+            <span style={infoStyle}><label>DP:</label> {this.dp()}</span>
+            <span style={infoStyle}><label>Bypass:</label> {this.bypass()}</span>
                     <Button onClick={(e) => this.handleRemove()}
                             ref={(c) => this._removeButton = c}
                             bsSize="xsmall"
                     >Remove</Button>
+            </div>
         </div>;
     }
 }
@@ -400,6 +414,7 @@ WeaponRow.FULL = "FULL";
 WeaponRow.PRI = "PRI";
 WeaponRow.SEC = "SEC";
 
+WeaponRow.ccActions = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5];
 WeaponRow.damageFITModifiers = {
     SPECIAL: 5,
     FULL: 7.5,
