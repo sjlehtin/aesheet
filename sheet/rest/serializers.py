@@ -1,6 +1,7 @@
 from rest_framework import serializers
 import sheet.models
 
+
 class AmmunitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Ammunition
@@ -107,6 +108,17 @@ class SheetFirearmListSerializer(serializers.ModelSerializer):
 
 class SheetFirearmCreateSerializer(serializers.ModelSerializer):
 
+    def create(self, validated_data):
+        if set(validated_data.keys()) == {'base', 'ammo'}:
+            objs = sheet.models.Firearm.objects.filter(
+                    base=validated_data['base'],
+                    ammo=validated_data['ammo'])
+            if objs:
+                return objs[0]
+
+        return super(SheetFirearmCreateSerializer, self).create(
+                validated_data)
+
     class Meta:
         model = sheet.models.Firearm
         fields = "__all__"
@@ -121,6 +133,18 @@ class SheetWeaponListSerializer(serializers.ModelSerializer):
 
 
 class SheetWeaponCreateSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        if set(validated_data.keys()) == {'base', 'quality'}:
+            objs = sheet.models.Weapon.objects.filter(
+                    base=validated_data['base'],
+                    quality=validated_data['quality'],
+                    special_qualities=None)
+            if objs:
+                return objs[0]
+
+        return super(SheetWeaponCreateSerializer, self).create(
+                validated_data)
 
     class Meta:
         model = sheet.models.Weapon

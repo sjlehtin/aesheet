@@ -670,6 +670,20 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
 
+    def test_adding_items_should_reuse_existing(self):
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(label="7.62x39")
+
+        fa = factories.FirearmFactory(base=firearm, ammo=ammo)
+
+        response = self.client.post(
+                self.url,
+                data={'ammo': ammo.pk,
+                      'base': firearm.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
+        self.assertEqual(self.sheet.firearms.all()[0].pk, fa.pk)
+
     def test_deleting_items(self):
         firearm = factories.FirearmFactory()
         self.sheet.firearms.add(firearm)
@@ -713,15 +727,48 @@ class SheetWeaponTestCase(TestCase):
         self.assertIsInstance(response.data[0]['quality'], dict)
 
     def test_adding_items(self):
-        weapon = factories.WeaponTemplateFactory(name="Long sword")
+        template = factories.WeaponTemplateFactory(name="Long sword")
         quality = factories.WeaponQualityFactory(name="L1")
 
         response = self.client.post(
                 self.url,
-                data={'base': weapon.pk,
+                data={'base': template.pk,
                       'quality': quality.pk}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(self.sheet.weapons.all()[0].base.name, "Long sword")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.WeaponFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.weapons.count(), 1)
+        self.assertEqual(self.sheet.weapons.all()[0].base.name, "Long sword")
+        self.assertEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(models.Weapon.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_weapons(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.WeaponFactory(base=template, quality=quality,
+                                         special_qualities=["Dancing"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.weapons.all()[0].base.name,
+                         "Long sword")
 
     def test_deleting_items(self):
         weapon = factories.WeaponFactory()
