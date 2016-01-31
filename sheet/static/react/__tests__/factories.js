@@ -37,7 +37,46 @@ var skillFactory = function (overrideFields) {
     return Object.assign(_baseSkill, overrideFields);
 };
 
-// Test pollute each other, need some reset functionality.
+var nextEdgeID = 0;
+
+var edgeFactory = function (overrideFields) {
+    var _baseEdge = {
+        "id": nextEdgeID,
+    "notes": "",
+    "cc_skill_levels": 0,
+    "fit": 0,
+    "ref": 0,
+    "lrn": 0,
+    "int": 0,
+    "psy": 0,
+    "wil": 0,
+    "cha": 0,
+    "pos": 0,
+    "mov": 0,
+    "dex": 0,
+    "imm": 0,
+    "saves_vs_fire": 0,
+    "saves_vs_cold": 0,
+    "saves_vs_lightning": 0,
+    "saves_vs_poison": 0,
+    "saves_vs_all": 0,
+    "run_multiplier": "0.00",
+    "swim_multiplier": "0.00",
+    "climb_multiplier": "0.00",
+    "fly_multiplier": "0.00",
+    "level": 1,
+    "cost": "-1.0",
+    "requires_hero": false,
+    "edge": "Uncouth",
+        "skill_bonuses": []
+    };
+    var newEdge = Object.assign(_baseEdge, overrideFields);
+    /* Overriding ID is possible. */
+    nextEdgeID = newEdge.id + 1;
+    return newEdge;
+};
+
+// Tests pollute each other, needs some reset functionality.
 var nextSkillID = 0;
 
 var characterSkillFactory = function (overrideFields) {
@@ -181,9 +220,11 @@ var weaponFactory = function (overrideFields) {
     return Object.assign(weapon, overrides);
 };
 
-module.exports = {characterSkillFactory: characterSkillFactory,
+module.exports = {
+    characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
+    edgeFactory: edgeFactory,
     statsFactory: statsFactory,
     firearmFactory: firearmFactory,
-    weaponFactory: weaponFactory,
+    weaponFactory: weaponFactory
 };

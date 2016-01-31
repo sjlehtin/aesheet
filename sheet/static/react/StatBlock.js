@@ -578,12 +578,14 @@ class StatBlock extends React.Component {
     }
 
     getSkillHandler() {
-        if (!this.state.characterSkills || !this.state.allSkills) {
+        if (!this.state.characterSkills || !this.state.allSkills ||
+            !this.state.edgeList) {
             return null;
         }
         return new SkillHandler({
             characterSkills: this.state.characterSkills,
             allSkills: this.state.allSkills,
+            edges: this.state.edgeList,
             stats: this.getEffStats()});
     }
 

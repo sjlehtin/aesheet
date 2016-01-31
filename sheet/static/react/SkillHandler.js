@@ -3,7 +3,8 @@ class SkillHandler {
         this.props = props;
         this.state = {
             characterSkillMap: SkillHandler.getCharacterSkillMap(this.props.characterSkills),
-            skillMap: SkillHandler.getSkillMap(this.props.allSkills)
+            skillMap: SkillHandler.getItemMap(this.props.allSkills),
+            edgeMap: SkillHandler.getItemMap(this.props.edges, 'edge')
         }
     }
 
@@ -16,12 +17,18 @@ class SkillHandler {
         return csMap;
     }
 
-    static getSkillMap(skillList) {
-        var skillMap = {};
-        for (let skill of skillList) {
-            skillMap[skill.name] = skill;
+    static getItemMap(list, field) {
+        if (!field) {
+            field = 'name';
         }
-        return skillMap;
+        if (!list) {
+            return {};
+        }
+        var newMap = {};
+        for (let item of list) {
+            newMap[item[field]] = item;
+        }
+        return newMap;
     }
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
@@ -93,6 +100,14 @@ class SkillHandler {
             }
         } else {
             return cs.level;
+        }
+    }
+
+    edgeLevel(edgeName) {
+        if (edgeName in this.state.edgeMap) {
+            return this.state.edgeMap[edgeName].level;
+        } else {
+            return null;
         }
     }
 
