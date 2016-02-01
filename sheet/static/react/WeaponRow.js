@@ -289,7 +289,8 @@ class WeaponRow extends React.Component {
         leth = Math.min(leth + fitLethBonus, this.durability() + 1);
 
         return `${numDice}d${base.dice}${
-            this.renderInt(extraDamage)}/${leth}${this.renderInt(plusLeth)}`;
+            extraDamage ? this.renderInt(extraDamage) : ''
+            }/${leth}${plusLeth ? this.renderInt(plusLeth) : ''}`;
     }
 
     renderInt(value) {
