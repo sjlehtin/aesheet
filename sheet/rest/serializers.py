@@ -60,10 +60,17 @@ class WeaponQualitySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class WeaponSerializer(serializers.ModelSerializer):
+class WeaponCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Weapon
         fields = "__all__"
+
+
+class WeaponListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Weapon
+        fields = "__all__"
+        depth = 1
 
 
 class CharacterSkillSerializer(serializers.ModelSerializer):

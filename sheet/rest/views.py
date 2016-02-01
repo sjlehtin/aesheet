@@ -151,8 +151,15 @@ class WeaponQualityViewSet(CampaignMixin, viewsets.ModelViewSet):
 
 
 class WeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
-    serializer_class = serializers.WeaponSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.WeaponCreateSerializer
+        else:
+            return serializers.WeaponListSerializer
 
     def get_queryset(self):
         qs = models.Weapon.objects.select_related().all()
