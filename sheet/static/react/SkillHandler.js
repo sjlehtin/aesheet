@@ -2,19 +2,10 @@ class SkillHandler {
     constructor(props) {
         this.props = props;
         this.state = {
-            characterSkillMap: SkillHandler.getCharacterSkillMap(this.props.characterSkills),
+            characterSkillMap: SkillHandler.getItemMap(this.props.characterSkills, 'skill'),
             skillMap: SkillHandler.getItemMap(this.props.allSkills),
             edgeMap: SkillHandler.getItemMap(this.props.edges, 'edge')
         }
-    }
-
-    /* TODO: Moved here from SkillTable. */
-    static getCharacterSkillMap(skillList) {
-        var csMap = {};
-        for (let cs of skillList) {
-            csMap[cs.skill] = cs;
-        }
-        return csMap;
     }
 
     static getItemMap(list, field) {
