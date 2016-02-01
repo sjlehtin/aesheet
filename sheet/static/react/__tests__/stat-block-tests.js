@@ -9,6 +9,7 @@ jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
 jest.dontMock('../WeaponRow');
+jest.dontMock('../AddWeaponControl');
 jest.dontMock('../FirearmControl');
 jest.dontMock('../AddFirearmControl');
 jest.dontMock('../sheet-util');
@@ -133,6 +134,12 @@ describe('stat block', function() {
             } else if (url === "/rest/characters/2/characterskills/") {
                 return jsonResponse([]);
             } else if (url === "/rest/skills/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weapontemplates/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weaponqualities/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weapons/campaign/2/") {
                 return jsonResponse([]);
             } else if (url === "/rest/sheets/1/sheetfirearms/") {
                 return jsonResponse([]);
