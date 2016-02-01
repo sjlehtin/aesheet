@@ -61,6 +61,18 @@ var exports = function () {
                 map[obj] = 1;
             }
             return map;
+        },
+
+        renderInt: function (value) {
+            if (value !== null) {
+                if (value >= 0) {
+                    return "+" + value;
+                } else {
+                    return value;
+                }
+            } else {
+                return '';
+            }
         }
     }
 }();

@@ -294,15 +294,7 @@ class WeaponRow extends React.Component {
     }
 
     renderInt(value) {
-        if (value !== null) {
-            if (value >= 0) {
-                return "+" + value;
-            } else {
-                return value;
-            }
-        } else {
-            return '';
-        }
+        return util.renderInt(value);
     }
 
     handleRemove() {
@@ -319,6 +311,7 @@ class WeaponRow extends React.Component {
             return true;
         }
     }
+
     renderUseType(useType) {
         if (useType === WeaponRow.PRI || useType === WeaponRow.SEC) {
             if (!this.oneHandedUseAvailable()) {
