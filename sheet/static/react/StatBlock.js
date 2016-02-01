@@ -177,11 +177,31 @@ class StatBlock extends React.Component {
     }
 
     getEffStats() {
-        var block = {}
+        var block = {};
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos", "mov", "dex", "imm"];
         for (var ii = 0; ii < stats.length; ii++) {
             block[stats[ii]] = this.effStat(stats[ii]);
+        }
+        return block;
+    }
+
+    getStartStats() {
+        var block = {};
+        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+                "pos"];
+        for (var ii = 0; ii < stats.length; ii++) {
+            block[stats[ii]] = this.state.char['cur_' + stats[ii]];
+        }
+        return block;
+    }
+
+    getBaseStats() {
+        var block = {};
+        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+                "pos"];
+        for (var ii = 0; ii < stats.length; ii++) {
+            block[stats[ii]] = this.baseStat(stats[ii]);
         }
         return block;
     }
@@ -487,11 +507,13 @@ class StatBlock extends React.Component {
     }
 
     renderSkills() {
-        if (!this.state.characterSkills || !this.state.allSkills) {
+        var skillHandler = this.getSkillHandler();
+        if (!skillHandler) {
             return <Loading>Skills</Loading>
         }
         return <SkillTable
             style={{fontSize: "80%"}}
+            skillHandler={skillHandler}
             characterSkills={this.state.characterSkills}
             allSkills={this.state.allSkills}
             onCharacterSkillRemove={
@@ -501,7 +523,8 @@ class StatBlock extends React.Component {
             onCharacterSkillAdd={
                       (skill) => this.handleCharacterSkillAdd(skill)}
             effStats={this.getEffStats()}
-            baseStats={this.getEffStats()}
+            baseStats={this.getBaseStats()}
+            startStats={this.getStartStats()}
         />
     }
 
