@@ -63,7 +63,7 @@ class AddSkillControl extends React.Component {
         return false;
     }
 
-    handleAdd(){
+    handleAdd() {
         if (typeof(this.props.onCharacterSkillAdd) !== "undefined") {
             this.props.onCharacterSkillAdd(
                 {skill: this.state.selectedSkill.name,
@@ -74,6 +74,11 @@ class AddSkillControl extends React.Component {
         }
     }
 
+    getSkillChoices() {
+        return AddSkillControl.filterSkills(this.props.allSkills,
+                this.props.characterSkillMap);
+    }
+
     render () {
         var levelChoices = this.getLevelChoices();
 
@@ -82,12 +87,12 @@ class AddSkillControl extends React.Component {
                 <tbody>
                 <tr>
                     <td><label>Skill</label></td>
-                    <td><Combobox data={
-              AddSkillControl.filterSkills(this.props.allSkills,
-                this.props.characterSkillMap)} textField='name' suggest
-                      filter="contains" groupBy="type"
-                          value={this.state.skillValue}
-                          onChange={(value) => this.handleSkillChange(value) }
+                    <td><Combobox data={this.getSkillChoices()}
+                                  textField='name' suggest
+                                  filter="contains" groupBy="type"
+                                  value={this.state.skillValue}
+                                  onChange={(value) =>
+                                    this.handleSkillChange(value) }
                 /></td>
                 </tr>
                 <tr>

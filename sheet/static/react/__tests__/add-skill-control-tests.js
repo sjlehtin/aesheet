@@ -48,8 +48,11 @@ describe('AddSkillControl', function() {
     };
 
     it("can filter skills the user already has", function () {
-        var filteredList = AddSkillControl.filterSkills(_basicSkills,
-            SkillTable.getCharacterSkillMap([factories.characterSkillFactory({skill: "Persuasion"})]));
+        var control = getAddSkillControl({characterSkillMap:
+            SkillTable.getCharacterSkillMap([
+                factories.characterSkillFactory({skill: "Persuasion"})])});
+
+        var filteredList = control.getSkillChoices();
         var names = filteredList.map((elem) => { return elem.name} );
         expect(names).toEqual(["Endurance / run", "Mental Fortitude"]);
     });
