@@ -68,8 +68,10 @@ var edgeFactory = function (overrideFields) {
     "cost": "-1.0",
     "requires_hero": false,
     "edge": "Uncouth",
-        "skill_bonuses": []
+        "skill_bonuses": [],
+        "extra_skill_points": 0
     };
+
     var newEdge = Object.assign(_baseEdge, overrideFields);
     /* Overriding ID is possible. */
     nextEdgeID = newEdge.id + 1;
