@@ -889,4 +889,4 @@ class WeaponTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         weapon = response.data[0]
-        self.assertEqual(weapon['base'], "Sword"),
+        self.assertEqual(weapon['base']['name'], "Sword"),
