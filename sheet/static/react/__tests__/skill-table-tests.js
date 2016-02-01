@@ -1,4 +1,5 @@
 jest.dontMock('../SkillTable');
+jest.dontMock('../SkillHandler');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../sheet-util');
@@ -9,6 +10,7 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 const SkillTable = require('../SkillTable').default;
+const SkillHandler = require('../SkillHandler').default;
 
 var factories = require('./factories');
 
@@ -33,11 +35,32 @@ describe('SkillTable', function() {
     var getSkillTable = function (givenProps) {
         var props = {allSkills: _basicPhysical,
             characterSkills: [],
-            effStats: factories.statsFactory()
+            effStats: factories.statsFactory(),
+            baseStats: factories.statsFactory(),
+            edges: [],
+            character: {start_lrn: 45, start_int: 45, start_psy: 45,
+                gained_sp: 0}
         };
-        if (typeof(givenProps) !== "undefined") {
+
+        if (givenProps) {
             props = Object.assign(props, givenProps);
         }
+
+        var extraSkills = []
+        for (let skill of props.characterSkills) {
+            extraSkills.push(factories.skillFactory({
+                name: skill.skill,
+                stat: "mov"}));
+        }
+
+        var handlerProps = {
+            characterSkills: props.characterSkills,
+            allSkills: extraSkills.concat(props.allSkills),
+            edges: props.edges,
+            stats: {mov: 45}
+        };
+
+        props.skillHandler = new SkillHandler(handlerProps);
         var table = TestUtils.renderIntoDocument(
             <SkillTable {...props}/>
         );
@@ -329,42 +352,38 @@ describe('SkillTable', function() {
         expect(SkillTable.spCost(undefined, skill)).toEqual(0);
     });
 
-    it("does not choke on real missing skills", function () {
-        // This is mainly for testing purposes, as the underlying DB
-        // mechanism should remove CharacterSkills if a Skill is removed,
-        // and not allow adding a CharacterSkill without a skill to match
-        // it with.
-        var skillList = [
-            factories.characterSkillFactory(
-                {skill: "Florism", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Aesthetism", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Gardening", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var allSkills = [factories.skillFactory({name: "Agriculture"}),
-            factories.skillFactory({
-                name: "Gardening",
-                required_skills: ["Agriculture"]
-            }),
-            factories.skillFactory({name: "Aesthetism"})
-        ];
-        var table = getSkillTable({
-            effStats: factories.statsFactory({"int": 50}),
-            characterSkills: skillList,
-            allSkills: allSkills
-        });
-
-    });
     // if the parent stores the passed object directly, state should not
     // get passed over.  TODO: test for sanitizeSkillObject usage in
     // handleCharacterSkillModify
     xit("should clean away internal fields from parent notifications");
-    xit("filters out skills that the character already has");
     xit("calculates edge skill bonuses correctly and passes them to" +
         " skillrows");
 
-    xit("calculates SPs from edges correctly");
+    it("calculates SPs from edges", function () {
+        var table = getSkillTable({
+            edges: [factories.edgeFactory({extra_skill_points: 6}),
+                factories.edgeFactory({extra_skill_points: 8})
+            ]
+        });
+        expect(table.edgeSkillPoints()).toEqual(14);
+    });
+
+    it("calculates starting SP", function () {
+        var table = getSkillTable({character: {
+            start_lrn: 50, start_int: 38, start_psy: 47}
+        });
+        expect(table.initialSkillPoints()).toEqual(30);
+    });
+
+    it("processes age SP", function () {
+        var table = getSkillTable({character: {gained_sp: 23}});
+        expect(table.earnedSkillPoints()).toEqual(23);
+    });
+
+    it("can give hints to optimize skill point accumulation", function () {
+        var table = getSkillTable({baseStats: {
+            lrn: 50, int: 38, psy: 47}
+        });
+        expect(table.optimizeAgeSP()).toEqual({lrn: 3, int: 0, psy: 1});
+    });
 });

@@ -152,6 +152,34 @@ class SkillTable extends React.Component {
         return cost
     }
 
+    edgeSkillPoints() {
+        var sum = 0;
+        for (let edge of this.props.skillHandler.getEdgeList()) {
+            sum += edge.extra_skill_points;
+        }
+        return sum;
+    }
+
+    initialSkillPoints() {
+        return util.roundup(this.props.character.start_lrn/3) + util.roundup(this.props.character.start_int/5) +
+                util.roundup(this.props.character.start_psy/10);
+    }
+
+    earnedSkillPoints() {
+        return this.props.character.gained_sp;
+    }
+
+    optimizeAgeSP() {
+        /* Optimal stat raises, slightly munchkin, but only sensible. */
+        var raw = this.props.baseStats.lrn/15 + this.props.baseStats.int/25
+            + this.props.baseStats.psy/50;
+        var diff = util.roundup(raw) - raw;
+        var lrn = util.rounddown(diff * 15);
+        var int = util.rounddown((diff - lrn/15) * 25);
+        var psy = util.roundup(diff - lrn/15 - int/25);
+        return {lrn: lrn, int: int, psy: psy};
+    }
+
     render () {
         var rows = [];
         var ii;
@@ -208,26 +236,43 @@ class SkillTable extends React.Component {
             }
         }
 
-        /* TODO:
-         * Displaying SP, along with SP from edges, correctly.  This
-         * includes a small tweak to how the edge sp is generated (moved
-         * to be an edgelevel attribute).
-         * SP: 29 + 0 + 13 = 42 / 60
-         *
-         * Calculate age sp, and add a button to assign it.  If no
-         * reversal, add a confirmation dialog.
-         * Age SP: 7
-         *
-         * Add "optimal stat raises back".
-         * Munch munch: +14 LRN, + 1 INT
-         * */
+        var edgeSP = this.edgeSkillPoints(),
+            initialSP = this.initialSkillPoints(),
+            ageSP = this.earnedSkillPoints(),
+            gainedSP = edgeSP + initialSP + ageSP;
+
+        var totalStyle = {};
+        if (totalSP > gainedSP) {
+            var totalTitle = "Too much SP used!";
+            totalStyle.color = "red";
+        }
+        var opt = this.optimizeAgeSP();
 
         return <Panel style={this.props.style} header={<h4>Skills</h4>}><Table style={{fontSize: "inherit"}} striped fill>
             <thead>
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
             </thead>
             <tbody>{rows}</tbody>
-            <tfoot><tr><td colSpan="2" style={{ fontWeight: 'bold'}}>Total SP</td><td>{totalSP}</td><td></td></tr></tfoot>
+            <tfoot><tr>
+                <td colSpan="2" style={{ fontWeight: 'bold'}}>
+                    Total SP used</td>
+                <td colSpan={2} style={totalStyle} title={totalTitle}>{totalSP}</td></tr>
+            <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Gained SP</td>
+                <td colSpan={2}>
+                <span title="From starting stats">{initialSP}</span>
+                <span> + </span>
+                <span title="From edges">{edgeSP}</span>
+                <span> + </span>
+                <span title="Earned during play">{ageSP}</span>
+                <span> = </span>
+                <span title="Total gained">{gainedSP}</span></td></tr>
+            <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Next age SP increase</td>
+                <td colSpan={2}>{util.renderInt(opt.lrn)
+                } LRN, {util.renderInt(opt.int)} INT,  {
+                    util.renderInt(opt.psy)} PSY
+                </td>
+            </tr>
+            </tfoot>
         </Table>
             <AddSkillControl characterSkillMap={csMap}
                              allSkills={this.props.allSkills}
@@ -242,6 +287,7 @@ SkillTable.propTypes = {
     allSkills: React.PropTypes.array.isRequired,
     effStats: React.PropTypes.object.isRequired,
     baseStats: React.PropTypes.object.isRequired,
+    skillHandler: React.PropTypes.object.isRequired,
     onCharacterSkillAdd: React.PropTypes.func,
     onCharacterSkillRemove: React.PropTypes.func,
     onCharacterSkillModify: React.PropTypes.func
