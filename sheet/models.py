@@ -452,6 +452,7 @@ class Character(PrivateMixin, models.Model):
     def __unicode__(self):
         return u"%s: %s %s" % (self.name, self.race, self.occupation)
 
+    # TODO: remove
     @property
     def initial_sp(self):
         return roundup(self.start_lrn/3.0) + roundup(self.start_int/5.0) + \
