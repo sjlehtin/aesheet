@@ -989,35 +989,8 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         sheet = Sheet.objects.get(pk=self.sheet.pk)
         # Verify Acute Touch has an effect.
         self.assertEqual(sheet.eff_dex + 13,
-                         sheet.skills.get(skill__name="Surgery").skill_check(sheet))
-
-        # TODO: Fix by implementing missing stuff in SkillTable.
-        # Probably a good idea to add SP add to edgelevel in the same go.
-    # def test_childhood_education_skill_mod(self):
-    #     factories.EdgeLevelFactory(edge__name="Childhood Education", level=1)
-    #     original = self.sheet.character.total_sp
-    #     self.add_edge(self.sheet.character, "Childhood Education", 1)
-    #     sheet = Sheet.objects.get(pk=self.sheet.pk)
-    #     self.assertEqual(sheet.edge_sp, 8)
-    #     self.assertEqual(original + 8, sheet.character.total_sp)
-    #
-    # def test_specialist_training1_skill_mod(self):
-    #     factories.EdgeLevelFactory(edge__name="Specialist Training", level=1)
-    #
-    #     original = self.sheet.character.total_sp
-    #     self.add_edge(self.sheet.character, "Specialist Training", 1)
-    #     sheet = Sheet.objects.get(pk=self.sheet.pk)
-    #     self.assertEqual(sheet.edge_sp, 6)
-    #     self.assertEqual(original + 6, sheet.character.total_sp)
-    #
-    # def test_specialist_training2_skill_mod(self):
-    #     factories.EdgeLevelFactory(edge__name="Specialist Training", level=2)
-    #
-    #     original = self.sheet.character.total_sp
-    #     self.add_edge(self.sheet.character, "Specialist Training", 2)
-    #     sheet = Sheet.objects.get(pk=self.sheet.pk)
-    #     self.assertEqual(sheet.edge_sp, 10)
-    #     self.assertEqual(original + 10, sheet.character.total_sp)
+                         sheet.skills.get(skill__name="Surgery")
+                         .skill_check(sheet))
 
 
 class Views(WebTest):
