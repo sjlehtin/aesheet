@@ -105,6 +105,10 @@ class SkillHandler {
     hasSkill(skillName) {
         return skillName in this.state.characterSkillMap;
     }
+
+    getEdgeList() {
+        return this.props.edges;
+    }
 }
 
 export default SkillHandler;
