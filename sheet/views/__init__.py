@@ -376,6 +376,7 @@ class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
 
+    # TODO: Remove.
     def weapons(self):
         return [WeaponWrap(xx, self.sheet)
                 for xx in self.sheet.weapons.all()]
@@ -437,6 +438,7 @@ def process_sheet_change_request(request, sheet):
         item = form.cleaned_data['item']
         item_type = form.cleaned_data['item_type']
         logger.info("Removing %s" % item_type)
+        # TODO: Remove
         if item_type == "Weapon":
             item = get_object_or_404(Weapon, pk=item)
             sheet.weapons.remove(item)
@@ -519,8 +521,6 @@ def sheet_detail(request, sheet_id=None):
     add_form(AddHelmForm, "add-helm", instance=sheet)
     add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
     add_form(AddArmorForm, "add-armor", instance=sheet)
-    add_form(AddExistingWeaponForm, "add-existing-weapon", instance=sheet)
-    add_form(AddWeaponForm, "add-weapon", instance=sheet)
     add_form(AddRangedWeaponForm, "add-ranged-weapon", instance=sheet)
     add_form(AddExistingRangedWeaponForm, "add-existing-ranged-weapon",
              instance=sheet)
@@ -530,6 +530,8 @@ def sheet_detail(request, sheet_id=None):
 
     # TODO: Remove.
     add_form(AddFirearmForm, "add-firearm", instance=sheet)
+    add_form(AddExistingWeaponForm, "add-existing-weapon", instance=sheet)
+    add_form(AddWeaponForm, "add-weapon", instance=sheet)
 
     if request.method == "POST":
         should_change = False
