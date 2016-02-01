@@ -59,7 +59,7 @@ class EditSheetForm(RequestForm):
 class AddSheetForm(SetOwnerMixin, EditSheetForm):
     pass
 
-
+# TODO: Remove.
 class AddWeaponForm(RequestForm):
     item_class = sheet.models.Weapon
     item_queryset = sheet.models.Weapon.objects.all()
