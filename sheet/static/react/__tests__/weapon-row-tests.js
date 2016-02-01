@@ -7,7 +7,6 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 const WeaponRow = require('../WeaponRow').default;
-const SkillTable = require('../SkillTable').default;
 const SkillHandler = require('../SkillHandler').default;
 
 var rest = require('sheet-rest');
