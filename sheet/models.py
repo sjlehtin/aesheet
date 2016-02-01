@@ -725,6 +725,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     requires_hero = models.BooleanField(default=False)
     skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
                                            blank=True)
+    extra_skill_points = models.IntegerField(default=0)
 
     @classmethod
     def dont_export(cls):
