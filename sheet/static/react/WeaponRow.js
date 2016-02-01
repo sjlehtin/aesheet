@@ -82,9 +82,9 @@ class WeaponRow extends React.Component {
     }
 
     dp() {
-        return this.props.weapon.base.dp *
+        return Math.round(this.props.weapon.base.dp *
             parseFloat(this.props.weapon.quality.dp_multiplier) *
-            Math.pow(2, (this.props.weapon.size - 1));
+            Math.pow(2, (this.props.weapon.size - 1)));
     }
 
     bypass() {
