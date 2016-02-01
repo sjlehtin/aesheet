@@ -173,13 +173,13 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if not attrs.get('weapon'):
-            if not attrs['base']:
+            if 'base' not in attrs:
                 raise serializers.ValidationError("weapon not passed, "
                                                   "base is required")
-            if not attrs['quality']:
+            if 'quality' not in attrs:
                 raise serializers.ValidationError("weapon not passed, "
                                                   "quality is required")
-
+                    
         return attrs
 
     def create(self, validated_data):
@@ -194,6 +194,14 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
             if objs:
                 return objs[0]
 
+            if 'name' not in validated_data:
+                if validated_data['quality'].name != "normal":
+                    validated_data['name'] = "{} {}".format(
+                            validated_data['base'].name,
+                            validated_data['quality'].short_name)
+                else:
+                    validated_data['name'] = validated_data['base'].name
+            
         return super(SheetWeaponCreateSerializer, self).create(
                 validated_data)
 
