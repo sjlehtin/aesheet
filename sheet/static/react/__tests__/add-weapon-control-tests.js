@@ -10,10 +10,34 @@ var rest = require('sheet-rest');
 
 var factories = require('./factories');
 
-describe('AddSkillControl', function() {
+describe('AddWeaponControl', function() {
     "use strict";
 
+    var promises;
+    
+    var jsonResponse = function (json) {
+        var promise = Promise.resolve(json);
+        promises.push(promise);
+        return promise;
+    };
+
+    beforeEach(function () {
+        promises = [];
+    });
+
     var getAddWeaponControl = function (givenProps) {
+        rest.getData.mockImplementation(function (url) {
+            if (url === "/rest/weapontemplates/campaign/1/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weaponqualities/campaign/1/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weapons/campaign/1/") {
+                return jsonResponse([]);
+            } else {
+                /* Throwing errors here do not cancel the test. */
+                fail("this is an unsupported url:" + url);
+            }
+        });
         var props = {campaign: 1};
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);
