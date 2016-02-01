@@ -9,6 +9,7 @@ import Loading from 'Loading';
 import FirearmControl from 'FirearmControl';
 import AddFirearmControl from 'AddFirearmControl';
 import WeaponRow from 'WeaponRow';
+import AddWeaponControl from 'AddWeaponControl';
 
 const SkillHandler = require('SkillHandler').default;
 
@@ -387,7 +388,7 @@ class StatBlock extends React.Component {
     }
 
     handleFirearmAdded(firearm) {
-        rest.post(this.props.url + 'sheetfirearms/', {base: firearm.base.name,
+        rest.post(this.getFirearmURL(), {base: firearm.base.name,
         ammo: firearm.ammo.id}).then((json) => {
             console.log("POST success", json);
             firearm.id = json.id;
@@ -404,6 +405,46 @@ class StatBlock extends React.Component {
                     this.state.firearmList, firearm);
                 this.state.firearmList.splice(index, 1);
                 this.setState({firearmList: this.state.firearmList});
+            }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
+    getWeaponURL(fa) {
+        var baseURL = this.props.url + 'sheetweapons/';
+        if (fa) {
+            return baseURL + fa.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleWeaponAdded(weapon) {
+        var data;
+        if ('id' in weapon) {
+            data = {weapon: weapon.id};
+        } else {
+            data = {
+                base: weapon.base.name,
+                quality: weapon.quality.name
+            };
+        }
+        console.log("Adding: ", data, weapon);
+        rest.post(this.getWeaponURL(), data).then((json) => {
+            console.log("POST success", json);
+            weapon.id = json.id;
+            weapon.name = json.name;
+            var newList = this.state.weaponList;
+            newList.push(weapon);
+            this.setState({weaponList: newList});
+        }).catch((err) => {console.log("error", err)});
+    }
+
+    handleWeaponRemoved(weapon) {
+        rest.delete(this.getWeaponURL(weapon), weapon).then(
+            (json) => {
+                var index = StatBlock.findCharacterSkillIndex(
+                    this.state.weaponList, weapon);
+                this.state.weaponList.splice(index, 1);
+                this.setState({weaponList: this.state.weaponList});
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
@@ -650,13 +691,15 @@ class StatBlock extends React.Component {
             rows.push(<WeaponRow
                 key={idx++} weapon={wpn}
                 skillHandler={skillHandler}
-                //onRemove={(fa) => this.handleFirearmRemoved(fa) }
+                onRemove={(wpn) => this.handleWeaponRemoved(wpn) }
                 style={{fontSize: "80%", backgroundColor: bgColor}}
             />);
         }
 
         return <Panel header={<h4>Close combat</h4>}>
             {rows}
+            <AddWeaponControl campaign={this.state.char.campaign}
+            onAdd={(fa) => this.handleWeaponAdded(fa) }/>
 
         </Panel>;
 
@@ -697,10 +740,10 @@ class StatBlock extends React.Component {
                         </Col>
                     </Row>
                     <Row>
-                        {this.renderCCWeapons()}
+                        {this.renderFirearms()}
                     </Row>
                     <Row>
-                        {this.renderFirearms()}
+                        {this.renderCCWeapons()}
                     </Row>
                 </Col>
                 <Col md={4}>
