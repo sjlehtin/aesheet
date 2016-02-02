@@ -358,6 +358,7 @@ describe('SkillTable', function() {
     xit("should clean away internal fields from parent notifications");
     xit("calculates edge skill bonuses correctly and passes them to" +
         " skillrows");
+    xit("passes armor modifiers them to skillrows");
 
     it("calculates SPs from edges", function () {
         var table = getSkillTable({
