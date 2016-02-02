@@ -150,6 +150,11 @@ class WeaponQualityViewSet(CampaignMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class RangedWeaponTemplateViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.RangedWeaponTemplateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
 class WeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -163,6 +168,27 @@ class WeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = models.Weapon.objects.select_related().all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                    self.tech_levels))
+            qs = qs.filter(base__tech_level__in=self.tech_levels)
+            qs = qs.filter(quality__tech_level__in=self.tech_levels)
+        return qs
+
+
+class RangedWeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.RangedWeaponCreateSerializer
+        else:
+            return serializers.RangedWeaponListSerializer
+
+    def get_queryset(self):
+        qs = models.RangedWeapon.objects.select_related().all()
         if self.tech_levels:
             logger.info("filtering with tech_levels: {}".format(
                     self.tech_levels))

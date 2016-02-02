@@ -48,6 +48,18 @@ router.register(r'weapons/campaign/(?P<campaign_pk>[0-9]+)',
                 views.WeaponViewSet,
                 base_name='campaign-weapon')
 
+router.register(r'rangedweapontemplates', views.RangedWeaponTemplateViewSet,
+                base_name='rangedweapontemplate')
+router.register(r'rangedweapontemplates/campaign/(?P<campaign_pk>[0-9]+)',
+                views.RangedWeaponTemplateViewSet,
+                base_name='campaign-rangedweapontemplate')
+
+router.register(r'rangedweapons', views.RangedWeaponViewSet,
+                base_name='rangedweapon')
+router.register(r'rangedweapons/campaign/(?P<campaign_pk>[0-9]+)',
+                views.RangedWeaponViewSet,
+                base_name='campaign-rangedweapon')
+
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,
                 base_name='sheet-inventory-item')

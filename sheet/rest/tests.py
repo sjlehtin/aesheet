@@ -825,6 +825,14 @@ class WeaponTestCase(TestCase):
         factories.WeaponFactory(base=sword, quality=nanotech)
         factories.WeaponFactory(base=power, quality=normal)
 
+        bow = factories.RangedWeaponTemplateFactory(name="Composite bow",
+                                                 tech_level=self.tech_twok)
+        powerbow = factories.RangedWeaponTemplateFactory(name="Powerbow",
+                                                tech_level=self.tech_threek)
+        factories.RangedWeaponFactory(base=bow, quality=normal)
+        factories.RangedWeaponFactory(base=bow, quality=nanotech)
+        factories.RangedWeaponFactory(base=powerbow, quality=normal)
+
     def test_main_url_templates(self):
         url = '/rest/weapontemplates/'.format()
         response = self.client.get(url, format='json')
@@ -847,6 +855,31 @@ class WeaponTestCase(TestCase):
         self.assertEqual(len(response.data), 1)
         weapon = response.data[0]
         self.assertEqual(weapon['name'], "Sword"),
+
+    def test_main_url_rangedweapon_templates(self):
+        url = '/rest/rangedweapontemplates/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_rangedweapon__templates(self):
+        url = '/rest/rangedweapontemplates/campaign/{}/'.format(
+            self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([weapon['name']
+                                 for weapon in response.data]),
+                         ["Composite bow", "Powerbow"])
+
+    def test_mr_campaign_url_rangedweapon__templates(self):
+        url = '/rest/rangedweapontemplates/campaign/{}/'.format(
+            self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['name'], "Composite bow"),
 
     def test_main_url_qualities(self):
         url = '/rest/weaponqualities/'.format()
@@ -890,3 +923,23 @@ class WeaponTestCase(TestCase):
         self.assertEqual(len(response.data), 1)
         weapon = response.data[0]
         self.assertEqual(weapon['base']['name'], "Sword"),
+
+    def test_main_url_rangedweapons(self):
+        url = '/rest/rangedweapons/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_gz_campaign_url_for_rangedweapons(self):
+        url = '/rest/rangedweapons/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_mr_campaign_url_rangedweapons(self):
+        url = '/rest/rangedweapons/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['base']['name'], "Composite bow"),

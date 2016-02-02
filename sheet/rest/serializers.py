@@ -73,6 +73,25 @@ class WeaponListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class RangedWeaponTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.RangedWeaponTemplate
+        fields = "__all__"
+
+
+class RangedWeaponCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.RangedWeapon
+        fields = "__all__"
+
+
+class RangedWeaponListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.RangedWeapon
+        fields = "__all__"
+        depth = 1
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
