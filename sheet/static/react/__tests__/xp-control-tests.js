@@ -9,7 +9,7 @@ var rest = require('sheet-rest');
 
 const XPControl = require('../XPControl').default;
 
-describe('stat block', function() {
+describe('XPControl', function() {
     "use strict";
 
     var promises;
