@@ -14,7 +14,7 @@ describe('AddWeaponControl', function() {
     "use strict";
 
     var promises;
-    
+
     var jsonResponse = function (json) {
         var promise = Promise.resolve(json);
         promises.push(promise);
