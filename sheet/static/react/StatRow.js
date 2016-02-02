@@ -11,6 +11,7 @@ class StatRow extends React.Component {
            effects, item effects, etc. to JS.  This allows creating a UI where
            hovering over the stat allows to show a breakdown where the stat
            bonuses and penalties are coming from, in real time. */
+        /* TODO: Move stat update towards backend to StatBlock. */
         var stat = this.props.stat.toLowerCase();
         this.state = {
             stat: stat,
