@@ -452,29 +452,6 @@ class Character(PrivateMixin, models.Model):
     def __unicode__(self):
         return u"%s: %s %s" % (self.name, self.race, self.occupation)
 
-    # TODO: remove
-    @property
-    def initial_sp(self):
-        return roundup(self.start_lrn/3.0) + roundup(self.start_int/5.0) + \
-            roundup(self.start_psy/10.0)
-
-    @property
-    def age_sp(self):
-        return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
-
-    # TODO: EdgeLevel setting for skill points.
-    @property
-    def edge_sp(self):
-        extra_sp = 0
-        if self.edge_level("Childhood Education"):
-            extra_sp += 8
-        specialist_training_level = self.edge_level("Specialist Training")
-        if specialist_training_level == 1:
-            extra_sp += 6
-        elif specialist_training_level == 2:
-            extra_sp += 10
-        return extra_sp
-
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_characters(user))
@@ -596,25 +573,6 @@ class Skill(ExportedModel):
                 return lvl
         raise ValueError("Skill is invalid")
 
-    def cost(self, level):
-        if level == 0:
-            if not self.skill_cost_0:
-                return 0
-            return self.skill_cost_0
-
-        if level == 1:
-            cost_at_this_level = self.skill_cost_1
-        elif level == 2:
-            cost_at_this_level = self.skill_cost_2
-        elif level > 5:
-            cost_at_this_level = self.skill_cost_3 + 2
-        else:
-            cost_at_this_level = self.skill_cost_3
-
-        if cost_at_this_level is None:
-            raise ValueError("Skill does not support level %s" % level)
-        return cost_at_this_level + self.cost(level - 1)
-
     @classmethod
     def dont_export(cls):
         return ['characterskill',
@@ -638,12 +596,6 @@ class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
     level = models.IntegerField(default=0)
-
-    def cost(self):
-        try:
-            return self.skill.cost(self.level)
-        except ValueError:
-            return "invalid skill level"
 
     def skill_check(self, sheet, stat=None):
         # XXX To better support skill checks, even if the character does not
