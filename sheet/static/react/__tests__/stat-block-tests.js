@@ -1,6 +1,7 @@
 jest.dontMock('../StatBlock');
 jest.dontMock('../StatRow');
 jest.dontMock('../XPControl');
+jest.dontMock('../AddSPControl');
 jest.dontMock('../NoteBlock');
 jest.dontMock('../InitiativeBlock');
 jest.dontMock('../Loading');
@@ -25,6 +26,7 @@ var factories = require('./factories');
 
 const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
+const AddSPControl = require('../AddSPControl').default;
 
 describe('stat block', function() {
     "use strict";
@@ -650,4 +652,28 @@ describe('stat block', function() {
 
     // TODO: Add system tests to check integration through this up till
     // SkillRow.
+
+    it("handles age SP additions", function (done) {
+        var block = getStatBlock(charDataFactory({gained_sp: 4}), sheetDataFactory());
+        afterLoad(function () {
+
+            var promise = Promise.resolve({});
+            rest.patch.mockReturnValue(promise);
+
+            var addSPControl = TestUtils.findRenderedComponentWithType(
+                block, AddSPControl);
+            expect(addSPControl.props.initialAgeSP).toEqual(6);
+
+            block.handleAddGainedSP(4);
+
+            expect(rest.patch.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/');
+            expect(rest.patch.mock.calls[0][1]).toEqual({gained_sp: 8});
+            promise.then(() => {
+                expect(block.state.char.gained_sp).toEqual(8);
+                done();
+            }).catch(err => fail(err));
+        });
+    });
+
 });

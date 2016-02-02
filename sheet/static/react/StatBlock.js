@@ -2,6 +2,7 @@ import React from 'react';
 
 import StatRow from 'StatRow';
 import XPControl from 'XPControl';
+import AddSPControl from 'AddSPControl';
 import NoteBlock from 'NoteBlock';
 import InitiativeBlock from 'InitiativeBlock';
 import SkillTable from 'SkillTable';
@@ -186,16 +187,6 @@ class StatBlock extends React.Component {
         return block;
     }
 
-    getStartStats() {
-        var block = {};
-        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
-                "pos"];
-        for (var ii = 0; ii < stats.length; ii++) {
-            block[stats[ii]] = this.state.char['cur_' + stats[ii]];
-        }
-        return block;
-    }
-
     getBaseStats() {
         var block = {};
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
@@ -348,7 +339,6 @@ class StatBlock extends React.Component {
         this.setState({char: data});
     }
 
-
     handleCharacterSkillAdd(skill) {
         rest.post(this.getCharacterSkillURL(), skill).then((json) => {
             if (!("skill" in json) || !("id" in json)) {
@@ -357,6 +347,16 @@ class StatBlock extends React.Component {
             var skillList = this.state.characterSkills;
             skillList.push(json);
             this.setState({characterSkills: skillList});
+        }).then((err) => console.log(err));
+    }
+
+    handleAddGainedSP(addedSP) {
+        var data = this.state.char,
+            newGained = data.gained_sp + addedSP;
+
+        rest.patch(this.state.url, {gained_sp: newGained}).then((json) => {
+            data.gained_sp = newGained;
+            this.setState({char: data});
         }).then((err) => console.log(err));
     }
 
@@ -524,7 +524,7 @@ class StatBlock extends React.Component {
                       (skill) => this.handleCharacterSkillAdd(skill)}
             effStats={this.getEffStats()}
             baseStats={this.getBaseStats()}
-            startStats={this.getStartStats()}
+            character={this.state.char}
         />
     }
 
@@ -652,6 +652,18 @@ class StatBlock extends React.Component {
             onMod={this.handleXPMod.bind(this)} />;
     }
 
+    renderSPControl() {
+        if (!this.state.char) {
+            return <Loading>SP</Loading>
+        }
+
+        var ageSP = util.roundup(this.baseStat('lrn')/15 +
+            this.baseStat('int')/25 + this.baseStat('psy')/50);
+        return <AddSPControl
+            initialAgeSP={ageSP}
+            onAdd={(sp) => this.handleAddGainedSP(sp)} />;
+    }
+
     getSkillHandler() {
         if (!this.state.characterSkills || !this.state.allSkills ||
             !this.state.edgeList) {
@@ -661,7 +673,8 @@ class StatBlock extends React.Component {
             characterSkills: this.state.characterSkills,
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
-            stats: this.getEffStats()});
+            stats: this.getEffStats()
+        });
     }
 
     renderFirearms() {
@@ -735,7 +748,8 @@ class StatBlock extends React.Component {
             stats = this.renderStats(),
             initiativeBlock = this.renderAdvancingInitiatives(),
             portrait = this.renderPortrait(),
-            xpcontrol = this.renderXPControl();
+            xpControl = this.renderXPControl(),
+            spControl = this.renderSPControl();
 
         return (
             <Grid>
@@ -747,7 +761,8 @@ class StatBlock extends React.Component {
                             </Row>
                             <Row>
                                 {stats}
-                                {xpcontrol}
+                                {xpControl}
+                                {spControl}
                             </Row>
                         </Col>
                         <Col md={6}>
