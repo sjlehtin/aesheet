@@ -187,8 +187,11 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
             queryset=sheet.models.WeaponQuality.objects.all(),
             required=False)
 
+    def get_queryset(self):
+        return sheet.models.Weapon.objects.all()
+
     def validate_weapon(self, value):
-        return sheet.models.Weapon.objects.get(pk=value)
+        return self.get_queryset().get(pk=value)
 
     def validate(self, attrs):
         if not attrs.get('weapon'):
@@ -206,7 +209,7 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
             return validated_data['weapon']
 
         if set(validated_data.keys()) == {'base', 'quality'}:
-            objs = sheet.models.Weapon.objects.filter(
+            objs = self.get_queryset().filter(
                     base=validated_data['base'],
                     quality=validated_data['quality'],
                     special_qualities=None)
@@ -226,4 +229,31 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = sheet.models.Weapon
+        fields = "__all__"
+
+
+class SheetRangedWeaponListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = sheet.models.RangedWeapon
+        fields = "__all__"
+        depth = 1
+
+
+class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
+    weapon = serializers.IntegerField(
+            required=False)
+
+    base = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.RangedWeaponTemplate.objects.all(),
+            required=False)
+    quality = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.WeaponQuality.objects.all(),
+            required=False)
+
+    def get_queryset(self):
+        return sheet.models.RangedWeapon.objects.all()
+
+    class Meta:
+        model = sheet.models.RangedWeapon
         fields = "__all__"

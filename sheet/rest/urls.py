@@ -20,10 +20,13 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetweapons',
                 views.SheetWeaponViewSet,
                 base_name='sheet-weapon')
 
-
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetfirearms',
                 views.SheetFirearmViewSet,
                 base_name='sheet-firearm')
+
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetrangedweapons',
+                views.SheetRangedWeaponViewSet,
+                base_name='sheet-rangedweapon')
 
 router.register(r'firearms', views.FirearmViewSet, base_name='firearm')
 router.register(r'firearms/campaign/(?P<campaign_pk>[0-9]+)',

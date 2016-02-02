@@ -698,7 +698,7 @@ class SheetFirearmTestCase(TestCase):
     # TODO: With SheetFirearms, modifications make sense.
 
 # TODO: add test for checking private sheets restrict access to
-# sheetfirearms correctly.
+# sheetfirearms, sheetweapons, and sheetrangedweapons correctly.
 
 
 class SheetWeaponTestCase(TestCase):
@@ -797,6 +797,106 @@ class SheetWeaponTestCase(TestCase):
         # Should still be found.
         models.Weapon.objects.get(pk=weapon.pk)
         self.assertEqual(len(self.sheet.weapons.all()), 0)
+
+
+class SheetRangedWeaponTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetrangedweapons/'.format(
+            self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_weapons(self):
+        self.sheet.ranged_weapons.add(factories.RangedWeaponFactory())
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].base.name, "Bow")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.RangedWeaponFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.ranged_weapons.count(), 1)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].base.name, "Bow")
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(models.RangedWeapon.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_weapons(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.RangedWeaponFactory(base=template, quality=quality,
+                                               special_qualities=[
+                                                   "Super burst"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].base.name, "Bow")
+
+    def test_should_be_possible_to_add_existing_unique_weapons(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.RangedWeaponFactory(name="Super burst bow",
+                                               base=template,
+                                               quality=quality,
+                                               special_qualities=[
+                                                   "Super burst"])
+
+        response = self.client.post(
+                self.url,
+                data={'weapon': weapon.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].name,
+                         "Super burst bow")
+
+    def test_deleting_items(self):
+        weapon = factories.RangedWeaponFactory()
+        self.sheet.ranged_weapons.add(weapon)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, weapon.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.RangedWeapon.objects.get(pk=weapon.pk)
+        self.assertEqual(len(self.sheet.ranged_weapons.all()), 0)
 
 
 class WeaponTestCase(TestCase):

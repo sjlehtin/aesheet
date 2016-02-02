@@ -363,3 +363,36 @@ class SheetWeaponViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         self.sheet.weapons.remove(instance)
+
+
+class SheetRangedWeaponViewSet(viewsets.ModelViewSet):
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
+        return super(SheetRangedWeaponViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetRangedWeaponCreateSerializer
+        else:
+            return serializers.SheetRangedWeaponListSerializer
+
+    def get_queryset(self):
+        return self.sheet.ranged_weapons.all()
+
+    def perform_update(self, serializer):
+        # TODO: not supported for Weapon.  Will be supported for
+        # SheetWeapon.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetRangedWeaponViewSet, self).perform_create(serializer)
+        self.sheet.ranged_weapons.add(serializer.instance)
+
+    def perform_destroy(self, instance):
+        self.sheet.ranged_weapons.remove(instance)
