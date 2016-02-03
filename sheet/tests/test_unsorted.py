@@ -61,21 +61,6 @@ class ItemHandlingTestCase(TestCase):
         self.assertIn(weapon, accessor(response.context['sheet']))
         return response
 
-    def add_ranged_weapon_and_verify(self, weapon_template, quality, weapon):
-        def get_weapons(char):
-            return [wpn.name for wpn in char.ranged_weapons()]
-        return self.add_weapon_and_verify(weapon_template, quality, weapon,
-                                          prefix="add-ranged-weapon",
-                                          accessor=get_weapons)
-
-    def add_firearm_and_verify(self, weapon_template, ammunition, weapon):
-        def get_weapons(char):
-            return [unicode(wpn) for wpn in char.firearms()]
-        return self.add_weapon_and_verify(weapon_template, ammunition, weapon,
-                                          prefix="add-firearm",
-                                          accessor=get_weapons,
-                                          sheet_id=3)
-
     def add_armor_and_verify(self, template, quality, item):
         return self.add_weapon_and_verify(template, quality, item,
                                           prefix="add-armor",
