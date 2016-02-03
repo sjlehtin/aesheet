@@ -795,7 +795,6 @@ class BaseArmament(ExportedModel):
     weight = models.DecimalField(max_digits=4, decimal_places=1,
                                  default=1.0)
 
-    # XXX Melee weapons currently always assume "Weapon Combat"
     base_skill = models.ForeignKey(Skill,
                                    related_name="base_skill_for_%(class)s")
     skill = models.ForeignKey(Skill, blank=True, null=True,
@@ -1704,7 +1703,7 @@ class Sheet(PrivateMixin, models.Model):
 
     _cached_special_effects = None
     def special_effects(self):
-        if not self._cached_special_effects:
+        if self._cached_special_effects is None:
             self._cached_special_effects = self._special_effects()
         return self._cached_special_effects
 
