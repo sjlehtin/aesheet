@@ -35,13 +35,26 @@ class WeaponRow extends React.Component {
         return this.missingSkills().length === 0;
     }
 
+    baseROA() {
+        return parseFloat(this.props.weapon.base.roa) +
+            (-0.15) * (this.props.weapon.size - 1) +
+            parseFloat(this.props.weapon.quality.roa);
+    }
+
+    skillROAMultiplier() {
+        var level = this.props.skillHandler.skillLevel(
+            this.props.weapon.base.base_skill);
+        if (level > 0) {
+            return (1 + 0.1 * level);
+        }
+        return 1;
+    }
+
     roa(useType) {
         if (!useType) {
             useType = WeaponRow.FULL;
         }
-        var roa = parseFloat(this.props.weapon.base.roa) +
-            (-0.15) * (this.props.weapon.size - 1) +
-            parseFloat(this.props.weapon.quality.roa);
+        var roa = this.baseROA();
 
         var specLevel;
         if (useType === WeaponRow.SPECIAL || useType === WeaponRow.FULL) {
@@ -67,12 +80,7 @@ class WeaponRow extends React.Component {
 
             roa += Math.min(mod, 0);
         }
-        var level = this.props.skillHandler.skillLevel(
-            this.props.weapon.base.base_skill);
-        if (level > 0) {
-            roa *= (1 + 0.1 * level);
-        }
-
+        roa *= this.skillROAMultiplier();
         return Math.min(roa, 2.5);
     }
 
@@ -247,6 +255,23 @@ class WeaponRow extends React.Component {
             2 * (this.props.weapon.size - 1);
     }
 
+    fitDamageBonus(useType) {
+        /* Martial arts expertise skill grants a bonus to damage. */
+        var maeLevel = this.props.skillHandler.skillLevel("Martial arts" +
+            " expertise");
+
+        var ccFITBonus = this.getStat("fit") - 45;
+        if (maeLevel > 0) {
+            ccFITBonus += maeLevel * 5;
+        }
+
+        var fitBonusDmg = util.rounddown(ccFITBonus /
+            WeaponRow.damageFITModifiers[useType]);
+        var fitLethBonus = util.rounddown(ccFITBonus /
+            WeaponRow.lethalityFITModifiers[useType]);
+        return {damage: fitBonusDmg, leth: fitLethBonus};
+    }
+
     renderDamage(givenProps) {
         var props = {defense: false, useType: WeaponRow.FULL};
         if (givenProps) {
@@ -270,21 +295,8 @@ class WeaponRow extends React.Component {
         /* Damage is capped to twice the base damage of the weapon (incl.
          size and quality). */
         var maxDmg = numDice * base.dice + extraDamage;
-
-        /* Martial arts expertise skill grants a bonus to damage. */
-        var maeLevel = this.props.skillHandler.skillLevel("Martial arts" +
-            " expertise");
-
-        var ccFITBonus = this.getStat("fit") - 45;
-        if (maeLevel > 0) {
-            ccFITBonus += maeLevel * 5;
-        }
-
-        var fitBonusDmg = util.rounddown(ccFITBonus /
-            WeaponRow.damageFITModifiers[props.useType]);
-        var fitLethBonus = util.rounddown(ccFITBonus /
-            WeaponRow.lethalityFITModifiers[props.useType]);
-
+        var {damage: fitBonusDmg, leth: fitLethBonus} =
+            this.fitDamageBonus(props.useType);
         extraDamage += Math.min(fitBonusDmg, maxDmg);
         leth = Math.min(leth + fitLethBonus, this.durability() + 1);
 
@@ -356,6 +368,10 @@ class WeaponRow extends React.Component {
         </tr>;
     }
 
+    weaponName() {
+        return this.props.weapon.name;
+    }
+
     render() {
         var headerStyle = {padding: 2};
         var cellStyle = {padding: 2};
@@ -378,8 +394,7 @@ class WeaponRow extends React.Component {
                 </thead>
                 <tbody>
                 <tr>
-                    <td style={cellStyle} rowSpan={4}>{
-                        this.props.weapon.name}</td>
+                    <td style={cellStyle} rowSpan={4}>{this.weaponName()}</td>
                     <td style={cellStyle} rowSpan={4}>{this.skillLevel()}</td>
                 </tr>
                 {this.renderUseType(WeaponRow.FULL)}
