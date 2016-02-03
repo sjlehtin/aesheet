@@ -240,104 +240,6 @@ class RemoveWrap(object):
         return unicode(self.item)
 
 
-class SkilledMixin(object):
-    def skilled(self):
-        return self.sheet.skilled(self.item)
-
-
-# TODO: Remove.
-class WeaponWrap(RemoveWrap, SkilledMixin):
-    class Stats(object):
-        rendered_attack_inits = 4
-        rendered_defense_inits = 3
-
-        def __init__(self, item, sheet, use_type):
-            self.use_type = use_type
-            self.sheet = sheet
-            self.item = item
-
-        def roa(self):
-            return self.sheet.roa(self.item, use_type=self.use_type)
-
-        def skill_checks(self):
-            checks = self.sheet.weapon_skill_checks(self.item,
-                                                    use_type=self.use_type)
-            if len(checks) < len(self.sheet.actions):
-                checks.extend([''] * (len(self.sheet.actions) - len(checks)))
-            return checks
-
-        def initiatives(self):
-            inits = self.sheet.initiatives(self.item, use_type=self.use_type)
-            if len(inits) < self.rendered_attack_inits:
-                inits.extend([''] * (self.rendered_attack_inits - len(inits)))
-            return inits[0:self.rendered_attack_inits]
-
-        def defense_initiatives(self):
-            inits = self.sheet.defense_initiatives(self.item,
-                                                   use_type=self.use_type)
-            if len(inits) < self.rendered_defense_inits:
-                inits.extend([''] * (self.rendered_defense_inits - len(inits)))
-            return inits[0:self.rendered_defense_inits]
-
-        def damage(self):
-            return self.sheet.damage(self.item, use_type=self.use_type)
-
-        def defense_damage(self):
-            return self.sheet.defense_damage(self.item, use_type=self.use_type)
-
-    def __init__(self, item, sheet):
-        super(WeaponWrap, self).__init__(item)
-        self.item = item
-        self.sheet = sheet
-        self.special = self.Stats(self.item, self.sheet, use_type=sheet.SPECIAL)
-        self.full = self.Stats(self.item, self.sheet, use_type=sheet.FULL)
-        self.pri = self.Stats(self.item, self.sheet, use_type=sheet.PRI)
-        self.sec = self.Stats(self.item, self.sheet, use_type=sheet.SEC)
-
-
-# TODO: Remove.
-class FirearmWrap(RemoveWrap, SkilledMixin):
-    def __init__(self, item, sheet):
-        super(FirearmWrap, self).__init__(item)
-        self.sheet = sheet
-        self.item = item
-
-    def rof(self):
-        return self.sheet.rof(self.item)
-
-    def skill_checks(self):
-        return self.sheet.firearm_skill_checks(self.item)
-
-    def ranges(self):
-        return self.sheet.ranged_ranges(self.item)
-
-    def initiatives(self):
-        return self.sheet.initiatives(self.item)
-
-    def level(self):
-        return self.sheet.character.skill_level(self.item.base.base_skill)
-
-    def draw_initiative(self):
-        return self.item.base.draw_initiative
-
-    def target_initiative(self):
-        return self.item.base.target_initiative
-
-    def burst_fire_skill_checks(self):
-        return self.sheet.firearm_burst_fire_skill_checks(self.item)
-
-    def sweep_fire_skill_checks(self):
-        return self.sheet.firearm_sweep_fire_skill_checks(self.item)
-
-
-class RangedWeaponWrap(FirearmWrap):
-    def skill_checks(self):
-        return self.sheet.ranged_skill_checks(self.item)
-
-    def damage(self):
-        return self.sheet.damage(self.item, use_type=Sheet.PRI)
-
-
 class ArmorWrap(RemoveWrap):
     def __init__(self, item, sheet, type):
         super(ArmorWrap, self).__init__(item, type)
@@ -376,20 +278,6 @@ class ArmorWrap(RemoveWrap):
 class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
-
-    # TODO: Remove.
-    def weapons(self):
-        return [WeaponWrap(xx, self.sheet)
-                for xx in self.sheet.weapons.all()]
-
-    def ranged_weapons(self):
-        return [RangedWeaponWrap(xx, self.sheet)
-                for xx in self.sheet.ranged_weapons.all()]
-
-    # TODO: Remove.
-    def firearms(self):
-        return [FirearmWrap(xx, self.sheet)
-                for xx in self.sheet.firearms.all()]
 
     def spell_effects(self):
         return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
@@ -439,18 +327,7 @@ def process_sheet_change_request(request, sheet):
         item = form.cleaned_data['item']
         item_type = form.cleaned_data['item_type']
         logger.info("Removing %s" % item_type)
-        # TODO: Remove
-        if item_type == "Weapon":
-            item = get_object_or_404(Weapon, pk=item)
-            sheet.weapons.remove(item)
-        elif item_type == "RangedWeapon":
-            item = get_object_or_404(RangedWeapon, pk=item)
-            sheet.ranged_weapons.remove(item)
-        # TODO: Remove.
-        elif item_type == "Firearm":
-            item = get_object_or_404(Firearm, pk=item)
-            sheet.firearms.remove(item)
-        elif item_type == "Armor":
+        if item_type == "Armor":
             sheet.armor = None
         elif item_type == "Helm":
             sheet.helm = None
@@ -522,17 +399,9 @@ def sheet_detail(request, sheet_id=None):
     add_form(AddHelmForm, "add-helm", instance=sheet)
     add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
     add_form(AddArmorForm, "add-armor", instance=sheet)
-    add_form(AddRangedWeaponForm, "add-ranged-weapon", instance=sheet)
-    add_form(AddExistingRangedWeaponForm, "add-existing-ranged-weapon",
-             instance=sheet)
     add_form(AddExistingMiscellaneousItemForm,
              "add-existing-miscellaneous-item", instance=sheet)
     add_form(HelmForm, "new-helm")
-
-    # TODO: Remove.
-    add_form(AddFirearmForm, "add-firearm", instance=sheet)
-    add_form(AddExistingWeaponForm, "add-existing-weapon", instance=sheet)
-    add_form(AddWeaponForm, "add-weapon", instance=sheet)
 
     if request.method == "POST":
         should_change = False
@@ -544,11 +413,7 @@ def sheet_detail(request, sheet_id=None):
                     logger.info("saved %s" % kk)
                     oo = ff.save()
                     should_change = True
-                    if kk == 'new_weapon_form':
-                        sheet.weapons.add(oo)
-                    elif kk == 'new_ranged_weapon_form':
-                        sheet.ranged_weapons.add(oo)
-                    elif kk == 'new_armor_form':
+                    if kk == 'new_armor_form':
                         sheet.armor = oo
                         sheet.save()
                     elif kk == 'new_helm_form':
@@ -567,11 +432,7 @@ def sheet_detail(request, sheet_id=None):
             return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
                                         sheet.id)
 
-    c = {'sheet': SheetView(sheet),
-         # TODO: Remove.
-         'sweep_fire_available': any([wpn.has_sweep_fire()
-                                      for wpn in sheet.firearms.all()]),
-         }
+    c = {'sheet': SheetView(sheet) }
     c.update(forms)
     return render(request, 'sheet/sheet_detail.html', c)
 
