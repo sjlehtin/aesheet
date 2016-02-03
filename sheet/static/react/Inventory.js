@@ -13,13 +13,34 @@ class Inventory extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {inventory: [], addEnabled: false };
+        this.state = {inventory: [], addEnabled: false,
+        addButtonEnabled: true};
     }
 
     componentDidMount() {
         rest.getData(this.props.url).then((json) => {
-            this.setState({inventory: json});
+            this.updateInventory(json);
         });
+    }
+
+    notifyWeightChange() {
+        if (typeof(this.props.onWeightChange) !== "undefined") {
+            this.props.onWeightChange(this.totalWeight());
+        }
+    }
+
+    updateInventory(newInventory) {
+        this.setState({inventory: newInventory});
+        this.notifyWeightChange();
+    }
+
+    totalWeight() {
+        var total = 0;
+        this.state.inventory.forEach((elem, ii) => {
+            total += parseFloat(elem.unit_weight)
+                * parseInt(elem.quantity);
+        });
+        return total;
     }
 
     handleAddButtonClick(e) {
@@ -41,7 +62,9 @@ class Inventory extends React.Component {
 
                 newInventory.push(data);
 
-                this.setState({inventory: newInventory, addEnabled: false});
+                this.setState({addEnabled: false});
+                this.setState({addButtonEnabled: true});
+                this.updateInventory(newInventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); });
     }
@@ -52,8 +75,9 @@ class Inventory extends React.Component {
             this.state.inventory[idx])
             .then((json) => {
                 var removed = this.state.inventory.splice(idx, 1);
-                console.log("removed:", idx, removed, this.state.inventory);
-                this.setState({inventory: this.state.inventory});
+                console.log("removed:", idx, removed);
+                console.log("new inventory:", this.state.inventory);
+                this.updateInventory(this.state.inventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); })
     }
@@ -66,9 +90,25 @@ class Inventory extends React.Component {
         rest.put(`${this.props.url}${newElem.id}/`,
             newElem)
             .then((json) => {
-                this.setState({inventory: newInventory}) })
+                this.updateInventory(newInventory);
+            })
             .catch((err) => {console.log("Failed to update: ", err); });
+    }
 
+    handleInputRowChanged() {
+        console.log("Changed ", this._inputRow.isValid());
+        this.setState({addButtonEnabled: this._inputRow.isValid()});
+    }
+
+    handleAddButtonClick() {
+        if (!this.state.addEnabled) {
+            this.setState({addEnabled: true});
+            this.setState({addButtonEnabled: false});
+        } else {
+            if (this._inputRow.isValid()) {
+                this._inputRow.submit();
+            }
+        }
     }
 
     render() {
@@ -84,10 +124,14 @@ class Inventory extends React.Component {
         });
 
         if (this.state.addEnabled) {
-            rows.push(
-                <InventoryRow key={-1} createNew={true}
-                              onMod={(newElem) => this.handleNew(newElem)}>
-                    <Button onClick={() => this.setState({addEnabled: false})}>Cancel</Button>
+            rows.push(<InventoryRow
+                ref={(c) => this._inputRow = c}
+                key={-1}
+                createNew={true}
+                onMod={(newElem) => this.handleNew(newElem)}
+                onChange={() => this.handleInputRowChanged()}>
+                <Button onClick={() => this.setState({addEnabled: false})}
+                >Cancel</Button>
             </InventoryRow>);
         }
         return <Table striped condensed style={{fontSize: "80%"}}>
@@ -103,6 +147,7 @@ class Inventory extends React.Component {
                     ref={(c) => {this._addButton =
                     c ? ReactDOM.findDOMNode(c) : undefined}}
                     style={{}}
+                    disabled={!this.state.addButtonEnabled}
                     onClick={(e) => this.handleAddButtonClick(e)}>
                     Add entry</Button></td>
                 <td colSpan="3" style={{
@@ -115,7 +160,8 @@ class Inventory extends React.Component {
 }
 
 Inventory.propTypes = {
-    url: React.PropTypes.string.isRequired
+    url: React.PropTypes.string.isRequired,
+    onWeightChange: React.PropTypes.func
 };
 
 export default Inventory;

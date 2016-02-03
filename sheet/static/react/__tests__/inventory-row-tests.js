@@ -178,7 +178,6 @@ describe('InventoryRow', function() {
         expect(row.state.show.unitWeight).toBe(false);
     });
 
-
     it('disables submit on invalid input', function () {
         var spy = jasmine.createSpy("changed");
         var row = inventoryRowFactory({onMod: spy});

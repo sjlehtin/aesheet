@@ -263,8 +263,8 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
 
 
 class FirearmFactory(factory.DjangoModelFactory):
-    base = factory.SubFactory(BaseFirearmFactory)
-    ammo = factory.SubFactory(AmmunitionFactory)
+    base = factory.SubFactory(BaseFirearmFactory, name="Glock 19")
+    ammo = factory.SubFactory(AmmunitionFactory, label="9x19+")
 
     class Meta:
         model = models.Firearm
@@ -320,6 +320,7 @@ class HelmFactory(ArmorFactory):
 
 
 class WeaponTemplateFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "weapon-%03d" % n)
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
     base_skill = factory.SubFactory(SkillFactory)
@@ -339,6 +340,12 @@ class WeaponQualityFactory(factory.DjangoModelFactory):
         django_get_or_create = ('name', )
 
 
+class WeaponSpecialQualityFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.WeaponSpecialQuality
+        django_get_or_create = ('name', )
+
+
 class WeaponFactory(factory.DjangoModelFactory):
     base = factory.SubFactory(WeaponTemplateFactory)
     quality = factory.SubFactory(WeaponQualityFactory)
@@ -346,6 +353,17 @@ class WeaponFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = models.Weapon
+
+    @factory.post_generation
+    def special_qualities(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            # A list of groups were passed in, use them
+            for sq in extracted:
+                self.special_qualities.add(
+                        WeaponSpecialQualityFactory(name=sq))
 
 
 class RangedWeaponTemplateFactory(WeaponTemplateFactory):
@@ -364,6 +382,17 @@ class RangedWeaponFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = models.RangedWeapon
+
+    @factory.post_generation
+    def special_qualities(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            # A list of groups were passed in, use them
+            for sq in extracted:
+                self.special_qualities.add(
+                        WeaponSpecialQualityFactory(name=sq))
 
 
 class MiscellaneousItemFactory(factory.DjangoModelFactory):

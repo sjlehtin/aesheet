@@ -27,139 +27,53 @@ perhaps Robot-system tests.
 
 {% block content %}
     <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-12">
 
     <div class="row">
-    <div class="col-md-3">
-<h1>{{ sheet.name }}</h1>
-{{ sheet.race }}
-{{ sheet.occupation }}
-        <p title="Character description">
-            {{ sheet.character.description }}
-        </p>
-        <p title="Sheet description">
-            {{ sheet.description }}
-        </p>
+        <div class="col-md-3">
+            <h1>{{ sheet.name }}</h1>
+        </div>
 
-    </div>
-    <div class="col-md-2">
-        <div class="edit-control">
-        <a href="{% url "edit_character" sheet.character.id %}">
-      Edit base character</a>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <div class="edit-control">
-    <a href="{% url "edit_sheet" sheet.id %}">
-      Edit base sheet</a>
+        <div class="col-md-2">
+            <div class="edit-control">
+                <a href="{% url "edit_character" sheet.character.id %}">
+                    Edit base character</a>
             </div>
-    </div>
-    <div class="col-md-2">
-        <div class="edit-control">
-    <a href="{% url "copy_sheet" sheet_id=sheet.id %}">
-      Copy this sheet</a>
         </div>
+
+        <div class="col-md-2">
+            <div class="edit-control">
+                <a href="{% url "edit_sheet" sheet.id %}">
+                    Edit base sheet</a>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="edit-control">
+                <a href="{% url "copy_sheet" sheet_id=sheet.id %}">
+                    Copy this sheet</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+    <div class="panel panel-default">
+        <div class="panel-heading">Owner</div>
+        <div class="panel-body">{{ sheet.owner }}
+            {% if sheet.private %}
+                <span class="label label-danger">Private</span>
+            {% endif %}</div>
     </div>
+        </div>
     </div>
 
     <div class="row">
 
         <div class="col-md-12">
                 <div id="stat-block-container">Loading...</div>
-{#            <div class="row">#}
-{#                <div class="col-md-4">#}
-{#            {% comment %}#}
-{#                    <div class="stats">#}
-{#                        {% url "sheet_detail" sheet.id as act %}#}
-{#                        <table class="base">#}
-{#                        {% for stat in sheet.base_stats %}#}
-{#                            {% include "sheet/sheet_detail/stat.html" %}#}
-{#                        {% endfor %}#}
-{#                        </table>#}
-{##}
-{#                    </div>#}
-{#            {% endcomment %}#}
-{#                <div id="stat-block-container">Loading...</div>#}
-{##}
-{#                </div>#}
-{#                <div class="col-md-8">#}
-{#                    <div>#}
-{#                        {% if sheet.character.portrait %}#}
-{#                        <img id="portrait" src="{{ sheet.character.portrait.url }}" title="{{ sheet.name }}"#}
-{#                             class="img-rounded">#}
-{#                        {% else %}#}
-{#                            <div class="edit-control">You can add a portrait for your character in#}
-{#                                the <a href="{% url "edit_character" sheet.character.id %}">#}
-{#                                    base character edit</a>.</div>#}
-{#                        {% endif %}#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
         </div>
     </div>
-
-{#        <div class="row">#}
-{#<div class="col-md-6">#}
-{% comment %}
-<table class="derived">
-{% for stat in sheet.derived_stats %}
-    {% include "sheet/sheet_detail/stat.html" %}
-{% endfor %}
-</table>
-{% endcomment %}
-
-{% comment %}
-<div class="xp">
-<label>XP:</label> {{ sheet.xp_used_stats }} +
-{% if sheet.hero %}
-{{ sheet.xp_used_hero }} +
-{% endif %}
-{{ sheet.xp_used_edges }} +
-{{ sheet.xp_used_ingame }} = {{ sheet.xp_used }} / {{ sheet.total_xp}}
-
-<div class="edit-control">
-    <form action="{{ act }}" method="post">
-        {% csrf_token %}
-        {{ add_xp_form }}
-        <input type="submit" value="Add XP" />
-    </form>
-</div>
-</div>
-</div>
-
-{% endcomment %}
-
-{% comment %}
-<div class="col-md-2">
-    <table class="derived">
-{% with b=sheet.body sta=sheet.stamina mana=sheet.mana %}
-{# XXX Temporary stamina and body #}
-  <tr class="body">
-    <td>B</td><td>{{ b.base}}</td>
-    <td>{{ b.mod|default:""}}</td>
-    <td>{{ b.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="stamina">
-    <td>S</td><td>{{ sta.base}}</td>
-    <td>{{ sta.mod|default:""}}</td>
-    <td>{{sta.recovery_rate|default:"" }}</td>
-  </tr>
-  <tr class="mana">
-    <td>M</td><td>{{ mana.base}}</td>
-    <td>{{ mana.mod|default:""}}</td>
-    <td>{{mana.recovery_rate|default:"" }}</td>
-  </tr>
-{% endwith %}
-</table>
-{% endcomment %}
-{#</div>#}
-
-    {% comment %}
-<div class="col-md-12">
-    {% include "sheet/sheet_detail/advancing_initiatives.html" %}
-</div>
-{% endcomment %}
-{#</div>#}
+    </div>
+        <div class="col-md-9">
 
 <div class="row">
 <div class="col-md-4">
@@ -176,48 +90,8 @@ perhaps Robot-system tests.
     </div>
 </div>
 
-    {% comment %}
-<div class="row">
-<h3>Notes</h3>
-<ul class="note positive">
-    {% for note in notes.positive %}
-        <li>{{ note|join:": " }}</li>
-    {% endfor %}
-</ul>
-<ul class="note negative">
-    {% for note in notes.negative %}
-        <li>{{ note|join:": " }}</li>
-    {% endfor %}
-</ul>
-</div>
-{% endcomment %}
-
-        <div class="row">
-            <div class="col-md-12">
-
-<h3>Close combat</h3>
-{% include "sheet/sheet_detail/melee_weapons.html" %}
-            </div>
-</div>
-
-        <div class="row">
-            <div class="col-md-12">
-<h3>Ranged combat</h3>
-{% include "sheet/sheet_detail/ranged_weapons.html" %}
-            </div>
-</div>
 
 <div class="row">
-{% if sheet.campaign.has_firearms %}
-<div class="col-md-12">
-<h3>Firearms</h3>
-{% include "sheet/sheet_detail/edit_firearms.html" %}
-</div>
-{% endif %}
-</div>
-
-<div class="row">
-    {% if sheet.campaign.has_spells %}
         <div class="col-sm-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -229,6 +103,7 @@ perhaps Robot-system tests.
             </div>
         </div>
 
+    {% if sheet.campaign.has_spells %}
         <div class="col-sm-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -291,66 +166,6 @@ perhaps Robot-system tests.
 </div>
 
     <div id="skill-pane" class="col-md-3">
-    <div class="panel panel-default">
-        <div class="panel-heading">Owner</div>
-        <div class="panel-body">{{ sheet.owner }}
-            {% if sheet.private %}
-                <span class="label label-danger">Private</span>
-            {% endif %}</div>
-    </div>
-
-        <div class="skills panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Skills</h3>
-        </div>
-        <div class="panel-body">
-                    <table>
-                        {% include "sheet/sheet_detail/skill.html" with skill=sheet.endurance %}
-                        {% include "sheet/sheet_detail/skill.html" with skill=sheet.balance %}
-                        {% for skill in sheet.physical_skills %}
-                            {% include "sheet/sheet_detail/skill.html" %}
-                        {% endfor %}
-                        {% for skill in sheet.skills %}
-                            {% include "sheet/sheet_detail/skill.html" %}
-                        {% endfor %}
-                    </table>
-                    <div>
-                        SP: {{ sheet.initial_sp }} + {{ sheet.edge_sp }}
-                        + {{ sheet.gained_sp }} =
-                        {{ sheet.total_sp }} / {{ sheet.used_sp }}
-                    </div>
-                    <div>Age SP: {{ sheet.age_sp }} </div>
-                    {% with sheet.optimized_age_sp as opt %}
-                        <div>Munch munch: +{{ opt.lrn }} LRN, + {{ opt.int }}
-                            INT
-                        </div>
-                    {% endwith %}
-
-            <div id="add_skill" class="edit-control">
-                <label for="add_skill_form"><strong>Add a skill</strong></label>
-
-                <form action="{{ act }}" method="post"
-                      id="add_skill_form">{% csrf_token %}
-                    <table>
-                        {{ add_skill_form.as_table }}
-                    </table>
-                    <input type="submit" value="Add"/>
-                </form>
-            </div>
-            <div id="add_lang" class="edit-control">
-                <label for="add_lang_form"><strong>Add a language skill</strong></label>
-
-                <form action="{{ act }}" method="post"
-                      id="add_lang_form">{% csrf_token %}
-                    <table>
-                        {{ add_lang_form.as_table }}
-                    </table>
-                    <input type="submit" value="Add"/>
-                </form>
-            </div>
-        </div>
-        </div>
-        <div>Missing skills: {{ sheet.missing_skills }}</div>
 
 
         <div id="log-entries">
@@ -387,14 +202,7 @@ $(document).ready(function () {
     });
 });
 </script>
-<script src="{{ STATIC_URL }}jquery-combobox.js"></script>
 <script src="{{ STATIC_URL }}hideAdvanced.js"></script>
-<script>
-    $(document).ready(function () {
-        $("#add_skill select").combobox();
-        $("#add_lang select").combobox();
-    });
-</script>
 <script src="{% static "react/bundle.js" %}"></script>
 <script type="application/javascript">
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes,

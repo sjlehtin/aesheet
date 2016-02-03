@@ -76,6 +76,17 @@ class NameManager(models.Manager):
         return self.get(name=name)
 
 
+class PrivateMixin(object):
+    def access_allowed(self, user):
+        """
+        This checks that the resource is accessible by the user.
+
+        :param user: the user accessing the resource
+        :return: True if access is granted, false otherwise.
+        """
+        raise RuntimeError("not implemented")
+
+
 class TechLevel(ExportedModel):
     """
     Different periods have different kinds of technologies available.
@@ -152,7 +163,7 @@ class SkillLookup(object):
         return self.character.get_skill(skill)
 
 
-class Character(models.Model):
+class Character(PrivateMixin, models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
     basic character will immediately affect all sheets based on the
@@ -189,8 +200,8 @@ class Character(models.Model):
 
     notes = models.TextField(blank=True,
                              help_text="Freeform notes for the character, "
-                                       "intended for quick notes across gaming "
-                                       "sessions.")
+                                       "intended for quick notes across "
+                                       "gaming sessions.")
 
     hero = models.BooleanField(default=False)
 
@@ -438,92 +449,8 @@ class Character(models.Model):
     def imm(self):
         return roundup((self.fit + self.psy)/2.0) + self.mod_imm
 
-    @property
-    def xp_used_stats(self):
-        xp_used_stats = 0
-        for st in self.BASE_STATS:
-            xp_used_stats += (getattr(self, "cur_" + st) -
-                              getattr(self, "start_" + st))
-        xp_used_stats += self.bought_stamina
-        xp_used_stats += self.bought_mana
-        xp_used_stats *= 5
-        return xp_used_stats
-
-    @property
-    def xp_used_edges(self):
-        # XXX this should be changed in the future to just count the
-        # cost from the actual edges obtained by the character.
-        return 25 * self.edges_bought
-        # sum([ee.edge.cost for ee in self.edges.all()])
-
-    @property
-    def xp_used_hero(self):
-        if self.hero:
-            return 100
-        return 0
-
-    def xp_used(self):
-        return self.xp_used_edges + self.xp_used_ingame + \
-            self.xp_used_stats + self.xp_used_hero
-
     def __unicode__(self):
         return u"%s: %s %s" % (self.name, self.race, self.occupation)
-
-    @property
-    def initial_sp(self):
-        return roundup(self.start_lrn/3.0) + roundup(self.start_int/5.0) + \
-            roundup(self.start_psy/10.0)
-
-    @property
-    def age_sp(self):
-        return roundup(self.lrn/15.0 + self.int/25.0 + self.psy/50.0)
-
-    @property
-    def edge_sp(self):
-        extra_sp = 0
-        if self.edge_level("Childhood Education"):
-            extra_sp += 8
-        specialist_training_level = self.edge_level("Specialist Training")
-        if specialist_training_level == 1:
-            extra_sp += 6
-        elif specialist_training_level == 2:
-            extra_sp += 10
-        return extra_sp
-
-    @property
-    def total_sp(self):
-        return self.initial_sp + self.edge_sp + self.gained_sp
-
-    def optimized_age_sp(self):
-        diff = self.age_sp + 0.00001 - (self.lrn/15.0 + self.int/25.0 +
-                                        self.psy/50.0)
-        lrn = rounddown(diff * 15)
-        int = roundup((diff - lrn/15.0)*25)
-        return {"lrn": lrn, "int": int, "psy": 0}
-
-    @property
-    def missing_skills(self):
-
-        from django.db import connection, transaction
-        cursor = connection.cursor()
-
-        # # Get all skill the character has prerequisites for.
-        cursor.execute(
-            # First get all the skills that are required for the
-            # characters skills.
-            """SELECT cs.skill_id, rs.to_skill_id FROM
-               sheet_skill_required_skills rs, sheet_characterskill cs WHERE
-               cs.character_id = %s and cs.skill_id = rs.from_skill_id
-
-               EXCEPT
-            """
-            # Then take out all skills the character has the skills for.
-            """
-               SELECT rs.from_skill_id, cs.skill_id FROM
-               sheet_skill_required_skills rs, sheet_characterskill cs WHERE
-               cs.character_id = %s and cs.skill_id = rs.to_skill_id""",
-            [self.id, self.id])
-        return dict(cursor.fetchall())
 
     @classmethod
     def get_by_campaign(cls, user):
@@ -626,24 +553,25 @@ class Skill(ExportedModel):
         self.stat = self.stat.upper()
         super(Skill, self).clean_fields(exclude=exclude)
 
-    def cost(self, level):
-        if level == 0:
-            if not self.skill_cost_0:
-                return 0
-            return self.skill_cost_0
+    def get_minimum_level(self):
+        levels = [0, 1, 2, 3]
+        for lvl in levels:
+            cost = getattr(self, 'skill_cost_{}'.format(lvl))
+            if cost is not None and not (
+                            cost == 0 and self.is_specialization):
+                return lvl
+        raise ValueError("Skill is invalid")
 
-        if level == 1:
-            cost_at_this_level = self.skill_cost_1
-        elif level == 2:
-            cost_at_this_level = self.skill_cost_2
-        elif level > 5:
-            cost_at_this_level = self.skill_cost_3 + 2
-        else:
-            cost_at_this_level = self.skill_cost_3
+    def get_maximum_level(self):
+        if self.skill_cost_3 is not None:
+            return 8
 
-        if cost_at_this_level is None:
-            raise ValueError("Skill does not support level %s" % level)
-        return cost_at_this_level + self.cost(level - 1)
+        levels = [2, 1, 0]
+        for lvl in levels:
+            cost = getattr(self, 'skill_cost_{}'.format(lvl))
+            if cost is not None:
+                return lvl
+        raise ValueError("Skill is invalid")
 
     @classmethod
     def dont_export(cls):
@@ -664,16 +592,10 @@ class Skill(ExportedModel):
         return u"%s" % (self.name)
 
 
-class CharacterSkill(models.Model):
+class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(Character, related_name='skills')
     skill = models.ForeignKey(Skill)
     level = models.IntegerField(default=0)
-
-    def cost(self):
-        try:
-            return self.skill.cost(self.level)
-        except ValueError:
-            return "invalid skill level"
 
     def skill_check(self, sheet, stat=None):
         # XXX To better support skill checks, even if the character does not
@@ -694,6 +616,9 @@ class CharacterSkill(models.Model):
             stat = self.skill.stat.lower()
         return mod + self.level * 5 + \
             getattr(sheet, "eff_" + stat)
+
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
 
     def __unicode__(self):
         return u"%s: %s %s" % (self.character, self.skill, self.level)
@@ -753,6 +678,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     requires_hero = models.BooleanField(default=False)
     skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
                                            blank=True)
+    extra_skill_points = models.IntegerField(default=0)
 
     @classmethod
     def dont_export(cls):
@@ -781,7 +707,7 @@ class EdgeSkillBonus(ExportedModel):
         return u"%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
 
-class CharacterEdge(models.Model):
+class CharacterEdge(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     edge = models.ForeignKey(EdgeLevel)
 
@@ -869,7 +795,6 @@ class BaseArmament(ExportedModel):
     weight = models.DecimalField(max_digits=4, decimal_places=1,
                                  default=1.0)
 
-    # XXX Melee weapons currently always assume "Weapon Combat"
     base_skill = models.ForeignKey(Skill,
                                    related_name="base_skill_for_%(class)s")
     skill = models.ForeignKey(Skill, blank=True, null=True,
@@ -992,22 +917,14 @@ class Ammunition(ExportedModel, BaseDamager):
     velocity = models.IntegerField(help_text="Velocity of the bullet at muzzle "
                                              "in meters per second.  Used to "
                                              "calculate recoil.")
-    @property
-    def damage(self):
-        return format_damage(self.num_dice, self.dice, self.extra_damage,
-                             self.leth, self.plus_leth)
-
-    def impulse(self):
-        return (float(self.weight)* self.velocity)/1000
 
     @classmethod
     def dont_export(cls):
         return ['firearm']
 
     def __unicode__(self):
-        return u"{label} {type} ({impulse:.2f})".format(label=self.label,
-                                                        type=self.bullet_type,
-                                                        impulse=self.impulse())
+        return u"{label} {type})".format(label=self.label,
+                                         type=self.bullet_type)
 
 
 class FirearmAmmunitionType(models.Model):
@@ -1023,33 +940,6 @@ class Firearm(models.Model):
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
 
-    def roa(self):
-        """
-        Calculated based on ammo and base.
-        """
-        # Magic formula for ROF calculation.
-        recoil = self.ammo.impulse()/float(
-            self.base.duration * self.base.stock * (self.base.weight + 6))
-        logger.debug("impulse: {impulse}, recoil: {recoil}".format(
-            impulse=self.ammo.impulse(),
-            recoil=recoil))
-        rof = 30 / (recoil + float(self.base.weapon_class_modifier))
-        logger.debug("rof: {rof}".format(rof=rof))
-        return rof
-
-    def ranges(self, sheet):
-        return self.base.ranges(sheet)
-
-    def damage(self):
-        return self.ammo.damage
-
-    def has_sweep_fire(self):
-        return not self.base.sweep_fire_disabled and bool(self.base.autofire_rpm)
-
-    @property
-    def to_hit(self):
-        # XXX scopes etc
-        return 0
 
     def __unicode__(self):
         return u"{base} w/ {ammo}".format(base=self.base,
@@ -1082,6 +972,7 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
                                       default=0.1)
 
+    # TODO: Get rid of this, use base_skill to indicate the type instead.
     THROWN = "thrown"
     CROSSBOW = "xbow"
     BOW = "bow"
@@ -1246,46 +1137,6 @@ class BaseWeapon(ExportedModel):
                                                      (2, "double"),
                                                      (3, "triple"),
                                                      (4, "quadruple")))
-
-    @property
-    def bypass(self):
-        size_mod = -1 * (self.size - 1)
-        return self.base.bypass + size_mod + self.quality.bypass
-
-    def roa(self):
-        size_mod = 0
-        if self.size > 1:
-            size_mod = -0.15 * (self.size - 1)
-        return float(self.base.roa) + size_mod + float(self.quality.roa)
-
-    @property
-    def draw_initiative(self):
-        size_mod = 0
-        if self.size > 1:
-            size_mod = -2 * (self.size - 1)
-        return self.base.draw_initiative + size_mod
-
-    @property
-    def durability(self):
-        size_mod = 0
-        if self.size > 1:
-            size_mod = (self.size - 1) * 2
-        return self.base.durability + size_mod + self.quality.durability
-
-    @property
-    def dp(self):
-        size_mod = pow(2, (self.size - 1))
-        return self.base.dp * size_mod * self.quality.dp_multiplier
-
-    @property
-    def weight(self):
-        size_mod = pow(3, (self.size - 1))
-        return round(self.base.weight * size_mod *
-                     self.quality.weight_multiplier, 2)
-
-    def damage(self, defense=False):
-        return WeaponDamage(weapon=self, quality=self.quality,
-                            defense=defense)
 
     def __unicode__(self):
         if self.name:
@@ -1603,7 +1454,7 @@ class MovementRates(object):
 Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 
-class Sheet(models.Model):
+class Sheet(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     # TODO: Remove this.  It should be determined from the Character.owner.
     owner = models.ForeignKey(auth.models.User, related_name="sheets")
@@ -1628,6 +1479,7 @@ class Sheet(models.Model):
                              related_name='helm_for',
                              on_delete=models.SET_NULL)
 
+    # TODO: to remove.  This will come from the inventory.
     extra_weight_carried = models.IntegerField(
         default=0,
         help_text="Extra encumbrance the character is carrying")
@@ -1638,385 +1490,6 @@ class Sheet(models.Model):
         ordering = ['campaign', 'name']
 
     (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
-
-    fit_modifiers_for_damage = {
-        SPECIAL : 5,
-        FULL : 7.5,
-        PRI : 10,
-        SEC : 15
-        }
-
-    fit_modifiers_for_lethality = {
-        SPECIAL : 20,
-        FULL : 30,
-        PRI : 40,
-        SEC : 60
-        }
-
-    def roa(self, weapon, use_type=FULL):
-        roa = weapon.roa()
-        if use_type == self.PRI:
-            roa -= 0.25
-        elif use_type == self.SEC:
-            roa -= 0.5
-
-        if use_type in [self.FULL, self.SPECIAL]:
-            spec_level = self.character.skill_level("Single-weapon style")
-        else:
-            spec_level = self.character.skill_level("Two-weapon style")
-
-        if spec_level:
-            roa += spec_level * 0.05
-
-        level = self.character.skill_level("Weapon combat")
-        if level:
-            roa *= (1 + level * 0.10)
-
-        roa = min(roa, 2.5)
-
-        return roa
-
-    def rof(self, weapon):
-        roa = float(weapon.roa())
-        level = self.character.skill_level(weapon.base.base_skill)
-        spec_level = 0
-        if isinstance(weapon, RangedWeapon):
-            if weapon.base.weapon_type == weapon.base.BOW:
-                spec_level = self.character.skill_level("Rapid archery")
-
-        if spec_level:
-            roa += spec_level * 0.05
-
-        if level:
-            roa *= (1 + level * 0.10)
-
-        roa = min(roa, 5.0)
-
-        return roa
-
-    actions = [xx/2.0 for xx in range(1, 10, 1)]
-    ranged_actions = [0.5, 1, 2, 3, 4, 5]
-    firearm_actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    firearm_burst_fire_actions = [0.5, 1, 2, 3, 4]
-
-    def max_attacks(self, roa):
-        return min(int(math.floor(roa * 2)), 9)
-
-    def max_defenses(self, roa):
-        return min(int(math.floor(roa * 4)), 9)
-
-    @property
-    def base_initiative(self):
-        return (self.eff_ref / 10.0 + self.eff_int / 20.0 +
-                self.eff_psy / 20.0)
-
-    def _initiatives(self, roa, actions=None, readied_base_i=-3,
-                     target_i=0):
-        bi_multipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9]
-        bi = -5 / roa
-
-        if actions is None:
-            actions = range(1, self.max_attacks(roa) + 1)
-
-        inits = []
-        for act in actions:
-            if roa > 2 * act and act < 1:
-                # House Rules, initiative, p. 8, initiatives when target
-                # acquired and weapon readied in a previous turn.
-                inits.append(max(readied_base_i, bi) + min(target_i + 3, 0))
-            else:
-                # If the action is less than one, we use the first.
-                action_index = roundup(act) - 1
-                inits.append(bi_multipliers[action_index] * bi + target_i)
-
-        return map(lambda xx: int(round(xx + self.base_initiative)), inits)
-
-    def initiatives(self, weapon, use_type=FULL):
-        return self._initiatives(self.roa(weapon, use_type=use_type))
-
-    def defense_initiatives(self, weapon, use_type=FULL):
-        bi_multipliers = [0, 3, 6, 0, 3, 6, 0, 3, 6]
-        roa = self.roa(weapon, use_type=use_type)
-        bi = -5 / roa
-        inits = []
-        for ii in range(1, self.max_defenses(roa) + 1):
-            inits.append(bi_multipliers[ii - 1] * bi)
-        return map(lambda xx: int(math.ceil(xx + self.base_initiative)), inits)
-
-    def skilled(self, weapon):
-        if not self.character.has_skill(weapon.base.base_skill):
-            logger.debug("not skilled with %s" %
-                         unicode(weapon.base.base_skill))
-            return False
-        elif not self.character.has_skill(weapon.base.skill):
-            logger.debug("not skilled with %s" %
-                         unicode(weapon.base.skill))
-            return False
-        elif not self.character.has_skill(weapon.base.skill2):
-            logger.debug("not skilled with %s" %
-                         unicode(weapon.base.skill2))
-            return False
-        return True
-
-    def _counter_penalty(self, penalty, stat):
-        if penalty > 0:
-            # It was actually a bonus, so no effect.
-            return penalty
-        return min(0, penalty + rounddown((stat - 45)/3.0))
-
-    def weapon_skill_checks(self, weapon, use_type=FULL):
-        roa = self.roa(weapon, use_type=use_type)
-        roa = float(roa)
-        def check_mod_from_action_index(act):
-            act = float(act)
-            if 1/act >= 1/roa + 1:
-                return 5 # cc.
-            if act > roa:
-                return - act/roa * 20 + 10
-            if act < 0.5 * roa:
-                return roa / act
-            return 0
-
-        modifiers = 0
-
-        # skill level/unskilled.
-
-        level = self.character.skill_level("Weapon combat")
-        if level:
-            modifiers += level * 5
-        logger.debug("Skill level: %s" % level)
-
-        # CCV bonus (penalty for unskilled)
-        if not self.skilled(weapon):
-            logger.debug("not skilled with %s" % unicode(weapon))
-            modifiers += weapon.base.ccv_unskilled_modifier
-
-        modifiers += weapon.ccv
-
-        if use_type == self.SEC:
-            if weapon.base.is_shield:
-                logger.debug("Shield, not applying wrong hand penalty.")
-            else:
-                wrong_hand_mod = min(-25 + self.edge_level("Ambidexterity") * 5,
-                                      0)
-                logger.debug("Wrong hand modifiers: %d" % wrong_hand_mod)
-                modifiers += wrong_hand_mod
-
-        logger.debug("total modifiers: %d" % modifiers)
-
-        checks = [check_mod_from_action_index(act)
-                           # cap number of actions.
-                           for act in filter(lambda act: act < roa * 2,
-                                             self.actions)]
-        def counter_penalty(penalty):
-            return self._counter_penalty(penalty, self.eff_int)
-
-        checks = map(counter_penalty, checks)
-        mov = self.eff_mov + modifiers
-        return [int(round(xx) + mov) for xx in checks]
-
-    def weapon_skill_check(self, weapon):
-        # skill level/unskilled.
-        cs = self.character.get_skill(weapon.base.base_skill)
-        if cs is not None:
-            base_skill = self.eff_dex + cs.level * 5
-        else:
-            base_skill = self.eff_dex / 2.0
-        return base_skill
-
-    def ranged_skill_checks(self, weapon, actions=ranged_actions,
-                            extra_action_modifier=10,
-                            counter_penalties=True):
-        """
-        extra_action_modifier is used to derive the check for actions exceeding
-        the ROA.
-        """
-        roa = float(self.rof(weapon))
-        def check_mod_from_action_index(act):
-            if 1/act >= 1/roa + 1:
-                return 10 # ranged.
-            if act > roa:
-                return - act/roa * 20 + extra_action_modifier
-            if act < 0.5 * roa:
-                return roa / act
-            return 0
-
-        base_skill = self.weapon_skill_check(weapon)
-
-        logging.info("ROF %s" % roa)
-        checks = [check_mod_from_action_index(act)
-                  # cap number of actions.
-                  for act in filter(lambda act: act < roa * 2, actions)]
-        logging.info("checks: %s" % checks)
-
-        def counter_penalty(penalty):
-            return self._counter_penalty(penalty, self.eff_fit)
-
-        if counter_penalties:
-            checks = map(counter_penalty, checks)
-        base_skill = base_skill + weapon.to_hit
-
-        checks = [int(round(xx + base_skill)) for xx in checks]
-
-        # Pad actions with Nones where an action is not available.
-        return [Action(action=act, check=check,
-                       initiative=(init if check is not None else None))
-                for (act, check, init) in itertools.izip_longest(
-                    actions, checks, self._initiatives(
-                    roa, actions,
-                    readied_base_i=-1,
-                    target_i=weapon.base.target_initiative))]
-
-    def firearm_skill_checks(self, weapon, actions=None,
-                             counter_penalties=True):
-        if actions is None:
-            actions = self.firearm_actions
-        return self.ranged_skill_checks(weapon,
-                                        actions=actions,
-                                        extra_action_modifier=15,
-                                        counter_penalties=counter_penalties)
-
-    _autofire_classes = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5}
-
-    def firearm_burst_fire_skill_checks(self, weapon):
-        if not weapon.base.autofire_rpm:
-            # no burst fire with this weapon.
-            return
-
-        single_fire_actions = []
-        # Map burst fire actions to respective single fire actions to get the
-        # base skill check.
-        for act in self.firearm_burst_fire_actions:
-            if act >= 1:
-                act = 2*act - 1
-            single_fire_actions.append(act)
-
-        logger.debug("Burst fire actions mapped to single-fire actions: "
-                     "{acts}".format(acts=single_fire_actions))
-        checks = self.firearm_skill_checks(weapon,
-                                           actions=single_fire_actions,
-                                           counter_penalties=False)
-
-        burst_multipliers = [0, 1, 3, 6, 10]
-        burst_modifiers = [self._autofire_classes[weapon.base.autofire_class] * mod
-                           for mod in burst_multipliers]
-        # XXX Replace modifiers from the end with None if the RPM of the weapon
-        # is not enough for the obtained number of hits.
-
-        if not self.character.has_skill("Autofire"):
-            autofire_penalty = -10
-        else:
-            autofire_penalty = 0
-
-        Burst = namedtuple('Burst', ["action", "initiative", "checks"])
-
-        max_hits = int(min(weapon.base.autofire_rpm / 120, 5))
-        # Cap the burst if the weapon has restricted burst.
-        if weapon.base.restricted_burst_rounds:
-            max_hits = min(max_hits, weapon.base.restricted_burst_rounds)
-
-        bursts = []
-        # Remap the actions to burst actions.
-        for (act, cc) in itertools.izip_longest(
-                                     self.firearm_burst_fire_actions,
-                                     checks):
-            burst = []
-            logger.debug("Processing check: {check}".format(check=cc))
-            for ii, burst_mod in zip(range(max_hits), burst_modifiers):
-                if cc.check is not None:
-                    # XXX Apply autofire penalty (not counterable).
-                    # XXX Counter penalties with high FIT.
-                    check = cc.check + burst_mod + autofire_penalty
-                else:
-                    check = None
-                burst.append(check)
-            bursts.append(Burst(action=act, initiative=cc.initiative,
-                                checks=list(itertools.islice(
-                                    itertools.chain(burst,
-                                                    itertools.repeat(None)),
-                                    0, 5))))
-        return bursts
-
-    def firearm_sweep_fire_skill_checks(self, weapon):
-        if not weapon.base.autofire_rpm:
-            # no sweep fire with this weapon.
-            return
-
-        klass = self._autofire_classes[weapon.base.autofire_class]
-
-        check = self.weapon_skill_check(weapon)
-
-        Sweep = namedtuple('Sweep', ["rounds", "checks"])
-
-        if not self.character.has_skill("Autofire"):
-            autofire_penalty = -20
-        else:
-            autofire_penalty = -10
-
-        def burst_check(iter, sweep_bonus):
-            penalty_multiplier = 0
-            for ii in iter:
-                penalty_multiplier += ii
-                yield int(round(self._counter_penalty(sweep_bonus +
-                                             penalty_multiplier * klass,
-                                             self.eff_fit) +
-                       autofire_penalty +
-                       check))
-
-        return [Sweep(rounds=5, checks=list(burst_check(
-                    [0, 2, 5, 10], 5))),
-                Sweep(rounds=10, checks=list(burst_check(
-                    [0, 1, 2, 2, 5, 5, 10, 10], 10))),
-                Sweep(rounds=15, checks=list(burst_check(
-                    [0, 1, 1, 2, 2, 2, 5, 5, 5, 10, 10, 10], 15))),
-                Sweep(rounds=20, checks=list(burst_check(
-                    [0, 1, 1, 1, 2, 2, 2, 2, 5, 5, 5, 5, 10, 10, 10, 10], 20)))]
-
-    def ranged_ranges(self, weapon):
-        return weapon.ranges(self)
-
-    def _cc_bonus_fit(self):
-        return (self.eff_fit +
-                (self.character.skill_level("Martial arts expertise") or 0) * 5
-                - 45)
-
-    def damage(self, weapon, use_type=PRI):
-        dmg = weapon.damage()
-        if isinstance(weapon, Weapon):
-            bonus_fit = self._cc_bonus_fit()
-            extra_damage = bonus_fit / self.fit_modifiers_for_damage[use_type]
-            extra_leth = bonus_fit / self.fit_modifiers_for_lethality[use_type]
-        elif isinstance(weapon, RangedWeapon):
-            if weapon.base.weapon_type == weapon.base.CROSSBOW:
-                extra_damage = 0
-                extra_leth = 0
-            else:
-                if weapon.base.weapon_type == weapon.base.BOW:
-                    eff_fit = min(self.eff_fit, weapon.max_fit)
-                else:
-                    eff_fit = self.eff_fit
-                bonus_fit = eff_fit - 45
-                extra_damage = (bonus_fit /
-                                self.fit_modifiers_for_damage[self.PRI])
-                extra_leth = (bonus_fit /
-                              self.fit_modifiers_for_lethality[self.PRI])
-        else:
-            extra_damage = 0
-            extra_leth = 0
-        dmg.add_damage(rounddown(extra_damage))
-        dmg.add_leth(rounddown(extra_leth))
-
-        return dmg
-
-    def defense_damage(self, weapon, use_type=FULL):
-        dmg = weapon.defense_damage()
-        bonus_fit = self._cc_bonus_fit()
-        dmg.add_damage(rounddown(bonus_fit /
-                                 self.fit_modifiers_for_damage[use_type]))
-        dmg.add_leth(rounddown(bonus_fit /
-                               self.fit_modifiers_for_lethality[use_type]))
-
-        return dmg
 
     @property
     def eff_fit(self):
@@ -2173,72 +1646,6 @@ class Sheet(models.Model):
     def mod_imm(self):
         pass
 
-    # TODO: Remove.
-    @property
-    def body(self):
-        """
-        Return amount of body as a dict, {'base', 'bonus',
-        'recovery_rate'}.  The recovery_rate indicates the amount the
-        body recovered when not resting.
-        """
-
-        sizes = {"M" : 0,
-                 "S" : -1,
-                 "L" : 1 }
-        toughness = self.character.edge_level('Toughness')
-        body = roundup(self.fit / 4.0) + (1 + sizes[self.size]) * toughness
-
-        return { 'base': body,
-                 'mod': toughness,
-                 'recovery_rate' : "",
-                 }
-
-    # TODO: Remove.
-    def _format_recovery(self, level, extra_recovery):
-        rate = ""
-        if level:
-            # XXX Higher levels.
-            rate = "%d" % pow(2, (level - 1))
-        if extra_recovery:
-            if rate:
-                rate = "%s%+d" % (rate, extra_recovery)
-            else:
-                rate = "%d" % extra_recovery
-        if rate:
-            rate += "/8h"
-        return rate
-
-    # TODO: Remove.
-    @property
-    def stamina(self):
-        """
-        Return amount of stamina as a dict (see "body").
-        """
-
-        # Stamina recovery modifier = ROUNDDOWN((IMM-45)/15;0)
-        lvl = self.character.edge_level('Fast Healing')
-        extra_recovery = rounddown((self.eff_imm - 45) / 15)
-        rate = self._format_recovery(lvl, extra_recovery)
-        return { 'base': (roundup((self.ref + self.wil) / 4.0) +
-                          self.bought_stamina),
-                 'mod': 0,
-                 'recovery_rate' : rate }
-
-    # TODO: Remove.
-    @property
-    def mana(self):
-        """
-        Return amount of mana as a dict (see "body").
-        """
-        # Mana recovery modifier =2* ROUNDDOWN((CHA-45)/15;0) / 8h
-        lvl = self.character.edge_level('Fast Mana Recovery')
-        extra_recovery = rounddown(2 * ((self.eff_cha - 45) / 15))
-        rate = self._format_recovery(lvl, extra_recovery)
-        return { 'base': (roundup((self.psy + self.wil) / 4.0) +
-                          self.bought_mana),
-                 'mod': 0,
-                 'recovery_rate' : rate }
-
     @property
     def weight_carried(self):
         weight = 0
@@ -2296,7 +1703,7 @@ class Sheet(models.Model):
 
     _cached_special_effects = None
     def special_effects(self):
-        if not self._cached_special_effects:
+        if self._cached_special_effects is None:
             self._cached_special_effects = self._special_effects()
         return self._cached_special_effects
 
@@ -2343,6 +1750,9 @@ class Sheet(models.Model):
         else:
             return 0
 
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
+
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_sheets(user), lambda sheet: sheet.character)
@@ -2363,7 +1773,7 @@ class Sheet(models.Model):
         ordering = ('character__name', )
 
 
-class InventoryEntry(models.Model):
+class InventoryEntry(PrivateMixin, models.Model):
     sheet = models.ForeignKey(Sheet, related_name='inventory_entries')
 
     quantity = models.PositiveIntegerField(default=1)
@@ -2377,6 +1787,9 @@ class InventoryEntry(models.Model):
 
     order = models.IntegerField(help_text="explicit ordering for the "
                                           "entries", default=0)
+
+    def access_allowed(self, user):
+        return self.sheet.access_allowed(user)
 
     class Meta:
         ordering = ('order', )

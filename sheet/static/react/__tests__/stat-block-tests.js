@@ -1,9 +1,22 @@
 jest.dontMock('../StatBlock');
 jest.dontMock('../StatRow');
 jest.dontMock('../XPControl');
+jest.dontMock('../AddSPControl');
 jest.dontMock('../NoteBlock');
 jest.dontMock('../InitiativeBlock');
+jest.dontMock('../Loading');
+jest.dontMock('../SkillTable');
+jest.dontMock('../SkillRow');
+jest.dontMock('../AddSkillControl');
+jest.dontMock('../SkillHandler');
+jest.dontMock('../WeaponRow');
+jest.dontMock('../RangedWeaponRow');
+jest.dontMock('../AddWeaponControl');
+jest.dontMock('../AddRangedWeaponControl');
+jest.dontMock('../FirearmControl');
+jest.dontMock('../AddFirearmControl');
 jest.dontMock('../sheet-util');
+jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -11,8 +24,11 @@ import TestUtils from 'react-addons-test-utils';
 
 var rest = require('sheet-rest');
 
+var factories = require('./factories');
+
 const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
+const AddSPControl = require('../AddSPControl').default;
 
 describe('stat block', function() {
     "use strict";
@@ -45,7 +61,8 @@ describe('stat block', function() {
             "mod_imm": 0,
             bought_mana: 0,
             bought_stamina: 0,
-            edges: []
+            edges: [],
+            "campaign": 2
         };
 
         return Object.assign(_charData, statOverrides);
@@ -118,6 +135,26 @@ describe('stat block', function() {
                 return jsonResponse(sheetData);
             } else if (url === "/rest/characters/2/") {
                 return jsonResponse(charData);
+            } else if (url === "/rest/characters/2/characterskills/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/skills/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weapontemplates/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weaponqualities/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/weapons/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheetfirearms/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheetweapons/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/rangedweapontemplates/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/rangedweapons/campaign/2/") {
+                return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */
                 fail("this is an unsupported url:" + url);
@@ -137,6 +174,14 @@ describe('stat block', function() {
         promises = [];
     });
 
+    var getAllArgsByIndex = function (mockCalls, ind) {
+        var list = [];
+        for (let call of mockCalls) {
+            list.push(call[ind]);
+        }
+        return list;
+    }
+
     it('fetched initial data', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         expect(block.state.char).toBe(undefined);
@@ -144,11 +189,11 @@ describe('stat block', function() {
         Promise.all(promises).then(function () {
             expect(block.state.sheet).not.toBe(undefined);
             expect(block.state.url).not.toBe(undefined);
-            expect(rest.getData.mock.calls[0][0]).toEqual('/rest/sheets/1/');
+            expect(getAllArgsByIndex(rest.getData.mock.calls, 0)).toContain('/rest/sheets/1/');
 
             Promise.all(promises).then(function () {
-                expect(rest.getData.mock.calls[1][0])
-                    .toEqual('/rest/characters/2/');
+                expect(getAllArgsByIndex(rest.getData.mock.calls, 0))
+                    .toContain('/rest/characters/2/');
 
                 Promise.all(promises).then(function () {
                     /* TODO: Ridiculoso! */
@@ -452,6 +497,190 @@ describe('stat block', function() {
         afterLoad(function () {
             expect(block.runMultiplier()).toEqual(1);
             done();
+        });
+    });
+
+    it('can calculate all effective stats', function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+                "pos", "mov", "dex", "imm"];
+            for (var ii = 0; ii < stats.length; ii++) {
+                expect(typeof(block.getEffStats().ref)).toEqual("number");
+            }
+            expect(block.getEffStats().ref).toEqual(60);
+            done();
+        });
+    });
+
+    it("handles skill removal", function (done) {
+        var skill = factories.characterSkillFactory({
+            id: 2, skill: "Weaponsmithing", level: 1 });
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            block.handleSkillsLoaded([skill,
+                factories.characterSkillFactory({
+                    id: 1, skill: "Gardening",
+                    level: 3
+                })
+            ]);
+
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
+
+            block.handleCharacterSkillRemove({id: 1});
+
+            expect(rest.delete.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/characterskills/1/');
+
+            promise.then(() => {
+                expect(block.state.characterSkills).toEqual([skill]);
+                done();
+            }).catch((err) => fail(err));
+        });
+    });
+
+    it("handles skill addition", function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            block.handleSkillsLoaded([], []);
+
+            var expectedSkill = {
+                id: 1, skill: "Gardening",
+                level: 3
+            };
+            var promise = Promise.resolve(expectedSkill);
+            rest.post.mockReturnValue(promise);
+
+            var skill = {
+                skill: "Gardening",
+                level: 3
+            };
+            block.handleCharacterSkillAdd(skill);
+
+            expect(rest.post.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/characterskills/');
+            expect(rest.post.mock.calls[0][1]).toEqual({
+                skill: "Gardening",
+                level: 3
+            });
+
+            promise.then(() => {
+                expect(block.state.characterSkills).toEqual([expectedSkill]);
+                done();
+            }).catch((err) => fail(err));
+        });
+    });
+
+    it("handles skill level changes", function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+
+            var skillList = [
+                factories.characterSkillFactory({
+                    id: 2, skill: "Weaponsmithing",
+                    level: 1
+                }),
+                factories.characterSkillFactory({
+                    id: 1, skill: "Gardening",
+                    level: 3
+                })
+            ];
+            block.handleSkillsLoaded(skillList);
+
+            var promise = Promise.resolve({
+                id: 1, skill: "Gardening",
+                level: 2
+            });
+            rest.patch.mockReturnValue(promise);
+            block.handleCharacterSkillModify({
+                id: 1, skill: "Gardening",
+                level: 2
+            });
+            expect(rest.patch.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/characterskills/1/');
+            expect(rest.patch.mock.calls[0][1]).toEqual({
+                id: 1, skill: "Gardening",
+                level: 2
+            });
+
+            promise.then(() => {
+                var listCopy = skillList.map((elem) => {
+                    return Object.assign({}, elem)
+                });
+                listCopy[1].level = 2;
+                expect(block.state.characterSkills).toEqual(listCopy);
+                done();
+            }).catch((err) => {
+                fail(err)
+            });
+        });
+    });
+
+    it ("can add firearms", function () {
+        // TODO
+    });
+
+    it ("can remove firearms", function (done) {
+        var block = getStatBlock(charDataFactory(), sheetDataFactory());
+        afterLoad(function () {
+            var skillList = [
+                factories.characterSkillFactory({
+                    id: 1, skill: "Handguns",
+                    level: 1
+                })
+            ];
+            block.handleSkillsLoaded(skillList);
+            block.handleFirearmsLoaded([factories.firearmFactory({id: 3}),
+            factories.firearmFactory({id: 5})]);
+
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
+
+            block.handleFirearmRemoved({id: 3});
+
+            promise.then(() => {
+                expect(block.state.firearmList.length).toEqual(1);
+                expect(block.state.firearmList[0].id).toEqual(5);
+
+                expect(getAllArgsByIndex(rest.delete.mock.calls, 0)).toContain(
+                    '/rest/sheets/1/sheetfirearms/3/');
+                done();
+            }).catch((err) => {fail(err)});
+        });
+    });
+
+    it ("can add weapons", function () {
+        // TODO
+    });
+
+    it ("can remove weapons", function () {
+        // TODO
+    });
+
+    // TODO: Add system tests to check integration through this up till
+    // SkillRow.
+
+    it("handles age SP additions", function (done) {
+        var block = getStatBlock(charDataFactory({gained_sp: 4}), sheetDataFactory());
+        afterLoad(function () {
+
+            var promise = Promise.resolve({});
+            rest.patch.mockReturnValue(promise);
+
+            var addSPControl = TestUtils.findRenderedComponentWithType(
+                block, AddSPControl);
+            expect(addSPControl.props.initialAgeSP).toEqual(6);
+
+            block.handleAddGainedSP(4);
+
+            expect(rest.patch.mock.calls[0][0]).toEqual(
+                '/rest/characters/2/');
+            expect(rest.patch.mock.calls[0][1]).toEqual({gained_sp: 8});
+            promise.then(() => {
+                expect(block.state.char.gained_sp).toEqual(8);
+                done();
+            }).catch(err => fail(err));
         });
     });
 

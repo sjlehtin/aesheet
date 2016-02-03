@@ -65,64 +65,64 @@ class SheetTestCase(TestCase):
         self.assertIn('weight_carried', serializer.data)
 
 
-class SheetWeaponTestCase(TestCase):
-    def setUp(self):
-        self.update_view = views.SheetViewSet.as_view(
-                {'patch': 'partial_update'})
-
-        self.sword = factories.WeaponFactory(base__name="Sword")
-        self.plate = factories.ArmorFactory(base__name="Plate mail")
-        self.spear = factories.WeaponFactory(base__name="Spear")
-        self.request_factory = APIRequestFactory()
-        self.user = factories.UserFactory(username="leia")
-        self.owner = factories.UserFactory(username="luke")
-        self.sheet = factories.SheetFactory(character__owner=self.owner,
-                                            character__private=True)
-        self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
-
-    def _make_verify_patch(self, query_data):
-        req = self.request_factory.patch(self.url, query_data)
-        force_authenticate(req, user=self.owner)
-        response = self.update_view(req, pk=self.sheet.pk)
-        self.assertEqual(response.status_code, 200)
-
-    def test_remove_weapon(self):
-        self.sheet.weapons.add(self.spear)
-        self.sheet.weapons.add(self.sword)
-        self.sheet.armor = self.plate
-        self.sheet.save()
-
-        updated_weapons = [self.spear.pk]
-        self._make_verify_patch({'weapons': updated_weapons})
-
-        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-        self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
-                         updated_weapons)
-        self.assertEqual(sheet.armor, self.plate,
-                         "Other aspects should not change")
-
-    def test_add_armor(self):
-        self.sheet.weapons.add(self.spear)
-        armor = {'armor': self.plate.pk}
-        self._make_verify_patch(armor)
-
-        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-        self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
-                         [self.spear.pk], "Other aspects should not change")
-
-    def test_add_weapon(self):
-        self.sheet.weapons.add(self.spear)
-        self.sheet.armor = self.plate
-        self.sheet.save()
-
-        updated_weapons = [self.spear.pk, self.sword.pk]
-        self._make_verify_patch({'weapons': updated_weapons})
-
-        sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-        self.assertEqual(sorted([wpn.pk for wpn in sheet.weapons.all()]),
-                         sorted(updated_weapons))
-        self.assertEqual(sheet.armor, self.plate,
-                         "Other aspects should not change")
+# class SheetWeaponTestCase(TestCase):
+#     def setUp(self):
+#         self.update_view = views.SheetViewSet.as_view(
+#                 {'patch': 'partial_update'})
+#
+#         self.sword = factories.WeaponFactory(base__name="Sword")
+#         self.plate = factories.ArmorFactory(base__name="Plate mail")
+#         self.spear = factories.WeaponFactory(base__name="Spear")
+#         self.request_factory = APIRequestFactory()
+#         self.user = factories.UserFactory(username="leia")
+#         self.owner = factories.UserFactory(username="luke")
+#         self.sheet = factories.SheetFactory(character__owner=self.owner,
+#                                             character__private=True)
+#         self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
+#
+#     def _make_verify_patch(self, query_data):
+#         req = self.request_factory.patch(self.url, query_data)
+#         force_authenticate(req, user=self.owner)
+#         response = self.update_view(req, pk=self.sheet.pk)
+#         self.assertEqual(response.status_code, 200)
+#
+#     def test_remove_weapon(self):
+#         self.sheet.weapons.add(self.spear)
+#         self.sheet.weapons.add(self.sword)
+#         self.sheet.armor = self.plate
+#         self.sheet.save()
+#
+#         updated_weapons = [self.spear.pk]
+#         self._make_verify_patch({'weapons': updated_weapons})
+#
+#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+#         self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
+#                          updated_weapons)
+#         self.assertEqual(sheet.armor, self.plate,
+#                          "Other aspects should not change")
+#
+#     def test_add_armor(self):
+#         self.sheet.weapons.add(self.spear)
+#         armor = {'armor': self.plate.pk}
+#         self._make_verify_patch(armor)
+#
+#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+#         self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
+#                          [self.spear.pk], "Other aspects should not change")
+#
+#     def test_add_weapon(self):
+#         self.sheet.weapons.add(self.spear)
+#         self.sheet.armor = self.plate
+#         self.sheet.save()
+#
+#         updated_weapons = [self.spear.pk, self.sword.pk]
+#         self._make_verify_patch({'weapons': updated_weapons})
+#
+#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
+#         self.assertEqual(sorted([wpn.pk for wpn in sheet.weapons.all()]),
+#                          sorted(updated_weapons))
+#         self.assertEqual(sheet.armor, self.plate,
+#                          "Other aspects should not change")
 
 
 class CharacterTestCase(TestCase):
@@ -224,6 +224,10 @@ class CharacterTestCase(TestCase):
         deity_entry = qs[0]
         self.assertEqual(deity_entry.amount, 0)
         self.assertEqual(deity_entry.field, "deity")
+
+# TODO: add test case to verify that private characters and sheets do not
+# show to other users form the /rest/characters/ and /rest/sheets/ API
+# endpoints.
 
 
 class EdgeTestCase(TestCase):
@@ -389,3 +393,653 @@ class InventoryMultipleSheetsTestCase(TestCase):
         self.assertEqual(len(response.data), 1)
 
         self.assertEqual(response.data[0]['description'], "potion of flying")
+
+
+class CharacterSkillTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.other_user = factories.UserFactory(username="leia")
+        self.char = factories.CharacterFactory(owner=self.owner, private=True)
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        factories.CharacterSkillFactory(character=self.char,
+                                        skill__name="Ice Dancing",
+                                        level=3)
+        self.url = '/rest/characters/{}/characterskills/'.format(
+                self.char.pk)
+
+    def test_character_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['skill'], 'Ice Dancing')
+        self.assertEqual(response.data[0]['level'], 3)
+
+    def test_url_invalid_user(self):
+        self.assertTrue(
+            self.client.login(username="leia", password="foobar"))
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 403)
+
+    def test_verify_skill_level(self):
+        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=None)
+
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 0}, format="json")
+        self.assertEqual(response.status_code, 400)
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 3}, format="json")
+        self.assertEqual(response.status_code, 400)
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 2}, format="json")
+        self.assertEqual(response.status_code, 201)
+        cs = models.CharacterSkill.objects.get(character=self.char,
+                                               skill="Lightsaber")
+        self.assertEqual(cs.level, 2)
+
+    def test_verify_skill_level_5(self):
+        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=4)
+
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 5}, format="json")
+        self.assertEqual(response.status_code, 201)
+        cs = models.CharacterSkill.objects.get(character=self.char,
+                                               skill="Lightsaber")
+        self.assertEqual(cs.level, 5)
+
+    def test_verify_skill_level_modification_logged(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        cs = factories.CharacterSkillFactory(character=self.char,
+                                             skill=skill, level=2)
+
+        url = "{}{}/".format(self.url, cs.pk)
+
+        response = self.client.patch(url, {"skill": "Lightsaber",
+                                           "level": 5}, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        cs = models.CharacterSkill.objects.get(character=self.char,
+                                               skill="Lightsaber")
+        self.assertEqual(cs.level, 5)
+
+    def test_skill_remove_logged(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
+                                             level=2)
+        url = "{}{}/".format(self.url, cs.pk)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Removed skill Lightsaber 2", str(log))
+
+    def test_skill_decrease_logged(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
+                                             level=2)
+        url = "{}{}/".format(self.url, cs.pk)
+        response = self.client.patch(url, {'level': 1})
+        self.assertEqual(response.status_code, 200)
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Skill Lightsaber decreased to level 1",
+                      str(log))
+
+    def test_skill_add_logged(self):
+        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=4)
+
+        response = self.client.post(self.url, {"skill": "Lightsaber",
+                                               "level": 5}, format="json")
+        self.assertEqual(response.status_code, 201)
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Added skill Lightsaber 5",
+                      str(log))
+
+    def test_skill_invariant(self):
+        factories.SkillFactory(name="Unarmed Combat",
+                               skill_cost_0=None,
+                               skill_cost_1=2, skill_cost_2=3,
+                               skill_cost_3=4)
+
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+
+        cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
+                                             level=2)
+        url = "{}{}/".format(self.url, cs.pk)
+        response = self.client.patch(url, {'skill': "Unarmed Combat"})
+        self.assertEqual(response.status_code, 400)
+        response = self.client.patch(url, {'skill': "Unarmed Combat",
+                                           'level': 2})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['skill'], "Lightsaber")
+
+
+class SkillTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_onek = factories.TechLevelFactory(name="OneK")
+        self.tech_frp = factories.TechLevelFactory(name="Magic")
+        self.onek = factories.CampaignFactory(name='1K',
+                                              tech_levels=["OneK"])
+        self.frp = factories.CampaignFactory(name='FRP',
+                                             tech_levels=["OneK", "Magic"])
+
+        factories.SkillFactory(name="Sword", tech_level=self.tech_onek)
+        factories.SkillFactory(name="Kordism", tech_level=self.tech_frp)
+
+    def test_main_url(self):
+        url = '/rest/skills/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_1k_campaign_url(self):
+        url = '/rest/skills/campaign/{}/'.format(self.onek.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['name'], "Sword")
+
+    def test_frp_campaign_url(self):
+        url = '/rest/skills/campaign/{}/'.format(self.frp.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(sorted([skill['name'] for skill in response.data]),
+                         ["Kordism", "Sword"])
+
+    def test_verify_skill_level_max_min(self):
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
+        url = "/rest/skills/{}/".format(skill.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('max_level', response.data)
+        self.assertIn('min_level', response.data)
+        self.assertEqual(response.data['max_level'], 8)
+        self.assertEqual(response.data['min_level'], 1)
+
+    def test_verify_skill_level_max_min_2(self):
+        skill = factories.SkillFactory(name="Gardening", skill_cost_0=1,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=None)
+        url = "/rest/skills/{}/".format(skill.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('max_level', response.data)
+        self.assertIn('min_level', response.data)
+        self.assertEqual(response.data['max_level'], 2)
+        self.assertEqual(response.data['min_level'], 0)
+
+
+class FirearmTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_onek = factories.TechLevelFactory(name="OneK")
+        self.tech_frp = factories.TechLevelFactory(name="Magic")
+        self.onek = factories.CampaignFactory(name='1K',
+                                              tech_levels=["OneK"])
+        self.frp = factories.CampaignFactory(name='FRP',
+                                             tech_levels=["OneK", "Magic"])
+
+        factories.BaseFirearmFactory(name="Catapult",
+                                     tech_level=self.tech_onek)
+        factories.BaseFirearmFactory(name="Magic Catapult",
+                                     tech_level=self.tech_frp)
+
+    def test_main_url(self):
+        url = '/rest/firearms/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_frp_campaign_url(self):
+        url = '/rest/firearms/campaign/{}/'.format(self.frp.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([weapon['name']
+                                 for weapon in response.data]),
+                         ["Catapult", "Magic Catapult"])
+
+    def test_1k_campaign_url(self):
+        url = '/rest/firearms/campaign/{}/'.format(self.onek.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['name'], "Catapult"),
+
+
+class SheetFirearmTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetfirearms/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_firearms(self):
+        self.sheet.firearms.add(factories.FirearmFactory())
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['ammo'], dict)
+
+    def test_adding_items(self):
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(label="7.62x39")
+
+        response = self.client.post(
+                self.url,
+                data={'ammo': ammo.pk,
+                      'base': firearm.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
+
+    def test_adding_items_should_reuse_existing(self):
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(label="7.62x39")
+
+        fa = factories.FirearmFactory(base=firearm, ammo=ammo)
+
+        response = self.client.post(
+                self.url,
+                data={'ammo': ammo.pk,
+                      'base': firearm.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
+        self.assertEqual(self.sheet.firearms.all()[0].pk, fa.pk)
+
+    def test_deleting_items(self):
+        firearm = factories.FirearmFactory()
+        self.sheet.firearms.add(firearm)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, firearm.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Firearm.objects.get(pk=firearm.pk)
+        self.assertEqual(len(self.sheet.firearms.all()), 0)
+
+    # TODO: With SheetFirearms, modifications make sense.
+
+# TODO: add test for checking private sheets restrict access to
+# sheetfirearms, sheetweapons, and sheetrangedweapons correctly.
+
+
+class SheetWeaponTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetweapons/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_weapons(self):
+        self.sheet.weapons.add(factories.WeaponFactory())
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.weapons.all()[0].base.name, "Long sword")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.WeaponFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.weapons.count(), 1)
+        self.assertEqual(self.sheet.weapons.all()[0].base.name, "Long sword")
+        self.assertEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(models.Weapon.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_weapons(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.WeaponFactory(base=template, quality=quality,
+                                         special_qualities=["Dancing"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.weapons.all()[0].base.name,
+                         "Long sword")
+
+    def test_should_be_possible_to_add_existing_unique_weapons(self):
+        template = factories.WeaponTemplateFactory(name="Long sword")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.WeaponFactory(name="Dancing sword",
+                                         base=template,
+                                         quality=quality,
+                                         special_qualities=["Dancing"])
+
+        response = self.client.post(
+                self.url,
+                data={'weapon': weapon.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.weapons.all()[0].name,
+                         "Dancing sword")
+
+    def test_deleting_items(self):
+        weapon = factories.WeaponFactory()
+        self.sheet.weapons.add(weapon)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, weapon.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Weapon.objects.get(pk=weapon.pk)
+        self.assertEqual(len(self.sheet.weapons.all()), 0)
+
+
+class SheetRangedWeaponTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetrangedweapons/'.format(
+            self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_weapons(self):
+        self.sheet.ranged_weapons.add(factories.RangedWeaponFactory())
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].base.name, "Bow")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.RangedWeaponFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.ranged_weapons.count(), 1)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].base.name, "Bow")
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(models.RangedWeapon.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_weapons(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.RangedWeaponFactory(base=template, quality=quality,
+                                               special_qualities=[
+                                                   "Super burst"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertNotEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].base.name, "Bow")
+
+    def test_should_be_possible_to_add_existing_unique_weapons(self):
+        template = factories.RangedWeaponTemplateFactory(name="Bow")
+        quality = factories.WeaponQualityFactory(name="L1")
+
+        weapon = factories.RangedWeaponFactory(name="Super burst bow",
+                                               base=template,
+                                               quality=quality,
+                                               special_qualities=[
+                                                   "Super burst"])
+
+        response = self.client.post(
+                self.url,
+                data={'weapon': weapon.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
+        self.assertEqual(self.sheet.ranged_weapons.all()[0].name,
+                         "Super burst bow")
+
+    def test_deleting_items(self):
+        weapon = factories.RangedWeaponFactory()
+        self.sheet.ranged_weapons.add(weapon)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, weapon.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.RangedWeapon.objects.get(pk=weapon.pk)
+        self.assertEqual(len(self.sheet.ranged_weapons.all()), 0)
+
+
+class WeaponTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_twok = factories.TechLevelFactory(name="2K")
+        self.tech_threek = factories.TechLevelFactory(name="3K")
+        self.campaign_mr = factories.CampaignFactory(name='MR',
+                                                     tech_levels=["2K"])
+        self.campaign_gz = factories.CampaignFactory(name='GZ',
+                                                     tech_levels=["2K", "3K"])
+        normal = factories.WeaponQualityFactory(name="normal",
+                                                tech_level__name="2K")
+        nanotech = factories.WeaponQualityFactory(name="nanotech",
+                                                  tech_level__name="3K")
+        sword = factories.WeaponTemplateFactory(name="Sword",
+                                                 tech_level=self.tech_twok)
+        power = factories.WeaponTemplateFactory(name="Powersword",
+                                                tech_level=self.tech_threek)
+
+        factories.WeaponFactory(base=sword, quality=normal)
+        factories.WeaponFactory(base=sword, quality=nanotech)
+        factories.WeaponFactory(base=power, quality=normal)
+
+        bow = factories.RangedWeaponTemplateFactory(name="Composite bow",
+                                                 tech_level=self.tech_twok)
+        powerbow = factories.RangedWeaponTemplateFactory(name="Powerbow",
+                                                tech_level=self.tech_threek)
+        factories.RangedWeaponFactory(base=bow, quality=normal)
+        factories.RangedWeaponFactory(base=bow, quality=nanotech)
+        factories.RangedWeaponFactory(base=powerbow, quality=normal)
+
+    def test_main_url_templates(self):
+        url = '/rest/weapontemplates/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_templates(self):
+        url = '/rest/weapontemplates/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([weapon['name']
+                                 for weapon in response.data]),
+                         ["Powersword", "Sword"])
+
+    def test_mr_campaign_url_templates(self):
+        url = '/rest/weapontemplates/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['name'], "Sword"),
+
+    def test_main_url_rangedweapon_templates(self):
+        url = '/rest/rangedweapontemplates/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_rangedweapon__templates(self):
+        url = '/rest/rangedweapontemplates/campaign/{}/'.format(
+            self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([weapon['name']
+                                 for weapon in response.data]),
+                         ["Composite bow", "Powerbow"])
+
+    def test_mr_campaign_url_rangedweapon__templates(self):
+        url = '/rest/rangedweapontemplates/campaign/{}/'.format(
+            self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['name'], "Composite bow"),
+
+    def test_main_url_qualities(self):
+        url = '/rest/weaponqualities/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_qualities(self):
+        url = '/rest/weaponqualities/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([quality['name']
+                                 for quality in response.data]),
+                         ["nanotech", "normal"])
+
+    def test_mr_campaign_url_qualities(self):
+        url = '/rest/weaponqualities/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        quality = response.data[0]
+        self.assertEqual(quality['name'], "normal"),
+
+    def test_main_url_weapons(self):
+        url = '/rest/weapons/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_gz_campaign_url_for_weapons(self):
+        url = '/rest/weapons/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_mr_campaign_url_weapons(self):
+        url = '/rest/weapons/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['base']['name'], "Sword"),
+
+    def test_main_url_rangedweapons(self):
+        url = '/rest/rangedweapons/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_gz_campaign_url_for_rangedweapons(self):
+        url = '/rest/rangedweapons/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_mr_campaign_url_rangedweapons(self):
+        url = '/rest/rangedweapons/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        weapon = response.data[0]
+        self.assertEqual(weapon['base']['name'], "Composite bow"),

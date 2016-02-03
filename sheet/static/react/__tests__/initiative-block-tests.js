@@ -30,4 +30,17 @@ describe('InitiativeBlock', function() {
         var calculated  = block.initiatives(20, [30, 20, 10, 5, 2]);
         expect(calculated).toEqual([-12,-8,-4,-2,-1]);
     });
+
+    it('allows free-form input', function () {
+        var block = getInitiativeBlock({effMOV: 52});
+        TestUtils.Simulate.change(ReactDOM.findDOMNode(block._inputNode),
+            {target: {value: "25"}})
+        var rows = ReactDOM.findDOMNode(block).querySelectorAll('tbody tr');
+        var calculated = [];
+        for (var row of rows) {
+            calculated.push(parseInt(
+                row.querySelectorAll('td')[1].textContent));
+        }
+        expect(calculated).toEqual([-10, -15, -29]);
+    });
 });

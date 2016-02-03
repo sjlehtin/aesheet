@@ -235,9 +235,13 @@ if os.getenv('LOG_TO_CONSOLE'):
                 'handlers' : ['console'],
                 'level' : 'DEBUG'
                 },
-            'django.db' : {
+            'django' : {
                 'handlers' : ['console'],
-                'level' : 'DEBUG'
+                'level' : 'INFO'
+            },
+            'factory': {
+                'handlers' : ['console'],
+                'level' : 'INFO'
             },
             '' : {
                 'handlers' : ['console'],

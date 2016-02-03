@@ -59,10 +59,12 @@ class InventoryRow extends React.Component {
 
     startEdit(field) {
         var update = {};
-        this.state.show[field] = true;
-        this.state.old[field] = this.state[field]
-        this.setState({show: this.state.show,
-            old: this.state.old
+        update.show = Object.assign({}, this.state.show);
+        update.old = Object.assign({}, this.state.old);
+        update.show[field] = true;
+        update.old[field] = this.state[field]
+        this.setState({show: update.show,
+            old: update.old
         });
     }
 
@@ -73,20 +75,30 @@ class InventoryRow extends React.Component {
         this.setState(Object.assign(update, {show: this.state.show}));
     }
 
+    handleChange(e) {
+        if (this.props.onChange) {
+            this.props.onChange();
+        }
+    }
+
     handleDescriptionChange(e) {
-        this.setState({description: e.target.value})
+        this.setState({description: e.target.value},
+            () => this.handleChange(e));
     }
 
     handleLocationChange(e) {
-        this.setState({location: e.target.value})
+        this.setState({location: e.target.value},
+            () => this.handleChange(e));
     }
 
     handleQuantityChange(e) {
-        this.setState({quantity: e.target.value})
+        this.setState({quantity: e.target.value},
+            () => this.handleChange(e));
     }
 
     handleUnitWeightChange(e) {
-        this.setState({unitWeight: e.target.value})
+        this.setState({unitWeight: e.target.value},
+            () => this.handleChange(e));
     }
 
     unitWeightValidationState() {
@@ -102,7 +114,7 @@ class InventoryRow extends React.Component {
     }
 
     isValid() {
-        if (this.unitWeightValidationState() != "success") {
+        if (this.descriptionValidationState() != "success") {
             return false;
         }
 
@@ -110,7 +122,7 @@ class InventoryRow extends React.Component {
             return false;
         }
 
-        if (this.descriptionValidationState() != "success") {
+        if (this.unitWeightValidationState() != "success") {
             return false;
         }
 
@@ -122,10 +134,12 @@ class InventoryRow extends React.Component {
             return;
         }
 
-        if (typeof(this.props.onMod) !== "undefined") {
-            var initial = this.props.initialEntry;
-            if (!initial) {
+        if (this.props.onMod) {
+            var initial;
+            if (!this.props.initialEntry) {
                 initial = {};
+            } else {
+                initial = Object.assign({}, this.props.initialEntry);
             }
             this.props.onMod(Object.assign(initial,
                 { description: this.state.description,
@@ -257,6 +271,7 @@ class InventoryRow extends React.Component {
 InventoryRow.propTypes = {
     onDelete: React.PropTypes.func,
     onMod: React.PropTypes.func,
+    onChange: React.PropTypes.func,
     initialEntry: React.PropTypes.object,
     createNew: React.PropTypes.bool
 };

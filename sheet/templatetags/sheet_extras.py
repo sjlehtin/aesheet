@@ -46,6 +46,7 @@ def padnone(value, arg):
                             0, int(arg))
 
 
+# TODO: Remove.
 @register.simple_tag
 def render_burst_fire(weapon):
     bursts = weapon.burst_fire_skill_checks()

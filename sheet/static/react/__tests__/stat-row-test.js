@@ -128,5 +128,5 @@ describe('StatRow updates', function (){
             }).catch(function (err) { fail(err);});;
             }).catch(function (err) { fail(err);});;
         }).catch(function (err) { fail(err);});
-    })
+    });
 });

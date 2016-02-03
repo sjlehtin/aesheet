@@ -7,8 +7,11 @@ import CharacterNotes from "CharacterNotes"
 import StatBlock from "StatBlock"
 import Inventory from "Inventory"
 import InitiativeBlock from "InitiativeBlock"
+import SkillTable from "SkillTable"
 
 import 'bootstrap/dist/css/bootstrap.css';
+
+import 'react-widgets/lib/less/react-widgets.less';
 
 var rest = require('sheet-rest');
 
@@ -32,5 +35,6 @@ module.exports = {
     "StatBlock": StatBlock,
     "Inventory": Inventory,
     "InitiativeBlock": InitiativeBlock,
+    "SkillTable": SkillTable,
     "render": render
 }

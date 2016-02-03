@@ -40,8 +40,12 @@ describe('Inventory', function() {
         promises = [];
     });
 
-    var getInventory = function () {
-        var inventory = <Inventory url="/rest/sheets/1/inventory/" />;
+    var getInventory = function (givenProps) {
+        var props = {url: "/rest/sheets/1/inventory/"};
+        if (typeof(givenProps) !== "undefined") {
+            props = Object.assign(props, givenProps);
+        }
+        var inventory = <Inventory {...props} />;
         var node = TestUtils.renderIntoDocument(inventory);
         return TestUtils.findRenderedComponentWithType(node, Inventory);
     };
@@ -116,6 +120,35 @@ describe('Inventory', function() {
         }).catch((err) => fail(err));
     });
 
+    it('allows items to be added with button click', function (done) {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
+        var inventory = getInventory();
+
+        Promise.all(promises).then((data) => {
+            TestUtils.Simulate.click(inventory._addButton);
+
+            var node = ReactDOM.findDOMNode(inventory._inputRow)
+                .querySelector('td input');
+            expect(ReactDOM.findDOMNode(inventory._addButton)
+                .hasAttribute("disabled")).toEqual(true);
+
+            expect(inventory._inputRow.isValid()).toEqual(false);
+            node.value = "Foofaafom";
+            TestUtils.Simulate.change(node);
+            expect(inventory._inputRow.isValid()).toEqual(true);
+
+            expect(ReactDOM.findDOMNode(inventory._addButton)
+                .hasAttribute("disabled")).toEqual(false);
+            spyOn(inventory, 'handleNew');
+
+            TestUtils.Simulate.click(
+                ReactDOM.findDOMNode(inventory._addButton));
+
+            expect(inventory.handleNew).toHaveBeenCalled();
+            done();
+        }).catch((err) => fail(err));
+    });
+
     it('allows items to be removed', function (done) {
         var initialElem = inventoryEntryFactory({id: 1});
         rest.getData.mockReturnValue(jsonResponse([initialElem]));
@@ -181,4 +214,66 @@ describe('Inventory', function() {
         }).catch((err) => fail(err));
     });
 
+    it('reports total weight', function (done) {
+        var callback = jasmine.createSpy("callback");
+
+        rest.getData.mockReturnValue(jsonResponse([
+            inventoryEntryFactory({id: 2, quantity: 5, unit_weight: 2.3}),
+            inventoryEntryFactory({id: 3, quantity: 1, unit_weight: 2.7})
+        ]));
+
+        var inventory = getInventory({onWeightChange: callback});
+
+        Promise.all(promises).then((data) => {
+            expect(callback).toHaveBeenCalledWith(5 * 2.3 + 2.7);
+            done();
+        }).catch((err) => fail(err));
+    });
+
+    it('reports total weight after removal', function (done) {
+        var callback = jasmine.createSpy("callback");
+
+        rest.getData.mockReturnValue(jsonResponse([
+            inventoryEntryFactory({id: 2, quantity: 5, unit_weight: 2.3}),
+            inventoryEntryFactory({id: 3, quantity: 1, unit_weight: 2.7})
+        ]));
+
+        var inventory = getInventory({onWeightChange: callback});
+
+        Promise.all(promises).then((data) => {
+            rest.delete.mockReturnValue(jsonResponse());
+
+            inventory.handleRemove(0);
+
+            Promise.all(promises).then((data) => {
+                expect(callback).toHaveBeenCalledWith(2.7);
+                done();
+            }).catch((err) => fail(err));
+
+        }).catch((err) => fail(err));
+    });
+
+
+    it('reports total weight after edit', function (done) {
+        var callback = jasmine.createSpy("callback");
+
+        var initialElem = {id: 1, quantity: 1, unit_weight: 2.7};
+        rest.getData.mockReturnValue(jsonResponse([
+            inventoryEntryFactory(initialElem)]));
+        var inventory = getInventory({onWeightChange: callback});
+
+        Promise.all(promises).then((data) => {
+
+            var newElem = Object.assign({}, initialElem);
+            newElem.quantity = 5;
+            rest.put.mockReturnValue(jsonResponse(newElem));
+
+            inventory.handleEdit(0, newElem);
+
+            Promise.all(promises).then((data) => {
+                expect(callback).toHaveBeenCalledWith(5 * 2.7);
+                done();
+            }).catch((err) => fail(err));
+        }).catch((err) => fail(err));
+    });
 });
