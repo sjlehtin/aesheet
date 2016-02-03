@@ -1,9 +1,9 @@
 import React from 'react';
-import WeaponRow from 'WeaponRow';
+import RangedWeaponRow from 'RangedWeaponRow';
 var util = require('sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
-class FirearmControl extends WeaponRow {
+class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
 
@@ -11,28 +11,6 @@ class FirearmControl extends WeaponRow {
         this.baseCheckBonusForSlowActions = 10;
         this.extraActionModifier = 15;
         this.penaltyCounterStat = "FIT";
-    }
-
-    skillCheck () {
-        var check = this.props.skillHandler.skillCheck(
-            this.props.weapon.base.base_skill);
-
-        /* TODO: This works differently with ranged and close-combat
-           weapons (CCV on unskilled).  Might need a slightly more intricate
-           system to handle this. */
-        if (this.props.weapon.base.skill) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill)) {
-                check -= 10;
-            }
-        }
-        if (this.props.weapon.base.skill2) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill2)) {
-                check -= 10;
-            }
-        }
-        return check;
     }
 
     roa() {
@@ -52,10 +30,6 @@ class FirearmControl extends WeaponRow {
             rof *= 1 + 0.1 * skillLevel;
         }
         return rof;
-    }
-
-    rof() {
-        return this.roa();
     }
 
     singleBurstChecks(check) {
