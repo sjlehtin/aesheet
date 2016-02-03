@@ -42,7 +42,7 @@ Priority list by JW:
 - bootstrap data pop-up links for armor, effects in edit area
 -- show basic info.
 - reordering weapons.  possible to do with ajax, so it would be faster.
--- removing weapons etc to use REST API.
+++ removing weapons etc to use REST API.
 
 + possibility to copy characters and sheets (mainly sheets), which will copy
   also the underlying character.
@@ -84,7 +84,7 @@ Priority list by JW:
 + change log for sheet (stat modifications etc)
 ++ skills
 -- edges
-- nicer fast edit of basic stats
++ nicer fast edit of basic stats
 + stamina
 ++ recovery
 + mana
@@ -166,7 +166,7 @@ BUGS = """
 - Better error messages on importing completely invalid CSV (heading line or
   data type broken)
 + crossbows should not have FIT modifiers for damage
-- draw I missing
++ draw I missing
 + Rapid archery affects thrown weapons, crossbows and firearms.
 """
 
