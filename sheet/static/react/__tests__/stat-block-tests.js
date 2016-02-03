@@ -10,6 +10,7 @@ jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
 jest.dontMock('../WeaponRow');
+jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
 jest.dontMock('../FirearmControl');
 jest.dontMock('../AddFirearmControl');
@@ -146,6 +147,8 @@ describe('stat block', function() {
             } else if (url === "/rest/sheets/1/sheetfirearms/") {
                 return jsonResponse([]);
             } else if (url === "/rest/sheets/1/sheetweapons/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
                 return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */

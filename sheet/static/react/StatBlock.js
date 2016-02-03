@@ -10,6 +10,7 @@ import Loading from 'Loading';
 import FirearmControl from 'FirearmControl';
 import AddFirearmControl from 'AddFirearmControl';
 import WeaponRow from 'WeaponRow';
+import RangedWeaponRow from 'RangedWeaponRow';
 import AddWeaponControl from 'AddWeaponControl';
 
 const SkillHandler = require('SkillHandler').default;
@@ -40,7 +41,8 @@ class StatBlock extends React.Component {
             allSkills: undefined,
 
             firearmList: undefined,
-            weaponList: undefined
+            weaponList: undefined,
+            rangedWeaponList: undefined
         };
     }
 
@@ -52,6 +54,11 @@ class StatBlock extends React.Component {
     handleWeaponsLoaded(weapons) {
         console.log("Weapons loaded");
         this.setState({weaponList: weapons});
+    }
+
+    handleRangedWeaponsLoaded(weapons) {
+        console.log("Ranged weapons loaded");
+        this.setState({rangedWeaponList: weapons});
     }
 
     handleSkillsLoaded(skillList, allSkills) {
@@ -71,6 +78,11 @@ class StatBlock extends React.Component {
         rest.getData(this.props.url + 'sheetweapons/').then((json) => {
             this.handleWeaponsLoaded(json);
         }).catch((err) => {console.log("Failed to load weapons:", err)});
+
+        rest.getData(this.props.url + 'sheetrangedweapons/').then((json) => {
+            this.handleRangedWeaponsLoaded(json);
+        }).catch((err) => {console.log("Failed to load ranged weapons:",
+            err)});
 
         rest.getData(this.props.url).then((json) => {
             this.setState({
@@ -468,6 +480,26 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
+    getWeaponURL(rw) {
+        var baseURL = this.props.url + 'sheetrangedweapons/';
+        if (rw) {
+            return baseURL + rw.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleRangedWeaponRemoved(weapon) {
+        rest.delete(this.getRangedWeaponURL(weapon), weapon).then(
+            (json) => {
+                var index = StatBlock.findCharacterSkillIndex(
+                    this.state.rangedWeaponList, weapon);
+                this.state.rangedWeaponList.splice(index, 1);
+                this.setState({rangedWeaponList:
+                this.state.rangedWeaponList});
+            }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
     renderDescription() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading/>;
@@ -741,6 +773,42 @@ class StatBlock extends React.Component {
 
     }
 
+    renderRangedWeapons() {
+        var skillHandler = this.getSkillHandler();
+        if (!this.state.rangedWeaponList || !skillHandler) {
+            return <Loading>Ranged weapons</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let wpn of this.state.rangedWeaponList) {
+            if (idx % 2 === 0) {
+                var bgColor = "transparent";
+            } else {
+                bgColor = "rgb(245, 245, 255)";
+            }
+
+            rows.push(<RangedWeaponRow
+                key={idx++} weapon={wpn}
+                skillHandler={skillHandler}
+                onRemove={(wpn) => this.handleRangedWeaponRemoved(wpn) }
+                style={{fontSize: "80%", backgroundColor: bgColor}}
+            />);
+        }
+
+        return <Panel header={<h4>Ranged weapons</h4>}>
+            {rows}
+            {/*
+            <AddWeaponControl campaign={this.state.char.campaign}
+                              onAdd={
+                              (rw) => this.handleRangedWeaponAdded(rw) }/>
+             */}
+        </Panel>;
+
+    }
+
     render() {
         var description = this.renderDescription(),
             skillTable = this.renderSkills(),
@@ -778,10 +846,13 @@ class StatBlock extends React.Component {
                         </Col>
                     </Row>
                     <Row>
+                        {this.renderCCWeapons()}
+                    </Row>
+                    <Row>
                         {this.renderFirearms()}
                     </Row>
                     <Row>
-                        {this.renderCCWeapons()}
+                        {this.renderRangedWeapons()}
                     </Row>
                 </Col>
                 <Col md={4}>
