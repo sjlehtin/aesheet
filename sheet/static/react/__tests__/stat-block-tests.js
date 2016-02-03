@@ -12,6 +12,7 @@ jest.dontMock('../SkillHandler');
 jest.dontMock('../WeaponRow');
 jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
+jest.dontMock('../AddRangedWeaponControl');
 jest.dontMock('../FirearmControl');
 jest.dontMock('../AddFirearmControl');
 jest.dontMock('../sheet-util');
@@ -149,6 +150,10 @@ describe('stat block', function() {
             } else if (url === "/rest/sheets/1/sheetweapons/") {
                 return jsonResponse([]);
             } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/rangedweapontemplates/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/rangedweapons/campaign/2/") {
                 return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */

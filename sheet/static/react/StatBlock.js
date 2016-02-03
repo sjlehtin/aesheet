@@ -12,6 +12,7 @@ import AddFirearmControl from 'AddFirearmControl';
 import WeaponRow from 'WeaponRow';
 import RangedWeaponRow from 'RangedWeaponRow';
 import AddWeaponControl from 'AddWeaponControl';
+import AddRangedWeaponControl from 'AddRangedWeaponControl';
 
 const SkillHandler = require('SkillHandler').default;
 
@@ -480,13 +481,34 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
-    getWeaponURL(rw) {
+    getRangedWeaponURL(rw) {
         var baseURL = this.props.url + 'sheetrangedweapons/';
         if (rw) {
             return baseURL + rw.id + '/';
         } else {
             return baseURL;
         }
+    }
+
+    handleRangedWeaponAdded(weapon) {
+        var data;
+        if ('id' in weapon) {
+            data = {weapon: weapon.id};
+        } else {
+            data = {
+                base: weapon.base.name,
+                quality: weapon.quality.name
+            };
+        }
+        console.log("Adding: ", data, weapon);
+        rest.post(this.getRangedWeaponURL(), data).then((json) => {
+            console.log("POST success", json);
+            weapon.id = json.id;
+            weapon.name = json.name;
+            var newList = this.state.rangedWeaponList;
+            newList.push(weapon);
+            this.setState({rangedWeaponList: newList});
+        }).catch((err) => {console.log("error", err)});
     }
 
     handleRangedWeaponRemoved(weapon) {
@@ -800,11 +822,9 @@ class StatBlock extends React.Component {
 
         return <Panel header={<h4>Ranged weapons</h4>}>
             {rows}
-            {/*
-            <AddWeaponControl campaign={this.state.char.campaign}
+            <AddRangedWeaponControl campaign={this.state.char.campaign}
                               onAdd={
                               (rw) => this.handleRangedWeaponAdded(rw) }/>
-             */}
         </Panel>;
 
     }
