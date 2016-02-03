@@ -1016,6 +1016,7 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
                                       default=0.1)
 
+    # TODO: Get rid of this, use base_skill to indicate the type instead.
     THROWN = "thrown"
     CROSSBOW = "xbow"
     BOW = "bow"
@@ -1920,6 +1921,7 @@ class Sheet(PrivateMixin, models.Model):
     def ranged_ranges(self, weapon):
         return weapon.ranges(self)
 
+    # TODO: Remove.
     def _cc_bonus_fit(self):
         return (self.eff_fit +
                 (self.character.skill_level("Martial arts expertise") or 0) * 5
@@ -1953,6 +1955,7 @@ class Sheet(PrivateMixin, models.Model):
 
         return dmg
 
+    # TODO: Remove.
     def defense_damage(self, weapon, use_type=FULL):
         dmg = weapon.defense_damage()
         bonus_fit = self._cc_bonus_fit()

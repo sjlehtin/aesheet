@@ -245,6 +245,7 @@ class SkilledMixin(object):
         return self.sheet.skilled(self.item)
 
 
+# TODO: Remove.
 class WeaponWrap(RemoveWrap, SkilledMixin):
     class Stats(object):
         rendered_attack_inits = 4
