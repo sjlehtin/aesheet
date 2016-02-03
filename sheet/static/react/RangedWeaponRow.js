@@ -76,14 +76,14 @@ class RangedWeaponRow extends WeaponRow {
 
     render() {
         var headerStyle = {padding: 2};
-        var cellStyle = {padding: 2};
+        var cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
         var initStyle = Object.assign({color: "red"}, cellStyle);
         var infoStyle = {marginRight: 5};
         var helpStyle = {color: "hotpink"};
 
         var actions = [0.5, 1, 2, 3, 4, 5];
         var actionCells = actions.map((el, ii) => {
-            return <th style={headerStyle} key={`act-${ii}`}>{el.toFixed(1)}</th>;
+            return <th style={headerStyle} key={`act-${ii}`}>{el}</th>;
         });
         var checkCells = this.skillChecks(actions).map((el, ii) =>
         { return <td style={cellStyle} key={`chk-${ii}`}>{el}</td>; });
@@ -112,12 +112,12 @@ class RangedWeaponRow extends WeaponRow {
                     <td style={cellStyle} rowSpan={2}>{
                         this.weaponName()}</td>
                     <td style={cellStyle}>{this.skillLevel()}</td>
-                    <td>{this.rof().toFixed(2)}</td>
+                    <td style={cellStyle}>{this.rof().toFixed(2)}</td>
                     {checkCells}
-                    <td>{this.props.weapon.base.target_initiative}</td>
-                    <td>{this.drawInitiative()}</td>
-                    <td>{this.renderDamage()}</td>
-                    <td>{ranges}</td>
+                    <td style={cellStyle}>{this.props.weapon.base.target_initiative}</td>
+                    <td style={cellStyle}>{this.drawInitiative()}</td>
+                    <td style={cellStyle}>{this.renderDamage()}</td>
+                    <td style={cellStyle}>{ranges}</td>
                 </tr>
                 <tr>
                     <td colSpan={2}><span style={helpStyle}>I vs. 1 target</span></td>

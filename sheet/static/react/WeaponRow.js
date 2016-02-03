@@ -327,13 +327,13 @@ class WeaponRow extends React.Component {
     renderUseType(useType) {
         if (useType === WeaponRow.PRI || useType === WeaponRow.SEC) {
             if (!this.oneHandedUseAvailable()) {
-                return <tr colSpan={19}>
-                    <td style={{color: "red", textAlign: "left"}}
+                return <tr>
+                    <td colSpan={19} style={{color: "red", textAlign: "left"}}
                     >Unskilled for one-handed use</td></tr>
             }
         }
-        var cellStyle = {padding: 2, borderStyle: "dotted", borderWidth: 1, minWidth: "2em",
-            textAlign: "center"};
+        var cellStyle = {padding: 2, borderStyle: "dotted", borderWidth: 1,
+            minWidth: "2em", textAlign: "center"};
         var initStyle = Object.assign({color: "red"}, cellStyle);
         var defenseInitStyle = Object.assign({color: "blue"}, cellStyle);
         var attackDamageStyle = initStyle;
@@ -374,6 +374,7 @@ class WeaponRow extends React.Component {
 
     render() {
         var headerStyle = {padding: 2};
+        var nameStyle = Object.assign({}, headerStyle, {width: "10em"});
         var cellStyle = {padding: 2};
         var infoStyle = {marginRight: 5};
         var actionCells = WeaponRow.ccActions.map((el, ii) => {
@@ -384,7 +385,7 @@ class WeaponRow extends React.Component {
             <table style={{fontSize: 'inherit'}}>
                 <thead>
                   <tr>
-                    <th style={headerStyle}>Weapon</th>
+                    <th style={nameStyle}>Weapon</th>
                     <th style={headerStyle}>Lvl</th>
                     <th style={headerStyle}>ROA</th>
                       {actionCells}

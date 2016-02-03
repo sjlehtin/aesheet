@@ -301,14 +301,14 @@ class FirearmControl extends RangedWeaponRow {
 
         var actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-        var headerStyle = {paddingRight: 5, paddingBottom: 5};
+        var headerStyle = {padding: 2};
         var actionCells = actions.map((act, ii) =>
         {return <th key={`act-${ii}`} style={headerStyle}>{act}</th>});
 
         var renderInit = (init) => {
             return this.renderInt(init);
         };
-        var cellStyle = {paddingRight: 5, paddingBottom: 5};
+        var cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
         var helpStyle = Object.assign({color: "hotpink"}, cellStyle);
         var initStyle = Object.assign({color: "red"}, cellStyle);
 
@@ -321,65 +321,64 @@ class FirearmControl extends RangedWeaponRow {
 
         return <div style={this.props.style}>
             <Row>
-            <Col md={9}>
-                <Row>
-            <table style={{fontSize: 'inherit'}}>
-                <thead>
-                  <tr>
-                    <th style={headerStyle}>Weapon</th>
-                    <th style={headerStyle}>Lvl</th>
-                    <th style={headerStyle}>ROF</th>
-                      {actionCells}
-                    <th style={headerStyle}>TI</th>
-                    <th style={headerStyle}>DI</th>
-                    <th style={headerStyle}>Damage</th>
-                    <th style={headerStyle}>S/M/L</th>
-                  </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td rowSpan="2" style={cellStyle}>
-                        <div>
-                            {weapon.name}
-                            {ammoIdentifier}
-                            {unskilled}
-                        </div>
-                    </td>
-                    <td style={cellStyle}>{this.skillLevel()}</td>
-                    <td style={cellStyle}>{ this.rof().toFixed(2) }</td>
-                    {skillChecks}
-                    <td style={cellStyle}>{ weapon.target_initiative }</td>
-                    <td style={cellStyle}>{ weapon.draw_initiative }</td>
-                    <td style={cellStyle} rowSpan="2">{ this.renderDamage() } {ammo.type}
-                        <div>{ ammoIdentifier }</div></td>
-                    <td style={cellStyle} rowSpan="2">
-                        {weapon.range_s } / {weapon.range_m } / {weapon.range_l }
-                    </td>
-                </tr>
-      <tr>
-      <td style={helpStyle} colSpan={2}>
-          I vs. 1 target
-      </td>
-          {initiatives}
-      <td></td>
-      <td></td>
-      </tr>
-      </tbody>
-</table>
-            <div className="durability">
-                <label>Durability:</label>{weapon.durability}</div>
-                    <Button onClick={(e) => this.handleRemove()}
-                            ref={(c) => this._removeButton = c}
-                            bsSize="xsmall"
-                    >Remove</Button>
-                </Row>
-                <Row>
-                    {this.renderSweepTable()}
-                </Row>
-            </Col>
-            <Col md={3}>
-                {this.renderBurstTable()}
-            </Col>
+                <Col md={9}>
+                    <Row>
+                        <table style={{fontSize: 'inherit'}}>
+                            <thead>
+                            <tr>
+                                <th style={headerStyle}>Weapon</th>
+                                <th style={headerStyle}>Lvl</th>
+                                <th style={headerStyle}>ROF</th>
+                                  {actionCells}
+                                <th style={headerStyle}>TI</th>
+                                <th style={headerStyle}>DI</th>
+                                <th style={headerStyle}>Damage</th>
+                                <th style={headerStyle}>S/M/L</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td rowSpan="2" style={cellStyle}>
+                                    <div>
+                                        {weapon.name}
+                                        {ammoIdentifier}
+                                        {unskilled}
+                                    </div>
+                                </td>
+                                <td style={cellStyle}>{this.skillLevel()}</td>
+                                <td style={cellStyle}>{ this.rof().toFixed(2) }</td>
+                                {skillChecks}
+                                <td style={cellStyle}>{ weapon.target_initiative }</td>
+                                <td style={cellStyle}>{ weapon.draw_initiative }</td>
+                                <td style={cellStyle} rowSpan="2">{ this.renderDamage() } {ammo.type}
+                                    <div>{ ammoIdentifier }</div></td>
+                                <td style={cellStyle} rowSpan="2">
+                                    {weapon.range_s } / {weapon.range_m } / {weapon.range_l }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={helpStyle} colSpan={2}>
+                                    I vs. 1 target
+                                </td>
+                                {initiatives}
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div className="durability">
+                            <label>Durability:</label>{weapon.durability}</div>
+                        <Button onClick={(e) => this.handleRemove()}
+                                ref={(c) => this._removeButton = c}
+                                bsSize="xsmall">Remove</Button>
+                    </Row>
+                    <Row>
+                        {this.renderSweepTable()}
+                    </Row>
+                </Col>
+                <Col md={3}>
+                    {this.renderBurstTable()}
+                </Col>
             </Row>
         </div>;
     }
