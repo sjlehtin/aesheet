@@ -153,14 +153,9 @@ var firearmFactory = function (overrideFields) {
     return Object.assign(firearm, overrides);
 };
 
-var weaponFactory = function (overrideFields) {
+var weaponQualityFactory = function (overrideFields) {
     "use strict";
-    var weapon ={
-        "id": 3,
-        "name": "Broadsword",
-        "description": "",
-        "size": 1,
-        "quality": {
+    var quality = {
             "name": "normal",
             "short_name": "",
             "roa": "0.0000",
@@ -178,7 +173,25 @@ var weaponFactory = function (overrideFields) {
             "versus_area_save_modifier": 0,
             "max_fit": 90,
             "tech_level": 1
-        },
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(quality, overrideFields);
+};
+
+var weaponFactory = function (overrideFields) {
+    "use strict";
+
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    var weapon ={
+        "id": 3,
+        "name": "Broadsword",
+        "description": "",
+        "size": 1,
+        "quality": weaponQualityFactory(overrideFields.quality),
         "base": {
             "name": "Broadsword",
             "short_name": "Spatha",
@@ -209,14 +222,75 @@ var weaponFactory = function (overrideFields) {
         "special_qualities": []
     };
     
-    var overrides = Object.assign({}, overrideFields ? overrideFields : {});
+    var overrides = Object.assign({}, overrideFields);
     if ('base' in overrides) {
         weapon.base = Object.assign(weapon.base, overrideFields.base);
         delete overrides.base;
     }
 
     if ('quality' in overrides) {
-        weapon.quality = Object.assign(weapon.quality, overrideFields.quality);
+        delete overrides.quality;
+    }
+    return Object.assign(weapon, overrides);
+};
+
+var rangedWeaponFactory = function (overrideFields) {
+    "use strict";
+
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var weapon = {
+        "id": 1,
+        "name": "Short bow, 2h w/ Broadhead arrow Exceptional",
+        "description": "",
+        "size": 1,
+        "quality": weaponQualityFactory(overrideFields.quality),
+        "base": {
+            "name": "Short bow, 2h w/ Broadhead arrow",
+            "short_name": "Sb-bh",
+            "description": "",
+            "notes": "",
+            "draw_initiative": -8,
+            "durability": 6,
+            "dp": 0,
+            "weight": "1.0",
+            "num_dice": 1,
+            "dice": 6,
+            "extra_damage": 0,
+            "leth": 5,
+            "plus_leth": -1,
+            "roa": "1.000",
+            "bypass": -1,
+            "target_initiative": -2,
+            "range_pb": 3,
+            "range_xs": 5,
+            "range_vs": 10,
+            "range_s": 20,
+            "range_m": 40,
+            "range_l": 65,
+            "range_xl": 98,
+            "range_e": 130,
+            "type": "P(S)",
+            "ammo_weight": "0.0",
+            "weapon_type": "bow",
+            "tech_level": 1,
+            "base_skill": "Bow",
+            "skill": null,
+            "skill2": null
+        },
+        "ammo_quality": null,
+        "special_qualities": []
+    };
+
+    var overrides = Object.assign({}, overrideFields);
+    if ('base' in overrides) {
+        weapon.base = Object.assign(weapon.base, overrideFields.base);
+        delete overrides.base;
+    }
+
+    if ('quality' in overrides) {
         delete overrides.quality;
     }
     return Object.assign(weapon, overrides);
@@ -228,5 +302,6 @@ module.exports = {
     edgeFactory: edgeFactory,
     statsFactory: statsFactory,
     firearmFactory: firearmFactory,
-    weaponFactory: weaponFactory
+    weaponFactory: weaponFactory,
+    rangedWeaponFactory: rangedWeaponFactory
 };
