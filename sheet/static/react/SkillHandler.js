@@ -1,3 +1,10 @@
+/*
+ * SkillHandler
+ *
+ * This is container, created typically in StatBlock, which handles
+ * skills, characterskills and edges.
+ */
+
 class SkillHandler {
     constructor(props) {
         this.props = props;
