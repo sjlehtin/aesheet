@@ -212,7 +212,7 @@ describe('FirearmControl', function() {
             base: {name: "Invented",
                 autofire_rpm: props.autofireRPM,
                 autofire_class: "B",
-                sweep_fire_disabled: false,
+                sweep_fire_disabled: props.sweepFireDisabled,
                 restricted_burst_rounds: props.restrictedBurstRounds,
                 base_skill: "Long guns"
             }
@@ -273,6 +273,12 @@ describe('FirearmControl', function() {
         expect(checks.length).toEqual(16);
         expect(checks).toEqual([55, 53, 51, 49, 45, 41, 37, 33, 23, 13, 3,
             -7, -27, -47, -67, -87]);
+    });
+
+    it ("does not render sweep fire if it is disabled", function () {
+        var firearm = getBurstController({sweepFireDisabled: true});
+        var table = firearm.renderSweepTable();
+        expect(table).toEqual('');
     });
 
     it ("takes missing Autofire skill into account in sweep fire", function () {

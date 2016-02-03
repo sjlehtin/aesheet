@@ -225,7 +225,8 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     renderSweepTable() {
-        if (!this.props.weapon.base.autofire_rpm) {
+        if (!this.props.weapon.base.autofire_rpm ||
+            this.props.weapon.base.sweep_fire_disabled) {
             return '';
         }
 
