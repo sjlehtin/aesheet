@@ -1558,19 +1558,7 @@ class Sheet(PrivateMixin, models.Model):
 
     def _penalties_for_weight_carried(self):
         ratio = float(self.weight_carried)/self.cur_fit
-        if ratio <= 0.25:
-            return 0
-        elif ratio <= 0.5:
-            return -5
-        elif ratio <= 1:
-            return -10
-        elif ratio <= 1.5:
-            return -15
-        elif ratio <= 2:
-            return -20
-        elif ratio <= 3:
-            return -30
-        return -99 # Unable to carry this load.
+        return int(round(-10 * ratio))
 
     @property
     @_stat_wrapper
