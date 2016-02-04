@@ -32,6 +32,8 @@ Priority list by JW:
 
 - armor modifiers to skill checks.  These should work for the physical skills
   where the check is shown even without the character having the skill.
+- edge skillbonuses back to sheet, they are missing after moving skills to
+  react.
 
 - show character height, weight in sheet.
 - "add xp used ingame" with a possibility to enter description (to log)
@@ -42,37 +44,20 @@ Priority list by JW:
 - bootstrap data pop-up links for armor, effects in edit area
 -- show basic info.
 - reordering weapons.  possible to do with ajax, so it would be faster.
-++ removing weapons etc to use REST API.
 
-+ possibility to copy characters and sheets (mainly sheets), which will copy
-  also the underlying character.
 - character addition form layout for easier "intake"
   + group cur, starting stats
   - show raises
 +/- adding weapon inplace ("add row" functionality), instead of the large set of
     controls.  Might already be sufficient with the condensed layout, verify with
     JW.
-+ access controls
-++ marking sheet as only visible to self (SM)
-++ marking characters as only visible to self (SM)
-+++ these should not show in the lists.
 
 
-+ character mugshot upload (SM)
 - senses (SM)
-+ movement chart (SM)
 - spell skill checks (SM)
 
-+ weapon maximum damage based on durability.
 - edge levels from items (toughness, darkvision, etc)
 - automatic used edge point calculation
-
-+ Creating a new character should automatically create a sheet for that
-  character and redirect to edit the new character.
-
-+ form errors should be highlighted, and if the form element is hidden, it
-  should be shown by default (errors in add forms can get hidden)
-++ form errorlist class should be highlighted.
 
 - you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
@@ -84,13 +69,6 @@ Priority list by JW:
 + change log for sheet (stat modifications etc)
 ++ skills
 -- edges
-+ nicer fast edit of basic stats
-+ stamina
-++ recovery
-+ mana
-++ recovery
-+ body
-++ recovery
 
 - code simplification; sheet detail form handling mainly.
 
@@ -100,10 +78,6 @@ Priority list by JW:
 
 - short description of spell effect (+50 FIT etc)
 - stats, armors etc if the character is larger sized.
-
-+ Basic skill checks:  Adding skills without any points (or reduced amount of
-  points) allocated.  For example, Climbing B -> show skill check at half
-  ability.  Currently supported are the basic physical skills.
 
 - Partial skills.  This is a larger item than it sounds, as the current design
   assumes whole skill levels.  Investigate if could be done as a skill level
@@ -137,10 +111,6 @@ Firearms:
    be applied based on weapon type.  If both hands are occupied, apply penalty
    for two guns.
 - firearms in CC.
-+ some weapons with autofire do not have sweep fire enabled.
-+ some weapons have restricted burst (restricted to 2 or 3 shots).
-+ weapon class modifiers for ROF calculations
-+ adding weapon with inline form does not allow setting ammo types.
 
 Edges:
 
@@ -158,16 +128,12 @@ Skills:
 Spells:
 + fly speed multiplier
 
-
 """
 
 BUGS = """
 - Adding skills with multiple prereqs doesn't work.
 - Better error messages on importing completely invalid CSV (heading line or
   data type broken)
-+ crossbows should not have FIT modifiers for damage
-+ draw I missing
-+ Rapid archery affects thrown weapons, crossbows and firearms.
 """
 
 from django.shortcuts import render, get_object_or_404
