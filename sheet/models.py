@@ -846,12 +846,6 @@ class RangedWeaponMixin(models.Model):
         abstract = True
         ordering = ['name']
 
-    def ranges(self, sheet):
-        return Range._make([self.range_pb, self.range_xs,
-                            self.range_vs, self.range_s,
-                            self.range_m, self.range_l,
-                            self.range_xl, self.range_e])
-
 
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
     """
