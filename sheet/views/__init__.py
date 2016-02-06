@@ -57,7 +57,7 @@ Priority list by JW:
 - spell skill checks (SM)
 
 - edge levels from items (toughness, darkvision, etc)
-- automatic used edge point calculation
++ automatic used edge point calculation
 
 - you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
