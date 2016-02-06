@@ -528,8 +528,7 @@ class StatBlock extends React.Component {
         }
 
         return <div>
-            { this.state.char.race }
-            { this.state.char.occupation }
+            {this.state.char.race} {this.state.char.occupation}
             <p title="Character description">
                 { this.state.char.description }
             </p>
@@ -687,10 +686,10 @@ class StatBlock extends React.Component {
             return <Image style={{maxWidth: 300}}
                                   src={this.state.char.portrait} rounded />;
         } else {
+            var editURL = `/characters/edit_char/${this.state.char.id}/`;
             return <div className="edit-control">
                 You can add a portrait for
-                your character in the <a href="`/characters/edit_char/${
-                        this.state.char}/`"> base character edit</a>.
+                your character in the <a href={editURL}> base character edit</a>.
             </div>;
         }
     }
