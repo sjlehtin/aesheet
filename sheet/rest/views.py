@@ -197,6 +197,37 @@ class RangedWeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
         return qs
 
 
+class ArmorTemplateViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.ArmorTemplateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ArmorQualityViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.ArmorQualitySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ArmorViewSet(CampaignMixin, viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.ArmorCreateSerializer
+        else:
+            return serializers.ArmorListSerializer
+
+    def get_queryset(self):
+        qs = models.Armor.objects.select_related().all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                    self.tech_levels))
+            qs = qs.filter(base__tech_level__in=self.tech_levels)
+            qs = qs.filter(quality__tech_level__in=self.tech_levels)
+        return qs
+
+
 class ListPermissionMixin(object):
     """
     The `list` method of ListModelMixin does not check object
@@ -396,3 +427,40 @@ class SheetRangedWeaponViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         self.sheet.ranged_weapons.remove(instance)
+
+
+class SheetArmorViewSet(viewsets.ModelViewSet):
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
+        return super(SheetArmorViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetArmorCreateSerializer
+        else:
+            return serializers.SheetArmorDetailSerializer
+
+    def get_queryset(self):
+        return sheet.models.Armor.objects.filter(id=self.sheet.armor_id)
+
+    def perform_update(self, serializer):
+        # TODO: not supported for Armor.  Will be supported for
+        # SheetArmor.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetArmorViewSet, self).perform_create(serializer)
+        self.sheet.armor = serializer.instance
+        self.sheet.save()
+        
+    def perform_destroy(self, instance):
+        self.sheet.armor = None
+        self.sheet.save()
+
+

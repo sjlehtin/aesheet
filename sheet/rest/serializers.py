@@ -92,6 +92,31 @@ class RangedWeaponListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class ArmorTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.ArmorTemplate
+        fields = "__all__"
+
+
+class ArmorQualitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.ArmorQuality
+        fields = "__all__"
+
+
+class ArmorCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+
+
+class ArmorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+        depth = 1
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
@@ -177,8 +202,7 @@ class SheetWeaponListSerializer(serializers.ModelSerializer):
 
 
 class SheetWeaponCreateSerializer(serializers.ModelSerializer):
-    weapon = serializers.IntegerField(
-            required=False)
+    item = serializers.IntegerField(required=False)
 
     base = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.WeaponTemplate.objects.all(),
@@ -190,23 +214,23 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
     def get_queryset(self):
         return sheet.models.Weapon.objects.all()
 
-    def validate_weapon(self, value):
+    def validate_item(self, value):
         return self.get_queryset().get(pk=value)
 
     def validate(self, attrs):
-        if not attrs.get('weapon'):
+        if not attrs.get('item'):
             if 'base' not in attrs:
-                raise serializers.ValidationError("weapon not passed, "
+                raise serializers.ValidationError("item not passed, "
                                                   "base is required")
             if 'quality' not in attrs:
-                raise serializers.ValidationError("weapon not passed, "
+                raise serializers.ValidationError("item not passed, "
                                                   "quality is required")
                     
         return attrs
 
     def create(self, validated_data):
-        if 'weapon' in validated_data:
-            return validated_data['weapon']
+        if 'item' in validated_data:
+            return validated_data['item']
 
         if set(validated_data.keys()) == {'base', 'quality'}:
             objs = self.get_queryset().filter(
@@ -241,9 +265,6 @@ class SheetRangedWeaponListSerializer(serializers.ModelSerializer):
 
 
 class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
-    weapon = serializers.IntegerField(
-            required=False)
-
     base = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.RangedWeaponTemplate.objects.all(),
             required=False)
@@ -257,3 +278,26 @@ class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
     class Meta:
         model = sheet.models.RangedWeapon
         fields = "__all__"
+
+
+class SheetArmorCreateSerializer(SheetWeaponCreateSerializer):
+    base = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.ArmorTemplate.objects.all(),
+            required=False)
+    quality = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.ArmorQuality.objects.all(),
+            required=False)
+
+    def get_queryset(self):
+        return sheet.models.Armor.objects.all()
+
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+
+
+class SheetArmorDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+        depth = 1

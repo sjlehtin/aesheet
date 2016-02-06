@@ -284,6 +284,7 @@ class FirearmFactory(factory.DjangoModelFactory):
 
 
 class ArmorTemplateFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "armor-%03d" % n)
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
@@ -311,8 +312,20 @@ class ArmorFactory(factory.DjangoModelFactory):
     base = factory.SubFactory(ArmorTemplateFactory)
     quality = factory.SubFactory(ArmorQualityFactory)
     quality__name = "normal"
+
     class Meta:
         model = models.Armor
+
+    @factory.post_generation
+    def special_qualities(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            # A list of groups were passed in, use them
+            for sq in extracted:
+                self.special_qualities.add(
+                        ArmorSpecialQualityFactory(name=sq))
 
 
 class HelmFactory(ArmorFactory):
