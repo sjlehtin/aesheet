@@ -1315,7 +1315,7 @@ class ArmorQuality(ExportedModel):
         return ['armor']
 
     def __unicode__(self):
-        return u"AQ:" + self.name
+        return u"%s" % self.name
 
 
 class Armor(ExportedModel):
