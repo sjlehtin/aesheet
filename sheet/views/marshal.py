@@ -329,7 +329,6 @@ def import_text(data):
 
 def import_data(request):
     """
-    XXX Create tests and refactor.
     """
     if request.method == 'POST':
         form = sheet.forms.ImportForm(request.POST, request.FILES)
