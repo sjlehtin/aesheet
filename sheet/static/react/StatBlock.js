@@ -142,7 +142,7 @@ class StatBlock extends React.Component {
 
     /*
      * TODO:  Effects from SpellEffects, ArmorSpecialQualities,
-     * WeaponSpecialQualities, MiscellanousItems, and Edges should be
+     * WeaponSpecialQualities, MiscellaneousItems, and Edges should be
      * combined and added to stats, skill levels, movement etc.
      *
      * Edges affect base stats ("hard" modifier) and the rest are
@@ -204,6 +204,10 @@ class StatBlock extends React.Component {
     }
 
     getEffStats() {
+        if (!this.state.char || !this.state.sheet) {
+            return undefined;
+        }
+
         var block = {};
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos", "mov", "dex", "imm"];
@@ -214,6 +218,9 @@ class StatBlock extends React.Component {
     }
 
     getBaseStats() {
+        if (!this.state.char) {
+            return undefined;
+        }
         var block = {};
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
@@ -256,7 +263,6 @@ class StatBlock extends React.Component {
         } else {
             return "3/16d";
         }
-
     }
 
     staminaRecovery() {
@@ -311,7 +317,7 @@ class StatBlock extends React.Component {
         if (rates.length) {
             return rates.join('+') + "/8h";
         } else {
-            return ""
+            return "";
         }
     }
 
@@ -604,8 +610,7 @@ class StatBlock extends React.Component {
         }
     }
 
-    renderSkills() {
-        var skillHandler = this.getSkillHandler();
+    renderSkills(skillHandler) {
         if (!skillHandler) {
             return <Loading>Skills</Loading>
         }
@@ -626,8 +631,8 @@ class StatBlock extends React.Component {
         />
     }
 
-    renderStats() {
-        if (!this.state.char|| !this.state.sheet) {
+    renderStats(baseStats, effStats) {
+        if (!baseStats|| !effStats) {
             return <Loading>Stats</Loading>;
         }
 
@@ -657,45 +662,45 @@ class StatBlock extends React.Component {
         derivedRows = <tbody>
             <tr>
                 <td style={statStyle}>MOV</td>
-                <td style={baseStyle}>{this.baseMOV()}</td>
-                <td style={effStyle}>{this.effMOV()}</td>
+                <td style={baseStyle}>{baseStats.mov}</td>
+                <td style={effStyle}>{effStats.mov}</td>
             </tr>
             <tr>
                 <td style={statStyle}>DEX</td>
-                <td style={baseStyle}>{this.baseDEX()}</td>
-                <td style={effStyle}>{this.effDEX()}</td>
+                <td style={baseStyle}>{baseStats.dex}</td>
+                <td style={effStyle}>{effStats.dex}</td>
             </tr>
             <tr>
                 <td style={statStyle}>IMM</td>
-                <td style={baseStyle}>{this.baseIMM()}</td>
-                <td style={effStyle}>{this.effIMM()}</td>
+                <td style={baseStyle}>{baseStats.imm}</td>
+                <td style={effStyle}>{effStats.imm}</td>
             </tr>
         </tbody>;
 
-            var toughness = this.toughness();
-            if (toughness) {
-                toughness = (<span>+<span
-                    style={{ fontWeight: "bold"}}>{toughness}</span></span>);
-            } else {
-                toughness = "";
-            }
+        var toughness = this.toughness();
+        if (toughness) {
+            toughness = (<span>+<span
+                style={{ fontWeight: "bold"}}>{toughness}</span></span>);
+        } else {
+            toughness = "";
+        }
 
-            var recoveryStyle = {
-                color: "grey",
-                paddingLeft: 5
-            };
+        var recoveryStyle = {
+            color: "grey",
+            paddingLeft: 5
+        };
 
-            expendable = <tbody>
-                <tr><td style={statStyle}>B</td>
-                    <td style={baseStyle}>{this.baseBody()}{toughness}</td>
-                    <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>
-                <tr><td style={statStyle}>S</td>
-                    <td style={baseStyle}>{this.stamina()}</td>
-                    <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>
-                <tr><td style={statStyle}>M</td>
-                    <td style={baseStyle}>{this.mana()}</td>
-                    <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>
-            </tbody>;
+        expendable = <tbody>
+            <tr><td style={statStyle}>B</td>
+                <td style={baseStyle}>{this.baseBody()}{toughness}</td>
+                <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>
+            <tr><td style={statStyle}>S</td>
+                <td style={baseStyle}>{this.stamina()}</td>
+                <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>
+            <tr><td style={statStyle}>M</td>
+                <td style={baseStyle}>{this.mana()}</td>
+                <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>
+        </tbody>;
 
         return <div style={{position: "relative", width: "18em"}}>
             <h4>Stats</h4>
@@ -713,12 +718,12 @@ class StatBlock extends React.Component {
         </div>;
     }
 
-    renderAdvancingInitiatives () {
-        if (!this.state.char|| !this.state.sheet) {
+    renderAdvancingInitiatives (effStats) {
+        if (!effStats) {
             return <Loading>Advancing initiatives</Loading>;
         }
         return <InitiativeBlock style={{fontSize: "80%"}}
-                                effMOV={this.effMOV()}
+                                effMOV={effStats.mov}
                                 runMultiplier={this.runMultiplier()} />;
     }
 
@@ -750,13 +755,13 @@ class StatBlock extends React.Component {
             onMod={this.handleXPMod.bind(this)} />;
     }
 
-    renderSPControl() {
+    renderSPControl(baseStats) {
         if (!this.state.char) {
             return <Loading>SP</Loading>
         }
 
-        var ageSP = util.roundup(this.baseStat('lrn')/15 +
-            this.baseStat('int')/25 + this.baseStat('psy')/50);
+        var ageSP = util.roundup(baseStats.lrn/15 +
+            baseStats.int/25 + baseStats.psy/50);
         return <AddSPControl
             initialAgeSP={ageSP}
             onAdd={(sp) => this.handleAddGainedSP(sp)} />;
@@ -805,8 +810,7 @@ class StatBlock extends React.Component {
         </Panel>;
     }
 
-    renderCCWeapons() {
-        var skillHandler = this.getSkillHandler();
+    renderCCWeapons(skillHandler) {
         if (!this.state.weaponList || !skillHandler) {
             return <Loading>Close-combat weapons</Loading>;
         }
@@ -907,14 +911,9 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var description = this.renderDescription(),
-            skillTable = this.renderSkills(),
-            notes = this.renderNotes(),
-            stats = this.renderStats(),
-            initiativeBlock = this.renderAdvancingInitiatives(),
-            portrait = this.renderPortrait(),
-            xpControl = this.renderXPControl(),
-            spControl = this.renderSPControl();
+        var baseStats = this.getBaseStats();
+        var effStats = this.getEffStats();
+        var skillHandler = this.getSkillHandler();
 
         return (
             <Grid>
@@ -922,41 +921,41 @@ class StatBlock extends React.Component {
                     <Row>
                         <Col md={6}>
                             <Row>
-                                {description}
+                                {this.renderDescription()}
                             </Row>
                             <Row>
-                                {stats}
-                                {xpControl}
-                                {spControl}
+                                {this.renderStats(baseStats, effStats)}
+                                {this.renderXPControl()}
+                                {this.renderSPControl(baseStats)}
                             </Row>
                         </Col>
                         <Col md={6}>
                             <Row style={{paddingBottom: 5}}>
-                                {portrait}
+                                {this.renderPortrait()}
                             </Row>
                             <Row>
-                                {notes}
+                                {this.renderNotes()}
                             </Row>
                             <Row>
-                                {initiativeBlock}
+                                {this.renderAdvancingInitiatives(effStats)}
                             </Row>
                         </Col>
                     </Row>
                     <Row>
-                        {this.renderCCWeapons()}
+                        {this.renderCCWeapons(skillHandler)}
                     </Row>
                     <Row>
-                        {this.renderFirearms()}
+                        {this.renderFirearms(skillHandler)}
                     </Row>
                     <Row>
-                        {this.renderRangedWeapons()}
+                        {this.renderRangedWeapons(skillHandler)}
                     </Row>
                     <Row>
                         {this.renderTransientEffects()}
                     </Row>
                 </Col>
                 <Col md={4}>
-                    {skillTable}
+                    {this.renderSkills(skillHandler)}
                 </Col>
             </Grid>
         )
