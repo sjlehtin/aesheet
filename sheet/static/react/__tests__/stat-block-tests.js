@@ -15,6 +15,8 @@ jest.dontMock('../AddWeaponControl');
 jest.dontMock('../AddRangedWeaponControl');
 jest.dontMock('../FirearmControl');
 jest.dontMock('../AddFirearmControl');
+jest.dontMock('../TransientEffectRow');
+jest.dontMock('../AddTransientEffectControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -154,6 +156,10 @@ describe('stat block', function() {
             } else if (url === "/rest/rangedweapontemplates/campaign/2/") {
                 return jsonResponse([]);
             } else if (url === "/rest/rangedweapons/campaign/2/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/sheettransienteffects/") {
+                return jsonResponse([]);
+            } else if (url === "/rest/transienteffects/campaign/2/") {
                 return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */

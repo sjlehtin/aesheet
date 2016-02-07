@@ -296,6 +296,67 @@ var rangedWeaponFactory = function (overrideFields) {
     return Object.assign(weapon, overrides);
 };
 
+var transientEffectFactory = function (overrideFields) {
+    "use strict";
+
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var effect = {
+        "name": "No effect",
+        "notes": "",
+        "cc_skill_levels": 0,
+        "fit": 0,
+        "ref": 0,
+        "lrn": 0,
+        "int": 0,
+        "psy": 0,
+        "wil": 0,
+        "cha": 0,
+        "pos": 0,
+        "mov": 0,
+        "dex": 0,
+        "imm": 0,
+        "saves_vs_fire": 0,
+        "saves_vs_cold": 0,
+        "saves_vs_lightning": 0,
+        "saves_vs_poison": 0,
+        "saves_vs_all": 0,
+        "run_multiplier": "0.00",
+        "swim_multiplier": "0.00",
+        "climb_multiplier": "0.00",
+        "fly_multiplier": "0.00",
+        "description": "",
+        "type": "enhancement",
+        "tech_level": 1
+    };
+
+    var overrides = Object.assign({}, overrideFields);
+    return Object.assign(effect, overrides);
+};
+
+var sheetTransientEffectFactory = function (overrideFields) {
+    "use strict";
+
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var effect = {
+        "id": 1,
+        "effect": transientEffectFactory(overrideFields.effect),
+        "sheet": 1
+    };
+
+    var overrides = Object.assign({}, overrideFields);
+    if ('effect' in overrides) {
+        delete overrides.effect;
+    }
+    return Object.assign(effect, overrides);
+};
+
+
 module.exports = {
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
@@ -303,5 +364,7 @@ module.exports = {
     statsFactory: statsFactory,
     firearmFactory: firearmFactory,
     weaponFactory: weaponFactory,
-    rangedWeaponFactory: rangedWeaponFactory
+    rangedWeaponFactory: rangedWeaponFactory,
+    transientEffectFactory: transientEffectFactory,
+    sheetTransientEffectFactory: sheetTransientEffectFactory
 };

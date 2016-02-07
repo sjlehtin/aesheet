@@ -13,10 +13,12 @@ import WeaponRow from 'WeaponRow';
 import RangedWeaponRow from 'RangedWeaponRow';
 import AddWeaponControl from 'AddWeaponControl';
 import AddRangedWeaponControl from 'AddRangedWeaponControl';
+import TransientEffectRow from 'TransientEffectRow';
+import AddTransientEffectControl from 'AddTransientEffectControl';
 
 const SkillHandler = require('SkillHandler').default;
 
-import {Grid, Row, Col, Image, Panel} from 'react-bootstrap';
+import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 var util = require('sheet-util');
@@ -43,7 +45,8 @@ class StatBlock extends React.Component {
 
             firearmList: undefined,
             weaponList: undefined,
-            rangedWeaponList: undefined
+            rangedWeaponList: undefined,
+            transientEffectList: undefined
         };
     }
 
@@ -60,6 +63,11 @@ class StatBlock extends React.Component {
     handleRangedWeaponsLoaded(weapons) {
         console.log("Ranged weapons loaded");
         this.setState({rangedWeaponList: weapons});
+    }
+
+    handleTransientEffectsLoaded(effects) {
+        console.log("Transient effects loaded");
+        this.setState({transientEffectList: effects});
     }
 
     handleSkillsLoaded(skillList, allSkills) {
@@ -83,6 +91,11 @@ class StatBlock extends React.Component {
         rest.getData(this.props.url + 'sheetrangedweapons/').then((json) => {
             this.handleRangedWeaponsLoaded(json);
         }).catch((err) => {console.log("Failed to load ranged weapons:",
+            err)});
+
+        rest.getData(this.props.url + 'sheettransienteffects/').then((json) => {
+            this.handleTransientEffectsLoaded(json);
+        }).catch((err) => {console.log("Failed to load transient effects:",
             err)});
 
         rest.getData(this.props.url).then((json) => {
@@ -522,6 +535,38 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
+    getTransientEffectURL(eff) {
+        var baseURL = this.props.url + 'sheettransienteffects/';
+        if (eff) {
+            return baseURL + eff.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleTransientEffectAdded(data) {
+        var effect = {effect: data};
+        console.log("Adding: ", effect);
+        rest.post(this.getTransientEffectURL(), {effect: data.name}).then((json) => {
+            console.log("POST success", json);
+            effect.id = json.id;
+            var newList = this.state.transientEffectList;
+            newList.push(effect);
+            this.setState({transientEffectList: newList});
+        }).catch((err) => {console.log("error", err)});
+    }
+
+    handleTransientEffectRemoved(effect) {
+        rest.delete(this.getTransientEffectURL(effect), effect).then(
+            (json) => {
+                var index = StatBlock.findItemIndex(
+                    this.state.transientEffectList, effect);
+                this.state.transientEffectList.splice(index, 1);
+                this.setState({transientEffectList:
+                  this.state.transientEffectList});
+            }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
     renderDescription() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading/>;
@@ -828,6 +873,39 @@ class StatBlock extends React.Component {
 
     }
 
+    renderTransientEffects() {
+        if (!this.state.transientEffectList || !this.state.char) {
+            return <Loading>Transient effects</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let eff of this.state.transientEffectList) {
+            rows.push(<TransientEffectRow
+                key={idx++}
+                effect={eff}
+                onRemove={(eff) => this.handleTransientEffectRemoved(eff) }
+            />);
+        }
+
+        return <Panel header={<h4>Transient effects</h4>}>
+            <Table striped fill>
+                <thead>
+                <tr><th>Effect</th></tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+                <AddTransientEffectControl
+                    campaign={this.state.char.campaign}
+                    onAdd={(eff) => this.handleTransientEffectAdded(eff) }/>
+            </Table>
+        </Panel>;
+
+    }
+
     render() {
         var description = this.renderDescription(),
             skillTable = this.renderSkills(),
@@ -872,6 +950,9 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         {this.renderRangedWeapons()}
+                    </Row>
+                    <Row>
+                        {this.renderTransientEffects()}
                     </Row>
                 </Col>
                 <Col md={4}>
