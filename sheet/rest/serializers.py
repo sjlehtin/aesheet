@@ -117,6 +117,12 @@ class ArmorListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class TransientEffectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.TransientEffect
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):

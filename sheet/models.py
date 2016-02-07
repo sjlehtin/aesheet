@@ -1442,6 +1442,22 @@ class SpellEffect(ExportedModel, Effect):
         return ['sheet']
 
 
+class TransientEffect(ExportedModel, Effect):
+    """
+    Temporary effects, like spells or drugs, affecting character
+    performance in the short term.
+    """
+    tech_level = models.ForeignKey(TechLevel)
+    @classmethod
+    def dont_export(cls):
+        return ['sheet']
+
+
+class SheetTransientEffect(models.Model):
+    sheet = models.ForeignKey('Sheet')
+    effect = models.ForeignKey(TransientEffect)
+
+
 class MiscellaneousItem(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
 
@@ -1533,6 +1549,9 @@ class Sheet(PrivateMixin, models.Model):
                                                  blank=True)
 
     spell_effects = models.ManyToManyField(SpellEffect, blank=True)
+
+    transient_effects = models.ManyToManyField(TransientEffect, blank=True,
+                                               through=SheetTransientEffect)
 
     armor = models.ForeignKey(Armor, blank=True, null=True,
                               on_delete=models.SET_NULL)

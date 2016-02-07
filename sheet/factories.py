@@ -423,6 +423,15 @@ class SpellEffectFactory(factory.DjangoModelFactory):
         django_get_or_create = ('name', )
 
 
+class TransientEffectFactory(factory.DjangoModelFactory):
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
+    class Meta:
+        model = models.TransientEffect
+        django_get_or_create = ('name', )
+
+
 class InventoryEntryFactory(factory.DjangoModelFactory):
     description = factory.Sequence(lambda n: "inventory entry %03d" % n)
 

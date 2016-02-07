@@ -1138,6 +1138,47 @@ class ArmorTestCase(TestCase):
         self.assertEqual(armor['base']['name'], "Leather"),
 
 
+class EffectTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_twok = factories.TechLevelFactory(name="2K")
+        self.tech_threek = factories.TechLevelFactory(name="3K")
+        self.campaign_mr = factories.CampaignFactory(name='MR',
+                                                     tech_levels=["2K"])
+        self.campaign_gz = factories.CampaignFactory(name='GZ',
+                                                     tech_levels=["2K", "3K"])
+        factories.TransientEffectFactory(name="Booze",
+                                         tech_level=self.tech_twok)
+        factories.TransientEffectFactory(name="Frenzon",
+                                         tech_level=self.tech_threek)
+
+    def test_main_url(self):
+        url = '/rest/transienteffects/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url(self):
+        url = '/rest/transienteffects/campaign/{}/'.format(
+            self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_mr_campaign_url(self):
+        url = '/rest/transienteffects/campaign/{}/'.format(
+            self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        effect = response.data[0]
+        self.assertEqual(effect['name'], "Booze")
+
+
 class SheetArmorTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()

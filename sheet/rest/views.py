@@ -228,6 +228,11 @@ class ArmorViewSet(CampaignMixin, viewsets.ModelViewSet):
         return qs
 
 
+class TransientEffectViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.TransientEffectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
 class ListPermissionMixin(object):
     """
     The `list` method of ListModelMixin does not check object

@@ -89,6 +89,12 @@ router.register(r'armors/campaign/(?P<campaign_pk>[0-9]+)',
                 views.ArmorViewSet,
                 base_name='campaign-armor')
 
+router.register(r'transienteffects', views.TransientEffectViewSet,
+                base_name='transienteffect')
+router.register(r'transienteffects/campaign/(?P<campaign_pk>[0-9]+)',
+                views.TransientEffectViewSet,
+                base_name='campaign-transienteffect')
+
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,
                 base_name='sheet-inventory-item')
