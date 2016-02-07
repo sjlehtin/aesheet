@@ -334,7 +334,12 @@ class InventoryEntryViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         serializer.save(sheet=self.sheet)
 
 
-class SheetViewSetMixin(object):
+class SheetViewSetMixin(ListPermissionMixin):
+    # TODO: until all sheet* objects are handled through intermediate
+    # objects, we can't use IsAccessible here.  The implicit tables do not
+    # allow for object permissions.
+    permission_classes = [permissions.IsAuthenticated]
+
     def initialize_request(self, request, *args, **kwargs):
         self.sheet = models.Sheet.objects.get(
                 pk=self.kwargs['sheet_pk'])
@@ -477,3 +482,36 @@ class SheetHelmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
         self.sheet.save()
 
 
+class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetTransientEffectCreateSerializer
+        else:
+            return serializers.SheetTransientEffectListSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(SheetTransientEffectViewSet, self).get_serializer(
+                *args, **kwargs)
+        if not kwargs.get('many'):
+            # ListSerializer does not have the fields.
+            serializer.fields['sheet'].default = self.sheet
+            serializer.fields['sheet'].read_only = True
+            # The effect will not be changed with this API after creation.
+            if serializer.instance is not None:
+                serializer.fields['effect'].read_only = True
+
+        return serializer
+
+    def get_queryset(self):
+        return models.SheetTransientEffect.objects.filter(sheet=self.sheet)
+
+    def perform_update(self, serializer):
+        # Update should not be allowed for sheet or effect fields, but just
+        # the changeable fields.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetTransientEffectViewSet, self).perform_create(
+            serializer)

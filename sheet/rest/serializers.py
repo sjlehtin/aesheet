@@ -123,6 +123,19 @@ class TransientEffectSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SheetTransientEffectCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.SheetTransientEffect
+        fields = "__all__"
+
+
+class SheetTransientEffectListSerializer(serializers.ModelSerializer):
+    effect = TransientEffectSerializer()
+    class Meta:
+        model = sheet.models.SheetTransientEffect
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
@@ -148,6 +161,7 @@ class CharacterSkillSerializer(serializers.ModelSerializer):
 
 
 class CharacterSerializer(serializers.ModelSerializer):
+    # TODO: Removed once the JavaScript calculates these from the effects.
     mod_fit = serializers.IntegerField(read_only=True)
     mod_ref = serializers.IntegerField(read_only=True)
     mod_lrn = serializers.IntegerField(read_only=True)

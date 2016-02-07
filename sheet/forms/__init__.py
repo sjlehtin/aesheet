@@ -53,6 +53,7 @@ class EditSheetForm(RequestForm):
         model = sheet.models.Sheet
         exclude = ('owner',
                    'weapons', 'ranged_weapons', 'armor', 'helm',
+                   'transient_effects',
                    'spell_effects', 'miscellaneous_items', 'firearms')
 
 

@@ -1420,3 +1420,61 @@ class SheetHelmTestCase(TestCase):
         models.Armor.objects.get(pk=helm.pk)
         self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).helm,
                          None)
+
+
+class SheetTransientEffectTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheettransienteffects/'.format(
+            self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_effects(self):
+        factories.SheetTransientEffectFactory(sheet=self.sheet)
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]["effect"], dict)
+
+    def test_adding_items(self):
+        template = factories.TransientEffectFactory(name="Booze")
+
+        response = self.client.post(
+                self.url,
+                data={'effect': template.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+                         .transient_effects.all()[0].name, "Booze")
+
+    # def test_modifying_items(self):
+    #     sheet_effect = factories.SheetTransientEffectFactory(
+    #         sheet=self.sheet, order=2)
+    #     response = self.client.patch(
+    #             "{}/{}".format(self.url, sheet_effect.pk),
+    #             data={'order': 3}, format='json')
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+    #                      .transient_effects()[0].order, 3)
+
+
+    def test_deleting_items(self):
+        sheet_effect = factories.SheetTransientEffectFactory(
+            sheet=self.sheet)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, sheet_effect.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(models.SheetTransientEffect.objects.count(), 0,
+                         "The tying row should get deleted")
+

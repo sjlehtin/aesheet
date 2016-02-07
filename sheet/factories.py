@@ -424,12 +424,23 @@ class SpellEffectFactory(factory.DjangoModelFactory):
 
 
 class TransientEffectFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "effect-%03d" % n)
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
     class Meta:
         model = models.TransientEffect
         django_get_or_create = ('name', )
+
+
+class SheetTransientEffectFactory(factory.DjangoModelFactory):
+    sheet = factory.SubFactory(SheetFactory)
+    effect = factory.SubFactory(TransientEffectFactory)
+    effect__tech_level = factory.SubFactory(TechLevelFactory)
+    effect__tech_level__name = "2K"
+
+    class Meta:
+        model = models.SheetTransientEffect
 
 
 class InventoryEntryFactory(factory.DjangoModelFactory):

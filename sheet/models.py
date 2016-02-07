@@ -102,7 +102,7 @@ class TechLevel(ExportedModel):
     def dont_export(cls):
         return ["weapontemplate", "campaign", "armortemplate", "armorquality",
                 "miscellaneousitem", "weaponquality", "skill",
-                "rangedweapontemplate", "basefirearm",
+                "rangedweapontemplate", "basefirearm", "transienteffect",
                 "ammunition", "id"]
 
 
