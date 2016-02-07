@@ -1454,6 +1454,9 @@ class MiscellaneousItem(ExportedModel):
     weapon_qualities = models.ManyToManyField(WeaponSpecialQuality,
                                               blank=True)
 
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
+                                 default=1.0)
+
     def __unicode__(self):
         return self.name
 
@@ -1510,9 +1513,6 @@ class MovementRates(object):
 
     def flying(self):
         return self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
-
-
-Action = namedtuple('Action', ['action', 'check', 'initiative'])
 
 
 class Sheet(PrivateMixin, models.Model):
