@@ -1089,7 +1089,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
     def __unicode__(self):
-        return u"ASQ: %s" % (self.name)
+        return u"%s" % self.name
 
 
 class WeaponDamage(object):
