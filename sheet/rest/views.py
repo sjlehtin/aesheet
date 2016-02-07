@@ -334,15 +334,17 @@ class InventoryEntryViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         serializer.save(sheet=self.sheet)
 
 
-class SheetFirearmViewSet(viewsets.ModelViewSet):
-    #serializer_class = serializers.SheetFirearmListSerializer
-
+class SheetViewSetMixin(object):
     def initialize_request(self, request, *args, **kwargs):
         self.sheet = models.Sheet.objects.get(
                 pk=self.kwargs['sheet_pk'])
         self.containing_object = self.sheet
-        return super(SheetFirearmViewSet, self).initialize_request(
+        return super(SheetViewSetMixin, self).initialize_request(
                 request, *args, **kwargs)
+
+
+class SheetFirearmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    #serializer_class = serializers.SheetFirearmListSerializer
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -368,14 +370,7 @@ class SheetFirearmViewSet(viewsets.ModelViewSet):
         self.sheet.firearms.remove(instance)
         
 
-class SheetWeaponViewSet(viewsets.ModelViewSet):
-
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetWeaponViewSet, self).initialize_request(
-                request, *args, **kwargs)
+class SheetWeaponViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -401,14 +396,7 @@ class SheetWeaponViewSet(viewsets.ModelViewSet):
         self.sheet.weapons.remove(instance)
 
 
-class SheetRangedWeaponViewSet(viewsets.ModelViewSet):
-
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetRangedWeaponViewSet, self).initialize_request(
-                request, *args, **kwargs)
+class SheetRangedWeaponViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -434,14 +422,7 @@ class SheetRangedWeaponViewSet(viewsets.ModelViewSet):
         self.sheet.ranged_weapons.remove(instance)
 
 
-class SheetArmorViewSet(viewsets.ModelViewSet):
-
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetArmorViewSet, self).initialize_request(
-                request, *args, **kwargs)
+class SheetArmorViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -469,15 +450,7 @@ class SheetArmorViewSet(viewsets.ModelViewSet):
         self.sheet.save()
 
 
-class SheetHelmViewSet(viewsets.ModelViewSet):
-
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetHelmViewSet, self).initialize_request(
-                request, *args, **kwargs)
-
+class SheetHelmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             # When creating new, we do not want the full nested
