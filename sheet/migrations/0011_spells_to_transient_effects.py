@@ -8,6 +8,7 @@ def forwards(apps, schema_editor):
     SpellEffect = apps.get_model('sheet', 'SpellEffect')
     TransientEffect = apps.get_model('sheet', 'TransientEffect')
     TechLevel = apps.get_model('sheet', 'TechLevel')
+    SheetTransientEffect = apps.get_model('sheet', 'SheetTransientEffect')
 
     frp = TechLevel.objects.filter(name='FRP')
     if not frp:
@@ -16,12 +17,30 @@ def forwards(apps, schema_editor):
 
     for sp in SpellEffect.objects.all():
         te = TransientEffect()
-        for field in  sp._meta.concrete_fields:
+        for field in sp._meta.concrete_fields:
             setattr(te, field.name, getattr(sp, field.name))
         te.tech_level = frp
         te.save()
+        for sheet in sp.sheet_set.all():
+            SheetTransientEffect.objects.create(sheet=sheet, effect=te)
         sp.delete()
         print("Updated spell {} to transient effect".format(te.name))
+
+
+def backwards(apps, schema_editor):
+    SpellEffect = apps.get_model('sheet', 'SpellEffect')
+    TransientEffect = apps.get_model('sheet', 'TransientEffect')
+
+    for te in TransientEffect.objects.filter(tech_level__name="FRP"):
+        sp = SpellEffect()
+        for field in sp._meta.concrete_fields:
+            setattr(sp, field.name, getattr(te, field.name))
+        sp.save()
+        for sheet in te.sheet_set.all():
+            sheet.spell_effects.add(sp)
+        te.delete()
+        print("Downgraded transient effect {} to spell".format(
+            sp.name))
 
 
 class Migration(migrations.Migration):
@@ -31,5 +50,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(forwards, reverse_code=migrations.RunPython.noop)
+        migrations.RunPython(forwards, reverse_code=backwards)
     ]
