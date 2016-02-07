@@ -281,6 +281,8 @@ class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
 
 
 class SheetArmorCreateSerializer(SheetWeaponCreateSerializer):
+    is_helm = False
+
     base = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.ArmorTemplate.objects.all(),
             required=False)
@@ -288,16 +290,30 @@ class SheetArmorCreateSerializer(SheetWeaponCreateSerializer):
             queryset=sheet.models.ArmorQuality.objects.all(),
             required=False)
 
+    def __init__(self, *args, **kwargs):
+        super(SheetArmorCreateSerializer, self).__init__(*args, **kwargs)
+        self.fields['base'].queryset = self.fields['base'].queryset.filter(
+                                       is_helm=self.is_helm)
+
     def get_queryset(self):
-        return sheet.models.Armor.objects.all()
+        return sheet.models.Armor.objects.select_related(
+            "base", "quality").filter(base__is_helm=self.is_helm)
 
     class Meta:
         model = sheet.models.Armor
         fields = "__all__"
 
 
-class SheetArmorDetailSerializer(serializers.ModelSerializer):
+class SheetArmorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Armor
         fields = "__all__"
         depth = 1
+
+
+class SheetHelmCreateSerializer(SheetArmorCreateSerializer):
+    is_helm = True
+
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"

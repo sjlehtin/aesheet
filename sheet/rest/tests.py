@@ -1197,7 +1197,7 @@ class SheetArmorTestCase(TestCase):
         template = factories.ArmorTemplateFactory(name="Leather")
         quality = factories.ArmorQualityFactory(name="L1")
 
-        armor = factories.ArmorFactory(base=template, quality=quality)
+        orig_armor = factories.ArmorFactory(base=template, quality=quality)
 
         response = self.client.post(
                 self.url,
@@ -1206,7 +1206,7 @@ class SheetArmorTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
         armor = models.Sheet.objects.get(id=self.sheet.id).armor
         self.assertEqual(armor.base.name, "Leather")
-        self.assertEqual(armor.pk, armor.pk)
+        self.assertEqual(orig_armor.pk, armor.pk)
         self.assertEqual(models.Armor.objects.filter(
                 base=template, quality=quality).count(), 1)
 
@@ -1256,3 +1256,126 @@ class SheetArmorTestCase(TestCase):
         self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).armor,
                          None)
 
+
+class SheetHelmTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheethelm/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_armors(self):
+        self.sheet.helm = factories.HelmFactory()
+        self.sheet.save()
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+                         .helm.base.name, "Leather hood")
+
+    def test_replacing_item(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+        self.sheet.helm = factories.ArmorFactory(base=template,
+                                                 quality=quality)
+        self.sheet.save()
+        quality_l2 = factories.ArmorQualityFactory(name="L2")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality_l2.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertEqual(helm.base.name, "Leather hood")
+        self.assertEqual(helm.quality.name, "L2")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.HelmFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertEqual(helm.base.name, "Leather hood")
+        self.assertEqual(orig_armor.pk, helm.pk)
+        self.assertEqual(models.Armor.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_armors(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.HelmFactory(base=template, quality=quality,
+                                           special_qualities=["Dragonhide"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertNotEqual(orig_armor.pk, helm.pk)
+        self.assertEqual(helm.base.name, "Leather hood")
+
+    def test_should_be_possible_to_add_existing_unique_armors(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.HelmFactory(name="Dragonhide armor",
+                                         base=template,
+                                         quality=quality,
+                                         special_qualities=["Dragonhide"])
+
+        response = self.client.post(
+                self.url,
+                data={'item': orig_armor.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertEqual(orig_armor.pk, helm.pk)
+        self.assertEqual(helm.name, "Dragonhide armor")
+
+    def test_deleting_items(self):
+        helm = factories.HelmFactory()
+        self.sheet.helm = helm
+        self.sheet.save()
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, helm.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Armor.objects.get(pk=helm.pk)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).helm,
+                         None)

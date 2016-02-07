@@ -444,7 +444,7 @@ class SheetArmorViewSet(viewsets.ModelViewSet):
             # representation, just id's.
             return serializers.SheetArmorCreateSerializer
         else:
-            return serializers.SheetArmorDetailSerializer
+            return serializers.SheetArmorListSerializer
 
     def get_queryset(self):
         return sheet.models.Armor.objects.filter(id=self.sheet.armor_id)
@@ -461,6 +461,41 @@ class SheetArmorViewSet(viewsets.ModelViewSet):
         
     def perform_destroy(self, instance):
         self.sheet.armor = None
+        self.sheet.save()
+
+
+class SheetHelmViewSet(viewsets.ModelViewSet):
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
+        return super(SheetHelmViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetHelmCreateSerializer
+        else:
+            return serializers.SheetArmorListSerializer
+
+    def get_queryset(self):
+        return sheet.models.Armor.objects.filter(id=self.sheet.helm_id)
+
+    def perform_update(self, serializer):
+        # TODO: not supported for Helm.  Will be supported for
+        # SheetHelm.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetHelmViewSet, self).perform_create(serializer)
+        self.sheet.helm = serializer.instance
+        self.sheet.save()
+
+    def perform_destroy(self, instance):
+        self.sheet.helm = None
         self.sheet.save()
 
 
