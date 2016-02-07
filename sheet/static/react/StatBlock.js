@@ -373,7 +373,7 @@ class StatBlock extends React.Component {
         }).then((err) => console.log(err));
     }
 
-    static findCharacterSkillIndex(skillList, skill) {
+    static findItemIndex(skillList, skill) {
         for (var ii = 0; ii < skillList.length; ii++) {
             var item = skillList[ii];
             if (item.id === skill.id) {
@@ -386,7 +386,7 @@ class StatBlock extends React.Component {
     handleCharacterSkillRemove(skill) {
         console.log("Removed: ", skill);
         rest.delete(this.getCharacterSkillURL(skill)).then((json) => {
-            var index = StatBlock.findCharacterSkillIndex(
+            var index = StatBlock.findItemIndex(
                 this.state.characterSkills, skill);
             this.state.characterSkills.splice(index, 1);
             this.setState({characterSkills: this.state.characterSkills});
@@ -404,7 +404,7 @@ class StatBlock extends React.Component {
 
     handleCharacterSkillModify(skill) {
         rest.patch(this.getCharacterSkillURL(skill), skill).then(() => {
-            var index = StatBlock.findCharacterSkillIndex(
+            var index = StatBlock.findItemIndex(
                 this.state.characterSkills, skill);
             this.state.characterSkills.splice(index, 1, skill);
             this.setState({characterSkills: this.state.characterSkills});
@@ -434,7 +434,7 @@ class StatBlock extends React.Component {
     handleFirearmRemoved(firearm) {
         rest.delete(this.getFirearmURL(firearm), firearm).then(
             (json) => {
-                var index = StatBlock.findCharacterSkillIndex(
+                var index = StatBlock.findItemIndex(
                     this.state.firearmList, firearm);
                 this.state.firearmList.splice(index, 1);
                 this.setState({firearmList: this.state.firearmList});
@@ -514,7 +514,7 @@ class StatBlock extends React.Component {
     handleRangedWeaponRemoved(weapon) {
         rest.delete(this.getRangedWeaponURL(weapon), weapon).then(
             (json) => {
-                var index = StatBlock.findCharacterSkillIndex(
+                var index = StatBlock.findItemIndex(
                     this.state.rangedWeaponList, weapon);
                 this.state.rangedWeaponList.splice(index, 1);
                 this.setState({rangedWeaponList:
