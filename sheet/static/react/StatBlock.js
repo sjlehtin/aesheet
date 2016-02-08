@@ -17,6 +17,7 @@ import TransientEffectRow from 'TransientEffectRow';
 import AddTransientEffectControl from 'AddTransientEffectControl';
 
 const SkillHandler = require('SkillHandler').default;
+const StatHandler = require('StatHandler').default;
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -136,105 +137,12 @@ class StatBlock extends React.Component {
         });
     }
 
-    baseStat(stat) {
-        if (stat === "mov") {
-            return this.baseMOV();
-        } else if (stat === "dex") {
-            return this.baseDEX();
-        } else if (stat === "imm") {
-            return this.baseIMM();
-        }
-        return this.state.char['cur_' + stat] + this.state.char['mod_' + stat];
-    }
-
-    /*
-     * TODO:  Effects from SpellEffects, ArmorSpecialQualities,
-     * WeaponSpecialQualities, MiscellaneousItems, and Edges should be
-     * combined and added to stats, skill levels, movement etc.
-     *
-     * Edges affect base stats ("hard" modifier) and the rest are
-     * modifiers for the effective stats ("soft" modifier).
-     */
-
-    effStat(stat) {
-        if (stat === "mov") {
-            return this.effMOV();
-        } else if (stat === "dex") {
-            return this.effDEX();
-        } else if (stat === "imm") {
-            return this.effIMM();
-        }
-        return this.baseStat(stat) +
-                // TODO:  this should be discarded, and the mods from
-                // effects (see above) calculated, with the addition of
-                // fit/ref penalties from armor and weight carried.
-            this.state.sheet['mod_' + stat];
-    }
-
-    baseMOV() {
-        return Math.round((this.baseStat("fit") + this.baseStat("ref"))/2) +
-            this.state.char.mod_mov;
-    }
-
-    effMOV() {
-        return Math.round((this.effStat("fit") + this.effStat("ref"))/2) +
-            this.state.sheet.mod_mov;
-    }
-
-    baseDEX() {
-        return Math.round((this.baseStat("ref") + this.baseStat("int"))/2) +
-            this.state.char.mod_dex;
-    }
-
-    effDEX() {
-        return Math.round((this.effStat("ref") + this.effStat("int"))/2) +
-            this.state.sheet.mod_dex;
-    }
-
-    baseIMM() {
-        return Math.round((this.baseStat("fit") + this.baseStat("psy"))/2) +
-            this.state.char.mod_imm;
-    }
-
-    effIMM() {
-        /* "Soft" bonuses do not apply to IMM. */
-        return Math.round((this.baseStat("fit") + this.baseStat("psy"))/2) +
-            this.state.sheet.mod_imm;
-    }
-
     getEdgeLevel(edge) {
         if (typeof(this.state.edges[edge]) !== "undefined") {
             return this.state.edges[edge].level;
         } else {
             return 0;
         }
-    }
-
-    getEffStats() {
-        if (!this.state.char || !this.state.sheet) {
-            return undefined;
-        }
-
-        var block = {};
-        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
-                "pos", "mov", "dex", "imm"];
-        for (var ii = 0; ii < stats.length; ii++) {
-            block[stats[ii]] = this.effStat(stats[ii]);
-        }
-        return block;
-    }
-
-    getBaseStats() {
-        if (!this.state.char) {
-            return undefined;
-        }
-        var block = {};
-        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
-                "pos", "mov", "dex", "imm"];
-        for (var ii = 0; ii < stats.length; ii++) {
-            block[stats[ii]] = this.baseStat(stats[ii]);
-        }
-        return block;
     }
 
     baseBody(baseStats) {
@@ -617,8 +525,8 @@ class StatBlock extends React.Component {
         }
     }
 
-    renderSkills(skillHandler) {
-        if (!skillHandler) {
+    renderSkills(skillHandler, statHandler) {
+        if (!skillHandler || !statHandler) {
             return <Loading>Skills</Loading>
         }
         return <SkillTable
@@ -632,14 +540,14 @@ class StatBlock extends React.Component {
                       (skill) => this.handleCharacterSkillModify(skill)}
             onCharacterSkillAdd={
                       (skill) => this.handleCharacterSkillAdd(skill)}
-            effStats={this.getEffStats()}
-            baseStats={this.getBaseStats()}
+            effStats={statHandler.getEffStats()}
+            baseStats={statHandler.getBaseStats()}
             character={this.state.char}
         />
     }
 
-    renderStats(baseStats, effStats) {
-        if (!baseStats|| !effStats) {
+    renderStats(statHandler) {
+        if (!statHandler) {
             return <Loading>Stats</Loading>;
         }
 
@@ -654,6 +562,9 @@ class StatBlock extends React.Component {
 
         var rows, derivedRows, expendable;
 
+        var baseStats = statHandler.getBaseStats();
+        var effStats = statHandler.getEffStats();
+
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
             "pos"];
         rows = stats.map((st, ii) => {
@@ -661,7 +572,8 @@ class StatBlock extends React.Component {
             return <StatRow stat={st}
                             key={ii}
                             initialChar={this.state.char}
-                            initialSheet={this.state.sheet}
+                            baseStats={baseStats}
+                            effStats={effStats}
                             onMod={this.handleModification.bind(this)}
                             url={this.state.url} />;
         });
@@ -767,7 +679,7 @@ class StatBlock extends React.Component {
     }
 
     renderSPControl(baseStats) {
-        if (!this.state.char) {
+        if (!baseStats) {
             return <Loading>SP</Loading>
         }
 
@@ -788,6 +700,18 @@ class StatBlock extends React.Component {
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
             stats: effStats
+        });
+    }
+
+    getStatHandler() {
+        if (!this.state.char|| !this.state.edgeList ||
+                !this.state.transientEffectList) {
+            return null;
+        }
+        return new StatHandler({
+            character: this.state.char,
+            edges: this.state.edgeList,
+            effects: this.state.transientEffectList
         });
     }
 
@@ -920,8 +844,11 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var baseStats = this.getBaseStats();
-        var effStats = this.getEffStats();
+        var statHandler = this.getStatHandler();
+        if (statHandler) {
+            var baseStats = statHandler.getBaseStats();
+            var effStats = statHandler.getEffStats();
+        }
         var skillHandler = this.getSkillHandler(effStats);
 
         return (
@@ -933,7 +860,7 @@ class StatBlock extends React.Component {
                                 {this.renderDescription()}
                             </Row>
                             <Row>
-                                {this.renderStats(baseStats, effStats)}
+                                {this.renderStats(statHandler)}
                                 {this.renderXPControl()}
                                 {this.renderSPControl(baseStats)}
                             </Row>
@@ -964,7 +891,7 @@ class StatBlock extends React.Component {
                     </Row>
                 </Col>
                 <Col md={4}>
-                    {this.renderSkills(skillHandler)}
+                    {this.renderSkills(skillHandler, statHandler)}
                 </Col>
             </Grid>
         )

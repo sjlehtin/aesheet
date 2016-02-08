@@ -9,6 +9,7 @@ jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
+jest.dontMock('../StatHandler');
 jest.dontMock('../WeaponRow');
 jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
@@ -188,16 +189,16 @@ describe('stat block', function() {
                 Promise.all(promises).then(function () {
                     callback()
                 }).catch(function (err) { fail("failed with " + err)});
-            }).catch(function (err) { fail("failed with " + err)});;
-        }).catch(function (err) { fail("failed with " + err)});;
+            }).catch(function (err) { fail("failed with " + err)});
+        }).catch(function (err) { fail("failed with " + err)});
     };
 
     it('calculates MOV', function (done) {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
-            var effStats = block.getEffStats();
+            var baseStats = block.getStatHandler().getBaseStats();
+            var effStats = block.getStatHandler().getEffStats();
             expect(baseStats.mov).toEqual(50);
             expect(effStats.mov).toEqual(50);
             done();
@@ -208,8 +209,8 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
-            var effStats = block.getEffStats();
+            var baseStats = block.getStatHandler().getBaseStats();
+            var effStats = block.getStatHandler().getEffStats();
             expect(baseStats.dex).toEqual(52);
             expect(effStats.dex).toEqual(52);
             done();
@@ -220,8 +221,8 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
-            var effStats = block.getEffStats();
+            var baseStats = block.getStatHandler().getBaseStats();
+            var effStats = block.getStatHandler().getEffStats();
             expect(baseStats.imm).toEqual(45);
             expect(effStats.imm).toEqual(45);
             done();
@@ -232,7 +233,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.stamina(baseStats)).toEqual(26);
             done();
         });
@@ -243,7 +244,7 @@ describe('stat block', function() {
             sheetDataFactory());
 
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.stamina(baseStats)).toEqual(31);
             done();
         });
@@ -252,7 +253,7 @@ describe('stat block', function() {
     it('calculates mana', function (done) {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(24);
             done();
         });
@@ -262,7 +263,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory({bought_mana: 5}),
             sheetDataFactory());
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(29);
             done();
         });
@@ -272,7 +273,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory({cur_fit: 41}),
             sheetDataFactory());
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.baseBody(baseStats)).toEqual(11);
             done();
         });
@@ -282,7 +283,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory({cur_fit: 39}),
             sheetDataFactory());
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.baseBody(baseStats)).toEqual(10);
             done();
         });
@@ -333,7 +334,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory({cur_fit: 40}),
             sheetDataFactory());
         afterLoad(function () {
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(block.toughness()).toEqual(0);
             block.handleEdgeAdded(edgeFactory({"Toughness": 1}));
             expect(block.toughness()).toEqual(1);
@@ -346,7 +347,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory(),
             sheetDataFactory());
         afterLoad(function () {
-            var effStats = block.getEffStats();
+            var effStats = block.getStatHandler().getEffStats();
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
                 level: 1}));
             expect(block.staminaRecovery(effStats)).toEqual('1d6/8h');
@@ -364,7 +365,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory({cur_fit: 75}),
             sheetDataFactory());
         afterLoad(function () {
-            var effStats = block.getEffStats();
+            var effStats = block.getStatHandler().getEffStats();
             expect(block.staminaRecovery(effStats)).toEqual('1/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
                 level: 1}));
@@ -377,7 +378,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory(),
             sheetDataFactory());
         afterLoad(function () {
-            var effStats = block.getEffStats();
+            var effStats = block.getStatHandler().getEffStats();
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 1}));
             expect(block.manaRecovery(effStats)).toEqual('2d6/8h');
@@ -395,7 +396,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory({cur_cha: 70}),
             sheetDataFactory());
         afterLoad(function () {
-            var effStats = block.getEffStats();
+            var effStats = block.getStatHandler().getEffStats();
             expect(block.manaRecovery(effStats)).toEqual('2/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 1}));
@@ -420,7 +421,7 @@ describe('stat block', function() {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
         afterLoad(function () {
             block.handleModification("fit", 40, 41);
-            var baseStats = block.getBaseStats();
+            var baseStats = block.getStatHandler().getBaseStats();
             expect(baseStats.mov).toEqual(51);
             done();
         });
@@ -497,9 +498,10 @@ describe('stat block', function() {
             var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos", "mov", "dex", "imm"];
             for (var ii = 0; ii < stats.length; ii++) {
-                expect(typeof(block.getEffStats().ref)).toEqual("number");
+                expect(typeof(block.getStatHandler().getEffStats().ref))
+                    .toEqual("number");
             }
-            expect(block.getEffStats().ref).toEqual(60);
+            expect(block.getStatHandler().getEffStats().ref).toEqual(60);
             done();
         });
     });
