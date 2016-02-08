@@ -927,6 +927,9 @@ class FirearmAmmunitionType(models.Model):
     short_label = models.CharField(max_length=20,
                                    help_text="Matches the respective field in "
                                              "ammunition")
+    def __unicode__(self):
+        return u"{firearm} {label})".format(firearm=self.firearm,
+                                            label=self.short_label)
 
 
 class Firearm(models.Model):
@@ -1013,7 +1016,7 @@ class WeaponSpecialQuality(ExportedModel, Effect):
         return ['weapon', 'rangedweapon', 'miscellaneousitem']
 
     def __unicode__(self):
-        return u"WSQ: %s" % (self.name)
+        return u"%s" % self.name
 
 
 class ArmorSpecialQuality(ExportedModel, Effect):
