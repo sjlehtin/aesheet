@@ -206,7 +206,7 @@ class SheetFactory(factory.DjangoModelFactory):
                 self.miscellaneous_items.add(item)
 
     @factory.post_generation
-    def spell_effects(self, create, extracted, **kwargs):
+    def transient_effects(self, create, extracted, **kwargs):
         if not create:
             # Simple build, do nothing.
             return
@@ -214,7 +214,7 @@ class SheetFactory(factory.DjangoModelFactory):
         if extracted:
             # A list of groups were passed in, use them
             for effect in extracted:
-                self.spell_effects.add(effect)
+                SheetTransientEffectFactory(sheet=self, effect=effect)
 
 
 class AmmunitionFactory(factory.DjangoModelFactory):
@@ -414,12 +414,6 @@ class MiscellaneousItemFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = models.MiscellaneousItem
-        django_get_or_create = ('name', )
-
-
-class SpellEffectFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = models.SpellEffect
         django_get_or_create = ('name', )
 
 

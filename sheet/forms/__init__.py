@@ -281,21 +281,6 @@ class AddExistingMiscellaneousItemForm(AddExistingWeaponForm):
         self.instance.miscellaneous_items.add(item)
 
 
-class AddSpellEffectForm(RequestForm):
-    effect = forms.ModelChoiceField(
-        queryset=sheet.models.SpellEffect.objects.all())
-
-    class Meta:
-        model = sheet.models.Sheet
-        fields = ()
-
-    def save(self):
-        self.instance.spell_effects.add(self.cleaned_data['effect'])
-        self.instance.full_clean()
-        self.instance.save()
-        return self.instance
-
-
 class AddEdgeForm(RequestForm):
     edge = forms.ModelChoiceField(
         queryset=sheet.models.EdgeLevel.objects.all())
@@ -499,7 +484,7 @@ class CopySheetForm(RequestFormMixin, forms.Form):
         ranged_weapons = original_sheet.ranged_weapons.all()
         firearms = original_sheet.firearms.all()
         miscellaneous_items = original_sheet.miscellaneous_items.all()
-        spell_effects = original_sheet.spell_effects.all()
+        transient_effects = original_sheet.transient_effects.all()
 
         new_sheet = original_sheet
         new_sheet.pk = None
@@ -545,7 +530,9 @@ class CopySheetForm(RequestFormMixin, forms.Form):
         for item in miscellaneous_items:
             new_sheet.miscellaneous_items.add(item)
 
-        for effect in spell_effects:
-            new_sheet.spell_effects.add(effect)
+        for effect in transient_effects:
+            sheet.models.SheetTransientEffect.objects.create(
+                sheet=new_sheet,
+                effect=effect)
 
         return new_sheet

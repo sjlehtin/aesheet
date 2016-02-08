@@ -49,7 +49,6 @@ class SheetViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         return models.Sheet.objects.prefetch_related('character__edges',
                                                      'character__edges__edge',
-                                                     'spell_effects',
                                                      'weapons__base',
                                                      'weapons__quality',
                                                      'ranged_weapons__base',

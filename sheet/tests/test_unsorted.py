@@ -39,7 +39,7 @@ class SkillTestCase(TestCase):
 
 
 class ItemHandlingTestCase(TestCase):
-    fixtures = ["user", "char", "skills", "sheet", "weapons", "armor", "spell",
+    fixtures = ["user", "char", "skills", "sheet", "weapons", "armor",
                 "ranged_weapons", "campaigns"]
 
     def setUp(self):
@@ -132,27 +132,6 @@ class ItemHandlingTestCase(TestCase):
         self.assertRedirects(response, det_url)
         response = self.client.get(det_url)
         self.assertContains(response, "No armor.")
-
-    def test_add_remove_effect(self):
-        det_url = reverse(views.sheet_detail, args=[1])
-        req_data = { 'add-spell-effect-effect' : 'Bull\'s strength L5' }
-        response = self.client.get(det_url)
-
-        self.assertContains(response, "No spell effects.")
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertNotContains(response, "No spell effects.")
-        self.assertEquals(response.context['sheet'].spell_effects()[0].name,
-                          'Bull\'s strength L5')
-
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'SpellEffect',
-                     'remove-item' : 'Bull\'s strength L5' }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertContains(response, "No spell effects.")
 
 
 class BaseFirearmFormTestCase(TestCase):
@@ -491,18 +470,6 @@ class Views(WebTest):
                 self.character.pk))
         self.assertContains(response, "Priest")
 
-    def testNewSpellEffect(self):
-        det_url = reverse('add_spell_effect')
-        form = self.app.get(det_url, user="admin").form
-        form['fit'] = 40
-        form['name'] = "MyEffect"
-        form['type'] = "enhancement"
-
-        response = self.client.post(det_url, dict(form.submit_fields()))
-        self.assertRedirects(response, reverse(views.sheets_index))
-        eff = sheet.models.SpellEffect.objects.get(name='MyEffect')
-        self.assertEqual(eff.fit, 40)
-
 
 class SheetOrganizationTestCase(TestCase):
     def setUp(self):
@@ -690,9 +657,9 @@ class SheetCopyTestCase(TestCase):
             miscellaneous_items=[
                 factories.MiscellaneousItemFactory(name="Geiger counter"),
                 factories.MiscellaneousItemFactory(name="Bandolier")],
-            spell_effects=[
-                factories.SpellEffectFactory(name="Bless of templars"),
-                factories.SpellEffectFactory(name="Courage of ancients")],
+            transient_effects=[
+                factories.TransientEffectFactory(name="Bless of templars"),
+                factories.TransientEffectFactory(name="Courage of ancients")],
             character__skills=[("Shooting", 3),
                                ("Heckling", 2),
                                ("Drunken boxing", 4)],
@@ -773,7 +740,7 @@ class SheetCopyTestCase(TestCase):
         self.assertIsNotNone(new_sheet.armor)
 
         for accessor in ["weapons", "firearms", "ranged_weapons",
-                         "miscellaneous_items", "spell_effects"]:
+                         "miscellaneous_items", "transient_effects"]:
             logger.debug("Checking {acc}...".format(acc=accessor))
             self.assertListEqual(self.get_item_list(new_sheet,
                                                     accessor),

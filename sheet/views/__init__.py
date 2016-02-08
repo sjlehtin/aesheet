@@ -245,10 +245,6 @@ class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
 
-    def spell_effects(self):
-        return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
-
-
     def edges(self):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
@@ -297,9 +293,6 @@ def process_sheet_change_request(request, sheet):
             sheet.armor = None
         elif item_type == "Helm":
             sheet.helm = None
-        elif item_type == "SpellEffect":
-            item = get_object_or_404(SpellEffect, pk=item)
-            sheet.spell_effects.remove(item)
         elif item_type == "MiscellaneousItem":
             item = get_object_or_404(MiscellaneousItem, pk=item)
             sheet.miscellaneous_items.remove(item)
@@ -322,7 +315,6 @@ def sheet_detail(request, sheet_id=None):
                                               'armor__quality',
                                               'helm', )
                               .prefetch_related(
-        'spell_effects',
         'weapons__base',
         'weapons__quality',
         'ranged_weapons__base',
@@ -360,7 +352,6 @@ def sheet_detail(request, sheet_id=None):
                                 prefix=prefix, **kwargs)
 
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
-    add_form(AddSpellEffectForm, "add-spell-effect", instance=sheet)
     add_form(AddExistingHelmForm, "add-existing-helm", instance=sheet)
     add_form(AddHelmForm, "add-helm", instance=sheet)
     add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
@@ -509,13 +500,13 @@ class AddCharacterView(BaseCreateView):
         return reverse('sheet_detail', args=(self.sheet.pk, ))
 
 
-class AddSpellEffectView(BaseCreateView):
-    model = SpellEffect
+class AddTransientEffectView(BaseCreateView):
+    model = sheet.models.TransientEffect
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
 
-class AddEdgeView(AddSpellEffectView):
+class AddEdgeView(AddTransientEffectView):
     model = Edge
 
 
@@ -544,12 +535,12 @@ class AddSheetView(BaseCreateView):
         return reverse('sheet_detail', args=(self.object.pk, ))
 
 
-class AddEdgeLevelView(AddSpellEffectView):
+class AddEdgeLevelView(AddTransientEffectView):
     form_class = EditEdgeLevelForm
     model = EdgeLevel
 
 
-class AddEdgeSkillBonusView(AddSpellEffectView):
+class AddEdgeSkillBonusView(AddTransientEffectView):
     model = EdgeSkillBonus
 
 
@@ -570,20 +561,20 @@ class AddRangedWeaponTemplateView(AddRangedWeaponView):
     model = RangedWeaponTemplate
 
 
-class AddArmorView(AddSpellEffectView):
+class AddArmorView(AddTransientEffectView):
     model = Armor
     template_name = 'sheet/add_armor.html'
 
 
-class AddArmorTemplateView(AddSpellEffectView):
+class AddArmorTemplateView(AddTransientEffectView):
     model = ArmorTemplate
 
 
-class AddArmorQualityView(AddSpellEffectView):
+class AddArmorQualityView(AddTransientEffectView):
     model = ArmorQuality
 
 
-class AddArmorSpecialQualityView(AddSpellEffectView):
+class AddArmorSpecialQualityView(AddTransientEffectView):
     model = ArmorSpecialQuality
     template_name = 'sheet/add_armor_special_quality.html'
 

@@ -51,13 +51,13 @@ def class_from_name(name):
 
 
 CREATE_NAMES = ["add_sheet", "add_edge", "add_edge_level",
-                "add_edge_skill_bonus", "add_spell_effect", "add_armor",
+                "add_edge_skill_bonus", "add_armor",
                 "add_armor_template",
                 "add_armor_quality", "add_armor_special_quality", "add_weapon",
                 "add_weapon_template", "add_weapon_quality",
                 "add_weapon_special_quality", "add_ranged_weapon",
                 "add_ranged_weapon_template", "add_miscellaneous_item",
-                "add_firearm", "add_ammunition"]
+                "add_firearm", "add_ammunition", "add_transient_effect"]
 
 CREATE_URLS = ["sheets/{0}/".format(name) for name in CREATE_NAMES]
 

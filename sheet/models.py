@@ -1437,14 +1437,6 @@ class Armor(ExportedModel):
         return min(self.base.mod_psy + self.quality.mod_psy, 0)
 
 
-class SpellEffect(ExportedModel, Effect):
-    """
-    """
-    @classmethod
-    def dont_export(cls):
-        return ['sheet']
-
-
 class TransientEffect(ExportedModel, Effect):
     """
     Temporary effects, like spells or drugs, affecting character
@@ -1550,8 +1542,6 @@ class Sheet(PrivateMixin, models.Model):
 
     miscellaneous_items = models.ManyToManyField(MiscellaneousItem,
                                                  blank=True)
-
-    spell_effects = models.ManyToManyField(SpellEffect, blank=True)
 
     transient_effects = models.ManyToManyField(TransientEffect, blank=True,
                                                through=SheetTransientEffect)
@@ -1769,8 +1759,7 @@ class Sheet(PrivateMixin, models.Model):
         return list(itertools.chain(armor_special_qualities,
                                helm_special_qualities,
                                weapon_special_qualities,
-                               item_special_qualities,
-                               self.spell_effects.all()))
+                               item_special_qualities))
 
     _cached_special_effects = None
     def special_effects(self):

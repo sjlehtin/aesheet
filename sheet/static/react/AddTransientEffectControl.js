@@ -55,9 +55,10 @@ class AddTransientEffectRow extends React.Component {
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Effect</Button>
+                <a href="sheets/add_transient_effect/">Create a new effect</a>
             </td>
         </tr>
-        </tfoot>;
+        </tfoot>
     }
 }
 
