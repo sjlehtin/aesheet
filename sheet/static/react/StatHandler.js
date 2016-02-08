@@ -3,6 +3,15 @@
  * character: The initial character.
  */
 
+/*
+ * TODO:  Effects from SpellEffects, ArmorSpecialQualities,
+ * WeaponSpecialQualities, MiscellaneousItems, and Edges should be
+ * combined and added to stats, skill levels, movement etc.
+ *
+ * Edges affect base stats ("hard" modifier) and the rest are
+ * modifiers for the effective stats ("soft" modifier).
+ */
+
 class StatHandler {
     constructor(props) {
         this.props = props;
@@ -43,6 +52,7 @@ class StatHandler {
             this._baseStats = {};
             for (let st of StatHandler.baseStatNames) {
                 this._baseStats[st] = this.props.character['cur_' + st] +
+                    this.props.character['base_mod_' + st] +
                     this._hardMods[st];
             }
             this._baseStats.mov = Math.round((this._baseStats.fit + 
@@ -81,6 +91,5 @@ StatHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
 StatHandler.allStatNames =  StatHandler.baseStatNames.concat(
     ["mov", "dex", "imm"]);
-
 
 export default StatHandler;
