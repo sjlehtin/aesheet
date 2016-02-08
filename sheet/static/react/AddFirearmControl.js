@@ -87,7 +87,7 @@ class AddFirearmControl extends React.Component {
                 <tr>
                     <td><label>Firearm</label></td>
                     <td><Combobox data={this.state.firearmChoices}
-                                  textField='name' suggest
+                                  textField='name'
                                   open={this.state.isOpen}
                                   busy={this.state.isBusy}
                                   onToggle={(isOpen) => {
