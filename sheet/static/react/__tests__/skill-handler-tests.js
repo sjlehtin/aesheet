@@ -1,6 +1,6 @@
 jest.dontMock('../SkillHandler');
 jest.dontMock('../sheet-util');
-jest.dontMock('./factories')
+jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
