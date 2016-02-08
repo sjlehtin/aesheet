@@ -1,3 +1,36 @@
+var characterFactory = function (statOverrides) {
+    var _charData = {
+        id: 2,
+
+        "cur_fit": 40,
+        "cur_ref": 60,
+        "cur_lrn": 43,
+        "cur_int": 43,
+        "cur_psy": 50,
+        "cur_wil": 43,
+        "cur_cha": 43,
+        "cur_pos": 43,
+
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_lrn": 0,
+        "mod_int": 0,
+        "mod_psy": 0,
+        "mod_wil": 0,
+        "mod_cha": 0,
+        "mod_pos": 0,
+        "mod_mov": 0,
+        "mod_dex": 0,
+        "mod_imm": 0,
+        bought_mana: 0,
+        bought_stamina: 0,
+        edges: [],
+        "campaign": 2
+    };
+
+    return Object.assign(_charData, statOverrides);
+};
+
 var statsFactory = function (overrideStats) {
     var _baseStats = {
         fit: 45,
@@ -358,6 +391,7 @@ var sheetTransientEffectFactory = function (overrideFields) {
 
 
 module.exports = {
+    characterFactory: characterFactory,
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
     edgeFactory: edgeFactory,
