@@ -55,11 +55,6 @@ class SheetTestCase(TestCase):
     def test_movement_rates(self):
         pass
 
-    def test_stat_modifications(self):
-        serializer = SheetSerializer(self.sheet)
-        for stat in models.ALL_STATS:
-            self.assertIn('mod_' + stat.lower(), serializer.data)
-
     def test_weight(self):
         serializer = SheetSerializer(self.sheet)
         self.assertIn('weight_carried', serializer.data)
@@ -185,11 +180,6 @@ class CharacterTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         char = models.Character.objects.get(pk=self.character.pk)
         self.assertEqual(char.owner, self.owner)
-
-    def test_stat_modifications(self):
-        serializer = CharacterSerializer(self.character)
-        for stat in models.ALL_STATS:
-            self.assertIn('mod_' + stat.lower(), serializer.data)
 
     def test_generated_log_entries(self):
         update_view = views.CharacterViewSet.as_view({
