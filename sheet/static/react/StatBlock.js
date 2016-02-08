@@ -137,6 +137,13 @@ class StatBlock extends React.Component {
     }
 
     baseStat(stat) {
+        if (stat === "mov") {
+            return this.baseMOV();
+        } else if (stat === "dex") {
+            return this.baseDEX();
+        } else if (stat === "imm") {
+            return this.baseIMM();
+        }
         return this.state.char['cur_' + stat] + this.state.char['mod_' + stat];
     }
 
@@ -223,28 +230,28 @@ class StatBlock extends React.Component {
         }
         var block = {};
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
-                "pos"];
+                "pos", "mov", "dex", "imm"];
         for (var ii = 0; ii < stats.length; ii++) {
             block[stats[ii]] = this.baseStat(stats[ii]);
         }
         return block;
     }
 
-    baseBody() {
-        return util.roundup(this.baseStat("fit") / 4);
+    baseBody(baseStats) {
+        return util.roundup(baseStats.fit / 4);
     }
 
     toughness() {
         return this.getEdgeLevel("Toughness");
     }
 
-    stamina() {
-        return util.roundup((this.baseStat("ref") + this.baseStat("wil"))/ 4)
+    stamina(baseStats) {
+        return util.roundup((baseStats.ref + baseStats.wil)/ 4)
             + this.state.char.bought_stamina;
     }
 
-    mana() {
-        return util.roundup((this.baseStat("psy") + this.baseStat("wil"))/ 4)
+    mana(baseStats) {
+        return util.roundup((baseStats.psy + baseStats.wil)/ 4)
             + this.state.char.bought_mana;
     }
 
@@ -265,9 +272,9 @@ class StatBlock extends React.Component {
         }
     }
 
-    staminaRecovery() {
+    staminaRecovery(effStats) {
         /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
-        var highStat = util.rounddown((this.effIMM() - 45)/15);
+        var highStat = util.rounddown((effStats.imm - 45)/15);
         var level = this.getEdgeLevel("Fast Healing");
 
         var rates = [];
@@ -293,9 +300,9 @@ class StatBlock extends React.Component {
         }
     }
 
-    manaRecovery() {
+    manaRecovery(effStats) {
         /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
-        var highStat = 2*util.rounddown((this.effStat("cha") - 45)/15);
+        var highStat = 2*util.rounddown((effStats.cha - 45)/15);
         var level = this.getEdgeLevel("Fast Mana Recovery");
 
         var rates = [];
@@ -650,6 +657,7 @@ class StatBlock extends React.Component {
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
             "pos"];
         rows = stats.map((st, ii) => {
+            /* TODO: hard and soft mods should be passed here. */
             return <StatRow stat={st}
                             key={ii}
                             initialChar={this.state.char}
@@ -692,14 +700,17 @@ class StatBlock extends React.Component {
 
         expendable = <tbody>
             <tr><td style={statStyle}>B</td>
-                <td style={baseStyle}>{this.baseBody()}{toughness}</td>
+                <td style={baseStyle}>{this.baseBody(baseStats)
+                  }{toughness}</td>
                 <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>
             <tr><td style={statStyle}>S</td>
-                <td style={baseStyle}>{this.stamina()}</td>
-                <td style={recoveryStyle}>{this.staminaRecovery()}</td></tr>
+                <td style={baseStyle}>{this.stamina(baseStats)}</td>
+                <td style={recoveryStyle}>{this.staminaRecovery(effStats)
+                  }</td></tr>
             <tr><td style={statStyle}>M</td>
-                <td style={baseStyle}>{this.mana()}</td>
-                <td style={recoveryStyle}>{this.manaRecovery()}</td></tr>
+                <td style={baseStyle}>{this.mana(baseStats)}</td>
+                <td style={recoveryStyle}>{this.manaRecovery(effStats)
+                  }</td></tr>
         </tbody>;
 
         return <div style={{position: "relative", width: "18em"}}>
@@ -767,21 +778,20 @@ class StatBlock extends React.Component {
             onAdd={(sp) => this.handleAddGainedSP(sp)} />;
     }
 
-    getSkillHandler() {
+    getSkillHandler(effStats) {
         if (!this.state.characterSkills || !this.state.allSkills ||
-            !this.state.edgeList) {
+            !this.state.edgeList || !effStats) {
             return null;
         }
         return new SkillHandler({
             characterSkills: this.state.characterSkills,
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
-            stats: this.getEffStats()
+            stats: effStats
         });
     }
 
-    renderFirearms() {
-        var skillHandler = this.getSkillHandler();
+    renderFirearms(skillHandler) {
         if (!this.state.firearmList || !skillHandler) {
             return <Loading>Firearms</Loading>;
         }
@@ -843,8 +853,7 @@ class StatBlock extends React.Component {
 
     }
 
-    renderRangedWeapons() {
-        var skillHandler = this.getSkillHandler();
+    renderRangedWeapons(skillHandler) {
         if (!this.state.rangedWeaponList || !skillHandler) {
             return <Loading>Ranged weapons</Loading>;
         }
@@ -913,7 +922,7 @@ class StatBlock extends React.Component {
     render() {
         var baseStats = this.getBaseStats();
         var effStats = this.getEffStats();
-        var skillHandler = this.getSkillHandler();
+        var skillHandler = this.getSkillHandler(effStats);
 
         return (
             <Grid>

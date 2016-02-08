@@ -221,16 +221,18 @@ describe('stat block', function() {
                 Promise.all(promises).then(function () {
                     callback()
                 }).catch(function (err) { fail("failed with " + err)});
-            });
-        });
+            }).catch(function (err) { fail("failed with " + err)});;
+        }).catch(function (err) { fail("failed with " + err)});;
     };
 
     it('calculates MOV', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            expect(block.baseMOV()).toEqual(50);
-            expect(block.effMOV()).toEqual(60);
+            var baseStats = block.getBaseStats();
+            var effStats = block.getEffStats();
+            expect(baseStats.mov).toEqual(50);
+            expect(effStats.mov).toEqual(60);
             done();
         });
     });
@@ -239,8 +241,11 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            expect(block.baseDEX()).toEqual(52);
-            expect(block.effDEX()).toEqual(52);
+            var baseStats = block.getBaseStats();
+            var effStats = block.getEffStats();
+            console.log(baseStats, effStats);
+            expect(baseStats.dex).toEqual(52);
+            expect(effStats.dex).toEqual(52);
             done();
         });
     });
@@ -259,7 +264,8 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
 
         afterLoad(function () {
-            expect(block.stamina()).toEqual(26);
+            var baseStats = block.getBaseStats();
+            expect(block.stamina(baseStats)).toEqual(26);
             done();
         });
     });
@@ -269,16 +275,17 @@ describe('stat block', function() {
             sheetDataFactory());
 
         afterLoad(function () {
-            expect(block.stamina()).toEqual(31);
+            var baseStats = block.getBaseStats();
+            expect(block.stamina(baseStats)).toEqual(31);
             done();
         });
     });
 
     it('calculates mana', function (done) {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
-
         afterLoad(function () {
-            expect(block.mana()).toEqual(24);
+            var baseStats = block.getBaseStats();
+            expect(block.mana(baseStats)).toEqual(24);
             done();
         });
     });
@@ -286,9 +293,9 @@ describe('stat block', function() {
     it('calculates mana with bought mana', function (done) {
         var block = getStatBlock(charDataFactory({bought_mana: 5}),
             sheetDataFactory());
-
         afterLoad(function () {
-            expect(block.mana()).toEqual(29);
+            var baseStats = block.getBaseStats();
+            expect(block.mana(baseStats)).toEqual(29);
             done();
         });
     });
@@ -297,7 +304,8 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory({cur_fit: 41}),
             sheetDataFactory());
         afterLoad(function () {
-            expect(block.baseBody()).toEqual(11);
+            var baseStats = block.getBaseStats();
+            expect(block.baseBody(baseStats)).toEqual(11);
             done();
         });
     });
@@ -306,7 +314,8 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory({cur_fit: 39}),
             sheetDataFactory());
         afterLoad(function () {
-            expect(block.baseBody()).toEqual(10);
+            var baseStats = block.getBaseStats();
+            expect(block.baseBody(baseStats)).toEqual(10);
             done();
         });
     });
@@ -354,10 +363,11 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory({cur_fit: 40}),
             sheetDataFactory());
         afterLoad(function () {
+            var baseStats = block.getBaseStats();
             expect(block.toughness()).toEqual(0);
             block.handleEdgeAdded(edgeFactory({"Toughness": 1}));
             expect(block.toughness()).toEqual(1);
-            expect(block.baseBody()).toEqual(10);
+            expect(block.baseBody(baseStats)).toEqual(10);
             done();
         });
     });
@@ -366,15 +376,16 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory(),
             sheetDataFactory());
         afterLoad(function () {
+            var effStats = block.getEffStats();
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
                 level: 1}));
-            expect(block.staminaRecovery()).toEqual('1d6/8h');
+            expect(block.staminaRecovery(effStats)).toEqual('1d6/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
                 level: 2}));
-            expect(block.staminaRecovery()).toEqual('2d6/8h');
+            expect(block.staminaRecovery(effStats)).toEqual('2d6/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
                 level: 3}));
-            expect(block.staminaRecovery()).toEqual('4d6/8h');
+            expect(block.staminaRecovery(effStats)).toEqual('4d6/8h');
             done();
         });
     });
@@ -383,10 +394,11 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory({cur_fit: 75}),
             sheetDataFactory());
         afterLoad(function () {
-            expect(block.staminaRecovery()).toEqual('1/8h');
+            var effStats = block.getEffStats();
+            expect(block.staminaRecovery(effStats)).toEqual('1/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
                 level: 1}));
-            expect(block.staminaRecovery()).toEqual('1+1d6/8h');
+            expect(block.staminaRecovery(effStats)).toEqual('1+1d6/8h');
             done();
         });
     });
@@ -395,15 +407,16 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory(),
             sheetDataFactory());
         afterLoad(function () {
+            var effStats = block.getEffStats();
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 1}));
-            expect(block.manaRecovery()).toEqual('2d6/8h');
+            expect(block.manaRecovery(effStats)).toEqual('2d6/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 2}));
-            expect(block.manaRecovery()).toEqual('4d6/8h');
+            expect(block.manaRecovery(effStats)).toEqual('4d6/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 3}));
-            expect(block.manaRecovery()).toEqual('8d6/8h');
+            expect(block.manaRecovery(effStats)).toEqual('8d6/8h');
             done();
         });
     });
@@ -412,10 +425,11 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory({cur_cha: 70}),
             sheetDataFactory());
         afterLoad(function () {
-            expect(block.manaRecovery()).toEqual('2/8h');
+            var effStats = block.getEffStats();
+            expect(block.manaRecovery(effStats)).toEqual('2/8h');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 1}));
-            expect(block.manaRecovery()).toEqual('2+2d6/8h');
+            expect(block.manaRecovery(effStats)).toEqual('2+2d6/8h');
             done();
         });
     });
@@ -436,7 +450,8 @@ describe('stat block', function() {
         var block = getStatBlock(charDataFactory(), sheetDataFactory());
         afterLoad(function () {
             block.handleModification("fit", 40, 41);
-            expect(block.baseMOV()).toEqual(51);
+            var baseStats = block.getBaseStats();
+            expect(baseStats.mov).toEqual(51);
             done();
         });
     });
