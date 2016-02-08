@@ -1,12 +1,16 @@
 jest.dontMock('../StatRow');
+jest.dontMock('../StatHandler');
+jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 var rest = require('sheet-rest');
+var factories = require('./factories');
 
 const StatRow = require('../StatRow').default;
+const StatHandler = require('../StatHandler').default;
 
 var statRowFactory = function(givenProps) {
     // TODO: React TestUtils suck a bit of a balls.
@@ -18,16 +22,21 @@ var statRowFactory = function(givenProps) {
     var props = {
         stat: "fit",
         url: "/rest/characters/1/",
-        initialChar: {
+        initialChar: factories.characterFactory({
             start_fit: 50,
             cur_fit: 55,
-            mod_fit: -2
-        },
-        initialSheet: {mod_fit: 20}
+            base_mod_fit: -2
+        })
     };
     if (typeof(givenProps) !== "undefined") {
         props = Object.assign(props, givenProps);
     }
+    var handler = new StatHandler({character: props.initialChar,
+        edges: [],
+        effects: [factories.sheetTransientEffectFactory({
+            effect: {fit: 20}})]});
+    props.effStats = handler.getEffStats();
+    props.baseStats = handler.getBaseStats();
     var rowElement = React.createElement(StatRow, props);
     var table = TestUtils.renderIntoDocument(
         <Wrapper>
