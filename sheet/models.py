@@ -792,7 +792,7 @@ class BaseArmament(ExportedModel):
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
 
-    weight = models.DecimalField(max_digits=4, decimal_places=1,
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
                                  default=1.0)
 
     base_skill = models.ForeignKey(Skill,
@@ -966,7 +966,7 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     type = models.CharField(max_length=5, default="P")
 
-    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
+    ammo_weight = models.DecimalField(max_digits=6, decimal_places=3,
                                       default=0.1)
 
     # TODO: Get rid of this, use base_skill to indicate the type instead.
@@ -1334,7 +1334,7 @@ class ArmorTemplate(ExportedModel):
     mod_climb = models.IntegerField(default=0)
     mod_tumble = models.IntegerField(default=0)
 
-    weight = models.DecimalField(max_digits=4, decimal_places=1,
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
                                  default=1.0)
     # 0 no armor, 1 light, 2 medium, 3 heavy
     encumbrance_class = models.IntegerField(default=0)
