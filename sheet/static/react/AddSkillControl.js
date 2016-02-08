@@ -39,12 +39,17 @@ class AddSkillControl extends React.Component {
     }
 
     handleSkillChange(value) {
-        var skill = undefined;
+
+        var skill = undefined, minLevel = undefined;
+
         if (typeof(value) === "object") {
             skill = value;
+            minLevel = value.min_level;
         }
 
-        this.setState({skillValue: value, selectedSkill: skill});
+        this.setState({skillValue: value,
+            selectedSkill: skill,
+            selectedLevel: minLevel});
     }
 
     handleLevelChange(value) {
@@ -88,12 +93,11 @@ class AddSkillControl extends React.Component {
                 <tr>
                     <td><label>Skill</label></td>
                     <td><Combobox data={this.getSkillChoices()}
-                                  textField='name' suggest
+                                  textField='name'
                                   filter="contains" groupBy="type"
                                   value={this.state.skillValue}
                                   onChange={(value) =>
-                                    this.handleSkillChange(value) }
-                /></td>
+                                    this.handleSkillChange(value) }/></td>
                 </tr>
                 <tr>
                     <td><label>Level</label></td>
