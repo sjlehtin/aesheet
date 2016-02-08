@@ -43,18 +43,6 @@ class SheetTestCase(TestCase):
         response = self.detail_view(req, pk=self.sheet.pk)
         self.assertEqual(response.status_code, 403)
 
-    # TODO: Probably unnecessary, as these should be calculated in a React
-    # component.
-    def test_url(self):
-        client = APIClient()
-        url = '/rest/sheets/{}/movement_rates/'.format(self.sheet.pk)
-        self.assertTrue(client.login(username="luke", password="foobar"))
-        response = client.get(url, format='json')
-        self.assertEqual(response.status_code, 200)
-
-    def test_movement_rates(self):
-        pass
-
     def test_weight(self):
         serializer = SheetSerializer(self.sheet)
         self.assertIn('weight_carried', serializer.data)

@@ -57,18 +57,6 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                                                      'character__campaign',
                                                      ).all()
 
-    @detail_route(methods=['get'])
-    def movement_rates(self, request, pk=None):
-        try:
-            sheet = models.Sheet.objects.get(pk=pk)
-        except models.Sheet.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        rates = sheet.movement_rates()
-        return Response(dict([(ff, getattr(rates, ff)())
-                              for ff in dir(rates)
-                              if not ff.startswith('_') and
-                              callable(getattr(rates, ff))]))
-
 
 class CharacterViewSet(mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
