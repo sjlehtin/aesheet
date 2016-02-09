@@ -116,7 +116,7 @@ class AddFirearmControl extends React.Component {
             <Button bsSize="small" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
-                Add firearm</Button>
+                Add Firearm</Button>
                 <div><a href="/sheets/add_firearm/">Create a new firearm</a>
                     <a href="/sheets/add_ammunition/">Create new ammo</a>
                 </div>
