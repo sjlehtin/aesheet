@@ -358,7 +358,6 @@ def sheet_detail(request, sheet_id=None):
     add_form(AddArmorForm, "add-armor", instance=sheet)
     add_form(AddExistingMiscellaneousItemForm,
              "add-existing-miscellaneous-item", instance=sheet)
-    add_form(HelmForm, "new-helm")
 
     if request.method == "POST":
         should_change = False
@@ -368,14 +367,8 @@ def sheet_detail(request, sheet_id=None):
             if ff.is_bound:
                 if ff.is_valid():
                     logger.info("saved %s" % kk)
-                    oo = ff.save()
+                    ff.save()
                     should_change = True
-                    if kk == 'new_armor_form':
-                        sheet.armor = oo
-                        sheet.save()
-                    elif kk == 'new_helm_form':
-                        sheet.helm = oo
-                        sheet.save()
                 else:
                     messages.error(request, 'Errors in processing request '
                                             '({form_slug}).'.format(

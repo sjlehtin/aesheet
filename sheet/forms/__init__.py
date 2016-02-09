@@ -345,22 +345,6 @@ def log_stat_change(character, request, field, change):
         entry.delete()
 
 
-class ArmorForm(RequestForm):
-    base = forms.ModelChoiceField(
-        queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=False))
-    class Meta:
-        model = sheet.models.Armor
-        fields = '__all__'
-
-
-class HelmForm(RequestForm):
-    base = forms.ModelChoiceField(
-        queryset=sheet.models.ArmorTemplate.objects.filter(is_helm=True))
-    class Meta:
-        model = sheet.models.Armor
-        fields = '__all__'
-
-
 class BaseEditCharacterForm(RequestForm):
     base_stat_field_names = []
     PREFIXES = ["start_", "cur_", "base_mod_"]
