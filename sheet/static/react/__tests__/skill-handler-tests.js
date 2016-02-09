@@ -1,4 +1,5 @@
 jest.dontMock('../SkillHandler');
+jest.dontMock('../StatHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -8,6 +9,7 @@ import TestUtils from 'react-addons-test-utils';
 
 var factories = require('./factories');
 
+const StatHandler = require('../StatHandler').default;
 const SkillHandler = require('../SkillHandler').default;
 
 describe('SkillHandler', function() {
@@ -30,7 +32,10 @@ describe('SkillHandler', function() {
                 }),
                 factories.skillFactory({name: "Basic Firearms", stat: "INT"})
             ],
-            stats: factories.statsFactory({dex: 50})
+            stats: new StatHandler({
+                character: factories.characterFactory({
+                    cur_ref: 50, cur_int: 50}),
+                edges: [], effects: []})
         };
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);

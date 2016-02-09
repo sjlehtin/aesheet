@@ -35,7 +35,7 @@ class StatBlock extends React.Component {
             sheet: undefined,
             char: undefined,
             /* This is preferred over the edges list in the char.  A
-               subcomponent will handle the actual edges for the character,
+               sub-component will handle the actual edges for the character,
                and will notify this component of changes. */
             edges: {},
             edgeList: [],
@@ -681,16 +681,16 @@ class StatBlock extends React.Component {
                              onAdd={(sp) => this.handleAddGainedSP(sp)} />;
     }
 
-    getSkillHandler(effStats) {
+    getSkillHandler(statHandler) {
         if (!this.state.characterSkills || !this.state.allSkills ||
-            !this.state.edgeList || !effStats) {
+            !statHandler) {
             return null;
         }
         return new SkillHandler({
             characterSkills: this.state.characterSkills,
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
-            stats: effStats
+            stats: statHandler
         });
     }
 
@@ -840,7 +840,7 @@ class StatBlock extends React.Component {
             var baseStats = statHandler.getBaseStats();
             var effStats = statHandler.getEffStats();
         }
-        var skillHandler = this.getSkillHandler(effStats);
+        var skillHandler = this.getSkillHandler(statHandler);
 
         return (
             <Grid>
