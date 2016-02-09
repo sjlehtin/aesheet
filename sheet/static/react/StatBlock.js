@@ -39,8 +39,7 @@ class StatBlock extends React.Component {
                and will notify this component of changes. */
             edges: {},
             edgeList: [],
-            /* Running total of edge cost. */
-            edgesBought: 0,
+
             characterSkills: undefined,
             allSkills: undefined,
 
@@ -254,23 +253,12 @@ class StatBlock extends React.Component {
 
     handleEdgeAdded(data) {
         /* This assumes that characters will only have a single edgelevel of
-           an edge.  I think this is an invariant.
-
-           TODO: The lower level (the upcoming EdgeComponent) will need to
-           remove old edgelevels when an upgraded level is added; otherwise
-           the database will contain crud from the past, which may then pop
-           up when, e.g., trying to remove edges. */
+           an edge.  I think this is an invariant. */
         var update = {};
         update[data.edge] = data;
 
-        this.state.edgeList.push(data);
-        var newList = this.state.edgeList;
-
         this.setState({edges: Object.assign({}, this.state.edges, update),
-            /* TODO: the data in JSON will have the floats rendered as
-             strings.   Anyway around this? */
-            edgesBought: this.state.edgesBought + parseFloat(data.cost),
-            edgeList: newList
+            edgeList: this.state.edgeList.concat([data])
         });
     }
 
@@ -672,8 +660,12 @@ class StatBlock extends React.Component {
             return <Loading>XP</Loading>
         }
 
+        var edgesBought = 0;
+        for (let edge of this.state.edgeList) {
+            edgesBought += parseFloat(edge.cost);
+        }
         return <XPControl
-            url={this.state.url} edgesBought={this.state.edgesBought}
+            url={this.state.url} edgesBought={edgesBought}
             initialChar={this.state.char}
             onMod={this.handleXPMod.bind(this)} />;
     }
@@ -685,9 +677,8 @@ class StatBlock extends React.Component {
 
         var ageSP = util.roundup(baseStats.lrn/15 +
             baseStats.int/25 + baseStats.psy/50);
-        return <AddSPControl
-            initialAgeSP={ageSP}
-            onAdd={(sp) => this.handleAddGainedSP(sp)} />;
+        return <AddSPControl initialAgeSP={ageSP}
+                             onAdd={(sp) => this.handleAddGainedSP(sp)} />;
     }
 
     getSkillHandler(effStats) {
