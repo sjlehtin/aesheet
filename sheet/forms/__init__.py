@@ -60,16 +60,17 @@ class EditSheetForm(RequestForm):
 class AddSheetForm(SetOwnerMixin, EditSheetForm):
     pass
 
-# TODO: Remove.
-class AddWeaponForm(RequestForm):
-    item_class = sheet.models.Weapon
-    item_queryset = sheet.models.Weapon.objects.all()
-    template_queryset = sheet.models.WeaponTemplate.objects.all()
-    quality_queryset = sheet.models.WeaponQuality.objects.all()
+
+class AddArmorForm(RequestForm):
+    item_class = sheet.models.Armor
+    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)
+    template_queryset = sheet.models.ArmorTemplate.objects.filter(is_helm=False)
+    quality_queryset = sheet.models.ArmorQuality.objects.all()
     quality_field_name = 'quality'
 
     def add_item(self, item):
-        self.instance.weapons.add(item)
+        self.instance.armor = item
+        self.instance.save()
 
     item_template = forms.ModelChoiceField(
                               queryset=template_queryset.all())
@@ -87,7 +88,7 @@ class AddWeaponForm(RequestForm):
         quality_queryset = self.quality_queryset
         if 'item_quality' not in initial:
             initial['item_quality'] = self.get_default_quality
-        super(AddWeaponForm, self).__init__(*args, **kwargs)
+        super(AddArmorForm, self).__init__(*args, **kwargs)
         if self.instance.character.campaign:
             template_queryset = template_queryset.filter(
                       tech_level__in=self.instance.campaign.tech_levels.all())
@@ -135,27 +136,6 @@ class AddWeaponForm(RequestForm):
         return self.instance
 
 
-class AddRangedWeaponForm(AddWeaponForm):
-    item_class = sheet.models.RangedWeapon
-    item_queryset = sheet.models.RangedWeapon.objects.all()
-    template_queryset = sheet.models.RangedWeaponTemplate.objects.all()
-    quality_queryset = sheet.models.WeaponQuality.objects.all()
-
-    def add_item(self, item):
-        self.instance.ranged_weapons.add(item)
-
-
-class AddArmorForm(AddWeaponForm):
-    item_class = sheet.models.Armor
-    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)
-    template_queryset = sheet.models.ArmorTemplate.objects.filter(is_helm=False)
-    quality_queryset = sheet.models.ArmorQuality.objects.all()
-
-    def add_item(self, item):
-        self.instance.armor = item
-        self.instance.save()
-
-
 class AddHelmForm(AddArmorForm):
     item_queryset = sheet.models.Armor.objects.filter(base__is_helm=True)
     template_queryset = sheet.models.ArmorTemplate.objects.filter(is_helm=True)
@@ -165,56 +145,8 @@ class AddHelmForm(AddArmorForm):
         self.instance.save()
 
 
-class AddFirearmForm(RequestForm):
-    def __init__(self, *args, **kwargs):
-        super(AddFirearmForm, self).__init__(*args, **kwargs)
-        template_queryset = sheet.models.BaseFirearm.objects.filter(
-            tech_level__in=self.instance.campaign.tech_levels.all())
-        quality_queryset = sheet.models.Ammunition.objects.filter(
-            tech_level__in=self.instance.campaign.tech_levels.all())
-
-        self.fields['item_template'] = forms.ModelChoiceField(
-                              queryset=template_queryset.all(),
-                              label="Firearm")
-        self.fields['item_quality'] = forms.ModelChoiceField(
-            queryset=quality_queryset.all(),
-            label="Ammunition")
-
-    class Meta:
-        model = sheet.models.Sheet
-        fields = ()
-
-    def clean(self):
-        base = self.cleaned_data.get('item_template')
-        quality = self.cleaned_data.get('item_quality')
-        if not base or not quality:
-            raise forms.ValidationError, \
-                "Both base and ammunition are required."
-        types = base.get_ammunition_types()
-        ammunition = quality.label
-        if ammunition not in types:
-            raise forms.ValidationError, 'Invalid ammo type'
-
-        return self.cleaned_data
-
-    def save(self, commit=True):
-        if commit:
-            qs = sheet.models.Firearm.objects.filter(
-                base=self.cleaned_data['item_template'],
-                ammo=self.cleaned_data['item_quality'])
-            if qs:
-                item = qs[0]
-            else:
-                item = sheet.models.Firearm.objects.create(
-                    base=self.cleaned_data['item_template'],
-                    ammo=self.cleaned_data['item_quality'])
-
-            self.instance.firearms.add(item)
-        return self.instance
-
-
-class AddExistingWeaponForm(RequestForm):
-    item_queryset = sheet.models.Weapon.objects.all()
+class AddExistingArmorForm(RequestForm):
+    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)
 
     def _filter_tech_level(self, qs):
         return qs.filter(
@@ -223,7 +155,7 @@ class AddExistingWeaponForm(RequestForm):
              quality__tech_level__in=self.instance.campaign.tech_levels.all())
 
     def __init__(self, *args, **kwargs):
-        super(AddExistingWeaponForm, self).__init__(*args, **kwargs)
+        super(AddExistingArmorForm, self).__init__(*args, **kwargs)
         item_queryset = self.item_queryset
         if self.instance.character.campaign:
             item_queryset = self._filter_tech_level(item_queryset)
@@ -237,7 +169,8 @@ class AddExistingWeaponForm(RequestForm):
         fields = ()
 
     def add_item(self, item):
-        self.instance.weapons.add(item)
+        self.instance.armor = item
+        self.instance.save()
 
     def save(self):
         item = self.cleaned_data['item']
@@ -247,22 +180,7 @@ class AddExistingWeaponForm(RequestForm):
         return self.instance
 
 
-class AddExistingRangedWeaponForm(AddExistingWeaponForm):
-    item_queryset = sheet.models.RangedWeapon.objects.all()
-
-    def add_item(self, item):
-        self.instance.ranged_weapons.add(item)
-
-
-class AddExistingArmorForm(AddExistingWeaponForm):
-    item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)
-
-    def add_item(self, item):
-        self.instance.armor = item
-        self.instance.save()
-
-
-class AddExistingHelmForm(AddExistingWeaponForm):
+class AddExistingHelmForm(AddExistingArmorForm):
     item_queryset = sheet.models.Armor.objects.filter(base__is_helm=True)
 
     def add_item(self, item):
@@ -270,7 +188,7 @@ class AddExistingHelmForm(AddExistingWeaponForm):
         self.instance.save()
 
 
-class AddExistingMiscellaneousItemForm(AddExistingWeaponForm):
+class AddExistingMiscellaneousItemForm(AddExistingArmorForm):
     item_queryset = sheet.models.MiscellaneousItem.objects.all()
 
     def _filter_tech_level(self, qs):
