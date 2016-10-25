@@ -15,9 +15,8 @@ import AddWeaponControl from 'AddWeaponControl';
 import AddRangedWeaponControl from 'AddRangedWeaponControl';
 import TransientEffectRow from 'TransientEffectRow';
 import AddTransientEffectControl from 'AddTransientEffectControl';
-
-const SkillHandler = require('SkillHandler').default;
-const StatHandler = require('StatHandler').default;
+import SkillHandler from 'SkillHandler';
+import StatHandler from 'StatHandler';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
