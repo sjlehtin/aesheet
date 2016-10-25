@@ -32,6 +32,7 @@ var factories = require('./factories');
 const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
 const AddSPControl = require('../AddSPControl').default;
+const XPControl = require('../XPControl').default;
 
 describe('stat block', function() {
     "use strict";
@@ -317,12 +318,14 @@ describe('stat block', function() {
     it('handles edge point calculation', function (done) {
         var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
         afterLoad(function () {
-            expect(block.state.edgesBought).toEqual(0);
+            var control = TestUtils.findRenderedComponentWithType(block,
+                XPControl);
+            expect(control.props.edgesBought).toEqual(0);
             block.handleEdgeAdded(edgeFactory({
                 edge: "Toughness", level: 2, cost: 4}));
             block.handleEdgeAdded(edgeFactory({
                 edge: "Acute Touch", level: 1, cost: 1}));
-            expect(block.state.edgesBought).toEqual(5);
+            expect(control.props.edgesBought).toEqual(5);
             done();
         });
     });
