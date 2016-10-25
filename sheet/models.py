@@ -634,6 +634,7 @@ class StatModifier(models.Model):
     # immediately visible from stats, saves and such.
     notes = models.TextField(blank=True)
 
+    # TODO: not actually used yet.
     cc_skill_levels = models.IntegerField(default=0)
 
     fit = models.IntegerField(default=0)
@@ -648,6 +649,7 @@ class StatModifier(models.Model):
     dex = models.IntegerField(default=0)
     imm = models.IntegerField(default=0)
 
+    # TODO: not actually used yet.
     saves_vs_fire = models.IntegerField(default=0)
     saves_vs_cold = models.IntegerField(default=0)
     saves_vs_lightning = models.IntegerField(default=0)
