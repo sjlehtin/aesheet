@@ -26,3 +26,8 @@ When updating to new edge skillpoint system:
  (Tome), and their levels:  make sure the amount of granted SP is correct.
 
  Here a data migration action might be useful.
+
+Production use:
+
+requires "auth" file with the database access credentials.
+requires "secret" file with the secret key used for Django sessions etc.
