@@ -43,9 +43,11 @@ var statsFactory = function (overrideStats) {
         pos: 45,
         dex: 45,
         mov: 45,
-        imm: 45
+        imm: 45,
     };
-    return Object.assign(_baseStats, overrideStats);
+    var oo = Object.assign(_baseStats, overrideStats);
+    oo.getEffStats = (st) => { return _baseStats; }
+    return oo;
 };
 
 var skillFactory = function (overrideFields) {
