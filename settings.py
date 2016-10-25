@@ -39,6 +39,9 @@ if PRODUCTION:
     f = open(os.path.join(BASEDIR, "auth"), "r")
     auth_details = f.read()
     (USER, PASSWORD) = auth_details.strip().split()
+
+    SECRET_KEY = open(os.path.join(BASEDIR, "secret"), "r").read().strip()
+
     DEBUG = False
     DEBUG_TOOLBAR_ENABLED = False
 else:
@@ -48,6 +51,10 @@ else:
     (USER, PASSWORD) = "", ""
     DEBUG_TOOLBAR_ENABLED = True
     DEBUG = True
+    if os.path.exists(os.path.join(BASEDIR, "secret")):
+        SECRET_KEY = open(os.path.join(BASEDIR, "secret"), "r").read().strip()
+    else:
+        SECRET_KEY = "XXXXsecretnotsetXXXX"
 
 val = os.getenv('DEBUG_TOOLBAR')
 if val is not None:
@@ -141,9 +148,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'wDbImXEkn/v9oAnEjxquj/3u9DY'
 
 MIDDLEWARE_CLASSES = (
     'loginreqd.RequireLoginMiddleware',
