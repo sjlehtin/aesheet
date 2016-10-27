@@ -28,6 +28,7 @@ class AddFirearmControl extends React.Component {
     }
 
     handleFirearmChange(value) {
+        this.setState({selectedFirearm: value});
         if (!this.state.firearmChoices) {
             this.loadFirearms();
         }
@@ -35,7 +36,7 @@ class AddFirearmControl extends React.Component {
         this.setState({selectedAmmo: null});
 
         if (typeof(value) === "object") {
-            this.setState({selectedFirearm: value});
+
             rest.getData(`/rest/ammunition/firearm/${value.name}/`).then(
                 (json) => {
                     this.setState({ammoChoices: json})
@@ -64,7 +65,13 @@ class AddFirearmControl extends React.Component {
     }
 
     fieldsValid() {
-        if (this.state.selectedFirearm && this.state.selectedAmmo) {
+        if (!this.state.selectedFirearm) {
+            return false;
+        }
+        if (typeof(this.state.selectedFirearm) !== "object") {
+            return false;
+        }
+        if (typeof(this.state.selectedAmmo) === "object") {
             return true;
         } else {
             return false;
@@ -74,6 +81,9 @@ class AddFirearmControl extends React.Component {
     formatAmmo(ammo) {
         if (!ammo) {
             return '';
+        }
+        if (typeof(ammo) !== "object") {
+            return ammo;
         }
         var impulse = parseFloat(ammo.weight) * ammo.velocity / 1000;
         return `${ammo.label} ${ammo.bullet_type} (${impulse.toFixed(2)})`;
