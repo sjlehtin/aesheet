@@ -61,6 +61,8 @@ class AddFirearmControl extends React.Component {
                 base: this.state.selectedFirearm,
                 ammo: this.state.selectedAmmo
             });
+
+            this.setState({selectedFirearm: null, selectedAmmo: null});
         }
     }
 

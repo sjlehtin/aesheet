@@ -81,6 +81,8 @@ class AddRangedWeaponControl extends React.Component {
                 }
             }
             this.props.onAdd(weapon);
+
+            this.setState({selectedQuality: null, selectedWeapon: null});
         }
     }
 
