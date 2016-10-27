@@ -51,12 +51,9 @@ class AddRangedWeaponControl extends React.Component {
     }
 
     handleWeaponChange(value) {
+        this.setState({selectedWeapon: value});
         if (!this.state.weaponChoices) {
             this.loadWeapons();
-        }
-
-        if (typeof(value) === "object") {
-            this.setState({selectedWeapon: value});
         }
     }
 
@@ -91,7 +88,13 @@ class AddRangedWeaponControl extends React.Component {
         if (!this.state.selectedWeapon) {
             return false;
         }
-        if (this.state.selectedWeapon.base || this.state.selectedQuality) {
+        if (typeof(this.state.selectedWeapon) !== "object") {
+            return false;
+        }
+        if (this.state.selectedWeapon.base) {
+            return true;
+        }
+        if (typeof(this.state.selectedQuality) === "object") {
             return true;
         } else {
             return false;
@@ -122,7 +125,7 @@ class AddRangedWeaponControl extends React.Component {
                 <tr>
                     <td><label>Weapon</label></td>
                     <td><Combobox data={choices}
-                                  textField='name' suggest
+                                  textField='name'
                                   //open={this.state.isOpen}
                                   busy={this.state.isBusy}
                                   //onToggle={(isOpen) => {
