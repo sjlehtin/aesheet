@@ -395,7 +395,7 @@ class StatBlock extends React.Component {
     handleWeaponRemoved(weapon) {
         rest.delete(this.getWeaponURL(weapon), weapon).then(
             (json) => {
-                var index = StatBlock.findCharacterSkillIndex(
+                var index = StatBlock.findItemIndex(
                     this.state.weaponList, weapon);
                 this.state.weaponList.splice(index, 1);
                 this.setState({weaponList: this.state.weaponList});
