@@ -374,7 +374,7 @@ class StatBlock extends React.Component {
     handleWeaponAdded(weapon) {
         var data;
         if ('id' in weapon) {
-            data = {weapon: weapon.id};
+            data = {item: weapon.id};
         } else {
             data = {
                 base: weapon.base.name,
