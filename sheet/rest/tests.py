@@ -43,86 +43,9 @@ class SheetTestCase(TestCase):
         response = self.detail_view(req, pk=self.sheet.pk)
         self.assertEqual(response.status_code, 403)
 
-    # TODO: Probably unnecessary, as these should be calculated in a React
-    # component.
-    def test_url(self):
-        client = APIClient()
-        url = '/rest/sheets/{}/movement_rates/'.format(self.sheet.pk)
-        self.assertTrue(client.login(username="luke", password="foobar"))
-        response = client.get(url, format='json')
-        self.assertEqual(response.status_code, 200)
-
-    def test_movement_rates(self):
-        pass
-
-    def test_stat_modifications(self):
-        serializer = SheetSerializer(self.sheet)
-        for stat in models.ALL_STATS:
-            self.assertIn('mod_' + stat.lower(), serializer.data)
-
     def test_weight(self):
         serializer = SheetSerializer(self.sheet)
         self.assertIn('weight_carried', serializer.data)
-
-
-# class SheetWeaponTestCase(TestCase):
-#     def setUp(self):
-#         self.update_view = views.SheetViewSet.as_view(
-#                 {'patch': 'partial_update'})
-#
-#         self.sword = factories.WeaponFactory(base__name="Sword")
-#         self.plate = factories.ArmorFactory(base__name="Plate mail")
-#         self.spear = factories.WeaponFactory(base__name="Spear")
-#         self.request_factory = APIRequestFactory()
-#         self.user = factories.UserFactory(username="leia")
-#         self.owner = factories.UserFactory(username="luke")
-#         self.sheet = factories.SheetFactory(character__owner=self.owner,
-#                                             character__private=True)
-#         self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
-#
-#     def _make_verify_patch(self, query_data):
-#         req = self.request_factory.patch(self.url, query_data)
-#         force_authenticate(req, user=self.owner)
-#         response = self.update_view(req, pk=self.sheet.pk)
-#         self.assertEqual(response.status_code, 200)
-#
-#     def test_remove_weapon(self):
-#         self.sheet.weapons.add(self.spear)
-#         self.sheet.weapons.add(self.sword)
-#         self.sheet.armor = self.plate
-#         self.sheet.save()
-#
-#         updated_weapons = [self.spear.pk]
-#         self._make_verify_patch({'weapons': updated_weapons})
-#
-#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-#         self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
-#                          updated_weapons)
-#         self.assertEqual(sheet.armor, self.plate,
-#                          "Other aspects should not change")
-#
-#     def test_add_armor(self):
-#         self.sheet.weapons.add(self.spear)
-#         armor = {'armor': self.plate.pk}
-#         self._make_verify_patch(armor)
-#
-#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-#         self.assertEqual([wpn.pk for wpn in sheet.weapons.all()],
-#                          [self.spear.pk], "Other aspects should not change")
-#
-#     def test_add_weapon(self):
-#         self.sheet.weapons.add(self.spear)
-#         self.sheet.armor = self.plate
-#         self.sheet.save()
-#
-#         updated_weapons = [self.spear.pk, self.sword.pk]
-#         self._make_verify_patch({'weapons': updated_weapons})
-#
-#         sheet = models.Sheet.objects.get(pk=self.sheet.pk)
-#         self.assertEqual(sorted([wpn.pk for wpn in sheet.weapons.all()]),
-#                          sorted(updated_weapons))
-#         self.assertEqual(sheet.armor, self.plate,
-#                          "Other aspects should not change")
 
 
 class CharacterTestCase(TestCase):
@@ -185,11 +108,6 @@ class CharacterTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         char = models.Character.objects.get(pk=self.character.pk)
         self.assertEqual(char.owner, self.owner)
-
-    def test_stat_modifications(self):
-        serializer = CharacterSerializer(self.character)
-        for stat in models.ALL_STATS:
-            self.assertIn('mod_' + stat.lower(), serializer.data)
 
     def test_generated_log_entries(self):
         update_view = views.CharacterViewSet.as_view({
@@ -781,7 +699,7 @@ class SheetWeaponTestCase(TestCase):
 
         response = self.client.post(
                 self.url,
-                data={'weapon': weapon.pk}, format='json')
+                data={'item': weapon.pk}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(self.sheet.weapons.all()[0].pk, weapon.pk)
         self.assertEqual(self.sheet.weapons.all()[0].name,
@@ -881,7 +799,7 @@ class SheetRangedWeaponTestCase(TestCase):
 
         response = self.client.post(
                 self.url,
-                data={'weapon': weapon.pk}, format='json')
+                data={'item': weapon.pk}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(self.sheet.ranged_weapons.all()[0].pk, weapon.pk)
         self.assertEqual(self.sheet.ranged_weapons.all()[0].name,
@@ -1043,3 +961,438 @@ class WeaponTestCase(TestCase):
         self.assertEqual(len(response.data), 1)
         weapon = response.data[0]
         self.assertEqual(weapon['base']['name'], "Composite bow"),
+
+
+class ArmorTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_twok = factories.TechLevelFactory(name="2K")
+        self.tech_threek = factories.TechLevelFactory(name="3K")
+        self.campaign_mr = factories.CampaignFactory(name='MR',
+                                                     tech_levels=["2K"])
+        self.campaign_gz = factories.CampaignFactory(name='GZ',
+                                                     tech_levels=["2K", "3K"])
+        normal = factories.ArmorQualityFactory(name="normal",
+                                                tech_level__name="2K")
+        nanotech = factories.ArmorQualityFactory(name="nanotech",
+                                                  tech_level__name="3K")
+        leather = factories.ArmorTemplateFactory(name="Leather",
+                                                 tech_level=self.tech_twok)
+        power = factories.ArmorTemplateFactory(name="Powerarmor",
+                                                tech_level=self.tech_threek)
+
+        factories.ArmorFactory(base=leather, quality=normal)
+        factories.ArmorFactory(base=leather, quality=nanotech)
+        factories.ArmorFactory(base=power, quality=normal)
+
+    def test_main_url_templates(self):
+        url = '/rest/armortemplates/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_templates(self):
+        url = '/rest/armortemplates/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([armor['name']
+                                 for armor in response.data]),
+                         ["Leather", "Powerarmor"])
+
+    def test_mr_campaign_url_templates(self):
+        url = '/rest/armortemplates/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        armor = response.data[0]
+        self.assertEqual(armor['name'], "Leather"),
+
+    def test_main_url_qualities(self):
+        url = '/rest/armorqualities/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url_for_qualities(self):
+        url = '/rest/armorqualities/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(sorted([quality['name']
+                                 for quality in response.data]),
+                         ["nanotech", "normal"])
+
+    def test_mr_campaign_url_qualities(self):
+        url = '/rest/armorqualities/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        quality = response.data[0]
+        self.assertEqual(quality['name'], "normal"),
+
+    def test_main_url_armors(self):
+        url = '/rest/armors/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_gz_campaign_url_for_armors(self):
+        url = '/rest/armors/campaign/{}/'.format(self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 3)
+
+    def test_mr_campaign_url_armors(self):
+        url = '/rest/armors/campaign/{}/'.format(self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        armor = response.data[0]
+        self.assertEqual(armor['base']['name'], "Leather"),
+
+
+class EffectTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_twok = factories.TechLevelFactory(name="2K")
+        self.tech_threek = factories.TechLevelFactory(name="3K")
+        self.campaign_mr = factories.CampaignFactory(name='MR',
+                                                     tech_levels=["2K"])
+        self.campaign_gz = factories.CampaignFactory(name='GZ',
+                                                     tech_levels=["2K", "3K"])
+        factories.TransientEffectFactory(name="Booze",
+                                         tech_level=self.tech_twok)
+        factories.TransientEffectFactory(name="Frenzon",
+                                         tech_level=self.tech_threek)
+
+    def test_main_url(self):
+        url = '/rest/transienteffects/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url(self):
+        url = '/rest/transienteffects/campaign/{}/'.format(
+            self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_mr_campaign_url(self):
+        url = '/rest/transienteffects/campaign/{}/'.format(
+            self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        effect = response.data[0]
+        self.assertEqual(effect['name'], "Booze")
+
+
+class SheetArmorTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheetarmor/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_armors(self):
+        self.sheet.armor = factories.ArmorFactory()
+        self.sheet.save()
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        template = factories.ArmorTemplateFactory(name="Leather")
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+                         .armor.base.name, "Leather")
+
+    def test_replacing_item(self):
+        template = factories.ArmorTemplateFactory(name="Leather")
+        quality = factories.ArmorQualityFactory(name="L1")
+        self.sheet.armor = factories.ArmorFactory(base=template,
+                                                  quality=quality)
+        self.sheet.save()
+        quality_l2 = factories.ArmorQualityFactory(name="L2")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality_l2.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        armor = models.Sheet.objects.get(id=self.sheet.id).armor
+        self.assertEqual(armor.base.name, "Leather")
+        self.assertEqual(armor.quality.name, "L2")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.ArmorTemplateFactory(name="Leather")
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.ArmorFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        armor = models.Sheet.objects.get(id=self.sheet.id).armor
+        self.assertEqual(armor.base.name, "Leather")
+        self.assertEqual(orig_armor.pk, armor.pk)
+        self.assertEqual(models.Armor.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_armors(self):
+        template = factories.ArmorTemplateFactory(name="Leather")
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.ArmorFactory(base=template, quality=quality,
+                                       special_qualities=["Dragonhide"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        armor = models.Sheet.objects.get(id=self.sheet.id).armor
+        self.assertNotEqual(orig_armor.pk, armor.pk)
+        self.assertEqual(armor.base.name, "Leather")
+
+    def test_should_be_possible_to_add_existing_unique_armors(self):
+        template = factories.ArmorTemplateFactory(name="Leather")
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.ArmorFactory(name="Dragonhide armor",
+                                         base=template,
+                                         quality=quality,
+                                         special_qualities=["Dragonhide"])
+
+        response = self.client.post(
+                self.url,
+                data={'item': orig_armor.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        armor = models.Sheet.objects.get(id=self.sheet.id).armor
+        self.assertEqual(orig_armor.pk, armor.pk)
+        self.assertEqual(armor.name, "Dragonhide armor")
+
+    def test_deleting_items(self):
+        armor = factories.ArmorFactory()
+        self.sheet.armor = armor
+        self.sheet.save()
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, armor.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Armor.objects.get(pk=armor.pk)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).armor,
+                         None)
+
+
+class SheetHelmTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheethelm/'.format(self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_armors(self):
+        self.sheet.helm = factories.HelmFactory()
+        self.sheet.save()
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['quality'], dict)
+
+    def test_adding_items(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+                         .helm.base.name, "Leather hood")
+
+    def test_replacing_item(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+        self.sheet.helm = factories.ArmorFactory(base=template,
+                                                 quality=quality)
+        self.sheet.save()
+        quality_l2 = factories.ArmorQualityFactory(name="L2")
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality_l2.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertEqual(helm.base.name, "Leather hood")
+        self.assertEqual(helm.quality.name, "L2")
+
+    def test_adding_items_should_reuse_existing(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.HelmFactory(base=template, quality=quality)
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertEqual(helm.base.name, "Leather hood")
+        self.assertEqual(orig_armor.pk, helm.pk)
+        self.assertEqual(models.Armor.objects.filter(
+                base=template, quality=quality).count(), 1)
+
+    def test_adding_items_should_not_reuse_unique_armors(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.HelmFactory(base=template, quality=quality,
+                                           special_qualities=["Dragonhide"])
+
+        response = self.client.post(
+                self.url,
+                data={'base': template.pk,
+                      'quality': quality.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertNotEqual(orig_armor.pk, helm.pk)
+        self.assertEqual(helm.base.name, "Leather hood")
+
+    def test_should_be_possible_to_add_existing_unique_armors(self):
+        template = factories.ArmorTemplateFactory(name="Leather hood",
+                                                  is_helm=True)
+        quality = factories.ArmorQualityFactory(name="L1")
+
+        orig_armor = factories.HelmFactory(name="Dragonhide armor",
+                                         base=template,
+                                         quality=quality,
+                                         special_qualities=["Dragonhide"])
+
+        response = self.client.post(
+                self.url,
+                data={'item': orig_armor.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        helm = models.Sheet.objects.get(id=self.sheet.id).helm
+        self.assertEqual(orig_armor.pk, helm.pk)
+        self.assertEqual(helm.name, "Dragonhide armor")
+
+    def test_deleting_items(self):
+        helm = factories.HelmFactory()
+        self.sheet.helm = helm
+        self.sheet.save()
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, helm.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        # Should still be found.
+        models.Armor.objects.get(pk=helm.pk)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).helm,
+                         None)
+
+
+class SheetTransientEffectTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/sheettransienteffects/'.format(
+            self.sheet.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_effects(self):
+        factories.SheetTransientEffectFactory(sheet=self.sheet)
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]["effect"], dict)
+
+    def test_adding_items(self):
+        template = factories.TransientEffectFactory(name="Booze")
+
+        response = self.client.post(
+                self.url,
+                data={'effect': template.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+                         .transient_effects.all()[0].name, "Booze")
+
+    # def test_modifying_items(self):
+    #     sheet_effect = factories.SheetTransientEffectFactory(
+    #         sheet=self.sheet, order=2)
+    #     response = self.client.patch(
+    #             "{}/{}".format(self.url, sheet_effect.pk),
+    #             data={'order': 3}, format='json')
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+    #                      .transient_effects()[0].order, 3)
+
+
+    def test_deleting_items(self):
+        sheet_effect = factories.SheetTransientEffectFactory(
+            sheet=self.sheet)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, sheet_effect.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(models.SheetTransientEffect.objects.count(), 0,
+                         "The tying row should get deleted")
+

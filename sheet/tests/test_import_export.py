@@ -143,7 +143,7 @@ class ImportExport(TestCase):
                          msg="Abstract classes should not be exportable")
         for dt in ['ArmorTemplate',
             'Armor', 'ArmorQuality', 'ArmorSpecialQuality',
-            'SpellEffect', 'WeaponTemplate', 'Weapon',
+            'TransientEffect', 'WeaponTemplate', 'Weapon',
             'WeaponQuality', 'WeaponSpecialQuality', 'Skill', 'Edge',
             'EdgeLevel', 'EdgeSkillBonus',
             'RangedWeaponTemplate', 'RangedWeapon']:

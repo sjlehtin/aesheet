@@ -40,7 +40,7 @@ class SkillAdmin(admin.ModelAdmin):
                     'skill_cost_3', 'stat', 'type')
 
 admin.site.register(sm.Skill, SkillAdmin)
-admin.site.register(sm.SpellEffect)
+admin.site.register(sm.TransientEffect)
 admin.site.register(sm.WeaponSpecialQuality)
 admin.site.register(sm.WeaponTemplate, WeaponTemplateAdmin)
 admin.site.register(sm.Weapon)

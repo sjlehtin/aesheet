@@ -206,7 +206,7 @@ class SheetFactory(factory.DjangoModelFactory):
                 self.miscellaneous_items.add(item)
 
     @factory.post_generation
-    def spell_effects(self, create, extracted, **kwargs):
+    def transient_effects(self, create, extracted, **kwargs):
         if not create:
             # Simple build, do nothing.
             return
@@ -214,7 +214,7 @@ class SheetFactory(factory.DjangoModelFactory):
         if extracted:
             # A list of groups were passed in, use them
             for effect in extracted:
-                self.spell_effects.add(effect)
+                SheetTransientEffectFactory(sheet=self, effect=effect)
 
 
 class AmmunitionFactory(factory.DjangoModelFactory):
@@ -284,6 +284,7 @@ class FirearmFactory(factory.DjangoModelFactory):
 
 
 class ArmorTemplateFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "armor-%03d" % n)
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
 
@@ -311,8 +312,20 @@ class ArmorFactory(factory.DjangoModelFactory):
     base = factory.SubFactory(ArmorTemplateFactory)
     quality = factory.SubFactory(ArmorQualityFactory)
     quality__name = "normal"
+
     class Meta:
         model = models.Armor
+
+    @factory.post_generation
+    def special_qualities(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        if extracted:
+            # A list of groups were passed in, use them
+            for sq in extracted:
+                self.special_qualities.add(
+                        ArmorSpecialQualityFactory(name=sq))
 
 
 class HelmFactory(ArmorFactory):
@@ -404,10 +417,24 @@ class MiscellaneousItemFactory(factory.DjangoModelFactory):
         django_get_or_create = ('name', )
 
 
-class SpellEffectFactory(factory.DjangoModelFactory):
+class TransientEffectFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "effect-%03d" % n)
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
     class Meta:
-        model = models.SpellEffect
+        model = models.TransientEffect
         django_get_or_create = ('name', )
+
+
+class SheetTransientEffectFactory(factory.DjangoModelFactory):
+    sheet = factory.SubFactory(SheetFactory)
+    effect = factory.SubFactory(TransientEffectFactory)
+    effect__tech_level = factory.SubFactory(TechLevelFactory)
+    effect__tech_level__name = "2K"
+
+    class Meta:
+        model = models.SheetTransientEffect
 
 
 class InventoryEntryFactory(factory.DjangoModelFactory):

@@ -45,7 +45,7 @@ var exports = function () {
             }
         },
 
-        /* Like excel roundup, rounds away from zero. */
+        /* Like excel rounddown, rounds away from zero. */
         rounddown: function (value) {
             "use strict";
             if (value < 0) {

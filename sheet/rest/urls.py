@@ -28,6 +28,18 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetrangedweapons',
                 views.SheetRangedWeaponViewSet,
                 base_name='sheet-rangedweapon')
 
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetarmor',
+                views.SheetArmorViewSet,
+                base_name='sheet-armor')
+
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheethelm',
+                views.SheetHelmViewSet,
+                base_name='sheet-helm')
+
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheettransienteffects',
+                views.SheetTransientEffectViewSet,
+                base_name='sheet-transienteffect')
+
 router.register(r'firearms', views.FirearmViewSet, base_name='firearm')
 router.register(r'firearms/campaign/(?P<campaign_pk>[0-9]+)',
                 views.FirearmViewSet,
@@ -62,6 +74,30 @@ router.register(r'rangedweapons', views.RangedWeaponViewSet,
 router.register(r'rangedweapons/campaign/(?P<campaign_pk>[0-9]+)',
                 views.RangedWeaponViewSet,
                 base_name='campaign-rangedweapon')
+
+router.register(r'armortemplates', views.ArmorTemplateViewSet,
+                base_name='armortemplate')
+router.register(r'armortemplates/campaign/(?P<campaign_pk>[0-9]+)',
+                views.ArmorTemplateViewSet,
+                base_name='campaign-armortemplate')
+
+router.register(r'armorqualities', views.ArmorQualityViewSet,
+                base_name='armorquality')
+router.register(r'armorqualities/campaign/(?P<campaign_pk>[0-9]+)',
+                views.ArmorQualityViewSet,
+                base_name='campaign-armorquality')
+
+router.register(r'armors', views.ArmorViewSet,
+                base_name='armor')
+router.register(r'armors/campaign/(?P<campaign_pk>[0-9]+)',
+                views.ArmorViewSet,
+                base_name='campaign-armor')
+
+router.register(r'transienteffects', views.TransientEffectViewSet,
+                base_name='transienteffect')
+router.register(r'transienteffects/campaign/(?P<campaign_pk>[0-9]+)',
+                views.TransientEffectViewSet,
+                base_name='campaign-transienteffect')
 
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,

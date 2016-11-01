@@ -49,7 +49,6 @@ class SheetViewSet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         return models.Sheet.objects.prefetch_related('character__edges',
                                                      'character__edges__edge',
-                                                     'spell_effects',
                                                      'weapons__base',
                                                      'weapons__quality',
                                                      'ranged_weapons__base',
@@ -57,18 +56,6 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                                                      'miscellaneous_items',
                                                      'character__campaign',
                                                      ).all()
-
-    @detail_route(methods=['get'])
-    def movement_rates(self, request, pk=None):
-        try:
-            sheet = models.Sheet.objects.get(pk=pk)
-        except models.Sheet.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        rates = sheet.movement_rates()
-        return Response(dict([(ff, getattr(rates, ff)())
-                              for ff in dir(rates)
-                              if not ff.startswith('_') and
-                              callable(getattr(rates, ff))]))
 
 
 class CharacterViewSet(mixins.RetrieveModelMixin,
@@ -197,6 +184,42 @@ class RangedWeaponViewSet(CampaignMixin, viewsets.ModelViewSet):
         return qs
 
 
+class ArmorTemplateViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.ArmorTemplateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ArmorQualityViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.ArmorQualitySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class ArmorViewSet(CampaignMixin, viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.ArmorCreateSerializer
+        else:
+            return serializers.ArmorListSerializer
+
+    def get_queryset(self):
+        qs = models.Armor.objects.select_related().all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                    self.tech_levels))
+            qs = qs.filter(base__tech_level__in=self.tech_levels)
+            qs = qs.filter(quality__tech_level__in=self.tech_levels)
+        return qs
+
+
+class TransientEffectViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.TransientEffectSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
 class ListPermissionMixin(object):
     """
     The `list` method of ListModelMixin does not check object
@@ -298,15 +321,22 @@ class InventoryEntryViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         serializer.save(sheet=self.sheet)
 
 
-class SheetFirearmViewSet(viewsets.ModelViewSet):
-    #serializer_class = serializers.SheetFirearmListSerializer
+class SheetViewSetMixin(ListPermissionMixin):
+    # TODO: until all sheet* objects are handled through intermediate
+    # objects, we can't use IsAccessible here.  The implicit tables do not
+    # allow for object permissions.
+    permission_classes = [permissions.IsAuthenticated]
 
     def initialize_request(self, request, *args, **kwargs):
         self.sheet = models.Sheet.objects.get(
                 pk=self.kwargs['sheet_pk'])
         self.containing_object = self.sheet
-        return super(SheetFirearmViewSet, self).initialize_request(
+        return super(SheetViewSetMixin, self).initialize_request(
                 request, *args, **kwargs)
+
+
+class SheetFirearmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    #serializer_class = serializers.SheetFirearmListSerializer
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -332,14 +362,7 @@ class SheetFirearmViewSet(viewsets.ModelViewSet):
         self.sheet.firearms.remove(instance)
         
 
-class SheetWeaponViewSet(viewsets.ModelViewSet):
-
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetWeaponViewSet, self).initialize_request(
-                request, *args, **kwargs)
+class SheetWeaponViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -365,14 +388,7 @@ class SheetWeaponViewSet(viewsets.ModelViewSet):
         self.sheet.weapons.remove(instance)
 
 
-class SheetRangedWeaponViewSet(viewsets.ModelViewSet):
-
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetRangedWeaponViewSet, self).initialize_request(
-                request, *args, **kwargs)
+class SheetRangedWeaponViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -396,3 +412,93 @@ class SheetRangedWeaponViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         self.sheet.ranged_weapons.remove(instance)
+
+
+class SheetArmorViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetArmorCreateSerializer
+        else:
+            return serializers.SheetArmorListSerializer
+
+    def get_queryset(self):
+        return sheet.models.Armor.objects.filter(id=self.sheet.armor_id)
+
+    def perform_update(self, serializer):
+        # TODO: not supported for Armor.  Will be supported for
+        # SheetArmor.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetArmorViewSet, self).perform_create(serializer)
+        self.sheet.armor = serializer.instance
+        self.sheet.save()
+        
+    def perform_destroy(self, instance):
+        self.sheet.armor = None
+        self.sheet.save()
+
+
+class SheetHelmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetHelmCreateSerializer
+        else:
+            return serializers.SheetArmorListSerializer
+
+    def get_queryset(self):
+        return sheet.models.Armor.objects.filter(id=self.sheet.helm_id)
+
+    def perform_update(self, serializer):
+        # TODO: not supported for Helm.  Will be supported for
+        # SheetHelm.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetHelmViewSet, self).perform_create(serializer)
+        self.sheet.helm = serializer.instance
+        self.sheet.save()
+
+    def perform_destroy(self, instance):
+        self.sheet.helm = None
+        self.sheet.save()
+
+
+class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetTransientEffectCreateSerializer
+        else:
+            return serializers.SheetTransientEffectListSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(SheetTransientEffectViewSet, self).get_serializer(
+                *args, **kwargs)
+        if not kwargs.get('many'):
+            # ListSerializer does not have the fields.
+            serializer.fields['sheet'].default = self.sheet
+            serializer.fields['sheet'].read_only = True
+            # The effect will not be changed with this API after creation.
+            if serializer.instance is not None:
+                serializer.fields['effect'].read_only = True
+
+        return serializer
+
+    def get_queryset(self):
+        return models.SheetTransientEffect.objects.filter(sheet=self.sheet)
+
+    def perform_update(self, serializer):
+        # Update should not be allowed for sheet or effect fields, but just
+        # the changeable fields.
+        raise exceptions.MethodNotAllowed("Update not supported yet")
+
+    def perform_create(self, serializer):
+        super(SheetTransientEffectViewSet, self).perform_create(
+            serializer)

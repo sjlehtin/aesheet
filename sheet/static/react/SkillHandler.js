@@ -5,6 +5,12 @@
  * skills, characterskills and edges.
  */
 
+/*
+ * props: stats: statHandler
+ * characterSkills
+ * allSkills
+ * edges <- probably should come from statHandler
+ */
 class SkillHandler {
     constructor(props) {
         this.props = props;
@@ -39,7 +45,7 @@ class SkillHandler {
     }
 
     getStat(stat) {
-        return this.props.stats[stat.toLowerCase()];
+        return this.props.stats.getEffStats()[stat.toLowerCase()];
     }
 
     /*
@@ -62,7 +68,7 @@ class SkillHandler {
         if (!stat) {
             stat = skill.stat;
         }
-        var ability = this.props.stats[stat.toLowerCase()];
+        var ability = this.getStat(stat);
         var level = this.skillLevel(skillName);
         if (level === "U") {
             return Math.round(ability / 4)

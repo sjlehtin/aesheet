@@ -102,7 +102,7 @@ class TechLevel(ExportedModel):
     def dont_export(cls):
         return ["weapontemplate", "campaign", "armortemplate", "armorquality",
                 "miscellaneousitem", "weaponquality", "skill",
-                "rangedweapontemplate", "basefirearm",
+                "rangedweapontemplate", "basefirearm", "transienteffect",
                 "ammunition", "id"]
 
 
@@ -589,7 +589,7 @@ class Skill(ExportedModel):
                 'edgelevel']
 
     def __unicode__(self):
-        return u"%s" % (self.name)
+        return u"%s" % self.name
 
 
 class CharacterSkill(PrivateMixin, models.Model):
@@ -634,6 +634,7 @@ class StatModifier(models.Model):
     # immediately visible from stats, saves and such.
     notes = models.TextField(blank=True)
 
+    # TODO: not actually used yet.
     cc_skill_levels = models.IntegerField(default=0)
 
     fit = models.IntegerField(default=0)
@@ -648,6 +649,7 @@ class StatModifier(models.Model):
     dex = models.IntegerField(default=0)
     imm = models.IntegerField(default=0)
 
+    # TODO: not actually used yet.
     saves_vs_fire = models.IntegerField(default=0)
     saves_vs_cold = models.IntegerField(default=0)
     saves_vs_lightning = models.IntegerField(default=0)
@@ -792,7 +794,7 @@ class BaseArmament(ExportedModel):
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
 
-    weight = models.DecimalField(max_digits=4, decimal_places=1,
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
                                  default=1.0)
 
     base_skill = models.ForeignKey(Skill,
@@ -803,7 +805,7 @@ class BaseArmament(ExportedModel):
                                related_name="secondary_for_%(class)s")
 
     def __unicode__(self):
-        return u"%s" % (self.name)
+        return u"%s" % self.name
 
 
 class BaseDamager(models.Model):
@@ -845,12 +847,6 @@ class RangedWeaponMixin(models.Model):
     class Meta:
         abstract = True
         ordering = ['name']
-
-    def ranges(self, sheet):
-        return Range._make([self.range_pb, self.range_xs,
-                            self.range_vs, self.range_s,
-                            self.range_m, self.range_l,
-                            self.range_xl, self.range_e])
 
 
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
@@ -933,6 +929,9 @@ class FirearmAmmunitionType(models.Model):
     short_label = models.CharField(max_length=20,
                                    help_text="Matches the respective field in "
                                              "ammunition")
+    def __unicode__(self):
+        return u"{firearm} {label})".format(firearm=self.firearm,
+                                            label=self.short_label)
 
 
 class Firearm(models.Model):
@@ -969,7 +968,7 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
     """
     type = models.CharField(max_length=5, default="P")
 
-    ammo_weight = models.DecimalField(max_digits=4, decimal_places=1,
+    ammo_weight = models.DecimalField(max_digits=6, decimal_places=3,
                                       default=0.1)
 
     # TODO: Get rid of this, use base_skill to indicate the type instead.
@@ -1019,46 +1018,74 @@ class WeaponSpecialQuality(ExportedModel, Effect):
         return ['weapon', 'rangedweapon', 'miscellaneousitem']
 
     def __unicode__(self):
-        return u"WSQ: %s" % (self.name)
+        return u"%s" % self.name
 
 
 class ArmorSpecialQuality(ExportedModel, Effect):
     """
     """
 
-    #name = models.CharField(max_length=32, primary_key=True)
-
     # Extra protection provided by the special quality.
-    armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_t_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_la_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_rl_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_ra_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
 
     @classmethod
     def dont_export(cls):
@@ -1067,7 +1094,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
     def __unicode__(self):
-        return u"ASQ: %s" % (self.name)
+        return u"%s" % self.name
 
 
 class WeaponDamage(object):
@@ -1168,7 +1195,8 @@ class Weapon(BaseWeapon):
     """
     """
     base = models.ForeignKey(WeaponTemplate)
-    special_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+    special_qualities = models.ManyToManyField(WeaponSpecialQuality,
+                                               blank=True)
 
     @property
     def ccv(self):
@@ -1214,42 +1242,78 @@ class ArmorTemplate(ExportedModel):
 
     is_helm = models.BooleanField(default=False)
 
-    armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_h_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_t_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ll_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_la_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_rl_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_b = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
-    armor_ra_dp = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    armor_h_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_h_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_h_dp = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_t_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                    default=0)
+    armor_t_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_t_dp = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ll_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_ll_dp = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_la_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_la_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_la_dp = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_rl_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_rl_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_rl_dp = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_ra_p = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_s = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_b = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_r = models.DecimalField(max_digits=4, decimal_places=1,
+                                     default=0)
+    armor_ra_dr = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
+    armor_ra_dp = models.DecimalField(max_digits=4, decimal_places=1,
+                                      default=0)
 
     armor_h_pl = models.IntegerField(default=0)
     armor_t_pl = models.IntegerField(default=0)
@@ -1272,7 +1336,7 @@ class ArmorTemplate(ExportedModel):
     mod_climb = models.IntegerField(default=0)
     mod_tumble = models.IntegerField(default=0)
 
-    weight = models.DecimalField(max_digits=4, decimal_places=1,
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
                                  default=1.0)
     # 0 no armor, 1 light, 2 medium, 3 heavy
     encumbrance_class = models.IntegerField(default=0)
@@ -1321,7 +1385,7 @@ class ArmorQuality(ExportedModel):
         return ['armor']
 
     def __unicode__(self):
-        return u"AQ:" + self.name
+        return u"%s" % self.name
 
 
 class Armor(ExportedModel):
@@ -1335,7 +1399,8 @@ class Armor(ExportedModel):
     description = models.TextField(blank=True)
     base = models.ForeignKey(ArmorTemplate)
     quality = models.ForeignKey(ArmorQuality)
-    special_qualities = models.ManyToManyField(ArmorSpecialQuality, blank=True)
+    special_qualities = models.ManyToManyField(ArmorSpecialQuality,
+                                               blank=True)
 
     @classmethod
     def dont_export(cls):
@@ -1374,12 +1439,20 @@ class Armor(ExportedModel):
         return min(self.base.mod_psy + self.quality.mod_psy, 0)
 
 
-class SpellEffect(ExportedModel, Effect):
+class TransientEffect(ExportedModel, Effect):
     """
+    Temporary effects, like spells or drugs, affecting character
+    performance in the short term.
     """
+    tech_level = models.ForeignKey(TechLevel)
     @classmethod
     def dont_export(cls):
         return ['sheet']
+
+
+class SheetTransientEffect(models.Model):
+    sheet = models.ForeignKey('Sheet')
+    effect = models.ForeignKey(TransientEffect)
 
 
 class MiscellaneousItem(ExportedModel):
@@ -1391,7 +1464,11 @@ class MiscellaneousItem(ExportedModel):
     notes = models.TextField(blank=True)
 
     armor_qualities = models.ManyToManyField(ArmorSpecialQuality, blank=True)
-    weapon_qualities = models.ManyToManyField(WeaponSpecialQuality, blank=True)
+    weapon_qualities = models.ManyToManyField(WeaponSpecialQuality,
+                                              blank=True)
+
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
+                                 default=1.0)
 
     def __unicode__(self):
         return self.name
@@ -1451,9 +1528,6 @@ class MovementRates(object):
         return self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
 
 
-Action = namedtuple('Action', ['action', 'check', 'initiative'])
-
-
 class Sheet(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     # TODO: Remove this.  It should be determined from the Character.owner.
@@ -1471,7 +1545,8 @@ class Sheet(PrivateMixin, models.Model):
     miscellaneous_items = models.ManyToManyField(MiscellaneousItem,
                                                  blank=True)
 
-    spell_effects = models.ManyToManyField(SpellEffect, blank=True)
+    transient_effects = models.ManyToManyField(TransientEffect, blank=True,
+                                               through=SheetTransientEffect)
 
     armor = models.ForeignKey(Armor, blank=True, null=True,
                               on_delete=models.SET_NULL)
@@ -1564,19 +1639,7 @@ class Sheet(PrivateMixin, models.Model):
 
     def _penalties_for_weight_carried(self):
         ratio = float(self.weight_carried)/self.cur_fit
-        if ratio <= 0.25:
-            return 0
-        elif ratio <= 0.5:
-            return -5
-        elif ratio <= 1:
-            return -10
-        elif ratio <= 1.5:
-            return -15
-        elif ratio <= 2:
-            return -20
-        elif ratio <= 3:
-            return -30
-        return -99 # Unable to carry this load.
+        return int(round(-10 * ratio))
 
     @property
     @_stat_wrapper
@@ -1698,8 +1761,7 @@ class Sheet(PrivateMixin, models.Model):
         return list(itertools.chain(armor_special_qualities,
                                helm_special_qualities,
                                weapon_special_qualities,
-                               item_special_qualities,
-                               self.spell_effects.all()))
+                               item_special_qualities))
 
     _cached_special_effects = None
     def special_effects(self):
@@ -1722,7 +1784,8 @@ class Sheet(PrivateMixin, models.Model):
             return 1
 
     def run_multiplier(self):
-        return self.innate_run_multiplier() * self.enhancement_run_multiplier()
+        return (self.innate_run_multiplier() *
+                self.enhancement_run_multiplier())
 
     def innate_climb_multiplier(self):
         return self.innate_run_multiplier(field="climb_multiplier")
@@ -1744,7 +1807,8 @@ class Sheet(PrivateMixin, models.Model):
 
     def enhancement_fly_multiplier(self):
         # Assume effects do not stack.
-        effects = [effect.fly_multiplier for effect in self.special_effects()]
+        effects = [effect.fly_multiplier
+                   for effect in self.special_effects()]
         if effects:
             return float(max(effects))
         else:
@@ -1755,7 +1819,8 @@ class Sheet(PrivateMixin, models.Model):
 
     @classmethod
     def get_by_campaign(cls, user):
-        return get_by_campaign(get_sheets(user), lambda sheet: sheet.character)
+        return get_by_campaign(get_sheets(user),
+                               lambda sheet: sheet.character)
 
     def __getattr__(self, v):
         # pass through all attribute references not handled by us to
@@ -1801,12 +1866,13 @@ class CharacterLogEntry(models.Model):
     character = models.ForeignKey(Character)
 
     STAT, SKILL, EDGE, NON_FIELD = range(0, 4)
-    entry_type = models.PositiveIntegerField(choices=((STAT, ("stat")),
-                                                      (SKILL, ("skill")),
-                                                      (EDGE, ("edge")),
-                                                      (NON_FIELD, ("non-field")),
-                                                      ),
-                                             default=STAT)
+    entry_type = models.PositiveIntegerField(
+        choices=((STAT, ("stat")),
+                 (SKILL, ("skill")),
+                 (EDGE, ("edge")),
+                 (NON_FIELD, ("non-field")),
+                 ),
+                 default=STAT)
 
     entry = models.TextField(blank=True,
                              help_text="Additional information about this "
@@ -1824,8 +1890,9 @@ class CharacterLogEntry(models.Model):
     edge_level = models.IntegerField(default=0)
 
     removed = models.BooleanField(default=False,
-                                  help_text="Setting this means that the edge "
-                                  "or skill was removed instead of added.")
+                                  help_text="Setting this means that the "
+                                            "edge or skill was removed "
+                                            "instead of added.")
 
     class Meta:
         ordering = ["-timestamp"]

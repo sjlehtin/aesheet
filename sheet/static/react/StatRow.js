@@ -16,8 +16,6 @@ class StatRow extends React.Component {
         this.state = {
             stat: stat,
             cur: this.props.initialChar["cur_" + stat],
-            hard_mod: this.props.initialChar["mod_" + stat],
-            soft_mod: this.props.initialSheet["mod_" + stat],
             showEditControls: false,
             updating: false
         };
@@ -121,15 +119,14 @@ class StatRow extends React.Component {
 
         var change = this.state.cur
             - this.props.initialChar["start_" + this.state.stat];
-        var base = this.state.cur + this.state.hard_mod;
 
         return (
             <tr onMouseEnter={this.handleMouseEnter.bind(this)}
                 onMouseLeave={this.handleMouseOut.bind(this)}
                 onTouchEnd={this.handleTouchEnd.bind(this)}>
                 <td style={statStyle}>{this.props.stat.toUpperCase()}</td>
-                <td style={baseStyle}>{base}</td>
-                <td style={effStyle}>{base + this.state.soft_mod}</td>
+                <td style={baseStyle}>{this.props.baseStats[this.props.stat]}</td>
+                <td style={effStyle}>{this.props.effStats[this.props.stat]}</td>
                 <td style={changeStyle}>
                     ({change >= 0 ? "+" : ""}{change})
                 </td>
@@ -153,7 +150,8 @@ class StatRow extends React.Component {
 StatRow.propTypes = {
     stat: React.PropTypes.string.isRequired,
     initialChar: React.PropTypes.object.isRequired,
-    initialSheet: React.PropTypes.object.isRequired,
+    effStats: React.PropTypes.object.isRequired,
+    baseStats: React.PropTypes.object.isRequired,
     url: React.PropTypes.string.isRequired,
     onMod: React.PropTypes.func
 };

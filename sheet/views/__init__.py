@@ -32,6 +32,8 @@ Priority list by JW:
 
 - armor modifiers to skill checks.  These should work for the physical skills
   where the check is shown even without the character having the skill.
+- edge skillbonuses back to sheet, they are missing after moving skills to
+  react.
 
 - show character height, weight in sheet.
 - "add xp used ingame" with a possibility to enter description (to log)
@@ -42,37 +44,20 @@ Priority list by JW:
 - bootstrap data pop-up links for armor, effects in edit area
 -- show basic info.
 - reordering weapons.  possible to do with ajax, so it would be faster.
-++ removing weapons etc to use REST API.
 
-+ possibility to copy characters and sheets (mainly sheets), which will copy
-  also the underlying character.
 - character addition form layout for easier "intake"
   + group cur, starting stats
   - show raises
 +/- adding weapon inplace ("add row" functionality), instead of the large set of
     controls.  Might already be sufficient with the condensed layout, verify with
     JW.
-+ access controls
-++ marking sheet as only visible to self (SM)
-++ marking characters as only visible to self (SM)
-+++ these should not show in the lists.
 
 
-+ character mugshot upload (SM)
 - senses (SM)
-+ movement chart (SM)
 - spell skill checks (SM)
 
-+ weapon maximum damage based on durability.
 - edge levels from items (toughness, darkvision, etc)
-- automatic used edge point calculation
-
-+ Creating a new character should automatically create a sheet for that
-  character and redirect to edit the new character.
-
-+ form errors should be highlighted, and if the form element is hidden, it
-  should be shown by default (errors in add forms can get hidden)
-++ form errorlist class should be highlighted.
++ automatic used edge point calculation
 
 - you should be able to leave current stats empty on character creation,
   in which case the stats would be filled in from the initial stats.
@@ -84,13 +69,6 @@ Priority list by JW:
 + change log for sheet (stat modifications etc)
 ++ skills
 -- edges
-+ nicer fast edit of basic stats
-+ stamina
-++ recovery
-+ mana
-++ recovery
-+ body
-++ recovery
 
 - code simplification; sheet detail form handling mainly.
 
@@ -100,10 +78,6 @@ Priority list by JW:
 
 - short description of spell effect (+50 FIT etc)
 - stats, armors etc if the character is larger sized.
-
-+ Basic skill checks:  Adding skills without any points (or reduced amount of
-  points) allocated.  For example, Climbing B -> show skill check at half
-  ability.  Currently supported are the basic physical skills.
 
 - Partial skills.  This is a larger item than it sounds, as the current design
   assumes whole skill levels.  Investigate if could be done as a skill level
@@ -137,10 +111,6 @@ Firearms:
    be applied based on weapon type.  If both hands are occupied, apply penalty
    for two guns.
 - firearms in CC.
-+ some weapons with autofire do not have sweep fire enabled.
-+ some weapons have restricted burst (restricted to 2 or 3 shots).
-+ weapon class modifiers for ROF calculations
-+ adding weapon with inline form does not allow setting ammo types.
 
 Edges:
 
@@ -158,16 +128,12 @@ Skills:
 Spells:
 + fly speed multiplier
 
-
 """
 
 BUGS = """
 - Adding skills with multiple prereqs doesn't work.
 - Better error messages on importing completely invalid CSV (heading line or
   data type broken)
-+ crossbows should not have FIT modifiers for damage
-+ draw I missing
-+ Rapid archery affects thrown weapons, crossbows and firearms.
 """
 
 from django.shortcuts import render, get_object_or_404
@@ -279,10 +245,6 @@ class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
 
-    def spell_effects(self):
-        return [RemoveWrap(xx) for xx in self.sheet.spell_effects.all()]
-
-
     def edges(self):
         return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
 
@@ -331,9 +293,6 @@ def process_sheet_change_request(request, sheet):
             sheet.armor = None
         elif item_type == "Helm":
             sheet.helm = None
-        elif item_type == "SpellEffect":
-            item = get_object_or_404(SpellEffect, pk=item)
-            sheet.spell_effects.remove(item)
         elif item_type == "MiscellaneousItem":
             item = get_object_or_404(MiscellaneousItem, pk=item)
             sheet.miscellaneous_items.remove(item)
@@ -356,7 +315,6 @@ def sheet_detail(request, sheet_id=None):
                                               'armor__quality',
                                               'helm', )
                               .prefetch_related(
-        'spell_effects',
         'weapons__base',
         'weapons__quality',
         'ranged_weapons__base',
@@ -394,14 +352,12 @@ def sheet_detail(request, sheet_id=None):
                                 prefix=prefix, **kwargs)
 
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
-    add_form(AddSpellEffectForm, "add-spell-effect", instance=sheet)
     add_form(AddExistingHelmForm, "add-existing-helm", instance=sheet)
     add_form(AddHelmForm, "add-helm", instance=sheet)
     add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
     add_form(AddArmorForm, "add-armor", instance=sheet)
     add_form(AddExistingMiscellaneousItemForm,
              "add-existing-miscellaneous-item", instance=sheet)
-    add_form(HelmForm, "new-helm")
 
     if request.method == "POST":
         should_change = False
@@ -411,14 +367,8 @@ def sheet_detail(request, sheet_id=None):
             if ff.is_bound:
                 if ff.is_valid():
                     logger.info("saved %s" % kk)
-                    oo = ff.save()
+                    ff.save()
                     should_change = True
-                    if kk == 'new_armor_form':
-                        sheet.armor = oo
-                        sheet.save()
-                    elif kk == 'new_helm_form':
-                        sheet.helm = oo
-                        sheet.save()
                 else:
                     messages.error(request, 'Errors in processing request '
                                             '({form_slug}).'.format(
@@ -543,13 +493,13 @@ class AddCharacterView(BaseCreateView):
         return reverse('sheet_detail', args=(self.sheet.pk, ))
 
 
-class AddSpellEffectView(BaseCreateView):
-    model = SpellEffect
+class AddTransientEffectView(BaseCreateView):
+    model = sheet.models.TransientEffect
     template_name = 'sheet/gen_edit.html'
     success_url = reverse_lazy(sheets_index)
 
 
-class AddEdgeView(AddSpellEffectView):
+class AddEdgeView(AddTransientEffectView):
     model = Edge
 
 
@@ -578,12 +528,12 @@ class AddSheetView(BaseCreateView):
         return reverse('sheet_detail', args=(self.object.pk, ))
 
 
-class AddEdgeLevelView(AddSpellEffectView):
+class AddEdgeLevelView(AddTransientEffectView):
     form_class = EditEdgeLevelForm
     model = EdgeLevel
 
 
-class AddEdgeSkillBonusView(AddSpellEffectView):
+class AddEdgeSkillBonusView(AddTransientEffectView):
     model = EdgeSkillBonus
 
 
@@ -604,20 +554,20 @@ class AddRangedWeaponTemplateView(AddRangedWeaponView):
     model = RangedWeaponTemplate
 
 
-class AddArmorView(AddSpellEffectView):
+class AddArmorView(AddTransientEffectView):
     model = Armor
     template_name = 'sheet/add_armor.html'
 
 
-class AddArmorTemplateView(AddSpellEffectView):
+class AddArmorTemplateView(AddTransientEffectView):
     model = ArmorTemplate
 
 
-class AddArmorQualityView(AddSpellEffectView):
+class AddArmorQualityView(AddTransientEffectView):
     model = ArmorQuality
 
 
-class AddArmorSpecialQualityView(AddSpellEffectView):
+class AddArmorSpecialQualityView(AddTransientEffectView):
     model = ArmorSpecialQuality
     template_name = 'sheet/add_armor_special_quality.html'
 

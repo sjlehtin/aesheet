@@ -9,18 +9,6 @@ class AmmunitionSerializer(serializers.ModelSerializer):
 
 class SheetSerializer(serializers.ModelSerializer):
     weight_carried = serializers.DecimalField(4, 2, read_only=True)
-    mod_fit = serializers.IntegerField(read_only=True)
-    mod_ref = serializers.IntegerField(read_only=True)
-    mod_lrn = serializers.IntegerField(read_only=True)
-    mod_int = serializers.IntegerField(read_only=True)
-    mod_psy = serializers.IntegerField(read_only=True)
-    mod_wil = serializers.IntegerField(read_only=True)
-    mod_cha = serializers.IntegerField(read_only=True)
-    mod_pos = serializers.IntegerField(read_only=True)
-    mod_mov = serializers.IntegerField(read_only=True)
-    mod_dex = serializers.IntegerField(read_only=True)
-    mod_imm = serializers.IntegerField(read_only=True)
-
     class Meta:
         model = sheet.models.Sheet
         fields = "__all__"
@@ -92,6 +80,50 @@ class RangedWeaponListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class ArmorTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.ArmorTemplate
+        fields = "__all__"
+
+
+class ArmorQualitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.ArmorQuality
+        fields = "__all__"
+
+
+class ArmorCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+
+
+class ArmorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+        depth = 1
+
+
+class TransientEffectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.TransientEffect
+        fields = "__all__"
+
+
+class SheetTransientEffectCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.SheetTransientEffect
+        fields = "__all__"
+
+
+class SheetTransientEffectListSerializer(serializers.ModelSerializer):
+    effect = TransientEffectSerializer()
+    class Meta:
+        model = sheet.models.SheetTransientEffect
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
@@ -117,18 +149,6 @@ class CharacterSkillSerializer(serializers.ModelSerializer):
 
 
 class CharacterSerializer(serializers.ModelSerializer):
-    mod_fit = serializers.IntegerField(read_only=True)
-    mod_ref = serializers.IntegerField(read_only=True)
-    mod_lrn = serializers.IntegerField(read_only=True)
-    mod_int = serializers.IntegerField(read_only=True)
-    mod_psy = serializers.IntegerField(read_only=True)
-    mod_wil = serializers.IntegerField(read_only=True)
-    mod_cha = serializers.IntegerField(read_only=True)
-    mod_pos = serializers.IntegerField(read_only=True)
-    mod_mov = serializers.IntegerField(read_only=True)
-    mod_dex = serializers.IntegerField(read_only=True)
-    mod_imm = serializers.IntegerField(read_only=True)
-
     class Meta:
         model = sheet.models.Character
         fields = "__all__"
@@ -177,8 +197,7 @@ class SheetWeaponListSerializer(serializers.ModelSerializer):
 
 
 class SheetWeaponCreateSerializer(serializers.ModelSerializer):
-    weapon = serializers.IntegerField(
-            required=False)
+    item = serializers.IntegerField(required=False)
 
     base = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.WeaponTemplate.objects.all(),
@@ -190,23 +209,23 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
     def get_queryset(self):
         return sheet.models.Weapon.objects.all()
 
-    def validate_weapon(self, value):
+    def validate_item(self, value):
         return self.get_queryset().get(pk=value)
 
     def validate(self, attrs):
-        if not attrs.get('weapon'):
+        if not attrs.get('item'):
             if 'base' not in attrs:
-                raise serializers.ValidationError("weapon not passed, "
+                raise serializers.ValidationError("item not passed, "
                                                   "base is required")
             if 'quality' not in attrs:
-                raise serializers.ValidationError("weapon not passed, "
+                raise serializers.ValidationError("item not passed, "
                                                   "quality is required")
                     
         return attrs
 
     def create(self, validated_data):
-        if 'weapon' in validated_data:
-            return validated_data['weapon']
+        if 'item' in validated_data:
+            return validated_data['item']
 
         if set(validated_data.keys()) == {'base', 'quality'}:
             objs = self.get_queryset().filter(
@@ -241,9 +260,6 @@ class SheetRangedWeaponListSerializer(serializers.ModelSerializer):
 
 
 class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
-    weapon = serializers.IntegerField(
-            required=False)
-
     base = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.RangedWeaponTemplate.objects.all(),
             required=False)
@@ -256,4 +272,43 @@ class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
 
     class Meta:
         model = sheet.models.RangedWeapon
+        fields = "__all__"
+
+
+class SheetArmorCreateSerializer(SheetWeaponCreateSerializer):
+    is_helm = False
+
+    base = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.ArmorTemplate.objects.all(),
+            required=False)
+    quality = serializers.PrimaryKeyRelatedField(
+            queryset=sheet.models.ArmorQuality.objects.all(),
+            required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(SheetArmorCreateSerializer, self).__init__(*args, **kwargs)
+        self.fields['base'].queryset = self.fields['base'].queryset.filter(
+                                       is_helm=self.is_helm)
+
+    def get_queryset(self):
+        return sheet.models.Armor.objects.select_related(
+            "base", "quality").filter(base__is_helm=self.is_helm)
+
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+
+
+class SheetArmorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Armor
+        fields = "__all__"
+        depth = 1
+
+
+class SheetHelmCreateSerializer(SheetArmorCreateSerializer):
+    is_helm = True
+
+    class Meta:
+        model = sheet.models.Armor
         fields = "__all__"

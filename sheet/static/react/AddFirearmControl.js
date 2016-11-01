@@ -28,6 +28,7 @@ class AddFirearmControl extends React.Component {
     }
 
     handleFirearmChange(value) {
+        this.setState({selectedFirearm: value});
         if (!this.state.firearmChoices) {
             this.loadFirearms();
         }
@@ -35,7 +36,7 @@ class AddFirearmControl extends React.Component {
         this.setState({selectedAmmo: null});
 
         if (typeof(value) === "object") {
-            this.setState({selectedFirearm: value});
+
             rest.getData(`/rest/ammunition/firearm/${value.name}/`).then(
                 (json) => {
                     this.setState({ammoChoices: json})
@@ -60,11 +61,19 @@ class AddFirearmControl extends React.Component {
                 base: this.state.selectedFirearm,
                 ammo: this.state.selectedAmmo
             });
+
+            this.setState({selectedFirearm: null, selectedAmmo: null});
         }
     }
 
     fieldsValid() {
-        if (this.state.selectedFirearm && this.state.selectedAmmo) {
+        if (!this.state.selectedFirearm) {
+            return false;
+        }
+        if (typeof(this.state.selectedFirearm) !== "object") {
+            return false;
+        }
+        if (typeof(this.state.selectedAmmo) === "object") {
             return true;
         } else {
             return false;
@@ -74,6 +83,9 @@ class AddFirearmControl extends React.Component {
     formatAmmo(ammo) {
         if (!ammo) {
             return '';
+        }
+        if (typeof(ammo) !== "object") {
+            return ammo;
         }
         var impulse = parseFloat(ammo.weight) * ammo.velocity / 1000;
         return `${ammo.label} ${ammo.bullet_type} (${impulse.toFixed(2)})`;
@@ -87,7 +99,7 @@ class AddFirearmControl extends React.Component {
                 <tr>
                     <td><label>Firearm</label></td>
                     <td><Combobox data={this.state.firearmChoices}
-                                  textField='name' suggest
+                                  textField='name'
                                   open={this.state.isOpen}
                                   busy={this.state.isBusy}
                                   onToggle={(isOpen) => {
@@ -116,7 +128,7 @@ class AddFirearmControl extends React.Component {
             <Button bsSize="small" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
-                Add firearm</Button>
+                Add Firearm</Button>
                 <div><a href="/sheets/add_firearm/">Create a new firearm</a>
                     <a href="/sheets/add_ammunition/">Create new ammo</a>
                 </div>
