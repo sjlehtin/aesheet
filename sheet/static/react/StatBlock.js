@@ -492,6 +492,7 @@ class StatBlock extends React.Component {
     }
 
     renderNotes() {
+        // TODO: should gather also from transient effects.
         if (!this.state.edgeList) {
             return <Loading>Notes</Loading>;
         }
