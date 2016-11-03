@@ -367,8 +367,7 @@ var transientEffectFactory = function (overrideFields) {
         "tech_level": 1
     };
 
-    var overrides = Object.assign({}, overrideFields);
-    return Object.assign(effect, overrides);
+    return Object.assign(effect, overrideFields);
 };
 
 var sheetTransientEffectFactory = function (overrideFields) {
