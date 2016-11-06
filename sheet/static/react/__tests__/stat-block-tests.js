@@ -18,6 +18,8 @@ jest.dontMock('../FirearmControl');
 jest.dontMock('../AddFirearmControl');
 jest.dontMock('../TransientEffectRow');
 jest.dontMock('../AddTransientEffectControl');
+jest.dontMock('../Inventory');
+jest.dontMock('../InventoryRow');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -33,13 +35,15 @@ const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
 const AddSPControl = require('../AddSPControl').default;
 const XPControl = require('../XPControl').default;
+const Inventory = require('../Inventory').default;
+
 
 describe('stat block', function() {
     "use strict";
 
     var promises;
 
-    var sheetDataFactory = function (statOverrides) {
+    var sheetFactory = function (statOverrides) {
         var _sheetData = {
             id: 1,
             character: 2,
@@ -130,6 +134,8 @@ describe('stat block', function() {
                 return jsonResponse([]);
             } else if (url === "/rest/transienteffects/campaign/2/") {
                 return jsonResponse([]);
+            } else if (url === "/rest/sheets/1/inventory/") {
+                return jsonResponse([]);
             } else {
                 /* Throwing errors here do not cancel the test. */
                 fail("this is an unsupported url:" + url);
@@ -158,7 +164,7 @@ describe('stat block', function() {
     };
 
     it('fetched initial data', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         expect(block.state.char).toBe(undefined);
 
         Promise.all(promises).then(function () {
@@ -195,7 +201,7 @@ describe('stat block', function() {
     };
 
     it('calculates MOV', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
 
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
@@ -207,7 +213,7 @@ describe('stat block', function() {
     });
 
     it('calculates DEX', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
 
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
@@ -219,7 +225,7 @@ describe('stat block', function() {
     });
 
     it('calculates IMM', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
 
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
@@ -231,7 +237,7 @@ describe('stat block', function() {
     });
 
     it('calculates stamina', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
 
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
@@ -242,7 +248,7 @@ describe('stat block', function() {
 
     it('calculates stamina with bought stamina', function (done) {
         var block = getStatBlock(factories.characterFactory({bought_stamina: 5}),
-            sheetDataFactory());
+            sheetFactory());
 
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
@@ -252,7 +258,7 @@ describe('stat block', function() {
     });
 
     it('calculates mana', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(24);
@@ -262,7 +268,7 @@ describe('stat block', function() {
 
     it('calculates mana with bought mana', function (done) {
         var block = getStatBlock(factories.characterFactory({bought_mana: 5}),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(29);
@@ -272,7 +278,7 @@ describe('stat block', function() {
 
     it('calculates body upwards', function (done) {
         var block = getStatBlock(factories.characterFactory({cur_fit: 41}),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
             expect(block.baseBody(baseStats)).toEqual(11);
@@ -282,7 +288,7 @@ describe('stat block', function() {
 
     it('calculates body', function (done) {
         var block = getStatBlock(factories.characterFactory({cur_fit: 39}),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
             expect(block.baseBody(baseStats)).toEqual(10);
@@ -291,7 +297,7 @@ describe('stat block', function() {
     });
 
     it('handles edge addition', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleEdgeAdded(edgeFactory({name: "Toughness", level: 2}));
             expect(Object.keys(block.state.edges).length).toBe(1);
@@ -302,7 +308,7 @@ describe('stat block', function() {
     });
 
     it('handles a list of edges to pass to child components', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             expect(block.state.edgeList.length).toBe(0);
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
@@ -316,7 +322,7 @@ describe('stat block', function() {
     });
 
     it('handles edge point calculation', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             var control = TestUtils.findRenderedComponentWithType(block,
                 XPControl);
@@ -335,7 +341,7 @@ describe('stat block', function() {
 
     it('can indicate toughness', function (done) {
         var block = getStatBlock(factories.characterFactory({cur_fit: 40}),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
             expect(block.toughness()).toEqual(0);
@@ -348,7 +354,7 @@ describe('stat block', function() {
 
     it('can indicate stamina recovery', function (done) {
         var block = getStatBlock(factories.characterFactory(),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
@@ -366,7 +372,7 @@ describe('stat block', function() {
 
     it('can indicate stamina recovery with high stat', function (done) {
         var block = getStatBlock(factories.characterFactory({cur_fit: 75}),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
             expect(block.staminaRecovery(effStats)).toEqual('1/8h');
@@ -379,7 +385,7 @@ describe('stat block', function() {
 
     it('can indicate mana recovery', function (done) {
         var block = getStatBlock(factories.characterFactory(),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
@@ -397,7 +403,7 @@ describe('stat block', function() {
 
     it('can indicate mana recovery with high stat', function (done) {
         var block = getStatBlock(factories.characterFactory({cur_cha: 70}),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
             expect(block.manaRecovery(effStats)).toEqual('2/8h');
@@ -410,7 +416,7 @@ describe('stat block', function() {
 
     it('can indicate body healing', function (done) {
         var block = getStatBlock(factories.characterFactory(),
-            sheetDataFactory());
+            sheetFactory());
         afterLoad(function () {
             expect(block.bodyHealing()).toEqual('3/16d');
             block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
@@ -421,7 +427,7 @@ describe('stat block', function() {
     });
 
     it('handles modifications of stats from child components', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleModification("fit", 40, 41);
             var baseStats = block.getStatHandler().getBaseStats();
@@ -431,7 +437,7 @@ describe('stat block', function() {
     });
 
     it('handles modifications of xp from child components', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleXPMod("total_xp", 0, 231);
             expect(block.state.char.total_xp).toEqual(231);
@@ -440,7 +446,7 @@ describe('stat block', function() {
     });
 
     it('contains a NoteBlock component', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 1, notes: "Foofaafom"}));
@@ -453,7 +459,7 @@ describe('stat block', function() {
     });
 
     it('should not contain a NoteBlock without edges', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
 
             var noteBlocks = TestUtils.scryRenderedComponentsWithType(
@@ -464,7 +470,7 @@ describe('stat block', function() {
     });
 
     it('should not contain a NoteBlock with only edges without notes', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
                 level: 1, notes: ""}));
@@ -477,7 +483,7 @@ describe('stat block', function() {
     });
 
     it('calculate runMultiplier with an edge', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleEdgeAdded(edgeFactory({edge: "Natural Runner",
                 level: 1, run_multiplier: 1.5}));
@@ -488,7 +494,7 @@ describe('stat block', function() {
     });
 
     it('have a decent default for runMultiplier', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             expect(block.runMultiplier()).toEqual(1);
             done();
@@ -496,7 +502,7 @@ describe('stat block', function() {
     });
 
     it('can calculate all effective stats', function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos", "mov", "dex", "imm"];
@@ -512,7 +518,7 @@ describe('stat block', function() {
     it("handles skill removal", function (done) {
         var skill = factories.characterSkillFactory({
             id: 2, skill: "Weaponsmithing", level: 1 });
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleSkillsLoaded([skill,
                 factories.characterSkillFactory({
@@ -537,7 +543,7 @@ describe('stat block', function() {
     });
 
     it("handles skill addition", function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             block.handleSkillsLoaded([], []);
 
@@ -569,7 +575,7 @@ describe('stat block', function() {
     });
 
     it("handles skill level changes", function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
 
             var skillList = [
@@ -613,12 +619,12 @@ describe('stat block', function() {
         });
     });
 
-    it ("can add firearms", function () {
-        // TODO
-    });
+    // it ("can add firearms", function () {
+    //     // TODO
+    // });
 
     it ("can remove firearms", function (done) {
-        var block = getStatBlock(factories.characterFactory(), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory(), sheetFactory());
         afterLoad(function () {
             var skillList = [
                 factories.characterSkillFactory({
@@ -646,19 +652,21 @@ describe('stat block', function() {
         });
     });
 
-    it ("can add weapons", function () {
-        // TODO
-    });
+    // it ("can add weapons", function () {
+    //     // TODO
+    // });
+    //
+    // it ("can remove weapons", function () {
+    //     // TODO
+    // });
 
-    it ("can remove weapons", function () {
-        // TODO
-    });
+
 
     // TODO: Add system tests to check integration through this up till
     // SkillRow.
 
     it("handles age SP additions", function (done) {
-        var block = getStatBlock(factories.characterFactory({gained_sp: 4}), sheetDataFactory());
+        var block = getStatBlock(factories.characterFactory({gained_sp: 4}), sheetFactory());
         afterLoad(function () {
 
             var promise = Promise.resolve({});
@@ -679,5 +687,4 @@ describe('stat block', function() {
             }).catch(err => fail(err));
         });
     });
-
 });
