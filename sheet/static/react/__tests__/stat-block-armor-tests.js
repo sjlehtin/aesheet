@@ -39,7 +39,7 @@ describe('stat block armor handling', function(done) {
     it("can load armor", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.state.armor.base).toBe(undefined);
+            expect(block.state.armor).toBe(undefined);
             block.handleArmorLoaded(factories.armorFactory(
                 {base: {weight: 8}}));
             expect(block.state.armor.base.weight).toEqual(8);
@@ -68,7 +68,7 @@ describe('stat block armor handling', function(done) {
     it("can change armor", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.state.armor.base).toBe(undefined);
+            expect(block.state.armor).toBe(undefined);
             block.handleArmorChanged(factories.armorFactory({base: {weight: 8}}));
             expect(block.state.armor.base.weight).toEqual(8);
             // TODO: change armor with REST.
@@ -79,7 +79,7 @@ describe('stat block armor handling', function(done) {
     it("can load helm", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.state.helm.base).toBe(undefined);
+            expect(block.state.helm).toBe(undefined);
             block.handleHelmLoaded(factories.armorFactory(
                 {base: {is_helm: true, weight: 8}}));
             expect(block.state.helm.base.weight).toEqual(8);
@@ -90,7 +90,7 @@ describe('stat block armor handling', function(done) {
     it("can change the helm", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.state.helm.base).toBe(undefined);
+            expect(block.state.helm).toBe(undefined);
             block.handleHelmChanged(factories.armorFactory({base: {is_helm: true, weight: 8}}));
             expect(block.state.helm.base.weight).toEqual(8);
             // TODO: change armor with REST.
