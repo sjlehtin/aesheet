@@ -48,7 +48,10 @@ class StatBlock extends React.Component {
             rangedWeaponList: undefined,
             transientEffectList: undefined,
 
-            carriedInventoryWeight: 0
+            carriedInventoryWeight: 0,
+
+            armor: undefined,
+            helm: undefined
         };
     }
 
@@ -98,6 +101,16 @@ class StatBlock extends React.Component {
         rest.getData(this.props.url + 'sheettransienteffects/').then((json) => {
             this.handleTransientEffectsLoaded(json);
         }).catch((err) => {console.log("Failed to load transient effects:",
+            err)});
+
+        rest.getData(this.props.url + 'sheetarmor/').then((json) => {
+            this.handleArmorLoaded(json[0]);
+        }).catch((err) => {console.log("Failed to load armor:",
+            err)});
+
+        rest.getData(this.props.url + 'sheethelm/').then((json) => {
+            this.handleHelmLoaded(json[0]);
+        }).catch((err) => {console.log("Failed to load armor:",
             err)});
 
         rest.getData(this.props.url).then((json) => {
@@ -363,6 +376,22 @@ class StatBlock extends React.Component {
                 this.state.firearmList.splice(index, 1);
                 this.setState({firearmList: this.state.firearmList});
             }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
+    handleArmorLoaded(armor) {
+        this.setState({armor: armor})
+    }
+
+    handleArmorChanged(armor) {
+        this.setState({armor: armor})
+    }
+
+    handleHelmLoaded(helm) {
+        this.setState({helm: helm})
+    }
+
+    handleHelmChanged(helm) {
+        this.setState({helm: helm})
     }
 
     getWeaponURL(fa) {
@@ -715,7 +744,16 @@ class StatBlock extends React.Component {
     }
 
     getCarriedWeight() {
-        return this.state.carriedInventoryWeight;
+        var weight = 0;
+        if (this.state.armor && this.state.armor.base) {
+            weight += parseFloat(this.state.armor.base.weight) *
+            parseFloat(this.state.armor.quality.mod_weight_multiplier);
+        }
+        if (this.state.helm && this.state.helm.base) {
+            weight += parseFloat(this.state.helm.base.weight) *
+            parseFloat(this.state.helm.quality.mod_weight_multiplier);
+        }
+        return weight + this.state.carriedInventoryWeight;
     }
 
     renderFirearms(skillHandler) {
@@ -871,6 +909,9 @@ class StatBlock extends React.Component {
                                 {this.renderStats(statHandler)}
                                 {this.renderXPControl()}
                                 {this.renderSPControl(baseStats)}
+                            </Row>
+                            <Row>
+                                Weight carried: {this.getCarriedWeight()} kg
                             </Row>
                         </Col>
                         <Col md={6}>
