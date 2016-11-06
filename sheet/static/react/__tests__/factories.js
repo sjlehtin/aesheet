@@ -222,6 +222,135 @@ var firearmFactory = function (overrideFields) {
     return Object.assign(firearm, overrides);
 };
 
+
+var armorQualityFactory = function (overrideFields) {
+    "use strict";
+    var quality = {
+        "name": "normal",
+        "short_name": "",
+        "dp_multiplier": "1.0",
+        "armor_p": "0.0",
+        "armor_s": "0.0",
+        "armor_b": "0.0",
+        "armor_r": "0.0",
+        "armor_dr": "0.0",
+        "mod_fit_multiplier": "1.0",
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_psy": 0,
+        "mod_sensory": 0,
+        "mod_stealth": 0,
+        "mod_conceal": 0,
+        "mod_climb": 0,
+        "mod_weight_multiplier": "1.0",
+        "mod_encumbrance_class": 0,
+        "tech_level": 1
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(quality, overrideFields);
+};
+
+var armorTemplateFactory = function (overrideFields) {
+    "use strict";
+    var quality = {
+        "name": "Cloth hood",
+        "description": "",
+        "is_helm": true,
+        "armor_h_p": "0.0",
+        "armor_h_s": "0.0",
+        "armor_h_b": "0.0",
+        "armor_h_r": "-0.5",
+        "armor_h_dr": "-1.0",
+        "armor_h_dp": "1.0",
+        "armor_t_p": "0.0",
+        "armor_t_s": "0.0",
+        "armor_t_b": "0.0",
+        "armor_t_r": "0.0",
+        "armor_t_dr": "0.0",
+        "armor_t_dp": "0.0",
+        "armor_ll_p": "0.0",
+        "armor_ll_s": "0.0",
+        "armor_ll_b": "0.0",
+        "armor_ll_r": "0.0",
+        "armor_ll_dr": "0.0",
+        "armor_ll_dp": "0.0",
+        "armor_la_p": "0.0",
+        "armor_la_s": "0.0",
+        "armor_la_b": "0.0",
+        "armor_la_r": "0.0",
+        "armor_la_dr": "0.0",
+        "armor_la_dp": "0.0",
+        "armor_rl_p": "0.0",
+        "armor_rl_s": "0.0",
+        "armor_rl_b": "0.0",
+        "armor_rl_r": "0.0",
+        "armor_rl_dr": "0.0",
+        "armor_rl_dp": "0.0",
+        "armor_ra_p": "0.0",
+        "armor_ra_s": "0.0",
+        "armor_ra_b": "0.0",
+        "armor_ra_r": "0.0",
+        "armor_ra_dr": "0.0",
+        "armor_ra_dp": "0.0",
+        "armor_h_pl": -2,
+        "armor_t_pl": 0,
+        "armor_ll_pl": 0,
+        "armor_rl_pl": 0,
+        "armor_la_pl": 0,
+        "armor_ra_pl": 0,
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_psy": -1,
+        "mod_vision": 0,
+        "mod_hear": -4,
+        "mod_smell": 0,
+        "mod_surprise": -2,
+        "mod_stealth": 0,
+        "mod_conceal": 5,
+        "mod_climb": 0,
+        "mod_tumble": -5,
+        "weight": "0.40",
+        "encumbrance_class": 0,
+        "tech_level": 1
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(quality, overrideFields);
+};
+
+var armorFactory = function(overrideFields) {
+    "use strict";
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var base = {};
+    if (overrideFields.base) {
+        base = overrideFields.base;
+        delete overrideFields.base;
+    }
+
+    var quality = {};
+    if (overrideFields.quality) {
+        quality = overrideFields.quality;
+        delete overrideFields.quality;
+    }
+
+    var armor = {
+        "id": 1,
+        "name": "Leather armor",
+        "description": "",
+        "base": armorTemplateFactory(Object.assign(
+                {name: "Leather" + " armor"}, base)),
+        "quality": armorQualityFactory(quality),
+        "special_qualities": []
+    };
+    return armor;
+};
+
 var weaponQualityFactory = function (overrideFields) {
     "use strict";
     var quality = {
@@ -553,5 +682,8 @@ module.exports = {
     rangedWeaponFactory: rangedWeaponFactory,
     transientEffectFactory: transientEffectFactory,
     sheetTransientEffectFactory: sheetTransientEffectFactory,
-    inventoryEntryFactory: inventoryEntryFactory
+    inventoryEntryFactory: inventoryEntryFactory,
+    armorTemplateFactory: armorTemplateFactory,
+    armorQualityFactory: armorQualityFactory,
+    armorFactory: armorFactory
 };
