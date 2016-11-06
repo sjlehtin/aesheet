@@ -61,7 +61,7 @@ class SkillHandler {
      */
     skillCheck(skillName, stat) {
         var skill = this.state.skillMap[skillName];
-        if (this.isBaseSkill(skill)) {
+        if (!skill || this.isBaseSkill(skill)) {
             return null;
         }
 
