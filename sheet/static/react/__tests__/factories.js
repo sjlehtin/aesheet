@@ -390,6 +390,17 @@ var sheetTransientEffectFactory = function (overrideFields) {
     return Object.assign(effect, overrides);
 };
 
+var inventoryEntryFactory = function (overrides) {
+    var _entryData = {
+        quantity: 1,
+        unit_weight: "0.5",
+        description: "Item",
+        order: 0,
+        location: ""
+    };
+
+    return Object.assign(_entryData, overrides);
+};
 
 module.exports = {
     characterFactory: characterFactory,
@@ -401,5 +412,6 @@ module.exports = {
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,
     transientEffectFactory: transientEffectFactory,
-    sheetTransientEffectFactory: sheetTransientEffectFactory
+    sheetTransientEffectFactory: sheetTransientEffectFactory,
+    inventoryEntryFactory: inventoryEntryFactory
 };

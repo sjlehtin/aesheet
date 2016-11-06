@@ -1,10 +1,13 @@
 jest.dontMock('../Inventory');
 jest.dontMock('../InventoryRow');
 jest.dontMock('../sheet-util');
+jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
+
+const inventoryEntryFactory = require('./factories').inventoryEntryFactory;
 
 var rest = require('../sheet-rest');
 
@@ -14,18 +17,6 @@ describe('Inventory', function() {
     "use strict";
 
     var promises = [];
-
-    var inventoryEntryFactory = function (overrides) {
-        var _entryData = {
-            quantity: 1,
-            unit_weight: "0.5",
-            description: "Item",
-            order: 0,
-            location: ""
-        };
-
-        return Object.assign(_entryData, overrides);
-    };
 
     var jsonResponse = function (json) {
         var promise = Promise.resolve(json);
