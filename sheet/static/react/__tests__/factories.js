@@ -1,3 +1,37 @@
+jest.dontMock('../StatBlock');
+jest.dontMock('../StatRow');
+jest.dontMock('../XPControl');
+jest.dontMock('../AddSPControl');
+jest.dontMock('../NoteBlock');
+jest.dontMock('../InitiativeBlock');
+jest.dontMock('../Loading');
+jest.dontMock('../SkillTable');
+jest.dontMock('../SkillRow');
+jest.dontMock('../AddSkillControl');
+jest.dontMock('../SkillHandler');
+jest.dontMock('../StatHandler');
+jest.dontMock('../WeaponRow');
+jest.dontMock('../RangedWeaponRow');
+jest.dontMock('../AddWeaponControl');
+jest.dontMock('../AddRangedWeaponControl');
+jest.dontMock('../FirearmControl');
+jest.dontMock('../AddFirearmControl');
+jest.dontMock('../TransientEffectRow');
+jest.dontMock('../AddTransientEffectControl');
+jest.dontMock('../Inventory');
+jest.dontMock('../InventoryRow');
+jest.dontMock('../sheet-util');
+jest.dontMock('./factories');
+
+import React from 'react';
+import TestUtils from 'react-addons-test-utils';
+
+var rest = require('sheet-rest');
+
+const StatBlock = require('../StatBlock').default;
+
+var objectId = 1;
+
 var characterFactory = function (statOverrides) {
     var _charData = {
         id: 2,
@@ -396,14 +430,120 @@ var inventoryEntryFactory = function (overrides) {
         unit_weight: "0.5",
         description: "Item",
         order: 0,
-        location: ""
+        location: "",
+        id: objectId++
     };
 
     return Object.assign(_entryData, overrides);
 };
 
+var sheetFactory = function (statOverrides) {
+    var _sheetData = {
+        id: 1,
+        character: 2,
+        "weight_carried": "0.00",
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_lrn": 0,
+        "mod_int": 0,
+        "mod_psy": 0,
+        "mod_wil": 0,
+        "mod_cha": 0,
+        "mod_pos": 0,
+        "mod_mov": 0,
+        "mod_dex": 0,
+        "mod_imm": 0
+    };
+
+    return Object.assign(_sheetData, statOverrides);
+};
+
+
+
+var statBlockFactory = function (overrides) {
+    var characterOverrides = undefined;
+    var sheetOverrides = undefined;
+    if (overrides) {
+        characterOverrides = overrides.character;
+        sheetOverrides = overrides.sheet;
+    }
+
+    var charData = characterFactory(characterOverrides);
+    var sheetData = sheetFactory(sheetOverrides);
+
+
+    var promises = [];
+
+    var jsonResponse = function (json) {
+        var promise = Promise.resolve(json);
+        promises.push(promise);
+        return promise;
+    };
+
+    var afterLoad = function (callback) {
+        Promise.all(promises).then(function () {
+            Promise.all(promises).then(function () {
+                Promise.all(promises).then(function () {
+                    callback()
+                }).catch(function (err) { fail("failed with " + err)});
+            }).catch(function (err) { fail("failed with " + err)});
+        }).catch(function (err) { fail("failed with " + err)});
+    };
+
+    rest.getData.mockImplementation(function (url) {
+        if (url === "/rest/sheets/1/") {
+            return jsonResponse(sheetData);
+        } else if (url === "/rest/characters/2/") {
+            return jsonResponse(charData);
+        } else if (url === "/rest/characters/2/characterskills/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/skills/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/weapontemplates/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/weaponqualities/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/weapons/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetfirearms/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetweapons/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/rangedweapontemplates/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/rangedweapons/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheettransienteffects/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/transienteffects/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/inventory/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetarmor/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheethelm/") {
+            return jsonResponse([]);
+        } else {
+            /* Throwing errors here do not cancel the test. */
+            fail("this is an unsupported url:" + url);
+        }
+    });
+    var table = TestUtils.renderIntoDocument(
+        <StatBlock url="/rest/sheets/1/"/>
+    );
+
+    var statBlock = TestUtils.findRenderedComponentWithType(table,
+        StatBlock);
+    statBlock.afterLoad = afterLoad;
+    return statBlock;
+};
+
 module.exports = {
     characterFactory: characterFactory,
+    sheetFactory: sheetFactory,
+    statBlockFactory: statBlockFactory,
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
     edgeFactory: edgeFactory,
