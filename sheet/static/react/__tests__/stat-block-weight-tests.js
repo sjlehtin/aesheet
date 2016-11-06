@@ -143,8 +143,4 @@ describe('stat block weight handling', function() {
             done();
         });
     });
-
-    // it("adds firearms weight", function (done) {
-    //
-    // });
 });
