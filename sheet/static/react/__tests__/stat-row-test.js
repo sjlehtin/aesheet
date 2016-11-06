@@ -1,5 +1,6 @@
 jest.dontMock('../StatRow');
 jest.dontMock('../StatHandler');
+jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
 import React from 'react';
