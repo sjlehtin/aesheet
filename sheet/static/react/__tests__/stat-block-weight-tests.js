@@ -24,7 +24,6 @@ jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 var rest = require('sheet-rest');
@@ -74,12 +73,32 @@ describe('stat block weight handling', function() {
     it("adds armor weight", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
+            block.handleArmorChanged(factories.armorFactory({base: {weight: 8}}));
+            expect(block.getCarriedWeight()).toEqual(8);
+            done();
+        });
+    });
 
+    it("accounts for armor quality", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleArmorChanged(factories.armorFactory({base: {weight: 8},
+            quality: {mod_weight_multiplier: 0.8}}));
+            expect(block.getCarriedWeight()).toEqual(6.4);
             done();
         });
     });
 
     it("adds helm weight", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            expect(block.getCarriedWeight()).toEqual(0);
+            block.handleHelmChanged(factories.armorFactory({
+                base: {is_helm:true, weight: 8},
+                quality: {mod_weight_multiplier: 0.8}}));
+            expect(block.getCarriedWeight()).toEqual(6.4);
+            done();
+        });
 
     });
 
