@@ -10,11 +10,17 @@
  *
  * Edges affect base stats ("hard" modifier) and the rest are
  * modifiers for the effective stats ("soft" modifier).
+ *
+ * This should accept the collated weight and calculate effects from that.
+ * Some effects of encumbrance are not directly attributable as stats,
+ * though (can't run, jump, etc).
  */
+
+var util = require('sheet-util');
 
 class StatHandler {
     constructor(props) {
-        this.props = props;
+        this.props = Object.assign({}, StatHandler.defaultProps, props);
 
         this._hardMods = {};
         this._softMods = {};
@@ -55,11 +61,11 @@ class StatHandler {
                     this.props.character['base_mod_' + st] +
                     this._hardMods[st];
             }
-            this._baseStats.mov = Math.round((this._baseStats.fit + 
+            this._baseStats.mov = util.roundup((this._baseStats.fit +
                 this._baseStats.ref)/2) + this._hardMods.mov;
-            this._baseStats.dex = Math.round((this._baseStats.int + 
+            this._baseStats.dex = util.roundup((this._baseStats.int +
                 this._baseStats.ref)/2) + this._hardMods.dex;
-            this._baseStats.imm = Math.round((this._baseStats.fit + 
+            this._baseStats.imm = util.roundup((this._baseStats.fit +
                 this._baseStats.psy)/2) + this._hardMods.mov;
         }
         return this._baseStats;
@@ -73,13 +79,23 @@ class StatHandler {
                 this._effStats[st] = baseStats[st] +
                     this._softMods[st];
             }
-            this._effStats.mov = Math.round((this._effStats.fit + 
+            // Encumbrance and armor are calculated after soft mods
+            // (transient effects, such as spells) and hard mods (edges)
+            // in the excel combat sheet.
+            // TODO: encumbrance and armor after other modifiers.
+            var encumbrancePenalty = util.roundup(
+                (-10 * this.props.weightCarried) / this._effStats.fit);
+
+            this._effStats.fit += encumbrancePenalty;
+            this._effStats.ref += encumbrancePenalty;
+
+            this._effStats.mov = util.roundup((this._effStats.fit +
                 this._effStats.ref)/2) + this._hardMods.mov +
                 this._softMods.mov;
-            this._effStats.dex = Math.round((this._effStats.int + 
+            this._effStats.dex = util.roundup((this._effStats.int +
                 this._effStats.ref)/2) + this._hardMods.dex +
                 this._softMods.dex;
-            this._effStats.imm = Math.round((this._baseStats.fit +
+            this._effStats.imm = util.roundup((this._baseStats.fit +
                 this._baseStats.psy)/2) + this._hardMods.imm +
                 this._softMods.imm;
         }
@@ -91,5 +107,16 @@ StatHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
 StatHandler.allStatNames =  StatHandler.baseStatNames.concat(
     ["mov", "dex", "imm"]);
+
+// StatHandler.props = {
+//     character: React.PropTypes.object.isRequired,
+//     edges: React.PropTypes.array,
+//     effects: React.PropTypes.array,
+//     weightCarried: React.PropTypes.number.isRequired
+//};
+
+StatHandler.defaultProps = {
+    weightCarried: 0
+};
 
 export default StatHandler;
