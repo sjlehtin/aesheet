@@ -99,16 +99,50 @@ describe('stat block weight handling', function() {
             expect(block.getCarriedWeight()).toEqual(6.4);
             done();
         });
-
     });
 
-    // it("adds close combat weapons weight", function (done) {
-    //
-    // });
+    it("adds close combat weapons weight", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleWeaponsLoaded([factories.weaponFactory({
+                base: {weight: 6},
+                quality: {weight_multiplier: 0.5}})]);
+            expect(block.getCarriedWeight()).toEqual(3.0);
+            done();
+        });
+    });
 
-    // it("adds ranged weapons weight", function (done) {
-    //
-    // });
+    it("adds ranged weapons weight", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleRangedWeaponsLoaded([factories.rangedWeaponFactory({
+                base: {weight: 6},
+                quality: {weight_multiplier: 0.5}})]);
+            expect(block.getCarriedWeight()).toEqual(3.0);
+            done();
+        });
+    });
+
+    it("adds firearms weight", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleFirearmsLoaded([factories.firearmFactory({
+                base: {weight: 6}})]);
+            expect(block.getCarriedWeight()).toEqual(6.0);
+            done();
+        });
+    });
+
+    it("handles lists of weapons", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleWeaponsLoaded([factories.weaponFactory({
+                base: {weight: 3}}),
+            factories.weaponFactory({base: {weight: 4}})]);
+            expect(block.getCarriedWeight()).toEqual(7.0);
+            done();
+        });
+    });
 
     // it("adds firearms weight", function (done) {
     //

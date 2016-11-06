@@ -43,9 +43,9 @@ class StatBlock extends React.Component {
             characterSkills: undefined,
             allSkills: undefined,
 
-            firearmList: undefined,
-            weaponList: undefined,
-            rangedWeaponList: undefined,
+            firearmList: [],
+            weaponList: [],
+            rangedWeaponList: [],
             transientEffectList: undefined,
 
             carriedInventoryWeight: 0,
@@ -753,6 +753,21 @@ class StatBlock extends React.Component {
             weight += parseFloat(this.state.helm.base.weight) *
             parseFloat(this.state.helm.quality.mod_weight_multiplier);
         }
+
+        for (let wpn of this.state.weaponList){
+            weight += parseFloat(wpn.base.weight) *
+                parseFloat(wpn.quality.weight_multiplier);
+        }
+
+        for (let wpn of this.state.rangedWeaponList){
+            weight += parseFloat(wpn.base.weight) *
+                parseFloat(wpn.quality.weight_multiplier);
+        }
+
+        for (let wpn of this.state.firearmList){
+            weight += parseFloat(wpn.base.weight);
+        }
+
         return weight + this.state.carriedInventoryWeight;
     }
 
