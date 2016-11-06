@@ -384,7 +384,7 @@ var weaponFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
-    var weapon ={
+    var weapon = {
         "id": 3,
         "name": "Broadsword",
         "description": "",
