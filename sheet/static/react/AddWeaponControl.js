@@ -108,7 +108,7 @@ class AddWeaponControl extends React.Component {
         var quality;
 
         if (this.state.selectedWeapon && this.state.selectedWeapon.quality) {
-            quality = <span>{this.state.selectedWeapon.quality.name}</span>
+            quality = <span>{this.state.selectedWeapon.quality.name}</span>;
         } else {
             quality = <Combobox
                 data={this.state.qualityChoices}
