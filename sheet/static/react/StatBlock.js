@@ -17,6 +17,7 @@ import TransientEffectRow from 'TransientEffectRow';
 import AddTransientEffectControl from 'AddTransientEffectControl';
 import SkillHandler from 'SkillHandler';
 import StatHandler from 'StatHandler';
+import Inventory from 'Inventory';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -45,7 +46,9 @@ class StatBlock extends React.Component {
             firearmList: undefined,
             weaponList: undefined,
             rangedWeaponList: undefined,
-            transientEffectList: undefined
+            transientEffectList: undefined,
+
+            carriedInventoryWeight: 0
         };
     }
 
@@ -76,7 +79,7 @@ class StatBlock extends React.Component {
 
     componentDidMount() {
         /* Failures to load objects from the server should be indicated
-           visually to the users, as well as failures to save etc.  Use a
+           visually to the users, as well as failures to save etc.  Use an
            error-handling control for this purpose. */
 
         rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
@@ -702,8 +705,17 @@ class StatBlock extends React.Component {
         return new StatHandler({
             character: this.state.char,
             edges: this.state.edgeList,
-            effects: this.state.transientEffectList
+            effects: this.state.transientEffectList,
+            weightCarried: this.getCarriedWeight()
         });
+    }
+
+    inventoryWeightChanged(newWeight) {
+        this.setState({carriedInventoryWeight: newWeight});
+    }
+
+    getCarriedWeight() {
+        return this.state.carriedInventoryWeight;
     }
 
     renderFirearms(skillHandler) {
@@ -834,6 +846,11 @@ class StatBlock extends React.Component {
 
     }
 
+    renderInventory() {
+        return <Inventory url={this.props.url + "inventory/"}
+                          onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
+    }
+
     render() {
         var statHandler = this.getStatHandler();
         if (statHandler) {
@@ -879,6 +896,9 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         {this.renderTransientEffects()}
+                    </Row>
+                    <Row>
+                        {this.renderInventory()}
                     </Row>
                 </Col>
                 <Col md={4}>
