@@ -196,7 +196,8 @@ class AddExistingMiscellaneousItemForm(AddExistingArmorForm):
              tech_level__in=self.instance.campaign.tech_levels.all())
 
     def add_item(self, item):
-        self.instance.miscellaneous_items.add(item)
+        sheet.models.SheetMiscellaneousItem.objects.create(item=item,
+                                                           sheet=self.instance)
 
 
 class AddEdgeForm(RequestForm):

@@ -124,6 +124,25 @@ class SheetTransientEffectListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MiscellaneousItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.MiscellaneousItem
+        fields = "__all__"
+
+
+class SheetMiscellaneousItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.SheetMiscellaneousItem
+        fields = "__all__"
+
+
+class SheetMiscellaneousItemListSerializer(serializers.ModelSerializer):
+    item = MiscellaneousItemSerializer()
+    class Meta:
+        model = sheet.models.SheetMiscellaneousItem
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):

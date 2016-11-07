@@ -40,6 +40,10 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheettransienteffects',
                 views.SheetTransientEffectViewSet,
                 base_name='sheet-transienteffect')
 
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetmiscellaneousitems',
+                views.SheetMiscellaneousItemViewSet,
+                base_name='sheet-miscellaneousitem')
+
 router.register(r'firearms', views.FirearmViewSet, base_name='firearm')
 router.register(r'firearms/campaign/(?P<campaign_pk>[0-9]+)',
                 views.FirearmViewSet,
@@ -98,6 +102,12 @@ router.register(r'transienteffects', views.TransientEffectViewSet,
 router.register(r'transienteffects/campaign/(?P<campaign_pk>[0-9]+)',
                 views.TransientEffectViewSet,
                 base_name='campaign-transienteffect')
+
+router.register(r'miscellaneousitems', views.MiscellaneousItemViewSet,
+                base_name='miscellaneousitem')
+router.register(r'miscellaneousitems/campaign/(?P<campaign_pk>[0-9]+)',
+                views.MiscellaneousItemViewSet,
+                base_name='campaign-miscellaneousitem')
 
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,

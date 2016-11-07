@@ -220,6 +220,11 @@ class TransientEffectViewSet(CampaignMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class MiscellaneousItemViewSet(CampaignMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.MiscellaneousItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
 class ListPermissionMixin(object):
     """
     The `list` method of ListModelMixin does not check object
@@ -470,13 +475,17 @@ class SheetHelmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
 
 class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    create_serializer = serializers.SheetTransientEffectCreateSerializer
+    list_serializer = serializers.SheetTransientEffectListSerializer
+    model = models.SheetTransientEffect
+
     def get_serializer_class(self):
         if self.action == 'create':
             # When creating new, we do not want the full nested
             # representation, just id's.
-            return serializers.SheetTransientEffectCreateSerializer
+            return self.create_serializer
         else:
-            return serializers.SheetTransientEffectListSerializer
+            return self.list_serializer
 
     def get_serializer(self, *args, **kwargs):
         serializer = super(SheetTransientEffectViewSet, self).get_serializer(
@@ -492,7 +501,7 @@ class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
         return serializer
 
     def get_queryset(self):
-        return models.SheetTransientEffect.objects.filter(sheet=self.sheet)
+        return self.model.objects.filter(sheet=self.sheet)
 
     def perform_update(self, serializer):
         # Update should not be allowed for sheet or effect fields, but just
@@ -502,3 +511,10 @@ class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         super(SheetTransientEffectViewSet, self).perform_create(
             serializer)
+
+
+class SheetMiscellaneousItemViewSet(SheetTransientEffectViewSet):
+    create_serializer = serializers.SheetMiscellaneousItemCreateSerializer
+    list_serializer = serializers.SheetMiscellaneousItemListSerializer
+    model = models.SheetMiscellaneousItem
+
