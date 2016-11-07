@@ -20,6 +20,8 @@ jest.dontMock('../TransientEffectRow');
 jest.dontMock('../AddTransientEffectControl');
 jest.dontMock('../Inventory');
 jest.dontMock('../InventoryRow');
+jest.dontMock('../ArmorControl');
+jest.dontMock('../AddArmorControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -39,7 +41,7 @@ describe('stat block armor handling', function(done) {
     it("can load armor", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.state.armor).toBe(undefined);
+            expect(block.state.armor.base).toBe(undefined);
             block.handleArmorLoaded(factories.armorFactory(
                 {base: {weight: 8}}));
             expect(block.state.armor.base.weight).toEqual(8);
@@ -67,21 +69,29 @@ describe('stat block armor handling', function(done) {
 
     it("can change armor", function (done) {
         var block = factories.statBlockFactory();
+        var armor = factories.armorFactory(
+                {base: {is_helm: true, weight: 8}});
+        var promise = Promise.resolve(
+            Object.assign({}, armor, {id: 1, name: "foo armor"}));
+        rest.post.mockReturnValue(promise);
         block.afterLoad(function () {
-            expect(block.state.armor).toBe(undefined);
+            expect(block.state.armor.base).toBe(undefined);
             block.handleArmorChanged(factories.armorFactory({base: {weight: 8}}));
-            expect(block.state.armor.base.weight).toEqual(8);
-            // TODO: change armor with REST.
-            done();
+            promise.then(() => {
+                expect(block.state.armor.base.weight).toEqual(8);
+                // TODO: change armor with REST.
+                done();
+            });
         });
     });
 
     it("can load helm", function (done) {
+        var armor = factories.armorFactory(
+                {base: {is_helm: true, weight: 8}});
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.state.helm).toBe(undefined);
-            block.handleHelmLoaded(factories.armorFactory(
-                {base: {is_helm: true, weight: 8}}));
+            expect(block.state.helm.base).toBe(undefined);
+            block.handleHelmLoaded(armor);
             expect(block.state.helm.base.weight).toEqual(8);
             done();
         });
@@ -89,12 +99,18 @@ describe('stat block armor handling', function(done) {
 
     it("can change the helm", function (done) {
         var block = factories.statBlockFactory();
+        var armor = factories.armorFactory({base: {is_helm: true, weight: 8}});
+        var promise = Promise.resolve(
+            Object.assign({}, armor, {id: 1, name: "foo armor"}));
+        rest.post.mockReturnValue(promise);
         block.afterLoad(function () {
-            expect(block.state.helm).toBe(undefined);
-            block.handleHelmChanged(factories.armorFactory({base: {is_helm: true, weight: 8}}));
-            expect(block.state.helm.base.weight).toEqual(8);
-            // TODO: change armor with REST.
-            done();
+            expect(block.state.helm.base).toBe(undefined);
+            block.handleHelmChanged(armor);
+            promise.then(() => {
+                expect(block.state.helm.base.weight).toEqual(8);
+                // TODO: change armor with REST.
+                done();
+            });
         });
     });
 });

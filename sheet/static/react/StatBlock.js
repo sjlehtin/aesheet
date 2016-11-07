@@ -18,6 +18,7 @@ import AddTransientEffectControl from 'AddTransientEffectControl';
 import SkillHandler from 'SkillHandler';
 import StatHandler from 'StatHandler';
 import Inventory from 'Inventory';
+import ArmorControl from 'ArmorControl';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -80,6 +81,67 @@ class StatBlock extends React.Component {
         allSkills: allSkills});
     }
 
+    getArmorURL(item) {
+        var baseURL = this.props.url + 'sheetarmor/';
+        if (item) {
+            return baseURL + item.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleArmorLoaded(armor) {
+        console.log("Armor loaded");
+        this.setState({armor: armor})
+    }
+
+    handleArmorChanged(armor, url, finalizer) {
+        if (typeof(url) === "undefined") {
+            url = this.getArmorURL();
+        }
+
+        if (typeof(finalizer) === "undefined") {
+            finalizer = (item) => { this.setState({armor: armor}); };
+        }
+
+        var data;
+        if ('id' in armor) {
+            data = {item: armor.id};
+        } else {
+            data = {
+                base: armor.base.name,
+                quality: armor.quality.name
+            };
+        }
+        console.log("Adding: ", data, armor);
+        rest.post(url, data).then((json) => {
+            console.log("POST success", json);
+            armor.id = json.id;
+            armor.name = json.name;
+            finalizer(armor);
+        }).catch((err) => {console.log("error", err)});
+    }
+
+    getHelmURL(item) {
+        var baseURL = this.props.url + 'sheethelm/';
+        if (item) {
+            return baseURL + item.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleHelmLoaded(helm) {
+        console.log("Helm loaded");
+        this.setState({helm: helm})
+    }
+
+    handleHelmChanged(armor) {
+        this.handleArmorChanged(armor, this.getHelmURL(),
+            (helm) => {this.setState({helm: helm});});
+    }
+
+
     componentDidMount() {
         /* Failures to load objects from the server should be indicated
            visually to the users, as well as failures to save etc.  Use an
@@ -104,13 +166,21 @@ class StatBlock extends React.Component {
             err)});
 
         rest.getData(this.props.url + 'sheetarmor/').then((json) => {
-            this.handleArmorLoaded(json[0]);
+            var obj = {};
+            if (json.length > 0) {
+                obj = json[0];
+            }
+            this.handleArmorLoaded(obj);
         }).catch((err) => {console.log("Failed to load armor:",
             err)});
 
         rest.getData(this.props.url + 'sheethelm/').then((json) => {
-            this.handleHelmLoaded(json[0]);
-        }).catch((err) => {console.log("Failed to load armor:",
+            var obj = {};
+            if (json.length > 0) {
+                obj = json[0];
+            }
+            this.handleHelmLoaded(obj);
+        }).catch((err) => {console.log("Failed to load helm:",
             err)});
 
         rest.getData(this.props.url).then((json) => {
@@ -376,22 +446,6 @@ class StatBlock extends React.Component {
                 this.state.firearmList.splice(index, 1);
                 this.setState({firearmList: this.state.firearmList});
             }).catch((err) => {console.log("Error in deletion: ", err)});
-    }
-
-    handleArmorLoaded(armor) {
-        this.setState({armor: armor})
-    }
-
-    handleArmorChanged(armor) {
-        this.setState({armor: armor})
-    }
-
-    handleHelmLoaded(helm) {
-        this.setState({helm: helm})
-    }
-
-    handleHelmChanged(helm) {
-        this.setState({helm: helm})
     }
 
     getWeaponURL(fa) {
@@ -904,6 +958,20 @@ class StatBlock extends React.Component {
                           onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
     }
 
+    renderArmor() {
+        if (!this.state.char || !this.state.armor || !this.state.helm) {
+            return <Loading>Armor</Loading>;
+        }
+
+        return <Panel header={<h4>Armor</h4>}>
+            <ArmorControl campaign={this.state.char.campaign}
+                          armor={this.state.armor} helm={this.state.helm}
+                onHelmChange={(value) => this.handleHelmChanged(value)}
+                onArmorChange={(value) => this.handleArmorChanged(value)}
+                />
+            </Panel>;
+    }
+
     render() {
         var statHandler = this.getStatHandler();
         if (statHandler) {
@@ -926,7 +994,10 @@ class StatBlock extends React.Component {
                                 {this.renderSPControl(baseStats)}
                             </Row>
                             <Row>
-                                Weight carried: {this.getCarriedWeight()} kg
+                                Weight carried: {this.getCarriedWeight().toFixed(2)} kg
+                            </Row>
+                            <Row>
+                                {this.renderArmor()}
                             </Row>
                         </Col>
                         <Col md={6}>

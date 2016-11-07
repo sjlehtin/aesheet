@@ -20,6 +20,8 @@ jest.dontMock('../TransientEffectRow');
 jest.dontMock('../AddTransientEffectControl');
 jest.dontMock('../Inventory');
 jest.dontMock('../InventoryRow');
+jest.dontMock('../ArmorControl');
+jest.dontMock('../AddArmorControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 

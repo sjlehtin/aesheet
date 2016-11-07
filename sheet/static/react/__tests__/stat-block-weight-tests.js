@@ -20,6 +20,8 @@ jest.dontMock('../TransientEffectRow');
 jest.dontMock('../AddTransientEffectControl');
 jest.dontMock('../Inventory');
 jest.dontMock('../InventoryRow');
+jest.dontMock('../ArmorControl');
+jest.dontMock('../AddArmorControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -73,19 +75,35 @@ describe('stat block weight handling', function() {
     it("adds armor weight", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            block.handleArmorChanged(factories.armorFactory({base: {weight: 8}}));
-            expect(block.getCarriedWeight()).toEqual(8);
-            done();
+            var armor = factories.armorFactory({base: {weight: 8}});
+            var promise = Promise.resolve(
+            Object.assign({}, armor, {id: 1, name: "foo armor"}));
+            rest.post.mockReturnValue(promise);
+
+            block.handleArmorChanged(armor);
+            promise.then(() => {
+                expect(block.getCarriedWeight()).toEqual(8);
+                done();
+            });
         });
     });
 
     it("accounts for armor quality", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            block.handleArmorChanged(factories.armorFactory({base: {weight: 8},
-            quality: {mod_weight_multiplier: 0.8}}));
-            expect(block.getCarriedWeight()).toEqual(6.4);
-            done();
+            var armor = factories.armorFactory({
+                base: {weight: 8},
+                quality: {mod_weight_multiplier: 0.8}});
+            var promise = Promise.resolve(
+            Object.assign({}, armor, {id: 1, name: "foo armor"}));
+            rest.post.mockReturnValue(promise);
+
+            block.handleArmorChanged(armor);
+
+            promise.then(() => {
+                expect(block.getCarriedWeight()).toEqual(6.4);
+                done();
+            });
         });
     });
 
@@ -93,11 +111,19 @@ describe('stat block weight handling', function() {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
             expect(block.getCarriedWeight()).toEqual(0);
-            block.handleHelmChanged(factories.armorFactory({
+            var armor = factories.armorFactory({
                 base: {is_helm:true, weight: 8},
-                quality: {mod_weight_multiplier: 0.8}}));
-            expect(block.getCarriedWeight()).toEqual(6.4);
-            done();
+                quality: {mod_weight_multiplier: 0.8}});
+            var promise = Promise.resolve(
+            Object.assign({}, armor, {id: 1, name: "foo armor"}));
+            rest.post.mockReturnValue(promise);
+
+            block.handleHelmChanged(armor);
+
+            promise.then(() => {
+                expect(block.getCarriedWeight()).toEqual(6.4);
+                done();
+            });
         });
     });
 
