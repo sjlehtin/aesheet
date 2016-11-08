@@ -693,6 +693,8 @@ var statBlockFactory = function (overrides) {
             return jsonResponse([]);
         } else if (url === "/rest/sheets/1/sheetmiscellaneousitems/") {
             return jsonResponse([]);
+        } else if (url === "/rest/miscellaneousitems/campaign/2/") {
+            return jsonResponse([]);
         } else {
             /* Throwing errors here do not cancel the test. */
             fail("this is an unsupported url:" + url);

@@ -22,6 +22,8 @@ jest.dontMock('../Inventory');
 jest.dontMock('../InventoryRow');
 jest.dontMock('../ArmorControl');
 jest.dontMock('../AddArmorControl');
+jest.dontMock('../MiscellaneousItemRow');
+jest.dontMock('../AddMiscellaneousItemControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
