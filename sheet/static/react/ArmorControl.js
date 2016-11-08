@@ -21,13 +21,13 @@ class ArmorControl extends React.Component {
             }
             return 0;
         }
-        if (this.props.armor) {
+        if (this.props.armor && this.props.armor.base) {
             stat += getFieldValue(this.props.armor.base[accessor]);
             if (location !== "H") {
                 stat += getFieldValue(this.props.armor.quality[quality]);
             }
         }
-        if (this.props.helm) {
+        if (this.props.helm && this.props.helm.base) {
             stat += getFieldValue(this.props.helm.base[accessor]);
             if (location === "H") {
                 stat += getFieldValue(this.props.helm.quality[quality]);
@@ -57,14 +57,15 @@ class ArmorControl extends React.Component {
                     <a href="/sheets/add_armor_template/">Create a new armortemplate</a>
                     <a href="/sheets/add_armor_quality/">Create new quality</a>
                     <a href="/sheets/add_armor_special_quality/">Create new special quality</a>
-                </div></div>;
+                </div>
+            </div>;
             buttonText = 'Close';
         }
         var armors = [];
-        if (this.props.helm.name) {
+        if (this.props.helm && this.props.helm.name) {
             armors.push(this.props.helm.name);
         }
-        if (this.props.armor.name) {
+        if (this.props.armor && this.props.armor.name) {
             armors.push(this.props.armor.name)
         }
 
@@ -82,7 +83,9 @@ class ArmorControl extends React.Component {
             row.push(<td style={cellStyle} key={loc + "-1"}>{dice[loc]}</td>);
             row.push(<td style={cellStyle} key={loc + "-2"}>{loc}</td>);
             for (let col of ["P", "S", "B", "R", "DR", "DP", "PL"]) {
-                row.push(<td style={cellStyle} key={loc + '-' + col}>{ util.rounddown(this.getArmorStat(loc, col)) }</td>);
+                row.push(<td style={cellStyle} key={loc + '-' + col}>
+                    { util.rounddown(this.getArmorStat(loc, col)) }
+                </td>);
             }
             locations.push(<tr key={loc}>{row}</tr>);
         }
