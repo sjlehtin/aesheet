@@ -72,67 +72,7 @@ class ItemHandlingTestCase(TestCase):
                                           prefix="add-helm",
                                           accessor=lambda char:
                                           [char.helm().name])
-
-    def test_add_armor(self):
-        response = self.client.get(reverse(views.sheet_detail,
-                                           args=[1]))
-        self.assertContains(response, "No armor.")
-        self.assertContains(response, "No helmet.")
-        response = self.add_armor_and_verify("Plate mail", "L5",
-                                             "Plate mail L5")
-        self.assertNotContains(response, "No armor.")
-        self.add_armor_and_verify("Plate mail", "L3",
-                                  "Plate mail L3")
-        response = self.add_helm_and_verify("Basinet wfa", "L5",
-                                            "Basinet wfa L5")
-        self.assertNotContains(response, "No helmet.")
-        self.add_helm_and_verify("Basinet wfa", "L3",
-                                 "Basinet wfa L3")
-
-    def test_add_remove_armor(self):
-        det_url = reverse(views.sheet_detail, args=[1])
-
-        hh = Armor.objects.get(name='Basinet wfa L5')
-        # Add helmet.
-        req_data = { 'add-existing-helm-item' : hh.pk }
-        response = self.client.get(det_url)
-        self.assertContains(response, "No helmet.")
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertNotContains(response, "No helmet.")
-        self.assertEquals(response.context['sheet'].helm().name,
-                          'Basinet wfa L5')
-        # Remove helmet.
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'Helm',
-                     }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertContains(response, "No helmet.")
-
-        # Add armor.
-        aa = Armor.objects.get(name='Plate mail L5')
-        req_data = { 'add-existing-armor-item' : aa.pk }
-        response = self.client.get(det_url)
-        self.assertContains(response, "No armor.")
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertNotContains(response, "No armor.")
-        self.assertEquals(response.context['sheet'].armor().name,
-                          'Plate mail L5')
-
-        # Remove armor.
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'Armor',
-                     }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertContains(response, "No armor.")
-
+    
 
 class BaseFirearmFormTestCase(TestCase):
     def setUp(self):
