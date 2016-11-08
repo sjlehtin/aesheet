@@ -18,7 +18,7 @@ describe('ArmorControl', function() {
     "use strict";
 
     var getArmorControl = function (givenProps) {
-        var props = {};
+        var props = {campaign: 1};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
@@ -32,6 +32,8 @@ describe('ArmorControl', function() {
 
     it("can render the add controls", function () {
         var control = getArmorControl({armor: {}, helm: {}});
+
+        rest.getData.mockReturnValue(Promise.resolve([]));
 
         var addControls = TestUtils.scryRenderedComponentsWithType(control,
             AddArmorControl);
