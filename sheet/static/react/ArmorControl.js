@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Input } from 'react-bootstrap';
 import AddArmorControl from 'AddArmorControl';
+var util = require('sheet-util');
 
 class ArmorControl extends React.Component {
     constructor(props) {
@@ -10,9 +11,35 @@ class ArmorControl extends React.Component {
     }
 
     getArmorStat(location, type) {
-        return 0;
-        return parseFloat(this.props.armor.base[`armor_${location.toLowerCase()}_${type.toLowerCase()}`]) +
-            parseFloat(this.props.helm.base[`armor_${location.toLowerCase()}_${type.toLowerCase()}`]);
+        var stat = 0;
+        var accessor = `armor_${location.toLowerCase()}_${type.toLowerCase()}`;
+        var quality = `armor_${type.toLowerCase()}`;
+
+        var getFieldValue = function(field) {
+            if (field) {
+                return parseFloat(field);
+            }
+            return 0;
+        }
+        if (this.props.armor) {
+            stat += getFieldValue(this.props.armor.base[accessor]);
+            if (location !== "H") {
+                stat += getFieldValue(this.props.armor.quality[quality]);
+            }
+        }
+        if (this.props.helm) {
+            stat += getFieldValue(this.props.helm.base[accessor]);
+            if (location === "H") {
+                stat += getFieldValue(this.props.helm.quality[quality]);
+            }
+        }
+
+        for (let item of this.props.miscellaneousItems) {
+            for (let ql of item.item.armor_qualities) {
+                    stat += getFieldValue(ql[accessor]);
+            }
+        }
+        return stat;
     }
 
     render() {
@@ -46,7 +73,7 @@ class ArmorControl extends React.Component {
         var cellStyle = {minWidth: "2em"};
 
         armorStats.push(<thead key={"thead"}><tr><th>d8</th><th>Loc</th>
-             <th>P</th><th>S</th><th>B</th><th>Br</th><th>DR</th><th>DP</th>
+             <th>P</th><th>S</th><th>B</th><th>R</th><th>DR</th><th>DP</th>
              <th>PL</th></tr></thead>);
         var locations = [];
         var dice = { H: "8", T: "5-7", RA: "4", RL: "3", LA: "2", LL: "1"};
@@ -55,7 +82,7 @@ class ArmorControl extends React.Component {
             row.push(<td style={cellStyle} key={loc + "-1"}>{dice[loc]}</td>);
             row.push(<td style={cellStyle} key={loc + "-2"}>{loc}</td>);
             for (let col of ["P", "S", "B", "R", "DR", "DP", "PL"]) {
-                row.push(<td style={cellStyle} key={loc + '-' + col}>{ this.getArmorStat(loc, col) }</td>);
+                row.push(<td style={cellStyle} key={loc + '-' + col}>{ util.rounddown(this.getArmorStat(loc, col)) }</td>);
             }
             locations.push(<tr key={loc}>{row}</tr>);
         }
@@ -77,6 +104,7 @@ ArmorControl.propTypes = {
     tag: React.PropTypes.string,
     armor: React.PropTypes.object,
     helm: React.PropTypes.object,
+    miscellaneousItems: React.PropTypes.arrayOf(React.PropTypes.object),
     effects: React.PropTypes.arrayOf(React.PropTypes.object),
     campaign: React.PropTypes.number.isRequired,
     onHelmChange: React.PropTypes.func,
