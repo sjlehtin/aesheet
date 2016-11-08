@@ -101,22 +101,7 @@ class StatBlock extends React.Component {
         this.setState({armor: armor})
     }
 
-    handleArmorChanged(armor, url, finalizer) {
-        if (typeof(url) === "undefined") {
-            url = this.getArmorURL();
-        }
-
-        if (typeof(finalizer) === "undefined") {
-            finalizer = (item) => { this.setState({armor: armor}); };
-        }
-
-        if (armor === null) {
-            rest.delete(url).then(function (json) {
-                finalizer(null);
-            }).catch((err) => {console.log("error", err)});
-            return;
-        }
-
+    changeArmor(armor, url, finalizer) {
         var data;
         if ('id' in armor) {
             data = {item: armor.id};
@@ -132,7 +117,21 @@ class StatBlock extends React.Component {
             armor.id = json.id;
             armor.name = json.name;
             finalizer(armor);
-        }).catch((err) => {console.log("error", err)});
+        }).catch((err) => {
+            console.log("error", err)
+        });
+    }
+
+    handleArmorChanged(armor) {
+        var finalizer = (item) => { this.setState({armor: item}); };
+
+        if (armor === null) {
+            rest.delete(this.getArmorURL(this.state.armor)).then(function (json) {
+                finalizer({});
+            }).catch((err) => {console.log("error", err)});
+            return;
+        }
+        this.changeArmor(armor, this.getArmorURL(), finalizer);
     }
 
     getHelmURL(item) {
@@ -150,8 +149,14 @@ class StatBlock extends React.Component {
     }
 
     handleHelmChanged(armor) {
-        this.handleArmorChanged(armor, this.getHelmURL(),
-            (helm) => {this.setState({helm: helm});});
+        var finalizer = (helm) => {this.setState({helm: helm});};
+        if (armor === null) {
+            rest.delete(this.getHelmURL(this.state.helm)).then(function (json) {
+                finalizer({});
+            }).catch((err) => {console.log("error", err)});
+            return;
+        }
+        this.changeArmor(armor, this.getHelmURL(), finalizer);
     }
 
 

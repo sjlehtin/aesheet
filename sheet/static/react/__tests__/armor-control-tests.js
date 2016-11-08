@@ -18,6 +18,8 @@ describe('ArmorControl', function() {
     "use strict";
 
     var getArmorControl = function (givenProps) {
+        rest.getData.mockReturnValue(Promise.resolve([]));
+
         var props = {campaign: 1};
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -33,8 +35,6 @@ describe('ArmorControl', function() {
     it("can render the add controls", function () {
         var control = getArmorControl({armor: {}, helm: {}});
 
-        rest.getData.mockReturnValue(Promise.resolve([]));
-
         var addControls = TestUtils.scryRenderedComponentsWithType(control,
             AddArmorControl);
         expect(addControls.length).toEqual(0);
@@ -44,6 +44,38 @@ describe('ArmorControl', function() {
         addControls = TestUtils.scryRenderedComponentsWithType(control,
             AddArmorControl);
         expect(addControls.length).toEqual(2);
+    });
+
+    it("can remove the helmet", function () {
+        var spy = jasmine.createSpy();
+
+        var control = getArmorControl({
+            armor: factories.armorFactory(),
+            helm: factories.armorFactory({is_helm: true}),
+            onHelmChange: spy
+        });
+
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._editButton));
+
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._removeHelmetButton));
+
+        expect(spy).toHaveBeenCalledWith(null);
+    });
+
+    it("can remove the helmet", function () {
+        var spy = jasmine.createSpy();
+
+        var control = getArmorControl({
+            armor: factories.armorFactory(),
+            helm: factories.armorFactory({is_helm: true}),
+            onArmorChange: spy
+        });
+
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._editButton));
+
+        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._removeArmorButton));
+
+        expect(spy).toHaveBeenCalledWith(null);
     });
 
 });

@@ -47,6 +47,13 @@ class ArmorControl extends React.Component {
         var buttonText = 'Edit';
         if (this.state.editing) {
             addControls = <div>
+                <Button ref={(c) => this._removeHelmetButton = c}
+                    onClick={() => {this.props.onHelmChange(null)}}>
+                    Remove helmet</Button>
+                <Button ref={(c) => this._removeArmorButton = c}
+                        onClick={() => this.props.onArmorChange(null)}>
+                    Remove armor</Button>
+
                 <AddArmorControl
                     tag="Helmet"
                     onChange={(value) => this.props.onHelmChange(value) }

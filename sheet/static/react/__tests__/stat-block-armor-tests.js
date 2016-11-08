@@ -125,7 +125,7 @@ describe('stat block armor handling', function(done) {
             block.handleHelmChanged(null);
 
             promise.then(() => {
-                expect(block.state.helm).toBe(null);
+                expect(block.state.helm).toEqual({});
                 done();
             });
         });
@@ -143,8 +143,29 @@ describe('stat block armor handling', function(done) {
             block.handleArmorChanged(null);
 
             promise.then(() => {
-                expect(block.state.armor).toBe(null);
+                expect(block.state.armor).toEqual({});
                 done();
+            });
+        });
+    });
+
+    it("does not have a problem with removing armor twice", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleArmorLoaded(factories.armorFactory({base: {weight: 8}}));
+            expect(block.state.armor.base.weight).toEqual(8);
+
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
+
+            block.handleArmorChanged(null);
+
+            promise.then(() => {
+                expect(block.state.armor).toEqual({});
+                block.handleArmorChanged(null);
+                promise.then(() => {
+                    done();
+                });
             });
         });
     });
