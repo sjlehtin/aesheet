@@ -289,11 +289,7 @@ def process_sheet_change_request(request, sheet):
         item = form.cleaned_data['item']
         item_type = form.cleaned_data['item_type']
         logger.info("Removing %s" % item_type)
-        if item_type == "Armor":
-            sheet.armor = None
-        elif item_type == "Helm":
-            sheet.helm = None
-        elif item_type == "MiscellaneousItem":
+        if item_type == "MiscellaneousItem":
             item = get_object_or_404(MiscellaneousItem, pk=item)
             sheet.miscellaneous_items.remove(item)
         elif item_type == "CharacterEdge":
@@ -352,10 +348,6 @@ def sheet_detail(request, sheet_id=None):
                                 prefix=prefix, **kwargs)
 
     add_form(AddEdgeForm, "add-edge", instance=sheet.character)
-    add_form(AddExistingHelmForm, "add-existing-helm", instance=sheet)
-    add_form(AddHelmForm, "add-helm", instance=sheet)
-    add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
-    add_form(AddArmorForm, "add-armor", instance=sheet)
     add_form(AddExistingMiscellaneousItemForm,
              "add-existing-miscellaneous-item", instance=sheet)
 
