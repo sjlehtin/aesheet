@@ -26,7 +26,7 @@ var rest = require('sheet-rest');
 var util = require('sheet-util');
 
 /**
- * TODO: controls to add bought_mana, bought_stamina, age sp, change
+ * TODO: controls to add bought_mana, bought_stamina, change
  * portrait, adventures, times wounded.
  */
 class StatBlock extends React.Component {
@@ -108,6 +108,13 @@ class StatBlock extends React.Component {
 
         if (typeof(finalizer) === "undefined") {
             finalizer = (item) => { this.setState({armor: armor}); };
+        }
+
+        if (armor === null) {
+            rest.delete(url).then(function (json) {
+                finalizer(null);
+            }).catch((err) => {console.log("error", err)});
+            return;
         }
 
         var data;
@@ -977,7 +984,6 @@ class StatBlock extends React.Component {
         if (!this.state.char || !this.state.armor || !this.state.helm) {
             return <Loading>Armor</Loading>;
         }
-
         return <Panel header={<h4>Armor</h4>}>
             <ArmorControl
                 campaign={this.state.char.campaign}

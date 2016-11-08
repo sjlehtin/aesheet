@@ -108,9 +108,45 @@ describe('stat block armor handling', function(done) {
             block.handleHelmChanged(armor);
             promise.then(() => {
                 expect(block.state.helm.base.weight).toEqual(8);
-                // TODO: change armor with REST.
                 done();
             });
         });
     });
+
+    it("can remove the helm", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleHelmLoaded(factories.armorFactory({base: {is_helm: true, weight: 8}}));
+            expect(block.state.helm.base.weight).toEqual(8);
+
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
+
+            block.handleHelmChanged(null);
+
+            promise.then(() => {
+                expect(block.state.helm).toBe(null);
+                done();
+            });
+        });
+    });
+
+    it("can remove the armor", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleArmorLoaded(factories.armorFactory({base: {weight: 8}}));
+            expect(block.state.armor.base.weight).toEqual(8);
+
+            var promise = Promise.resolve({});
+            rest.delete.mockReturnValue(promise);
+
+            block.handleArmorChanged(null);
+
+            promise.then(() => {
+                expect(block.state.armor).toBe(null);
+                done();
+            });
+        });
+    });
+
 });
