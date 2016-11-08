@@ -82,17 +82,22 @@ class ArmorControl extends React.Component {
 
         var armorStats = [];
 
-        var cellStyle = {minWidth: "2em"};
+        var headerStyle = {textAlign: "center", minWidth: "2.5em"};
+        var cellStyle = { minWidth: "2.5em", textAlign: "center", border: "1px dotted black" };
+        var descStyle = Object.assign({fontWeight: "bold"}, cellStyle);
 
-        armorStats.push(<thead key={"thead"}><tr><th>d8</th><th>Loc</th>
-             <th>P</th><th>S</th><th>B</th><th>R</th><th>DR</th><th>DP</th>
-             <th>PL</th></tr></thead>);
+        var headerCells = ["d8", "Loc", "P", "S", "B", "R", "DR", "DP",
+            "PL"].map((el, ii) => {
+            return <th style={headerStyle} key={ii}>{el}</th>;});
+
+        armorStats.push(<thead style={headerStyle} key={"thead"}>
+            <tr>{headerCells}</tr></thead>);
         var locations = [];
         var dice = { H: "8", T: "5-7", RA: "4", RL: "3", LA: "2", LL: "1"};
         for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
             var row = [];
-            row.push(<td style={cellStyle} key={loc + "-1"}>{dice[loc]}</td>);
-            row.push(<td style={cellStyle} key={loc + "-2"}>{loc}</td>);
+            row.push(<td style={descStyle} key={loc + "-1"}>{dice[loc]}</td>);
+            row.push(<td style={descStyle} key={loc + "-2"}>{loc}</td>);
             for (let col of ["P", "S", "B", "R", "DR", "DP", "PL"]) {
                 row.push(<td style={cellStyle} key={loc + '-' + col}>
                     { util.rounddown(this.getArmorStat(loc, col)) }
