@@ -255,7 +255,7 @@ var armorQualityFactory = function (overrideFields) {
 var miscellaneousItemFactory = function (overrideFields) {
     "use strict";
     var item = {
-        "id": 1,
+        "id": objectId++,
         "name": "Bullet proof cloak",
         "description": "",
         "notes": "",
@@ -270,6 +270,23 @@ var miscellaneousItemFactory = function (overrideFields) {
         overrideFields = {};
     }
     return Object.assign(item, overrideFields);
+};
+
+var sheetMiscellaneousItemFactory = function (overrideFields) {
+    "use strict";
+
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var item = {};
+    if (overrideFields.item) {
+        item = overrideFields.item;
+        delete overrideFields.item;
+    }
+    var sheetItem = Object.assign({id: objectId++}, overrideFields);
+    sheetItem.item = miscellaneousItemFactory(item);
+    return sheetItem;
 };
 
 var armorTemplateFactory = function (overrideFields) {
@@ -708,5 +725,6 @@ module.exports = {
     armorTemplateFactory: armorTemplateFactory,
     armorQualityFactory: armorQualityFactory,
     armorFactory: armorFactory,
-    miscellaneousItemFactory: miscellaneousItemFactory
+    miscellaneousItemFactory: miscellaneousItemFactory,
+    sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory
 };
