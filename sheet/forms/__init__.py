@@ -431,7 +431,8 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             new_sheet.firearms.add(firearm)
 
         for item in miscellaneous_items:
-            new_sheet.miscellaneous_items.add(item)
+            sheet.models.SheetMiscellaneousItem.objects.create(
+                sheet=new_sheet, item=item)
 
         for effect in transient_effects:
             sheet.models.SheetTransientEffect.objects.create(
