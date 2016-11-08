@@ -76,15 +76,6 @@ perhaps Robot-system tests.
         <div class="col-md-9">
 
 <div class="row">
-<div class="col-md-4">
-    {% include "sheet/sheet_detail/armor.html" %}
-
-    <div>
-        <ul>
-            <li>Weight carried: {{ sheet.weight_carried }} kg </li>
-        </ul>
-    </div>
-</div>
     <div class="col-md-8">
         {% include "sheet/sheet_detail/movement.html" %}
     </div>
@@ -110,28 +101,6 @@ perhaps Robot-system tests.
             </div>
             <div class="panel-body">
                 {% include "sheet/sheet_detail/edit_edges.html" %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-sm-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Helm</h3>
-            </div>
-            <div class="panel-body">
-                {% include "sheet/sheet_detail/edit_helm.html" %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-sm-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Armor</h3>
-            </div>
-            <div class="panel-body">
-                {% include "sheet/sheet_detail/edit_armor.html" %}
             </div>
         </div>
     </div>
