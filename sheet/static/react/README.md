@@ -11,9 +11,8 @@ Lots of dependencies for react-bootstrap needed to be added to the
 unmockedModulePathPatterns in the jest configuration in package.json; this
 is mentioned here because the package.json does not allow comments.
 
-TODO: stat modifications due to weight carried
-TODO: weight from armor and weapons
 TODO: armor
+TODO: stat modifiers from armor
 TODO: stat modifiers from weaponspecialqualities in weapons
 TODO: stat modifiers from armorspecialqualities in armor
 TODO: stat modifiers from specialqualities in miscellaneous items
