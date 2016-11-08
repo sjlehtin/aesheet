@@ -48,6 +48,7 @@ class StatBlock extends React.Component {
             weaponList: [],
             rangedWeaponList: [],
             transientEffectList: undefined,
+            miscellaneousItemList: [],
 
             carriedInventoryWeight: 0,
 
@@ -74,6 +75,11 @@ class StatBlock extends React.Component {
     handleTransientEffectsLoaded(effects) {
         console.log("Transient effects loaded");
         this.setState({transientEffectList: effects});
+    }
+
+    handleMiscellaneousItemsLoaded(items) {
+        console.log("Miscellaneous items loaded");
+        this.setState({miscellaneousItemList: items});
     }
 
     handleSkillsLoaded(skillList, allSkills) {
@@ -163,6 +169,11 @@ class StatBlock extends React.Component {
         rest.getData(this.props.url + 'sheettransienteffects/').then((json) => {
             this.handleTransientEffectsLoaded(json);
         }).catch((err) => {console.log("Failed to load transient effects:",
+            err)});
+
+        rest.getData(this.props.url + 'sheetmiscellaneousitems/').then((json) => {
+            this.handleMiscellaneousItemsLoaded(json);
+        }).catch((err) => {console.log("Failed to load miscellaneous items:",
             err)});
 
         rest.getData(this.props.url + 'sheetarmor/').then((json) => {
@@ -822,6 +833,10 @@ class StatBlock extends React.Component {
             weight += parseFloat(wpn.base.weight);
         }
 
+        for (let item of this.state.miscellaneousItemList){
+            weight += parseFloat(item.item.weight);
+        }
+
         return weight + this.state.carriedInventoryWeight;
     }
 
@@ -964,8 +979,11 @@ class StatBlock extends React.Component {
         }
 
         return <Panel header={<h4>Armor</h4>}>
-            <ArmorControl campaign={this.state.char.campaign}
-                          armor={this.state.armor} helm={this.state.helm}
+            <ArmorControl
+                campaign={this.state.char.campaign}
+                armor={this.state.armor}
+                helm={this.state.helm}
+                miscellaneousItems={this.state.miscellaneousItemList}
                 onHelmChange={(value) => this.handleHelmChanged(value)}
                 onArmorChange={(value) => this.handleArmorChanged(value)}
                 />

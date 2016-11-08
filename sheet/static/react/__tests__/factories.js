@@ -252,6 +252,26 @@ var armorQualityFactory = function (overrideFields) {
     return Object.assign(quality, overrideFields);
 };
 
+var miscellaneousItemFactory = function (overrideFields) {
+    "use strict";
+    var item = {
+        "id": 1,
+        "name": "Bullet proof cloak",
+        "description": "",
+        "notes": "",
+        "weight": "1.00",
+        "tech_level": 5,
+        "armor_qualities": [
+            "DR Torso L1"
+        ],
+        "weapon_qualities": []
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(item, overrideFields);
+};
+
 var armorTemplateFactory = function (overrideFields) {
     "use strict";
     var quality = {
@@ -654,6 +674,8 @@ var statBlockFactory = function (overrides) {
             return jsonResponse([]);
         } else if (url === "/rest/sheets/1/sheethelm/") {
             return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetmiscellaneousitems/") {
+            return jsonResponse([]);
         } else {
             /* Throwing errors here do not cancel the test. */
             fail("this is an unsupported url:" + url);
@@ -685,5 +707,6 @@ module.exports = {
     inventoryEntryFactory: inventoryEntryFactory,
     armorTemplateFactory: armorTemplateFactory,
     armorQualityFactory: armorQualityFactory,
-    armorFactory: armorFactory
+    armorFactory: armorFactory,
+    miscellaneousItemFactory: miscellaneousItemFactory
 };

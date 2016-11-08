@@ -159,6 +159,16 @@ describe('stat block weight handling', function() {
         });
     });
 
+    it("adds miscellaneous items weight", function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            block.handleMiscellaneousItemsLoaded([factories.miscellaneousItemFactory({
+                weight: 2})]);
+            expect(block.getCarriedWeight()).toEqual(2);
+            done();
+        });
+    });
+
     it("handles lists of weapons", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
