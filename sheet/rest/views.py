@@ -203,9 +203,9 @@ class ArmorViewSet(CampaignMixin, viewsets.ModelViewSet):
         if self.action == 'create':
             # When creating new, we do not want the full nested
             # representation, just id's.
-            return serializers.ArmorCreateSerializer
+            return self.create_serializer
         else:
-            return serializers.ArmorListSerializer
+            return self.list_serializer
 
     def get_queryset(self):
         qs = models.Armor.objects.select_related().all()

@@ -19,6 +19,8 @@ import SkillHandler from 'SkillHandler';
 import StatHandler from 'StatHandler';
 import Inventory from 'Inventory';
 import ArmorControl from 'ArmorControl';
+import MiscellaneousItemRow from 'MiscellaneousItemRow';
+import AddMiscellaneousItemControl from 'AddMiscellaneousItemControl';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -584,6 +586,38 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
+    getMiscellaneousItemURL(eff) {
+        var baseURL = this.props.url + 'sheetmiscellaneousitems/';
+        if (eff) {
+            return baseURL + eff.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleMiscellaneousItemAdded(data) {
+        var item = {item: data};
+        console.log("Adding: ", item);
+        rest.post(this.getMiscellaneousItemURL(), {item: data.id}).then((json) => {
+            console.log("POST success", json);
+            item.id = json.id;
+            var newList = this.state.miscellaneousItemList;
+            newList.push(item);
+            this.setState({miscellaneousItemList: newList});
+        }).catch((err) => {console.log("error", err)});
+    }
+
+    handleMiscellaneousItemRemoved(item) {
+        rest.delete(this.getMiscellaneousItemURL(item), item).then(
+            (json) => {
+                var index = StatBlock.findItemIndex(
+                    this.state.miscellaneousItemList, item);
+                this.state.miscellaneousItemList.splice(index, 1);
+                this.setState({miscellaneousItemList:
+                  this.state.miscellaneousItemList});
+            }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
     renderDescription() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading/>;
@@ -977,9 +1011,40 @@ class StatBlock extends React.Component {
                     onAdd={(eff) => this.handleTransientEffectAdded(eff) }/>
             </Table>
         </Panel>;
-
     }
 
+    renderMiscellaneousItems() {
+        if (!this.state.miscellaneousItemList || !this.state.char) {
+            return <Loading>Miscellaneous items</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let item of this.state.miscellaneousItemList) {
+            rows.push(<MiscellaneousItemRow
+                key={idx++}
+                item={item}
+                onRemove={(item) => this.handleMiscellaneousItemRemoved(item) }
+            />);
+        }
+
+        return <Panel header={<h4>Miscellaneous items</h4>}>
+            <Table striped fill>
+                <thead>
+                <tr><th>Item</th></tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+                <AddMiscellaneousItemControl
+                    campaign={this.state.char.campaign}
+                    onAdd={(eff) => this.handleMiscellaneousItemAdded(eff) }/>
+            </Table>
+        </Panel>;
+    }
+    
     renderInventory() {
         return <Inventory url={this.props.url + "inventory/"}
                           onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
@@ -1049,6 +1114,9 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         {this.renderRangedWeapons(skillHandler)}
+                    </Row>
+                    <Row>
+                        {this.renderMiscellaneousItems()}
                     </Row>
                     <Row>
                         {this.renderTransientEffects()}
