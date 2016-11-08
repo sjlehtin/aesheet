@@ -124,10 +124,17 @@ class SheetTransientEffectListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class MiscellaneousItemSerializer(serializers.ModelSerializer):
+class MiscellaneousItemCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.MiscellaneousItem
         fields = "__all__"
+
+
+class MiscellaneousItemListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.MiscellaneousItem
+        fields = "__all__"
+        depth = 1
 
 
 class SheetMiscellaneousItemCreateSerializer(serializers.ModelSerializer):
@@ -137,7 +144,7 @@ class SheetMiscellaneousItemCreateSerializer(serializers.ModelSerializer):
 
 
 class SheetMiscellaneousItemListSerializer(serializers.ModelSerializer):
-    item = MiscellaneousItemSerializer()
+    item = MiscellaneousItemListSerializer()
     class Meta:
         model = sheet.models.SheetMiscellaneousItem
         fields = "__all__"
