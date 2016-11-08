@@ -114,4 +114,5 @@ ArmorControl.propTypes = {
     onArmorChange: React.PropTypes.func
 };
 
+ArmorControl.defaultProps = {miscellaneousItems: []}
 export default ArmorControl;
