@@ -65,6 +65,8 @@ class SkillFactory(factory.DjangoModelFactory):
 
 
 class EdgeFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda xx: "edge-{0}".format(xx))
+
     class Meta:
         model = models.Edge
         django_get_or_create = ('name', )
