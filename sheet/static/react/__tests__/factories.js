@@ -106,9 +106,30 @@ var skillFactory = function (overrideFields) {
     return Object.assign(_baseSkill, overrideFields);
 };
 
+
 var nextEdgeID = 0;
 
 var edgeFactory = function (overrideFields) {
+    "use strict";
+
+    var edge = {
+        "name": "Acute Hearing",
+        "description": "",
+        "notes": ""
+    };
+    return Object.assign(edge, overrideFields);
+};
+
+var edgeLevelFactory = function (overrideFields) {
+    if (!overrideFields){
+        overrideFields = {};
+    }
+    var edge = edgeFactory(overrideFields.edge);
+
+    if ('edge' in overrideFields) {
+        delete overrideFields.edge;
+    }
+
     var _baseEdge = {
         "id": nextEdgeID,
     "notes": "",
@@ -136,9 +157,9 @@ var edgeFactory = function (overrideFields) {
     "level": 1,
     "cost": "-1.0",
     "requires_hero": false,
-    "edge": "Uncouth",
-        "skill_bonuses": [],
-        "extra_skill_points": 0
+    "edge": edge,
+    "skill_bonuses": [],
+    "extra_skill_points": 0
     };
 
     var newEdge = Object.assign(_baseEdge, overrideFields);
@@ -663,6 +684,8 @@ var statBlockFactory = function (overrides) {
             return jsonResponse(charData);
         } else if (url === "/rest/characters/2/characterskills/") {
             return jsonResponse([]);
+        } else if (url === "/rest/characters/2/characteredges/") {
+            return jsonResponse([]);
         } else if (url === "/rest/skills/campaign/2/") {
             return jsonResponse([]);
         } else if (url === "/rest/weapontemplates/campaign/2/") {
@@ -716,6 +739,7 @@ module.exports = {
     statBlockFactory: statBlockFactory,
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
+    edgeLevelFactory: edgeLevelFactory,
     edgeFactory: edgeFactory,
     statsFactory: statsFactory,
     firearmFactory: firearmFactory,

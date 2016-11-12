@@ -530,3 +530,42 @@ class SheetMiscellaneousItemViewSet(SheetTransientEffectViewSet):
     list_serializer = serializers.SheetMiscellaneousItemListSerializer
     model = models.SheetMiscellaneousItem
 
+
+class CharacterEdgeViewSet(ListPermissionMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.CharacterEdgeCreateSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.character = models.Character.objects.get(
+                pk=self.kwargs['character_pk'])
+        self.containing_object = self.character
+        return super(CharacterEdgeViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        return models.CharacterEdge.objects.filter(character=self.character)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.CharacterEdgeCreateSerializer
+        else:
+            return serializers.CharacterEdgeListSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(CharacterEdgeViewSet, self).get_serializer(
+                *args, **kwargs)
+        if self.action == 'create':
+            # ListSerializer does not have the fields.
+            serializer.fields['character'].default = self.character
+            serializer.fields['character'].read_only = True
+            # The effect will not be changed with this API after creation.
+            if serializer.instance is not None:
+                serializer.fields['edge'].read_only = True
+
+        return serializer
+
+
+    def perform_create(self, serializer):
+        super(CharacterEdgeViewSet, self).perform_create(
+            serializer)

@@ -712,6 +712,9 @@ class CharacterEdge(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     edge = models.ForeignKey(EdgeLevel)
 
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
+
     def __unicode__(self):
         return u"%s: %s" % (self.character, self.edge)
 

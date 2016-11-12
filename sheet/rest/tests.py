@@ -161,7 +161,7 @@ class EdgeTestCase(TestCase):
         response = client.get(url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertIn("edge", response.data)
-        self.assertEqual(response.data['edge'], "Toughness")
+        self.assertEqual(response.data['edge']['name'], "Toughness")
 
 
 class InventoryTestCase(TestCase):
@@ -1493,3 +1493,104 @@ class SheetMiscellaneousItemTestCase(TestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(models.SheetMiscellaneousItem.objects.count(), 0,
                          "The tying row should get deleted")
+
+
+class CharacterEdgeTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/characters/{}/characteredges/'.format(
+            self.sheet.character.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_items(self):
+        factories.CharacterEdgeFactory(character=self.sheet.character)
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertIsInstance(response.data[0]["edge"], dict)
+
+    def test_adding_items(self):
+        edge = factories.EdgeLevelFactory(edge__name="Natural climber")
+
+        response = self.client.post(
+                self.url,
+                data={'edge': edge.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Character.objects.get(
+            id=self.sheet.character.id).edges.all()[0].edge.name,
+                         "Natural climber")
+
+    # def test_modifying_items(self):
+    #     sheet_effect = factories.SheetMiscellaneousItemFactory(
+    #         sheet=self.sheet, order=2)
+    #     response = self.client.patch(
+    #             "{}/{}".format(self.url, sheet_effect.pk),
+    #             data={'order': 3}, format='json')
+    #     self.assertEqual(response.status_code, 201)
+    #     self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
+    #                      .transient_effects()[0].order, 3)
+
+
+    def test_deleting_items(self):
+        char_edge = factories.CharacterEdgeFactory(
+            character=self.sheet.character)
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, char_edge.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(models.CharacterEdge.objects.count(), 0,
+                         "The tying row should get deleted")
+
+
+class EdgeLevelTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.tech_twok = factories.TechLevelFactory(name="2K")
+        self.tech_threek = factories.TechLevelFactory(name="3K")
+        self.campaign_mr = factories.CampaignFactory(name='MR',
+                                                     tech_levels=["2K"])
+        self.campaign_gz = factories.CampaignFactory(name='GZ',
+                                                     tech_levels=["2K", "3K"])
+        factories.EdgeLevelFactory(edge__name="Night vision")
+            #, edge__tech_level=self.tech_twok)
+        factories.EdgeLevelFactory(edge__name="Machine empathy")
+            #                       edge__tech_level=self.tech_threek)
+
+    def test_main_url(self):
+        url = '/rest/edgelevels/'.format()
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_gz_campaign_url(self):
+        url = '/rest/edgelevels/campaign/{}/'.format(
+            self.campaign_gz.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_mr_campaign_url(self):
+        url = '/rest/edgelevels/campaign/{}/'.format(
+            self.campaign_mr.pk)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+        names = [item['edge']['name'] for item in response.data]
+        self.assertIn("Night vision", names)
+
+

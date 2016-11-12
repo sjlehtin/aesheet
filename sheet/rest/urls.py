@@ -5,7 +5,11 @@ from rest_framework import routers
 router = routers.SimpleRouter()
 router.register(r'sheets', views.SheetViewSet)
 router.register(r'characters', views.CharacterViewSet)
+
 router.register(r'edgelevels', views.EdgeLevelViewSet)
+router.register(r'edgelevels/campaign/(?P<campaign_pk>[0-9]+)',
+                views.EdgeLevelViewSet,
+                base_name='campaign-edgelevel')
 
 router.register(r'characters/(?P<character_pk>[0-9]+)/characterskills',
                 views.CharacterSkillViewSet,
@@ -15,6 +19,10 @@ router.register(r'skills', views.SkillViewSet, base_name='skill')
 router.register(r'skills/campaign/(?P<campaign_pk>[0-9]+)',
                 views.SkillViewSet,
                 base_name='campaign-skill')
+
+router.register(r'characters/(?P<character_pk>[0-9]+)/characteredges',
+                views.CharacterEdgeViewSet,
+                base_name='character-characteredges')
 
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetweapons',
                 views.SheetWeaponViewSet,

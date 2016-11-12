@@ -37,19 +37,19 @@ class StatBlock extends React.Component {
         this.state = {
             sheet: undefined,
             char: undefined,
-            /* This is preferred over the edges list in the char.  A
-               sub-component will handle the actual edges for the character,
-               and will notify this component of changes. */
-            edges: {},
+            // /* This is preferred over the edges list in the char.  A
+            //    sub-component will handle the actual edges for the character,
+            //    and will notify this component of changes. */
+            //edges: {},
             edgeList: [],
 
-            characterSkills: undefined,
-            allSkills: undefined,
+            characterSkills: [],
+            allSkills: [],
 
             firearmList: [],
             weaponList: [],
             rangedWeaponList: [],
-            transientEffectList: undefined,
+            transientEffectList: [],
             miscellaneousItemList: [],
 
             carriedInventoryWeight: 0,
@@ -161,6 +161,21 @@ class StatBlock extends React.Component {
         this.changeArmor(armor, this.getHelmURL(), finalizer);
     }
 
+    handleEdgesLoaded(characterEdges) {
+        this.setState({
+            characterEdges: characterEdges,
+            edgeList: characterEdges.map(
+                (charEdge) => {return charEdge.edge})
+        });
+    }
+
+    handleEdgeAdded(data) {
+        // TODO: push data via REST, update characterEdges and regenerate
+        // edgeList.
+        this.setState({
+            edgeList: this.state.edgeList.concat([data])
+        });
+    }
 
     componentDidMount() {
         /* Failures to load objects from the server should be indicated
@@ -214,6 +229,13 @@ class StatBlock extends React.Component {
                 // Updates occur towards the character.
                 url: `/rest/characters/${json.character}/`
             });
+
+            rest.getData(this.state.url + 'characteredges/').then(
+                (characterEdges) => {
+                    this.handleEdgesLoaded(characterEdges);
+                }
+                ).catch(function (err) {
+                    console.log("Failed to load edges", err)});
             rest.getData(this.state.url)
                 .then((json) => {
                     this.setState({char: json});
@@ -228,38 +250,17 @@ class StatBlock extends React.Component {
                                 }).catch((err) => {
                                 console.log("Failed load: ", err)});
                         }).catch(function (err) {console.log(err)});
-
-                    /* TODO: would be better to have the edges with
-                       contents from under the character URL, see
-                       characterskills. */
-                    Promise.all(json.edges.map(
-                    (edge_id) => {
-                        return rest.getData(`/rest/edgelevels/${edge_id}/`)
-                            .then((json) => { this.handleEdgeAdded(json);
-                            console.log("Added edge: ", json); })
-                            .catch((err) => { console.log("got err:", err)});}))
-                        .then((status) => { console.log("All loaded.")})
-                        .catch((err) => { console.log("There was an error:",
-                            err)});
                 });
 
         });
-    }
-
-    getEdgeLevel(edge) {
-        if (typeof(this.state.edges[edge]) !== "undefined") {
-            return this.state.edges[edge].level;
-        } else {
-            return 0;
-        }
     }
 
     baseBody(baseStats) {
         return util.roundup(baseStats.fit / 4);
     }
 
-    toughness() {
-        return this.getEdgeLevel("Toughness");
+    toughness(skillHandler) {
+        return skillHandler.edgeLevel("Toughness");
     }
 
     stamina(baseStats) {
@@ -272,8 +273,8 @@ class StatBlock extends React.Component {
             + this.state.char.bought_mana;
     }
 
-    bodyHealing() {
-        var level = this.getEdgeLevel("Fast Healing");
+    bodyHealing(skillHandler) {
+        var level = skillHandler.edgeLevel("Fast Healing");
         if (level > 0) {
             var _lookupFastHealing = {
                 1: "3/8d",
@@ -289,10 +290,10 @@ class StatBlock extends React.Component {
         }
     }
 
-    staminaRecovery(effStats) {
+    staminaRecovery(effStats, skillHandler) {
         /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
         var highStat = util.rounddown((effStats.imm - 45)/15);
-        var level = this.getEdgeLevel("Fast Healing");
+        var level = skillHandler.edgeLevel("Fast Healing");
 
         var rates = [];
 
@@ -317,10 +318,10 @@ class StatBlock extends React.Component {
         }
     }
 
-    manaRecovery(effStats) {
+    manaRecovery(effStats, skillHandler) {
         /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
         var highStat = 2*util.rounddown((effStats.cha - 45)/15);
-        var level = this.getEdgeLevel("Fast Mana Recovery");
+        var level = skillHandler.edgeLevel("Fast Mana Recovery");
 
         var rates = [];
 
@@ -359,17 +360,6 @@ class StatBlock extends React.Component {
         } else {
             return 1.0;
         }
-    }
-
-    handleEdgeAdded(data) {
-        /* This assumes that characters will only have a single edgelevel of
-           an edge.  I think this is an invariant. */
-        var update = {};
-        update[data.edge] = data;
-
-        this.setState({edges: Object.assign({}, this.state.edges, update),
-            edgeList: this.state.edgeList.concat([data])
-        });
     }
 
     handleModification(stat, oldValue, newValue) {
@@ -677,8 +667,8 @@ class StatBlock extends React.Component {
         />
     }
 
-    renderStats(statHandler) {
-        if (!statHandler) {
+    renderStats(statHandler, edgeHandler) {
+        if (!statHandler || !edgeHandler) {
             return <Loading>Stats</Loading>;
         }
 
@@ -728,7 +718,7 @@ class StatBlock extends React.Component {
             </tr>
         </tbody>;
 
-        var toughness = this.toughness();
+        var toughness = this.toughness(edgeHandler);
         if (toughness) {
             toughness = (<span>+<span
                 style={{ fontWeight: "bold"}}>{toughness}</span></span>);
@@ -742,18 +732,18 @@ class StatBlock extends React.Component {
         };
 
         expendable = <tbody>
-            <tr><td style={statStyle}>B</td>
-                <td style={baseStyle}>{this.baseBody(baseStats)
-                  }{toughness}</td>
-                <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>
-            <tr><td style={statStyle}>S</td>
-                <td style={baseStyle}>{this.stamina(baseStats)}</td>
-                <td style={recoveryStyle}>{this.staminaRecovery(effStats)
-                  }</td></tr>
-            <tr><td style={statStyle}>M</td>
-                <td style={baseStyle}>{this.mana(baseStats)}</td>
-                <td style={recoveryStyle}>{this.manaRecovery(effStats)
-                  }</td></tr>
+        <tr><td style={statStyle}>B</td>
+            <td style={baseStyle}>{this.baseBody(baseStats)
+            }{toughness}</td>
+            <td style={recoveryStyle}>{this.bodyHealing(edgeHandler)}</td></tr>
+        <tr><td style={statStyle}>S</td>
+            <td style={baseStyle}>{this.stamina(baseStats)}</td>
+            <td style={recoveryStyle}>{this.staminaRecovery(effStats, edgeHandler)
+            }</td></tr>
+        <tr><td style={statStyle}>M</td>
+            <td style={baseStyle}>{this.mana(baseStats)}</td>
+            <td style={recoveryStyle}>{this.manaRecovery(effStats, edgeHandler)
+            }</td></tr>
         </tbody>;
 
         return <div style={{position: "relative", width: "18em"}}>
@@ -825,8 +815,7 @@ class StatBlock extends React.Component {
     }
 
     getSkillHandler(statHandler) {
-        if (!this.state.characterSkills || !this.state.allSkills ||
-            !statHandler) {
+        if (!statHandler) {
             return null;
         }
         return new SkillHandler({
@@ -1083,7 +1072,7 @@ class StatBlock extends React.Component {
                                 {this.renderDescription()}
                             </Row>
                             <Row>
-                                {this.renderStats(statHandler)}
+                                {this.renderStats(statHandler, skillHandler)}
                                 {this.renderXPControl()}
                                 {this.renderSPControl(baseStats)}
                             </Row>

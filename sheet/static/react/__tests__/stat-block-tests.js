@@ -46,40 +46,6 @@ const Inventory = require('../Inventory').default;
 describe('stat block', function() {
     "use strict";
 
-    var edgeFactory = function (statOverrides) {
-        var _edgeLevelData = {
-            "id": 1,
-            "notes": "",
-            "cc_skill_levels": 0,
-            "fit": 0,
-            "ref": 0,
-            "lrn": 0,
-            "int": 0,
-            "psy": 0,
-            "wil": 0,
-            "cha": 0,
-            "pos": 0,
-            "mov": 0,
-            "dex": 0,
-            "imm": 0,
-            "saves_vs_fire": 0,
-            "saves_vs_cold": 0,
-            "saves_vs_lightning": 0,
-            "saves_vs_poison": 0,
-            "saves_vs_all": 0,
-            "run_multiplier": 0.0,
-            "swim_multiplier": 0.0,
-            "climb_multiplier": 0.0,
-            "fly_multiplier": 0.0,
-            "level": 1,
-            "cost": 2.0,
-            "requires_hero": false,
-            "edge": "Toughness",
-            "skill_bonuses": []
-        };
-        return Object.assign(_edgeLevelData, statOverrides);
-    };
-
     it('fetched initial data', function (done) {
         var block = factories.statBlockFactory();
         expect(block.state.char).toBe(undefined);
@@ -208,10 +174,12 @@ describe('stat block', function() {
     it('handles edge addition', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            block.handleEdgeAdded(edgeFactory({name: "Toughness", level: 2}));
-            expect(Object.keys(block.state.edges).length).toBe(1);
-            expect(block.state.edges.Toughness).not.toBe(undefined);
-            expect(block.state.edges.Toughness.level).toEqual(2);
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Toughness"}, level: 2}));
+
+            expect(Object.keys(block.state.edgeList).length).toBe(1);
+            var skillHandler = getSkillHandler(block);
+            expect(skillHandler.edgeLevel('Toughness')).toEqual(2);
             done();
         });
     });
@@ -220,10 +188,12 @@ describe('stat block', function() {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
             expect(block.state.edgeList.length).toBe(0);
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Healing"},
                 level: 3}));
             expect(block.state.edgeList.length).toBe(1);
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            block.handleEdgeAdded(factories.edgeLevelFactory({edge:
+                {name: "Fast Healing"},
                 level: 3}));
             expect(block.state.edgeList.length).toBe(2);
             done();
@@ -236,26 +206,37 @@ describe('stat block', function() {
             var control = TestUtils.findRenderedComponentWithType(block,
                 XPControl);
             expect(control.props.edgesBought).toEqual(0);
-            block.handleEdgeAdded(edgeFactory({
-                edge: "Toughness", level: 2, cost: 4}));
-            block.handleEdgeAdded(edgeFactory({
-                edge: "Acute Touch", level: 1, cost: 1}));
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Toughness"}, level: 2, cost: 4}));
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Acute Touch"}, level: 1, cost: 1}));
             expect(control.props.edgesBought).toEqual(5);
             done();
         });
     });
 
+    xit('should not indicate negative XP with unbought free edges');
     xit('handles edge removal');
     xit('handles edge point calculation after edge removal');
+
+
+    var getSkillHandler = function (block) {
+        // TODO: skills need to be loaded because edges are handled by
+        // skillhandler, which requires the skills.  edges should be contained
+        // by the stat handler.
+
+        return block.getSkillHandler(block.getStatHandler());
+    };
 
     it('can indicate toughness', function (done) {
         var block = factories.statBlockFactory({
             character: factories.characterFactory({cur_fit: 40})});
         block.afterLoad(function () {
             var baseStats = block.getStatHandler().getBaseStats();
-            expect(block.toughness()).toEqual(0);
-            block.handleEdgeAdded(edgeFactory({"Toughness": 1}));
-            expect(block.toughness()).toEqual(1);
+            expect(block.toughness(getSkillHandler(block))).toEqual(0);
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Toughness"}, level: 1}));
+            expect(block.toughness(getSkillHandler(block))).toEqual(1);
             expect(block.baseBody(baseStats)).toEqual(10);
             done();
         });
@@ -265,15 +246,18 @@ describe('stat block', function() {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Healing"},
                 level: 1}));
-            expect(block.staminaRecovery(effStats)).toEqual('1d6/8h');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('1d6/8h');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Healing"},
                 level: 2}));
-            expect(block.staminaRecovery(effStats)).toEqual('2d6/8h');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('2d6/8h');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Healing"},
                 level: 3}));
-            expect(block.staminaRecovery(effStats)).toEqual('4d6/8h');
+            expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('4d6/8h');
             done();
         });
     });
@@ -283,10 +267,11 @@ describe('stat block', function() {
             character: factories.characterFactory({cur_fit: 75})});
         block.afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
-            expect(block.staminaRecovery(effStats)).toEqual('1/8h');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('1/8h');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Healing"},
                 level: 1}));
-            expect(block.staminaRecovery(effStats)).toEqual('1+1d6/8h');
+            expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('1+1d6/8h');
             done();
         });
     });
@@ -295,15 +280,18 @@ describe('stat block', function() {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Mana Recovery"},
                 level: 1}));
-            expect(block.manaRecovery(effStats)).toEqual('2d6/8h');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+            expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('2d6/8h');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Mana Recovery"},
                 level: 2}));
-            expect(block.manaRecovery(effStats)).toEqual('4d6/8h');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+            expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('4d6/8h');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Mana Recovery"},
                 level: 3}));
-            expect(block.manaRecovery(effStats)).toEqual('8d6/8h');
+            expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('8d6/8h');
             done();
         });
     });
@@ -313,10 +301,12 @@ describe('stat block', function() {
             character: factories.characterFactory({cur_cha: 70})});
         block.afterLoad(function () {
             var effStats = block.getStatHandler().getEffStats();
-            expect(block.manaRecovery(effStats)).toEqual('2/8h');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
-                level: 1}));
-            expect(block.manaRecovery(effStats)).toEqual('2+2d6/8h');
+            expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('2/8h');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name:"Fast Mana Recovery"},
+                level: 1}
+            ));
+            expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('2+2d6/8h');
             done();
         });
     });
@@ -324,10 +314,11 @@ describe('stat block', function() {
     it('can indicate body healing', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            expect(block.bodyHealing()).toEqual('3/16d');
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Healing",
+            expect(block.bodyHealing(getSkillHandler(block))).toEqual('3/16d');
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Healing"},
                 level: 3}));
-            expect(block.bodyHealing()).toEqual('3/2d');
+            expect(block.bodyHealing(getSkillHandler(block))).toEqual('3/2d');
             done();
         });
     });
@@ -354,7 +345,8 @@ describe('stat block', function() {
     it('contains a NoteBlock component', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Mana Recovery"},
                 level: 1, notes: "Foofaafom"}));
 
             var noteBlock = TestUtils.findRenderedComponentWithType(
@@ -378,7 +370,8 @@ describe('stat block', function() {
     it('should not contain a NoteBlock with only edges without notes', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            block.handleEdgeAdded(edgeFactory({edge: "Fast Mana Recovery",
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Fast Mana Recovery"},
                 level: 1, notes: ""}));
 
             var noteBlocks = TestUtils.scryRenderedComponentsWithType(
@@ -391,7 +384,8 @@ describe('stat block', function() {
     it('calculate runMultiplier with an edge', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            block.handleEdgeAdded(edgeFactory({edge: "Natural Runner",
+            block.handleEdgeAdded(factories.edgeLevelFactory({
+                edge: {name: "Natural Runner"},
                 level: 1, run_multiplier: 1.5}));
 
             expect(block.runMultiplier()).toEqual(1.5);
@@ -431,7 +425,7 @@ describe('stat block', function() {
                     id: 1, skill: "Gardening",
                     level: 3
                 })
-            ]);
+            ], []);
 
             var promise = Promise.resolve({});
             rest.delete.mockReturnValue(promise);
@@ -494,7 +488,7 @@ describe('stat block', function() {
                     level: 3
                 })
             ];
-            block.handleSkillsLoaded(skillList);
+            block.handleSkillsLoaded(skillList, []);
 
             var promise = Promise.resolve({
                 id: 1, skill: "Gardening",
@@ -538,7 +532,7 @@ describe('stat block', function() {
                     level: 1
                 })
             ];
-            block.handleSkillsLoaded(skillList);
+            block.handleSkillsLoaded(skillList, []);
             block.handleFirearmsLoaded([factories.firearmFactory({id: 3}),
             factories.firearmFactory({id: 5})]);
 

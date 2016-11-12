@@ -30,8 +30,8 @@ class NoteBlock extends React.Component {
                        style={{fontSize: "80%", color: color}}>
                 {edgeList.map((elem, ii) => {
                     return <li key={ii}
-                               title={`${elem.edge} ${elem.level}`}>
-                        {`${elem.edge}: ${elem.notes}`}</li>;
+                               title={`${elem.edge.name} ${elem.level}`}>
+                        {`${elem.edge.name}: ${elem.notes}`}</li>;
                 })}</ul>;
         };
 

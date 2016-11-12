@@ -14,7 +14,14 @@ class SheetSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class EdgeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Edge
+        fields = "__all__"
+
+
 class EdgeLevelSerializer(serializers.ModelSerializer):
+    edge = EdgeSerializer()
     class Meta:
         model = sheet.models.EdgeLevel
         fields = "__all__"
@@ -28,6 +35,21 @@ class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Skill
         fields = "__all__"
+
+
+class CharacterEdgeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.CharacterEdge
+        fields = "__all__"
+
+
+class CharacterEdgeListSerializer(serializers.ModelSerializer):
+    edge = EdgeLevelSerializer()
+
+    class Meta:
+        model = sheet.models.CharacterEdge
+        fields = "__all__"
+        depth = 1
 
 
 class BaseFirearmSerializer(serializers.ModelSerializer):
