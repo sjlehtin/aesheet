@@ -168,6 +168,26 @@ var edgeLevelFactory = function (overrideFields) {
     return newEdge;
 };
 
+var characterEdgeFactory = function (overrideFields) {
+    if (!overrideFields){
+        overrideFields = {};
+    }
+    var edge = edgeLevelFactory(overrideFields.edge);
+
+    if ('edge' in overrideFields) {
+        delete overrideFields.edge;
+    }
+
+    var _baseCharacterEdge = {
+        "id": objectId,
+        "edge": edge,
+        "character": 1 };
+    var newEdge = Object.assign(_baseCharacterEdge, overrideFields);
+    /* Overriding ID is possible. */
+    objectId = newEdge.id + 1;
+    return newEdge;
+};
+
 // Tests pollute each other, needs some reset functionality.
 var nextSkillID = 0;
 
@@ -718,6 +738,8 @@ var statBlockFactory = function (overrides) {
             return jsonResponse([]);
         } else if (url === "/rest/miscellaneousitems/campaign/2/") {
             return jsonResponse([]);
+        } else if (url === "/rest/edgelevels/campaign/2/") {
+            return jsonResponse([]);
         } else {
             /* Throwing errors here do not cancel the test. */
             fail("this is an unsupported url:" + url);
@@ -741,6 +763,7 @@ module.exports = {
     skillFactory: skillFactory,
     edgeLevelFactory: edgeLevelFactory,
     edgeFactory: edgeFactory,
+    characterEdgeFactory: characterEdgeFactory,
     statsFactory: statsFactory,
     firearmFactory: firearmFactory,
     weaponFactory: weaponFactory,

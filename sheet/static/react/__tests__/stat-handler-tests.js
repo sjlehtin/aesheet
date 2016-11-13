@@ -49,7 +49,7 @@ describe('StatHandler', function() {
     });
 
     it('calculates hard mods', function () {
-        var handler = getStatHandler({edges: [factories.edgeFactory({dex: 10})]});
+        var handler = getStatHandler({edges: [factories.edgeLevelFactory({dex: 10})]});
 
         expect(handler.getBaseStats().dex).toEqual(60);
         expect(handler.getEffStats().dex).toEqual(60);

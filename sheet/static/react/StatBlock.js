@@ -21,6 +21,8 @@ import Inventory from 'Inventory';
 import ArmorControl from 'ArmorControl';
 import MiscellaneousItemRow from 'MiscellaneousItemRow';
 import AddMiscellaneousItemControl from 'AddMiscellaneousItemControl';
+import EdgeRow from 'EdgeRow';
+import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -85,6 +87,7 @@ class StatBlock extends React.Component {
     }
 
     handleSkillsLoaded(skillList, allSkills) {
+        console.log("Skills loaded");
         this.setState({characterSkills: skillList,
         allSkills: allSkills});
     }
@@ -162,6 +165,7 @@ class StatBlock extends React.Component {
     }
 
     handleEdgesLoaded(characterEdges) {
+        console.log("Edges loaded");
         this.setState({
             characterEdges: characterEdges,
             edgeList: characterEdges.map(
@@ -169,16 +173,44 @@ class StatBlock extends React.Component {
         });
     }
 
+    getCharacterEdgeURL(edge) {
+        var baseURL = this.state.url + 'characteredges/';
+        if (edge) {
+            return baseURL + edge.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
     handleEdgeAdded(data) {
         // TODO: push data via REST, update characterEdges and regenerate
         // edgeList.
-        this.setState({
-            edgeList: this.state.edgeList.concat([data])
-        });
+        rest.post(this.getCharacterEdgeURL(), {edge: data.id}).then((json) => {
+            console.log("POST success:", json);
+            var ce = Object.assign({}, json, {edge: data});
+            var newList = this.state.edgeList;
+            newList.push(data);
+            var newCEList = this.state.characterEdges;
+            newCEList.push(ce);
+            this.setState({
+                edgeList: newList,
+                characterEdges: newCEList
+            });
+        }).catch((err) => console.log(err));
+    }
+
+    handleEdgeRemoved(givenEdge) {
+        console.log("Removed: ", givenEdge);
+        rest.delete(this.getCharacterEdgeURL(givenEdge)).then((json) => {
+            var index = StatBlock.findItemIndex(
+                this.state.characterEdges, givenEdge);
+            this.state.characterEdges.splice(index, 1);
+            this.handleEdgesLoaded(this.state.characterEdges);
+        }).catch((err) => console.log(err));
     }
 
     componentDidMount() {
-        /* Failures to load objects from the server should be indicated
+        /* TODO: Failures to load objects from the server should be indicated
            visually to the users, as well as failures to save etc.  Use an
            error-handling control for this purpose. */
 
@@ -223,33 +255,42 @@ class StatBlock extends React.Component {
         }).catch((err) => {console.log("Failed to load helm:",
             err)});
 
-        rest.getData(this.props.url).then((json) => {
+        rest.getData(this.props.url).then((sheet) => {
+            console.log("Sheet loaded");
+
             this.setState({
-                sheet: json,
+                sheet: sheet,
                 // Updates occur towards the character.
-                url: `/rest/characters/${json.character}/`
+                url: `/rest/characters/${sheet.character}/`
             });
 
             rest.getData(this.state.url + 'characteredges/').then(
                 (characterEdges) => {
                     this.handleEdgesLoaded(characterEdges);
-                }
-                ).catch(function (err) {
+                }).catch(function (err) {
                     console.log("Failed to load edges", err)});
-            rest.getData(this.state.url)
-                .then((json) => {
-                    this.setState({char: json});
 
+            rest.getData(this.state.url)
+                .then((character) => {
+                    console.log("Character loaded", character);
+                    console.log("Loading skills");
                     rest.getData(this.state.url + 'characterskills/').then(
                         (characterSkills) => {
+                            console.log("CS loaded");
                             rest.getData(
-                                `/rest/skills/campaign/${json.campaign}/`)
+                                `/rest/skills/campaign/${character.campaign}/`)
                                 .then((allSkills) => {
                                     this.handleSkillsLoaded(characterSkills,
                                     allSkills);
                                 }).catch((err) => {
                                 console.log("Failed load: ", err)});
-                        }).catch(function (err) {console.log(err)});
+                        }).catch(function (err) {
+                            console.log("Failed CS load", err)});
+                    this.setState({char: character});
+                    // TODO: for some reason this fails to be called when
+                    // the sheet is loaded for real.  A bug somewhere,
+                    // surely, but where?
+                    console.log("Character set");
                 });
 
         });
@@ -395,14 +436,14 @@ class StatBlock extends React.Component {
         }).then((err) => console.log(err));
     }
 
-    static findItemIndex(skillList, skill) {
-        for (var ii = 0; ii < skillList.length; ii++) {
-            var item = skillList[ii];
-            if (item.id === skill.id) {
+    static findItemIndex(itemList, givenItem) {
+        for (var ii = 0; ii < itemList.length; ii++) {
+            var item = itemList[ii];
+            if (item.id === givenItem.id) {
                 return ii;
             }
         }
-        throw Error("No such skill: " + skill);
+        throw Error("No such item: " + givenItem);
     }
 
     handleCharacterSkillRemove(skill) {
@@ -1033,7 +1074,39 @@ class StatBlock extends React.Component {
             </Table>
         </Panel>;
     }
-    
+
+    renderEdges() {
+        if (!this.state.edgeList || !this.state.char) {
+            return <Loading>Edges</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let item of this.state.characterEdges) {
+            rows.push(<EdgeRow
+                key={idx++}
+                edge={item}
+                onRemove={(item) => this.handleEdgeRemoved(item) }
+            />);
+        }
+
+        return <Panel header={<h4>Edges</h4>}>
+            <Table striped fill>
+                <thead>
+                <tr><th>Edge</th></tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+                <AddCharacterEdgeControl
+                    campaign={this.state.char.campaign}
+                    onAdd={(edge) => this.handleEdgeAdded(edge) }/>
+            </Table>
+        </Panel>;
+    }
+
     renderInventory() {
         return <Inventory url={this.props.url + "inventory/"}
                           onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
@@ -1103,6 +1176,9 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         {this.renderRangedWeapons(skillHandler)}
+                    </Row>
+                    <Row>
+                        {this.renderEdges()}
                     </Row>
                     <Row>
                         {this.renderMiscellaneousItems()}

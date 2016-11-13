@@ -221,7 +221,7 @@ describe('WeaponRow', function() {
     });
 
     it("takes Ambidexterity into account in secondary skill checks", function () {
-        var weapon = getWeapon({edges: [{edge: "Ambidexterity", level: 3}]});
+        var weapon = getWeapon({edges: [{edge: {name: "Ambidexterity"}, level: 3}]});
         expect(weapon.skillChecks([0.5, 1, 2, 3],
             {useType: WeaponRow.SEC})).toEqual([50, 45, 15, null]);
     });

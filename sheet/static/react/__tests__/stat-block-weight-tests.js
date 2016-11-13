@@ -24,6 +24,8 @@ jest.dontMock('../ArmorControl');
 jest.dontMock('../AddArmorControl');
 jest.dontMock('../MiscellaneousItemRow');
 jest.dontMock('../AddMiscellaneousItemControl');
+jest.dontMock('../EdgeRow');
+jest.dontMock('../AddCharacterEdgeControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
