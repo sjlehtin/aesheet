@@ -81,13 +81,8 @@ perhaps Robot-system tests.
     </div>
 </div>
 
-        <div class="row">
-    <div class="col-sm-12">
-        <div id="character-notes-container"></div>
-    </div>
 </div>
-</div>
-    
+
         <div id="log-entries">
             <ul>
                 {% for entry in sheet.character.characterlogentry_set.all %}
@@ -103,9 +98,6 @@ perhaps Robot-system tests.
 {% block script %}
 <script src="{% static "react/bundle.js" %}"></script>
 <script type="application/javascript">
-    var node = SheetApp.React.createElement(SheetApp.CharacterNotes,
-            {url: '/rest/characters/{{ sheet.character.pk }}/'});
-    SheetApp.render(node, document.getElementById('character-notes-container'));
     var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,
             {url: '/rest/sheets/{{ sheet.pk }}/'});
     SheetApp.render(statBlock, document.getElementById('stat-block-container'));

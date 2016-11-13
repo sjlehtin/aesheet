@@ -26,6 +26,7 @@ jest.dontMock('../MiscellaneousItemRow');
 jest.dontMock('../AddMiscellaneousItemControl');
 jest.dontMock('../EdgeRow');
 jest.dontMock('../AddCharacterEdgeControl');
+jest.dontMock('../CharacterNotes');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -467,7 +468,7 @@ describe('stat block', function() {
             };
 
             rest.post.mockClear();
-            
+
             var promise = Promise.resolve(expectedSkill);
             rest.post.mockReturnValue(promise);
 

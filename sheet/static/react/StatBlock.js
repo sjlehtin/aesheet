@@ -23,6 +23,7 @@ import MiscellaneousItemRow from 'MiscellaneousItemRow';
 import AddMiscellaneousItemControl from 'AddMiscellaneousItemControl';
 import EdgeRow from 'EdgeRow';
 import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
+import CharacterNotes from 'CharacterNotes';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -1112,6 +1113,13 @@ class StatBlock extends React.Component {
                           onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
     }
 
+    renderCharacterNotes() {
+        if (!this.state.char) {
+            return <Loading>Notes</Loading>;
+        }
+        return <CharacterNotes url={`/rest/characters/${this.state.char.id}/`}/>;
+    }
+
     renderArmor() {
         if (!this.state.char || !this.state.armor || !this.state.helm) {
             return <Loading>Armor</Loading>;
@@ -1188,6 +1196,9 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         {this.renderInventory()}
+                    </Row>
+                    <Row>
+                        {this.renderCharacterNotes()}
                     </Row>
                 </Col>
                 <Col md={4}>
