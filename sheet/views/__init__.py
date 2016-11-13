@@ -306,76 +306,14 @@ def process_sheet_change_request(request, sheet):
 
 
 def sheet_detail(request, sheet_id=None):
-    sheet = get_object_or_404(Sheet.objects.select_related()
-                              .select_related('armor__base',
-                                              'armor__quality',
-                                              'helm', )
-                              .prefetch_related(
-        'weapons__base',
-        'weapons__quality',
-        'ranged_weapons__base',
-        'ranged_weapons__quality',
-        'miscellaneous_items',
-        'character__campaign',
-        'character__skills',
-        'character__skills__skill',
-        'character__skills__skill__required_skills',
-        'character__skills__skill__edgeskillbonus_set',
-        'character__edges',
-        'character__edges__edge',
+    sheet = get_object_or_404(Sheet.objects.prefetch_related(
         'character__characterlogentry_set__skill',
     ),
                               pk=sheet_id)
     if not sheet.character.access_allowed(request.user):
         raise PermissionDenied
 
-    forms = {}
-
-    if request.method == "POST":
-        data = request.POST
-    else:
-        data = None
-
-    def add_form(form_class, prefix, **kwargs):
-        key = prefix.replace('-', '_') + "_form"
-        if data is not None:
-            has_prefix = any([var.startswith(prefix) for var in data.keys()])
-            form_data = data if has_prefix else None
-        else:
-            form_data = None
-        forms[key] = form_class(form_data,
-                                request=request,
-                                prefix=prefix, **kwargs)
-
-    add_form(AddEdgeForm, "add-edge", instance=sheet.character)
-    add_form(AddExistingMiscellaneousItemForm,
-             "add-existing-miscellaneous-item", instance=sheet)
-
-    if request.method == "POST":
-        should_change = False
-
-        for kk, ff in forms.items():
-            logger.info("handling %s" % kk)
-            if ff.is_bound:
-                if ff.is_valid():
-                    logger.info("saved %s" % kk)
-                    ff.save()
-                    should_change = True
-                else:
-                    messages.error(request, 'Errors in processing request '
-                                            '({form_slug}).'.format(
-                        form_slug=ff.prefix.replace('-', ' ')))
-        if not should_change:
-            should_change = process_sheet_change_request(request,
-                                                         sheet)
-        # More complex forms need to be passed back to
-        # render(), below.
-        if should_change:
-            return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
-                                        sheet.id)
-
     c = {'sheet': SheetView(sheet) }
-    c.update(forms)
     return render(request, 'sheet/sheet_detail.html', c)
 
 
