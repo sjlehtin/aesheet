@@ -81,30 +81,13 @@ perhaps Robot-system tests.
     </div>
 </div>
 
-
-<div class="row">
-    <div class="col-sm-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Edges</h3>
-            </div>
-            <div class="panel-body">
-                {% include "sheet/sheet_detail/edit_edges.html" %}
-            </div>
-        </div>
-    </div>
-</div>
-
         <div class="row">
     <div class="col-sm-12">
         <div id="character-notes-container"></div>
     </div>
 </div>
 </div>
-
-    <div id="skill-pane" class="col-md-3">
-
-
+    
         <div id="log-entries">
             <ul>
                 {% for entry in sheet.character.characterlogentry_set.all %}
@@ -118,28 +101,6 @@ perhaps Robot-system tests.
 {% endblock %}
 
 {% block script %}
-<script type="text/javascript">
-$(document).ready(function () {
-
-    var findRemoves = function (e) { return $(e)
-            .find('.remove'); };
-    var hideRemoves = function (e) { findRemoves(e).hide(); };
-    var showRemoves = function (e) { findRemoves(e).show(); };
-
-    $('.remove-container').find('.remove').hide().css('opacity', '0.5').end()
-            .hover(function () { showRemoves(this); },
-                   function () { hideRemoves(this); });
-
-    $('.advanced').each(function () {
-        var has_errors = $(this).find('.errorlist').length > 0;
-            $(this).hideAdvanced({
-                style: 'plain',
-                startOpen: has_errors
-            });
-    });
-});
-</script>
-<script src="{{ STATIC_URL }}hideAdvanced.js"></script>
 <script src="{% static "react/bundle.js" %}"></script>
 <script type="application/javascript">
     var node = SheetApp.React.createElement(SheetApp.CharacterNotes,
