@@ -24,6 +24,7 @@ import AddMiscellaneousItemControl from 'AddMiscellaneousItemControl';
 import EdgeRow from 'EdgeRow';
 import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
 import CharacterNotes from 'CharacterNotes';
+import MovementRates from 'MovementRates';
 
 import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
 
@@ -1136,6 +1137,14 @@ class StatBlock extends React.Component {
             </Panel>;
     }
 
+    renderMovementRates(statHandler, skillHandler) {
+        if (!statHandler || !skillHandler) {
+            return <Loading>Movement rates</Loading>;
+        }
+        return <MovementRates skillHandler={skillHandler}
+                              statHandler={statHandler}/>;
+    }
+
     render() {
         var statHandler = this.getStatHandler();
         if (statHandler) {
@@ -1175,6 +1184,9 @@ class StatBlock extends React.Component {
                                 {this.renderAdvancingInitiatives(effStats)}
                             </Row>
                         </Col>
+                    </Row>
+                    <Row>
+                        {this.renderMovementRates(statHandler, skillHandler)}
                     </Row>
                     <Row>
                         {this.renderCCWeapons(skillHandler)}

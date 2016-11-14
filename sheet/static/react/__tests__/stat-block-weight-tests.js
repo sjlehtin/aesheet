@@ -27,6 +27,7 @@ jest.dontMock('../AddMiscellaneousItemControl');
 jest.dontMock('../EdgeRow');
 jest.dontMock('../AddCharacterEdgeControl');
 jest.dontMock('../CharacterNotes');
+jest.dontMock('../MovementRates');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
