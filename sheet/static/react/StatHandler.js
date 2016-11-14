@@ -45,6 +45,31 @@ class StatHandler {
         this._effStats = undefined;
     }
 
+    getEdgeModifier(mod) {
+        // Return the sum of modifiers from edges for modifier `mod`.
+        var edges = [];
+        if (this.props.edges) {
+            edges = this.props.edges;
+        }
+        return this.getEffectModifier(mod, edges);
+    }
+
+    getEffectModifier(mod, effects) {
+        // Return the sum of modifiers from edges for modifier `mod`.  If
+        // no such mod is present, returns defaultValue.
+        if (!effects) {
+            effects = this.props.effects;
+            if (!effects) {
+                effects = [];
+            }
+        }
+        var sum = 0;
+        for (let eff of effects) {
+            sum += parseFloat(eff[mod]);
+        }
+        return sum;
+    }
+
     getHardMods() {
         return this._hardMods;
     }

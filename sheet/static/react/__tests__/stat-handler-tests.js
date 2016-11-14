@@ -91,6 +91,45 @@ describe('StatHandler', function() {
         expect(handler.getEffStats().mov).toEqual(44);
     });
 
+    it('can calculate modifiers from edges', function (){
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
+                edges: [
+            factories.edgeLevelFactory({edge: {name: "Natural climber"}, climb_multiplier: 2}),
+            factories.edgeLevelFactory({edge: {name: "Woodsman"}, climb_multiplier: 1.5})
+                ],
+        });
+        expect(handler.getEdgeModifier('climb_multiplier')).toEqual(3.5);
+    });
+
+    it('returns a value with unrelated edges', function () {
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
+                edges: [
+            factories.edgeLevelFactory({edge: {name: "Natural climber"}, climb_multiplier: "2.0"}),
+            factories.edgeLevelFactory({edge: {name: "Woodsman"}, climb_multiplier: "1.5"})
+                ],
+        });
+        expect(handler.getEdgeModifier('swim_multiplier')).toEqual(0);
+
+    });
+
+    it('returns a value without edges', function () {
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50})
+        });
+        expect(handler.getEdgeModifier('swim_multiplier')).toEqual(0);
+    });
+
+    it('can calculate modifiers from effects', function (){
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
+                effects: [
+            factories.transientEffectFactory({swim_multiplier: "2.0"})],
+        });
+        expect(handler.getEffectModifier('swim_multiplier')).toEqual(2);
+    });
+
     // it('takes armor into account with penalties', function () {
     //
     // });
