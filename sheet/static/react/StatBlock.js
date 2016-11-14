@@ -878,7 +878,9 @@ class StatBlock extends React.Component {
             character: this.state.char,
             edges: this.state.edgeList,
             effects: this.state.transientEffectList.map((eff) => {return eff.effect}),
-            weightCarried: this.getCarriedWeight()
+            weightCarried: this.getCarriedWeight(),
+            armor: this.state.armor,
+            helm: this.state.helm
         });
     }
 

@@ -130,7 +130,41 @@ describe('StatHandler', function() {
         expect(handler.getEffectModifier('swim_multiplier')).toEqual(2);
     });
 
-    // it('takes armor into account with penalties', function () {
-    //
+    it('takes armor into account with penalties', function () {
+        var handler = getStatHandler({
+            character: factories.characterFactory({
+                cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
+            }),
+            armor: factories.armorFactory({
+                base: {
+                    mod_fit: -2,
+                    mod_ref: -3,
+                    mod_psy: -5
+                }
+            }),
+        });
+        expect(handler.getEffStats().fit).toEqual(38);
+        expect(handler.getEffStats().ref).toEqual(42);
+        expect(handler.getEffStats().psy).toEqual(45);
+    });
+
+    // it('takes armor quality into account with penalties', function () {
+    //     var handler = getStatHandler({
+    //         character: factories.characterFactory({
+    //             cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
+    //         }),
+    //         armor: factories.armorFactory({
+    //             base: {
+    //                 mod_fit: "-2",
+    //                 mod_ref: "-3",
+    //                 mod_psy: "-5"
+    //             },
+    //             quality: {}
+    //         }),
+    //     });
+    //     expect(handler.getEffStats().fit).toEqual(38);
+    //     expect(handler.getEffStats().ref).toEqual(42);
+    //     expect(handler.getEffStats().psy).toEqual(45);
     // });
+
 });

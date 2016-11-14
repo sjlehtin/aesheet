@@ -41,8 +41,27 @@ class StatHandler {
                 this._softMods[st] += mod[st];
             }
         }
+
+        for (let st of ["fit", "ref", "psy"]) {
+
+            this._softMods[st] += this.getArmorMod(this.props.helm, st) +
+                 this.getArmorMod(this.props.armor, st);
+        }
+
         this._baseStats = undefined;
         this._effStats = undefined;
+    }
+
+    getArmorMod(armor, givenStat) {
+        var mod = 0;
+        var stat = "mod_" + givenStat;
+        if (armor.base && stat in armor.base) {
+            mod += armor.base[stat];
+        }
+        if (armor.quality && stat in armor.quality) {
+            mod += armor.quality[stat];
+        }
+        return mod;
     }
 
     getEdgeModifier(mod) {
@@ -141,7 +160,9 @@ StatHandler.allStatNames =  StatHandler.baseStatNames.concat(
 //};
 
 StatHandler.defaultProps = {
-    weightCarried: 0
+    weightCarried: 0,
+    armor: {},
+    helm: {}
 };
 
 export default StatHandler;
