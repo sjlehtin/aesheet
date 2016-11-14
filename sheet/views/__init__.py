@@ -245,18 +245,6 @@ class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
 
-    def edges(self):
-        return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
-
-    def armor(self):
-        return ArmorWrap(self.sheet.armor, sheet=self.sheet, type="Armor")
-
-    def helm(self):
-        return ArmorWrap(self.sheet.helm, sheet=self.sheet, type="Helm")
-
-    def miscellaneous_items(self):
-        return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
-
     def overland_movement(self):
         overland_mov = self.sheet.eff_mov * self.sheet.run_multiplier()
         fly_mov = self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
@@ -277,32 +265,8 @@ class SheetView(object):
         try:
             return getattr(self.sheet, v)
         except AttributeError:
-            raise AttributeError, \
-                "'SheetView' object has no attribute '{attr}'".format(attr=v)
-
-
-def process_sheet_change_request(request, sheet):
-    assert request.method == "POST"
-
-    form = RemoveGenericForm(request.POST, prefix='remove')
-    if form.is_valid():
-        item = form.cleaned_data['item']
-        item_type = form.cleaned_data['item_type']
-        logger.info("Removing %s" % item_type)
-        if item_type == "MiscellaneousItem":
-            item = get_object_or_404(MiscellaneousItem, pk=item)
-            sheet.miscellaneous_items.remove(item)
-        elif item_type == "CharacterEdge":
-            item = get_object_or_404(CharacterEdge, pk=item)
-            item.delete()
-        else:
-            raise ValidationError("Invalid item type")
-        sheet.full_clean()
-        sheet.save()
-        return True
-        # removal forms are forgotten and not updated on failures.
-
-    return False
+            raise AttributeError(
+                "'SheetView' object has no attribute '{attr}'".format(attr=v))
 
 
 def sheet_detail(request, sheet_id=None):

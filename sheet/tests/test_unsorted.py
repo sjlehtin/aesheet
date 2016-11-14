@@ -357,33 +357,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         post.user = self.admin
         return post
 
-    def test_add_remove_edge(self):
-        edge_level = factories.EdgeLevelFactory(edge__name="Toughness",
-                                                level=2)
-        req_data = { 'add-edge-edge' : edge_level.pk}
-        response = self.client.get(self.sheet_url)
-        self.assertContains(response, "No edges.")
-        response = self.client.post(self.sheet_url, req_data)
-        self.assertRedirects(response, self.sheet_url)
-        response = self.client.get(self.sheet_url)
-        self.assertNotContains(response, "No edges.")
-        edge_level = response.context['sheet'].edges()[0]
-        self.assertEquals(edge_level.edge.name, 'Toughness')
-        self.assertEquals(edge_level.level, 2)
-
-        self.assertEqual(response.context['sheet'].character
-                         .edge_level("Toughness"), 2)
-
-        # Remove edge.
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'CharacterEdge',
-                     'remove-item' : edge_level.pk }
-        response = self.client.post(self.sheet_url, req_data)
-
-        self.assertRedirects(response, self.sheet_url)
-        response = self.client.get(self.sheet_url)
-        self.assertContains(response, "No edges.")
-
     def add_edge(self, character, edge_name, level=1):
         ce = CharacterEdge()
         ce.character = character
