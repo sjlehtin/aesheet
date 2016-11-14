@@ -11,15 +11,14 @@ Lots of dependencies for react-bootstrap needed to be added to the
 unmockedModulePathPatterns in the jest configuration in package.json; this
 is mentioned here because the package.json does not allow comments.
 
-TODO: armor
 TODO: stat modifiers from armor
 TODO: stat modifiers from weaponspecialqualities in weapons
 TODO: stat modifiers from armorspecialqualities in armor
-TODO: stat modifiers from specialqualities in miscellaneous items
 TODO: edge skill bonuses
-TODO: edge add and remove
-TODO: misc item add and remove
-TODO: movement
 TODO: senses
 TODO: spell skill checks
 
+Reactifying and RESTifying the sheet should never result in test
+coverage of the sheet functionality in getting worse; it should only increase,
+but naturally with the focus moving towards the JavaScript unit-tests and
+perhaps Robot-system tests.

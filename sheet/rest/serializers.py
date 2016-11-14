@@ -8,6 +8,7 @@ class AmmunitionSerializer(serializers.ModelSerializer):
 
 
 class SheetSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username', read_only=True)
     weight_carried = serializers.DecimalField(4, 2, read_only=True)
     class Meta:
         model = sheet.models.Sheet
@@ -197,10 +198,10 @@ class CharacterSkillSerializer(serializers.ModelSerializer):
 
 
 class CharacterSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username', read_only=True)
     class Meta:
         model = sheet.models.Character
         fields = "__all__"
-        read_only_fields = ("owner", )
 
 
 class InventoryEntrySerializer(serializers.ModelSerializer):

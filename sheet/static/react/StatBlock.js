@@ -26,7 +26,7 @@ import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
 import CharacterNotes from 'CharacterNotes';
 import MovementRates from 'MovementRates';
 
-import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
+import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 var util = require('sheet-util');
@@ -1145,6 +1145,30 @@ class StatBlock extends React.Component {
                               statHandler={statHandler}/>;
     }
 
+    renderHeader() {
+        if (!this.state.char || !this.state.sheet) {
+            return <Loading>Header</Loading>;
+        }
+
+        var privateNotification = '';
+        if (this.state.char.private) {
+            privateNotification = <Label bsStyle="danger">Private</Label>;
+        }
+
+        return <Row>
+                <Col md={2}><h1>{this.state.char.name}</h1></Col>
+                <Col md={2}><a href={`/characters/edit_char/${this.state.char.id}/`}>Edit base character</a></Col>
+                <Col md={2}><a href={`/characters/edit_sheet/${this.state.sheet.id}/`}>Edit base sheet</a></Col>
+                <Col md={2}><a href={`/sheets/copy/${this.state.sheet.id}`}>Copy this sheet</a></Col>
+                <Col md={2}>
+                    <Panel header={<h4>Owner</h4>}>
+                        <span style={{marginRight: "1em"}}>{this.state.sheet.owner}</span>
+                        {privateNotification}
+                    </Panel>
+                </Col>
+            </Row>;
+    }
+
     render() {
         var statHandler = this.getStatHandler();
         if (statHandler) {
@@ -1155,6 +1179,7 @@ class StatBlock extends React.Component {
 
         return (
             <Grid>
+                {this.renderHeader()}
                 <Col md={8}>
                     <Row>
                         <Col md={6}>

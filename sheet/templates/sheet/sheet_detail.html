@@ -1,98 +1,22 @@
 {% extends "base.html" %}
-{% load sheet_extras %}
 {% load static %}
 {% load humanize %}
 
-{% comment %}
-The sheet should move to a more REST / ReactJS mode.  First, parts of the
-sheet, which introduce changes elsewhere in the sheet, such as weapon
-and armor with weight, stats wrt skill checks, should be passed a
-onSheetChange property, which is signaled when a change requiring sheet reload
-is done.
-
-See https://facebook.github.io/react/docs/tutorial.html
-
-Once the whole sheet is RESTified, the property can be retired.
-
-As all the skill checks etc are currently calculated in the python backend,
-this will probably not happen soon.  Perhaps the sheet components can gradually
-be reloaded in React code once the situation has improved.
-
-In any case, Reactifying and RESTifying the sheet should never result in test
-coverage of the sheet functionality in getting worse; it should only increase,
-but naturally with the focus moving towards the JavaScript unit-tests and
-perhaps Robot-system tests.
-{% endcomment %}
 {% block title %} {{ sheet.name }}'s sheet {% endblock %}
 
 {% block content %}
-    <div class="row">
-    <div class="col-md-12">
 
-    <div class="row">
-        <div class="col-md-3">
-            <h1>{{ sheet.name }}</h1>
-        </div>
 
-        <div class="col-md-2">
-            <div class="edit-control">
-                <a href="{% url "edit_character" sheet.character.id %}">
-                    Edit base character</a>
-            </div>
-        </div>
+    <div id="stat-block-container">Loading...</div>
 
-        <div class="col-md-2">
-            <div class="edit-control">
-                <a href="{% url "edit_sheet" sheet.id %}">
-                    Edit base sheet</a>
-            </div>
-        </div>
-
-        <div class="col-md-2">
-            <div class="edit-control">
-                <a href="{% url "copy_sheet" sheet_id=sheet.id %}">
-                    Copy this sheet</a>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-    <div class="panel panel-default">
-        <div class="panel-heading">Owner</div>
-        <div class="panel-body">{{ sheet.owner }}
-            {% if sheet.private %}
-                <span class="label label-danger">Private</span>
-            {% endif %}</div>
-    </div>
-        </div>
+    <div id="log-entries">
+        <ul>
+            {% for entry in sheet.character.characterlogentry_set.all %}
+                <li>{{ entry.timestamp|naturaltime }}: {{ entry }}</li>
+            {% endfor %}
+        </ul>
     </div>
 
-    <div class="row">
-
-        <div class="col-md-12">
-                <div id="stat-block-container">Loading...</div>
-        </div>
-    </div>
-    </div>
-        <div class="col-md-9">
-
-<div class="row">
-    <div class="col-md-8">
-        {% include "sheet/sheet_detail/movement.html" %}
-    </div>
-</div>
-
-</div>
-
-        <div id="log-entries">
-            <ul>
-                {% for entry in sheet.character.characterlogentry_set.all %}
-                    <li>{{ entry.timestamp|naturaltime }}: {{ entry }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</div>
-{#    </div>#}
 {% endblock %}
 
 {% block script %}
