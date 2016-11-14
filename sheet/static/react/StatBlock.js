@@ -273,7 +273,7 @@ class StatBlock extends React.Component {
 
             rest.getData(this.state.url)
                 .then((character) => {
-                    console.log("Character loaded", character);
+                    console.log("Character loaded");
                     console.log("Loading skills");
                     rest.getData(this.state.url + 'characterskills/').then(
                         (characterSkills) => {
@@ -876,7 +876,7 @@ class StatBlock extends React.Component {
         return new StatHandler({
             character: this.state.char,
             edges: this.state.edgeList,
-            effects: this.state.transientEffectList,
+            effects: this.state.transientEffectList.map((eff) => {return eff.effect}),
             weightCarried: this.getCarriedWeight()
         });
     }

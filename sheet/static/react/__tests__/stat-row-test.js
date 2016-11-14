@@ -34,8 +34,7 @@ var statRowFactory = function(givenProps) {
     }
     var handler = new StatHandler({character: props.initialChar,
         edges: [],
-        effects: [factories.sheetTransientEffectFactory({
-            effect: {fit: 20}})]});
+        effects: [factories.transientEffectFactory({fit: 20})]});
     props.effStats = handler.getEffStats();
     props.baseStats = handler.getBaseStats();
     var rowElement = React.createElement(StatRow, props);

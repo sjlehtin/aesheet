@@ -38,7 +38,7 @@ class StatHandler {
 
         for (let mod of this.props.effects) {
             for (let st of StatHandler.allStatNames) {
-                this._softMods[st] += mod.effect[st];
+                this._softMods[st] += mod[st];
             }
         }
         this._baseStats = undefined;

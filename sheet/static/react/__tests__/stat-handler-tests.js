@@ -41,7 +41,7 @@ describe('StatHandler', function() {
 
     it('calculates soft mods', function () {
         var handler = getStatHandler({effects: [
-            factories.sheetTransientEffectFactory({effect: {dex: 10}})]});
+            factories.transientEffectFactory({dex: 10})]});
 
         expect(handler.getBaseStats().dex).toEqual(50);
         expect(handler.getEffStats().dex).toEqual(60);
@@ -83,7 +83,7 @@ describe('StatHandler', function() {
         var handler = getStatHandler({character: factories.characterFactory({
             cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
                 effects: [
-            factories.sheetTransientEffectFactory({effect: {fit: 10}})],
+            factories.transientEffectFactory({fit: 10})],
             weightCarried: 26
         });
         expect(handler.getBaseStats().fit).toEqual(40);
