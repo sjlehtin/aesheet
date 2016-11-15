@@ -108,6 +108,6 @@ describe('NoteBlock', function() {
         expect(ulNodes.length).toEqual(1);
         expectEdgeAndNotes(ulNodes[0].querySelectorAll('li'),
             'foo', 'fam');
-
     });
+
 });

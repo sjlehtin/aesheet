@@ -14,7 +14,7 @@ class NoteBlock extends React.Component {
     static itemHasNotes(elem) {
         return !!elem.notes;
     }
-    
+
     render () {
         var positiveList = [], negativeList = [];
         this.props.edges.filter(NoteBlock.itemHasNotes).forEach((elem, ii) => {
