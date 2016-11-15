@@ -4,7 +4,7 @@
  */
 
 /*
- * TODO:  Effects from SpellEffects, ArmorSpecialQualities,
+ * TODO:  Effects from TransientEffects, ArmorSpecialQualities,
  * WeaponSpecialQualities, MiscellaneousItems, and Edges should be
  * combined and added to stats, skill levels, movement etc.
  *
@@ -126,7 +126,6 @@ class StatHandler {
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
             // in the excel combat sheet.
-            // TODO: encumbrance and armor after other modifiers.
             var encumbrancePenalty = util.roundup(
                 (-10 * this.props.weightCarried) / this._effStats.fit);
 
@@ -162,7 +161,9 @@ StatHandler.allStatNames =  StatHandler.baseStatNames.concat(
 StatHandler.defaultProps = {
     weightCarried: 0,
     armor: {},
-    helm: {}
+    helm: {},
+    effects: [],
+    edges: []
 };
 
 export default StatHandler;
