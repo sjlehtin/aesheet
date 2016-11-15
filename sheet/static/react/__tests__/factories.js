@@ -303,7 +303,6 @@ var miscellaneousItemFactory = function (overrideFields) {
         "weight": "1.00",
         "tech_level": 5,
         "armor_qualities": [
-            "DR Torso L1"
         ],
         "weapon_qualities": []
         };
@@ -332,7 +331,7 @@ var sheetMiscellaneousItemFactory = function (overrideFields) {
 
 var armorTemplateFactory = function (overrideFields) {
     "use strict";
-    var quality = {
+    var template = {
         "name": "Cloth hood",
         "description": "",
         "is_helm": true,
@@ -396,7 +395,7 @@ var armorTemplateFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
-    return Object.assign(quality, overrideFields);
+    return Object.assign(template, overrideFields);
 };
 
 var armorFactory = function(overrideFields) {
@@ -422,7 +421,7 @@ var armorFactory = function(overrideFields) {
         "name": "Leather armor",
         "description": "",
         "base": armorTemplateFactory(Object.assign(
-                {name: "Leather" + " armor"}, base)),
+                {name: "Leather armor"}, base)),
         "quality": armorQualityFactory(quality),
         "special_qualities": []
     };
