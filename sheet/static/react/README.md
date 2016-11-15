@@ -12,11 +12,21 @@ unmockedModulePathPatterns in the jest configuration in package.json; this
 is mentioned here because the package.json does not allow comments.
 
 TODO: stat modifiers from armor
+TODO: sense modifiers from armor
+TODO: skill modifiers from armor
 TODO: stat modifiers from weaponspecialqualities in weapons
 TODO: stat modifiers from armorspecialqualities in armor
 TODO: edge skill bonuses
 TODO: senses
 TODO: spell skill checks
+
+TODO: environment effects on movement as an overlay
+TODO: environment effects on overland movement as an overlay
+TODO: tiring: show tiring durations in the sheet
+TODO: tiring: account for armor encumbrance class
+TODO: tiring: allow adding turns fought, sprinted etc
+
+TODO: overland movement double time
 
 Reactifying and RESTifying the sheet should never result in test
 coverage of the sheet functionality in getting worse; it should only increase,
