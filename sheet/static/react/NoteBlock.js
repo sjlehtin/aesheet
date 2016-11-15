@@ -22,34 +22,57 @@ class NoteBlock extends React.Component {
                 }
             }
         });
-        var positive, negative;
+        var positive, negative, effects;
 
-        var generateNoteContainer = function (noteType, edgeList) {
-            var color = noteType === "positive" ? "blue" : "red";
-            return <ul className={noteType}
-                       style={{fontSize: "80%", color: color}}>
+        var generateNoteContainer = function (noteType, edgeList, formatItem) {
+            var colorMap = {positive: "blue", negative: "red",
+                neutral: "grey"};
+
+            var color = colorMap['noteType'];
+
+            return <ul style={{fontSize: "80%", color: color}}>
                 {edgeList.map((elem, ii) => {
-                    return <li key={ii}
-                               title={`${elem.edge.name} ${elem.level}`}>
-                        {`${elem.edge.name}: ${elem.notes}`}</li>;
+                    var title = formatItem(elem);
+                    if (title) {
+                        title += ": ";
+                    }
+                    return <li key={ii}>
+                        {`${title}${elem.notes}`}</li>;
                 })}</ul>;
         };
 
+        var formatEdge = function (edge) {
+            return `${edge.edge.name} ${edge.level}`;
+        };
+        var formatEffect = function (effect) {
+            return effect.name; // TODO: no "from" field yet.
+        }
         if (positiveList.length > 0) {
-            positive = generateNoteContainer("positive", positiveList);
+            positive = generateNoteContainer("positive", positiveList, formatEdge);
         }
         if (negativeList.length > 0) {
-            negative = generateNoteContainer("negative", negativeList);
+            negative = generateNoteContainer("negative", negativeList, formatEdge);
+        }
+        var effectsWithNotes = this.props.effects.filter((el) => {return !!el.notes});
+        if (effectsWithNotes.length > 0) {
+            effects = generateNoteContainer("neutral", effectsWithNotes, formatEffect);
         }
         return <div>
             {positive}
             {negative}
+            {effects}
         </div>;
     }
 }
 
 NoteBlock.propTypes = {
-    edges: React.PropTypes.array.isRequired
+    edges: React.PropTypes.array,
+    effects: React.PropTypes.array
+};
+
+NoteBlock.defaultProps = {
+    edges: [],
+    effects: []
 };
 
 export default NoteBlock;
