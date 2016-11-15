@@ -30,7 +30,7 @@ class NoteBlock extends React.Component {
             var colorMap = {positive: "blue", negative: "red",
                 neutral: "grey"};
 
-            var color = colorMap['noteType'];
+            var color = colorMap[noteType];
 
             return <ul style={{fontSize: "80%", color: color}}>
                 {edgeList.map((elem, ii) => {
