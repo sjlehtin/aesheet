@@ -11,15 +11,17 @@ class NoteBlock extends React.Component {
         };
     }
 
+    static itemHasNotes(elem) {
+        return !!elem.notes;
+    }
+    
     render () {
         var positiveList = [], negativeList = [];
-        this.props.edges.forEach((elem, ii) => {
-            if (elem.notes.length > 0) {
-                if (parseFloat(elem.cost) > 0) {
-                    positiveList.push(elem);
-                } else {
-                    negativeList.push(elem);
-                }
+        this.props.edges.filter(NoteBlock.itemHasNotes).forEach((elem, ii) => {
+            if (parseFloat(elem.cost) > 0) {
+                positiveList.push(elem);
+            } else {
+                negativeList.push(elem);
             }
         });
         var positive, negative, effects;
@@ -53,7 +55,7 @@ class NoteBlock extends React.Component {
         if (negativeList.length > 0) {
             negative = generateNoteContainer("negative", negativeList, formatEdge);
         }
-        var effectsWithNotes = this.props.effects.filter((el) => {return !!el.notes});
+        var effectsWithNotes = this.props.effects.filter(NoteBlock.itemHasNotes);
         if (effectsWithNotes.length > 0) {
             effects = generateNoteContainer("neutral", effectsWithNotes, formatEffect);
         }
