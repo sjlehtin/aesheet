@@ -41,10 +41,6 @@ class StatBlock extends React.Component {
         this.state = {
             sheet: undefined,
             char: undefined,
-            // /* This is preferred over the edges list in the char.  A
-            //    sub-component will handle the actual edges for the character,
-            //    and will notify this component of changes. */
-            //edges: {},
             edgeList: [],
 
             characterSkills: [],
@@ -668,25 +664,9 @@ class StatBlock extends React.Component {
     }
 
     renderNotes() {
-        // TODO: should gather also from transient effects.
-        if (!this.state.edgeList) {
-            return <Loading>Notes</Loading>;
-        }
-
-        var hasNotes = function (edgeList) {
-            for (var ii = 0; ii < edgeList.length; ii++) {
-                if (edgeList[ii].notes.length > 0) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        if (hasNotes(this.state.edgeList)) {
-            return <Panel><NoteBlock edges={this.state.edgeList}/></Panel>;
-        } else {
-            return '';
-        }
+        return <Panel header={<h4>Notes</h4>}>
+                    <NoteBlock edges={this.state.edgeList}
+                        effects={this.getAllEffects()} /></Panel>;
     }
 
     renderSkills(skillHandler, statHandler) {
@@ -869,15 +849,46 @@ class StatBlock extends React.Component {
         });
     }
 
+    getAllEffects() {
+        var effects = this.state.transientEffectList.map(
+            (eff) => {return eff.effect});
+
+        var addName = function (el, name) {
+            return Object.assign({}, el, {name: name})
+        }
+        if (this.state.armor && this.state.armor.special_qualities) {
+            effects = effects.concat(this.state.armor.special_qualities.map(
+                (el) => { return addName(el, this.state.armor.name) }));
+        }
+        if (this.state.helm && this.state.helm.special_qualities) {
+            effects = effects.concat(this.state.helm.special_qualities.map(
+                (el) => { return addName(el, this.state.helm.name) }));
+        }
+        for (let wpn of this.state.weaponList) {
+            effects = effects.concat(wpn.special_qualities.map(
+                (el) => { return addName(el, wpn.name) }));
+        }
+        for (let wpn of this.state.rangedWeaponList) {
+            effects = effects.concat(wpn.special_qualities.map(
+                (el) => { return addName(el, wpn.name) }));
+        }
+        for (let item of this.state.miscellaneousItemList) {
+            effects = effects.concat(item.item.armor_qualities.map(
+                (el) => { return addName(el, item.item.name) }));
+            effects = effects.concat(item.item.weapon_qualities.map(
+                (el) => { return addName(el, item.item.name) }));
+        }
+        return effects;
+    }
+
     getStatHandler() {
-        if (!this.state.char|| !this.state.edgeList ||
-                !this.state.transientEffectList) {
+        if (!this.state.char|| !this.state.edgeList) {
             return null;
         }
         return new StatHandler({
             character: this.state.char,
             edges: this.state.edgeList,
-            effects: this.state.transientEffectList.map((eff) => {return eff.effect}),
+            effects: this.getAllEffects(),
             weightCarried: this.getCarriedWeight(),
             armor: this.state.armor,
             helm: this.state.helm

@@ -369,30 +369,7 @@ describe('stat block', function() {
             done();
         });
     });
-
-    it('should not contain a NoteBlock without edges', function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-
-            var noteBlocks = TestUtils.scryRenderedComponentsWithType(
-                block, NoteBlock);
-            expect(noteBlocks.length).toEqual(0);
-            done();
-        });
-    });
-
-    it('should not contain a NoteBlock with only edges without notes', function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            addEdge(block, "Fast Healing", 3, {notes: ""});
-
-            var noteBlocks = TestUtils.scryRenderedComponentsWithType(
-                block, NoteBlock);
-            expect(noteBlocks.length).toEqual(0);
-            done();
-        });
-    });
-
+    
     it('calculates runMultiplier with an edge', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
