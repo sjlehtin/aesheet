@@ -20,7 +20,7 @@ class ArmorControl extends React.Component {
                 return parseFloat(field);
             }
             return 0;
-        }
+        };
         if (this.props.armor && this.props.armor.base) {
             stat += getFieldValue(this.props.armor.base[accessor]);
             if (location !== "H") {
