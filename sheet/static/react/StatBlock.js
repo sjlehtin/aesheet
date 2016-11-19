@@ -785,13 +785,12 @@ class StatBlock extends React.Component {
         </div>;
     }
 
-    renderAdvancingInitiatives (effStats) {
-        if (!effStats) {
+    renderAdvancingInitiatives (skillHandler) {
+        if (!skillHandler) {
             return <Loading>Advancing initiatives</Loading>;
         }
         return <InitiativeBlock style={{fontSize: "80%"}}
-                                effMOV={effStats.mov}
-                                runMultiplier={this.runMultiplier()} />;
+                                stats={skillHandler} />;
     }
 
     renderPortrait () {
@@ -1219,7 +1218,7 @@ class StatBlock extends React.Component {
                                 {this.renderNotes()}
                             </Row>
                             <Row>
-                                {this.renderAdvancingInitiatives(effStats)}
+                                {this.renderAdvancingInitiatives(skillHandler)}
                             </Row>
                         </Col>
                     </Row>
