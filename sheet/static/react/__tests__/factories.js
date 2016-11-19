@@ -29,6 +29,8 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
+const StatHandler = require('../StatHandler').default;
+const SkillHandler = require('../SkillHandler').default;
 
 var objectId = 1;
 
@@ -664,8 +666,6 @@ var sheetFactory = function (statOverrides) {
     return Object.assign(_sheetData, statOverrides);
 };
 
-
-
 var statBlockFactory = function (overrides) {
     var characterOverrides = undefined;
     var sheetOverrides = undefined;
@@ -754,6 +754,50 @@ var statBlockFactory = function (overrides) {
     return statBlock;
 };
 
+
+var skillHandlerFactory = function (givenProps) {
+    if (!givenProps) {
+        givenProps = {};
+    }
+
+    var edgeList = [];
+    var skills = [];
+    var allSkills = [];
+    var effects = [];
+
+    if (givenProps.skills) {
+        for (let sk of givenProps.skills) {
+            var skill = characterSkillFactory(sk);
+            skills.push(skill);
+            allSkills.push(skillFactory({name: skill.skill}));
+        }
+    }
+    if (givenProps.edges) {
+        for (let edge of givenProps.edges) {
+            var createdEdge = edgeLevelFactory(edge);
+            edgeList.push(createdEdge);
+        }
+    }
+    if (givenProps.effects) {
+        for (let eff of givenProps.effects) {
+            var createdEff = transientEffectFactory(eff);
+            effects.push(createdEff);
+        }
+    }
+
+    var statHandler = new StatHandler({
+        character: characterFactory(
+            Object.assign({cur_fit: 43, cur_ref: 43},
+                givenProps.character)),
+        edges: edgeList,
+        effects: effects
+    });
+
+    return new SkillHandler({
+        stats: statHandler, edges: edgeList,
+        characterSkills: skills, allSkills: allSkills});
+};
+
 module.exports = {
     characterFactory: characterFactory,
     sheetFactory: sheetFactory,
@@ -774,5 +818,6 @@ module.exports = {
     armorQualityFactory: armorQualityFactory,
     armorFactory: armorFactory,
     miscellaneousItemFactory: miscellaneousItemFactory,
-    sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory
+    sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory,
+    skillHandlerFactory: skillHandlerFactory
 };

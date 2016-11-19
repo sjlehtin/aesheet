@@ -17,68 +17,16 @@ const MovementRates = require('../MovementRates').default;
 describe('MovementRates', function() {
     "use strict";
 
-    var getSkillHandler = function (givenProps) {
-        if (!givenProps) {
-            givenProps = {};
-        }
-
-        var edgeList = [];
-        var skills = [];
-        var allSkills = [];
-        var effects = [];
-
-        if (givenProps.skills) {
-            for (let sk of givenProps.skills) {
-                var skill = factories.characterSkillFactory(sk);
-                skills.push(skill);
-                allSkills.push(factories.skillFactory({name: skill.skill}));
-            }
-        }
-        if (givenProps.edges) {
-            for (let edge of givenProps.edges) {
-                var createdEdge = factories.edgeLevelFactory(edge);
-                edgeList.push(createdEdge);
-            }
-        }
-        if (givenProps.effects) {
-            for (let eff of givenProps.effects) {
-                var createdEff = factories.transientEffectFactory(eff);
-                effects.push(createdEff);
-            }
-        }
-
-        var statHandler = new StatHandler({
-            character: factories.characterFactory(
-                Object.assign({cur_fit: 43, cur_ref: 43},
-                    givenProps.character)),
-            edges: edgeList,
-            effects: effects
-            });
-
-        return new SkillHandler({
-                    stats: statHandler, edges: edgeList,
-                    characterSkills: skills, allSkills: allSkills});
-    };
-
     var getMovementRates = function (givenProps) {
-        var skillHandler = getSkillHandler(givenProps);
+        var skillHandler = factories.skillHandlerFactory(givenProps);
 
         if (!givenProps) {
             givenProps = {};
         }
 
         var edgeList = [];
-        var skills = [];
-        var allSkills = [];
         var effects = [];
 
-        if (givenProps.skills) {
-            for (let sk of givenProps.skills) {
-                var skill = factories.characterSkillFactory(sk);
-                skills.push(skill);
-                allSkills.push(factories.skillFactory({name: skill.skill}));
-            }
-        }
         if (givenProps.edges) {
             for (let edge of givenProps.edges) {
                 var createdEdge = factories.edgeLevelFactory(edge);
