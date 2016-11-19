@@ -8,115 +8,6 @@ class MovementRates extends React.Component {
         super(props);
     }
 
-    climbingSpeed() {
-        var level = this.props.skillHandler.skillLevel('Climbing');
-        var rate;
-        if (typeof(level) !== 'number') {
-            rate = this.props.statHandler.getEffStats().mov / 60;
-        } else {
-            rate = this.props.statHandler.getEffStats().mov / 30 + level;
-        }
-
-        var edgeRate = this.props.statHandler.getEdgeModifier('climb_multiplier');
-        var effRate = this.props.statHandler.getEffectModifier('climb_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
-    }
-
-    swimmingSpeed() {
-        var level = this.props.skillHandler.skillLevel('Swimming');
-        var rate;
-        if (typeof(level) !== 'number') {
-            rate = this.props.statHandler.getEffStats().mov / 10;
-        } else {
-            rate = this.props.statHandler.getEffStats().mov / 5 + level * 5;
-        }
-
-        var edgeRate = this.props.statHandler.getEdgeModifier('swim_multiplier');
-        var effRate = this.props.statHandler.getEffectModifier('swim_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
-    }
-
-    flyingSpeed() {
-        var canFly = false;
-        var rate = this.props.statHandler.getEffStats().mov;
-        var edgeRate = this.props.statHandler.getEdgeModifier('fly_multiplier');
-        var effRate = this.props.statHandler.getEffectModifier('fly_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-            canFly = true;
-        }
-        if (effRate) {
-            rate *= effRate;
-            canFly = true;
-        }
-
-        if (canFly) {
-            return rate;
-        } else {
-            return 0;
-        }
-    }
-
-    jumpingDistance() {
-        var level = this.props.skillHandler.skillLevel('Jumping');
-        var rate;
-        if (typeof(level) !== 'number') {
-            rate = this.props.statHandler.getEffStats().mov / 24;
-        } else {
-            rate = this.props.statHandler.getEffStats().mov / 12 + level*0.75;
-        }
-
-        var edgeRate = this.props.statHandler.getEdgeModifier('run_multiplier');
-        var effRate = this.props.statHandler.getEffectModifier('run_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
-
-    }
-
-    jumpingHeight() {
-        return this.jumpingDistance() / 3;
-    }
-
-    runningSpeed() {
-        var rate = this.props.statHandler.getEffStats().mov;
-
-        var edgeRate = this.props.statHandler.getEdgeModifier('run_multiplier');
-        var effRate = this.props.statHandler.getEffectModifier('run_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
-
-    }
-
-    sprintingSpeed() {
-        return this.runningSpeed() * 1.5;
-    }
-
-    sneakingSpeed() {
-        return this.props.statHandler.getEffStats().mov / 5;
-    }
-
     render() {
         var terrains = [{name: 'Road', mult: 1}, {name: 'Clear', mult: 2},
             {name: 'Scrub', mult: 3}, {name: 'Woods', mult: 4},
@@ -126,7 +17,7 @@ class MovementRates extends React.Component {
         var terrainsRow = [];
         var milesPerDayRow = [];
         var milesPerHourRow = [];
-        var spd = this.runningSpeed();
+        var spd = this.props.skillHandler.runningSpeed();
         for (let terrain of terrains) {
             terrainsRow.push(<th key={"ter-"+terrain.name}>{terrain.name}</th>);
             milesPerDayRow.push(<td key={"mpd-"+terrain.name}>
@@ -134,7 +25,7 @@ class MovementRates extends React.Component {
             milesPerHourRow.push(<td key={"mph-"+terrain.name}>
                 {(spd/(15 * terrain.mult)).toFixed(1)}</td>);
         }
-        var flySpeed = this.flyingSpeed();
+        var flySpeed = this.props.skillHandler.flyingSpeed();
         terrainsRow.push(<th key="ter-fly">Fly</th>);
         milesPerDayRow.push(<td key="mpd-fly">{util.roundup(flySpeed/2)}</td>);
         milesPerHourRow.push(<td key="mph-fly">{util.roundup(flySpeed/15)}</td>);
@@ -146,13 +37,13 @@ class MovementRates extends React.Component {
                 </tr></thead>
                 <tbody>
                 <tr>
-                    <td><div>H = {this.jumpingDistance().toFixed(1)}</div><div>V = {this.jumpingHeight().toFixed(1)}</div></td>
-                    <td>{this.climbingSpeed().toFixed(1)}</td>
-                    <td>{util.roundup(this.swimmingSpeed())}</td>
-                    <td>{util.roundup(this.sneakingSpeed().toFixed())}</td>
-                    <td>{util.roundup(this.runningSpeed().toFixed())}</td>
-                    <td>{util.roundup(this.sprintingSpeed().toFixed())}</td>
-                    <td>{util.roundup(this.flyingSpeed().toFixed())}</td>
+                    <td><div>H = {this.props.skillHandler.jumpingDistance().toFixed(1)}</div><div>V = {this.props.skillHandler.jumpingHeight().toFixed(1)}</div></td>
+                    <td>{this.props.skillHandler.climbingSpeed().toFixed(1)}</td>
+                    <td>{util.roundup(this.props.skillHandler.swimmingSpeed())}</td>
+                    <td>{util.roundup(this.props.skillHandler.sneakingSpeed().toFixed())}</td>
+                    <td>{util.roundup(this.props.skillHandler.runningSpeed().toFixed())}</td>
+                    <td>{util.roundup(this.props.skillHandler.sprintingSpeed().toFixed())}</td>
+                    <td>{util.roundup(flySpeed.toFixed())}</td>
                 </tr>
                 </tbody>
             </Table>
