@@ -14,8 +14,6 @@ is mentioned here because the package.json does not allow comments.
 TODO: stat modifiers from armor
 TODO: sense modifiers from armor
 TODO: skill modifiers from armor
-TODO: stat modifiers from weaponspecialqualities in weapons
-TODO: stat modifiers from armorspecialqualities in armor
 TODO: edge skill bonuses
 TODO: senses
 TODO: spell skill checks
