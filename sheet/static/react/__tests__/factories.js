@@ -1,3 +1,37 @@
+jest.dontMock('../StatBlock');
+jest.dontMock('../StatRow');
+jest.dontMock('../XPControl');
+jest.dontMock('../AddSPControl');
+jest.dontMock('../NoteBlock');
+jest.dontMock('../InitiativeBlock');
+jest.dontMock('../Loading');
+jest.dontMock('../SkillTable');
+jest.dontMock('../SkillRow');
+jest.dontMock('../AddSkillControl');
+jest.dontMock('../SkillHandler');
+jest.dontMock('../StatHandler');
+jest.dontMock('../WeaponRow');
+jest.dontMock('../RangedWeaponRow');
+jest.dontMock('../AddWeaponControl');
+jest.dontMock('../AddRangedWeaponControl');
+jest.dontMock('../FirearmControl');
+jest.dontMock('../AddFirearmControl');
+jest.dontMock('../TransientEffectRow');
+jest.dontMock('../AddTransientEffectControl');
+jest.dontMock('../Inventory');
+jest.dontMock('../InventoryRow');
+jest.dontMock('../sheet-util');
+jest.dontMock('./factories');
+
+import React from 'react';
+import TestUtils from 'react-addons-test-utils';
+
+var rest = require('sheet-rest');
+
+const StatBlock = require('../StatBlock').default;
+
+var objectId = 1;
+
 var characterFactory = function (statOverrides) {
     var _charData = {
         id: 2,
@@ -72,9 +106,30 @@ var skillFactory = function (overrideFields) {
     return Object.assign(_baseSkill, overrideFields);
 };
 
+
 var nextEdgeID = 0;
 
 var edgeFactory = function (overrideFields) {
+    "use strict";
+
+    var edge = {
+        "name": "Acute Hearing",
+        "description": "",
+        "notes": ""
+    };
+    return Object.assign(edge, overrideFields);
+};
+
+var edgeLevelFactory = function (overrideFields) {
+    if (!overrideFields){
+        overrideFields = {};
+    }
+    var edge = edgeFactory(overrideFields.edge);
+
+    if ('edge' in overrideFields) {
+        delete overrideFields.edge;
+    }
+
     var _baseEdge = {
         "id": nextEdgeID,
     "notes": "",
@@ -102,14 +157,34 @@ var edgeFactory = function (overrideFields) {
     "level": 1,
     "cost": "-1.0",
     "requires_hero": false,
-    "edge": "Uncouth",
-        "skill_bonuses": [],
-        "extra_skill_points": 0
+    "edge": edge,
+    "skill_bonuses": [],
+    "extra_skill_points": 0
     };
 
     var newEdge = Object.assign(_baseEdge, overrideFields);
     /* Overriding ID is possible. */
     nextEdgeID = newEdge.id + 1;
+    return newEdge;
+};
+
+var characterEdgeFactory = function (overrideFields) {
+    if (!overrideFields){
+        overrideFields = {};
+    }
+    var edge = edgeLevelFactory(overrideFields.edge);
+
+    if ('edge' in overrideFields) {
+        delete overrideFields.edge;
+    }
+
+    var _baseCharacterEdge = {
+        "id": objectId,
+        "edge": edge,
+        "character": 1 };
+    var newEdge = Object.assign(_baseCharacterEdge, overrideFields);
+    /* Overriding ID is possible. */
+    objectId = newEdge.id + 1;
     return newEdge;
 };
 
@@ -188,6 +263,171 @@ var firearmFactory = function (overrideFields) {
     return Object.assign(firearm, overrides);
 };
 
+
+var armorQualityFactory = function (overrideFields) {
+    "use strict";
+    var quality = {
+        "name": "normal",
+        "short_name": "",
+        "dp_multiplier": "1.0",
+        "armor_p": "0.0",
+        "armor_s": "0.0",
+        "armor_b": "0.0",
+        "armor_r": "0.0",
+        "armor_dr": "0.0",
+        "mod_fit_multiplier": "1.0",
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_psy": 0,
+        "mod_sensory": 0,
+        "mod_stealth": 0,
+        "mod_conceal": 0,
+        "mod_climb": 0,
+        "mod_weight_multiplier": "1.0",
+        "mod_encumbrance_class": 0,
+        "tech_level": 1
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(quality, overrideFields);
+};
+
+var miscellaneousItemFactory = function (overrideFields) {
+    "use strict";
+    var item = {
+        "id": objectId++,
+        "name": "Bullet proof cloak",
+        "description": "",
+        "notes": "",
+        "weight": "1.00",
+        "tech_level": 5,
+        "armor_qualities": [
+        ],
+        "weapon_qualities": []
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(item, overrideFields);
+};
+
+var sheetMiscellaneousItemFactory = function (overrideFields) {
+    "use strict";
+
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var item = {};
+    if (overrideFields.item) {
+        item = overrideFields.item;
+        delete overrideFields.item;
+    }
+    var sheetItem = Object.assign({id: objectId++}, overrideFields);
+    sheetItem.item = miscellaneousItemFactory(item);
+    return sheetItem;
+};
+
+var armorTemplateFactory = function (overrideFields) {
+    "use strict";
+    var template = {
+        "name": "Cloth hood",
+        "description": "",
+        "is_helm": true,
+        "armor_h_p": "0.0",
+        "armor_h_s": "0.0",
+        "armor_h_b": "0.0",
+        "armor_h_r": "-0.5",
+        "armor_h_dr": "-1.0",
+        "armor_h_dp": "1.0",
+        "armor_t_p": "0.0",
+        "armor_t_s": "0.0",
+        "armor_t_b": "0.0",
+        "armor_t_r": "0.0",
+        "armor_t_dr": "0.0",
+        "armor_t_dp": "0.0",
+        "armor_ll_p": "0.0",
+        "armor_ll_s": "0.0",
+        "armor_ll_b": "0.0",
+        "armor_ll_r": "0.0",
+        "armor_ll_dr": "0.0",
+        "armor_ll_dp": "0.0",
+        "armor_la_p": "0.0",
+        "armor_la_s": "0.0",
+        "armor_la_b": "0.0",
+        "armor_la_r": "0.0",
+        "armor_la_dr": "0.0",
+        "armor_la_dp": "0.0",
+        "armor_rl_p": "0.0",
+        "armor_rl_s": "0.0",
+        "armor_rl_b": "0.0",
+        "armor_rl_r": "0.0",
+        "armor_rl_dr": "0.0",
+        "armor_rl_dp": "0.0",
+        "armor_ra_p": "0.0",
+        "armor_ra_s": "0.0",
+        "armor_ra_b": "0.0",
+        "armor_ra_r": "0.0",
+        "armor_ra_dr": "0.0",
+        "armor_ra_dp": "0.0",
+        "armor_h_pl": -2,
+        "armor_t_pl": 0,
+        "armor_ll_pl": 0,
+        "armor_rl_pl": 0,
+        "armor_la_pl": 0,
+        "armor_ra_pl": 0,
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_psy": -1,
+        "mod_vision": 0,
+        "mod_hear": -4,
+        "mod_smell": 0,
+        "mod_surprise": -2,
+        "mod_stealth": 0,
+        "mod_conceal": 5,
+        "mod_climb": 0,
+        "mod_tumble": -5,
+        "weight": "0.40",
+        "encumbrance_class": 0,
+        "tech_level": 1
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(template, overrideFields);
+};
+
+var armorFactory = function(overrideFields) {
+    "use strict";
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+
+    var base = {};
+    if (overrideFields.base) {
+        base = overrideFields.base;
+        delete overrideFields.base;
+    }
+
+    var quality = {};
+    if (overrideFields.quality) {
+        quality = overrideFields.quality;
+        delete overrideFields.quality;
+    }
+
+    var armor = {
+        "id": 1,
+        "name": "Leather armor",
+        "description": "",
+        "base": armorTemplateFactory(Object.assign(
+                {name: "Leather armor"}, base)),
+        "quality": armorQualityFactory(quality),
+        "special_qualities": []
+    };
+    return armor;
+};
+
 var weaponQualityFactory = function (overrideFields) {
     "use strict";
     var quality = {
@@ -221,7 +461,7 @@ var weaponFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
-    var weapon ={
+    var weapon = {
         "id": 3,
         "name": "Broadsword",
         "description": "",
@@ -396,22 +636,143 @@ var inventoryEntryFactory = function (overrides) {
         unit_weight: "0.5",
         description: "Item",
         order: 0,
-        location: ""
+        location: "",
+        id: objectId++
     };
 
     return Object.assign(_entryData, overrides);
 };
 
+var sheetFactory = function (statOverrides) {
+    var _sheetData = {
+        id: 1,
+        character: 2,
+        "weight_carried": "0.00",
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_lrn": 0,
+        "mod_int": 0,
+        "mod_psy": 0,
+        "mod_wil": 0,
+        "mod_cha": 0,
+        "mod_pos": 0,
+        "mod_mov": 0,
+        "mod_dex": 0,
+        "mod_imm": 0
+    };
+
+    return Object.assign(_sheetData, statOverrides);
+};
+
+
+
+var statBlockFactory = function (overrides) {
+    var characterOverrides = undefined;
+    var sheetOverrides = undefined;
+    if (overrides) {
+        characterOverrides = overrides.character;
+        sheetOverrides = overrides.sheet;
+    }
+
+    var charData = characterFactory(characterOverrides);
+    var sheetData = sheetFactory(sheetOverrides);
+
+
+    var promises = [];
+
+    var jsonResponse = function (json) {
+        var promise = Promise.resolve(json);
+        promises.push(promise);
+        return promise;
+    };
+
+    var afterLoad = function (callback) {
+        Promise.all(promises).then(function () {
+            Promise.all(promises).then(function () {
+                Promise.all(promises).then(function () {
+                    callback()
+                }).catch(function (err) { fail("failed with " + err)});
+            }).catch(function (err) { fail("failed with " + err)});
+        }).catch(function (err) { fail("failed with " + err)});
+    };
+
+    rest.getData.mockImplementation(function (url) {
+        if (url === "/rest/sheets/1/") {
+            return jsonResponse(sheetData);
+        } else if (url === "/rest/characters/2/") {
+            return jsonResponse(charData);
+        } else if (url === "/rest/characters/2/characterskills/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/characters/2/characteredges/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/skills/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/weapontemplates/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/weaponqualities/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/weapons/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetfirearms/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetweapons/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/rangedweapontemplates/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/rangedweapons/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheettransienteffects/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/transienteffects/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/inventory/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetarmor/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheethelm/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/sheets/1/sheetmiscellaneousitems/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/miscellaneousitems/campaign/2/") {
+            return jsonResponse([]);
+        } else if (url === "/rest/edgelevels/campaign/2/") {
+            return jsonResponse([]);
+        } else {
+            /* Throwing errors here do not cancel the test. */
+            fail("this is an unsupported url:" + url);
+        }
+    });
+    var table = TestUtils.renderIntoDocument(
+        <StatBlock url="/rest/sheets/1/"/>
+    );
+
+    var statBlock = TestUtils.findRenderedComponentWithType(table,
+        StatBlock);
+    statBlock.afterLoad = afterLoad;
+    return statBlock;
+};
+
 module.exports = {
     characterFactory: characterFactory,
+    sheetFactory: sheetFactory,
+    statBlockFactory: statBlockFactory,
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
+    edgeLevelFactory: edgeLevelFactory,
     edgeFactory: edgeFactory,
+    characterEdgeFactory: characterEdgeFactory,
     statsFactory: statsFactory,
     firearmFactory: firearmFactory,
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,
     transientEffectFactory: transientEffectFactory,
     sheetTransientEffectFactory: sheetTransientEffectFactory,
-    inventoryEntryFactory: inventoryEntryFactory
+    inventoryEntryFactory: inventoryEntryFactory,
+    armorTemplateFactory: armorTemplateFactory,
+    armorQualityFactory: armorQualityFactory,
+    armorFactory: armorFactory,
+    miscellaneousItemFactory: miscellaneousItemFactory,
+    sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory
 };

@@ -196,7 +196,8 @@ class AddExistingMiscellaneousItemForm(AddExistingArmorForm):
              tech_level__in=self.instance.campaign.tech_levels.all())
 
     def add_item(self, item):
-        self.instance.miscellaneous_items.add(item)
+        sheet.models.SheetMiscellaneousItem.objects.create(item=item,
+                                                           sheet=self.instance)
 
 
 class AddEdgeForm(RequestForm):
@@ -430,7 +431,8 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             new_sheet.firearms.add(firearm)
 
         for item in miscellaneous_items:
-            new_sheet.miscellaneous_items.add(item)
+            sheet.models.SheetMiscellaneousItem.objects.create(
+                sheet=new_sheet, item=item)
 
         for effect in transient_effects:
             sheet.models.SheetTransientEffect.objects.create(

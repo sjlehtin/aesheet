@@ -41,7 +41,7 @@ describe('StatHandler', function() {
 
     it('calculates soft mods', function () {
         var handler = getStatHandler({effects: [
-            factories.sheetTransientEffectFactory({effect: {dex: 10}})]});
+            factories.transientEffectFactory({dex: 10})]});
 
         expect(handler.getBaseStats().dex).toEqual(50);
         expect(handler.getEffStats().dex).toEqual(60);
@@ -49,7 +49,7 @@ describe('StatHandler', function() {
     });
 
     it('calculates hard mods', function () {
-        var handler = getStatHandler({edges: [factories.edgeFactory({dex: 10})]});
+        var handler = getStatHandler({edges: [factories.edgeLevelFactory({dex: 10})]});
 
         expect(handler.getBaseStats().dex).toEqual(60);
         expect(handler.getEffStats().dex).toEqual(60);
@@ -83,7 +83,7 @@ describe('StatHandler', function() {
         var handler = getStatHandler({character: factories.characterFactory({
             cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
                 effects: [
-            factories.sheetTransientEffectFactory({effect: {fit: 10}})],
+            factories.transientEffectFactory({fit: 10})],
             weightCarried: 26
         });
         expect(handler.getBaseStats().fit).toEqual(40);
@@ -91,7 +91,80 @@ describe('StatHandler', function() {
         expect(handler.getEffStats().mov).toEqual(44);
     });
 
-    // it('takes armor into account with penalties', function () {
-    //
+    it('can calculate modifiers from edges', function (){
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
+                edges: [
+            factories.edgeLevelFactory({edge: {name: "Natural climber"}, climb_multiplier: 2}),
+            factories.edgeLevelFactory({edge: {name: "Woodsman"}, climb_multiplier: 1.5})
+                ],
+        });
+        expect(handler.getEdgeModifier('climb_multiplier')).toEqual(3.5);
+    });
+
+    it('returns a value with unrelated edges', function () {
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
+                edges: [
+            factories.edgeLevelFactory({edge: {name: "Natural climber"}, climb_multiplier: "2.0"}),
+            factories.edgeLevelFactory({edge: {name: "Woodsman"}, climb_multiplier: "1.5"})
+                ],
+        });
+        expect(handler.getEdgeModifier('swim_multiplier')).toEqual(0);
+
+    });
+
+    it('returns a value without edges', function () {
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50})
+        });
+        expect(handler.getEdgeModifier('swim_multiplier')).toEqual(0);
+    });
+
+    it('can calculate modifiers from effects', function (){
+        var handler = getStatHandler({character: factories.characterFactory({
+            cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50}),
+                effects: [
+            factories.transientEffectFactory({swim_multiplier: "2.0"})],
+        });
+        expect(handler.getEffectModifier('swim_multiplier')).toEqual(2);
+    });
+
+    it('takes armor into account with penalties', function () {
+        var handler = getStatHandler({
+            character: factories.characterFactory({
+                cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
+            }),
+            armor: factories.armorFactory({
+                base: {
+                    mod_fit: -2,
+                    mod_ref: -3,
+                    mod_psy: -5
+                }
+            }),
+        });
+        expect(handler.getEffStats().fit).toEqual(38);
+        expect(handler.getEffStats().ref).toEqual(42);
+        expect(handler.getEffStats().psy).toEqual(45);
+    });
+
+    // it('takes armor quality into account with penalties', function () {
+    //     var handler = getStatHandler({
+    //         character: factories.characterFactory({
+    //             cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
+    //         }),
+    //         armor: factories.armorFactory({
+    //             base: {
+    //                 mod_fit: "-2",
+    //                 mod_ref: "-3",
+    //                 mod_psy: "-5"
+    //             },
+    //             quality: {}
+    //         }),
+    //     });
+    //     expect(handler.getEffStats().fit).toEqual(38);
+    //     expect(handler.getEffStats().ref).toEqual(42);
+    //     expect(handler.getEffStats().psy).toEqual(45);
     // });
+
 });

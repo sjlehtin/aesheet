@@ -196,14 +196,16 @@ class ArmorQualityViewSet(CampaignMixin, viewsets.ModelViewSet):
 
 class ArmorViewSet(CampaignMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    create_serializer = serializers.ArmorCreateSerializer
+    list_serializer = serializers.ArmorListSerializer
 
     def get_serializer_class(self):
         if self.action == 'create':
             # When creating new, we do not want the full nested
             # representation, just id's.
-            return serializers.ArmorCreateSerializer
+            return self.create_serializer
         else:
-            return serializers.ArmorListSerializer
+            return self.list_serializer
 
     def get_queryset(self):
         qs = models.Armor.objects.select_related().all()
@@ -218,6 +220,21 @@ class ArmorViewSet(CampaignMixin, viewsets.ModelViewSet):
 class TransientEffectViewSet(CampaignMixin, viewsets.ModelViewSet):
     serializer_class = serializers.TransientEffectSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class MiscellaneousItemViewSet(ArmorViewSet):
+    create_serializer = serializers.MiscellaneousItemCreateSerializer
+    list_serializer = serializers.MiscellaneousItemListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = models.MiscellaneousItem.objects.select_related().all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                self.tech_levels))
+            qs = qs.filter(tech_level__in=self.tech_levels)
+        return qs
+
 
 
 class ListPermissionMixin(object):
@@ -470,13 +487,17 @@ class SheetHelmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
 
 class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    create_serializer = serializers.SheetTransientEffectCreateSerializer
+    list_serializer = serializers.SheetTransientEffectListSerializer
+    model = models.SheetTransientEffect
+
     def get_serializer_class(self):
         if self.action == 'create':
             # When creating new, we do not want the full nested
             # representation, just id's.
-            return serializers.SheetTransientEffectCreateSerializer
+            return self.create_serializer
         else:
-            return serializers.SheetTransientEffectListSerializer
+            return self.list_serializer
 
     def get_serializer(self, *args, **kwargs):
         serializer = super(SheetTransientEffectViewSet, self).get_serializer(
@@ -492,7 +513,7 @@ class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
         return serializer
 
     def get_queryset(self):
-        return models.SheetTransientEffect.objects.filter(sheet=self.sheet)
+        return self.model.objects.filter(sheet=self.sheet)
 
     def perform_update(self, serializer):
         # Update should not be allowed for sheet or effect fields, but just
@@ -501,4 +522,50 @@ class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         super(SheetTransientEffectViewSet, self).perform_create(
+            serializer)
+
+
+class SheetMiscellaneousItemViewSet(SheetTransientEffectViewSet):
+    create_serializer = serializers.SheetMiscellaneousItemCreateSerializer
+    list_serializer = serializers.SheetMiscellaneousItemListSerializer
+    model = models.SheetMiscellaneousItem
+
+
+class CharacterEdgeViewSet(ListPermissionMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.CharacterEdgeCreateSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.character = models.Character.objects.get(
+                pk=self.kwargs['character_pk'])
+        self.containing_object = self.character
+        return super(CharacterEdgeViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_queryset(self):
+        return models.CharacterEdge.objects.filter(character=self.character)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.CharacterEdgeCreateSerializer
+        else:
+            return serializers.CharacterEdgeListSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(CharacterEdgeViewSet, self).get_serializer(
+                *args, **kwargs)
+        if self.action == 'create':
+            # ListSerializer does not have the fields.
+            serializer.fields['character'].default = self.character
+            serializer.fields['character'].read_only = True
+            # The effect will not be changed with this API after creation.
+            if serializer.instance is not None:
+                serializer.fields['edge'].read_only = True
+
+        return serializer
+
+
+    def perform_create(self, serializer):
+        super(CharacterEdgeViewSet, self).perform_create(
             serializer)

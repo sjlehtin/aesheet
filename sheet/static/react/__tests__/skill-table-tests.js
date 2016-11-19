@@ -362,8 +362,8 @@ describe('SkillTable', function() {
 
     it("calculates SPs from edges", function () {
         var table = getSkillTable({
-            edges: [factories.edgeFactory({extra_skill_points: 6}),
-                factories.edgeFactory({extra_skill_points: 8})
+            edges: [factories.edgeLevelFactory({extra_skill_points: 6}),
+                factories.edgeLevelFactory({extra_skill_points: 8})
             ]
         });
         expect(table.edgeSkillPoints()).toEqual(14);

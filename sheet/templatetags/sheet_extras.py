@@ -6,20 +6,6 @@ from django.utils.html import format_html, mark_safe
 register = template.Library()
 
 @register.simple_tag
-def render_armor(armor, loc_desc):
-    if not armor:
-        return ''
-
-    descr = []
-    for stat in ['p', 's', 'b', 'r', 'dr', 'dp', 'pl']:
-        value = getattr(armor, "armor_%s_%s" % (loc_desc, stat))
-        value = "%s%s" % ("-" if value < 0 else "", rounddown(abs(value)))
-        descr.append(unicode(value))
-
-    return format_html("<td>{}</td>", mark_safe("</td><td>".join(descr)))
-
-
-@register.simple_tag
 def sum_sp_cost(skills):
     try:
         return sum((skill.cost() for skill in skills))

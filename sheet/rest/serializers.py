@@ -8,13 +8,21 @@ class AmmunitionSerializer(serializers.ModelSerializer):
 
 
 class SheetSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username', read_only=True)
     weight_carried = serializers.DecimalField(4, 2, read_only=True)
     class Meta:
         model = sheet.models.Sheet
         fields = "__all__"
 
 
+class EdgeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Edge
+        fields = "__all__"
+
+
 class EdgeLevelSerializer(serializers.ModelSerializer):
+    edge = EdgeSerializer()
     class Meta:
         model = sheet.models.EdgeLevel
         fields = "__all__"
@@ -28,6 +36,21 @@ class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Skill
         fields = "__all__"
+
+
+class CharacterEdgeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.CharacterEdge
+        fields = "__all__"
+
+
+class CharacterEdgeListSerializer(serializers.ModelSerializer):
+    edge = EdgeLevelSerializer()
+
+    class Meta:
+        model = sheet.models.CharacterEdge
+        fields = "__all__"
+        depth = 1
 
 
 class BaseFirearmSerializer(serializers.ModelSerializer):
@@ -124,6 +147,32 @@ class SheetTransientEffectListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MiscellaneousItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.MiscellaneousItem
+        fields = "__all__"
+
+
+class MiscellaneousItemListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.MiscellaneousItem
+        fields = "__all__"
+        depth = 1
+
+
+class SheetMiscellaneousItemCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.SheetMiscellaneousItem
+        fields = "__all__"
+
+
+class SheetMiscellaneousItemListSerializer(serializers.ModelSerializer):
+    item = MiscellaneousItemListSerializer()
+    class Meta:
+        model = sheet.models.SheetMiscellaneousItem
+        fields = "__all__"
+
+
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
@@ -149,10 +198,10 @@ class CharacterSkillSerializer(serializers.ModelSerializer):
 
 
 class CharacterSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username', read_only=True)
     class Meta:
         model = sheet.models.Character
         fields = "__all__"
-        read_only_fields = ("owner", )
 
 
 class InventoryEntrySerializer(serializers.ModelSerializer):

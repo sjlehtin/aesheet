@@ -15,22 +15,24 @@ class SkillHandler {
     constructor(props) {
         this.props = props;
         this.state = {
-            characterSkillMap: SkillHandler.getItemMap(this.props.characterSkills, 'skill'),
+            characterSkillMap: SkillHandler.getItemMap(this.props.characterSkills,
+                (item) => { return item.skill; }),
             skillMap: SkillHandler.getItemMap(this.props.allSkills),
-            edgeMap: SkillHandler.getItemMap(this.props.edges, 'edge')
-        }
+            edgeMap: SkillHandler.getItemMap(this.props.edges,
+            (item) => { return item.edge.name; })
+        };
     }
 
-    static getItemMap(list, field) {
-        if (!field) {
-            field = 'name';
+    static getItemMap(list, accessor) {
+        if (!accessor) {
+            accessor = (item) => { return item.name; };
         }
         if (!list) {
             return {};
         }
         var newMap = {};
         for (let item of list) {
-            newMap[item[field]] = item;
+            newMap[accessor(item)] = item;
         }
         return newMap;
     }
@@ -61,7 +63,7 @@ class SkillHandler {
      */
     skillCheck(skillName, stat) {
         var skill = this.state.skillMap[skillName];
-        if (this.isBaseSkill(skill)) {
+        if (!skill || this.isBaseSkill(skill)) {
             return null;
         }
 
@@ -111,7 +113,7 @@ class SkillHandler {
         if (edgeName in this.state.edgeMap) {
             return this.state.edgeMap[edgeName].level;
         } else {
-            return null;
+            return 0;
         }
     }
 

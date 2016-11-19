@@ -18,14 +18,21 @@ import AddTransientEffectControl from 'AddTransientEffectControl';
 import SkillHandler from 'SkillHandler';
 import StatHandler from 'StatHandler';
 import Inventory from 'Inventory';
+import ArmorControl from 'ArmorControl';
+import MiscellaneousItemRow from 'MiscellaneousItemRow';
+import AddMiscellaneousItemControl from 'AddMiscellaneousItemControl';
+import EdgeRow from 'EdgeRow';
+import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
+import CharacterNotes from 'CharacterNotes';
+import MovementRates from 'MovementRates';
 
-import {Grid, Row, Col, Table, Image, Panel} from 'react-bootstrap';
+import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
 var rest = require('sheet-rest');
 var util = require('sheet-util');
 
 /**
- * TODO: controls to add bought_mana, bought_stamina, age sp, change
+ * TODO: controls to add bought_mana, bought_stamina, change
  * portrait, adventures, times wounded.
  */
 class StatBlock extends React.Component {
@@ -34,21 +41,21 @@ class StatBlock extends React.Component {
         this.state = {
             sheet: undefined,
             char: undefined,
-            /* This is preferred over the edges list in the char.  A
-               sub-component will handle the actual edges for the character,
-               and will notify this component of changes. */
-            edges: {},
             edgeList: [],
 
-            characterSkills: undefined,
-            allSkills: undefined,
+            characterSkills: [],
+            allSkills: [],
 
-            firearmList: undefined,
-            weaponList: undefined,
-            rangedWeaponList: undefined,
-            transientEffectList: undefined,
+            firearmList: [],
+            weaponList: [],
+            rangedWeaponList: [],
+            transientEffectList: [],
+            miscellaneousItemList: [],
 
-            carriedInventoryWeight: 0
+            carriedInventoryWeight: 0,
+
+            armor: undefined,
+            helm: undefined
         };
     }
 
@@ -72,13 +79,136 @@ class StatBlock extends React.Component {
         this.setState({transientEffectList: effects});
     }
 
+    handleMiscellaneousItemsLoaded(items) {
+        console.log("Miscellaneous items loaded");
+        this.setState({miscellaneousItemList: items});
+    }
+
     handleSkillsLoaded(skillList, allSkills) {
+        console.log("Skills loaded");
         this.setState({characterSkills: skillList,
         allSkills: allSkills});
     }
 
+    getArmorURL(item) {
+        var baseURL = this.props.url + 'sheetarmor/';
+        if (item) {
+            return baseURL + item.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleArmorLoaded(armor) {
+        console.log("Armor loaded");
+        this.setState({armor: armor})
+    }
+
+    changeArmor(armor, url, finalizer) {
+        var data;
+        if ('id' in armor) {
+            data = {item: armor.id};
+        } else {
+            data = {
+                base: armor.base.name,
+                quality: armor.quality.name
+            };
+        }
+        console.log("Adding: ", data, armor);
+        rest.post(url, data).then((json) => {
+            console.log("POST success", json);
+            armor.id = json.id;
+            armor.name = json.name;
+            finalizer(armor);
+        }).catch((err) => {
+            console.log("error", err)
+        });
+    }
+
+    handleArmorChanged(armor) {
+        var finalizer = (item) => { this.setState({armor: item}); };
+
+        if (armor === null) {
+            rest.delete(this.getArmorURL(this.state.armor)).then(function (json) {
+                finalizer({});
+            }).catch((err) => {console.log("error", err)});
+            return;
+        }
+        this.changeArmor(armor, this.getArmorURL(), finalizer);
+    }
+
+    getHelmURL(item) {
+        var baseURL = this.props.url + 'sheethelm/';
+        if (item) {
+            return baseURL + item.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleHelmLoaded(helm) {
+        console.log("Helm loaded");
+        this.setState({helm: helm})
+    }
+
+    handleHelmChanged(armor) {
+        var finalizer = (helm) => {this.setState({helm: helm});};
+        if (armor === null) {
+            rest.delete(this.getHelmURL(this.state.helm)).then(function (json) {
+                finalizer({});
+            }).catch((err) => {console.log("error", err)});
+            return;
+        }
+        this.changeArmor(armor, this.getHelmURL(), finalizer);
+    }
+
+    handleEdgesLoaded(characterEdges) {
+        console.log("Edges loaded");
+        this.setState({
+            characterEdges: characterEdges,
+            edgeList: characterEdges.map(
+                (charEdge) => {return charEdge.edge})
+        });
+    }
+
+    getCharacterEdgeURL(edge) {
+        var baseURL = this.state.url + 'characteredges/';
+        if (edge) {
+            return baseURL + edge.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleEdgeAdded(data) {
+        // TODO: push data via REST, update characterEdges and regenerate
+        // edgeList.
+        rest.post(this.getCharacterEdgeURL(), {edge: data.id}).then((json) => {
+            console.log("POST success:", json);
+            var ce = Object.assign({}, json, {edge: data});
+            var newList = this.state.edgeList;
+            newList.push(data);
+            var newCEList = this.state.characterEdges;
+            newCEList.push(ce);
+            this.setState({
+                edgeList: newList,
+                characterEdges: newCEList
+            });
+        }).catch((err) => console.log(err));
+    }
+
+    handleEdgeRemoved(givenEdge) {
+        console.log("Removed: ", givenEdge);
+        rest.delete(this.getCharacterEdgeURL(givenEdge)).then((json) => {
+            var index = StatBlock.findItemIndex(
+                this.state.characterEdges, givenEdge);
+            this.state.characterEdges.splice(index, 1);
+            this.handleEdgesLoaded(this.state.characterEdges);
+        }).catch((err) => console.log(err));
+    }
+
     componentDidMount() {
-        /* Failures to load objects from the server should be indicated
+        /* TODO: Failures to load objects from the server should be indicated
            visually to the users, as well as failures to save etc.  Use an
            error-handling control for this purpose. */
 
@@ -100,58 +230,76 @@ class StatBlock extends React.Component {
         }).catch((err) => {console.log("Failed to load transient effects:",
             err)});
 
-        rest.getData(this.props.url).then((json) => {
-            this.setState({
-                sheet: json,
-                // Updates occur towards the character.
-                url: `/rest/characters/${json.character}/`
-            });
-            rest.getData(this.state.url)
-                .then((json) => {
-                    this.setState({char: json});
+        rest.getData(this.props.url + 'sheetmiscellaneousitems/').then((json) => {
+            this.handleMiscellaneousItemsLoaded(json);
+        }).catch((err) => {console.log("Failed to load miscellaneous items:",
+            err)});
 
+        rest.getData(this.props.url + 'sheetarmor/').then((json) => {
+            var obj = {};
+            if (json.length > 0) {
+                obj = json[0];
+            }
+            this.handleArmorLoaded(obj);
+        }).catch((err) => {console.log("Failed to load armor:",
+            err)});
+
+        rest.getData(this.props.url + 'sheethelm/').then((json) => {
+            var obj = {};
+            if (json.length > 0) {
+                obj = json[0];
+            }
+            this.handleHelmLoaded(obj);
+        }).catch((err) => {console.log("Failed to load helm:",
+            err)});
+
+        rest.getData(this.props.url).then((sheet) => {
+            console.log("Sheet loaded");
+
+            this.setState({
+                sheet: sheet,
+                // Updates occur towards the character.
+                url: `/rest/characters/${sheet.character}/`
+            });
+
+            rest.getData(this.state.url + 'characteredges/').then(
+                (characterEdges) => {
+                    this.handleEdgesLoaded(characterEdges);
+                }).catch(function (err) {
+                    console.log("Failed to load edges", err)});
+
+            rest.getData(this.state.url)
+                .then((character) => {
+                    console.log("Character loaded");
+                    console.log("Loading skills");
                     rest.getData(this.state.url + 'characterskills/').then(
                         (characterSkills) => {
+                            console.log("CS loaded");
                             rest.getData(
-                                `/rest/skills/campaign/${json.campaign}/`)
+                                `/rest/skills/campaign/${character.campaign}/`)
                                 .then((allSkills) => {
                                     this.handleSkillsLoaded(characterSkills,
                                     allSkills);
                                 }).catch((err) => {
                                 console.log("Failed load: ", err)});
-                        }).catch(function (err) {console.log(err)});
-
-                    /* TODO: would be better to have the edges with
-                       contents from under the character URL, see
-                       characterskills. */
-                    Promise.all(json.edges.map(
-                    (edge_id) => {
-                        return rest.getData(`/rest/edgelevels/${edge_id}/`)
-                            .then((json) => { this.handleEdgeAdded(json);
-                            console.log("Added edge: ", json); })
-                            .catch((err) => { console.log("got err:", err)});}))
-                        .then((status) => { console.log("All loaded.")})
-                        .catch((err) => { console.log("There was an error:",
-                            err)});
+                        }).catch(function (err) {
+                            console.log("Failed CS load", err)});
+                    this.setState({char: character});
+                    // TODO: for some reason this fails to be called when
+                    // the sheet is loaded for real.  A bug somewhere,
+                    // surely, but where?
+                    console.log("Character set");
                 });
 
         });
-    }
-
-    getEdgeLevel(edge) {
-        if (typeof(this.state.edges[edge]) !== "undefined") {
-            return this.state.edges[edge].level;
-        } else {
-            return 0;
-        }
     }
 
     baseBody(baseStats) {
         return util.roundup(baseStats.fit / 4);
     }
 
-    toughness() {
-        return this.getEdgeLevel("Toughness");
+    toughness(skillHandler) {
+        return skillHandler.edgeLevel("Toughness");
     }
 
     stamina(baseStats) {
@@ -164,8 +312,8 @@ class StatBlock extends React.Component {
             + this.state.char.bought_mana;
     }
 
-    bodyHealing() {
-        var level = this.getEdgeLevel("Fast Healing");
+    bodyHealing(skillHandler) {
+        var level = skillHandler.edgeLevel("Fast Healing");
         if (level > 0) {
             var _lookupFastHealing = {
                 1: "3/8d",
@@ -181,10 +329,10 @@ class StatBlock extends React.Component {
         }
     }
 
-    staminaRecovery(effStats) {
+    staminaRecovery(effStats, skillHandler) {
         /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
         var highStat = util.rounddown((effStats.imm - 45)/15);
-        var level = this.getEdgeLevel("Fast Healing");
+        var level = skillHandler.edgeLevel("Fast Healing");
 
         var rates = [];
 
@@ -209,10 +357,10 @@ class StatBlock extends React.Component {
         }
     }
 
-    manaRecovery(effStats) {
+    manaRecovery(effStats, skillHandler) {
         /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
         var highStat = 2*util.rounddown((effStats.cha - 45)/15);
-        var level = this.getEdgeLevel("Fast Mana Recovery");
+        var level = skillHandler.edgeLevel("Fast Mana Recovery");
 
         var rates = [];
 
@@ -253,17 +401,6 @@ class StatBlock extends React.Component {
         }
     }
 
-    handleEdgeAdded(data) {
-        /* This assumes that characters will only have a single edgelevel of
-           an edge.  I think this is an invariant. */
-        var update = {};
-        update[data.edge] = data;
-
-        this.setState({edges: Object.assign({}, this.state.edges, update),
-            edgeList: this.state.edgeList.concat([data])
-        });
-    }
-
     handleModification(stat, oldValue, newValue) {
         var data = this.state.char;
         data["cur_" + stat] = newValue;
@@ -297,14 +434,14 @@ class StatBlock extends React.Component {
         }).then((err) => console.log(err));
     }
 
-    static findItemIndex(skillList, skill) {
-        for (var ii = 0; ii < skillList.length; ii++) {
-            var item = skillList[ii];
-            if (item.id === skill.id) {
+    static findItemIndex(itemList, givenItem) {
+        for (var ii = 0; ii < itemList.length; ii++) {
+            var item = itemList[ii];
+            if (item.id === givenItem.id) {
                 return ii;
             }
         }
-        throw Error("No such skill: " + skill);
+        throw Error("No such item: " + givenItem);
     }
 
     handleCharacterSkillRemove(skill) {
@@ -478,6 +615,38 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
+    getMiscellaneousItemURL(eff) {
+        var baseURL = this.props.url + 'sheetmiscellaneousitems/';
+        if (eff) {
+            return baseURL + eff.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
+    handleMiscellaneousItemAdded(data) {
+        var item = {item: data};
+        console.log("Adding: ", item);
+        rest.post(this.getMiscellaneousItemURL(), {item: data.id}).then((json) => {
+            console.log("POST success", json);
+            item.id = json.id;
+            var newList = this.state.miscellaneousItemList;
+            newList.push(item);
+            this.setState({miscellaneousItemList: newList});
+        }).catch((err) => {console.log("error", err)});
+    }
+
+    handleMiscellaneousItemRemoved(item) {
+        rest.delete(this.getMiscellaneousItemURL(item), item).then(
+            (json) => {
+                var index = StatBlock.findItemIndex(
+                    this.state.miscellaneousItemList, item);
+                this.state.miscellaneousItemList.splice(index, 1);
+                this.setState({miscellaneousItemList:
+                  this.state.miscellaneousItemList});
+            }).catch((err) => {console.log("Error in deletion: ", err)});
+    }
+
     renderDescription() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading/>;
@@ -495,25 +664,9 @@ class StatBlock extends React.Component {
     }
 
     renderNotes() {
-        // TODO: should gather also from transient effects.
-        if (!this.state.edgeList) {
-            return <Loading>Notes</Loading>;
-        }
-
-        var hasNotes = function (edgeList) {
-            for (var ii = 0; ii < edgeList.length; ii++) {
-                if (edgeList[ii].notes.length > 0) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        if (hasNotes(this.state.edgeList)) {
-            return <Panel><NoteBlock edges={this.state.edgeList}/></Panel>;
-        } else {
-            return '';
-        }
+        return <Panel header={<h4>Notes</h4>}>
+                    <NoteBlock edges={this.state.edgeList}
+                        effects={this.getAllEffects()} /></Panel>;
     }
 
     renderSkills(skillHandler, statHandler) {
@@ -537,8 +690,8 @@ class StatBlock extends React.Component {
         />
     }
 
-    renderStats(statHandler) {
-        if (!statHandler) {
+    renderStats(statHandler, edgeHandler) {
+        if (!statHandler || !edgeHandler) {
             return <Loading>Stats</Loading>;
         }
 
@@ -588,7 +741,7 @@ class StatBlock extends React.Component {
             </tr>
         </tbody>;
 
-        var toughness = this.toughness();
+        var toughness = this.toughness(edgeHandler);
         if (toughness) {
             toughness = (<span>+<span
                 style={{ fontWeight: "bold"}}>{toughness}</span></span>);
@@ -602,18 +755,18 @@ class StatBlock extends React.Component {
         };
 
         expendable = <tbody>
-            <tr><td style={statStyle}>B</td>
-                <td style={baseStyle}>{this.baseBody(baseStats)
-                  }{toughness}</td>
-                <td style={recoveryStyle}>{this.bodyHealing()}</td></tr>
-            <tr><td style={statStyle}>S</td>
-                <td style={baseStyle}>{this.stamina(baseStats)}</td>
-                <td style={recoveryStyle}>{this.staminaRecovery(effStats)
-                  }</td></tr>
-            <tr><td style={statStyle}>M</td>
-                <td style={baseStyle}>{this.mana(baseStats)}</td>
-                <td style={recoveryStyle}>{this.manaRecovery(effStats)
-                  }</td></tr>
+        <tr><td style={statStyle}>B</td>
+            <td style={baseStyle}>{this.baseBody(baseStats)
+            }{toughness}</td>
+            <td style={recoveryStyle}>{this.bodyHealing(edgeHandler)}</td></tr>
+        <tr><td style={statStyle}>S</td>
+            <td style={baseStyle}>{this.stamina(baseStats)}</td>
+            <td style={recoveryStyle}>{this.staminaRecovery(effStats, edgeHandler)
+            }</td></tr>
+        <tr><td style={statStyle}>M</td>
+            <td style={baseStyle}>{this.mana(baseStats)}</td>
+            <td style={recoveryStyle}>{this.manaRecovery(effStats, edgeHandler)
+            }</td></tr>
         </tbody>;
 
         return <div style={{position: "relative", width: "18em"}}>
@@ -685,8 +838,7 @@ class StatBlock extends React.Component {
     }
 
     getSkillHandler(statHandler) {
-        if (!this.state.characterSkills || !this.state.allSkills ||
-            !statHandler) {
+        if (!statHandler) {
             return null;
         }
         return new SkillHandler({
@@ -697,16 +849,49 @@ class StatBlock extends React.Component {
         });
     }
 
+    getAllEffects() {
+        var effects = this.state.transientEffectList.map(
+            (eff) => {return eff.effect});
+
+        var addName = function (el, name) {
+            return Object.assign({}, el, {name: name})
+        }
+        if (this.state.armor && this.state.armor.special_qualities) {
+            effects = effects.concat(this.state.armor.special_qualities.map(
+                (el) => { return addName(el, this.state.armor.name) }));
+        }
+        if (this.state.helm && this.state.helm.special_qualities) {
+            effects = effects.concat(this.state.helm.special_qualities.map(
+                (el) => { return addName(el, this.state.helm.name) }));
+        }
+        for (let wpn of this.state.weaponList) {
+            effects = effects.concat(wpn.special_qualities.map(
+                (el) => { return addName(el, wpn.name) }));
+        }
+        for (let wpn of this.state.rangedWeaponList) {
+            effects = effects.concat(wpn.special_qualities.map(
+                (el) => { return addName(el, wpn.name) }));
+        }
+        for (let item of this.state.miscellaneousItemList) {
+            effects = effects.concat(item.item.armor_qualities.map(
+                (el) => { return addName(el, item.item.name) }));
+            effects = effects.concat(item.item.weapon_qualities.map(
+                (el) => { return addName(el, item.item.name) }));
+        }
+        return effects;
+    }
+
     getStatHandler() {
-        if (!this.state.char|| !this.state.edgeList ||
-                !this.state.transientEffectList) {
+        if (!this.state.char|| !this.state.edgeList) {
             return null;
         }
         return new StatHandler({
             character: this.state.char,
             edges: this.state.edgeList,
-            effects: this.state.transientEffectList,
-            weightCarried: this.getCarriedWeight()
+            effects: this.getAllEffects(),
+            weightCarried: this.getCarriedWeight(),
+            armor: this.state.armor,
+            helm: this.state.helm
         });
     }
 
@@ -715,7 +900,35 @@ class StatBlock extends React.Component {
     }
 
     getCarriedWeight() {
-        return this.state.carriedInventoryWeight;
+        var weight = 0;
+        if (this.state.armor && this.state.armor.base) {
+            weight += parseFloat(this.state.armor.base.weight) *
+            parseFloat(this.state.armor.quality.mod_weight_multiplier);
+        }
+        if (this.state.helm && this.state.helm.base) {
+            weight += parseFloat(this.state.helm.base.weight) *
+            parseFloat(this.state.helm.quality.mod_weight_multiplier);
+        }
+
+        for (let wpn of this.state.weaponList){
+            weight += parseFloat(wpn.base.weight) *
+                parseFloat(wpn.quality.weight_multiplier);
+        }
+
+        for (let wpn of this.state.rangedWeaponList){
+            weight += parseFloat(wpn.base.weight) *
+                parseFloat(wpn.quality.weight_multiplier);
+        }
+
+        for (let wpn of this.state.firearmList){
+            weight += parseFloat(wpn.base.weight);
+        }
+
+        for (let item of this.state.miscellaneousItemList){
+            weight += parseFloat(item.item.weight);
+        }
+
+        return weight + this.state.carriedInventoryWeight;
     }
 
     renderFirearms(skillHandler) {
@@ -843,12 +1056,130 @@ class StatBlock extends React.Component {
                     onAdd={(eff) => this.handleTransientEffectAdded(eff) }/>
             </Table>
         </Panel>;
+    }
 
+    renderMiscellaneousItems() {
+        if (!this.state.miscellaneousItemList || !this.state.char) {
+            return <Loading>Miscellaneous items</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let item of this.state.miscellaneousItemList) {
+            rows.push(<MiscellaneousItemRow
+                key={idx++}
+                item={item}
+                onRemove={(item) => this.handleMiscellaneousItemRemoved(item) }
+            />);
+        }
+
+        return <Panel header={<h4>Miscellaneous items</h4>}>
+            <Table striped fill>
+                <thead>
+                <tr><th>Item</th></tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+                <AddMiscellaneousItemControl
+                    campaign={this.state.char.campaign}
+                    onAdd={(eff) => this.handleMiscellaneousItemAdded(eff) }/>
+            </Table>
+        </Panel>;
+    }
+
+    renderEdges() {
+        if (!this.state.edgeList || !this.state.char) {
+            return <Loading>Edges</Loading>;
+        }
+
+        var rows = [];
+
+        var idx = 0;
+
+        for (let item of this.state.characterEdges) {
+            rows.push(<EdgeRow
+                key={idx++}
+                edge={item}
+                onRemove={(item) => this.handleEdgeRemoved(item) }
+            />);
+        }
+
+        return <Panel header={<h4>Edges</h4>}>
+            <Table striped fill>
+                <thead>
+                <tr><th>Edge</th></tr>
+                </thead>
+                <tbody>
+                {rows}
+                </tbody>
+                <AddCharacterEdgeControl
+                    campaign={this.state.char.campaign}
+                    onAdd={(edge) => this.handleEdgeAdded(edge) }/>
+            </Table>
+        </Panel>;
     }
 
     renderInventory() {
         return <Inventory url={this.props.url + "inventory/"}
                           onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
+    }
+
+    renderCharacterNotes() {
+        if (!this.state.char) {
+            return <Loading>Notes</Loading>;
+        }
+        return <CharacterNotes url={`/rest/characters/${this.state.char.id}/`}/>;
+    }
+
+    renderArmor() {
+        if (!this.state.char || !this.state.armor || !this.state.helm) {
+            return <Loading>Armor</Loading>;
+        }
+        return <Panel header={<h4>Armor</h4>}>
+            <ArmorControl
+                campaign={this.state.char.campaign}
+                armor={this.state.armor}
+                helm={this.state.helm}
+                miscellaneousItems={this.state.miscellaneousItemList}
+                onHelmChange={(value) => this.handleHelmChanged(value)}
+                onArmorChange={(value) => this.handleArmorChanged(value)}
+                />
+            </Panel>;
+    }
+
+    renderMovementRates(statHandler, skillHandler) {
+        if (!statHandler || !skillHandler) {
+            return <Loading>Movement rates</Loading>;
+        }
+        return <MovementRates skillHandler={skillHandler}
+                              statHandler={statHandler}/>;
+    }
+
+    renderHeader() {
+        if (!this.state.char || !this.state.sheet) {
+            return <Loading>Header</Loading>;
+        }
+
+        var privateNotification = '';
+        if (this.state.char.private) {
+            privateNotification = <Label bsStyle="danger">Private</Label>;
+        }
+
+        return <Row>
+                <Col md={2}><h1>{this.state.char.name}</h1></Col>
+                <Col md={2}><a href={`/characters/edit_char/${this.state.char.id}/`}>Edit base character</a></Col>
+                <Col md={2}><a href={`/characters/edit_sheet/${this.state.sheet.id}/`}>Edit base sheet</a></Col>
+                <Col md={2}><a href={`/sheets/copy/${this.state.sheet.id}`}>Copy this sheet</a></Col>
+                <Col md={2}>
+                    <Panel header={<h4>Owner</h4>}>
+                        <span style={{marginRight: "1em"}}>{this.state.sheet.owner}</span>
+                        {privateNotification}
+                    </Panel>
+                </Col>
+            </Row>;
     }
 
     render() {
@@ -861,6 +1192,7 @@ class StatBlock extends React.Component {
 
         return (
             <Grid>
+                {this.renderHeader()}
                 <Col md={8}>
                     <Row>
                         <Col md={6}>
@@ -868,9 +1200,15 @@ class StatBlock extends React.Component {
                                 {this.renderDescription()}
                             </Row>
                             <Row>
-                                {this.renderStats(statHandler)}
+                                {this.renderStats(statHandler, skillHandler)}
                                 {this.renderXPControl()}
                                 {this.renderSPControl(baseStats)}
+                            </Row>
+                            <Row>
+                                Weight carried: {this.getCarriedWeight().toFixed(2)} kg
+                            </Row>
+                            <Row>
+                                {this.renderArmor()}
                             </Row>
                         </Col>
                         <Col md={6}>
@@ -886,6 +1224,9 @@ class StatBlock extends React.Component {
                         </Col>
                     </Row>
                     <Row>
+                        {this.renderMovementRates(statHandler, skillHandler)}
+                    </Row>
+                    <Row>
                         {this.renderCCWeapons(skillHandler)}
                     </Row>
                     <Row>
@@ -895,10 +1236,19 @@ class StatBlock extends React.Component {
                         {this.renderRangedWeapons(skillHandler)}
                     </Row>
                     <Row>
+                        {this.renderEdges()}
+                    </Row>
+                    <Row>
+                        {this.renderMiscellaneousItems()}
+                    </Row>
+                    <Row>
                         {this.renderTransientEffects()}
                     </Row>
                     <Row>
                         {this.renderInventory()}
+                    </Row>
+                    <Row>
+                        {this.renderCharacterNotes()}
                     </Row>
                 </Col>
                 <Col md={4}>

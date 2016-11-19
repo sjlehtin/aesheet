@@ -65,6 +65,8 @@ class SkillFactory(factory.DjangoModelFactory):
 
 
 class EdgeFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda xx: "edge-{0}".format(xx))
+
     class Meta:
         model = models.Edge
         django_get_or_create = ('name', )
@@ -411,10 +413,21 @@ class RangedWeaponFactory(factory.DjangoModelFactory):
 class MiscellaneousItemFactory(factory.DjangoModelFactory):
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
+    name = factory.Sequence(lambda n: "item-%03d" % n)
 
     class Meta:
         model = models.MiscellaneousItem
         django_get_or_create = ('name', )
+
+
+class SheetMiscellaneousItemFactory(factory.DjangoModelFactory):
+    sheet = factory.SubFactory(SheetFactory)
+    item = factory.SubFactory(MiscellaneousItemFactory)
+    item__tech_level = factory.SubFactory(TechLevelFactory)
+    item__tech_level__name = "2K"
+
+    class Meta:
+        model = models.SheetMiscellaneousItem
 
 
 class TransientEffectFactory(factory.DjangoModelFactory):

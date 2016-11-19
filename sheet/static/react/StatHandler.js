@@ -4,7 +4,7 @@
  */
 
 /*
- * TODO:  Effects from SpellEffects, ArmorSpecialQualities,
+ * TODO:  Effects from TransientEffects, ArmorSpecialQualities,
  * WeaponSpecialQualities, MiscellaneousItems, and Edges should be
  * combined and added to stats, skill levels, movement etc.
  *
@@ -38,11 +38,55 @@ class StatHandler {
 
         for (let mod of this.props.effects) {
             for (let st of StatHandler.allStatNames) {
-                this._softMods[st] += mod.effect[st];
+                this._softMods[st] += mod[st];
             }
         }
+
+        for (let st of ["fit", "ref", "psy"]) {
+
+            this._softMods[st] += this.getArmorMod(this.props.helm, st) +
+                 this.getArmorMod(this.props.armor, st);
+        }
+
         this._baseStats = undefined;
         this._effStats = undefined;
+    }
+
+    getArmorMod(armor, givenStat) {
+        var mod = 0;
+        var stat = "mod_" + givenStat;
+        if (armor.base && stat in armor.base) {
+            mod += armor.base[stat];
+        }
+        if (armor.quality && stat in armor.quality) {
+            mod += armor.quality[stat];
+        }
+        return mod;
+    }
+
+    getEdgeModifier(mod) {
+        // Return the sum of modifiers from edges for modifier `mod`.
+        var edges = [];
+        if (this.props.edges) {
+            edges = this.props.edges;
+        }
+        return this.getEffectModifier(mod, edges);
+    }
+
+    getEffectModifier(mod, effects) {
+        // Return the sum of modifiers from edges for modifier `mod`.  If
+        // no such mod is present, returns defaultValue.
+        if (!effects) {
+            effects = this.props.effects;
+            if (!effects) {
+                effects = [];
+            }
+        }
+        var sum = 0;
+        for (let eff of effects) {
+            sum += parseFloat(eff[mod]);
+        }
+        return sum;
     }
 
     getHardMods() {
@@ -82,7 +126,6 @@ class StatHandler {
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
             // in the excel combat sheet.
-            // TODO: encumbrance and armor after other modifiers.
             var encumbrancePenalty = util.roundup(
                 (-10 * this.props.weightCarried) / this._effStats.fit);
 
@@ -116,7 +159,11 @@ StatHandler.allStatNames =  StatHandler.baseStatNames.concat(
 //};
 
 StatHandler.defaultProps = {
-    weightCarried: 0
+    weightCarried: 0,
+    armor: {},
+    helm: {},
+    effects: [],
+    edges: []
 };
 
 export default StatHandler;

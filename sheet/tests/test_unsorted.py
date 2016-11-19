@@ -72,67 +72,7 @@ class ItemHandlingTestCase(TestCase):
                                           prefix="add-helm",
                                           accessor=lambda char:
                                           [char.helm().name])
-
-    def test_add_armor(self):
-        response = self.client.get(reverse(views.sheet_detail,
-                                           args=[1]))
-        self.assertContains(response, "No armor.")
-        self.assertContains(response, "No helmet.")
-        response = self.add_armor_and_verify("Plate mail", "L5",
-                                             "Plate mail L5")
-        self.assertNotContains(response, "No armor.")
-        self.add_armor_and_verify("Plate mail", "L3",
-                                  "Plate mail L3")
-        response = self.add_helm_and_verify("Basinet wfa", "L5",
-                                            "Basinet wfa L5")
-        self.assertNotContains(response, "No helmet.")
-        self.add_helm_and_verify("Basinet wfa", "L3",
-                                 "Basinet wfa L3")
-
-    def test_add_remove_armor(self):
-        det_url = reverse(views.sheet_detail, args=[1])
-
-        hh = Armor.objects.get(name='Basinet wfa L5')
-        # Add helmet.
-        req_data = { 'add-existing-helm-item' : hh.pk }
-        response = self.client.get(det_url)
-        self.assertContains(response, "No helmet.")
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertNotContains(response, "No helmet.")
-        self.assertEquals(response.context['sheet'].helm().name,
-                          'Basinet wfa L5')
-        # Remove helmet.
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'Helm',
-                     }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertContains(response, "No helmet.")
-
-        # Add armor.
-        aa = Armor.objects.get(name='Plate mail L5')
-        req_data = { 'add-existing-armor-item' : aa.pk }
-        response = self.client.get(det_url)
-        self.assertContains(response, "No armor.")
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertNotContains(response, "No armor.")
-        self.assertEquals(response.context['sheet'].armor().name,
-                          'Plate mail L5')
-
-        # Remove armor.
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'Armor',
-                     }
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        self.assertContains(response, "No armor.")
-
+    
 
 class BaseFirearmFormTestCase(TestCase):
     def setUp(self):
@@ -231,7 +171,9 @@ class MovementRateTestCase(TestCase):
         self.assertAlmostEqual(rates.climbing(), (43/30 + 3) * 2)
 
     def test_munckin_climber(self):
-        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=self.boots_of_speed)
         factories.CharacterSkillFactory(character=self.sheet.character,
                                         skill__name="Climbing",
                                         level=3)
@@ -271,7 +213,9 @@ class MovementRateTestCase(TestCase):
         self.assertAlmostEqual(rates.swimming(), 2*(43/5 + 3*5))
 
     def test_munchkin_swimmer(self):
-        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=self.boots_of_speed)
         factories.CharacterSkillFactory(character=self.sheet.character,
                                         skill__name="Swimming",
                                         level=3)
@@ -304,7 +248,9 @@ class MovementRateTestCase(TestCase):
         self.assertAlmostEqual(rates.jumping_distance(), 2*(43/12 + 3*0.75))
 
     def test_munchkin_jumper(self):
-        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=self.boots_of_speed)
         factories.CharacterSkillFactory(character=self.sheet.character,
                                         skill__name="Jumping",
                                         level=3)
@@ -335,7 +281,10 @@ class MovementRateTestCase(TestCase):
         self.assertAlmostEqual(rates.stealth(), 43/5 * 1.5)
 
     def test_stealth_speed_should_not_increase_with_boots_of_speed(self):
-        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=self.boots_of_speed)
+
         rates = self.sheet.movement_rates()
         self.assertAlmostEqual(rates.stealth(), 43/5)
 
@@ -352,12 +301,16 @@ class MovementRateTestCase(TestCase):
         self.assertAlmostEqual(rates.running(), 43 * 1.5)
 
     def test_enchanced_running_speed(self):
-        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=self.boots_of_speed)
         rates = self.sheet.movement_rates()
         self.assertAlmostEqual(rates.running(), 43 * 2)
 
     def test_munchkin_running_speed(self):
-        self.sheet.miscellaneous_items.add(self.boots_of_speed)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=self.boots_of_speed)
         factories.CharacterEdgeFactory(character=self.sheet.character,
                                        edge__edge__name="Increased land speed",
                                        edge__level=2,
@@ -374,7 +327,9 @@ class MovementRateTestCase(TestCase):
                                                    fly_multiplier=6)
         item.armor_qualities.add(fly)
 
-        self.sheet.miscellaneous_items.add(item)
+        sheet.models.SheetMiscellaneousItem.objects.create(
+            sheet=self.sheet,
+            item=item)
 
         rates = self.sheet.movement_rates()
         self.assertAlmostEqual(rates.flying(), 6*43)
@@ -401,33 +356,6 @@ class EdgeAndSkillHandlingTestCase(TestCase):
         post = self.request_factory.post('/copy/')
         post.user = self.admin
         return post
-
-    def test_add_remove_edge(self):
-        edge_level = factories.EdgeLevelFactory(edge__name="Toughness",
-                                                level=2)
-        req_data = { 'add-edge-edge' : edge_level.pk}
-        response = self.client.get(self.sheet_url)
-        self.assertContains(response, "No edges.")
-        response = self.client.post(self.sheet_url, req_data)
-        self.assertRedirects(response, self.sheet_url)
-        response = self.client.get(self.sheet_url)
-        self.assertNotContains(response, "No edges.")
-        edge_level = response.context['sheet'].edges()[0]
-        self.assertEquals(edge_level.edge.name, 'Toughness')
-        self.assertEquals(edge_level.level, 2)
-
-        self.assertEqual(response.context['sheet'].character
-                         .edge_level("Toughness"), 2)
-
-        # Remove edge.
-        req_data = { 'remove-form_id' : 'RemoveGeneric',
-                     'remove-item_type' : 'CharacterEdge',
-                     'remove-item' : edge_level.pk }
-        response = self.client.post(self.sheet_url, req_data)
-
-        self.assertRedirects(response, self.sheet_url)
-        response = self.client.get(self.sheet_url)
-        self.assertContains(response, "No edges.")
 
     def add_edge(self, character, edge_name, level=1):
         ce = CharacterEdge()
@@ -654,9 +582,6 @@ class SheetCopyTestCase(TestCase):
                       factories.FirearmFactory(base__name="RK95",
                                            ammo__label='5.56Nto',
                                            ammo__bullet_type='FMJ')],
-            miscellaneous_items=[
-                factories.MiscellaneousItemFactory(name="Geiger counter"),
-                factories.MiscellaneousItemFactory(name="Bandolier")],
             transient_effects=[
                 factories.TransientEffectFactory(name="Bless of templars"),
                 factories.TransientEffectFactory(name="Courage of ancients")],
@@ -667,6 +592,11 @@ class SheetCopyTestCase(TestCase):
                                ("Athletic ability", 2),
                                ("Bad eyesight", 4)])
         self.original_character = self.original_sheet.character
+        factories.SheetMiscellaneousItemFactory(item__name="Geiger counter",
+                                                sheet=self.original_sheet)
+
+        factories.SheetMiscellaneousItemFactory(item__name="Bandolier",
+                                                sheet=self.original_sheet)
 
     def _get_request(self):
         get = self.request_factory.post('/copy/')

@@ -184,7 +184,6 @@ class Character(PrivateMixin, models.Model):
     occupation = models.CharField(max_length=256)
     campaign = models.ForeignKey(Campaign)
 
-
     portrait = models.ImageField(blank=True, upload_to='portraits')
 
     # XXX race can be used to fill in basic edges and stats later for,
@@ -712,6 +711,9 @@ class EdgeSkillBonus(ExportedModel):
 class CharacterEdge(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     edge = models.ForeignKey(EdgeLevel)
+
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
 
     def __unicode__(self):
         return u"%s: %s" % (self.character, self.edge)
@@ -1474,6 +1476,11 @@ class MiscellaneousItem(ExportedModel):
         return self.name
 
 
+class SheetMiscellaneousItem(models.Model):
+    sheet = models.ForeignKey('Sheet')
+    item = models.ForeignKey(MiscellaneousItem)
+
+
 class MovementRates(object):
     def __init__(self, sheet):
         self.sheet = sheet
@@ -1542,8 +1549,10 @@ class Sheet(PrivateMixin, models.Model):
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
     firearms = models.ManyToManyField(Firearm, blank=True)
 
-    miscellaneous_items = models.ManyToManyField(MiscellaneousItem,
-                                                 blank=True)
+    miscellaneous_items = models.ManyToManyField(
+        MiscellaneousItem,
+        blank=True,
+        through=SheetMiscellaneousItem)
 
     transient_effects = models.ManyToManyField(TransientEffect, blank=True,
                                                through=SheetTransientEffect)

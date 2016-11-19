@@ -5,7 +5,11 @@ from rest_framework import routers
 router = routers.SimpleRouter()
 router.register(r'sheets', views.SheetViewSet)
 router.register(r'characters', views.CharacterViewSet)
+
 router.register(r'edgelevels', views.EdgeLevelViewSet)
+router.register(r'edgelevels/campaign/(?P<campaign_pk>[0-9]+)',
+                views.EdgeLevelViewSet,
+                base_name='campaign-edgelevel')
 
 router.register(r'characters/(?P<character_pk>[0-9]+)/characterskills',
                 views.CharacterSkillViewSet,
@@ -15,6 +19,10 @@ router.register(r'skills', views.SkillViewSet, base_name='skill')
 router.register(r'skills/campaign/(?P<campaign_pk>[0-9]+)',
                 views.SkillViewSet,
                 base_name='campaign-skill')
+
+router.register(r'characters/(?P<character_pk>[0-9]+)/characteredges',
+                views.CharacterEdgeViewSet,
+                base_name='character-characteredges')
 
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetweapons',
                 views.SheetWeaponViewSet,
@@ -39,6 +47,10 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheethelm',
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheettransienteffects',
                 views.SheetTransientEffectViewSet,
                 base_name='sheet-transienteffect')
+
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetmiscellaneousitems',
+                views.SheetMiscellaneousItemViewSet,
+                base_name='sheet-miscellaneousitem')
 
 router.register(r'firearms', views.FirearmViewSet, base_name='firearm')
 router.register(r'firearms/campaign/(?P<campaign_pk>[0-9]+)',
@@ -98,6 +110,12 @@ router.register(r'transienteffects', views.TransientEffectViewSet,
 router.register(r'transienteffects/campaign/(?P<campaign_pk>[0-9]+)',
                 views.TransientEffectViewSet,
                 base_name='campaign-transienteffect')
+
+router.register(r'miscellaneousitems', views.MiscellaneousItemViewSet,
+                base_name='miscellaneousitem')
+router.register(r'miscellaneousitems/campaign/(?P<campaign_pk>[0-9]+)',
+                views.MiscellaneousItemViewSet,
+                base_name='campaign-miscellaneousitem')
 
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,

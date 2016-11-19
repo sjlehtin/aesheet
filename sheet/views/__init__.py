@@ -245,18 +245,6 @@ class SheetView(object):
     def __init__(self, char_sheet):
         self.sheet = char_sheet
 
-    def edges(self):
-        return [RemoveWrap(xx) for xx in self.sheet.edges.all()]
-
-    def armor(self):
-        return ArmorWrap(self.sheet.armor, sheet=self.sheet, type="Armor")
-
-    def helm(self):
-        return ArmorWrap(self.sheet.helm, sheet=self.sheet, type="Helm")
-
-    def miscellaneous_items(self):
-        return [RemoveWrap(xx) for xx in self.sheet.miscellaneous_items.all()]
-
     def overland_movement(self):
         overland_mov = self.sheet.eff_mov * self.sheet.run_multiplier()
         fly_mov = self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
@@ -277,113 +265,19 @@ class SheetView(object):
         try:
             return getattr(self.sheet, v)
         except AttributeError:
-            raise AttributeError, \
-                "'SheetView' object has no attribute '{attr}'".format(attr=v)
-
-
-def process_sheet_change_request(request, sheet):
-    assert request.method == "POST"
-
-    form = RemoveGenericForm(request.POST, prefix='remove')
-    if form.is_valid():
-        item = form.cleaned_data['item']
-        item_type = form.cleaned_data['item_type']
-        logger.info("Removing %s" % item_type)
-        if item_type == "Armor":
-            sheet.armor = None
-        elif item_type == "Helm":
-            sheet.helm = None
-        elif item_type == "MiscellaneousItem":
-            item = get_object_or_404(MiscellaneousItem, pk=item)
-            sheet.miscellaneous_items.remove(item)
-        elif item_type == "CharacterEdge":
-            item = get_object_or_404(CharacterEdge, pk=item)
-            item.delete()
-        else:
-            raise ValidationError("Invalid item type")
-        sheet.full_clean()
-        sheet.save()
-        return True
-        # removal forms are forgotten and not updated on failures.
-
-    return False
+            raise AttributeError(
+                "'SheetView' object has no attribute '{attr}'".format(attr=v))
 
 
 def sheet_detail(request, sheet_id=None):
-    sheet = get_object_or_404(Sheet.objects.select_related()
-                              .select_related('armor__base',
-                                              'armor__quality',
-                                              'helm', )
-                              .prefetch_related(
-        'weapons__base',
-        'weapons__quality',
-        'ranged_weapons__base',
-        'ranged_weapons__quality',
-        'miscellaneous_items',
-        'character__campaign',
-        'character__skills',
-        'character__skills__skill',
-        'character__skills__skill__required_skills',
-        'character__skills__skill__edgeskillbonus_set',
-        'character__edges',
-        'character__edges__edge',
+    sheet = get_object_or_404(Sheet.objects.prefetch_related(
         'character__characterlogentry_set__skill',
     ),
                               pk=sheet_id)
     if not sheet.character.access_allowed(request.user):
         raise PermissionDenied
 
-    forms = {}
-
-    if request.method == "POST":
-        data = request.POST
-    else:
-        data = None
-
-    def add_form(form_class, prefix, **kwargs):
-        key = prefix.replace('-', '_') + "_form"
-        if data is not None:
-            has_prefix = any([var.startswith(prefix) for var in data.keys()])
-            form_data = data if has_prefix else None
-        else:
-            form_data = None
-        forms[key] = form_class(form_data,
-                                request=request,
-                                prefix=prefix, **kwargs)
-
-    add_form(AddEdgeForm, "add-edge", instance=sheet.character)
-    add_form(AddExistingHelmForm, "add-existing-helm", instance=sheet)
-    add_form(AddHelmForm, "add-helm", instance=sheet)
-    add_form(AddExistingArmorForm, "add-existing-armor", instance=sheet)
-    add_form(AddArmorForm, "add-armor", instance=sheet)
-    add_form(AddExistingMiscellaneousItemForm,
-             "add-existing-miscellaneous-item", instance=sheet)
-
-    if request.method == "POST":
-        should_change = False
-
-        for kk, ff in forms.items():
-            logger.info("handling %s" % kk)
-            if ff.is_bound:
-                if ff.is_valid():
-                    logger.info("saved %s" % kk)
-                    ff.save()
-                    should_change = True
-                else:
-                    messages.error(request, 'Errors in processing request '
-                                            '({form_slug}).'.format(
-                        form_slug=ff.prefix.replace('-', ' ')))
-        if not should_change:
-            should_change = process_sheet_change_request(request,
-                                                         sheet)
-        # More complex forms need to be passed back to
-        # render(), below.
-        if should_change:
-            return HttpResponseRedirect(settings.ROOT_URL + 'sheets/%s/' %
-                                        sheet.id)
-
     c = {'sheet': SheetView(sheet) }
-    c.update(forms)
     return render(request, 'sheet/sheet_detail.html', c)
 
 

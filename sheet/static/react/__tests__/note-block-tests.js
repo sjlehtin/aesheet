@@ -1,8 +1,11 @@
 jest.dontMock('../NoteBlock');
+jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
+
+var factories = require('./factories');
 
 const NoteBlock = require('../NoteBlock').default;
 
@@ -10,6 +13,7 @@ describe('NoteBlock', function() {
     "use strict";
 
     var edgeFactory = function (statOverrides) {
+        return factories.edgeLevelFactory(statOverrides);
         var _edgeLevelData = {
             "id": 1,
             "notes": "Skudaa",
@@ -58,18 +62,17 @@ describe('NoteBlock', function() {
         expect(liNodes.length).toBe(1);
         var noteNode = liNodes[0];
         expect(noteNode.textContent).toContain(expectedNotes);
-        var attr = noteNode.attributes.getNamedItem("title");
-        expect(attr.value).toContain(edgeName);
+        expect(noteNode.textContent).toContain(edgeName);
     };
 
     it('can contain a list of positive notes', function () {
         var block = noteBlockFactory({edges: [
-            edgeFactory({edge: "Skydiving", notes: 'skudaa', cost: 2.0})]});
+            edgeFactory({edge: {name: "Skydiving"}, notes: 'skudaa', cost: 2.0})]});
 
         expect(block.props.edges.length).toEqual(1);
 
         var ulNodes = ReactDOM.findDOMNode(block)
-            .querySelectorAll('ul.positive');
+            .querySelectorAll('ul');
         expect(ulNodes.length).toBe(1);
 
         expectEdgeAndNotes(ulNodes[0].querySelectorAll('li'), 'Skydiving', 'skudaa');
@@ -77,10 +80,10 @@ describe('NoteBlock', function() {
 
     it('can contain a list of negative notes', function () {
         var block = noteBlockFactory({edges: [
-            edgeFactory({edge: "Skydiving", notes: 'skudaa', cost: -2.0})]});
+            edgeFactory({edge: {name: "Skydiving"}, notes: 'skudaa', cost: -2.0})]});
 
         var ulNodes = ReactDOM.findDOMNode(block)
-            .querySelectorAll('ul.negative');
+            .querySelectorAll('ul');
         expect(ulNodes.length).toBe(1);
 
         expectEdgeAndNotes(ulNodes[0].querySelectorAll('li'), 'Skydiving', 'skudaa');
@@ -88,8 +91,8 @@ describe('NoteBlock', function() {
 
     it('can contain both positive and negative notes', function () {
         var block = noteBlockFactory({edges: [
-            edgeFactory({edge: "Toughness", notes: 'uraa', cost: 2.0}),
-            edgeFactory({edge: "Skydiving", notes: 'skudaa', cost: -2.0})]});
+            edgeFactory({edge: {name: "Toughness"}, notes: 'uraa', cost: 2.0}),
+            edgeFactory({edge: {name: "Skydiving"}, notes: 'skudaa', cost: -2.0})]});
         var ulNodes = ReactDOM.findDOMNode(block).querySelectorAll('ul');
         expect(ulNodes.length).toEqual(2);
 
@@ -98,4 +101,13 @@ describe('NoteBlock', function() {
         expectEdgeAndNotes(ulNodes[1].querySelectorAll('li'),
             'Skydiving', 'skudaa');
     });
+
+    it("can contain effects", function () {
+        var block = noteBlockFactory({effects: [{name: "foo", notes: "fam"}]});
+        var ulNodes = ReactDOM.findDOMNode(block).querySelectorAll('ul');
+        expect(ulNodes.length).toEqual(1);
+        expectEdgeAndNotes(ulNodes[0].querySelectorAll('li'),
+            'foo', 'fam');
+    });
+
 });
