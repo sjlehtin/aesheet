@@ -33,36 +33,24 @@ describe('SkillTable', function() {
     ];
 
     var getSkillTable = function (givenProps) {
-        var props = {allSkills: _basicPhysical,
-            characterSkills: [],
-            effStats: factories.statsFactory(),
-            baseStats: factories.statsFactory(),
-            edges: [],
-            character: {start_lrn: 45, start_int: 45, start_psy: 45,
-                gained_sp: 0}
-        };
-
+        var props = {};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
 
-        var extraSkills = []
-        for (let skill of props.characterSkills) {
-            extraSkills.push(factories.skillFactory({
-                name: skill.skill,
-                stat: "mov"}));
+        var allSkills = _basicPhysical;
+        if (props.allSkills) {
+            allSkills = allSkills.concat(props.allSkills);
         }
+        props.allSkills = allSkills;
 
-        var handlerProps = {
-            characterSkills: props.characterSkills,
-            allSkills: extraSkills.concat(props.allSkills),
-            edges: props.edges,
-            stats: {mov: 45}
-        };
-
-        props.skillHandler = new SkillHandler(handlerProps);
+        var skillHandler = factories.skillHandlerFactory(props);//new
         var table = TestUtils.renderIntoDocument(
-            <SkillTable {...props}/>
+            <SkillTable skillHandler={skillHandler}
+                        onCharacterSkillAdd={props.onCharacterSkillAdd}
+                        onCharacterSkillModify={props.onCharacterSkillModify}
+                        onCharacterSkillRemove={props.onCharacterSkillRemove}
+            />
         );
 
         return TestUtils.findRenderedComponentWithType(table,
@@ -111,7 +99,7 @@ describe('SkillTable', function() {
     
     it("starts with a good set of physical skills", function () {
         var table = getSkillTable({
-            effStats: factories.statsFactory({"int": 50})});
+            character: {cur_int: 50}});
         var expectedSkills = ["Endurance / run",
             "Balance",
             "Stealth",
@@ -131,14 +119,12 @@ describe('SkillTable', function() {
     });
 
     it("does render all skills", function (){
-        var table = getSkillTable({effStats:
-            factories.statsFactory({"int": 50}),
+        var table = getSkillTable({character: {cur_int: 50},
             allSkills: _basicPhysical.concat([
-                factories.skillFactory({name: "Agriculture"})]),
-            characterSkills: [
-                factories.characterSkillFactory({skill: "Search", level: 1}),
-                factories.characterSkillFactory(
-                    {skill: "Agriculture", level: 3})
+                {name: "Agriculture"}]),
+            skills: [
+                {skill: "Search", level: 1},
+                {skill: "Agriculture", level: 3}
             ]});
         // the basic physical skills + Agriculture.
         // expect(getSkillList(table).length).toEqual(10);
@@ -173,7 +159,7 @@ describe('SkillTable', function() {
             factories.statsFactory({"int": 50}),
             allSkills: _basicPhysical.concat([
                 factories.skillFactory({name: "Agriculture"})]),
-            characterSkills: [
+            skills: [
                 factories.characterSkillFactory({skill: "Search", level: 1}),
                 factories.characterSkillFactory(
                     {skill: "Agriculture", level: 3})
@@ -382,8 +368,8 @@ describe('SkillTable', function() {
     });
 
     it("can give hints to optimize skill point accumulation", function () {
-        var table = getSkillTable({baseStats: {
-            lrn: 50, int: 38, psy: 47}
+        var table = getSkillTable({character: {
+            cur_lrn: 50, cur_int: 38, cur_psy: 47}
         });
         expect(table.optimizeAgeSP()).toEqual({lrn: 3, int: 0, psy: 1});
     });

@@ -660,18 +660,13 @@ class StatBlock extends React.Component {
         return <SkillTable
             style={{fontSize: "80%"}}
             skillHandler={skillHandler}
-            characterSkills={this.state.characterSkills}
-            allSkills={this.state.allSkills}
             onCharacterSkillRemove={
                       (skill) => this.handleCharacterSkillRemove(skill)}
             onCharacterSkillModify={
                       (skill) => this.handleCharacterSkillModify(skill)}
             onCharacterSkillAdd={
                       (skill) => this.handleCharacterSkillAdd(skill)}
-            effStats={statHandler.getEffStats()}
-            baseStats={statHandler.getBaseStats()}
-            character={this.state.char}
-        />
+            />
     }
 
     renderStats(statHandler, edgeHandler) {
