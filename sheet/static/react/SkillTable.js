@@ -152,6 +152,7 @@ class SkillTable extends React.Component {
         return cost
     }
 
+    // TODO: move to skillhandler
     edgeSkillPoints() {
         var sum = 0;
         for (let edge of this.props.skillHandler.getEdgeList()) {
