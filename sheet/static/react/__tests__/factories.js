@@ -87,6 +87,14 @@ var statsFactory = function (overrideStats) {
 };
 
 var skillFactory = function (overrideFields) {
+    var props = {};
+    // Simplify generating skills to allow using only the name.  Slight
+    // allowance for older code.
+    if (typeof(overrideFields) === "object") {
+        props = overrideFields;
+    } else if (overrideFields){
+        props.name = overrideFields;
+    }
     var _baseSkill = {
         "name": "Acting / Bluff",
         "description": "",
@@ -105,7 +113,7 @@ var skillFactory = function (overrideFields) {
         "min_level": 0,
         "max_level": 8
     };
-    return Object.assign(_baseSkill, overrideFields);
+    return Object.assign(_baseSkill, props);
 };
 
 
@@ -122,6 +130,23 @@ var edgeFactory = function (overrideFields) {
     return Object.assign(edge, overrideFields);
 };
 
+var edgeSkillBonusFactory = function (overrideFields) {
+    if (!overrideFields){
+        overrideFields = {};
+    }
+
+    var _baseBonus = {
+        "id": objectId,
+        "skill": "Surgery",
+        "bonus": 15
+    };
+
+    var newBonus = Object.assign(_baseBonus, overrideFields);
+    /* Overriding ID is possible. */
+    objectId = newBonus.id + 1;
+    return newBonus;
+};
+
 var edgeLevelFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
@@ -132,8 +157,16 @@ var edgeLevelFactory = function (overrideFields) {
         delete overrideFields.edge;
     }
 
+    var edgeSkillBonuses = [];
+    if (overrideFields.edge_skill_bonuses) {
+        for (let bonus of overrideFields.edge_skill_bonuses) {
+            edgeSkillBonuses.push(edgeSkillBonusFactory(bonus));
+        }
+        delete overrideFields.edge_skill_bonuses;
+    }
+
     var _baseEdge = {
-        "id": nextEdgeID,
+        "id": objectId,
     "notes": "",
     "cc_skill_levels": 0,
     "fit": 0,
@@ -160,13 +193,13 @@ var edgeLevelFactory = function (overrideFields) {
     "cost": "-1.0",
     "requires_hero": false,
     "edge": edge,
-    "skill_bonuses": [],
+    "edge_skill_bonuses": edgeSkillBonuses,
     "extra_skill_points": 0
     };
 
     var newEdge = Object.assign(_baseEdge, overrideFields);
     /* Overriding ID is possible. */
-    nextEdgeID = newEdge.id + 1;
+    objectId = newEdge.id + 1;
     return newEdge;
 };
 
@@ -764,11 +797,26 @@ var skillHandlerFactory = function (givenProps) {
     var allSkills = [];
     var effects = [];
 
+
+    var skillMap = {};
+    if (givenProps.allSkills) {
+        for (let sk of givenProps.allSkills) {
+            var newSkill = skillFactory(sk);
+            allSkills.push(newSkill);
+            skillMap[newSkill.name] = newSkill;
+        }
+    }
     if (givenProps.skills) {
         for (let sk of givenProps.skills) {
-            var skill = characterSkillFactory(sk);
-            skills.push(skill);
-            allSkills.push(skillFactory({name: skill.skill}));
+            var skill = skillFactory(sk.skill);
+            if (!(skill.name in skillMap)) {
+                allSkills.push(skill);
+            } else {
+                skill = skillMap[skill.name];
+            }
+            var charSkill = characterSkillFactory(
+                Object.assign({}, sk, {skill: skill.name}));
+            skills.push(charSkill);
         }
     }
     if (givenProps.edges) {

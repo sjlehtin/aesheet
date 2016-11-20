@@ -9,18 +9,21 @@
  * props: stats: statHandler
  * characterSkills
  * allSkills
- * edges <- probably should come from statHandler
+ * edges
+ *
+ * TODO: merge this and statHandler, as they both need to be passed to
+ * many components, and it makes sense to just roll them into one.
  */
 class SkillHandler {
     constructor(props) {
         this.props = props;
         this.state = {
-            characterSkillMap: SkillHandler.getItemMap(this.props.characterSkills,
-                (item) => { return item.skill; }),
-            skillMap: SkillHandler.getItemMap(this.props.allSkills),
             edgeMap: SkillHandler.getItemMap(this.props.edges,
-            (item) => { return item.edge.name; })
+            (item) => { return item.edge.name; }),
+            skillBonusMap: this.getSkillBonusMap()
         };
+
+        this.state.skillList = this.createSkillList();
     }
 
     static getItemMap(list, accessor) {
@@ -37,8 +40,27 @@ class SkillHandler {
         return newMap;
     }
 
+    getSkillBonusMap() {
+        if (!this.props.edges) {
+            return {};
+        }
+
+        var skillBonusMap = {};
+        for (let edge of this.props.edges) {
+            for (let sb of edge.edge_skill_bonuses) {
+                if (!(sb.skill in skillBonusMap)) {
+                    skillBonusMap[sb.skill] = {bonus: 0};
+                }
+                skillBonusMap[sb.skill].bonus += sb.bonus;
+            }
+        }
+        return skillBonusMap;
+    }
+
     /* A base-level skill, i.e., Basic Artillery and the like. */
-    isBaseSkill(skill) {
+    isBaseSkill(skillName) {
+        var skill = this.state.skillMap[skillName];
+
         if (skill.skill_cost_1 === null) {
             return true;
         } else {
@@ -63,7 +85,7 @@ class SkillHandler {
      */
     skillCheck(skillName, stat) {
         var skill = this.state.skillMap[skillName];
-        if (!skill || this.isBaseSkill(skill)) {
+        if (!skill || this.isBaseSkill(skillName)) {
             return null;
         }
 
@@ -72,13 +94,19 @@ class SkillHandler {
         }
         var ability = this.getStat(stat);
         var level = this.skillLevel(skillName);
+
+        var check = 0;
         if (level === "U") {
-            return Math.round(ability / 4)
+            check = Math.round(ability / 4)
         } else if (level === "B") {
-            return Math.round(ability / 2)
+            check = Math.round(ability / 2)
         } else {
-            return ability + level * 5;
+            check = ability + level * 5;
         }
+        if (skillName in this.state.skillBonusMap) {
+            check += this.state.skillBonusMap[skillName].bonus;
+        }
+        return check;
     }
 
     /* U is quarter-skill, i.e., using a pistol even without Basic
@@ -123,6 +151,75 @@ class SkillHandler {
 
     getEdgeList() {
         return this.props.edges;
+    }
+
+    getSkillList() {
+        return this.state.skillList;
+    }
+
+    createSkillList() {
+        var newList = [];
+        var cs;
+
+        // Make a deep copy of the list so as not accidentally mangle
+        // parent copy of the props.
+        var skillList = this.props.characterSkills.map(
+            (elem) => {var obj = Object.assign({}, elem);
+        obj._children = [];
+        return obj; });
+
+        this.state.characterSkillMap = SkillHandler.getItemMap(skillList,
+                (item) => { return item.skill; });
+        this.state.skillMap = SkillHandler.getItemMap(this.props.allSkills);
+
+        var csMap = this.state.characterSkillMap;
+        var skillMap = this.state.skillMap;
+
+        var addChild = function (parent, child) {
+            parent._children.push(child);
+        };
+
+        var root = [];
+        for (cs of skillList) {
+            var skill = skillMap[cs.skill];
+            if (!skill) {
+                cs._unknownSkill = true;
+                root.push(cs);
+            } else {
+                if (skill.required_skills.length > 0) {
+                    var parent = skill.required_skills[0];
+                    cs._missingRequired = [];
+                    for (let sk of skill.required_skills) {
+                        if (!(sk in csMap)) {
+                            cs._missingRequired.push(sk);
+                        }
+                    }
+                    if (parent in csMap) {
+                        addChild(csMap[parent], cs);
+                    } else {
+                        root.push(cs);
+                    }
+                } else {
+                    root.push(cs);
+                }
+            }
+        }
+
+        var finalList = [];
+        var compare = function (a, b) {
+            return +(a.skill > b.skill) || +(a.skill === b.skill) - 1;
+        };
+        var depthFirst = function (cs, indent) {
+            cs.indent = indent;
+            finalList.push(cs);
+            for (let child of cs._children.sort(compare)) {
+                depthFirst(child, indent + 1);
+            }
+        };
+        for (cs of root.sort(compare)) {
+            depthFirst(cs, 0);
+        }
+        return finalList;
     }
 
     // Movement rates.

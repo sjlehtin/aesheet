@@ -20,8 +20,15 @@ class EdgeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class EdgeSkillBonusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.EdgeSkillBonus
+        fields = ("id", "skill", "bonus")
+
+
 class EdgeLevelSerializer(serializers.ModelSerializer):
     edge = EdgeSerializer()
+    edge_skill_bonuses = EdgeSkillBonusSerializer(many=True)
     class Meta:
         model = sheet.models.EdgeLevel
         fields = "__all__"
@@ -45,7 +52,7 @@ class CharacterEdgeCreateSerializer(serializers.ModelSerializer):
 
 class CharacterEdgeListSerializer(serializers.ModelSerializer):
     edge = EdgeLevelSerializer()
-
+    character = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = sheet.models.CharacterEdge
         fields = "__all__"

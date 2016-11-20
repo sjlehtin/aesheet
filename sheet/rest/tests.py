@@ -160,6 +160,29 @@ class EdgeTestCase(TestCase):
         self.assertEqual(response.data['edge']['name'], "Toughness")
 
 
+class EdgeSkillBonusTestCase(TestCase):
+    def setUp(self):
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.edge_level = factories.EdgeLevelFactory(
+            edge__name="Acute Touch",
+            level=1, edge_skill_bonuses=(("Surgery", 13),))
+
+    def test_url(self):
+        client = APIClient()
+        url = '/rest/edgelevels/{}/'.format(self.edge_level.pk)
+        self.assertTrue(client.login(username="luke", password="foobar"))
+        response = client.get(url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("edge", response.data)
+        self.assertEqual(response.data['edge']['name'], "Acute Touch")
+        self.assertIn("edge_skill_bonuses", response.data)
+        self.assertEquals(response.data['edge_skill_bonuses'],
+                          [{'id': 1,
+                            'skill': "Surgery",
+                            'bonus': 13}])
+
+
 class InventoryTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()

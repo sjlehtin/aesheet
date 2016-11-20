@@ -19,8 +19,10 @@ class SkillTable extends React.Component {
         var obj = Object.assign({}, skill);
         var toRemove = [];
         for (var field in obj) {
-            if (field[0] === '_') {
-                toRemove.push(field);
+            if (obj.hasOwnProperty(field)) {
+                if (field[0] === '_') {
+                    toRemove.push(field);
+                }
             }
         }
         for (field of toRemove) {
@@ -31,85 +33,26 @@ class SkillTable extends React.Component {
 
     handleCharacterSkillRemove(skill) {
         console.log("Removed: ", skill);
-        if (typeof(this.props.onCharacterSkillRemove) != "undefined") {
+        if (this.props.onCharacterSkillRemove) {
             this.props.onCharacterSkillRemove(SkillTable.sanitizeSkillObject(skill));
         }
     }
 
     handleCharacterSkillModify(skill) {
-        if (typeof(this.props.onCharacterSkillModify) != "undefined") {
+        if (this.props.onCharacterSkillModify) {
             this.props.onCharacterSkillModify(SkillTable.sanitizeSkillObject(skill));
         }
     }
 
-    static mangleSkillList(skillList, allSkills) {
-        var newList = [];
-        var cs;
-
-        // Make a deep copy of the list so as not accidentally mangle
-        // parent copy of the props.
-        skillList = skillList.map((elem) => {var obj = Object.assign({}, elem);
-        obj._children = [];
-        return obj; });
-
-        var csMap = SkillTable.getCharacterSkillMap(skillList);
-        var skillMap = SkillTable.getSkillMap(allSkills);
-
-        for (cs of skillList) {
-            if (cs.skill in SkillTable.prefilledPhysicalSkillsMap) {
-                continue;
-            }
-            newList.push(cs);
-        }
-
-        var addChild = function (parent, child) {
-            parent._children.push(child);
-        };
-
-        var root = [];
-        for (cs of newList) {
-            var skill = skillMap[cs.skill];
-            if (!skill) {
-                cs._unknownSkill = true;
-                root.push(cs);
-            } else {
-                if (skill.required_skills.length > 0) {
-                    var parent = skill.required_skills[0];
-                    cs._missingRequired = [];
-                    for (let sk of skill.required_skills) {
-                        if (!(sk in csMap)) {
-                            cs._missingRequired.push(sk);
-                        }
-                    }
-                    if (parent in csMap) {
-                        addChild(csMap[parent], cs);
-                    } else {
-                        root.push(cs);
-                    }
-                } else {
-                    root.push(cs);
-                }
-            }
-        }
-
-        var finalList = [];
-        var compare = function (a, b) {
-            return +(a.skill > b.skill) || +(a.skill === b.skill) - 1;
-        };
-        var depthFirst = function (cs, indent) {
-            cs.indent = indent;
-            finalList.push(cs);
-            for (let child of cs._children.sort(compare)) {
-                depthFirst(child, indent + 1);
-            }
-        };
-        for (cs of root.sort(compare)) {
-            depthFirst(cs, 0);
-        }
-        return finalList;
+    mangleSkillList() {
+        return this.props.skillHandler.getSkillList().filter(
+            (cs) => { return !(cs.skill in SkillTable.prefilledPhysicalSkillsMap)});
     }
 
     static getCharacterSkillMap(skillList) {
+        if (!skillList) {
+            return {};
+        }
         var csMap = {};
         for (let cs of skillList) {
             csMap[cs.skill] = cs;
@@ -118,6 +61,9 @@ class SkillTable extends React.Component {
     }
 
     static getSkillMap(skillList) {
+        if (!skillList) {
+            return {};
+        }
         var skillMap = {};
         for (let skill of skillList) {
             skillMap[skill.name] = skill;
@@ -162,18 +108,25 @@ class SkillTable extends React.Component {
     }
 
     initialSkillPoints() {
-        return util.roundup(this.props.character.start_lrn/3) + util.roundup(this.props.character.start_int/5) +
-                util.roundup(this.props.character.start_psy/10);
+        // TODO: data privacy.
+        var char = this.props.skillHandler.props.stats.props.character;
+        return util.roundup(char.start_lrn/3) + util.roundup(char.start_int/5) +
+                util.roundup(char.start_psy/10);
     }
 
     earnedSkillPoints() {
-        return this.props.character.gained_sp;
+        // TODO: data privacy.
+        var char = this.props.skillHandler.props.stats.props.character;
+
+        return char.gained_sp;
     }
 
     optimizeAgeSP() {
+        // TODO: data privacy violation.
+        var baseStats = this.props.skillHandler.props.stats.getBaseStats();
         /* Optimal stat raises, slightly munchkin, but only sensible. */
-        var raw = this.props.baseStats.lrn/15 + this.props.baseStats.int/25
-            + this.props.baseStats.psy/50;
+        var raw = baseStats.lrn/15 + baseStats.int/25
+            + baseStats.psy/50;
         var diff = util.roundup(raw) - raw;
         var lrn = util.rounddown(diff * 15);
         var int = util.rounddown((diff - lrn/15) * 25);
@@ -185,8 +138,8 @@ class SkillTable extends React.Component {
         var rows = [];
         var ii;
         var csMap = SkillTable.getCharacterSkillMap(
-            this.props.characterSkills);
-        var skillMap = SkillTable.getSkillMap(this.props.allSkills);
+            this.props.skillHandler.props.characterSkills);
+        var skillMap = SkillTable.getSkillMap(this.props.skillHandler.props.allSkills);
         var totalSP = 0, spCost;
         var skill;
 
@@ -197,11 +150,13 @@ class SkillTable extends React.Component {
                 spCost = SkillTable.spCost(csMap[skillName], skill);
                 rows.push(
                     <SkillRow key={`${skillName}-${ii}`}
-                              stats={this.props.effStats}
-                              characterSkill={csMap[skillName]}
+                              skillHandler={this.props.skillHandler}
                               skillName={skillName}
                               onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                               onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
+
+                              stats={this.props.skillHandler.props.stats.getEffStats()}
+                              characterSkill={csMap[skillName]}
                               skillPoints={spCost}
                               skill={skill}/>);
                 totalSP += spCost;
@@ -212,8 +167,7 @@ class SkillTable extends React.Component {
             }
         }
 
-        var skillList = SkillTable.mangleSkillList(this.props.characterSkills,
-            this.props.allSkills);
+        var skillList = this.mangleSkillList();
 
         for (ii = 0; ii < skillList.length; ii++) {
             var cs = skillList[ii];
@@ -222,7 +176,9 @@ class SkillTable extends React.Component {
                 spCost = SkillTable.spCost(cs, skill);
                 var idx = SkillTable.prefilledPhysicalSkills.length + ii;
                 rows.push(<SkillRow key={`${cs.skill}-${idx}`}
-                                    stats={this.props.effStats}
+                                    skillName={skill.name}
+                                    skillHandler={this.props.skillHandler}
+                                    stats={this.props.skillHandler.props.stats.getEffStats()}
                                     characterSkill={cs}
                                     onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                                     onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
@@ -276,7 +232,7 @@ class SkillTable extends React.Component {
             </tfoot>
         </Table>
             <AddSkillControl characterSkillMap={csMap}
-                             allSkills={this.props.allSkills}
+                             allSkills={this.props.skillHandler.props.allSkills}
                              onCharacterSkillAdd={this.props.onCharacterSkillAdd}
                              style={this.props.style}/>
         </Panel>;
@@ -284,14 +240,10 @@ class SkillTable extends React.Component {
 }
 
 SkillTable.propTypes = {
-    characterSkills: React.PropTypes.array.isRequired,
-    allSkills: React.PropTypes.array.isRequired,
-    effStats: React.PropTypes.object.isRequired,
-    baseStats: React.PropTypes.object.isRequired,
     skillHandler: React.PropTypes.object.isRequired,
     onCharacterSkillAdd: React.PropTypes.func,
     onCharacterSkillRemove: React.PropTypes.func,
-    onCharacterSkillModify: React.PropTypes.func
+    onCharacterSkillModify: React.PropTypes.func,
 };
 
 SkillTable.prefilledPhysicalSkills = ["Endurance / run",

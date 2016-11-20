@@ -1,6 +1,7 @@
 jest.dontMock('../SkillRow');
 jest.dontMock('../sheet-util');
-jest.dontMock('./factories')
+jest.dontMock('./factories');
+jest.dontMock('../SkillHandler');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -43,6 +44,13 @@ describe('SkillRow', function() {
 
     it('calculates skill check', function () {
         var row = getSkillRow({
+            skillName: "Persuasion",
+            skillHandler: factories.skillHandlerFactory({
+                character: {cur_cha: 55},
+                skills: [
+                    {skill: {name: "Persuasion", stat: "CHA"}, level: 1}],
+            }),
+
             characterSkill: characterSkillFactory({level: 1}),
             stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA"})});
@@ -52,6 +60,12 @@ describe('SkillRow', function() {
     it('recognizes base skills', function () {
         // i.e., does not render the skill check.
         var row = getSkillRow({
+            skillName: "Basic Farmhand",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [
+                    {skill: {name: "Basic Farmhand", stat: "CHA", skill_cost_1: null},
+                        level: 0}],
+            }),
             characterSkill: characterSkillFactory({level: 0}),
             stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA",
@@ -65,6 +79,11 @@ describe('SkillRow', function() {
     it('can render defaulted skills', function () {
         var row = getSkillRow({
             skillName: "Acting / Bluff",
+            skillHandler: factories.skillHandlerFactory({
+                character: {cur_cha: 55},
+                allSkills: [{skill: "Acting / Bluff", stat: "CHA"}]
+            }),
+
             stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA"})});
         expect(row.skillCheck()).toEqual(28);
@@ -73,6 +92,13 @@ describe('SkillRow', function() {
     it('can render skills which are available without cost', function () {
         var row = getSkillRow({
             skillName: "Acting / Bluff",
+            skillHandler: factories.skillHandlerFactory({
+                character: {cur_cha: 55},
+                allSkills: [{
+                    name: "Acting / Bluff",
+                    skill_cost_0: 0,
+                    stat: "CHA"}]
+            }),
             stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA", skill_cost_0: 0})});
         expect(row.skillCheck()).toEqual(55);
@@ -80,6 +106,12 @@ describe('SkillRow', function() {
 
     it('can find a skill check for a different stat', function () {
         var row = getSkillRow({
+            skillName: "Acting / Bluff",
+            skillHandler: factories.skillHandlerFactory({
+                character: {cur_wil: 60, cur_cha: 45},
+                skills: [{skill: "Acting / Bluff"}]
+            }),
+
             characterSkill: characterSkillFactory({level: 1}),
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"})
@@ -89,6 +121,12 @@ describe('SkillRow', function() {
 
     it('can render skill checks for multiple stats', function () {
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                character: {cur_fit: 50, cur_ref: 60},
+                skills: [{skill: "Balance", level: 1}]
+            }),
+
             characterSkill: characterSkillFactory({
                 skill: "Balance",
                 level: 1}),
@@ -100,7 +138,7 @@ describe('SkillRow', function() {
             "skill-check");
 
         expect(cell.textContent).toContain("REF: 65");
-        expect(cell.textContent).toContain("MOV: 50");
+        expect(cell.textContent).toContain("MOV: 60");
     });
 
     xit("shows skill with obsoleted skill level");
@@ -110,6 +148,11 @@ describe('SkillRow', function() {
         var spy = jasmine.createSpy("callback");
         var cs = characterSkillFactory({level: 1});
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: "Balance", level: 1}]
+            }),
+
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
@@ -123,6 +166,11 @@ describe('SkillRow', function() {
         var spy = jasmine.createSpy("callback");
         var cs = characterSkillFactory({level: 1});
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: "Balance", level: 1}]
+            }),
+
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
@@ -135,6 +183,11 @@ describe('SkillRow', function() {
     it('should not have a decrease control without a skill', function () {
         var spy = jasmine.createSpy("callback");
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                allSkills: [{name: "Balance", level: 1}]
+            }),
+
             characterSkill: undefined,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
@@ -148,6 +201,11 @@ describe('SkillRow', function() {
         var spy = jasmine.createSpy("callback");
         var cs = characterSkillFactory({level: 1});
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: {name: "Balance", min_level: 1}, level: 1}]
+            }),
+
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", min_level: 1}),
@@ -159,6 +217,10 @@ describe('SkillRow', function() {
     it('should not have a increase control without a skill', function () {
         var spy = jasmine.createSpy("callback");
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                allSkills: [{name: "Balance"}]
+            }),
             characterSkill: undefined,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
@@ -172,6 +234,11 @@ describe('SkillRow', function() {
         var spy = jasmine.createSpy("callback");
         var cs = characterSkillFactory({level: 3});
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: {name: "Balance", max_level: 3}, level: 3}]
+            }),
+
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
@@ -183,6 +250,11 @@ describe('SkillRow', function() {
     it("does not render missing skills if there are none", function () {
         var cs = characterSkillFactory({level: 3});
         var row = getSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: "Balance", level: 3}]
+            }),
+
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
@@ -195,6 +267,11 @@ describe('SkillRow', function() {
         var cs = characterSkillFactory({level: 3});
         cs._missingRequired = ["Frozzling"];
         var row = getSkillRow({
+            skillName: "Pistol",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: {name: "Pistol", required_skills: ["Frozzling"]}, level: 3}],
+                allSkills: [{name: "Frozzling"}]
+            }),
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
@@ -207,6 +284,11 @@ describe('SkillRow', function() {
         var cs = characterSkillFactory({level: 3});
         cs._missingRequired = ["Frozzling", "Foobying"];
         var row = getSkillRow({
+            skillName: "Pistol",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: {name: "Pistol", required_skills: ["Frozzling", "Foobying"]}, level: 3}],
+                allSkills: [{name: "Frozzling"}, {name: "Foobying"}]
+            }),
             characterSkill: cs,
             stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
