@@ -1415,33 +1415,6 @@ class Armor(ExportedModel):
             return self.name
         return u"%s %s" % (self.base.name, self.quality)
 
-    def __getattr__(self, v):
-        # pass through all attribute references not handled by us to
-        # base character.
-        if v.startswith("armor"):
-            typ = v.split('_')[-1]
-            if typ == 'dp':
-                return int(round(getattr(self.base, v) *
-                                 self.quality.dp_multiplier))
-            return getattr(self.base, v) + getattr(self.quality,
-                                                   "armor_" + typ, 0)
-
-        raise AttributeError, "no attr %s" % v
-
-    @property
-    def weight(self):
-        return self.base.weight * self.quality.mod_weight_multiplier
-
-    @property
-    def mod_fit(self):
-        return min(self.base.mod_fit + self.quality.mod_fit, 0)
-    @property
-    def mod_ref(self):
-        return min(self.base.mod_ref + self.quality.mod_ref, 0)
-    @property
-    def mod_psy(self):
-        return min(self.base.mod_psy + self.quality.mod_psy, 0)
-
 
 class TransientEffect(ExportedModel, Effect):
     """
