@@ -43,10 +43,6 @@ class SheetTestCase(TestCase):
         response = self.detail_view(req, pk=self.sheet.pk)
         self.assertEqual(response.status_code, 403)
 
-    def test_weight(self):
-        serializer = SheetSerializer(self.sheet)
-        self.assertIn('weight_carried', serializer.data)
-
 
 class CharacterTestCase(TestCase):
     def setUp(self):

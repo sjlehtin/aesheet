@@ -1508,11 +1508,6 @@ class Sheet(PrivateMixin, models.Model):
                              related_name='helm_for',
                              on_delete=models.SET_NULL)
 
-    # TODO: to remove.  This will come from the inventory.
-    extra_weight_carried = models.IntegerField(
-        default=0,
-        help_text="Extra encumbrance the character is carrying")
-
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
     class Meta:
@@ -1592,8 +1587,7 @@ class Sheet(PrivateMixin, models.Model):
         return _pass_name
 
     def _penalties_for_weight_carried(self):
-        ratio = float(self.weight_carried)/self.cur_fit
-        return int(round(-10 * ratio))
+        return 0
 
     @property
     @_stat_wrapper
@@ -1662,23 +1656,6 @@ class Sheet(PrivateMixin, models.Model):
     @_stat_wrapper
     def mod_imm(self):
         pass
-
-    @property
-    def weight_carried(self):
-        weight = 0
-        if self.armor:
-            weight += self.armor.weight
-        if self.helm:
-            weight += self.helm.weight
-
-        wpns = self.ranged_weapons.all()
-        if wpns:
-            weight += sum([ww.base.weight for ww in wpns])
-        wpns = self.weapons.all()
-        if wpns:
-            weight += sum([ww.base.weight for ww in wpns])
-
-        return weight + self.extra_weight_carried
 
     def innate_effects(self):
         """

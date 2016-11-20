@@ -649,7 +649,6 @@ var sheetFactory = function (statOverrides) {
     var _sheetData = {
         id: 1,
         character: 2,
-        "weight_carried": "0.00",
         "mod_fit": 0,
         "mod_ref": 0,
         "mod_lrn": 0,
