@@ -9,7 +9,10 @@
  * props: stats: statHandler
  * characterSkills
  * allSkills
- * edges <- probably should come from statHandler
+ * edges
+ *
+ * TODO: merge this and statHandler, as they both need to be passed to
+ * many components, and it makes sense to just roll them into one.
  */
 class SkillHandler {
     constructor(props) {
@@ -19,7 +22,8 @@ class SkillHandler {
                 (item) => { return item.skill; }),
             skillMap: SkillHandler.getItemMap(this.props.allSkills),
             edgeMap: SkillHandler.getItemMap(this.props.edges,
-            (item) => { return item.edge.name; })
+            (item) => { return item.edge.name; }),
+            skillBonusMap: this.getSkillBonusMap()
         };
     }
 
@@ -35,6 +39,23 @@ class SkillHandler {
             newMap[accessor(item)] = item;
         }
         return newMap;
+    }
+
+    getSkillBonusMap() {
+        if (!this.props.edges) {
+            return {};
+        }
+
+        var skillBonusMap = {};
+        for (let edge of this.props.edges) {
+            for (let sb of edge.edge_skill_bonuses) {
+                if (!(sb.skill in skillBonusMap)) {
+                    skillBonusMap[sb.skill] = {bonus: 0};
+                }
+                skillBonusMap[sb.skill].bonus += sb.bonus;
+            }
+        }
+        return skillBonusMap;
     }
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
@@ -72,13 +93,19 @@ class SkillHandler {
         }
         var ability = this.getStat(stat);
         var level = this.skillLevel(skillName);
+
+        var check = 0;
         if (level === "U") {
-            return Math.round(ability / 4)
+            check = Math.round(ability / 4)
         } else if (level === "B") {
-            return Math.round(ability / 2)
+            check = Math.round(ability / 2)
         } else {
-            return ability + level * 5;
+            check = ability + level * 5;
         }
+        if (skillName in this.state.skillBonusMap) {
+            check += this.state.skillBonusMap[skillName].bonus;
+        }
+        return check;
     }
 
     /* U is quarter-skill, i.e., using a pistol even without Basic
