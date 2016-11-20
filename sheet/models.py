@@ -211,7 +211,6 @@ class Character(PrivateMixin, models.Model):
     xp_used_ingame = models.PositiveIntegerField(default=0)
     bought_stamina = models.PositiveIntegerField(default=0)
     bought_mana = models.PositiveIntegerField(default=0)
-    edges_bought = models.PositiveIntegerField(default=0)
     total_xp = models.PositiveIntegerField(default=0)
 
     # The abilities the character was rolled with.
