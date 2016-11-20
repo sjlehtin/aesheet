@@ -676,8 +676,6 @@ class EdgeLevel(ExportedModel, StatModifier):
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
-    skill_bonuses = models.ManyToManyField(Skill, through='EdgeSkillBonus',
-                                           blank=True)
     extra_skill_points = models.IntegerField(default=0)
 
     @classmethod
@@ -699,7 +697,8 @@ class EdgeSkillBonus(ExportedModel):
     existing EdgeLevel (like Acute Touch 1) and the skill and assign a
     bonus (or penalty, if negative).
     """
-    edge_level = models.ForeignKey(EdgeLevel)
+    edge_level = models.ForeignKey(EdgeLevel,
+                                   related_name='edge_skill_bonuses')
     skill = models.ForeignKey(Skill)
     bonus = models.IntegerField(default=15)
 
