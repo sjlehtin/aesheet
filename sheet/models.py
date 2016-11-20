@@ -1358,6 +1358,7 @@ class ArmorQuality(ExportedModel):
 
     tech_level = models.ForeignKey(TechLevel)
 
+    # TODO: this is from size, which should be handled specially in code.
     dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                         default=1.0)
 
@@ -1367,6 +1368,7 @@ class ArmorQuality(ExportedModel):
     armor_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
+    # TODO: this is from size, which should be handled specially in code.
     mod_fit_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                              default=1.0)
     mod_fit = models.IntegerField(default=0)
@@ -1377,6 +1379,7 @@ class ArmorQuality(ExportedModel):
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
 
+    # TODO: this is from size, which should be handled specially in code.
     mod_weight_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                                 default=1.0)
     mod_encumbrance_class = models.IntegerField(default=0)
