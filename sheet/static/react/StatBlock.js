@@ -385,22 +385,6 @@ class StatBlock extends React.Component {
         }
     }
 
-    runMultiplier() {
-        /* TODO: Tests for run multiplier. */
-        /* TODO: run multiplier from effects. */
-        var total = 0;
-
-        this.state.edgeList.forEach((elem, ii) =>
-        total += parseFloat(elem.run_multiplier ));
-
-        if (total > 0) {
-            console.log("run multiplier:", total);
-            return total;
-        } else {
-            return 1.0;
-        }
-    }
-
     handleModification(stat, oldValue, newValue) {
         var data = this.state.char;
         data["cur_" + stat] = newValue;
