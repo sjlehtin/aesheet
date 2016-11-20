@@ -87,6 +87,14 @@ var statsFactory = function (overrideStats) {
 };
 
 var skillFactory = function (overrideFields) {
+    var props = {};
+    // Simplify generating skills to allow using only the name.  Slight
+    // allowance for older code.
+    if (typeof(overrideFields) === "object") {
+        props = overrideFields;
+    } else if (overrideFields){
+        props.name = overrideFields;
+    }
     var _baseSkill = {
         "name": "Acting / Bluff",
         "description": "",
@@ -105,7 +113,7 @@ var skillFactory = function (overrideFields) {
         "min_level": 0,
         "max_level": 8
     };
-    return Object.assign(_baseSkill, overrideFields);
+    return Object.assign(_baseSkill, props);
 };
 
 
@@ -764,11 +772,19 @@ var skillHandlerFactory = function (givenProps) {
     var allSkills = [];
     var effects = [];
 
+    if (givenProps.allSkills) {
+        for (let sk of givenProps.allSkills) {
+            var newSkill = skillFactory(sk);
+            allSkills.push(newSkill);
+        }
+    }
     if (givenProps.skills) {
         for (let sk of givenProps.skills) {
-            var skill = characterSkillFactory(sk);
-            skills.push(skill);
-            allSkills.push(skillFactory({name: skill.skill}));
+            var skill = skillFactory(sk.skill);
+            var charSkill = characterSkillFactory(
+                Object.assign({}, sk, {skill: skill.name}));
+            skills.push(charSkill);
+            allSkills.push(skill);
         }
     }
     if (givenProps.edges) {
