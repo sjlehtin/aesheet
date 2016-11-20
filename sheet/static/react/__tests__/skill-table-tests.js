@@ -141,15 +141,14 @@ describe('SkillTable', function() {
     });
 
     it("mangles skill list to remove physical prefilled skills", function () {
-        var skillList = [
-            factories.characterSkillFactory({skill: "Search", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var newList = SkillTable.mangleSkillList(skillList, [
-            factories.skillFactory({name: "Search"}),
-            factories.skillFactory({name: "Agriculture"}),
-        ]);
+        var table = getSkillTable({character: {cur_int: 50},
+            allSkills: _basicPhysical.concat([
+                {name: "Search"}]),
+            skills: [
+                {skill: "Search", level: 1},
+                {skill: "Agriculture", level: 3}
+            ]});
+        var newList = table.mangleSkillList();
         expect(newList.length).toEqual(1);
         expect(newList[0].skill).toEqual("Agriculture");
     });
@@ -172,117 +171,7 @@ describe('SkillTable', function() {
         expect(getSkillLevel(searchCells)).toEqual('1');
     });
 
-    it("mangles skill list to respect requirements order", function () {
-        var skillList = [
-            factories.characterSkillFactory(
-                {skill: "Naval Gunnery", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Basic Artillery", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var allSkills = [factories.skillFactory({name: "Agriculture"}),
-            factories.skillFactory({name: "Basic Artillery"}),
-            factories.skillFactory({name: "Naval Gunnery",
-                required_skills: ["Basic Artillery"]})
-        ];
 
-        var newList = SkillTable.mangleSkillList(skillList, allSkills);
-        expect(newList[0].skill).toEqual("Agriculture");
-    });
-
-    it("finds missing skills while mangling from all requires", function () {
-        var skillList = [
-            factories.characterSkillFactory(
-                {skill: "Naval Gunnery", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Basic Artillery", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var allSkills = [factories.skillFactory({name: "Agriculture"}),
-            factories.skillFactory({name: "Basic Artillery"}),
-            factories.skillFactory({name: "Naval Gunnery",
-                required_skills: ["Basic Artillery", "Gardening"]})
-        ];
-
-        var newList = SkillTable.mangleSkillList(skillList, allSkills);
-        expect(newList[2].skill).toEqual("Naval Gunnery");
-        expect(newList[2]._missingRequired).toEqual(["Gardening"]);
-    });
-
-    it("finds missing skills while mangling", function () {
-        var skillList = [
-            factories.characterSkillFactory(
-                {skill: "Florism", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Basic Artillery", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var allSkills = [factories.skillFactory({name: "Agriculture"}),
-            factories.skillFactory({name: "Basic Artillery"}),
-            factories.skillFactory({name: "Florism",
-                required_skills: ["Gardening"]})
-        ];
-
-        var newList = SkillTable.mangleSkillList(skillList, allSkills);
-        expect(newList[2].skill).toEqual("Florism");
-        expect(newList[2]._missingRequired).toEqual(["Gardening"]);
-    });
-
-    it("calculates indent for nested required skills while mangling", function () {
-        var skillList = [
-            factories.characterSkillFactory(
-                {skill: "Florism", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Gardening", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var allSkills = [factories.skillFactory({name: "Agriculture"}),
-            factories.skillFactory({name: "Gardening",
-                required_skills: ["Agriculture"]}),
-            factories.skillFactory({name: "Florism",
-                required_skills: ["Gardening"]})
-        ];
-
-        var newList = SkillTable.mangleSkillList(skillList, allSkills);
-        expect(newList[0].skill).toEqual("Agriculture");
-        expect(newList[0].indent).toEqual(0);
-        expect(newList[1].indent).toEqual(1);
-        expect(newList[2].skill).toEqual("Florism");
-        expect(newList[2].indent).toEqual(2);
-    });
-
-    it("does not choke on multiple required skills", function () {
-        var skillList = [
-            factories.characterSkillFactory(
-                {skill: "Florism", level: 1}),
-            factories.characterSkillFactory(
-                {skill: "Aesthetism", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Gardening", level: 0}),
-            factories.characterSkillFactory(
-                {skill: "Agriculture", level: 3})
-        ];
-        var allSkills = [factories.skillFactory({name: "Agriculture"}),
-            factories.skillFactory({name: "Gardening",
-                required_skills: ["Agriculture"]}),
-            factories.skillFactory({name: "Florism",
-                required_skills: ["Gardening", "Aesthetism"]}),
-            factories.skillFactory({name: "Aesthetism"})
-        ];
-
-        var newList = SkillTable.mangleSkillList(skillList, allSkills);
-        expect(newList[0].skill).toEqual("Aesthetism");
-        expect(newList[0].indent).toEqual(0);
-        expect(newList[1].skill).toEqual("Agriculture");
-        expect(newList[1].indent).toEqual(0);
-        expect(newList[2].indent).toEqual(1);
-        expect(newList[3].skill).toEqual("Florism");
-        expect(newList[3].indent).toEqual(2);
-    });
 
     // -> to skillrow.  Here we just pass the callbacks forward.
     xit("allows adding a physical skill level from the start set");
@@ -340,7 +229,7 @@ describe('SkillTable', function() {
 
     // if the parent stores the passed object directly, state should not
     // get passed over.  TODO: test for sanitizeSkillObject usage in
-    // handleCharacterSkillModify
+    // handleCharacterSkillModify.
     xit("should clean away internal fields from parent notifications");
     xit("calculates edge skill bonuses correctly and passes them to" +
         " skillrows");

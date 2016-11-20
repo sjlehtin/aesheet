@@ -44,71 +44,9 @@ class SkillTable extends React.Component {
         }
     }
 
-    static mangleSkillList(skillList, allSkills) {
-        var newList = [];
-        var cs;
-
-        // Make a deep copy of the list so as not accidentally mangle
-        // parent copy of the props.
-        skillList = skillList.map((elem) => {var obj = Object.assign({}, elem);
-        obj._children = [];
-        return obj; });
-
-        var csMap = SkillTable.getCharacterSkillMap(skillList);
-        var skillMap = SkillTable.getSkillMap(allSkills);
-
-        for (cs of skillList) {
-            if (cs.skill in SkillTable.prefilledPhysicalSkillsMap) {
-                continue;
-            }
-            newList.push(cs);
-        }
-
-        var addChild = function (parent, child) {
-            parent._children.push(child);
-        };
-
-        var root = [];
-        for (cs of newList) {
-            var skill = skillMap[cs.skill];
-            if (!skill) {
-                cs._unknownSkill = true;
-                root.push(cs);
-            } else {
-                if (skill.required_skills.length > 0) {
-                    var parent = skill.required_skills[0];
-                    cs._missingRequired = [];
-                    for (let sk of skill.required_skills) {
-                        if (!(sk in csMap)) {
-                            cs._missingRequired.push(sk);
-                        }
-                    }
-                    if (parent in csMap) {
-                        addChild(csMap[parent], cs);
-                    } else {
-                        root.push(cs);
-                    }
-                } else {
-                    root.push(cs);
-                }
-            }
-        }
-
-        var finalList = [];
-        var compare = function (a, b) {
-            return +(a.skill > b.skill) || +(a.skill === b.skill) - 1;
-        };
-        var depthFirst = function (cs, indent) {
-            cs.indent = indent;
-            finalList.push(cs);
-            for (let child of cs._children.sort(compare)) {
-                depthFirst(child, indent + 1);
-            }
-        };
-        for (cs of root.sort(compare)) {
-            depthFirst(cs, 0);
-        }
-        return finalList;
+    mangleSkillList() {
+        return this.props.skillHandler.getSkillList().filter(
+            (cs) => { return !(cs.skill in SkillTable.prefilledPhysicalSkillsMap)});
     }
 
     static getCharacterSkillMap(skillList) {
@@ -229,10 +167,7 @@ class SkillTable extends React.Component {
             }
         }
 
-        // TODO: data privacy violation.
-        var skillList = SkillTable.mangleSkillList(
-            this.props.skillHandler.props.characterSkills,
-            this.props.skillHandler.props.allSkills);
+        var skillList = this.mangleSkillList();
 
         for (ii = 0; ii < skillList.length; ii++) {
             var cs = skillList[ii];

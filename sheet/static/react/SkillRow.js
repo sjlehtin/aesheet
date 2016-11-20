@@ -27,62 +27,16 @@ class SkillRow extends React.Component {
     }
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
-    isBaseSkill(skill) {
-        if (skill.skill_cost_1 === null) {
-            return true;
-        } else {
-            return false;
-        }
+    isBaseSkill() {
+        return this.props.skillHandler.isBaseSkill(this.props.skillName);
     }
 
-    /*
-     * If character has the skill, use the check directly.
-     *
-     * If character does not have the skill, but the skill level 0
-     * has cost of 0, use level 0 check.  This should use the normal
-     * skill check calculation, as the character may have armor
-     * or edges which modify the skill check.
-     *
-     * If character doesn't have the skill, and the skill level 0 has
-     * a non-zero cost, calculate check defaulted to half-ability.
-     */
     skillCheck(stat) {
-        var skill = this.props.skill;
-
-        if (this.isBaseSkill(skill)) {
-            return null;
-        }
-
-        if (!stat) {
-            stat = skill.stat;
-        }
-        var ability = this.props.stats[stat.toLowerCase()];
-        var level = this.skillLevel();
-        if (level === "B") {
-            return Math.round(ability / 2)
-        } else {
-            return ability + level * 5;
-        }
-    }
-
-    skillName() {
-        var skillName = this.props.skill.name;
-        if (!skillName) {
-            skillName = this.props.characterSkill.skill;
-        }
-        return skillName;
+        return this.props.skillHandler.skillCheck(this.props.skillName, stat);
     }
 
     skillLevel() {
-        if (!this.props.characterSkill) {
-            if (this.props.skill.skill_cost_0 > 0) {
-                return 'B';
-            } else {
-                return 0;
-            }
-        } else {
-            return this.props.characterSkill.level;
-        }
+        return this.props.skillHandler.skillLevel(this.props.skillName);
     }
 
     handleIncrease() {
@@ -127,7 +81,7 @@ class SkillRow extends React.Component {
             checks = checkList.join(' ');
         } else {
             var skill = this.props.skill;
-            checks = <span title={skill.stat}>{this.skillCheck(skill.stat)}</span>
+            checks = <span title={skill.stat}>{this.skillCheck()}</span>
         }
         var indent = 0;
         if (this.props.indent > 0) {
@@ -135,7 +89,8 @@ class SkillRow extends React.Component {
         }
 
         var remove;
-        if (this.props.characterSkill && this.props.onCharacterSkillRemove) {
+        if (this.props.skillHandler.hasSkill(this.props.skillName) &&
+            this.props.onCharacterSkillRemove) {
             remove = <span style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
                     onClick={(e) => {this.props.onCharacterSkillRemove(
                       this.props.characterSkill)}}
@@ -172,7 +127,7 @@ class SkillRow extends React.Component {
             skillStyle.color = 'red';
         }
         return <tr style={skillStyle} title={missing}><td><span style={{paddingLeft: indent}}>{
-              this.skillName()}</span><span style={{position: "relative"}}>{remove}</span></td>
+              this.props.skillName}</span><span style={{position: "relative"}}>{remove}</span></td>
             <td>{this.skillLevel()}<span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
             <td className="skill-check">{checks}</td></tr>;
@@ -180,17 +135,8 @@ class SkillRow extends React.Component {
 }
 
 SkillRow.propTypes = {
-    /* Either characterSkill of skillName must be given.  If
-       characterSkill is missing, it is assumed that the character does not
-       possess the skill. */
-    characterSkill: React.PropTypes.object,
-    skillName: React.PropTypes.string,
-
-    stats: React.PropTypes.object.isRequired,
-
-    skill: React.PropTypes.object.isRequired,
-
-    skillPoints: React.PropTypes.number,
+    skillName: React.PropTypes.string.isRequired,
+    skillHandler: React.PropTypes.object.isRequired,
 
     /* Defaults to stat in the skill, but can be overridden for
        special cases. */
@@ -199,7 +145,20 @@ SkillRow.propTypes = {
     indent: React.PropTypes.number,
 
     onCharacterSkillRemove: React.PropTypes.func,
-    onCharacterSkillModify: React.PropTypes.func
+    onCharacterSkillModify: React.PropTypes.func,
+
+
+    // TODO: Rest of the props should be unnecessary with skillHandler as
+    // prop.
+    stats: React.PropTypes.object.isRequired,
+
+    /* Either characterSkill of skillName must be given.  If
+       characterSkill is missing, it is assumed that the character does not
+       possess the skill. */
+    characterSkill: React.PropTypes.object,
+    skill: React.PropTypes.object.isRequired,
+
+    skillPoints: React.PropTypes.number
 };
 
 SkillRow.defaultProps = {indent: 0, skillPoints: 0}

@@ -18,13 +18,12 @@ class SkillHandler {
     constructor(props) {
         this.props = props;
         this.state = {
-            characterSkillMap: SkillHandler.getItemMap(this.props.characterSkills,
-                (item) => { return item.skill; }),
-            skillMap: SkillHandler.getItemMap(this.props.allSkills),
             edgeMap: SkillHandler.getItemMap(this.props.edges,
             (item) => { return item.edge.name; }),
             skillBonusMap: this.getSkillBonusMap()
         };
+
+        this.state.skillList = this.createSkillList();
     }
 
     static getItemMap(list, accessor) {
@@ -59,7 +58,9 @@ class SkillHandler {
     }
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
-    isBaseSkill(skill) {
+    isBaseSkill(skillName) {
+        var skill = this.state.skillMap[skillName];
+
         if (skill.skill_cost_1 === null) {
             return true;
         } else {
@@ -84,7 +85,7 @@ class SkillHandler {
      */
     skillCheck(skillName, stat) {
         var skill = this.state.skillMap[skillName];
-        if (!skill || this.isBaseSkill(skill)) {
+        if (!skill || this.isBaseSkill(skillName)) {
             return null;
         }
 
@@ -150,6 +151,75 @@ class SkillHandler {
 
     getEdgeList() {
         return this.props.edges;
+    }
+
+    getSkillList() {
+        return this.state.skillList;
+    }
+
+    createSkillList() {
+        var newList = [];
+        var cs;
+
+        // Make a deep copy of the list so as not accidentally mangle
+        // parent copy of the props.
+        var skillList = this.props.characterSkills.map(
+            (elem) => {var obj = Object.assign({}, elem);
+        obj._children = [];
+        return obj; });
+
+        this.state.characterSkillMap = SkillHandler.getItemMap(skillList,
+                (item) => { return item.skill; });
+        this.state.skillMap = SkillHandler.getItemMap(this.props.allSkills);
+
+        var csMap = this.state.characterSkillMap;
+        var skillMap = this.state.skillMap;
+
+        var addChild = function (parent, child) {
+            parent._children.push(child);
+        };
+
+        var root = [];
+        for (cs of skillList) {
+            var skill = skillMap[cs.skill];
+            if (!skill) {
+                cs._unknownSkill = true;
+                root.push(cs);
+            } else {
+                if (skill.required_skills.length > 0) {
+                    var parent = skill.required_skills[0];
+                    cs._missingRequired = [];
+                    for (let sk of skill.required_skills) {
+                        if (!(sk in csMap)) {
+                            cs._missingRequired.push(sk);
+                        }
+                    }
+                    if (parent in csMap) {
+                        addChild(csMap[parent], cs);
+                    } else {
+                        root.push(cs);
+                    }
+                } else {
+                    root.push(cs);
+                }
+            }
+        }
+
+        var finalList = [];
+        var compare = function (a, b) {
+            return +(a.skill > b.skill) || +(a.skill === b.skill) - 1;
+        };
+        var depthFirst = function (cs, indent) {
+            cs.indent = indent;
+            finalList.push(cs);
+            for (let child of cs._children.sort(compare)) {
+                depthFirst(child, indent + 1);
+            }
+        };
+        for (cs of root.sort(compare)) {
+            depthFirst(cs, 0);
+        }
+        return finalList;
     }
 
     // Movement rates.
