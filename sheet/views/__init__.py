@@ -241,34 +241,6 @@ class ArmorWrap(RemoveWrap):
             return getattr(self.item, v)
 
 
-class SheetView(object):
-    def __init__(self, char_sheet):
-        self.sheet = char_sheet
-
-    def overland_movement(self):
-        overland_mov = self.sheet.eff_mov * self.sheet.run_multiplier()
-        fly_mov = self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
-
-        terrains = [1, 2, 3, 4, 5, 6, 10, 15]
-        miles_per_day = [(overland_mov / (2 * mult)) for mult in terrains]
-        miles_per_day.append(fly_mov/2)
-        return dict(terrains=["Road", "Clear", "Scrub", "Woods", "Sand",
-                              "Forest", "Mtn", "Swamp", "Fly"],
-                    miles_per_day=miles_per_day,
-                    miles_per_hour=[rate/7.5 for rate in miles_per_day])
-
-    def __getattr__(self, v):
-        # pass through all attribute references not handled by us to
-        # base character.
-        if v.startswith("_"):
-            raise AttributeError()
-        try:
-            return getattr(self.sheet, v)
-        except AttributeError:
-            raise AttributeError(
-                "'SheetView' object has no attribute '{attr}'".format(attr=v))
-
-
 def sheet_detail(request, sheet_id=None):
     sheet = get_object_or_404(Sheet.objects.prefetch_related(
         'character__characterlogentry_set__skill',
@@ -277,7 +249,7 @@ def sheet_detail(request, sheet_id=None):
     if not sheet.character.access_allowed(request.user):
         raise PermissionDenied
 
-    c = {'sheet': SheetView(sheet) }
+    c = {'sheet': sheet }
     return render(request, 'sheet/sheet_detail.html', c)
 
 
