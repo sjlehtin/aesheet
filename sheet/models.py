@@ -681,7 +681,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     @classmethod
     def dont_export(cls):
         return ['characteredge', 'edgeskillbonus', 'skill_bonuses',
-                'characterlogentry']
+                'edge_skill_bonuses', 'characterlogentry']
 
     def __unicode__(self):
         return u"%s %s (%s)" % (self.edge, self.level, self.cost)
