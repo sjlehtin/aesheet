@@ -124,6 +124,118 @@ class SkillHandler {
     getEdgeList() {
         return this.props.edges;
     }
+
+    // Movement rates.
+
+    sneakingSpeed() {
+        return this.props.stats.getEffStats().mov / 5;
+    }
+
+    runningSpeed() {
+        var rate = this.props.stats.getEffStats().mov;
+
+        var edgeRate = this.props.stats.getEdgeModifier('run_multiplier');
+        var effRate = this.props.stats.getEffectModifier('run_multiplier');
+        if (edgeRate) {
+            rate *= edgeRate;
+        }
+        if (effRate) {
+            rate *= effRate;
+        }
+        return rate;
+
+    }
+
+    sprintingSpeed() {
+        return this.runningSpeed() * 1.5;
+    }
+
+    climbingSpeed() {
+        var level = this.skillLevel('Climbing');
+        var rate;
+        if (typeof(level) !== 'number') {
+            rate = this.props.stats.getEffStats().mov / 60;
+        } else {
+            rate = this.props.stats.getEffStats().mov / 30 + level;
+        }
+
+        var edgeRate = this.props.stats.getEdgeModifier('climb_multiplier');
+        var effRate = this.props.stats.getEffectModifier('climb_multiplier');
+        if (edgeRate) {
+            rate *= edgeRate;
+        }
+        if (effRate) {
+            rate *= effRate;
+        }
+        return rate;
+    }
+    
+    swimmingSpeed() {
+        var level = this.skillLevel('Swimming');
+        var rate;
+        if (typeof(level) !== 'number') {
+            rate = this.props.stats.getEffStats().mov / 10;
+        } else {
+            rate = this.props.stats.getEffStats().mov / 5 + level * 5;
+        }
+
+        var edgeRate = this.props.stats.getEdgeModifier('swim_multiplier');
+        var effRate = this.props.stats.getEffectModifier('swim_multiplier');
+        if (edgeRate) {
+            rate *= edgeRate;
+        }
+        if (effRate) {
+            rate *= effRate;
+        }
+        return rate;
+    }
+
+    jumpingDistance() {
+        var level = this.skillLevel('Jumping');
+        var rate;
+        if (typeof(level) !== 'number') {
+            rate = this.props.stats.getEffStats().mov / 24;
+        } else {
+            rate = this.props.stats.getEffStats().mov / 12 + level*0.75;
+        }
+
+        var edgeRate = this.props.stats.getEdgeModifier('run_multiplier');
+        var effRate = this.props.stats.getEffectModifier('run_multiplier');
+        if (edgeRate) {
+            rate *= edgeRate;
+        }
+        if (effRate) {
+            rate *= effRate;
+        }
+        return rate;
+
+    }
+
+    jumpingHeight() {
+        return this.jumpingDistance() / 3;
+    }
+    
+    
+    flyingSpeed() {
+        var canFly = false;
+        var rate = this.props.stats.getEffStats().mov;
+        var edgeRate = this.props.stats.getEdgeModifier('fly_multiplier');
+        var effRate = this.props.stats.getEffectModifier('fly_multiplier');
+        if (edgeRate) {
+            rate *= edgeRate;
+            canFly = true;
+        }
+        if (effRate) {
+            rate *= effRate;
+            canFly = true;
+        }
+
+        if (canFly) {
+            return rate;
+        } else {
+            return 0;
+        }
+    }
 }
 
 export default SkillHandler;

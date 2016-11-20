@@ -15,7 +15,7 @@ class InitiativeBlock extends React.Component {
         return distances.map((distance) => {
             return util.roundup(
                 (-constant * distance) /
-                (this.props.effMOV * this.props.runMultiplier));
+                (this.props.stats.runningSpeed()));
         });
     }
 
@@ -35,17 +35,10 @@ class InitiativeBlock extends React.Component {
                         <th>Distance</th>
                         <th>
                             <input type="text" style={{width: "3em"}}
-                                //style={{fontSize: "inherit"}}
-                                   //style={{fontSize: "inherit", height:
-                                // "2em", width: "3em", paddingLeft: 5, textAlign: "right", }}
-                                   //addonAfter="m"
                                    value={this.state.distance}
-                                   //ref={(c) => {
-                                   //if (c) {
-                                   //  this._inputNode = c.getInputDOMNode()}}}
-                                ref={(c) => { this._inputNode = c }}
+                                   ref={(c) => { this._inputNode = c }}
                                    onChange={(e) => {this.setState({distance: e.target.value})}}
-                            /> m
+                            />
                         </th>
                         {distances.slice(1).map((elem, ii) => {
                             return <th key={ii}>{elem} m</th>})}</tr>
@@ -61,10 +54,7 @@ class InitiativeBlock extends React.Component {
 }
 
 InitiativeBlock.propTypes = {
-    effMOV: React.PropTypes.number.isRequired,
-    runMultiplier: React.PropTypes.number
+    stats: React.PropTypes.object.isRequired,
 };
-
-InitiativeBlock.defaultProps = {runMultiplier: 1};
 
 export default InitiativeBlock;

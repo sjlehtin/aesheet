@@ -211,7 +211,6 @@ class Character(PrivateMixin, models.Model):
     xp_used_ingame = models.PositiveIntegerField(default=0)
     bought_stamina = models.PositiveIntegerField(default=0)
     bought_mana = models.PositiveIntegerField(default=0)
-    edges_bought = models.PositiveIntegerField(default=0)
     total_xp = models.PositiveIntegerField(default=0)
 
     # The abilities the character was rolled with.
@@ -1359,6 +1358,7 @@ class ArmorQuality(ExportedModel):
 
     tech_level = models.ForeignKey(TechLevel)
 
+    # TODO: this is from size, which should be handled specially in code.
     dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                         default=1.0)
 
@@ -1368,6 +1368,7 @@ class ArmorQuality(ExportedModel):
     armor_r = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0)
 
+    # TODO: this is from size, which should be handled specially in code.
     mod_fit_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                              default=1.0)
     mod_fit = models.IntegerField(default=0)
@@ -1378,6 +1379,7 @@ class ArmorQuality(ExportedModel):
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
 
+    # TODO: this is from size, which should be handled specially in code.
     mod_weight_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
                                                 default=1.0)
     mod_encumbrance_class = models.IntegerField(default=0)
@@ -1412,33 +1414,6 @@ class Armor(ExportedModel):
         if self.name:
             return self.name
         return u"%s %s" % (self.base.name, self.quality)
-
-    def __getattr__(self, v):
-        # pass through all attribute references not handled by us to
-        # base character.
-        if v.startswith("armor"):
-            typ = v.split('_')[-1]
-            if typ == 'dp':
-                return int(round(getattr(self.base, v) *
-                                 self.quality.dp_multiplier))
-            return getattr(self.base, v) + getattr(self.quality,
-                                                   "armor_" + typ, 0)
-
-        raise AttributeError, "no attr %s" % v
-
-    @property
-    def weight(self):
-        return self.base.weight * self.quality.mod_weight_multiplier
-
-    @property
-    def mod_fit(self):
-        return min(self.base.mod_fit + self.quality.mod_fit, 0)
-    @property
-    def mod_ref(self):
-        return min(self.base.mod_ref + self.quality.mod_ref, 0)
-    @property
-    def mod_psy(self):
-        return min(self.base.mod_psy + self.quality.mod_psy, 0)
 
 
 class TransientEffect(ExportedModel, Effect):
@@ -1481,60 +1456,6 @@ class SheetMiscellaneousItem(models.Model):
     item = models.ForeignKey(MiscellaneousItem)
 
 
-class MovementRates(object):
-    def __init__(self, sheet):
-        self.sheet = sheet
-
-    def climbing(self):
-        multiplier = self.sheet.innate_climb_multiplier()
-        multiplier *= self.sheet.enhancement_climb_multiplier()
-        level = self.sheet.character.skill_level("Climbing")
-        if level is None:
-            base_rate = self.sheet.eff_mov / 60
-            level_bonus = 0
-        else:
-            base_rate = self.sheet.eff_mov / 30
-            level_bonus = level
-        return multiplier * (base_rate + level_bonus)
-
-    def swimming(self):
-        multiplier = self.sheet.innate_swim_multiplier()
-        multiplier *= self.sheet.enhancement_swim_multiplier()
-        level = self.sheet.character.skill_level("Swimming")
-        if level is None:
-            base_rate = self.sheet.eff_mov / 10
-            level_bonus = 0
-        else:
-            base_rate = self.sheet.eff_mov / 5
-            level_bonus = 5 * level
-        return multiplier * (base_rate + level_bonus)
-
-    def jumping_distance(self):
-        edge_level = self.sheet.character.edge_level("Natural Jumper")
-        multiplier = (2 * edge_level if edge_level else 1)
-        multiplier *= self.sheet.enhancement_run_multiplier()
-        level = self.sheet.character.skill_level("Jumping")
-        level_bonus = level * 0.75 if level is not None else 0
-        base_rate = self.sheet.eff_mov / 12
-        return multiplier * (base_rate + level_bonus)
-
-    def jumping_height(self):
-        return self.jumping_distance()/3
-
-    def stealth(self):
-        return self.sheet.eff_mov / 5 * self.sheet.innate_run_multiplier()
-
-    def running(self):
-        return (self.sheet.eff_mov * self.sheet.innate_run_multiplier() *
-                self.sheet.enhancement_run_multiplier())
-
-    def sprinting(self):
-        return 1.5 * self.running()
-
-    def flying(self):
-        return self.sheet.eff_mov * self.sheet.enhancement_fly_multiplier()
-
-
 class Sheet(PrivateMixin, models.Model):
     character = models.ForeignKey(Character)
     # TODO: Remove this.  It should be determined from the Character.owner.
@@ -1562,11 +1483,6 @@ class Sheet(PrivateMixin, models.Model):
     helm = models.ForeignKey(Armor, blank=True, null=True,
                              related_name='helm_for',
                              on_delete=models.SET_NULL)
-
-    # TODO: to remove.  This will come from the inventory.
-    extra_weight_carried = models.IntegerField(
-        default=0,
-        help_text="Extra encumbrance the character is carrying")
 
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
@@ -1647,8 +1563,7 @@ class Sheet(PrivateMixin, models.Model):
         return _pass_name
 
     def _penalties_for_weight_carried(self):
-        ratio = float(self.weight_carried)/self.cur_fit
-        return int(round(-10 * ratio))
+        return 0
 
     @property
     @_stat_wrapper
@@ -1718,23 +1633,6 @@ class Sheet(PrivateMixin, models.Model):
     def mod_imm(self):
         pass
 
-    @property
-    def weight_carried(self):
-        weight = 0
-        if self.armor:
-            weight += self.armor.weight
-        if self.helm:
-            weight += self.helm.weight
-
-        wpns = self.ranged_weapons.all()
-        if wpns:
-            weight += sum([ww.base.weight for ww in wpns])
-        wpns = self.weapons.all()
-        if wpns:
-            weight += sum([ww.base.weight for ww in wpns])
-
-        return weight + self.extra_weight_carried
-
     def innate_effects(self):
         """
         Iterate over all innate effects.
@@ -1777,51 +1675,6 @@ class Sheet(PrivateMixin, models.Model):
         if self._cached_special_effects is None:
             self._cached_special_effects = self._special_effects()
         return self._cached_special_effects
-
-    def innate_run_multiplier(self, field="run_multiplier"):
-        # Assume edges stack.
-        multiplier = sum([float(getattr(effect, field))
-                          for effect in self.innate_effects()])
-        return multiplier or 1
-
-    def enhancement_run_multiplier(self, field="run_multiplier"):
-        # Assume effects do not stack.
-        effects = [getattr(effect, field) for effect in self.special_effects()]
-        if effects:
-            return float(max(effects)) or 1
-        else:
-            return 1
-
-    def run_multiplier(self):
-        return (self.innate_run_multiplier() *
-                self.enhancement_run_multiplier())
-
-    def innate_climb_multiplier(self):
-        return self.innate_run_multiplier(field="climb_multiplier")
-
-    def enhancement_climb_multiplier(self):
-        return self.enhancement_run_multiplier(field="climb_multiplier")
-
-    def innate_swim_multiplier(self):
-        return self.innate_run_multiplier(field="swim_multiplier")
-
-    def enhancement_swim_multiplier(self):
-        return self.enhancement_run_multiplier(field="swim_multiplier")
-
-    _cached_movement_rates = None
-    def movement_rates(self):
-        if not self._cached_movement_rates:
-            self._cached_movement_rates = MovementRates(self)
-        return self._cached_movement_rates
-
-    def enhancement_fly_multiplier(self):
-        # Assume effects do not stack.
-        effects = [effect.fly_multiplier
-                   for effect in self.special_effects()]
-        if effects:
-            return float(max(effects))
-        else:
-            return 0
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)

@@ -369,30 +369,6 @@ describe('stat block', function() {
             done();
         });
     });
-    
-    it('calculates runMultiplier with an edge', function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            addEdge(block, "Fast Healing", 3, {run_multiplier: 1.5});
-
-            expect(block.runMultiplier()).toEqual(1.5);
-            done();
-        });
-    });
-
-    xit('calculates runMultiplier from edge and effect');
-    xit('calculates runMultiplier from miscellaneous items');
-    xit('calculates runMultiplier from effects');
-    xit('calculates runMultiplier from armor');
-    xit('calculates runMultiplier from weapons');
-
-    it('have a decent default for runMultiplier', function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            expect(block.runMultiplier()).toEqual(1);
-            done();
-        });
-    });
 
     it('can calculate all effective stats', function (done) {
         var block = factories.statBlockFactory();
