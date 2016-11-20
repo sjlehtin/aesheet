@@ -38,42 +38,6 @@ class SkillTestCase(TestCase):
         self.assertEqual(skill.get_minimum_level(), 1)
 
 
-class ItemHandlingTestCase(TestCase):
-    fixtures = ["user", "char", "skills", "sheet", "weapons", "armor",
-                "ranged_weapons", "campaigns"]
-
-    def setUp(self):
-        self.assertTrue(self.client.login(username="admin", password="admin"))
-
-    def add_weapon_and_verify(self, weapon_template, quality, weapon,
-                              prefix="add-weapon", accessor=None,
-                              sheet_id=1):
-        det_url = reverse(views.sheet_detail, args=[sheet_id])
-        req_data = {'%s-item_template' % prefix: weapon_template,
-                    '%s-item_quality' % prefix: quality}
-        response = self.client.post(det_url, req_data)
-        self.assertRedirects(response, det_url)
-        response = self.client.get(det_url)
-        def get_weapons(char):
-            return [wpn.name for wpn in char.weapons()]
-        if not accessor:
-            accessor = get_weapons
-        self.assertIn(weapon, accessor(response.context['sheet']))
-        return response
-
-    def add_armor_and_verify(self, template, quality, item):
-        return self.add_weapon_and_verify(template, quality, item,
-                                          prefix="add-armor",
-                                          accessor=lambda char:
-                                          [char.armor().name])
-
-    def add_helm_and_verify(self, template, quality, item):
-        return self.add_weapon_and_verify(template, quality, item,
-                                          prefix="add-helm",
-                                          accessor=lambda char:
-                                          [char.helm().name])
-    
-
 class BaseFirearmFormTestCase(TestCase):
     def setUp(self):
         self.tech_level = factories.TechLevelFactory(name='2K')
