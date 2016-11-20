@@ -797,19 +797,26 @@ var skillHandlerFactory = function (givenProps) {
     var allSkills = [];
     var effects = [];
 
+
+    var skillMap = {};
     if (givenProps.allSkills) {
         for (let sk of givenProps.allSkills) {
             var newSkill = skillFactory(sk);
             allSkills.push(newSkill);
+            skillMap[newSkill.name] = newSkill;
         }
     }
     if (givenProps.skills) {
         for (let sk of givenProps.skills) {
             var skill = skillFactory(sk.skill);
+            if (!(skill.name in skillMap)) {
+                allSkills.push(skill);
+            } else {
+                skill = skillMap[skill.name];
+            }
             var charSkill = characterSkillFactory(
                 Object.assign({}, sk, {skill: skill.name}));
             skills.push(charSkill);
-            allSkills.push(skill);
         }
     }
     if (givenProps.edges) {
