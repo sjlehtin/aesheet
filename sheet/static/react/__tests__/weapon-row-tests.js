@@ -39,13 +39,14 @@ describe('WeaponRow', function() {
 
         var edges = [];
         for (let edge of handlerProps.edges) {
-            edges.push(factories.edgeFactory(edge));
+            edges.push(factories.edgeLevelFactory(edge));
         }
         handlerProps.edges = edges;
 
         var props = {
             weapon: factories.weaponFactory(
                 {base: {base_skill: "Weapon combat"}}),
+            // TODO: use factories.skillHandlerFactory
             skillHandler: new SkillHandler(handlerProps)
         };
         if (givenProps) {
