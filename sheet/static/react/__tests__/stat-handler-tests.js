@@ -148,23 +148,27 @@ describe('StatHandler', function() {
         expect(handler.getEffStats().psy).toEqual(45);
     });
 
-    // it('takes armor quality into account with penalties', function () {
-    //     var handler = getStatHandler({
-    //         character: factories.characterFactory({
-    //             cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
-    //         }),
-    //         armor: factories.armorFactory({
-    //             base: {
-    //                 mod_fit: "-2",
-    //                 mod_ref: "-3",
-    //                 mod_psy: "-5"
-    //             },
-    //             quality: {}
-    //         }),
-    //     });
-    //     expect(handler.getEffStats().fit).toEqual(38);
-    //     expect(handler.getEffStats().ref).toEqual(42);
-    //     expect(handler.getEffStats().psy).toEqual(45);
-    // });
+    it('takes armor quality into account with penalties', function () {
+        var handler = getStatHandler({
+            character: factories.characterFactory({
+                cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
+            }),
+            armor: factories.armorFactory({
+                base: {
+                    mod_fit: -2,
+                    mod_ref: -3,
+                    mod_psy: -5
+                },
+                quality: {
+                    mod_fit: 1,
+                    mod_ref: 2,
+                    mod_psy: 3
+                }
+            }),
+        });
+        expect(handler.getEffStats().fit).toEqual(39);
+        expect(handler.getEffStats().ref).toEqual(44);
+        expect(handler.getEffStats().psy).toEqual(48);
+    });
 
 });
