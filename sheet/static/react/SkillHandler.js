@@ -333,6 +333,12 @@ class SkillHandler {
             return 0;
         }
     }
+
+    // Stats.
+
+    getEffStats() {
+        return this.props.stats.getEffStats();
+    }
 }
 
 export default SkillHandler;
