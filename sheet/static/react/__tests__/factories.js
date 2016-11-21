@@ -299,35 +299,6 @@ var firearmFactory = function (overrideFields) {
 };
 
 
-var armorQualityFactory = function (overrideFields) {
-    "use strict";
-    var quality = {
-        "name": "normal",
-        "short_name": "",
-        "dp_multiplier": "1.0",
-        "armor_p": "0.0",
-        "armor_s": "0.0",
-        "armor_b": "0.0",
-        "armor_r": "0.0",
-        "armor_dr": "0.0",
-        "mod_fit_multiplier": "1.0",
-        "mod_fit": 0,
-        "mod_ref": 0,
-        "mod_psy": 0,
-        "mod_sensory": 0,
-        "mod_stealth": 0,
-        "mod_conceal": 0,
-        "mod_climb": 0,
-        "mod_weight_multiplier": "1.0",
-        "mod_encumbrance_class": 0,
-        "tech_level": 1
-        };
-    if (!overrideFields) {
-        overrideFields = {};
-    }
-    return Object.assign(quality, overrideFields);
-};
-
 var miscellaneousItemFactory = function (overrideFields) {
     "use strict";
     var item = {
@@ -433,6 +404,35 @@ var armorTemplateFactory = function (overrideFields) {
     return Object.assign(template, overrideFields);
 };
 
+var armorQualityFactory = function (overrideFields) {
+    "use strict";
+    var quality = {
+        "name": "normal",
+        "short_name": "",
+        "dp_multiplier": "1.0",
+        "armor_p": "0.0",
+        "armor_s": "0.0",
+        "armor_b": "0.0",
+        "armor_r": "0.0",
+        "armor_dr": "0.0",
+        "mod_fit_multiplier": "1.0",
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_psy": 0,
+        "mod_sensory": 0,
+        "mod_stealth": 0,
+        "mod_conceal": 0,
+        "mod_climb": 0,
+        "mod_weight_multiplier": "1.0",
+        "mod_encumbrance_class": 0,
+        "tech_level": 1
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(quality, overrideFields);
+};
+
 var armorFactory = function(overrideFields) {
     "use strict";
     if (!overrideFields) {
@@ -460,7 +460,7 @@ var armorFactory = function(overrideFields) {
         "quality": armorQualityFactory(quality),
         "special_qualities": []
     };
-    return armor;
+    return Object.assign(armor, overrideFields);
 };
 
 var weaponQualityFactory = function (overrideFields) {
