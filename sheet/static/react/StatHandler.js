@@ -74,8 +74,7 @@ class StatHandler {
     }
 
     getEffectModifier(mod, effects) {
-        // Return the sum of modifiers from edges for modifier `mod`.  If
-        // no such mod is present, returns defaultValue.
+        // Return the sum of modifiers from edges for modifier `mod`.
         if (!effects) {
             effects = this.props.effects;
             if (!effects) {
