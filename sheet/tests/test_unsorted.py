@@ -94,56 +94,6 @@ class BaseFirearmFormTestCase(TestCase):
         self.assertEqual(new_firearm.get_ammunition_types(), [u"7.62x39"])
 
 
-class EdgeAndSkillHandlingTestCase(TestCase):
-    def setUp(self):
-        self.sword_skill = factories.SkillFactory(name="Sword",
-                                                  skill_cost_2=None,
-                                                  skill_cost_3=None)
-        factories.SkillFactory(name="Unarmed combat")
-        factories.SkillFactory(name="Martial arts expertise",
-                               required_skills=("Unarmed combat", ))
-        self.request_factory = django.test.RequestFactory()
-        self.admin = factories.UserFactory(username="admin")
-        self.sheet = factories.SheetFactory()
-        self.assertTrue(self.client.login(username="admin", password="foobar"))
-        self.sheet_url = reverse(views.sheet_detail,
-                                 args=[self.sheet.pk])
-
-    def _get_request(self):
-        post = self.request_factory.post('/copy/')
-        post.user = self.admin
-        return post
-
-    def add_edge(self, character, edge_name, level=1):
-        ce = CharacterEdge()
-        ce.character = character
-        edge = EdgeLevel.objects.get(edge__name=edge_name, level=level)
-        ce.edge = edge
-        ce.save()
-
-    def add_skill(self, character, skill_name, level):
-        cs = CharacterSkill()
-        cs.character = character
-        skill = Skill.objects.get(name=skill_name)
-        cs.skill = skill
-        cs.level = level
-        cs.save()
-
-    def test_acute_touch_edge_skill_mod(self):
-        factories.EdgeLevelFactory(edge__name="Acute Touch", level=1,
-                                   edge_skill_bonuses=(("Surgery", 13),))
-        factories.SkillFactory(name="Surgery")
-
-        self.add_skill(self.sheet.character, "Surgery", 0)
-        self.add_edge(self.sheet.character, "Acute Touch")
-
-        sheet = Sheet.objects.get(pk=self.sheet.pk)
-        # Verify Acute Touch has an effect.
-        self.assertEqual(sheet.eff_dex + 13,
-                         sheet.skills.get(skill__name="Surgery")
-                         .skill_check(sheet))
-
-
 class Views(WebTest):
     def setUp(self):
         factories.UserFactory(username="admin")

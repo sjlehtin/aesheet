@@ -682,17 +682,6 @@ var sheetFactory = function (statOverrides) {
     var _sheetData = {
         id: 1,
         character: 2,
-        "mod_fit": 0,
-        "mod_ref": 0,
-        "mod_lrn": 0,
-        "mod_int": 0,
-        "mod_psy": 0,
-        "mod_wil": 0,
-        "mod_cha": 0,
-        "mod_pos": 0,
-        "mod_mov": 0,
-        "mod_dex": 0,
-        "mod_imm": 0
     };
 
     return Object.assign(_sheetData, statOverrides);
