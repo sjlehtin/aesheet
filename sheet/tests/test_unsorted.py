@@ -400,7 +400,7 @@ class SheetCopyTestCase(TestCase):
             character__name='John Doe'), self.original_sheet)
 
         self.assertEqual(new_sheet.character.campaign,
-                         self.original_sheet.campaign)
+                         self.original_sheet.character.campaign)
         self.assertNotEqual(new_sheet, self.original_sheet)
 
         # Skills should match.

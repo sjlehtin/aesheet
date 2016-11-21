@@ -1683,13 +1683,6 @@ class Sheet(PrivateMixin, models.Model):
         return get_by_campaign(get_sheets(user),
                                lambda sheet: sheet.character)
 
-    def __getattr__(self, v):
-        # pass through all attribute references not handled by us to
-        # base character.
-        if v in ["body", "stamina", "mana"] or v.startswith("_"):
-            raise AttributeError, "no attr %s" % v
-        return getattr(self.character, v)
-
     def __unicode__(self):
         return u"sheet for {name}{descr}".format(
             name=self.character.name,
