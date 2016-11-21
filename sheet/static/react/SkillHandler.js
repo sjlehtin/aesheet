@@ -13,6 +13,11 @@
  *
  * TODO: merge this and statHandler, as they both need to be passed to
  * many components, and it makes sense to just roll them into one.
+ *
+ * StatHandler functionality to SkillHandler, nuke StatHandler, rename
+ * SkillHandler to CheckHandler (or CheckController).
+ *
+ * TODO: study Redux for handling state in a cleaner fashion.
  */
 class SkillHandler {
     constructor(props) {
