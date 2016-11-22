@@ -185,4 +185,21 @@ describe('SkillHandler stats', function() {
         expect(handler.getEffStats().psy).toEqual(48);
     });
 
+    it('caps quality penalty counter', function () {
+        var handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({
+                cur_psy: 50
+            }),
+            helm: factories.armorFactory({
+                base: {
+                    mod_psy: -5
+                },
+                quality: {
+                    mod_psy: 10
+                }
+            }),
+        });
+        expect(handler.getEffStats().psy).toEqual(50);
+    });
+
 });

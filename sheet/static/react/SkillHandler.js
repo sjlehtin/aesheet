@@ -385,6 +385,11 @@ class SkillHandler {
         if (armor.quality && stat in armor.quality) {
             mod += armor.quality[stat];
         }
+        // Quality can not raise the stat, it only counters penalties.
+        // Outlined in the armor excel.
+        if (mod > 0) {
+            mod = 0;
+        }
         return mod;
     }
 
