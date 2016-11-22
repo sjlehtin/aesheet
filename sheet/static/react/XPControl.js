@@ -30,8 +30,11 @@ class XPControl extends React.Component {
     };
 
     xpEdgesBought() {
-        return (this.props.edgesBought - this.props.initialChar.free_edges)
-            * 25;
+        var sum = this.props.edgesBought - this.props.initialChar.free_edges;
+        if (sum < 0) {
+            sum = 0;
+        }
+        return sum * 25;
     }
 
     handleSubmit(event) {
