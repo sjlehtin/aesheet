@@ -38,11 +38,11 @@ var characterFactory = function (statOverrides) {
     var _charData = {
         id: 2,
 
-        "cur_fit": 40,
-        "cur_ref": 60,
+        "cur_fit": 43,
+        "cur_ref": 43,
         "cur_lrn": 43,
         "cur_int": 43,
-        "cur_psy": 50,
+        "cur_psy": 43,
         "cur_wil": 43,
         "cur_cha": 43,
         "cur_pos": 43,
@@ -821,17 +821,26 @@ var skillHandlerFactory = function (givenProps) {
         }
     }
 
-    var statHandler = new StatHandler({
+    var armor = {};
+    if (givenProps.armor) {
+        armor = armorFactory(givenProps.armor);
+    }
+    var helm = {};
+    if (givenProps.helm) {
+        helm = armorFactory(givenProps.helm);
+    }
+    var handlerProps = {
         character: characterFactory(
-            Object.assign({cur_fit: 43, cur_ref: 43},
-                givenProps.character)),
+            Object.assign({}, givenProps.character)),
         edges: edgeList,
-        effects: effects
-    });
-
-    return new SkillHandler({
-        stats: statHandler, edges: edgeList,
-        characterSkills: skills, allSkills: allSkills});
+        effects: effects,
+        characterSkills: skills, allSkills: allSkills,
+        armor: armor, helm: helm
+    };
+    if (givenProps.weightCarried) {
+        handlerProps.weightCarried = givenProps.weightCarried;
+    }
+    return new SkillHandler(handlerProps);
 };
 
 module.exports = {

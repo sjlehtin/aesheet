@@ -809,21 +809,26 @@ class StatBlock extends React.Component {
             return <Loading>SP</Loading>
         }
 
-        var ageSP = util.roundup(baseStats.lrn/15 +
+    var ageSP = util.roundup(baseStats.lrn/15 +
             baseStats.int/25 + baseStats.psy/50);
         return <AddSPControl initialAgeSP={ageSP}
                              onAdd={(sp) => this.handleAddGainedSP(sp)} />;
     }
 
     getSkillHandler(statHandler) {
-        if (!statHandler) {
+        if (!this.state.char|| !this.state.edgeList || !this.state.armor ||
+            !this.state.helm) {
             return null;
         }
         return new SkillHandler({
+            character: this.state.char,
             characterSkills: this.state.characterSkills,
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
-            stats: statHandler
+            effects: this.getAllEffects(),
+            weightCarried: this.getCarriedWeight(),
+            armor: this.state.armor,
+            helm: this.state.helm
         });
     }
 
@@ -1161,12 +1166,12 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var statHandler = this.getStatHandler();
+        var statHandler = this.getSkillHandler();
         if (statHandler) {
             var baseStats = statHandler.getBaseStats();
             var effStats = statHandler.getEffStats();
         }
-        var skillHandler = this.getSkillHandler(statHandler);
+        var skillHandler = statHandler;
 
         return (
             <Grid>

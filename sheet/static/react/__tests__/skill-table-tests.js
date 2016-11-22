@@ -44,7 +44,7 @@ describe('SkillTable', function() {
         }
         props.allSkills = allSkills;
 
-        var skillHandler = factories.skillHandlerFactory(props);//new
+        var skillHandler = factories.skillHandlerFactory(props);
         var table = TestUtils.renderIntoDocument(
             <SkillTable skillHandler={skillHandler}
                         onCharacterSkillAdd={props.onCharacterSkillAdd}

@@ -20,7 +20,7 @@ describe('WeaponRow', function() {
         var handlerProps = {
             characterSkills: [],
             edges: [],
-            stats: {mov: 45}
+            character: {cur_fit: 45, cur_ref: 45}
         };
         if (givenProps && 'handlerProps' in givenProps) {
             handlerProps = Object.assign(handlerProps,
@@ -29,25 +29,17 @@ describe('WeaponRow', function() {
         }
 
         var allSkills = [];
-        for (let skill of handlerProps.characterSkills) {
-            allSkills.push(factories.skillFactory({
+        for (let skill of handlerProps.skills) {
+            allSkills.push({
                 name: skill.skill,
-                stat: "mov"}));
+                stat: "mov"});
         }
-        handlerProps.stats = factories.statsFactory(handlerProps.stats);
         handlerProps.allSkills = allSkills;
-
-        var edges = [];
-        for (let edge of handlerProps.edges) {
-            edges.push(factories.edgeLevelFactory(edge));
-        }
-        handlerProps.edges = edges;
 
         var props = {
             weapon: factories.weaponFactory(
                 {base: {base_skill: "Weapon combat"}}),
-            // TODO: use factories.skillHandlerFactory
-            skillHandler: new SkillHandler(handlerProps)
+            skillHandler: factories.skillHandlerFactory(handlerProps)
         };
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -64,10 +56,10 @@ describe('WeaponRow', function() {
         function () {
             var firearm = getWeaponRow({
                 handlerProps: {
-                    characterSkills: [factories.characterSkillFactory({
+                    skills: [{
                         skill: "Weapon combat",
                         level: 0
-                    })]
+                    }]
                 },
                 weapon: factories.weaponFactory({
                     base: {
@@ -84,14 +76,14 @@ describe('WeaponRow', function() {
     it("notices specializations", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
-                    skill: "Greatsword",
-                    level: 1
-                }),
-                    factories.characterSkillFactory({
+                skills: [{
+                        skill: "Greatsword",
+                        level: 1
+                    },
+                    {
                         skill: "Weapon combat",
                         level: 1
-                    })]
+                    }]
             },
             weapon: factories.weaponFactory({
                 base: {
@@ -108,10 +100,10 @@ describe('WeaponRow', function() {
     it("calculates correct ROA for full", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Weapon combat",
                     level: 3
-                })]
+                }]
             },
             weapon: factories.weaponFactory({
                 base: {base_skill: "Weapon combat", roa: "1.5"}})
@@ -126,13 +118,13 @@ describe('WeaponRow', function() {
             props = Object.assign(props, givenProps);
         }
 
-        var skills = [factories.characterSkillFactory({
+        var skills = [{
             skill: "Weapon combat",
             level: props.skillLevel
-        })];
+        }];
 
         for (let skill of props.extraSkills) {
-            skills.push(factories.characterSkillFactory(skill));
+            skills.push(skill);
         }
 
         var base = Object.assign({
@@ -143,9 +135,9 @@ describe('WeaponRow', function() {
 
         return getWeaponRow({
             handlerProps: {
-                characterSkills: skills,
+                skills: skills,
                 edges: props.edges,
-                stats: {mov: 45, int: props.int, fit: props.fit}
+                character: {cur_ref: 45, cur_int: props.int, cur_fit: props.fit}
             },
             weapon: factories.weaponFactory({
                 base: base,

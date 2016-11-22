@@ -42,16 +42,16 @@ describe('RangedWeaponRow', function() {
                     weaponProps ? weaponProps : {}));
 
         var allSkills = [];
-        for (let skill of handlerProps.characterSkills) {
-            allSkills.push(factories.skillFactory({
+        for (let skill of handlerProps.skills) {
+            allSkills.push({
                 name: skill.skill,
-                stat: "dex"}));
+                stat: "dex"});
         }
         var addExtraSkill = function (skill) {
             if (skill) {
-                allSkills.push(factories.skillFactory({
+                allSkills.push({
                     name: skill,
-                    stat: "dex"}));
+                    stat: "dex"});
             }
         };
 
@@ -59,18 +59,11 @@ describe('RangedWeaponRow', function() {
         addExtraSkill(weapon.base.skill);
         addExtraSkill(weapon.base.skill2);
 
-        handlerProps.stats = factories.statsFactory(handlerProps.stats);
         handlerProps.allSkills = allSkills;
-
-        var edges = [];
-        for (let edge of handlerProps.edges) {
-            edges.push(factories.edgeFactory(edge));
-        }
-        handlerProps.edges = edges;
 
         var props = {
             weapon: weapon,
-            skillHandler: new SkillHandler(handlerProps)
+            skillHandler: factories.skillHandlerFactory(handlerProps)
         };
 
         props = Object.assign(props, givenProps);
@@ -85,7 +78,7 @@ describe('RangedWeaponRow', function() {
     it("caps ROF", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [{skill: "Bow", level: 5}],
+                skills: [{skill: "Bow", level: 5}],
             },
             weaponProps: {base: {roa: "4", base_skill: "Bow"}}
         });
@@ -95,7 +88,7 @@ describe('RangedWeaponRow', function() {
     it("takes Rapid archery into account", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [{skill: "Bow", level: 0},
+                skills: [{skill: "Bow", level: 0},
                     {skill: "Rapid archery", level: 3}]
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Bow"}}
@@ -106,7 +99,7 @@ describe('RangedWeaponRow', function() {
     it("ignores Rapid archery for crossbows", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [
+                skills: [
                     {skill: "Bow", level: 0},
                     {skill: "Rapid archery", level: 3}]
             },
@@ -118,8 +111,8 @@ describe('RangedWeaponRow', function() {
     it("counters penalties with FIT", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [{skill: "Bow", level: 0}],
-                stats: {dex: 45, fit: 66}
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Bow"}}
         });
@@ -129,8 +122,8 @@ describe('RangedWeaponRow', function() {
     it("does not give damage bonus for crossbows for high FIT", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [{skill: "Bow", level: 0}],
-                stats: {dex: 45, fit: 66}
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Crossbow",
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1}}
@@ -141,8 +134,8 @@ describe('RangedWeaponRow', function() {
     it("gives damage bonus for bows for high FIT", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [{skill: "Bow", level: 0}],
-                stats: {dex: 45, fit: 66}
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Bow",
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1}}
@@ -153,8 +146,8 @@ describe('RangedWeaponRow', function() {
     it("caps FIT bonus", function () {
         var weapon = getWeaponRow({
             handlerProps: {
-                characterSkills: [{skill: "Bow", level: 0}],
-                stats: {dex: 45, fit: 190}
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 190}
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Bow",
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1},

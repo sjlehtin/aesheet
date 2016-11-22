@@ -19,9 +19,14 @@
  *
  * TODO: study Redux for handling state in a cleaner fashion.
  */
+
+var util = require('sheet-util');
+
 class SkillHandler {
     constructor(props) {
-        this.props = props;
+        this.props = Object.assign({}, SkillHandler.defaultProps, props);
+
+        // TODO: unify state variables after meld.
         this.state = {
             edgeMap: SkillHandler.getItemMap(this.props.edges,
             (item) => { return item.edge.name; }),
@@ -29,6 +34,36 @@ class SkillHandler {
         };
 
         this.state.skillList = this.createSkillList();
+
+        this._hardMods = {};
+        this._softMods = {};
+
+        for (let st of SkillHandler.allStatNames) {
+            this._hardMods[st] = 0;
+            this._softMods[st] = 0;
+        }
+
+        for (let mod of this.props.edges) {
+            for (let st of SkillHandler.allStatNames) {
+                this._hardMods[st] += mod[st];
+            }
+        }
+
+        for (let mod of this.props.effects) {
+            for (let st of SkillHandler.allStatNames) {
+                this._softMods[st] += mod[st];
+            }
+        }
+
+        for (let st of ["fit", "ref", "psy"]) {
+
+            this._softMods[st] += this.getArmorMod(this.props.helm, st) +
+                 this.getArmorMod(this.props.armor, st);
+        }
+
+        this._baseStats = undefined;
+        this._effStats = undefined;
+
     }
 
     static getItemMap(list, accessor) {
@@ -74,7 +109,7 @@ class SkillHandler {
     }
 
     getStat(stat) {
-        return this.props.stats.getEffStats()[stat.toLowerCase()];
+        return this.getEffStats()[stat.toLowerCase()];
     }
 
     /*
@@ -230,14 +265,14 @@ class SkillHandler {
     // Movement rates.
 
     sneakingSpeed() {
-        return this.props.stats.getEffStats().mov / 5;
+        return this.getEffStats().mov / 5;
     }
 
     runningSpeed() {
-        var rate = this.props.stats.getEffStats().mov;
+        var rate = this.getEffStats().mov;
 
-        var edgeRate = this.props.stats.getEdgeModifier('run_multiplier');
-        var effRate = this.props.stats.getEffectModifier('run_multiplier');
+        var edgeRate = this.getEdgeModifier('run_multiplier');
+        var effRate = this.getEffectModifier('run_multiplier');
         if (edgeRate) {
             rate *= edgeRate;
         }
@@ -256,13 +291,13 @@ class SkillHandler {
         var level = this.skillLevel('Climbing');
         var rate;
         if (typeof(level) !== 'number') {
-            rate = this.props.stats.getEffStats().mov / 60;
+            rate = this.getEffStats().mov / 60;
         } else {
-            rate = this.props.stats.getEffStats().mov / 30 + level;
+            rate = this.getEffStats().mov / 30 + level;
         }
 
-        var edgeRate = this.props.stats.getEdgeModifier('climb_multiplier');
-        var effRate = this.props.stats.getEffectModifier('climb_multiplier');
+        var edgeRate = this.getEdgeModifier('climb_multiplier');
+        var effRate = this.getEffectModifier('climb_multiplier');
         if (edgeRate) {
             rate *= edgeRate;
         }
@@ -276,13 +311,13 @@ class SkillHandler {
         var level = this.skillLevel('Swimming');
         var rate;
         if (typeof(level) !== 'number') {
-            rate = this.props.stats.getEffStats().mov / 10;
+            rate = this.getEffStats().mov / 10;
         } else {
-            rate = this.props.stats.getEffStats().mov / 5 + level * 5;
+            rate = this.getEffStats().mov / 5 + level * 5;
         }
 
-        var edgeRate = this.props.stats.getEdgeModifier('swim_multiplier');
-        var effRate = this.props.stats.getEffectModifier('swim_multiplier');
+        var edgeRate = this.getEdgeModifier('swim_multiplier');
+        var effRate = this.getEffectModifier('swim_multiplier');
         if (edgeRate) {
             rate *= edgeRate;
         }
@@ -296,13 +331,13 @@ class SkillHandler {
         var level = this.skillLevel('Jumping');
         var rate;
         if (typeof(level) !== 'number') {
-            rate = this.props.stats.getEffStats().mov / 24;
+            rate = this.getEffStats().mov / 24;
         } else {
-            rate = this.props.stats.getEffStats().mov / 12 + level*0.75;
+            rate = this.getEffStats().mov / 12 + level*0.75;
         }
 
-        var edgeRate = this.props.stats.getEdgeModifier('run_multiplier');
-        var effRate = this.props.stats.getEffectModifier('run_multiplier');
+        var edgeRate = this.getEdgeModifier('run_multiplier');
+        var effRate = this.getEffectModifier('run_multiplier');
         if (edgeRate) {
             rate *= edgeRate;
         }
@@ -320,9 +355,9 @@ class SkillHandler {
     
     flyingSpeed() {
         var canFly = false;
-        var rate = this.props.stats.getEffStats().mov;
-        var edgeRate = this.props.stats.getEdgeModifier('fly_multiplier');
-        var effRate = this.props.stats.getEffectModifier('fly_multiplier');
+        var rate = this.getEffStats().mov;
+        var edgeRate = this.getEdgeModifier('fly_multiplier');
+        var effRate = this.getEffectModifier('fly_multiplier');
         if (edgeRate) {
             rate *= edgeRate;
             canFly = true;
@@ -341,9 +376,117 @@ class SkillHandler {
 
     // Stats.
 
+    getArmorMod(armor, givenStat) {
+        var mod = 0;
+        var stat = "mod_" + givenStat;
+        if (armor.base && stat in armor.base) {
+            mod += armor.base[stat];
+        }
+        if (armor.quality && stat in armor.quality) {
+            mod += armor.quality[stat];
+        }
+        return mod;
+    }
+
+    getEdgeModifier(mod) {
+        // Return the sum of modifiers from edges for modifier `mod`.
+        var edges = [];
+        if (this.props.edges) {
+            edges = this.props.edges;
+        }
+        return this.getEffectModifier(mod, edges);
+    }
+
+    getEffectModifier(mod, effects) {
+        // Return the sum of modifiers from edges for modifier `mod`.
+        if (!effects) {
+            effects = this.props.effects;
+            if (!effects) {
+                effects = [];
+            }
+        }
+        var sum = 0;
+        for (let eff of effects) {
+            sum += parseFloat(eff[mod]);
+        }
+        return sum;
+    }
+
+    getHardMods() {
+        return this._hardMods;
+    }
+
+    getSoftMods() {
+        return this._softMods;
+    }
+    
+    getBaseStats() {
+        if (!this._baseStats) {
+            this._baseStats = {};
+            for (let st of SkillHandler.baseStatNames) {
+                this._baseStats[st] = this.props.character['cur_' + st] +
+                    this.props.character['base_mod_' + st] +
+                    this._hardMods[st];
+            }
+            this._baseStats.mov = util.roundup((this._baseStats.fit +
+                this._baseStats.ref)/2) + this._hardMods.mov;
+            this._baseStats.dex = util.roundup((this._baseStats.int +
+                this._baseStats.ref)/2) + this._hardMods.dex;
+            this._baseStats.imm = util.roundup((this._baseStats.fit +
+                this._baseStats.psy)/2) + this._hardMods.mov;
+        }
+        return this._baseStats;
+    }
+    
     getEffStats() {
-        return this.props.stats.getEffStats();
+        if (!this._effStats) {
+            this._effStats = {};
+            var baseStats = this.getBaseStats();
+            for (let st of SkillHandler.baseStatNames) {
+                this._effStats[st] = baseStats[st] +
+                    this._softMods[st];
+            }
+            // Encumbrance and armor are calculated after soft mods
+            // (transient effects, such as spells) and hard mods (edges)
+            // in the excel combat sheet.
+            var encumbrancePenalty = util.roundup(
+                (-10 * this.props.weightCarried) / this._effStats.fit);
+
+            this._effStats.fit += encumbrancePenalty;
+            this._effStats.ref += encumbrancePenalty;
+
+            this._effStats.mov = util.roundup((this._effStats.fit +
+                this._effStats.ref)/2) + this._hardMods.mov +
+                this._softMods.mov;
+            this._effStats.dex = util.roundup((this._effStats.int +
+                this._effStats.ref)/2) + this._hardMods.dex +
+                this._softMods.dex;
+            this._effStats.imm = util.roundup((this._baseStats.fit +
+                this._baseStats.psy)/2) + this._hardMods.imm +
+                this._softMods.imm;
+        }
+        return this._effStats;
     }
 }
+
+SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+                "pos"];
+SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
+    ["mov", "dex", "imm"]);
+
+// SkillHandler.props = {
+//     character: React.PropTypes.object.isRequired,
+//     edges: React.PropTypes.array,
+//     effects: React.PropTypes.array,
+//     weightCarried: React.PropTypes.number.isRequired
+//};
+
+SkillHandler.defaultProps = {
+    weightCarried: 0,
+    armor: {},
+    helm: {},
+    effects: [],
+    edges: []
+};
 
 export default SkillHandler;
