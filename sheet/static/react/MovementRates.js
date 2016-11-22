@@ -65,8 +65,7 @@ class MovementRates extends React.Component {
 }
 
 MovementRates.propTypes = {
-    skillHandler: React.PropTypes.object.isRequired,
-    statHandler: React.PropTypes.object.isRequired
+    skillHandler: React.PropTypes.object.isRequired
 };
 
 export default MovementRates;

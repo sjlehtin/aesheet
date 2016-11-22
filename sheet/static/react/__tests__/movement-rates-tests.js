@@ -17,37 +17,9 @@ describe('MovementRates', function() {
     var getMovementRates = function (givenProps) {
         var skillHandler = factories.skillHandlerFactory(givenProps);
 
-        if (!givenProps) {
-            givenProps = {};
-        }
-
-        var edgeList = [];
-        var effects = [];
-
-        if (givenProps.edges) {
-            for (let edge of givenProps.edges) {
-                var createdEdge = factories.edgeLevelFactory(edge);
-                edgeList.push(createdEdge);
-            }
-        }
-        if (givenProps.effects) {
-            for (let eff of givenProps.effects) {
-                var createdEff = factories.transientEffectFactory(eff);
-                effects.push(createdEff);
-            }
-        }
-        var statHandler = factories.skillHandlerFactory({
-            character:
-                Object.assign({cur_fit: 43, cur_ref: 43},
-                    givenProps.character),
-            edges: edgeList,
-            effects: effects
-            });
-
         var doc = TestUtils.renderIntoDocument(
             <MovementRates
                 skillHandler={skillHandler}
-                statHandler={statHandler}
             />);
         return TestUtils.findRenderedComponentWithType(doc, MovementRates);
     };
