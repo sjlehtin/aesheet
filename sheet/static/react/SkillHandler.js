@@ -146,6 +146,8 @@ class SkillHandler {
         if (skillName in this.state.skillBonusMap) {
             check += this.state.skillBonusMap[skillName].bonus;
         }
+
+        check += this.getSkillMod(skillName);
         return check;
     }
 
@@ -391,6 +393,17 @@ class SkillHandler {
             mod = 0;
         }
         return mod;
+    }
+
+    getSkillMod(skill) {
+        var normalized = skill.toLowerCase();
+        if (normalized === "climbing") {
+            normalized = "climb";
+        } else if (normalized === "concealment") {
+            normalized = "conceal";
+        }
+        return this.getArmorMod(this.props.armor, normalized) +
+            this.getArmorMod(this.props.helm, normalized);
     }
 
     getEdgeModifier(mod) {
