@@ -1,5 +1,4 @@
 jest.dontMock('../StatRow');
-jest.dontMock('../StatHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -11,7 +10,6 @@ var rest = require('sheet-rest');
 var factories = require('./factories');
 
 const StatRow = require('../StatRow').default;
-const StatHandler = require('../StatHandler').default;
 
 var statRowFactory = function(givenProps) {
     // TODO: React TestUtils suck a bit of a balls.
@@ -32,9 +30,9 @@ var statRowFactory = function(givenProps) {
     if (typeof(givenProps) !== "undefined") {
         props = Object.assign(props, givenProps);
     }
-    var handler = new StatHandler({character: props.initialChar,
+    var handler = factories.skillHandlerFactory({character: props.initialChar,
         edges: [],
-        effects: [factories.transientEffectFactory({fit: 20})]});
+        effects: [{fit: 20}]});
     props.effStats = handler.getEffStats();
     props.baseStats = handler.getBaseStats();
     var rowElement = React.createElement(StatRow, props);

@@ -9,7 +9,6 @@ jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
-jest.dontMock('../StatHandler');
 jest.dontMock('../WeaponRow');
 jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
@@ -29,7 +28,6 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
-const StatHandler = require('../StatHandler').default;
 const SkillHandler = require('../SkillHandler').default;
 
 var objectId = 1;

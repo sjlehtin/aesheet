@@ -2,30 +2,12 @@ jest.dontMock('../SkillHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
-
 var factories = require('./factories');
 
 const SkillHandler = require('../SkillHandler').default;
 
 describe('SkillHandler stats', function() {
     "use strict";
-
-    // var getStatHandler = function (givenProps) {
-    //     var props = {
-    //         character: factories.characterFactory({cur_ref: 50,
-    //         cur_int: 50}),
-    //         effects: [],
-    //         edges: []
-    //     };
-    //     if (typeof(givenProps) !== "undefined") {
-    //         props = Object.assign(props, givenProps);
-    //     }
-    //
-    //     return new StatHandler(props);
-    // };
 
     it('calculates eff stats', function () {
         var handler = factories.skillHandlerFactory({

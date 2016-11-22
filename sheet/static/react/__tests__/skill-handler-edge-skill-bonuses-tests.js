@@ -1,4 +1,3 @@
-jest.dontMock('../StatHandler');
 jest.dontMock('../SkillHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
@@ -7,7 +6,6 @@ import React from 'react';
 
 var factories = require('./factories');
 
-const StatHandler = require('../StatHandler').default;
 const SkillHandler = require('../SkillHandler').default;
 
 describe('SkillHandler edge skill bonuses', function() {

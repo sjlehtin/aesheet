@@ -1,5 +1,4 @@
 jest.dontMock('../SkillHandler');
-jest.dontMock('../StatHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -10,7 +9,6 @@ import TestUtils from 'react-addons-test-utils';
 var factories = require('./factories');
 var util = require('../sheet-util');
 
-const StatHandler = require('../StatHandler').default;
 const SkillHandler = require('../SkillHandler').default;
 
 describe('SkillHandler', function() {

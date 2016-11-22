@@ -16,7 +16,6 @@ import AddRangedWeaponControl from 'AddRangedWeaponControl';
 import TransientEffectRow from 'TransientEffectRow';
 import AddTransientEffectControl from 'AddTransientEffectControl';
 import SkillHandler from 'SkillHandler';
-import StatHandler from 'StatHandler';
 import Inventory from 'Inventory';
 import ArmorControl from 'ArmorControl';
 import MiscellaneousItemRow from 'MiscellaneousItemRow';
@@ -862,20 +861,6 @@ class StatBlock extends React.Component {
                 (el) => { return addName(el, item.item.name) }));
         }
         return effects;
-    }
-
-    getStatHandler() {
-        if (!this.state.char|| !this.state.edgeList) {
-            return null;
-        }
-        return new StatHandler({
-            character: this.state.char,
-            edges: this.state.edgeList,
-            effects: this.getAllEffects(),
-            weightCarried: this.getCarriedWeight(),
-            armor: this.state.armor,
-            helm: this.state.helm
-        });
     }
 
     inventoryWeightChanged(newWeight) {

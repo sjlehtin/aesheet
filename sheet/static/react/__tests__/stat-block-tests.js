@@ -9,7 +9,6 @@ jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
-jest.dontMock('../StatHandler');
 jest.dontMock('../WeaponRow');
 jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
@@ -71,8 +70,8 @@ describe('stat block', function() {
         var block = factories.statBlockFactory({character: {cur_fit: 49, cur_ref: 51}});
 
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
-            var effStats = block.getStatHandler().getEffStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
+            var effStats = block.getSkillHandler().getEffStats();
             expect(baseStats.mov).toEqual(50);
             expect(effStats.mov).toEqual(50);
             done();
@@ -84,8 +83,8 @@ describe('stat block', function() {
             cur_int: 49, cur_ref: 51}});
 
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
-            var effStats = block.getStatHandler().getEffStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
+            var effStats = block.getSkillHandler().getEffStats();
             expect(baseStats.dex).toEqual(50);
             expect(effStats.dex).toEqual(50);
             done();
@@ -97,8 +96,8 @@ describe('stat block', function() {
             cur_fit: 49, cur_psy: 51}});
 
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
-            var effStats = block.getStatHandler().getEffStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
+            var effStats = block.getSkillHandler().getEffStats();
             expect(baseStats.imm).toEqual(50);
             expect(effStats.imm).toEqual(50);
             done();
@@ -110,7 +109,7 @@ describe('stat block', function() {
             cur_ref: 53, cur_wil: 50}});
 
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.stamina(baseStats)).toEqual(26);
             done();
         });
@@ -122,7 +121,7 @@ describe('stat block', function() {
             cur_ref: 53, cur_wil: 50, bought_stamina: 5}});
 
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.stamina(baseStats)).toEqual(31);
             done();
         });
@@ -132,7 +131,7 @@ describe('stat block', function() {
         var block = factories.statBlockFactory({character: {
             cur_wil: 53, cur_psy: 42}});
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(24);
             done();
         });
@@ -143,7 +142,7 @@ describe('stat block', function() {
             cur_wil: 53, cur_psy: 42, bought_mana: 5}});
 
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(29);
             done();
         });
@@ -153,7 +152,7 @@ describe('stat block', function() {
         var block = factories.statBlockFactory({
             character: factories.characterFactory({cur_fit: 41})});
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.baseBody(baseStats)).toEqual(11);
             done();
         });
@@ -163,7 +162,7 @@ describe('stat block', function() {
         var block = factories.statBlockFactory({
             character: factories.characterFactory({cur_fit: 39})});
         block.afterLoad(function () {
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.baseBody(baseStats)).toEqual(10);
             done();
         });
@@ -285,7 +284,7 @@ describe('stat block', function() {
     it('can indicate stamina recovery', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            var effStats = block.getStatHandler().getEffStats();
+            var effStats = block.getSkillHandler().getEffStats();
 
             addEdge(block, "Fast Healing", 1);
             expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('1d6/8h');
@@ -301,7 +300,7 @@ describe('stat block', function() {
         var block = factories.statBlockFactory({
             character: {cur_fit: 70, cur_psy: 51}});
         block.afterLoad(function () {
-            var effStats = block.getStatHandler().getEffStats();
+            var effStats = block.getSkillHandler().getEffStats();
             expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('1/8h');
             addEdge(block, "Fast Healing", 1);
             expect(block.staminaRecovery(effStats, getSkillHandler(block))).toEqual('1+1d6/8h');
@@ -312,7 +311,7 @@ describe('stat block', function() {
     it('can indicate mana recovery', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
-            var effStats = block.getStatHandler().getEffStats();
+            var effStats = block.getSkillHandler().getEffStats();
             addEdge(block, "Fast Mana Recovery", 1);
             expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('2d6/8h');
             addEdge(block, "Fast Mana Recovery", 2);
@@ -327,7 +326,7 @@ describe('stat block', function() {
         var block = factories.statBlockFactory({
             character: {cur_cha: 70}});
         block.afterLoad(function () {
-            var effStats = block.getStatHandler().getEffStats();
+            var effStats = block.getSkillHandler().getEffStats();
             expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('2/8h');
             addEdge(block, "Fast Mana Recovery", 1);
             expect(block.manaRecovery(effStats, getSkillHandler(block))).toEqual('2+2d6/8h');
@@ -350,7 +349,7 @@ describe('stat block', function() {
             character: {cur_ref: 60}});
         block.afterLoad(function () {
             block.handleModification("fit", 40, 41);
-            var baseStats = block.getStatHandler().getBaseStats();
+            var baseStats = block.getSkillHandler().getBaseStats();
             expect(baseStats.mov).toEqual(51);
             done();
         });
