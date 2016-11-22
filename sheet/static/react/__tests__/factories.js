@@ -65,25 +65,6 @@ var characterFactory = function (statOverrides) {
     return Object.assign(_charData, statOverrides);
 };
 
-var statsFactory = function (overrideStats) {
-    var _baseStats = {
-        fit: 45,
-        ref: 45,
-        lrn: 45,
-        int: 45,
-        wil: 45,
-        psy: 45,
-        cha: 45,
-        pos: 45,
-        dex: 45,
-        mov: 45,
-        imm: 45,
-    };
-    var oo = Object.assign(_baseStats, overrideStats);
-    oo.getEffStats = (st) => { return _baseStats; }
-    return oo;
-};
-
 var skillFactory = function (overrideFields) {
     var props = {};
     // Simplify generating skills to allow using only the name.  Slight
@@ -850,7 +831,6 @@ module.exports = {
     edgeLevelFactory: edgeLevelFactory,
     edgeFactory: edgeFactory,
     characterEdgeFactory: characterEdgeFactory,
-    statsFactory: statsFactory,
     firearmFactory: firearmFactory,
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,

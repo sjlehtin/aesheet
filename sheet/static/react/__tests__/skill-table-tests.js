@@ -154,8 +154,7 @@ describe('SkillTable', function() {
     });
 
     it("does not render same skill twice", function () {
-        var table = getSkillTable({effStats:
-            factories.statsFactory({"int": 50}),
+        var table = getSkillTable({
             allSkills: _basicPhysical.concat([
                 factories.skillFactory({name: "Agriculture"})]),
             skills: [

@@ -11,7 +11,6 @@ var factories = require('./factories');
 
 var characterSkillFactory = factories.characterSkillFactory;
 var skillFactory = factories.skillFactory;
-var statsFactory = factories.statsFactory;
 
 const SkillRow = require('../SkillRow').default;
 
