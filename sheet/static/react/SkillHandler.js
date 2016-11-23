@@ -401,6 +401,8 @@ class SkillHandler {
             normalized = "climb";
         } else if (normalized === "concealment") {
             normalized = "conceal";
+        } else if (normalized === "tumbling") {
+            normalized = "tumble";
         }
         return this.getArmorMod(this.props.armor, normalized) +
             this.getArmorMod(this.props.helm, normalized);

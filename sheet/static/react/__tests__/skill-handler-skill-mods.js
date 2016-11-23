@@ -89,4 +89,17 @@ describe('SkillHandler stats', function() {
         expect(handler.skillCheck("Concealment", "mov")).toEqual(51);
     });
 
+    it('counts armor penalties in to the tumbling skill check', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 45, cur_ref: 45},
+            skills: [{skill: "Tumbling", level: 2}],
+            armor: factories.armorFactory({
+                base: {
+                    mod_tumble: -5
+                },
+            })
+        });
+        expect(handler.skillCheck("Tumbling", "ref")).toEqual(50);
+    });
+
 });
