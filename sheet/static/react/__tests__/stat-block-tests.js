@@ -65,29 +65,6 @@ describe('stat block', function() {
             done();
         });
     });
-    it('calculates stamina', function (done) {
-        var block = factories.statBlockFactory({character: {
-            cur_ref: 53, cur_wil: 50}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.stamina(baseStats)).toEqual(26);
-            done();
-        });
-    });
-
-    it('calculates stamina with bought stamina', function (done) {
-        var block = factories.statBlockFactory({
-            character: {
-            cur_ref: 53, cur_wil: 50, bought_stamina: 5}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.stamina(baseStats)).toEqual(31);
-            done();
-        });
-    });
-
     
     it('calculates mana', function (done) {
         var block = factories.statBlockFactory({character: {

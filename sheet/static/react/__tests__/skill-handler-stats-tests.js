@@ -253,4 +253,23 @@ describe('SkillHandler stats', function() {
         expect(handler.getEffStats().imm).toEqual(55);
     });
 
+    it('calculates stamina', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45
+            }
+        });
+        expect(handler.getBaseStats().stamina).toEqual(23);
+    });
+
+    it('calculates stamina taking bought_stamina into account',
+            function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45, bought_stamina: 5
+            }
+        });
+        expect(handler.getBaseStats().stamina).toEqual(28);
+    });
+
 });

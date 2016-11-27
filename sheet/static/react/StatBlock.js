@@ -301,11 +301,6 @@ class StatBlock extends React.Component {
         return skillHandler.edgeLevel("Toughness");
     }
 
-    stamina(baseStats) {
-        return util.roundup((baseStats.ref + baseStats.wil)/ 4)
-            + this.state.char.bought_stamina;
-    }
-
     mana(baseStats) {
         return util.roundup((baseStats.psy + baseStats.wil)/ 4)
             + this.state.char.bought_mana;
@@ -738,7 +733,7 @@ class StatBlock extends React.Component {
             }{toughness}</td>
             <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
-            <td style={baseStyle}>{this.stamina(baseStats)}</td>
+            <td style={baseStyle}>{baseStats.stamina}</td>
             <td style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
             }</td></tr>
         <tr><td style={statStyle}>M</td>

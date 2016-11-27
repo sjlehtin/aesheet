@@ -11,11 +11,8 @@
  * allSkills
  * edges
  *
- * TODO: merge this and statHandler, as they both need to be passed to
- * many components, and it makes sense to just roll them into one.
- *
- * StatHandler functionality to SkillHandler, nuke StatHandler, rename
- * SkillHandler to CheckHandler (or CheckController).
+ * StatHandler functionality to SkillHandler, nuke StatHandler,
+ * TODO: rename SkillHandler to CheckHandler (or CheckController).
  *
  * TODO: study Redux for handling state in a cleaner fashion.
  */
@@ -454,7 +451,12 @@ class SkillHandler {
                 this._baseStats.ref)/2) + this._hardMods.dex;
             this._baseStats.imm = util.roundup((this._baseStats.fit +
                 this._baseStats.psy)/2) + this._hardMods.mov;
+
+            this._baseStats.stamina = util.roundup(
+                (this._baseStats.ref + this._baseStats.wil)/ 4)
+                + this.props.character.bought_stamina;
         }
+
         return this._baseStats;
     }
     
