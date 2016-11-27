@@ -16,6 +16,11 @@ class DamageControl extends React.Component {
         };
     }
 
+    componentWillReceiveProps(props) {
+        this.setState({currentStamina: props.handler.getBaseStats().stamina -
+            this.props.character.stamina_damage});
+    }
+
     handleSubmit(event) {
         var newValue = this.props.handler.getBaseStats().stamina -
             this.state.currentStamina;
