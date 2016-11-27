@@ -9,7 +9,6 @@ jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
-jest.dontMock('../StatHandler');
 jest.dontMock('../WeaponRow');
 jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
@@ -29,7 +28,6 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
-const StatHandler = require('../StatHandler').default;
 const SkillHandler = require('../SkillHandler').default;
 
 var objectId = 1;
@@ -38,11 +36,11 @@ var characterFactory = function (statOverrides) {
     var _charData = {
         id: 2,
 
-        "cur_fit": 40,
-        "cur_ref": 60,
+        "cur_fit": 43,
+        "cur_ref": 43,
         "cur_lrn": 43,
         "cur_int": 43,
-        "cur_psy": 50,
+        "cur_psy": 43,
         "cur_wil": 43,
         "cur_cha": 43,
         "cur_pos": 43,
@@ -65,25 +63,6 @@ var characterFactory = function (statOverrides) {
     };
 
     return Object.assign(_charData, statOverrides);
-};
-
-var statsFactory = function (overrideStats) {
-    var _baseStats = {
-        fit: 45,
-        ref: 45,
-        lrn: 45,
-        int: 45,
-        wil: 45,
-        psy: 45,
-        cha: 45,
-        pos: 45,
-        dex: 45,
-        mov: 45,
-        imm: 45,
-    };
-    var oo = Object.assign(_baseStats, overrideStats);
-    oo.getEffStats = (st) => { return _baseStats; }
-    return oo;
 };
 
 var skillFactory = function (overrideFields) {
@@ -299,35 +278,6 @@ var firearmFactory = function (overrideFields) {
 };
 
 
-var armorQualityFactory = function (overrideFields) {
-    "use strict";
-    var quality = {
-        "name": "normal",
-        "short_name": "",
-        "dp_multiplier": "1.0",
-        "armor_p": "0.0",
-        "armor_s": "0.0",
-        "armor_b": "0.0",
-        "armor_r": "0.0",
-        "armor_dr": "0.0",
-        "mod_fit_multiplier": "1.0",
-        "mod_fit": 0,
-        "mod_ref": 0,
-        "mod_psy": 0,
-        "mod_sensory": 0,
-        "mod_stealth": 0,
-        "mod_conceal": 0,
-        "mod_climb": 0,
-        "mod_weight_multiplier": "1.0",
-        "mod_encumbrance_class": 0,
-        "tech_level": 1
-        };
-    if (!overrideFields) {
-        overrideFields = {};
-    }
-    return Object.assign(quality, overrideFields);
-};
-
 var miscellaneousItemFactory = function (overrideFields) {
     "use strict";
     var item = {
@@ -406,7 +356,7 @@ var armorTemplateFactory = function (overrideFields) {
         "armor_ra_r": "0.0",
         "armor_ra_dr": "0.0",
         "armor_ra_dp": "0.0",
-        "armor_h_pl": -2,
+        "armor_h_pl": 0,
         "armor_t_pl": 0,
         "armor_ll_pl": 0,
         "armor_rl_pl": 0,
@@ -414,16 +364,16 @@ var armorTemplateFactory = function (overrideFields) {
         "armor_ra_pl": 0,
         "mod_fit": 0,
         "mod_ref": 0,
-        "mod_psy": -1,
+        "mod_psy": 0,
         "mod_vision": 0,
-        "mod_hear": -4,
+        "mod_hear": 0,
         "mod_smell": 0,
-        "mod_surprise": -2,
+        "mod_surprise": 0,
         "mod_stealth": 0,
-        "mod_conceal": 5,
+        "mod_conceal": 0,
         "mod_climb": 0,
-        "mod_tumble": -5,
-        "weight": "0.40",
+        "mod_tumble": 0,
+        "weight": "1.00",
         "encumbrance_class": 0,
         "tech_level": 1
         };
@@ -431,6 +381,36 @@ var armorTemplateFactory = function (overrideFields) {
         overrideFields = {};
     }
     return Object.assign(template, overrideFields);
+};
+
+var armorQualityFactory = function (overrideFields) {
+    "use strict";
+    var quality = {
+        "name": "normal",
+        "short_name": "",
+        "dp_multiplier": "1.0",
+        "armor_p": "0.0",
+        "armor_s": "0.0",
+        "armor_b": "0.0",
+        "armor_r": "0.0",
+        "armor_dr": "0.0",
+        "mod_fit_multiplier": "1.0",
+        "mod_fit": 0,
+        "mod_ref": 0,
+        "mod_psy": 0,
+        "mod_sensory": 0,
+        "mod_stealth": 0,
+        "mod_conceal": 0,
+        "mod_climb": 0,
+        "mod_tumble": 0,
+        "mod_weight_multiplier": "1.0",
+        "mod_encumbrance_class": 0,
+        "tech_level": 1
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(quality, overrideFields);
 };
 
 var armorFactory = function(overrideFields) {
@@ -460,7 +440,7 @@ var armorFactory = function(overrideFields) {
         "quality": armorQualityFactory(quality),
         "special_qualities": []
     };
-    return armor;
+    return Object.assign(armor, overrideFields);
 };
 
 var weaponQualityFactory = function (overrideFields) {
@@ -821,17 +801,26 @@ var skillHandlerFactory = function (givenProps) {
         }
     }
 
-    var statHandler = new StatHandler({
+    var armor = {};
+    if (givenProps.armor) {
+        armor = armorFactory(givenProps.armor);
+    }
+    var helm = {};
+    if (givenProps.helm) {
+        helm = armorFactory(givenProps.helm);
+    }
+    var handlerProps = {
         character: characterFactory(
-            Object.assign({cur_fit: 43, cur_ref: 43},
-                givenProps.character)),
+            Object.assign({}, givenProps.character)),
         edges: edgeList,
-        effects: effects
-    });
-
-    return new SkillHandler({
-        stats: statHandler, edges: edgeList,
-        characterSkills: skills, allSkills: allSkills});
+        effects: effects,
+        characterSkills: skills, allSkills: allSkills,
+        armor: armor, helm: helm
+    };
+    if (givenProps.weightCarried) {
+        handlerProps.weightCarried = givenProps.weightCarried;
+    }
+    return new SkillHandler(handlerProps);
 };
 
 module.exports = {
@@ -843,7 +832,6 @@ module.exports = {
     edgeLevelFactory: edgeLevelFactory,
     edgeFactory: edgeFactory,
     characterEdgeFactory: characterEdgeFactory,
-    statsFactory: statsFactory,
     firearmFactory: firearmFactory,
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,

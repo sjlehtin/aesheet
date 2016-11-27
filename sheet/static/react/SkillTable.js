@@ -109,21 +109,20 @@ class SkillTable extends React.Component {
 
     initialSkillPoints() {
         // TODO: data privacy.
-        var char = this.props.skillHandler.props.stats.props.character;
+        var char = this.props.skillHandler.props.character;
         return util.roundup(char.start_lrn/3) + util.roundup(char.start_int/5) +
                 util.roundup(char.start_psy/10);
     }
 
     earnedSkillPoints() {
         // TODO: data privacy.
-        var char = this.props.skillHandler.props.stats.props.character;
+        var char = this.props.skillHandler.props.character;
 
         return char.gained_sp;
     }
 
     optimizeAgeSP() {
-        // TODO: data privacy violation.
-        var baseStats = this.props.skillHandler.props.stats.getBaseStats();
+        var baseStats = this.props.skillHandler.getBaseStats();
         /* Optimal stat raises, slightly munchkin, but only sensible. */
         var raw = baseStats.lrn/15 + baseStats.int/25
             + baseStats.psy/50;
@@ -155,7 +154,7 @@ class SkillTable extends React.Component {
                               onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                               onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
 
-                              stats={this.props.skillHandler.props.stats.getEffStats()}
+                              stats={this.props.skillHandler.getEffStats()}
                               characterSkill={csMap[skillName]}
                               skillPoints={spCost}
                               skill={skill}/>);
@@ -178,7 +177,7 @@ class SkillTable extends React.Component {
                 rows.push(<SkillRow key={`${cs.skill}-${idx}`}
                                     skillName={skill.name}
                                     skillHandler={this.props.skillHandler}
-                                    stats={this.props.skillHandler.props.stats.getEffStats()}
+                                    stats={this.props.skillHandler.getEffStats()}
                                     characterSkill={cs}
                                     onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
                                     onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}

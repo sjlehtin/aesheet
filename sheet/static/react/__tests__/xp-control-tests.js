@@ -86,6 +86,13 @@ describe('XPControl', function() {
         expect(control.xpEdgesBought()).toEqual(25);
     });
 
+    it('will not allow negative cost from free edges', function () {
+        var control = xpControlFactory({
+            edgesBought: 3, initialChar:
+            charDataFactory({free_edges: 4})});
+        expect(control.xpEdgesBought()).toEqual(0);
+    });
+
     var jsonResponse = function (json) {
         var promise = Promise.resolve(json);
         promises.push(promise);

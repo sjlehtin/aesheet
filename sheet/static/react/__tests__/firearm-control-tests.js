@@ -21,44 +21,42 @@ describe('FirearmControl', function() {
 
     var getFirearmControl = function (givenProps) {
         var handlerProps = {
-            characterSkills: [],
+            skills: [],
             allSkills: [
-                factories.skillFactory({
+                {
                     name: "Pistol", stat: "dex",
                     required_skills: ["Basic Firearms"]
-                }),
-                factories.skillFactory({
+                },
+                {
                     name: "Basic Firearms",
                     stat: "dex"
-                }),
-                factories.skillFactory({
+                },
+                {
                     name: "Wheeled",
                     stat: "dex"
-                }),
-                factories.skillFactory({
+                },
+                {
                     name: "Handguns",
                     stat: "dex",
                     required_skills: ["Basic Firearms"]
-                }),
-                factories.skillFactory({
+                },
+                {
                     name: "Long guns",
                     stat: "dex",
                     required_skills: ["Basic Firearms"]
-                })
-
+                }
             ],
-            stats: {dex: 45}
+            character: {cur_int: 45, cur_ref: 45}
         };
         if (givenProps && 'handlerProps' in givenProps) {
             handlerProps = Object.assign(handlerProps,
                 givenProps.handlerProps);
             delete givenProps.handlerProps;
         }
-        handlerProps.stats = factories.statsFactory(handlerProps.stats);
 
         var props = {
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}}),
-            skillHandler: new SkillHandler(handlerProps)
+            skillHandler: factories.skillHandlerFactory(handlerProps)
         };
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -80,10 +78,10 @@ describe('FirearmControl', function() {
         function () {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Handguns",
                     level: 1
-                })]
+                }]
             },
             weapon: factories.firearmFactory({base: {base_skill: "Handguns", skill: "Pistol"}})});
         expect(firearm.skillCheck()).toEqual(40);
@@ -92,14 +90,14 @@ describe('FirearmControl', function() {
     it("notices specializations", function () {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Pistol",
                     level: 1
-                }),
-                    factories.characterSkillFactory({
-                        skill: "Handguns",
-                        level: 1
-                    })]
+                },
+                {
+                    skill: "Handguns",
+                    level: 1
+                }]
             },
             weapon: factories.firearmFactory({base: {base_skill: "Handguns", skill: "Pistol"}})});
         expect(firearm.skillCheck()).toEqual(50);
@@ -108,10 +106,10 @@ describe('FirearmControl', function() {
     it ("calculates correct ROF", function() {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Pistol",
                     level: 0
-                })]},
+                }]},
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         });
         expect(firearm.rof()).toBeCloseTo(2.86, 2);
@@ -120,10 +118,10 @@ describe('FirearmControl', function() {
     it ("calculates correct ROF for higher skill level", function() {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Pistol",
                     level: 3
-                })]},
+                }]},
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         });
         expect(firearm.rof()).toBeCloseTo(3.72, 2);
@@ -132,10 +130,10 @@ describe('FirearmControl', function() {
     it ("can calculate a row of checks", function() {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Pistol",
                     level: 0
-                })]},
+                }]},
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         });
         expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
@@ -145,11 +143,11 @@ describe('FirearmControl', function() {
     it ("takes into account penalties countered", function() {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                skills: [{
                     skill: "Pistol",
                     level: 0
-                })],
-                stats: {dex: 45, fit: 63}
+                }],
+                character: {cur_int: 45, cur_ref: 45, cur_fit: 63}
             },
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         });
@@ -160,10 +158,12 @@ describe('FirearmControl', function() {
     it ("can calculate a row of initiatives", function() {
         var firearm = getFirearmControl({
             handlerProps: {
-                characterSkills: [factories.characterSkillFactory({
+                character: {cur_int: 45, cur_ref: 45, cur_fit: 45,
+                    cur_psy: 45},
+                skills: [{
                     skill: "Pistol",
                     level: 0
-                })]},
+                }]},
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         });
         expect(firearm.initiatives([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
@@ -193,20 +193,22 @@ describe('FirearmControl', function() {
             props = Object.assign(props, givenProps);
         }
         var skills = [
-            factories.characterSkillFactory({
+            {
                 skill: "Long guns",
-                level: 0})
+                level: 0
+            }
         ];
 
         if (props.hasAutofireSkill) {
-            skills.push(factories.characterSkillFactory({
+            skills.push({
                         skill: "Autofire",
-                        level: 0}));
+                        level: 0});
         }
         return getFirearmControl({
             handlerProps: {
-                characterSkills: skills,
-                stats: {dex: 45, fit: props.fit}
+                skills: skills,
+                character: {cur_ref: 45, cur_int: 45, cur_psy: 45,
+                    cur_fit: props.fit}
             },
             weapon: factories.firearmFactory({
             base: {name: "Invented",

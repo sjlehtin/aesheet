@@ -9,7 +9,6 @@ jest.dontMock('../SkillTable');
 jest.dontMock('../SkillRow');
 jest.dontMock('../AddSkillControl');
 jest.dontMock('../SkillHandler');
-jest.dontMock('../StatHandler');
 jest.dontMock('../WeaponRow');
 jest.dontMock('../RangedWeaponRow');
 jest.dontMock('../AddWeaponControl');
@@ -54,8 +53,8 @@ describe('stat block weight handling', function() {
 
             expect(block.getCarriedWeight()).toEqual(5.5);
 
-            expect(block.getStatHandler().getEffStats().ref).toBeLessThan(
-                block.getStatHandler().getBaseStats().ref);
+            expect(block.getSkillHandler().getEffStats().ref).toBeLessThan(
+                block.getSkillHandler().getBaseStats().ref);
             done();
         });
     });

@@ -16,7 +16,6 @@ import AddRangedWeaponControl from 'AddRangedWeaponControl';
 import TransientEffectRow from 'TransientEffectRow';
 import AddTransientEffectControl from 'AddTransientEffectControl';
 import SkillHandler from 'SkillHandler';
-import StatHandler from 'StatHandler';
 import Inventory from 'Inventory';
 import ArmorControl from 'ArmorControl';
 import MiscellaneousItemRow from 'MiscellaneousItemRow';
@@ -653,8 +652,8 @@ class StatBlock extends React.Component {
                         effects={this.getAllEffects()} /></Panel>;
     }
 
-    renderSkills(skillHandler, statHandler) {
-        if (!skillHandler || !statHandler) {
+    renderSkills(skillHandler) {
+        if (!skillHandler) {
             return <Loading>Skills</Loading>
         }
         return <SkillTable
@@ -669,8 +668,8 @@ class StatBlock extends React.Component {
             />
     }
 
-    renderStats(statHandler, edgeHandler) {
-        if (!statHandler || !edgeHandler) {
+    renderStats(skillHandler) {
+        if (!skillHandler) {
             return <Loading>Stats</Loading>;
         }
 
@@ -685,8 +684,8 @@ class StatBlock extends React.Component {
 
         var rows, derivedRows, expendable;
 
-        var baseStats = statHandler.getBaseStats();
-        var effStats = statHandler.getEffStats();
+        var baseStats = skillHandler.getBaseStats();
+        var effStats = skillHandler.getEffStats();
 
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
             "pos"];
@@ -720,7 +719,7 @@ class StatBlock extends React.Component {
             </tr>
         </tbody>;
 
-        var toughness = this.toughness(edgeHandler);
+        var toughness = this.toughness(skillHandler);
         if (toughness) {
             toughness = (<span>+<span
                 style={{ fontWeight: "bold"}}>{toughness}</span></span>);
@@ -737,14 +736,14 @@ class StatBlock extends React.Component {
         <tr><td style={statStyle}>B</td>
             <td style={baseStyle}>{this.baseBody(baseStats)
             }{toughness}</td>
-            <td style={recoveryStyle}>{this.bodyHealing(edgeHandler)}</td></tr>
+            <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
             <td style={baseStyle}>{this.stamina(baseStats)}</td>
-            <td style={recoveryStyle}>{this.staminaRecovery(effStats, edgeHandler)
+            <td style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
             }</td></tr>
         <tr><td style={statStyle}>M</td>
             <td style={baseStyle}>{this.mana(baseStats)}</td>
-            <td style={recoveryStyle}>{this.manaRecovery(effStats, edgeHandler)
+            <td style={recoveryStyle}>{this.manaRecovery(effStats, skillHandler)
             }</td></tr>
         </tbody>;
 
@@ -809,21 +808,26 @@ class StatBlock extends React.Component {
             return <Loading>SP</Loading>
         }
 
-        var ageSP = util.roundup(baseStats.lrn/15 +
+    var ageSP = util.roundup(baseStats.lrn/15 +
             baseStats.int/25 + baseStats.psy/50);
         return <AddSPControl initialAgeSP={ageSP}
                              onAdd={(sp) => this.handleAddGainedSP(sp)} />;
     }
 
-    getSkillHandler(statHandler) {
-        if (!statHandler) {
+    getSkillHandler() {
+        if (!this.state.char|| !this.state.edgeList || !this.state.armor ||
+            !this.state.helm) {
             return null;
         }
         return new SkillHandler({
+            character: this.state.char,
             characterSkills: this.state.characterSkills,
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
-            stats: statHandler
+            effects: this.getAllEffects(),
+            weightCarried: this.getCarriedWeight(),
+            armor: this.state.armor,
+            helm: this.state.helm
         });
     }
 
@@ -857,20 +861,6 @@ class StatBlock extends React.Component {
                 (el) => { return addName(el, item.item.name) }));
         }
         return effects;
-    }
-
-    getStatHandler() {
-        if (!this.state.char|| !this.state.edgeList) {
-            return null;
-        }
-        return new StatHandler({
-            character: this.state.char,
-            edges: this.state.edgeList,
-            effects: this.getAllEffects(),
-            weightCarried: this.getCarriedWeight(),
-            armor: this.state.armor,
-            helm: this.state.helm
-        });
     }
 
     inventoryWeightChanged(newWeight) {
@@ -1128,12 +1118,11 @@ class StatBlock extends React.Component {
             </Panel>;
     }
 
-    renderMovementRates(statHandler, skillHandler) {
-        if (!statHandler || !skillHandler) {
+    renderMovementRates(skillHandler) {
+        if (!skillHandler) {
             return <Loading>Movement rates</Loading>;
         }
-        return <MovementRates skillHandler={skillHandler}
-                              statHandler={statHandler}/>;
+        return <MovementRates skillHandler={skillHandler} />;
     }
 
     renderHeader() {
@@ -1161,12 +1150,11 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var statHandler = this.getStatHandler();
-        if (statHandler) {
-            var baseStats = statHandler.getBaseStats();
-            var effStats = statHandler.getEffStats();
+        var skillHandler = this.getSkillHandler();
+        if (skillHandler) {
+            var baseStats = skillHandler.getBaseStats();
+            var effStats = skillHandler.getEffStats();
         }
-        var skillHandler = this.getSkillHandler(statHandler);
 
         return (
             <Grid>
@@ -1178,7 +1166,7 @@ class StatBlock extends React.Component {
                                 {this.renderDescription()}
                             </Row>
                             <Row>
-                                {this.renderStats(statHandler, skillHandler)}
+                                {this.renderStats(skillHandler)}
                                 {this.renderXPControl()}
                                 {this.renderSPControl(baseStats)}
                             </Row>
@@ -1202,7 +1190,7 @@ class StatBlock extends React.Component {
                         </Col>
                     </Row>
                     <Row>
-                        {this.renderMovementRates(statHandler, skillHandler)}
+                        {this.renderMovementRates(skillHandler)}
                     </Row>
                     <Row>
                         {this.renderCCWeapons(skillHandler)}
@@ -1230,7 +1218,7 @@ class StatBlock extends React.Component {
                     </Row>
                 </Col>
                 <Col md={4}>
-                    {this.renderSkills(skillHandler, statHandler)}
+                    {this.renderSkills(skillHandler)}
                 </Col>
             </Grid>
         )

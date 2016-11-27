@@ -11,7 +11,6 @@ var factories = require('./factories');
 
 var characterSkillFactory = factories.characterSkillFactory;
 var skillFactory = factories.skillFactory;
-var statsFactory = factories.statsFactory;
 
 const SkillRow = require('../SkillRow').default;
 
@@ -52,7 +51,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: characterSkillFactory({level: 1}),
-            stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA"})});
         expect(row.skillCheck()).toEqual(60);
     });
@@ -67,7 +65,6 @@ describe('SkillRow', function() {
                         level: 0}],
             }),
             characterSkill: characterSkillFactory({level: 0}),
-            stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA",
             skill_cost_1: null,
                 skill_cost_2: null,
@@ -84,7 +81,6 @@ describe('SkillRow', function() {
                 allSkills: [{skill: "Acting / Bluff", stat: "CHA"}]
             }),
 
-            stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA"})});
         expect(row.skillCheck()).toEqual(28);
     });
@@ -99,7 +95,6 @@ describe('SkillRow', function() {
                     skill_cost_0: 0,
                     stat: "CHA"}]
             }),
-            stats: statsFactory({cha: 55}),
             skill: skillFactory({stat: "CHA", skill_cost_0: 0})});
         expect(row.skillCheck()).toEqual(55);
     });
@@ -113,7 +108,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: characterSkillFactory({level: 1}),
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"})
         });
         expect(row.skillCheck("wil")).toEqual(65);
@@ -130,7 +124,6 @@ describe('SkillRow', function() {
             characterSkill: characterSkillFactory({
                 skill: "Balance",
                 level: 1}),
-            stats: statsFactory({mov: 45, ref: 60}),
             skill: skillFactory({name: "Balance", stat: "MOV"}),
             renderForStats: ["mov", "ref"]
         });
@@ -154,7 +147,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
             onCharacterSkillModify: spy
         });
@@ -172,7 +164,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
             onCharacterSkillModify: spy
         });
@@ -189,7 +180,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: undefined,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
             onCharacterSkillModify: spy
         });
@@ -207,7 +197,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", min_level: 1}),
             onCharacterSkillModify: spy
         });
@@ -222,7 +211,6 @@ describe('SkillRow', function() {
                 allSkills: [{name: "Balance"}]
             }),
             characterSkill: undefined,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA"}),
             onCharacterSkillModify: spy
         });
@@ -240,7 +228,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
             onCharacterSkillModify: spy
         });
@@ -256,7 +243,6 @@ describe('SkillRow', function() {
             }),
 
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
         });
         var node = ReactDOM.findDOMNode(row);
@@ -273,7 +259,6 @@ describe('SkillRow', function() {
                 allSkills: [{name: "Frozzling"}]
             }),
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
         });
         var node = ReactDOM.findDOMNode(row);
@@ -290,7 +275,6 @@ describe('SkillRow', function() {
                 allSkills: [{name: "Frozzling"}, {name: "Foobying"}]
             }),
             characterSkill: cs,
-            stats: statsFactory({cha: 45, wil: 60}),
             skill: skillFactory({stat: "CHA", max_level: 3}),
         });
         var node = ReactDOM.findDOMNode(row);

@@ -44,7 +44,7 @@ describe('SkillTable', function() {
         }
         props.allSkills = allSkills;
 
-        var skillHandler = factories.skillHandlerFactory(props);//new
+        var skillHandler = factories.skillHandlerFactory(props);
         var table = TestUtils.renderIntoDocument(
             <SkillTable skillHandler={skillHandler}
                         onCharacterSkillAdd={props.onCharacterSkillAdd}
@@ -154,8 +154,7 @@ describe('SkillTable', function() {
     });
 
     it("does not render same skill twice", function () {
-        var table = getSkillTable({effStats:
-            factories.statsFactory({"int": 50}),
+        var table = getSkillTable({
             allSkills: _basicPhysical.concat([
                 factories.skillFactory({name: "Agriculture"})]),
             skills: [

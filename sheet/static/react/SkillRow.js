@@ -150,7 +150,6 @@ SkillRow.propTypes = {
 
     // TODO: Rest of the props should be unnecessary with skillHandler as
     // prop.
-    stats: React.PropTypes.object.isRequired,
 
     /* Either characterSkill of skillName must be given.  If
        characterSkill is missing, it is assumed that the character does not
