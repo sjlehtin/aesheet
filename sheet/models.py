@@ -132,17 +132,6 @@ def get_by_campaign(objects, get_character=lambda obj: obj):
     return items.values()
 
 
-class SkillLookup(object):
-    """
-    Allow skill lookup from templates more easily.
-    """
-    def __init__(self, character):
-        self.character = character
-
-    def __getattr__(self, skill):
-        return self.character.get_skill(skill)
-
-
 class Character(PrivateMixin, models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
@@ -238,10 +227,6 @@ class Character(PrivateMixin, models.Model):
 
     class Meta:
         ordering = ['campaign', 'name']
-
-    def __init__(self, *args, **kwargs):
-        super(Character, self).__init__(*args, **kwargs)
-        self.skill_lookup = SkillLookup(self)
 
     BASE_STATS = ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]
     DERIVED_STATS = ["mov", "dex", "imm"]
