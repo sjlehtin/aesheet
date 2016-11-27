@@ -261,6 +261,15 @@ class Character(PrivateMixin, models.Model):
         entry.save()
 
 
+    def add_log_entry(self, entry_text, request=None):
+        entry = CharacterLogEntry()
+        entry.character = self
+        entry.user = request.user if request else None
+        entry.entry_type = entry.NON_FIELD
+        entry.entry = entry_text
+        entry.save()
+
+
 class Edge(ExportedModel):
     """
     A base model for edges.  Here is information that would otherwise
@@ -432,6 +441,34 @@ class StatModifier(models.Model):
     # items, etc.
     class Meta:
         abstract = True
+
+
+class Wound(models.Model):
+    """
+    Lethal wounds received by the character.
+    """
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
+
+    character = models.ForeignKey(Character, related_name="wounds")
+    LOCATION_CHOICES = [("H", "Head"),
+                        ("T", "Torso"),
+                        ("RA", "Right arm"),
+                        ("LA", "Left arm"),
+                        ("RL", "Right leg"),
+                        ("LL", "Left leg")]
+    location = models.CharField(max_length=2,
+                                choices=LOCATION_CHOICES,
+                                default="T")
+    damage = models.PositiveIntegerField(
+        default=0,
+        help_text="Initial damage from the wound.")
+    healed = models.PositiveIntegerField(
+        default=0,
+        help_text="Healed damage.  When this becomes equal to damage, "
+                  "the wound is healed.")
+    effect = models.CharField(max_length=64, blank=True,
+                              help_text="Initial effect from the injury.")
 
 
 class EdgeLevel(ExportedModel, StatModifier):
@@ -1299,7 +1336,7 @@ class CharacterLogEntry(models.Model):
             else:
                 return u"Added skill %s %d." % (self.skill, self.skill_level)
         elif self.entry_type == self.NON_FIELD:
-            return u"{0}".format(self.entry)
+            return self.entry
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)

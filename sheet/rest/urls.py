@@ -24,6 +24,9 @@ router.register(r'characters/(?P<character_pk>[0-9]+)/characteredges',
                 views.CharacterEdgeViewSet,
                 base_name='character-characteredges')
 
+router.register(r'characters/(?P<character_pk>[0-9]+)/wounds',
+                views.WoundViewSet, base_name='character-wounds')
+
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetweapons',
                 views.SheetWeaponViewSet,
                 base_name='sheet-weapon')

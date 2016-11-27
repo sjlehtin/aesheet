@@ -108,6 +108,11 @@ class CharacterEdgeFactory(factory.DjangoModelFactory):
         model = models.CharacterEdge
 
 
+class WoundFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Wound
+
+
 class CharacterFactory(factory.DjangoModelFactory):
     campaign = factory.SubFactory(CampaignFactory, tech_levels=("all", ))
     owner = factory.SubFactory(UserFactory)
