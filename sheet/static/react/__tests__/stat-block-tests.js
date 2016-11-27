@@ -65,45 +65,6 @@ describe('stat block', function() {
             done();
         });
     });
-
-    it('calculates MOV', function (done) {
-        var block = factories.statBlockFactory({character: {cur_fit: 49, cur_ref: 51}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            var effStats = block.getSkillHandler().getEffStats();
-            expect(baseStats.mov).toEqual(50);
-            expect(effStats.mov).toEqual(50);
-            done();
-        });
-    });
-
-    it('calculates DEX', function (done) {
-        var block = factories.statBlockFactory({character: {
-            cur_int: 49, cur_ref: 51}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            var effStats = block.getSkillHandler().getEffStats();
-            expect(baseStats.dex).toEqual(50);
-            expect(effStats.dex).toEqual(50);
-            done();
-        });
-    });
-
-    it('calculates IMM', function (done) {
-        var block = factories.statBlockFactory({character: {
-            cur_fit: 49, cur_psy: 51}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            var effStats = block.getSkillHandler().getEffStats();
-            expect(baseStats.imm).toEqual(50);
-            expect(effStats.imm).toEqual(50);
-            done();
-        });
-    });
-
     it('calculates stamina', function (done) {
         var block = factories.statBlockFactory({character: {
             cur_ref: 53, cur_wil: 50}});
@@ -127,6 +88,7 @@ describe('stat block', function() {
         });
     });
 
+    
     it('calculates mana', function (done) {
         var block = factories.statBlockFactory({character: {
             cur_wil: 53, cur_psy: 42}});
@@ -238,10 +200,7 @@ describe('stat block', function() {
         });
     });
 
-    xit('should not indicate negative XP with unbought free edges');
     xit('handles edge removal');
-    xit('handles edge point calculation after edge removal');
-
 
     var getSkillHandler = function (block) {
         // TODO: skills need to be loaded because edges are handled by

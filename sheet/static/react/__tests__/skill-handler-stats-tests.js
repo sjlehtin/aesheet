@@ -202,4 +202,55 @@ describe('SkillHandler stats', function() {
         expect(handler.getEffStats().psy).toEqual(50);
     });
 
+    it('calculates MOV', function () {
+        var handler = factories.skillHandlerFactory({character: {cur_fit: 49, cur_ref: 51}});
+
+        expect(handler.getBaseStats().mov).toEqual(50);
+        expect(handler.getEffStats().mov).toEqual(50);
+    });
+
+    it('calculates DEX', function () {
+        var handler = factories.skillHandlerFactory({character: {cur_int: 49, cur_ref: 51}});
+
+        expect(handler.getBaseStats().dex).toEqual(50);
+        expect(handler.getEffStats().dex).toEqual(50);
+    });
+
+    it('calculates IMM', function () {
+        var handler = factories.skillHandlerFactory({character: {cur_fit: 49, cur_psy: 51}});
+
+        expect(handler.getBaseStats().imm).toEqual(50);
+        expect(handler.getEffStats().imm).toEqual(50);
+    });
+
+    it('calculates MOV with effect', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 49, cur_ref: 51},
+            effects: [{mov: 5}]
+        });
+
+        expect(handler.getBaseStats().mov).toEqual(50);
+        expect(handler.getEffStats().mov).toEqual(55);
+    });
+
+    it('calculates DEX with effect', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_int: 49, cur_ref: 51},
+            effects: [{dex: 5}]
+        });
+
+        expect(handler.getBaseStats().dex).toEqual(50);
+        expect(handler.getEffStats().dex).toEqual(55);
+    });
+
+    it('calculates IMM with effect', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 49, cur_psy: 51},
+            effects: [{imm: 5}]
+        });
+
+        expect(handler.getBaseStats().imm).toEqual(50);
+        expect(handler.getEffStats().imm).toEqual(55);
+    });
+
 });
