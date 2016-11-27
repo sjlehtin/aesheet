@@ -234,6 +234,8 @@ class Character(PrivateMixin, models.Model):
                                    blank=True)
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
+    stamina_damage = models.IntegerField(default=0)
+
     class Meta:
         ordering = ['campaign', 'name']
 

@@ -58,6 +58,7 @@ var characterFactory = function (statOverrides) {
         "base_mod_imm": 0,
         bought_mana: 0,
         bought_stamina: 0,
+        stamina_damage: 0,
         edges: [],
         "campaign": 2
     };

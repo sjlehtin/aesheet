@@ -24,6 +24,7 @@ import EdgeRow from 'EdgeRow';
 import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
 import CharacterNotes from 'CharacterNotes';
 import MovementRates from 'MovementRates';
+import DamageControl from 'DamageControl';
 
 import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
@@ -411,6 +412,23 @@ class StatBlock extends React.Component {
             this.setState({char: data});
         }).then((err) => console.log(err));
     }
+
+    /* TODO:  I think this is the best way to handle the update.  The
+       sub-components request the update from the character, which does the
+       actual rest call and propagates the update back downward.  Handling
+       API call failures can then be handled by sending messages from
+       here in a unified manner. */
+    handleCharacterUpdate(field, oldValue, newValue) {
+        var data = this.state.char;
+
+        var update = {};
+        update[field] = newValue;
+        return rest.patch(this.state.url, update).then((json) => {
+            data[field] = newValue;
+            this.setState({char: data});
+        }).catch((err) => console.log(err));
+    }
+
 
     static findItemIndex(itemList, givenItem) {
         for (var ii = 0; ii < itemList.length; ii++) {
@@ -1120,6 +1138,19 @@ class StatBlock extends React.Component {
         return <MovementRates skillHandler={skillHandler} />;
     }
 
+    renderDamages(skillHandler) {
+        if (!skillHandler) {
+            return <Loading>Damage controls</Loading>;
+        }
+        return <Panel header={<h4>Stamina damage</h4>}>
+            <DamageControl
+                character={skillHandler.props.character}
+                handler={skillHandler}
+                onMod={this.handleCharacterUpdate.bind(this)}
+            />
+        </Panel>;
+    }
+
     renderHeader() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading>Header</Loading>;
@@ -1168,9 +1199,6 @@ class StatBlock extends React.Component {
                             <Row>
                                 Weight carried: {this.getCarriedWeight().toFixed(2)} kg
                             </Row>
-                            <Row>
-                                {this.renderArmor()}
-                            </Row>
                         </Col>
                         <Col md={6}>
                             <Row style={{paddingBottom: 5}}>
@@ -1182,6 +1210,14 @@ class StatBlock extends React.Component {
                             <Row>
                                 {this.renderAdvancingInitiatives(skillHandler)}
                             </Row>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={6}>
+                            {this.renderArmor()}
+                        </Col>
+                        <Col md={6}>
+                            {this.renderDamages(skillHandler)}
                         </Col>
                     </Row>
                     <Row>

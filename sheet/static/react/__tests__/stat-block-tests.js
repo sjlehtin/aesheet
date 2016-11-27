@@ -27,6 +27,7 @@ jest.dontMock('../EdgeRow');
 jest.dontMock('../AddCharacterEdgeControl');
 jest.dontMock('../CharacterNotes');
 jest.dontMock('../MovementRates');
+jest.dontMock('../DamageControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -44,10 +45,15 @@ const NoteBlock = require('../NoteBlock').default;
 const AddSPControl = require('../AddSPControl').default;
 const XPControl = require('../XPControl').default;
 const Inventory = require('../Inventory').default;
+const DamageControl = require('../DamageControl').default;
 
 
 describe('stat block', function() {
     "use strict";
+
+    // beforeEach(function() {
+    //
+    // });
 
     it('fetched initial data', function (done) {
         var block = factories.statBlockFactory();
@@ -65,7 +71,7 @@ describe('stat block', function() {
             done();
         });
     });
-    
+
     it('calculates mana', function (done) {
         var block = factories.statBlockFactory({character: {
             cur_wil: 53, cur_psy: 42}});
@@ -508,6 +514,28 @@ describe('stat block', function() {
                 expect(block.state.char.gained_sp).toEqual(8);
                 done();
             }).catch(err => fail(err));
+        });
+    });
+
+    it("handles stamina changes", function (done) {
+        var block = factories.statBlockFactory({
+            character: factories.characterFactory({cur_wil: 40, cur_ref: 40})
+        });
+
+        block.afterLoad(function () {
+
+            rest.patch.mockClear();
+
+            var control = TestUtils.findRenderedComponentWithType(
+                block, DamageControl);
+
+            TestUtils.Simulate.change(control._inputField,
+                {target: {value: 8}});
+            TestUtils.Simulate.click(control._changeButton);
+
+            expect(rest.patch.mock.calls[0][1]).toEqual({stamina_damage: 12});
+
+            done();
         });
     });
 });
