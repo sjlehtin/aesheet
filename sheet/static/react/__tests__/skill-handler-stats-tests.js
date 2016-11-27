@@ -272,4 +272,60 @@ describe('SkillHandler stats', function() {
         expect(handler.getBaseStats().stamina).toEqual(28);
     });
 
+    it('calculates initiative', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_int: 45, cur_psy: 46
+            }
+        });
+        expect(Math.round(handler.getInitiative())).toEqual(9);
+    });
+
+    it('gives no AC penalty when not damaged', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45, bought_stamina: 5
+            }
+        });
+        expect(handler.getACPenalty()).toEqual(-0);
+    });
+
+    it('calculates AC penalty when damaged', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45,
+                bought_stamina: 5, stamina_damage: 15
+            }
+        });
+        expect(handler.getACPenalty()).toEqual(-10);
+    });
+
+    it('calculates initiative penalty when damaged a lot', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_int: 45, cur_psy: 46, cur_wil: 45,
+                bought_stamina: 5, stamina_damage: 15
+            }
+        });
+        expect(Math.round(handler.getInitiative())).toEqual(8);
+    });
+
+    it('allows fetching the init penalty when AC penalty is known', function () {
+        expect(SkillHandler.getInitPenaltyFromACPenalty(10)).toEqual(0);
+        expect(SkillHandler.getInitPenaltyFromACPenalty(-11)).toEqual(-1);
+        expect(SkillHandler.getInitPenaltyFromACPenalty(-19)).toEqual(-1);
+        expect(SkillHandler.getInitPenaltyFromACPenalty(-20)).toEqual(-2);
+    });
+
+    it('applies AC penalty to skill check', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_int: 45,
+                cur_psy: 46, cur_wil: 45,
+                bought_stamina: 5, stamina_damage: 15
+            },
+            skills: [{skill: {name: "Pistol", stat: 'DEX'}, level: 1, }]});
+        expect(handler.skillCheck("Pistol")).toEqual(40);
+    });
+
 });

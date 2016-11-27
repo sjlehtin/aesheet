@@ -212,9 +212,7 @@ class WeaponRow extends React.Component {
         if (!targetI) {
             targetI = 0;
         }
-        var initiative = this.getStat('ref') / 10 +
-            this.getStat('int') / 20 +
-            this.getStat('psy') / 20;
+        var initiative = this.props.skillHandler.getInitiative();
 
         var initiatives = [];
         for (let act of actions) {

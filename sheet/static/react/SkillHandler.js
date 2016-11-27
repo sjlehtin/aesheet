@@ -109,6 +109,25 @@ class SkillHandler {
         return this.getEffStats()[stat.toLowerCase()];
     }
 
+    getInitiative() {
+        return this.getStat('ref') / 10 +
+            this.getStat('int') / 20 +
+            this.getStat('psy') / 20 +
+            SkillHandler.getInitPenaltyFromACPenalty(this.getACPenalty());
+    }
+
+    getACPenalty() {
+        return util.rounddown(this.props.character.stamina_damage/
+            this.getBaseStats().stamina * (-20));
+    }
+
+    static getInitPenaltyFromACPenalty(acPenalty) {
+        if (acPenalty > 0) {
+            return 0;
+        }
+        return util.rounddown(acPenalty/10);
+    }
+
     /*
      * If character has the skill, use the check directly.
      *
@@ -145,6 +164,7 @@ class SkillHandler {
         }
 
         check += this.getSkillMod(skillName);
+        check += this.getACPenalty();
         return check;
     }
 
