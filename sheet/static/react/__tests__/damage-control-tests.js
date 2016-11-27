@@ -77,5 +77,17 @@ describe('DamageControl', function() {
         });
     });
 
+    it("allows clearing damage", function () {
+        var promise = Promise.resolve({});
+        var callback = jasmine.createSpy("callback").and.returnValue(promise);
+
+        var control = getDamageControl({onMod: callback, character:
+        {cur_ref:40, cur_wil: 40, stamina_damage: 12}});
+
+        TestUtils.Simulate.click(control._clearButton);
+
+        expect(callback).toHaveBeenCalledWith('stamina_damage', 12, 0);
+    });
+
     // TODO: test for componentWillReceiveProps
 });

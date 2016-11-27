@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
 import Octicon from 'react-octicon'
+import SkillHandler from 'SkillHandler';
 
 var util = require('sheet-util');
 var rest = require('sheet-rest');
@@ -33,6 +34,13 @@ class DamageControl extends React.Component {
         this.setState({currentStamina: event.target.value});
     }
 
+    handleClear(event) {
+        this.setState({currentStamina: this.props.handler.getBaseStats().stamina,
+            isBusy: true});
+        this.props.onMod('stamina_damage', this.props.character.stamina_damage,
+            0).then(() => this.setState({isBusy: false}));
+    }
+
     validationState() {
         return util.isInt(this.state.currentStamina) ? "success" : "error";
     }
@@ -55,7 +63,25 @@ class DamageControl extends React.Component {
         if (this.state.isBusy) {
             loading = <Octicon spin name="sync"/>;
         }
-        return (<div style={this.props.style}><label>Current stamina:</label>
+        var damage = '';
+        if (this.props.character.stamina_damage) {
+            var renderedAcPenalty, renderedInitPenalty;
+            var acPenalty = this.props.handler.getACPenalty();
+            var descrStyle = {marginLeft: "1em"};
+            renderedAcPenalty = <span style={descrStyle}>{acPenalty} AC</span>;
+            var initPenalty = SkillHandler.getInitPenaltyFromACPenalty(acPenalty);
+            if (initPenalty) {
+                renderedInitPenalty = <span style={descrStyle}>{initPenalty} I</span>;
+            }
+            damage = <div style={{color: 'red'}}>-{this.props.character.stamina_damage} STA
+                => {renderedAcPenalty}
+                {renderedInitPenalty}
+            </div>;
+        }
+        return (<div style={this.props.style}>
+            {damage}
+            <label>Stamina: </label>
+            <span>{this.props.handler.getBaseStats().stamina} /</span>
             <input ref={(c) =>
                      c ? this._inputField = ReactDOM.findDOMNode(c) : null}
                    type="text"
@@ -71,6 +97,12 @@ class DamageControl extends React.Component {
                       c ? this._changeButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
+            <Button bsSize="xsmall"
+                    ref={(c) =>
+                      c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
+                    disabled={!this.isValid() || this.state.isBusy}
+                    onClick={(e) => this.handleClear()}>Clear{loading}</Button>
+
         </div>);
     }
 }
