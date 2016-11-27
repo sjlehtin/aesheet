@@ -77,7 +77,7 @@ describe('DamageControl', function() {
         });
     });
 
-    it("allows clearing damage", function () {
+    it("allows clearing stamina damage", function () {
         var promise = Promise.resolve({});
         var callback = jasmine.createSpy("callback").and.returnValue(promise);
 
