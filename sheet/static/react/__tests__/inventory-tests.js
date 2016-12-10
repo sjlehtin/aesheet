@@ -58,7 +58,6 @@ describe('Inventory', function() {
     });
 
     it('renders inventory', function (done) {
-        console.log("bar?");
         rest.getData.mockReturnValue(jsonResponse([
             inventoryEntryFactory({description: 'potion of flying', id: 1}),
             inventoryEntryFactory({
