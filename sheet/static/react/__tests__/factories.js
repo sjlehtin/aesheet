@@ -659,6 +659,19 @@ var inventoryEntryFactory = function (overrides) {
     return Object.assign(_entryData, overrides);
 };
 
+var woundFactory = function (overrides) {
+    var _entryData = {
+        "id": objectId++,
+        "location": "T",
+        "damage": 1,
+        "healed": 0,
+        "effect": "Grazed.",
+        "character": 2
+    };
+
+    return Object.assign(_entryData, overrides);
+};
+
 var sheetFactory = function (statOverrides) {
     var _sheetData = {
         id: 1,
@@ -844,5 +857,6 @@ module.exports = {
     armorFactory: armorFactory,
     miscellaneousItemFactory: miscellaneousItemFactory,
     sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory,
-    skillHandlerFactory: skillHandlerFactory
+    skillHandlerFactory: skillHandlerFactory,
+    woundFactory: woundFactory
 };
