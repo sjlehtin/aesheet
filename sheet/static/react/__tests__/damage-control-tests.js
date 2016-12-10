@@ -1,4 +1,5 @@
 jest.dontMock('../DamageControl');
+jest.dontMock('../WoundRow');
 jest.dontMock('../SkillHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
@@ -8,23 +9,31 @@ import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
 const DamageControl = require('../DamageControl').default;
+const WoundRow = require('../WoundRow').default;
 
 var factories = require('./factories');
 
 describe('DamageControl', function() {
     "use strict";
 
-    var getDamageControl = function(givenProps) {
+    var getDamageControlTree = function (givenProps) {
         var props = givenProps;
         if (!props) {
             props = {};
         }
         props.handler = factories.skillHandlerFactory({character: props.character});
         props.character = props.handler.props.character;
-
-        var control = TestUtils.renderIntoDocument(
+        if (props.wounds) {
+            props.wounds = props.wounds.map(
+                (props) => { return factories.woundFactory(props); });
+        }
+        return TestUtils.renderIntoDocument(
             <DamageControl {...props} />
         );
+    };
+
+    var getDamageControl = function(givenProps) {
+        var control = getDamageControlTree(givenProps);
         return TestUtils.findRenderedComponentWithType(control,
             DamageControl);
     };
@@ -90,4 +99,27 @@ describe('DamageControl', function() {
     });
 
     // TODO: test for componentWillReceiveProps
+
+    it("allows wounds to be passed", function () {
+        var tree = getDamageControlTree({
+            wounds: [{damage: 5, location: "H",
+                      id: 2, effect: "Throat punctured."}]
+            });
+        var woundRow = TestUtils.findRenderedComponentWithType(tree,
+            WoundRow);
+    });
+
+    it("renders multiple wounds", function () {
+        var tree = getDamageControlTree({
+            wounds: [{damage: 5, location: "H",
+                      id: 2, effect: "Throat punctured."},
+            {damage: 3, location: "T",
+                      id: 2, effect: "Heart racing."}]
+            });
+        var woundRows = TestUtils.scryRenderedComponentsWithType(tree,
+            WoundRow);
+        expect(ReactDOM.findDOMNode(woundRows[0]).textContent).toContain("Throat punctured");
+        expect(ReactDOM.findDOMNode(woundRows[1]).textContent).toContain("Heart racing");
+    });
+
 });

@@ -1,8 +1,35 @@
+/*
+ * Stamina damage is a scalar on the Character, with similar controls
+ * as stats.
+ *
+ * Lethal wounds are separate from each other, so they need to be
+ * in many-to-one rel to Character.  A wound's fatality may decrease as it is
+ * healed, or increase due to bleeding.  In any case, the original wound
+ * does not change due to either.  The current damage or the healed amount
+ * changes, but the effect stays the same.
+ *
+ * When adding wounds, the wound description, AA penalties, etc need to be
+ * filled in, but be editable at this point, due to the fact that there
+ * are often special circumstances when characters are wounded, esp. in
+ * fantasy or scifi campaigns where characters and enemies are more powerful.
+ *
+ * Lethal wounds need to be separated by location, as Toughness applies
+ * per location.
+ */
+
+/*
+ * Further improvements:
+ *
+ * - separate wounds per hit location
+ * - show the damages in a "straw man" view
+ * - show effects, AA, FIT/REF, MOV penalties
+ */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
+import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
 import Octicon from 'react-octicon'
 import SkillHandler from 'SkillHandler';
+import WoundRow from 'WoundRow';
 
 var util = require('sheet-util');
 var rest = require('sheet-rest');
@@ -68,15 +95,31 @@ class DamageControl extends React.Component {
             var renderedAcPenalty, renderedInitPenalty;
             var acPenalty = this.props.handler.getACPenalty();
             var descrStyle = {marginLeft: "1em"};
-            renderedAcPenalty = <span style={descrStyle}>{acPenalty} AC</span>;
+            renderedAcPenalty =
+                <span style={descrStyle}>{acPenalty} AC</span>;
             var initPenalty = SkillHandler.getInitPenaltyFromACPenalty(acPenalty);
             if (initPenalty) {
-                renderedInitPenalty = <span style={descrStyle}>{initPenalty} I</span>;
+                renderedInitPenalty =
+                    <span style={descrStyle}>{initPenalty} I</span>;
             }
-            damage = <div style={{color: 'red'}}>-{this.props.character.stamina_damage} STA
+            damage = <div style={{color: 'red'}}>
+                -{this.props.character.stamina_damage} STA
                 => {renderedAcPenalty}
                 {renderedInitPenalty}
             </div>;
+        }
+        var rows = this.props.wounds.map((wound, idx) => {
+            return <WoundRow key={"wound-" + idx} wound={wound} />;});
+        var wounds = '';
+        if (rows.length > 0) {
+            wounds = <Table>
+                {/*<thead>*/}
+                {/*<tr></tr>*/}
+                {/*</thead>*/}
+                <tbody>
+                {rows}
+                </tbody>
+            </Table>
         }
         return (<div style={this.props.style}>
             {damage}
@@ -97,19 +140,25 @@ class DamageControl extends React.Component {
                       c ? this._changeButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
+
             <Button bsSize="xsmall"
                     ref={(c) =>
                       c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleClear()}>Clear{loading}</Button>
-
+            {wounds}
         </div>);
     }
 }
 
 DamageControl.propTypes = {
     handler: React.PropTypes.object.isRequired,
+    wounds: React.PropTypes.arrayOf(React.PropTypes.object),
     onMod: React.PropTypes.func
+};
+
+DamageControl.defaultProps = {
+    wounds: []
 };
 
 export default DamageControl;
