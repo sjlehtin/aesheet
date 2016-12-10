@@ -1698,3 +1698,6 @@ class WoundTestCase(TestCase):
         entries = models.CharacterLogEntry.objects.all()
         self.assertEqual(len(entries), 1)
         self.assertIn("wound was healed", entries[0].entry)
+
+    # TODO: damage should only increase.  Location and effect should be
+    # immutable.
