@@ -55,7 +55,9 @@ class StatBlock extends React.Component {
             carriedInventoryWeight: 0,
 
             armor: undefined,
-            helm: undefined
+            helm: undefined,
+
+            woundList: []
         };
     }
 
@@ -171,6 +173,11 @@ class StatBlock extends React.Component {
         });
     }
 
+    handleWoundsLoaded(wounds) {
+        console.log("Wounds loaded");
+        this.setState({woundList: wounds})
+    }
+
     getCharacterEdgeURL(edge) {
         var baseURL = this.state.url + 'characteredges/';
         if (edge) {
@@ -267,6 +274,12 @@ class StatBlock extends React.Component {
                     this.handleEdgesLoaded(characterEdges);
                 }).catch(function (err) {
                     console.log("Failed to load edges", err)});
+
+            rest.getData(this.state.url + 'wounds/').then(
+                (wounds) => {
+                    this.handleWoundsLoaded(wounds);
+                }).catch(function (err) {
+                    console.log("Failed to load wounds", err)});
 
             rest.getData(this.state.url)
                 .then((character) => {
@@ -1146,6 +1159,7 @@ class StatBlock extends React.Component {
             <DamageControl
                 character={skillHandler.props.character}
                 handler={skillHandler}
+                wounds={this.state.woundList}
                 onMod={this.handleCharacterUpdate.bind(this)}
             />
         </Panel>;

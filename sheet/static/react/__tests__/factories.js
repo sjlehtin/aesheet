@@ -681,12 +681,17 @@ var sheetFactory = function (statOverrides) {
     return Object.assign(_sheetData, statOverrides);
 };
 
-var statBlockFactory = function (overrides) {
+var statBlockTreeFactory = function (overrides) {
     var characterOverrides = undefined;
     var sheetOverrides = undefined;
+    var wounds = [];
     if (overrides) {
         characterOverrides = overrides.character;
         sheetOverrides = overrides.sheet;
+        if (overrides.wounds) {
+            wounds = overrides.wounds.map(
+                (props) => { return woundFactory(props); });
+        }
     }
 
     var charData = characterFactory(characterOverrides);
@@ -720,6 +725,8 @@ var statBlockFactory = function (overrides) {
             return jsonResponse([]);
         } else if (url === "/rest/characters/2/characteredges/") {
             return jsonResponse([]);
+        } else if (url === "/rest/characters/2/wounds/") {
+            return jsonResponse(wounds);
         } else if (url === "/rest/skills/campaign/2/") {
             return jsonResponse([]);
         } else if (url === "/rest/weapontemplates/campaign/2/") {
@@ -763,12 +770,18 @@ var statBlockFactory = function (overrides) {
         <StatBlock url="/rest/sheets/1/"/>
     );
 
-    var statBlock = TestUtils.findRenderedComponentWithType(table,
-        StatBlock);
-    statBlock.afterLoad = afterLoad;
-    return statBlock;
+    table.afterLoad = afterLoad;
+    return table;
 };
 
+var statBlockFactory = function (overrides) {
+    "use strict";
+    var table = statBlockTreeFactory(overrides);
+    var statBlock = TestUtils.findRenderedComponentWithType(table,
+        StatBlock);
+    statBlock.afterLoad = table.afterLoad;
+    return statBlock;
+};
 
 var skillHandlerFactory = function (givenProps) {
     if (!givenProps) {
@@ -841,6 +854,7 @@ module.exports = {
     characterFactory: characterFactory,
     sheetFactory: sheetFactory,
     statBlockFactory: statBlockFactory,
+    statBlockTreeFactory: statBlockTreeFactory,
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
     edgeLevelFactory: edgeLevelFactory,
