@@ -49,11 +49,6 @@ class Inventory extends React.Component {
         return total;
     }
 
-    handleAddButtonClick(e) {
-        e.preventDefault();
-        this.setState({addEnabled: true})
-    }
-
     handleNew(newElem) {
         var newInventory = this.state.inventory;
         var data = newElem;
