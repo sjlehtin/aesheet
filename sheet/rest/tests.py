@@ -1703,3 +1703,4 @@ class WoundTestCase(TestCase):
     # immutable.
 
     # TODO: healing and worsening log entries should be coalesced.
+    # TODO: type of received damage should be stored.
