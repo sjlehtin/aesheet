@@ -29,6 +29,7 @@ jest.dontMock('../CharacterNotes');
 jest.dontMock('../MovementRates');
 jest.dontMock('../DamageControl');
 jest.dontMock('../sheet-util');
+jest.dontMock('./testutils');
 jest.dontMock('./factories');
 
 import React from 'react';
@@ -38,7 +39,8 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 var factories = require('./factories');
-var getAllArgumentsByPosition = require('./testutils').getAllArgumentsByPosition;
+
+const getAllArgumentsByPosition = require('./testutils').getAllArgumentsByPosition;
 
 const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
