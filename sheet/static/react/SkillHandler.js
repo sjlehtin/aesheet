@@ -479,15 +479,38 @@ class SkillHandler {
 
         return this._baseStats;
     }
-    
+
+    getWoundPenalties() {
+        if (!this._woundPenalties) {
+            var locationDamages = {H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0};
+            for (let ww of this.props.wounds) {
+                locationDamages[ww.location] += ww.damage - ww.healed;
+            }
+            this._woundPenalties = {};
+
+            var toughness = this.edgeLevel("Toughness");
+            this._woundPenalties.AA = -10 * Math.max(0, locationDamages.H - toughness);
+            this._woundPenalties.AA += -5 * Math.max(0, locationDamages.T - toughness);
+            for (let loc of ["RA", "LA", "RL", "LL"]) {
+                this._woundPenalties.AA +=
+                    util.rounddown(Math.max(0, locationDamages[loc] - toughness) / 3) * -5;
+            }
+        }
+        return this._woundPenalties;
+    }
+
     getEffStats() {
         if (!this._effStats) {
             this._effStats = {};
             var baseStats = this.getBaseStats();
+
+            var woundPenalties = this.getWoundPenalties();
+
             for (let st of SkillHandler.baseStatNames) {
                 this._effStats[st] = baseStats[st] +
-                    this._softMods[st];
+                    this._softMods[st] + woundPenalties.AA;
             }
+
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
             // in the excel combat sheet.
@@ -528,7 +551,8 @@ SkillHandler.defaultProps = {
     armor: {},
     helm: {},
     effects: [],
-    edges: []
+    edges: [],
+    wounds: []
 };
 
 export default SkillHandler;

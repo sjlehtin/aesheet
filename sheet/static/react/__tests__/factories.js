@@ -797,12 +797,7 @@ var skillHandlerFactory = function (givenProps) {
     if (!givenProps) {
         givenProps = {};
     }
-
-    var edgeList = [];
-    var skills = [];
-    var allSkills = [];
-    var effects = [];
-
+    var edgeList = [], skills = [], allSkills = [], effects = [], wounds = [];
 
     var skillMap = {};
     if (givenProps.allSkills) {
@@ -838,6 +833,13 @@ var skillHandlerFactory = function (givenProps) {
         }
     }
 
+    if (givenProps.wounds) {
+        for (let ww of givenProps.wounds) {
+            var wound = woundFactory(ww);
+            wounds.push(wound);
+        }
+
+    }
     var armor = {};
     if (givenProps.armor) {
         armor = armorFactory(givenProps.armor);
@@ -852,6 +854,7 @@ var skillHandlerFactory = function (givenProps) {
         edges: edgeList,
         effects: effects,
         characterSkills: skills, allSkills: allSkills,
+        wounds: wounds,
         armor: armor, helm: helm
     };
     if (givenProps.weightCarried) {
