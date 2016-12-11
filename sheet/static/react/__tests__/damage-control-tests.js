@@ -122,4 +122,18 @@ describe('DamageControl', function() {
         expect(ReactDOM.findDOMNode(woundRows[1]).textContent).toContain("Heart racing");
     });
 
+    it("allows wounds to be modified", function () {
+        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
+        var tree = getDamageControlTree({
+            wounds: [{damage: 5, location: "H", healed: 0,
+                      id: 2, effect: "Throat punctured."}],
+            onWoundMod: callback
+            });
+        var woundRow = TestUtils.findRenderedComponentWithType(tree,
+            WoundRow);
+
+        TestUtils.Simulate.click(woundRow._healButton);
+
+        expect(callback).toHaveBeenCalledWith({id:2, healed: 1});
+    });
 });

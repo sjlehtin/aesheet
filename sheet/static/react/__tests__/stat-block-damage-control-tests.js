@@ -55,4 +55,26 @@ describe('stat block wounds handling', function(done) {
             done();
         });
     });
+
+    it("allows wounds to be modified", function (done) {
+        var tree = factories.statBlockTreeFactory({wounds: [
+            {id: 2, damage: 5, healed: 0}]});
+        rest.patch.mockClear();
+        var patchPromise = Promise.resolve({});
+        rest.patch.mockReturnValue(patchPromise);
+        tree.afterLoad(function () {
+            var woundRow = TestUtils.findRenderedComponentWithType(tree, WoundRow);
+            TestUtils.Simulate.click(woundRow._healButton);
+
+            expect(rest.patch.mock.calls[0]).toEqual(['/rest/characters/2/wounds/2/', {id: 2, healed: 1}]);
+
+            patchPromise.then(() => {
+                var statBlock = TestUtils.findRenderedComponentWithType(tree, StatBlock);
+                expect(statBlock.state.woundList).toEqual([
+                    factories.woundFactory({id: 2, damage:5, healed: 1})]);
+                done();
+            });
+        });
+    });
+
 });
