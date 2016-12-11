@@ -486,15 +486,24 @@ class SkillHandler {
             for (let ww of this.props.wounds) {
                 locationDamages[ww.location] += ww.damage - ww.healed;
             }
-            this._woundPenalties = {};
 
             var toughness = this.edgeLevel("Toughness");
-            this._woundPenalties.AA = -10 * Math.max(0, locationDamages.H - toughness);
-            this._woundPenalties.AA += -5 * Math.max(0, locationDamages.T - toughness);
-            for (let loc of ["RA", "LA", "RL", "LL"]) {
-                this._woundPenalties.AA +=
-                    util.rounddown(Math.max(0, locationDamages[loc] - toughness) / 3) * -5;
+
+            for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+                locationDamages[loc] = Math.max(0, locationDamages[loc] - toughness);
             }
+
+            this._woundPenalties = {};
+
+            this._woundPenalties.aa = -10 * locationDamages.H;
+            this._woundPenalties.aa += -5 * locationDamages.T;
+            for (let loc of ["RA", "LA", "RL", "LL"]) {
+                this._woundPenalties.aa +=
+                    util.rounddown(locationDamages[loc] / 3) * -5;
+            }
+
+            this._woundPenalties.mov = -10 * locationDamages.RL;
+            this._woundPenalties.mov += -10 * locationDamages.LL;
         }
         return this._woundPenalties;
     }
@@ -508,7 +517,7 @@ class SkillHandler {
 
             for (let st of SkillHandler.baseStatNames) {
                 this._effStats[st] = baseStats[st] +
-                    this._softMods[st] + woundPenalties.AA;
+                    this._softMods[st] + woundPenalties.aa;
             }
 
             // Encumbrance and armor are calculated after soft mods
@@ -522,7 +531,7 @@ class SkillHandler {
 
             this._effStats.mov = util.roundup((this._effStats.fit +
                 this._effStats.ref)/2) + this._hardMods.mov +
-                this._softMods.mov;
+                this._softMods.mov + woundPenalties.mov;
             this._effStats.dex = util.roundup((this._effStats.int +
                 this._effStats.ref)/2) + this._hardMods.dex +
                 this._softMods.dex;

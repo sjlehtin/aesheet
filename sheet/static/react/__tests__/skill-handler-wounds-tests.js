@@ -9,7 +9,7 @@ const SkillHandler = require('../SkillHandler').default;
 describe('SkillHandler wounds', function() {
     "use strict";
 
-    it('integrates eff stats with wound penalties', function () {
+    it('integrates eff stats with wound AA penalties', function () {
         var handler = factories.skillHandlerFactory({
             character: {cur_ref: 50, cur_int: 50},
             wounds: [{damage: 2, location: "T"}]
@@ -24,7 +24,7 @@ describe('SkillHandler wounds', function() {
                 {damage: 3, location: "T"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-25);
+        expect(handler.getWoundPenalties().aa).toEqual(-25);
     });
 
     it('calculates penalties with partially healed torso wounds', function () {
@@ -32,7 +32,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 5, healed: 2, location: "T"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-15);
+        expect(handler.getWoundPenalties().aa).toEqual(-15);
     });
 
     it('calculates penalties with head wound', function () {
@@ -40,7 +40,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 3, location: "H"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-30);
+        expect(handler.getWoundPenalties().aa).toEqual(-30);
     });
 
     it('should recognize small limb wound', function () {
@@ -48,7 +48,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 2, location: "LA"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-0);
+        expect(handler.getWoundPenalties().aa).toEqual(-0);
     });
 
     it('should recognize threshold limb wound', function () {
@@ -56,7 +56,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 3, location: "LA"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-5);
+        expect(handler.getWoundPenalties().aa).toEqual(-5);
     });
 
     it('should recognize slightly above threshold limb wound', function () {
@@ -64,7 +64,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 4, location: "LA"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-5);
+        expect(handler.getWoundPenalties().aa).toEqual(-5);
     });
 
     it('should recognize major limb wound', function () {
@@ -72,7 +72,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 7, location: "LA"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-10);
+        expect(handler.getWoundPenalties().aa).toEqual(-10);
     });
 
     it('combines penalties from limb and head wounds', function () {
@@ -80,7 +80,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 3, location: "H"}, {damage: 3, location: "RA"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-35);
+        expect(handler.getWoundPenalties().aa).toEqual(-35);
     });
 
     it('calculates penalties from multiple wounds in a location', function () {
@@ -89,7 +89,7 @@ describe('SkillHandler wounds', function() {
                 {damage: 1, location: "RA"}, {damage: 1, location: "RA"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-10);
+        expect(handler.getWoundPenalties().aa).toEqual(-10);
     });
 
     it('calculates penalties taking toughness into account', function () {
@@ -98,10 +98,10 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 5, location: "H"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-10);
+        expect(handler.getWoundPenalties().aa).toEqual(-10);
     });
 
-    it('calculates penalties from multiple wounds taking toughness into' +
+    it('calculates MOV penalties from multiple wounds taking toughness into' +
         ' account', function () {
         // The Atlas example of the rules.
         var handler = factories.skillHandlerFactory({
@@ -110,7 +110,7 @@ describe('SkillHandler wounds', function() {
                 {damage: 1, location: "RL"}, {damage: 1, location: "RL"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-5);
+        expect(handler.getWoundPenalties().aa).toEqual(-5);
     });
 
     it('does not overdo toughness', function () {
@@ -120,7 +120,48 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 2, location: "RL"}]
         });
 
-        expect(handler.getWoundPenalties().AA).toEqual(-0);
+        expect(handler.getWoundPenalties().aa).toEqual(-0);
+    });
+
+    it('calculates MOV penalties from multiple wounds taking toughness into' +
+        ' account', function () {
+        // The Atlas example of the rules.
+        var handler = factories.skillHandlerFactory({
+            edges: [{edge: "Toughness", level: 3}],
+            wounds: [{damage: 2, location: "RL"}, {damage: 2, location: "RL"},
+                {damage: 1, location: "RL"}, {damage: 1, location: "RL"}]
+        });
+
+        expect(handler.getWoundPenalties().mov).toEqual(-30);
+    });
+
+    it('should not incur MOV penalty from torso or arms', function () {
+        // The Atlas example of the rules.
+        var handler = factories.skillHandlerFactory({
+            edges: [{edge: "Toughness", level: 3}],
+            wounds: [{damage: 2, location: "RA"}, {damage: 2, location: "LA"},
+                {damage: 1, location: "T"}, {damage: 1, location: "H"}]
+        });
+
+        expect(handler.getWoundPenalties().mov).toEqual(-0);
+    });
+
+    it('integrates eff stats with wound MOV penalties', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_ref: 50, cur_fit: 50},
+            wounds: [{damage: 2, location: "RL"}]
+        });
+
+        expect(handler.getEffStats().mov).toEqual(30);
+    });
+
+    it('combines AA and MOV penalties', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_ref: 50, cur_fit: 50},
+            wounds: [{damage: 2, location: "RL"}, {damage: 2, location: "T"}]
+        });
+
+        expect(handler.getEffStats().mov).toEqual(20);
     });
 
 });

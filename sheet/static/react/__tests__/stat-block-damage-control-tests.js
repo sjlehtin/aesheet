@@ -62,7 +62,7 @@ describe('stat block wounds handling', function(done) {
         var block = factories.statBlockFactory({wounds: [
             {damage: 2, effect: "Throat punctured", location: "T"}]});
         block.afterLoad(function () {
-            expect(block.getSkillHandler().getWoundPenalties().AA).toEqual(-10);
+            expect(block.getSkillHandler().getWoundPenalties().aa).toEqual(-10);
             done();
         });
     });
