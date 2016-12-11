@@ -28,7 +28,8 @@ class AddWoundControl extends React.Component {
     }
 
     handleLocationChange(value) {
-        this.setState({selectedLocation: value});
+        this.setState({selectedLocation: typeof(value) === "object" ?
+            value.location : value});
     }
 
     handleTypeChange(value) {
@@ -65,6 +66,8 @@ class AddWoundControl extends React.Component {
     render() {
         return <tr><td><Combobox data={AddWoundControl.locations}
                                  textField='description'
+                                 valueField='location'
+                                 bsSize="small"
                                  value={this.state.selectedLocation}
                                  filter="contains"
                                  onChange={(value) => this.handleLocationChange(value)}
