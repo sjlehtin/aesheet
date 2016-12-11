@@ -29,6 +29,7 @@ jest.dontMock('../CharacterNotes');
 jest.dontMock('../MovementRates');
 jest.dontMock('../DamageControl');
 jest.dontMock('../WoundRow');
+jest.dontMock('../AddWoundControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
@@ -42,6 +43,7 @@ var testutils = require('./testutils');
 
 const StatBlock = require('../StatBlock').default;
 const WoundRow = require('../WoundRow').default;
+const AddWoundControl = require('../AddWoundControl').default;
 
 describe('stat block wounds handling', function(done) {
     "use strict";
@@ -95,6 +97,41 @@ describe('stat block wounds handling', function(done) {
                 expect(statBlock.state.woundList).toEqual([
                     factories.woundFactory({id: 5, damage: 3, healed: 2})
                 ]);
+                done();
+            });
+        });
+    });
+
+    it("allows wounds to be added", function (done) {
+        var tree = factories.statBlockTreeFactory();
+        rest.post.mockClear();
+        tree.afterLoad(function () {
+            var addControl = TestUtils.findRenderedComponentWithType(tree, AddWoundControl);
+
+            TestUtils.Simulate.change(addControl._damageInputField,
+                {target: {value: 5}});
+            TestUtils.Simulate.change(addControl._effectInputField,
+                {target: {value: "Fuzznozzle"}});
+
+            var newWound = factories.woundFactory({id: 42, damage: 5,
+                effect: "Fuzznozzle", character: 2});
+
+            var expectedWound = Object.assign({}, newWound);
+            delete expectedWound.id;
+            delete expectedWound.character;
+            delete expectedWound.healed;
+
+            var postPromise = Promise.resolve(newWound);
+            rest.post.mockReturnValue(postPromise);
+
+            TestUtils.Simulate.click(addControl._addButton);
+
+            expect(rest.post.mock.calls[0]).toEqual(['/rest/characters/2/wounds/',
+                expectedWound]);
+
+            postPromise.then(() => {
+                var statBlock = TestUtils.findRenderedComponentWithType(tree, StatBlock);
+                expect(statBlock.state.woundList).toEqual([newWound]);
                 done();
             });
         });

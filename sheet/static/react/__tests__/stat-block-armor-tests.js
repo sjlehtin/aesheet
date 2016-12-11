@@ -28,6 +28,8 @@ jest.dontMock('../AddCharacterEdgeControl');
 jest.dontMock('../CharacterNotes');
 jest.dontMock('../MovementRates');
 jest.dontMock('../DamageControl');
+jest.dontMock('../WoundRow');
+jest.dontMock('../AddWoundControl');
 jest.dontMock('../sheet-util');
 jest.dontMock('./testutils');
 jest.dontMock('./factories');

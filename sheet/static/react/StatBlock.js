@@ -202,6 +202,13 @@ class StatBlock extends React.Component {
         ).catch((err) => console.log(err));
     }
 
+    handleWoundAdded(data) {
+        return rest.post(this.state.url + `wounds/`, data).then((json) => {
+            this.state.woundList.push(json);
+            this.setState({woundList: this.state.woundList});
+        }).then((err) => console.log(err));
+    }
+
     getCharacterEdgeURL(edge) {
         var baseURL = this.state.url + 'characteredges/';
         if (edge) {
@@ -1186,6 +1193,7 @@ class StatBlock extends React.Component {
                 wounds={this.state.woundList}
                 onWoundMod={this.handleWoundChanged.bind(this)}
                 onWoundRemove={this.handleWoundRemoved.bind(this)}
+                onWoundAdd={this.handleWoundAdded.bind(this)}
                 onMod={this.handleCharacterUpdate.bind(this)}
             />
         </Panel>;
