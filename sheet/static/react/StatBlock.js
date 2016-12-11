@@ -187,7 +187,19 @@ class StatBlock extends React.Component {
             var wound = Object.assign(this.state.woundList[index], data);
             this.state.woundList.splice(index, 1, wound);
             this.setState({woundList: this.state.woundList});
-        }).then((err) => console.log(err));
+        }).catch((err) => console.log(err));
+    }
+
+    handleWoundRemoved(data) {
+        var woundId = data.id;
+        return rest.delete(this.state.url + `wounds/${woundId}/`).then(
+            (json) => {
+            var index = StatBlock.findItemIndex(
+                this.state.woundList, data);
+            this.state.woundList.splice(index, 1);
+            this.setState({woundList: this.state.woundList});
+            }
+        ).catch((err) => console.log(err));
     }
 
     getCharacterEdgeURL(edge) {
@@ -1173,6 +1185,7 @@ class StatBlock extends React.Component {
                 handler={skillHandler}
                 wounds={this.state.woundList}
                 onWoundMod={this.handleWoundChanged.bind(this)}
+                onWoundRemove={this.handleWoundRemoved.bind(this)}
                 onMod={this.handleCharacterUpdate.bind(this)}
             />
         </Panel>;
