@@ -58,7 +58,8 @@ class WoundRow extends React.Component {
             <td>{this.props.wound.damage - this.props.wound.healed}
             <span style={{position: "relative"}}>{worsenButton}{decreaseButton}</span></td>
             <td>{this.props.wound.effect}
-                <Button ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
+                <Button bsSize="xsmall"
+                        ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleRemove()}>Heal</Button>
             </td>
         </tr>;
