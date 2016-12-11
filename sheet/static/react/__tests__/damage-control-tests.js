@@ -122,6 +122,21 @@ describe('DamageControl', function() {
         expect(ReactDOM.findDOMNode(woundRows[1]).textContent).toContain("Heart racing");
     });
 
+    it("allows wounds to be removed", function () {
+        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
+        var tree = getDamageControlTree({
+            wounds: [{id: 2}],
+            onWoundRemove: callback
+            });
+        var woundRow = TestUtils.findRenderedComponentWithType(tree,
+            WoundRow);
+
+        TestUtils.Simulate.click(woundRow._removeButton);
+
+        expect(callback).toHaveBeenCalledWith({id:2});
+
+    });
+
     it("allows wounds to be modified", function () {
         var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
         var tree = getDamageControlTree({
