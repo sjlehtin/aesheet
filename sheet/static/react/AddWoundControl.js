@@ -73,19 +73,20 @@ class AddWoundControl extends React.Component {
                                  onChange={(value) => this.handleLocationChange(value)}
                                  ref={(c) => { if (c) { this._locationField = c }}}
                             /></td>
-            <td><Input type="text" value={this.state.damage} onChange={
+            <td><Input bsSize="small" type="text" value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
                 ref={(c) => { if (c) { this._damageInputField = c.getInputDOMNode()}}}
             /></td>
             <td>
-                <Input type="text" value={this.state.effect} onChange={
+                <Input bsSize="small" type="text" value={this.state.effect} onChange={
                 (e) => this.handleEffectChange(e)}
                 ref={(c) => { if (c) { this._effectInputField = c.getInputDOMNode()}}}
             />
-                <button bsSize="small"
-                        ref={(c) => { if (c) { this._addButton = c}}}
+                <Button bsSize="small"
+                        disabled={!this.isValid()}
+                        ref={(c) => { if (c) { this._addButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleSubmit()}
-            >Add wound</button></td>
+            >Add wound</Button></td>
         </tr>;
     }
 }
