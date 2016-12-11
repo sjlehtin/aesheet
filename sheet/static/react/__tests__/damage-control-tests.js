@@ -1,5 +1,6 @@
 jest.dontMock('../DamageControl');
 jest.dontMock('../WoundRow');
+jest.dontMock('../AddWoundControl');
 jest.dontMock('../SkillHandler');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
@@ -10,6 +11,7 @@ import TestUtils from 'react-addons-test-utils';
 
 const DamageControl = require('../DamageControl').default;
 const WoundRow = require('../WoundRow').default;
+const AddWoundControl = require('../AddWoundControl').default;
 
 var factories = require('./factories');
 
@@ -120,6 +122,23 @@ describe('DamageControl', function() {
             WoundRow);
         expect(ReactDOM.findDOMNode(woundRows[0]).textContent).toContain("Throat punctured");
         expect(ReactDOM.findDOMNode(woundRows[1]).textContent).toContain("Heart racing");
+    });
+
+    it("allows wounds to be added", function () {
+        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
+        var tree = getDamageControlTree({onWoundAdd: callback});
+        var addWoundControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        TestUtils.Simulate.change(addWoundControl._damageInputField,
+            {target: {value: 5}});
+        TestUtils.Simulate.change(addWoundControl._effectInputField,
+            {target: {value: "Fuzznozzle"}});
+
+        TestUtils.Simulate.click(addWoundControl._addButton);
+
+        expect(callback).toHaveBeenCalledWith({location: "T", type: "S",
+            damage: 5, effect: 'Fuzznozzle'});
     });
 
     it("allows wounds to be removed", function () {

@@ -33,6 +33,7 @@ import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
 import Octicon from 'react-octicon'
 import SkillHandler from 'SkillHandler';
 import WoundRow from 'WoundRow';
+import AddWoundControl from 'AddWoundControl';
 
 var util = require('sheet-util');
 var rest = require('sheet-rest');
@@ -98,6 +99,13 @@ class DamageControl extends React.Component {
         }
     }
 
+    handleWoundAdd(data) {
+        if (this.props.onWoundAdd) {
+            return this.props.onWoundAdd(data);
+        }
+        return Promise.resolve({});
+    }
+
     render() {
         var inputStyle = {width: "3em"};
 
@@ -128,17 +136,16 @@ class DamageControl extends React.Component {
                              onMod={(data) => this.handleWoundMod(data)}
                              onRemove={(data) => this.handleWoundRemove(data)}
             />;});
-        var wounds = '';
-        if (rows.length > 0) {
-            wounds = <Table>
+        var wounds = <Table>
                 <thead>
                 <tr><th>Loc</th><th>Dmg</th><th>Effect</th></tr>
                 </thead>
                 <tbody>
                 {rows}
+                <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)} />
                 </tbody>
-            </Table>
-        }
+            </Table>;
+
         return (<div style={this.props.style}>
             {damage}
             <label>Stamina: </label>
@@ -174,7 +181,8 @@ DamageControl.propTypes = {
     wounds: React.PropTypes.arrayOf(React.PropTypes.object),
     onMod: React.PropTypes.func,
     onWoundMod: React.PropTypes.func,
-    onWoundRemove: React.PropTypes.func
+    onWoundRemove: React.PropTypes.func,
+    onWoundAdd: React.PropTypes.func
 };
 
 DamageControl.defaultProps = {
