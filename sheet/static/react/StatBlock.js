@@ -883,6 +883,7 @@ class StatBlock extends React.Component {
             edges: this.state.edgeList,
             effects: this.getAllEffects(),
             weightCarried: this.getCarriedWeight(),
+            wounds: this.state.woundList,
             armor: this.state.armor,
             helm: this.state.helm
         });

@@ -58,6 +58,15 @@ describe('stat block wounds handling', function(done) {
         });
     });
 
+    it("integrates wounds into skill checks", function (done) {
+        var block = factories.statBlockFactory({wounds: [
+            {damage: 2, effect: "Throat punctured", location: "T"}]});
+        block.afterLoad(function () {
+            expect(block.getSkillHandler().getWoundPenalties().AA).toEqual(-10);
+            done();
+        });
+    });
+
     it("allows wounds to be modified", function (done) {
         var tree = factories.statBlockTreeFactory({wounds: [
             {id: 2, damage: 5, healed: 0}]});
