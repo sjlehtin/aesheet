@@ -83,6 +83,12 @@ class DamageControl extends React.Component {
         }
     }
 
+    handleWoundMod(data) {
+        if (this.props.onWoundMod) {
+            this.props.onWoundMod(data);
+        }
+    }
+
     render() {
         var inputStyle = {width: "3em"};
 
@@ -109,13 +115,15 @@ class DamageControl extends React.Component {
             </div>;
         }
         var rows = this.props.wounds.map((wound, idx) => {
-            return <WoundRow key={"wound-" + idx} wound={wound} />;});
+            return <WoundRow key={"wound-" + idx} wound={wound}
+                             onMod={(data) => this.handleWoundMod(data)}
+            />;});
         var wounds = '';
         if (rows.length > 0) {
             wounds = <Table>
-                {/*<thead>*/}
-                {/*<tr></tr>*/}
-                {/*</thead>*/}
+                <thead>
+                <tr><th>Loc</th><th>Dmg</th><th>Effect</th></tr>
+                </thead>
                 <tbody>
                 {rows}
                 </tbody>
@@ -154,7 +162,8 @@ class DamageControl extends React.Component {
 DamageControl.propTypes = {
     handler: React.PropTypes.object.isRequired,
     wounds: React.PropTypes.arrayOf(React.PropTypes.object),
-    onMod: React.PropTypes.func
+    onMod: React.PropTypes.func,
+    onWoundMod: React.PropTypes.func
 };
 
 DamageControl.defaultProps = {
