@@ -1701,3 +1701,5 @@ class WoundTestCase(TestCase):
 
     # TODO: damage should only increase.  Location and effect should be
     # immutable.
+
+    # TODO: healing and worsening log entries should be coalesced.
