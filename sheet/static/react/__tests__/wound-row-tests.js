@@ -28,27 +28,19 @@ describe('WoundRow', function() {
         );
     };
 
-    // it("allows wounds to be added", function () {
-    //     var promise = Promise.resolve({});
-    //     var callback = jasmine.createSpy("callback").and.returnValue(promise);
-    //     var control = TestUtils.renderIntoDocument(
-    //         <DamageControl onAddWound={callback} />
-    //     );
-    //     var addWoundCtrl = TestUtils.findRenderedComponentWithType(control,
-    //         AddWoundControl);
-    // });
-    //
-    // it("allows wounds to be removed", function () {
-    //     var promise = Promise.resolve({});
-    //     var callback = jasmine.createSpy("callback").and.returnValue(promise);
-    //     var control = TestUtils.renderIntoDocument(
-    //         <DamageControl wounds={[
-    //             factories.woundFactory({damage:3, id: 1}),
-    //             factories.woundFactory({damage:5, id: 2})]}
-    //                        onRemoveWound={callback} />
-    //     );
-    //
-    // });
+    it("allows wounds to be removed", function () {
+        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
+        var tree = getWoundRowTree({
+            wound: {id: 2},
+            onRemove: callback
+            });
+        var woundRow = TestUtils.findRenderedComponentWithType(tree,
+            WoundRow);
+
+        TestUtils.Simulate.click(woundRow._removeButton);
+
+        expect(callback).toHaveBeenCalledWith({id:2});
+    });
 
     it("allows wounds to be healed", function () {
         var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
@@ -92,17 +84,4 @@ describe('WoundRow', function() {
 
         expect(woundRow._healButton).not.toBeDefined();
     });
-
-    // it("allows wounds to be worsened", function () {
-    //     var promise = Promise.resolve({});
-    //     var callback = jasmine.createSpy("callback").and.returnValue(promise);
-    //     var control = TestUtils.renderIntoDocument(
-    //         <DamageControl wounds={[
-    //             factories.woundFactory({damage:5, id: 2})]}
-    //                        onModifyWound={callback} />
-    //     );
-    //     var woundRow = TestUtils.findRenderedComponentWithType(control,
-    //         WoundRow);
-    // });
-
 });

@@ -1,5 +1,7 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import Octicon from 'react-octicon'
+import {Button} from 'react-bootstrap';
 
 var util = require('sheet-util');
 var rest = require('sheet-rest');
@@ -20,6 +22,12 @@ class WoundRow extends React.Component {
         if (this.props.onMod) {
             this.props.onMod({id: this.props.wound.id,
                 healed: this.props.wound.healed + 1});
+        }
+    }
+
+    handleRemove() {
+        if (this.props.onRemove) {
+            this.props.onRemove({id: this.props.wound.id});
         }
     }
 
@@ -49,14 +57,18 @@ class WoundRow extends React.Component {
             <td>{this.props.wound.location}</td>
             <td>{this.props.wound.damage - this.props.wound.healed}
             <span style={{position: "relative"}}>{worsenButton}{decreaseButton}</span></td>
-            <td>{this.props.wound.effect}</td>
+            <td>{this.props.wound.effect}
+                <Button ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
+                        onClick={() => this.handleRemove()}>Heal</Button>
+            </td>
         </tr>;
     }
 }
 
 WoundRow.propTypes = {
     wound: React.PropTypes.object.isRequired,
-    onMod: React.PropTypes.func
+    onMod: React.PropTypes.func,
+    onRemove: React.PropTypes.func
 };
 
 export default WoundRow;
