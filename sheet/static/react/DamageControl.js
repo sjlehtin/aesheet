@@ -23,6 +23,9 @@
  * - separate wounds per hit location
  * - show the damages in a "straw man" view
  * - show effects, AA, FIT/REF, MOV penalties
+ *
+ * FIT/REF damage to RA could affect FULL and PRI, to LA could affect SEC.
+ *
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
