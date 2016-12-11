@@ -102,12 +102,21 @@ var nextEdgeID = 0;
 var edgeFactory = function (overrideFields) {
     "use strict";
 
+    var props = {};
+
+    // Treat an existing non-object as name.
+    if (typeof(overrideFields) !== "object" && overrideFields) {
+        props = {name: overrideFields};
+    } else  if (overrideFields) {
+        props = overrideFields;
+    }
+
     var edge = {
         "name": "Acute Hearing",
         "description": "",
         "notes": ""
     };
-    return Object.assign(edge, overrideFields);
+    return Object.assign(edge, props);
 };
 
 var edgeSkillBonusFactory = function (overrideFields) {
