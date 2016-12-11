@@ -1187,7 +1187,7 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Damage controls</Loading>;
         }
-        return <Panel header={<h4>Stamina damage</h4>}>
+        return <Panel header={<h4>Stamina damage and wounds</h4>}>
             <DamageControl
                 character={skillHandler.props.character}
                 handler={skillHandler}
