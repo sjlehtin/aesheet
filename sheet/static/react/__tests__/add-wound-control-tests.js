@@ -45,7 +45,7 @@ describe('AddWoundControl', function() {
 
         TestUtils.Simulate.click(addControl._addButton);
 
-        expect(callback).toHaveBeenCalledWith({location: "H", type: "R", damage: 5, effect: 'Fuzznozzle'});
+        expect(callback).toHaveBeenCalledWith({location: "H", damage_type: "R", damage: 5, effect: 'Fuzznozzle'});
     });
 
     it("clears fields after add", function (done) {
@@ -57,7 +57,6 @@ describe('AddWoundControl', function() {
         var addControl = TestUtils.findRenderedComponentWithType(tree,
             AddWoundControl);
 
-        // TODO: change location and damage type
         TestUtils.Simulate.change(addControl._damageInputField,
             {target: {value: 5}});
 

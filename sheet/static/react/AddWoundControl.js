@@ -28,11 +28,16 @@ class AddWoundControl extends React.Component {
     }
 
     handleLocationChange(value) {
-        this.setState({selectedLocation: typeof(value) === "object" ?
-            value.location : value});
+        if (typeof(value) === "object") {
+            value = value.location;
+        }
+        this.setState({selectedLocation: value});
     }
 
     handleTypeChange(value) {
+        if (typeof(value) === "object") {
+            value = value.type;
+        }
         this.setState({selectedType: value});
     }
 
@@ -44,6 +49,10 @@ class AddWoundControl extends React.Component {
         if (locations.indexOf(this.state.selectedLocation) < 0) {
             return false;
         }
+        var types = AddWoundControl.damageTypes.map((el) => {return el.type});
+        if (types.indexOf(this.state.selectedType) < 0) {
+            return false;
+        }
         return true;
     }
 
@@ -52,7 +61,7 @@ class AddWoundControl extends React.Component {
             this.props.onAdd({
                 damage: this.state.damage,
                 location: this.state.selectedLocation,
-                type: this.state.selectedType,
+                damage_type: this.state.selectedType,
                 effect: this.state.effect
             }).then(() => {
                 this.setState({
@@ -64,24 +73,33 @@ class AddWoundControl extends React.Component {
     }
 
     render() {
-        return <tr><td><Combobox data={AddWoundControl.locations}
-                                 textField='description'
-                                 valueField='location'
-                                 bsSize="small"
-                                 value={this.state.selectedLocation}
-                                 filter="contains"
-                                 onChange={(value) => this.handleLocationChange(value)}
-                                 ref={(c) => { if (c) { this._locationField = c }}}
-                            /></td>
+        return <tr>
+            <td><Combobox data={AddWoundControl.locations}
+                          textField='description'
+                          valueField='location'
+                          bsSize="small"
+                          value={this.state.selectedLocation}
+                          filter="contains"
+                          onChange={(value) => this.handleLocationChange(value)}
+                          ref={(c) => { if (c) { this._locationField = c }}} />
+            </td>
+            <td><Combobox data={AddWoundControl.damageTypes}
+                          textField='description'
+                          valueField='type'
+                          bsSize="small"
+                          value={this.state.selectedType}
+                          filter="contains"
+                          onChange={(value) => this.handleTypeChange(value)}
+                          ref={(c) => { if (c) { this._typeField = c }}} />
+            </td>
             <td><Input bsSize="small" type="text" value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
-                ref={(c) => { if (c) { this._damageInputField = c.getInputDOMNode()}}}
-            /></td>
+                ref={(c) => { if (c) { this._damageInputField = c.getInputDOMNode()}}} />
+            </td>
             <td>
-                <Input bsSize="small" type="text" value={this.state.effect} onChange={
-                (e) => this.handleEffectChange(e)}
-                ref={(c) => { if (c) { this._effectInputField = c.getInputDOMNode()}}}
-            />
+                <Input bsSize="small" type="text" value={this.state.effect}
+                       onChange={(e) => this.handleEffectChange(e)}
+                       ref={(c) => { if (c) { this._effectInputField = c.getInputDOMNode()}}} />
                 <Button bsSize="small"
                         disabled={!this.isValid()}
                         ref={(c) => { if (c) { this._addButton = ReactDOM.findDOMNode(c)}}}
@@ -102,6 +120,13 @@ AddWoundControl.locations = [
     {location: "RL", description: "Right leg (3)"},
     {location: "LA", description: "Left arm (2)"},
     {location: "LL", description: "Left leg (1)"}
+];
+
+AddWoundControl.damageTypes = [
+    {type: "S", description: "Slash"},
+    {type: "P", description: "Pierce"},
+    {type: "B", description: "Bludgeon"},
+    {type: "R", description: "Burn"}
 ];
 
 export default AddWoundControl;

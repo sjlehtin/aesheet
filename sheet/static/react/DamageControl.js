@@ -138,7 +138,7 @@ class DamageControl extends React.Component {
             />;});
         var wounds = <Table>
                 <thead>
-                <tr><th>Loc</th><th>Dmg</th><th>Effect</th></tr>
+                <tr><th>Loc</th><th>Type</th><th>Dmg</th><th>Effect</th></tr>
                 </thead>
                 <tbody>
                 {rows}

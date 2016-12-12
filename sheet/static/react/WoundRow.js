@@ -55,6 +55,7 @@ class WoundRow extends React.Component {
 
         return <tr style={this.props.style}>
             <td>{this.props.wound.location}</td>
+            <td>{this.props.wound.damage_type}</td>
             <td>{this.props.wound.damage - this.props.wound.healed}
             <span style={{position: "relative"}}>{worsenButton}{decreaseButton}</span></td>
             <td>{this.props.wound.effect}

@@ -137,8 +137,8 @@ describe('DamageControl', function() {
 
         TestUtils.Simulate.click(addWoundControl._addButton);
 
-        expect(callback).toHaveBeenCalledWith({location: "T", type: "S",
-            damage: 5, effect: 'Fuzznozzle'});
+        expect(callback).toHaveBeenCalledWith({location: "T",
+            damage_type: "S", damage: 5, effect: 'Fuzznozzle'});
     });
 
     it("allows wounds to be removed", function () {

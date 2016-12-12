@@ -674,7 +674,7 @@ var woundFactory = function (overrides) {
         "location": "T",
         "damage": 1,
         "healed": 0,
-        "type": "S",
+        "damage_type": "S",
         "effect": "Grazed.",
         "character": 2
     };
