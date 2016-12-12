@@ -1265,12 +1265,12 @@ class StatBlock extends React.Component {
                         <Col md={6}>
                             {this.renderArmor()}
                         </Col>
-                        <Col md={6}>
-                            {this.renderDamages(skillHandler)}
+                        <Col md={6} style={{fontSize: "60%"}}>
+                            {this.renderMovementRates(skillHandler)}
                         </Col>
                     </Row>
                     <Row>
-                        {this.renderMovementRates(skillHandler)}
+                        {this.renderDamages(skillHandler)}
                     </Row>
                     <Row>
                         {this.renderCCWeapons(skillHandler)}
