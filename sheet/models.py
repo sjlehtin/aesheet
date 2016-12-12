@@ -451,6 +451,7 @@ class Wound(models.Model):
         return self.character.access_allowed(user)
 
     character = models.ForeignKey(Character, related_name="wounds")
+
     LOCATION_CHOICES = [("H", "Head"),
                         ("T", "Torso"),
                         ("RA", "Right arm"),
@@ -460,6 +461,13 @@ class Wound(models.Model):
     location = models.CharField(max_length=2,
                                 choices=LOCATION_CHOICES,
                                 default="T")
+    DAMAGE_TYPE_CHOICES = [("S", "Slash"),
+                           ("P", "Pierce"),
+                           ("B", "Bludgeon"),
+                           ("R", "Burn")]
+    damage_type = models.CharField(max_length=1,
+                                   choices=DAMAGE_TYPE_CHOICES,
+                                   default="S")
     damage = models.PositiveIntegerField(
         default=0,
         help_text="Initial damage from the wound.")
