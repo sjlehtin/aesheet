@@ -132,8 +132,7 @@ describe('DamageControl', function() {
 
         TestUtils.Simulate.change(addWoundControl._damageInputField,
             {target: {value: 5}});
-        TestUtils.Simulate.change(addWoundControl._effectInputField,
-            {target: {value: "Fuzznozzle"}});
+        addWoundControl.handleEffectChange("Fuzznozzle");
 
         TestUtils.Simulate.click(addWoundControl._addButton);
 
