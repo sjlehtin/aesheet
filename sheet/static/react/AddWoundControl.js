@@ -19,21 +19,23 @@ class AddWoundControl extends React.Component {
         };
     }
 
-    static findEffect(props) {
-        var choices = AddWoundControl.getWoundChoices(props.location, props.type);
+    findEffect(wound) {
+        var choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
 
-        if (props.damage < 0) {
+
+        var effDamage = wound.damage - this.props.toughness;
+        if (effDamage < 0) {
             return choices[0];
         }
-        if (props.damage >= choices.length) {
+        if (effDamage >= choices.length) {
             return choices[choices.length - 1];
         }
-        return choices[props.damage];
+        return choices[effDamage];
     }
 
     handleDamageChange(event) {
         this.setState({damage: event.target.value,
-                       effect: AddWoundControl.findEffect({type: this.state.selectedType,
+                       effect: this.findEffect({type: this.state.selectedType,
                             location: this.state.selectedLocation,
                             damage: event.target.value})
         });
@@ -48,7 +50,7 @@ class AddWoundControl extends React.Component {
             value = value.location;
         }
         this.setState({selectedLocation: value,
-                       effect: AddWoundControl.findEffect({
+                       effect: this.findEffect({
                            type: this.state.selectedType,
                            location: value,
                            damage: this.state.damage})});
@@ -59,7 +61,7 @@ class AddWoundControl extends React.Component {
             value = value.type;
         }
         this.setState({selectedType: value,
-            effect: AddWoundControl.findEffect({type: value,
+            effect: this.findEffect({type: value,
                             location: this.state.selectedLocation,
                             damage: this.state.damage})
         });
@@ -151,7 +153,12 @@ class AddWoundControl extends React.Component {
 }
 
 AddWoundControl.propTypes = {
-    onAdd: React.PropTypes.func
+    onAdd: React.PropTypes.func,
+    toughness: React.PropTypes.number
+};
+
+AddWoundControl.defaultProps = {
+    toughness: 0
 };
 
 AddWoundControl.locations = [
@@ -257,7 +264,7 @@ AddWoundControl.woundEffects = {
 "Gut pierced [minor int]",
 "Gut pierced [minor int]",
 "Internal organ pierced [major int]",
-"Internal organ pierced major int]",
+"Internal organ pierced [major int]",
 "Lung punctured [severe int]",
 "Lung punctured [severe int]",
 "Heart muscle pierced [severe int]",

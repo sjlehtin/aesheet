@@ -119,8 +119,7 @@ describe('stat block wounds handling', function(done) {
 
             TestUtils.Simulate.change(addControl._damageInputField,
                 {target: {value: 5}});
-            TestUtils.Simulate.change(addControl._effectInputField,
-                {target: {value: "Fuzznozzle"}});
+            addControl.handleEffectChange("Fuzznozzle");
 
             var newWound = factories.woundFactory({id: 42, damage: 5,
                 effect: "Fuzznozzle", character: 2});
@@ -146,4 +145,12 @@ describe('stat block wounds handling', function(done) {
         });
     });
 
+    it("integrates toughness into AddWoundControl", function (done) {
+        var tree = factories.statBlockTreeFactory({edges: [{edge: {edge: "Toughness", level: 3}}]});
+        tree.afterLoad(function () {
+            var addControl = TestUtils.findRenderedComponentWithType(tree, AddWoundControl);
+            expect(addControl.props.toughness).toEqual(3);
+            done();
+        });
+    });
 });

@@ -195,6 +195,17 @@ describe('AddWoundControl', function() {
         expect(addControl.state.effect).toContain("Gut pierced");
     });
 
-    // it("takes toughness into account in the effect", function () {
-    // });
+    it("takes toughness into account in the effect", function () {
+        var tree = getAddWoundControlTree({toughness: 3});
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        addControl.handleLocationChange("T");
+        addControl.handleTypeChange("S");
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 8}});
+
+        expect(addControl.state.effect).toContain("Gut pierced");
+    });
 });

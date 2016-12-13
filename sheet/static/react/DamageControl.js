@@ -142,7 +142,8 @@ class DamageControl extends React.Component {
                 </thead>
                 <tbody>
                 {rows}
-                <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)} />
+                <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)}
+                                 toughness={this.props.handler.edgeLevel("Toughness")}/>
                 </tbody>
             </Table>;
 
