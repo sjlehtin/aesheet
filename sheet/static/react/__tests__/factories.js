@@ -694,13 +694,16 @@ var sheetFactory = function (statOverrides) {
 var statBlockTreeFactory = function (overrides) {
     var characterOverrides = undefined;
     var sheetOverrides = undefined;
-    var wounds = [];
+    var wounds = [], edges = [];
     if (overrides) {
         characterOverrides = overrides.character;
         sheetOverrides = overrides.sheet;
         if (overrides.wounds) {
             wounds = overrides.wounds.map(
                 (props) => { return woundFactory(props); });
+        }
+        if (overrides.edges) {
+            edges = overrides.edges.map((props) => {return characterEdgeFactory(props)})
         }
     }
 
@@ -734,7 +737,7 @@ var statBlockTreeFactory = function (overrides) {
         } else if (url === "/rest/characters/2/characterskills/") {
             return jsonResponse([]);
         } else if (url === "/rest/characters/2/characteredges/") {
-            return jsonResponse([]);
+            return jsonResponse(edges);
         } else if (url === "/rest/characters/2/wounds/") {
             return jsonResponse(wounds);
         } else if (url === "/rest/skills/campaign/2/") {
