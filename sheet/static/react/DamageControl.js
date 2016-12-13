@@ -90,13 +90,13 @@ class DamageControl extends React.Component {
 
     handleWoundMod(data) {
         if (this.props.onWoundMod) {
-            this.props.onWoundMod(data);
+            return this.props.onWoundMod(data);
         }
     }
 
     handleWoundRemove(data) {
         if (this.props.onWoundRemove) {
-            this.props.onWoundRemove(data);
+            return this.props.onWoundRemove(data);
         }
     }
 
