@@ -621,7 +621,7 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                 self.character.add_log_entry(
                     u"{} wound worsened for {} points.".format(
                         self.map_location(instance.location),
-                        old_damage - new_damage),
+                        new_damage - old_damage),
                     request=self.request)
             else:
                 self.character.add_log_entry(
