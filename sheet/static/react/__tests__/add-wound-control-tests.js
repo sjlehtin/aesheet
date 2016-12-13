@@ -37,11 +37,9 @@ describe('AddWoundControl', function() {
         TestUtils.Simulate.change(addControl._damageInputField,
             {target: {value: 5}});
 
-        TestUtils.Simulate.change(addControl._effectInputField,
-            {target: {value: "Fuzznozzle"}});
-
         addControl.handleLocationChange("H");
         addControl.handleTypeChange("R");
+        addControl.handleEffectChange("Fuzznozzle");
 
         TestUtils.Simulate.click(addControl._addButton);
 
@@ -62,9 +60,7 @@ describe('AddWoundControl', function() {
 
         addControl.handleLocationChange("H");
         addControl.handleTypeChange("R");
-
-        TestUtils.Simulate.change(addControl._effectInputField,
-            {target: {value: "Fuzznozzle"}});
+        addControl.handleEffectChange("Fuzznozzle");
 
         TestUtils.Simulate.click(addControl._addButton);
 
@@ -86,6 +82,7 @@ describe('AddWoundControl', function() {
         TestUtils.Simulate.change(addControl._damageInputField,
             {target: {value: 5}});
 
+        console.log("testing foo?");
         // Cannot easily trigger change with the Combobox.
         addControl.handleLocationChange("Foo");
 
@@ -101,30 +98,102 @@ describe('AddWoundControl', function() {
         var addControl = TestUtils.findRenderedComponentWithType(tree,
             AddWoundControl);
 
-        expect(addControl.isValid()).toEqual(false);
-
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
-
+        // Allows zero wounds.  The effect should be fillable afterwards.
+        //  TODO: not yet modifiable after the fact.
         expect(addControl.isValid()).toEqual(true);
 
         TestUtils.Simulate.change(addControl._damageInputField,
             {target: {value: "5a"}});
 
         expect(addControl.isValid()).toEqual(false);
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 5}});
+
+        expect(addControl.isValid()).toEqual(true);
     });
 
-    // it("fills in effect for head wounds", function () {
-    // });
+    it("fills in effect for head wounds", function () {
+        var tree = getAddWoundControlTree();
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
 
-    // it("fills in effect for torso wounds", function () {
-    // });
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 5}});
 
-    // it("fills in effect for torso wounds", function () {
-    // });
+        addControl.handleLocationChange("H");
+        addControl.handleTypeChange("R");
 
-    // it("fills in effect for torso wounds", function () {
-    // });
+        expect(addControl.state.effect).toContain("Skin burned bad");
+        expect(addControl.state.effect).toContain("IMM -30");
+    });
+
+    it("takes effect from last in case of massive damage", function () {
+        var tree = getAddWoundControlTree();
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 20}});
+
+        addControl.handleLocationChange("H");
+        addControl.handleTypeChange("P");
+
+        expect(addControl.state.effect).toContain("Head blown off");
+    });
+
+    it("fills in effect for arm wounds", function () {
+        var tree = getAddWoundControlTree();
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 5}});
+
+        addControl.handleLocationChange("LA");
+        addControl.handleTypeChange("B");
+        expect(addControl.state.effect).toContain("Shoulder broken");
+    });
+
+    it("fills in effect for leg wounds", function () {
+        var tree = getAddWoundControlTree();
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 5}});
+
+        addControl.handleLocationChange("LL");
+        addControl.handleTypeChange("P");
+        expect(addControl.state.effect).toContain("Major vein cut");
+    });
+
+    it("fills in effect for torso wounds", function () {
+        var tree = getAddWoundControlTree();
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 5}});
+
+        addControl.handleLocationChange("T");
+        addControl.handleTypeChange("S");
+        expect(addControl.state.effect).toContain("Gut pierced");
+    });
+
+    it("updates effect on damage change", function () {
+        var tree = getAddWoundControlTree();
+        var addControl = TestUtils.findRenderedComponentWithType(tree,
+            AddWoundControl);
+
+        addControl.handleLocationChange("T");
+        addControl.handleTypeChange("S");
+
+        TestUtils.Simulate.change(addControl._damageInputField,
+            {target: {value: 5}});
+
+        expect(addControl.state.effect).toContain("Gut pierced");
+    });
 
     // it("takes toughness into account in the effect", function () {
     // });
