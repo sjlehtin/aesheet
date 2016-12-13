@@ -128,12 +128,14 @@ class DamageControl extends React.Component {
                 (effect not applied to checks)
             </span></span>);
         }
+
         if (penalties.la_fit_ref != 0) {
             penaltyCells.push(<span>LA {penalties.la_fit_ref} FIT/REF<span
                 style={noteStyle}>
                 (effect not applied to checks)
             </span></span>);
         }
+
         var penaltyBlock = '';
         if (penaltyCells.length > 0) {
             penaltyBlock = <div>
@@ -149,7 +151,7 @@ class DamageControl extends React.Component {
     }
 
     render() {
-        var inputStyle = {width: "3em"};
+        var inputStyle = {width: "3em", marginLeft: "1em"};
 
         var loading = '';
         if (this.state.isBusy) {
@@ -174,7 +176,9 @@ class DamageControl extends React.Component {
             </div>;
         }
         var penaltyBlock = this.renderPenaltyBlock();
+        var bodyDamage = 0;
         var rows = this.props.wounds.map((wound, idx) => {
+            bodyDamage += wound.damage - wound.healed;
             return <WoundRow key={"wound-" + idx} wound={wound}
                              onMod={(data) => this.handleWoundMod(data)}
                              onRemove={(data) => this.handleWoundRemove(data)}
@@ -190,10 +194,18 @@ class DamageControl extends React.Component {
                 </tbody>
             </Table>;
 
+        var stats = this.props.handler.getBaseStats();
+
+        var deathSymbol = '';
+        if (bodyDamage >= stats.body) {
+            deathSymbol = <span style={{fontSize: "200%"}}
+                                title="The character is dead due to massive damage">✟</span>;
+        }
+
         return (<div style={this.props.style}>
+            <div><label>Body: </label><span style={{marginLeft: "1em"}}>{stats.body - bodyDamage} / {stats.body} {deathSymbol}</span></div>
             {damage}
             <label>Stamina: </label>
-            <span>{this.props.handler.getBaseStats().stamina} /</span>
             <input ref={(c) =>
                      c ? this._inputField = ReactDOM.findDOMNode(c) : null}
                    type="text"
@@ -204,13 +216,17 @@ class DamageControl extends React.Component {
                    onKeyDown={(e) => this.handleKeyDown(e)}
                    style={inputStyle}
             />
-            <Button bsSize="xsmall"
+            <span> / {stats.stamina}</span>
+            <Button
+                style={{marginLeft: "1em"}}
+                bsSize="xsmall"
                     ref={(c) =>
                       c ? this._changeButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
 
-            <Button bsSize="xsmall"
+            <Button style={{marginLeft: ".5em"}}
+                    bsSize="xsmall"
                     ref={(c) =>
                       c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
