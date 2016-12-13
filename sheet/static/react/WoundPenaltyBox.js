@@ -8,17 +8,34 @@ class WoundPenaltyBox extends React.Component {
     render() {
         var penalties = this.props.handler.getWoundPenalties();
         var penaltyCells = [];
+
+        var stats = this.props.handler.getBaseStats();
+
+        var noteStyle = {
+            fontSize: "80%",
+            fontStyle: "italic",
+            marginLeft: "1em",
+            color: "gray"
+        };
+
+        if (-penalties.aa > stats.fit) {
+            penaltyCells.push(<span>Heart stopped <span style={noteStyle}>Body must be healed sufficiently to counter the penalty. Chance of severe permanent brain damage is 2% per minute.</span></span>);
+        }
+
+        if (-penalties.aa > stats.ref || -penalties.aa > stats.wil) {
+            penaltyCells.push(<span>Paralyzed/Unconscious</span>);
+        }
+
+        if (-penalties.aa > stats.int || -penalties.aa > stats.lrn || -penalties.aa > stats.psy) {
+            penaltyCells.push(<span>Shocked <span style={noteStyle}>Shocked PCs may continue combat, if they succeed in their WIL check (due to lethal wound) not counting shock modifiers.</span></span>);
+        }
+
         if (penalties.aa != 0) {
             penaltyCells.push(<span>{penalties.aa} AA</span>);
         }
         if (penalties.mov != 0) {
             penaltyCells.push(<span>{penalties.mov} MOV</span>);
         }
-
-        var noteStyle = {
-            fontSize: "small",
-            marginLeft: "1em"
-        };
 
         if (penalties.ra_fit_ref != 0) {
             var newVar = {fontSize: "small", marginLeft: "1em"};
