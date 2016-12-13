@@ -617,11 +617,16 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                         self.map_location(instance.location),
                         old_damage - new_damage),
                     request=self.request)
-            else:
+            elif new_damage > old_damage:
                 self.character.add_log_entry(
                     u"{} wound worsened for {} points.".format(
                         self.map_location(instance.location),
                         old_damage - new_damage),
+                    request=self.request)
+            else:
+                self.character.add_log_entry(
+                    u"{} wound changed.".format(
+                        self.map_location(instance.location)),
                     request=self.request)
 
             super(WoundViewSet, self).perform_update(serializer)

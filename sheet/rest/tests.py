@@ -1681,6 +1681,20 @@ class WoundTestCase(TestCase):
         self.assertEqual(len(entries), 1)
         self.assertIn("wound worsened", entries[0].entry)
 
+    def test_modifying_wounds(self):
+        wound = factories.WoundFactory(character=self.character,
+                               effect="Throat slashed", damage=5)
+        response = self.client.patch(
+                "{}{}/".format(self.url, wound.pk),
+                data={'effect': "FooFaafom"}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Foo", models.Character.objects.get(
+                                id=self.character.id).wounds.all()[0].effect)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("wound changed", entries[0].entry)
+
     def test_deleting_wounds(self):
         wound = factories.WoundFactory(character=self.character,
                                effect="Throat slashed")
