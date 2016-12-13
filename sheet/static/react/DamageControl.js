@@ -33,6 +33,7 @@ import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
 import Octicon from 'react-octicon'
 import SkillHandler from 'SkillHandler';
 import WoundRow from 'WoundRow';
+import WoundPenaltyBox from 'WoundPenaltyBox';
 import AddWoundControl from 'AddWoundControl';
 
 var util = require('sheet-util');
@@ -106,50 +107,6 @@ class DamageControl extends React.Component {
         return Promise.resolve({});
     }
 
-    renderPenaltyBlock() {
-        var penalties = this.props.handler.getWoundPenalties();
-        var penaltyCells = [];
-        if (penalties.aa != 0) {
-            penaltyCells.push(<span>{penalties.aa} AA</span>);
-        }
-        if (penalties.mov != 0) {
-            penaltyCells.push(<span>{penalties.mov} MOV</span>);
-        }
-
-        var noteStyle = {
-            fontSize: "small",
-            marginLeft: "1em"
-        };
-
-        if (penalties.ra_fit_ref != 0) {
-            var newVar = {fontSize: "small", marginLeft: "1em"};
-            penaltyCells.push(<span>RA {penalties.ra_fit_ref} FIT/REF<span
-                style={noteStyle}>
-                (effect not applied to checks)
-            </span></span>);
-        }
-
-        if (penalties.la_fit_ref != 0) {
-            penaltyCells.push(<span>LA {penalties.la_fit_ref} FIT/REF<span
-                style={noteStyle}>
-                (effect not applied to checks)
-            </span></span>);
-        }
-
-        var penaltyBlock = '';
-        if (penaltyCells.length > 0) {
-            penaltyBlock = <div>
-                <div style={{fontWeight: "bold"}}>From wounds</div>
-                <div style={{color: "red"}}>
-                    {penaltyCells.map((el, idx) => {
-                        return <div key={"pen-" + idx}>{el}</div>
-                    })}
-                </div>
-            </div>;
-        }
-        return penaltyBlock;
-    }
-
     render() {
         var inputStyle = {width: "3em", marginLeft: "1em"};
 
@@ -175,7 +132,6 @@ class DamageControl extends React.Component {
                 {renderedInitPenalty}
             </div>;
         }
-        var penaltyBlock = this.renderPenaltyBlock();
         var bodyDamage = 0;
         var rows = this.props.wounds.map((wound, idx) => {
             bodyDamage += wound.damage - wound.healed;
@@ -231,7 +187,7 @@ class DamageControl extends React.Component {
                       c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleClear()}>Clear{loading}</Button>
-            {penaltyBlock}
+            <WoundPenaltyBox handler={this.props.handler}/>
             {wounds}
         </div>);
     }
