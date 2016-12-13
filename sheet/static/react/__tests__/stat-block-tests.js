@@ -97,26 +97,6 @@ describe('stat block', function() {
         });
     });
 
-    it('calculates body upwards', function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_fit: 41})});
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.baseBody(baseStats)).toEqual(11);
-            done();
-        });
-    });
-
-    it('calculates body', function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_fit: 39})});
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.baseBody(baseStats)).toEqual(10);
-            done();
-        });
-    });
-
     it('handles edge addition', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
@@ -210,22 +190,6 @@ describe('stat block', function() {
         }
         block.handleEdgesLoaded(edgeList);
     };
-
-    it('can indicate toughness', function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_fit: 40})});
-        block.afterLoad(function () {
-            var skillHandler = getSkillHandler(block);
-            expect(block.toughness(skillHandler)).toEqual(0);
-
-            addEdge(block, "Toughness", 1);
-
-            skillHandler = getSkillHandler(block);
-            expect(block.toughness(skillHandler)).toEqual(1);
-            expect(block.baseBody(skillHandler.getBaseStats())).toEqual(10);
-            done();
-        });
-    });
 
     it('can indicate stamina recovery', function (done) {
         var block = factories.statBlockFactory();

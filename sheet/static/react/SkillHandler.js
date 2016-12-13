@@ -475,6 +475,10 @@ class SkillHandler {
             this._baseStats.stamina = util.roundup(
                 (this._baseStats.ref + this._baseStats.wil)/ 4)
                 + this.props.character.bought_stamina;
+
+            this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
+            this._baseStats.body =
+                this._baseStats.baseBody + this.edgeLevel("Toughness");
         }
 
         return this._baseStats;

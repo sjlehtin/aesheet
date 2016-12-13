@@ -272,6 +272,29 @@ describe('SkillHandler stats', function() {
         expect(handler.getBaseStats().stamina).toEqual(28);
     });
 
+    it('calculates body', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_fit: 61
+            }
+        });
+        expect(handler.getBaseStats().baseBody).toEqual(16);
+        expect(handler.getBaseStats().body).toEqual(16);
+    });
+
+    it('calculates body taking toughness into account', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_fit: 61
+            },
+            edges: [
+               {edge: "Toughness", level: 2},
+            ]
+        });
+        expect(handler.getBaseStats().baseBody).toEqual(16);
+        expect(handler.getBaseStats().body).toEqual(18);
+    });
+
     it('calculates initiative', function () {
         var handler = factories.skillHandlerFactory({
             character: {

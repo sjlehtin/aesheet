@@ -338,14 +338,6 @@ class StatBlock extends React.Component {
         });
     }
 
-    baseBody(baseStats) {
-        return util.roundup(baseStats.fit / 4);
-    }
-
-    toughness(skillHandler) {
-        return skillHandler.edgeLevel("Toughness");
-    }
-
     mana(baseStats) {
         return util.roundup((baseStats.psy + baseStats.wil)/ 4)
             + this.state.char.bought_mana;
@@ -776,7 +768,7 @@ class StatBlock extends React.Component {
             </tr>
         </tbody>;
 
-        var toughness = this.toughness(skillHandler);
+        var toughness = skillHandler.edgeLevel("Toughness");
         if (toughness) {
             toughness = (<span>+<span
                 style={{ fontWeight: "bold"}}>{toughness}</span></span>);
@@ -791,7 +783,7 @@ class StatBlock extends React.Component {
 
         expendable = <tbody>
         <tr><td style={statStyle}>B</td>
-            <td style={baseStyle}>{this.baseBody(baseStats)
+            <td style={baseStyle}>{baseStats.baseBody
             }{toughness}</td>
             <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
