@@ -164,4 +164,21 @@ describe('SkillHandler wounds', function() {
         expect(handler.getEffStats().mov).toEqual(20);
     });
 
+    it('calculates penalties to wounds to left arm', function () {
+        var handler = factories.skillHandlerFactory({
+            wounds: [{damage: 5, location: "LA"}]
+        });
+
+        expect(handler.getWoundPenalties().la_fit_ref).toEqual(-50);
+    });
+
+    it('calculates penalties to wounds to right arm with toughness', function () {
+        var handler = factories.skillHandlerFactory({
+            edges: [{edge: "Toughness", level: 3}],
+            wounds: [{damage: 5, location: "RA"}]
+        });
+
+        expect(handler.getWoundPenalties().ra_fit_ref).toEqual(-20);
+    });
+
 });

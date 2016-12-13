@@ -504,6 +504,9 @@ class SkillHandler {
 
             this._woundPenalties.mov = -10 * locationDamages.RL;
             this._woundPenalties.mov += -10 * locationDamages.LL;
+
+            this._woundPenalties.la_fit_ref = -10 * locationDamages.LA;
+            this._woundPenalties.ra_fit_ref = -10 * locationDamages.RA;
         }
         return this._woundPenalties;
     }
