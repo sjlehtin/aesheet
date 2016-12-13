@@ -8,6 +8,12 @@ var rest = require('sheet-rest');
 
 import InventoryRow from 'InventoryRow';
 
+/*
+ * Inventory component holds the inventory items by itself.  As the items
+ * do not have relations other than through their weight, this works ok.
+ * If need be, the inventory can also be pushed up as state for the
+ * StatBlock or a separate control.
+ */
 class Inventory extends React.Component {
 
     constructor(props) {
@@ -41,11 +47,6 @@ class Inventory extends React.Component {
                 * parseInt(elem.quantity);
         });
         return total;
-    }
-
-    handleAddButtonClick(e) {
-        e.preventDefault();
-        this.setState({addEnabled: true})
     }
 
     handleNew(newElem) {

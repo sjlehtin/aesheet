@@ -27,7 +27,12 @@ jest.dontMock('../EdgeRow');
 jest.dontMock('../AddCharacterEdgeControl');
 jest.dontMock('../CharacterNotes');
 jest.dontMock('../MovementRates');
+jest.dontMock('../DamageControl');
+jest.dontMock('../WoundRow');
+jest.dontMock('../AddWoundControl');
+jest.dontMock('../WoundPenaltyBox');
 jest.dontMock('../sheet-util');
+jest.dontMock('./testutils');
 jest.dontMock('./factories');
 
 import React from 'react';
@@ -36,8 +41,8 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 var factories = require('./factories');
-var testutils = require('./testutils');
 
+const testutils = require('./testutils');
 const StatBlock = require('../StatBlock').default;
 
 describe('stat block armor handling', function(done) {

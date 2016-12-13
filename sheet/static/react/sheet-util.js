@@ -11,13 +11,6 @@ var exports = function () {
                 return true;
             }
             return false;
-            if (isNaN(value)) {
-                return false;
-            }
-            if ((value | 0) === parseInt(value)) {
-                return true;
-            }
-            return false;
         };
 
     return {

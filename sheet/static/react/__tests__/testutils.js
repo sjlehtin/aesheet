@@ -1,4 +1,6 @@
-var getAllArgsByIndex = function (mockCalls, ind) {
+import React from 'react';
+
+var getAllArgumentsByPosition = function (mockCalls, ind) {
     var list = [];
     for (let call of mockCalls) {
         list.push(call[ind]);
@@ -6,4 +8,16 @@ var getAllArgsByIndex = function (mockCalls, ind) {
     return list;
 };
 
-module.exports = {getAllArgumentsByPosition: getAllArgsByIndex}
+class TableWrapper extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return <table>
+            <tbody>{this.props.children}</tbody>
+        </table>;
+    }
+}
+
+export {getAllArgumentsByPosition, TableWrapper};

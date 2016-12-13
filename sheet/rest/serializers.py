@@ -210,6 +210,12 @@ class CharacterSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class WoundSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Wound
+        fields = "__all__"
+
+
 class InventoryEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.InventoryEntry

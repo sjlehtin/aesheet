@@ -132,17 +132,6 @@ def get_by_campaign(objects, get_character=lambda obj: obj):
     return items.values()
 
 
-class SkillLookup(object):
-    """
-    Allow skill lookup from templates more easily.
-    """
-    def __init__(self, character):
-        self.character = character
-
-    def __getattr__(self, skill):
-        return self.character.get_skill(skill)
-
-
 class Character(PrivateMixin, models.Model):
     """
     Model for the character "under" the sheet.  Modifications to the
@@ -234,12 +223,10 @@ class Character(PrivateMixin, models.Model):
                                    blank=True)
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
+    stamina_damage = models.IntegerField(default=0)
+
     class Meta:
         ordering = ['campaign', 'name']
-
-    def __init__(self, *args, **kwargs):
-        super(Character, self).__init__(*args, **kwargs)
-        self.skill_lookup = SkillLookup(self)
 
     BASE_STATS = ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]
     DERIVED_STATS = ["mov", "dex", "imm"]
@@ -271,6 +258,15 @@ class Character(PrivateMixin, models.Model):
         entry.skill_level = level
         entry.amount = amount
         entry.removed = removed
+        entry.save()
+
+
+    def add_log_entry(self, entry_text, request=None):
+        entry = CharacterLogEntry()
+        entry.character = self
+        entry.user = request.user if request else None
+        entry.entry_type = entry.NON_FIELD
+        entry.entry = entry_text
         entry.save()
 
 
@@ -441,8 +437,46 @@ class StatModifier(models.Model):
     fly_multiplier = models.DecimalField(default=0,
                                          max_digits=4, decimal_places=2)
 
+    # TODO: link through to EdgeLevel to allow boosting edges with effects,
+    # items, etc.
     class Meta:
         abstract = True
+
+
+class Wound(models.Model):
+    """
+    Lethal wounds received by the character.
+    """
+    def access_allowed(self, user):
+        return self.character.access_allowed(user)
+
+    character = models.ForeignKey(Character, related_name="wounds")
+
+    LOCATION_CHOICES = [("H", "Head"),
+                        ("T", "Torso"),
+                        ("RA", "Right arm"),
+                        ("LA", "Left arm"),
+                        ("RL", "Right leg"),
+                        ("LL", "Left leg")]
+    location = models.CharField(max_length=2,
+                                choices=LOCATION_CHOICES,
+                                default="T")
+    DAMAGE_TYPE_CHOICES = [("S", "Slash"),
+                           ("P", "Pierce"),
+                           ("B", "Bludgeon"),
+                           ("R", "Burn")]
+    damage_type = models.CharField(max_length=1,
+                                   choices=DAMAGE_TYPE_CHOICES,
+                                   default="S")
+    damage = models.PositiveIntegerField(
+        default=0,
+        help_text="Initial damage from the wound.")
+    healed = models.PositiveIntegerField(
+        default=0,
+        help_text="Healed damage.  When this becomes equal to damage, "
+                  "the wound is healed.")
+    effect = models.CharField(max_length=64, blank=True,
+                              help_text="Initial effect from the injury.")
 
 
 class EdgeLevel(ExportedModel, StatModifier):
@@ -1310,7 +1344,7 @@ class CharacterLogEntry(models.Model):
             else:
                 return u"Added skill %s %d." % (self.skill, self.skill_level)
         elif self.entry_type == self.NON_FIELD:
-            return u"{0}".format(self.entry)
+            return self.entry
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)

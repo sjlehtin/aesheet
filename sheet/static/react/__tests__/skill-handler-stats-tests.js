@@ -66,6 +66,26 @@ describe('SkillHandler stats', function() {
         expect(handler.getEffStats().mov).toEqual(44);
     });
 
+    it('handles zero eff fit on weight penalty calculation', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 50},
+            weightCarried: 26,
+            wounds: [{location: "H", damage: 5}]
+        });
+        expect(handler.getWoundPenalties().aa).toEqual(-50);
+        expect(handler.getEffStats().fit).toEqual(-100);
+    });
+
+    it('handles negative eff fit on weight penalty calculation', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 50},
+            weightCarried: 26,
+            wounds: [{location: "H", damage: 6}]
+        });
+        expect(handler.getWoundPenalties().aa).toEqual(-60);
+        expect(handler.getEffStats().fit).toEqual(-100);
+    });
+
     it('takes transient effects into account in encumbrance', function () {
         // Transient effect should affect; +10 fit should decrease
         // penalties.
@@ -200,6 +220,155 @@ describe('SkillHandler stats', function() {
             }),
         });
         expect(handler.getEffStats().psy).toEqual(50);
+    });
+
+    it('calculates MOV', function () {
+        var handler = factories.skillHandlerFactory({character: {cur_fit: 49, cur_ref: 51}});
+
+        expect(handler.getBaseStats().mov).toEqual(50);
+        expect(handler.getEffStats().mov).toEqual(50);
+    });
+
+    it('calculates DEX', function () {
+        var handler = factories.skillHandlerFactory({character: {cur_int: 49, cur_ref: 51}});
+
+        expect(handler.getBaseStats().dex).toEqual(50);
+        expect(handler.getEffStats().dex).toEqual(50);
+    });
+
+    it('calculates IMM', function () {
+        var handler = factories.skillHandlerFactory({character: {cur_fit: 49, cur_psy: 51}});
+
+        expect(handler.getBaseStats().imm).toEqual(50);
+        expect(handler.getEffStats().imm).toEqual(50);
+    });
+
+    it('calculates MOV with effect', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 49, cur_ref: 51},
+            effects: [{mov: 5}]
+        });
+
+        expect(handler.getBaseStats().mov).toEqual(50);
+        expect(handler.getEffStats().mov).toEqual(55);
+    });
+
+    it('calculates DEX with effect', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_int: 49, cur_ref: 51},
+            effects: [{dex: 5}]
+        });
+
+        expect(handler.getBaseStats().dex).toEqual(50);
+        expect(handler.getEffStats().dex).toEqual(55);
+    });
+
+    it('calculates IMM with effect', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 49, cur_psy: 51},
+            effects: [{imm: 5}]
+        });
+
+        expect(handler.getBaseStats().imm).toEqual(50);
+        expect(handler.getEffStats().imm).toEqual(55);
+    });
+
+    it('calculates stamina', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45
+            }
+        });
+        expect(handler.getBaseStats().stamina).toEqual(23);
+    });
+
+    it('calculates stamina taking bought_stamina into account',
+            function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45, bought_stamina: 5
+            }
+        });
+        expect(handler.getBaseStats().stamina).toEqual(28);
+    });
+
+    it('calculates body', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_fit: 61
+            }
+        });
+        expect(handler.getBaseStats().baseBody).toEqual(16);
+        expect(handler.getBaseStats().body).toEqual(16);
+    });
+
+    it('calculates body taking toughness into account', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_fit: 61
+            },
+            edges: [
+               {edge: "Toughness", level: 2},
+            ]
+        });
+        expect(handler.getBaseStats().baseBody).toEqual(16);
+        expect(handler.getBaseStats().body).toEqual(18);
+    });
+
+    it('calculates initiative', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_int: 45, cur_psy: 46
+            }
+        });
+        expect(Math.round(handler.getInitiative())).toEqual(9);
+    });
+
+    it('gives no AC penalty when not damaged', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45, bought_stamina: 5
+            }
+        });
+        expect(handler.getACPenalty()).toEqual(-0);
+    });
+
+    it('calculates AC penalty when damaged', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_wil: 45,
+                bought_stamina: 5, stamina_damage: 15
+            }
+        });
+        expect(handler.getACPenalty()).toEqual(-10);
+    });
+
+    it('calculates initiative penalty when damaged a lot', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_int: 45, cur_psy: 46, cur_wil: 45,
+                bought_stamina: 5, stamina_damage: 15
+            }
+        });
+        expect(Math.round(handler.getInitiative())).toEqual(8);
+    });
+
+    it('allows fetching the init penalty when AC penalty is known', function () {
+        expect(SkillHandler.getInitPenaltyFromACPenalty(10)).toEqual(0);
+        expect(SkillHandler.getInitPenaltyFromACPenalty(-11)).toEqual(-1);
+        expect(SkillHandler.getInitPenaltyFromACPenalty(-19)).toEqual(-1);
+        expect(SkillHandler.getInitPenaltyFromACPenalty(-20)).toEqual(-2);
+    });
+
+    it('applies AC penalty to skill check', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {
+                cur_ref: 45, cur_int: 45,
+                cur_psy: 46, cur_wil: 45,
+                bought_stamina: 5, stamina_damage: 15
+            },
+            skills: [{skill: {name: "Pistol", stat: 'DEX'}, level: 1, }]});
+        expect(handler.skillCheck("Pistol")).toEqual(40);
     });
 
 });

@@ -58,6 +58,7 @@ var characterFactory = function (statOverrides) {
         "base_mod_imm": 0,
         bought_mana: 0,
         bought_stamina: 0,
+        stamina_damage: 0,
         edges: [],
         "campaign": 2
     };
@@ -101,12 +102,21 @@ var nextEdgeID = 0;
 var edgeFactory = function (overrideFields) {
     "use strict";
 
+    var props = {};
+
+    // Treat an existing non-object as name.
+    if (typeof(overrideFields) !== "object" && overrideFields) {
+        props = {name: overrideFields};
+    } else  if (overrideFields) {
+        props = overrideFields;
+    }
+
     var edge = {
         "name": "Acute Hearing",
         "description": "",
         "notes": ""
     };
-    return Object.assign(edge, overrideFields);
+    return Object.assign(edge, props);
 };
 
 var edgeSkillBonusFactory = function (overrideFields) {
@@ -658,6 +668,20 @@ var inventoryEntryFactory = function (overrides) {
     return Object.assign(_entryData, overrides);
 };
 
+var woundFactory = function (overrides) {
+    var _entryData = {
+        "id": objectId++,
+        "location": "T",
+        "damage": 1,
+        "healed": 0,
+        "damage_type": "S",
+        "effect": "Grazed.",
+        "character": 2
+    };
+
+    return Object.assign(_entryData, overrides);
+};
+
 var sheetFactory = function (statOverrides) {
     var _sheetData = {
         id: 1,
@@ -667,12 +691,20 @@ var sheetFactory = function (statOverrides) {
     return Object.assign(_sheetData, statOverrides);
 };
 
-var statBlockFactory = function (overrides) {
+var statBlockTreeFactory = function (overrides) {
     var characterOverrides = undefined;
     var sheetOverrides = undefined;
+    var wounds = [], edges = [];
     if (overrides) {
         characterOverrides = overrides.character;
         sheetOverrides = overrides.sheet;
+        if (overrides.wounds) {
+            wounds = overrides.wounds.map(
+                (props) => { return woundFactory(props); });
+        }
+        if (overrides.edges) {
+            edges = overrides.edges.map((props) => {return characterEdgeFactory(props)})
+        }
     }
 
     var charData = characterFactory(characterOverrides);
@@ -705,7 +737,9 @@ var statBlockFactory = function (overrides) {
         } else if (url === "/rest/characters/2/characterskills/") {
             return jsonResponse([]);
         } else if (url === "/rest/characters/2/characteredges/") {
-            return jsonResponse([]);
+            return jsonResponse(edges);
+        } else if (url === "/rest/characters/2/wounds/") {
+            return jsonResponse(wounds);
         } else if (url === "/rest/skills/campaign/2/") {
             return jsonResponse([]);
         } else if (url === "/rest/weapontemplates/campaign/2/") {
@@ -749,23 +783,24 @@ var statBlockFactory = function (overrides) {
         <StatBlock url="/rest/sheets/1/"/>
     );
 
-    var statBlock = TestUtils.findRenderedComponentWithType(table,
-        StatBlock);
-    statBlock.afterLoad = afterLoad;
-    return statBlock;
+    table.afterLoad = afterLoad;
+    return table;
 };
 
+var statBlockFactory = function (overrides) {
+    "use strict";
+    var table = statBlockTreeFactory(overrides);
+    var statBlock = TestUtils.findRenderedComponentWithType(table,
+        StatBlock);
+    statBlock.afterLoad = table.afterLoad;
+    return statBlock;
+};
 
 var skillHandlerFactory = function (givenProps) {
     if (!givenProps) {
         givenProps = {};
     }
-
-    var edgeList = [];
-    var skills = [];
-    var allSkills = [];
-    var effects = [];
-
+    var edgeList = [], skills = [], allSkills = [], effects = [], wounds = [];
 
     var skillMap = {};
     if (givenProps.allSkills) {
@@ -801,6 +836,13 @@ var skillHandlerFactory = function (givenProps) {
         }
     }
 
+    if (givenProps.wounds) {
+        for (let ww of givenProps.wounds) {
+            var wound = woundFactory(ww);
+            wounds.push(wound);
+        }
+
+    }
     var armor = {};
     if (givenProps.armor) {
         armor = armorFactory(givenProps.armor);
@@ -815,6 +857,7 @@ var skillHandlerFactory = function (givenProps) {
         edges: edgeList,
         effects: effects,
         characterSkills: skills, allSkills: allSkills,
+        wounds: wounds,
         armor: armor, helm: helm
     };
     if (givenProps.weightCarried) {
@@ -827,6 +870,7 @@ module.exports = {
     characterFactory: characterFactory,
     sheetFactory: sheetFactory,
     statBlockFactory: statBlockFactory,
+    statBlockTreeFactory: statBlockTreeFactory,
     characterSkillFactory: characterSkillFactory,
     skillFactory: skillFactory,
     edgeLevelFactory: edgeLevelFactory,
@@ -843,5 +887,6 @@ module.exports = {
     armorFactory: armorFactory,
     miscellaneousItemFactory: miscellaneousItemFactory,
     sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory,
-    skillHandlerFactory: skillHandlerFactory
+    skillHandlerFactory: skillHandlerFactory,
+    woundFactory: woundFactory
 };

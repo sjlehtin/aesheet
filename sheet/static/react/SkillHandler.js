@@ -11,11 +11,8 @@
  * allSkills
  * edges
  *
- * TODO: merge this and statHandler, as they both need to be passed to
- * many components, and it makes sense to just roll them into one.
- *
- * StatHandler functionality to SkillHandler, nuke StatHandler, rename
- * SkillHandler to CheckHandler (or CheckController).
+ * StatHandler functionality to SkillHandler, nuke StatHandler,
+ * TODO: rename SkillHandler to CheckHandler (or CheckController).
  *
  * TODO: study Redux for handling state in a cleaner fashion.
  */
@@ -112,6 +109,25 @@ class SkillHandler {
         return this.getEffStats()[stat.toLowerCase()];
     }
 
+    getInitiative() {
+        return this.getStat('ref') / 10 +
+            this.getStat('int') / 20 +
+            this.getStat('psy') / 20 +
+            SkillHandler.getInitPenaltyFromACPenalty(this.getACPenalty());
+    }
+
+    getACPenalty() {
+        return util.rounddown(this.props.character.stamina_damage/
+            this.getBaseStats().stamina * (-20));
+    }
+
+    static getInitPenaltyFromACPenalty(acPenalty) {
+        if (acPenalty > 0) {
+            return 0;
+        }
+        return util.rounddown(acPenalty/10);
+    }
+
     /*
      * If character has the skill, use the check directly.
      *
@@ -148,6 +164,7 @@ class SkillHandler {
         }
 
         check += this.getSkillMod(skillName);
+        check += this.getACPenalty();
         return check;
     }
 
@@ -454,30 +471,80 @@ class SkillHandler {
                 this._baseStats.ref)/2) + this._hardMods.dex;
             this._baseStats.imm = util.roundup((this._baseStats.fit +
                 this._baseStats.psy)/2) + this._hardMods.mov;
+
+            this._baseStats.stamina = util.roundup(
+                (this._baseStats.ref + this._baseStats.wil)/ 4)
+                + this.props.character.bought_stamina;
+
+            this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
+            this._baseStats.body =
+                this._baseStats.baseBody + this.edgeLevel("Toughness");
         }
+
         return this._baseStats;
     }
-    
+
+    getWoundPenalties() {
+        if (!this._woundPenalties) {
+            var locationDamages = {H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0};
+            for (let ww of this.props.wounds) {
+                locationDamages[ww.location] += ww.damage - ww.healed;
+            }
+
+            var toughness = this.edgeLevel("Toughness");
+
+            for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+                locationDamages[loc] = Math.max(0, locationDamages[loc] - toughness);
+            }
+
+            this._woundPenalties = {};
+
+            this._woundPenalties.aa = -10 * locationDamages.H;
+            this._woundPenalties.aa += -5 * locationDamages.T;
+            for (let loc of ["RA", "LA", "RL", "LL"]) {
+                this._woundPenalties.aa +=
+                    util.rounddown(locationDamages[loc] / 3) * -5;
+            }
+
+            this._woundPenalties.mov = -10 * locationDamages.RL;
+            this._woundPenalties.mov += -10 * locationDamages.LL;
+
+            this._woundPenalties.la_fit_ref = -10 * locationDamages.LA;
+            this._woundPenalties.ra_fit_ref = -10 * locationDamages.RA;
+        }
+        return this._woundPenalties;
+    }
+
     getEffStats() {
         if (!this._effStats) {
             this._effStats = {};
             var baseStats = this.getBaseStats();
+
+            var woundPenalties = this.getWoundPenalties();
+
             for (let st of SkillHandler.baseStatNames) {
                 this._effStats[st] = baseStats[st] +
-                    this._softMods[st];
+                    this._softMods[st] + woundPenalties.aa;
             }
+
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
             // in the excel combat sheet.
-            var encumbrancePenalty = util.roundup(
-                (-10 * this.props.weightCarried) / this._effStats.fit);
+            if (this._effStats.fit > 0) {
+                var encumbrancePenalty = util.roundup(
+                    (-10 * this.props.weightCarried) / this._effStats.fit);
 
-            this._effStats.fit += encumbrancePenalty;
-            this._effStats.ref += encumbrancePenalty;
+                this._effStats.fit += encumbrancePenalty;
+                this._effStats.ref += encumbrancePenalty;
+            } else {
+                // Effective FIT zero or negative, the character cannot move.
+                this._effStats.fit = -100;
+                this._effStats.ref = -100;
+            }
 
             this._effStats.mov = util.roundup((this._effStats.fit +
                 this._effStats.ref)/2) + this._hardMods.mov +
-                this._softMods.mov;
+                this._softMods.mov + woundPenalties.mov;
             this._effStats.dex = util.roundup((this._effStats.int +
                 this._effStats.ref)/2) + this._hardMods.dex +
                 this._softMods.dex;
@@ -506,7 +573,8 @@ SkillHandler.defaultProps = {
     armor: {},
     helm: {},
     effects: [],
-    edges: []
+    edges: [],
+    wounds: []
 };
 
 export default SkillHandler;

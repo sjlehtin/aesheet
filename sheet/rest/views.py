@@ -569,3 +569,83 @@ class CharacterEdgeViewSet(ListPermissionMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         super(CharacterEdgeViewSet, self).perform_create(
             serializer)
+
+
+class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.WoundSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.character = models.Character.objects.get(
+                pk=self.kwargs['character_pk'])
+        self.containing_object = self.character
+        return super(WoundViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(WoundViewSet, self).get_serializer(
+                *args, **kwargs)
+        if isinstance(serializer, serializers.WoundSerializer):
+            serializer.fields['character'].default = self.character
+            serializer.fields['character'].read_only = True
+            # serializer.fields['location'].read_only = True
+            # serializer.fields['location'].read_only = True
+
+        return serializer
+
+    def get_queryset(self):
+        return self.character.wounds.all()
+
+    def map_location(self, location):
+        map = dict(models.Wound.LOCATION_CHOICES)
+        loc = map.get(location, None)
+        if loc is None:
+            return location
+        return loc
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        with transaction.atomic():
+            old_damage = instance.damage - instance.healed
+
+            new_damage = (
+                serializer.validated_data.get('damage', instance.damage) -
+                serializer.validated_data.get('healed', instance.healed))
+
+            if old_damage > new_damage:
+                self.character.add_log_entry(
+                    u"{} wound partially healed for {} points.".format(
+                        self.map_location(instance.location),
+                        old_damage - new_damage),
+                    request=self.request)
+            elif new_damage > old_damage:
+                self.character.add_log_entry(
+                    u"{} wound worsened for {} points.".format(
+                        self.map_location(instance.location),
+                        old_damage - new_damage),
+                    request=self.request)
+            else:
+                self.character.add_log_entry(
+                    u"{} wound changed.".format(
+                        self.map_location(instance.location)),
+                    request=self.request)
+
+            super(WoundViewSet, self).perform_update(serializer)
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            self.character.add_log_entry(
+                u"{} was wounded to {} for {} points.".format(
+                         self.character.name,
+                         self.map_location(serializer.validated_data[
+                                           'location']),
+                         serializer.validated_data['damage']),
+                request=self.request)
+            super(WoundViewSet, self).perform_create(serializer)
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            self.character.add_log_entry(
+                u"{} wound was healed.".format(
+                    self.map_location(instance.location)),
+                request=self.request)
+            super(WoundViewSet, self).perform_destroy(instance)

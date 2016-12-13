@@ -1613,3 +1613,108 @@ class EdgeLevelTestCase(TestCase):
         self.assertIn("Night vision", names)
 
 
+class WoundTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.character = factories.CharacterFactory(owner=self.owner)
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/characters/{}/wounds/'.format(
+            self.character.pk)
+
+    def test_url(self):
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, [])
+
+    def test_shows_wounds(self):
+        factories.WoundFactory(character=self.character,
+                               effect="Throat slashed")
+
+        response = self.client.get(self.url, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        self.assertEqual(response.data[0]["effect"], "Throat slashed")
+
+    def test_adding_wounds(self):
+        response = self.client.post(
+                self.url,
+                data={'effect': "Throat puncture", 'damage': 5,
+                      'location': "H"},
+            format='json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(models.Character.objects.get(id=self.character.id)
+                         .wounds.all()[0].damage, 5)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("was wounded", entries[0].entry)
+
+    def test_healing_wounds(self):
+        wound = factories.WoundFactory(character=self.character,
+                               effect="Throat slashed", damage=5)
+        response = self.client.patch(
+                "{}{}/".format(self.url, wound.pk),
+                data={'healed': 3}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(models.Character.objects.get(id=self.character.id)
+                         .wounds.all()[0].healed, 3)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("wound partially healed", entries[0].entry)
+
+    def test_worsening_wounds(self):
+        wound = factories.WoundFactory(character=self.character,
+                               effect="Throat slashed", damage=5)
+        response = self.client.patch(
+                "{}{}/".format(self.url, wound.pk),
+                data={'damage': 6}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(models.Character.objects.get(id=self.character.id)
+                         .wounds.all()[0].damage, 6)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("wound worsened", entries[0].entry)
+
+    def test_modifying_wounds(self):
+        wound = factories.WoundFactory(character=self.character,
+                               effect="Throat slashed", damage=5)
+        response = self.client.patch(
+                "{}{}/".format(self.url, wound.pk),
+                data={'effect': "FooFaafom"}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Foo", models.Character.objects.get(
+                                id=self.character.id).wounds.all()[0].effect)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("wound changed", entries[0].entry)
+
+    def test_deleting_wounds(self):
+        wound = factories.WoundFactory(character=self.character,
+                               effect="Throat slashed")
+        factories.WoundFactory(character=self.character,
+                               effect="Throat punctured")
+
+        response = self.client.delete(
+                "{}{}/".format(self.url, wound.pk), format='json')
+        self.assertEqual(response.status_code, 204)
+        wounds = models.Wound.objects.all()
+        self.assertEqual(len(wounds), 1)
+        self.assertIn("punctured", wounds[0].effect)
+
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("wound was healed", entries[0].entry)
+
+    # TODO: damage should only increase.  Location and effect should be
+    # immutable.
+
+    # TODO: healing and worsening log entries should be coalesced.
+    # TODO: type of received damage should be stored.

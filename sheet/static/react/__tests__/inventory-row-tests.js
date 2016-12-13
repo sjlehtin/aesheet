@@ -20,7 +20,6 @@ var inventoryEntryFactory = function (overrides) {
 };
 
 var inventoryRowFactory = function(givenProps) {
-    // TODO: React TestUtils suck a bit of a balls.
     var Wrapper = React.createClass({
         render: function () {
             return <table>

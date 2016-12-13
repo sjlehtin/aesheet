@@ -24,6 +24,7 @@ import EdgeRow from 'EdgeRow';
 import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
 import CharacterNotes from 'CharacterNotes';
 import MovementRates from 'MovementRates';
+import DamageControl from 'DamageControl';
 
 import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
@@ -54,7 +55,9 @@ class StatBlock extends React.Component {
             carriedInventoryWeight: 0,
 
             armor: undefined,
-            helm: undefined
+            helm: undefined,
+
+            woundList: []
         };
     }
 
@@ -170,6 +173,42 @@ class StatBlock extends React.Component {
         });
     }
 
+    handleWoundsLoaded(wounds) {
+        console.log("Wounds loaded");
+        this.setState({woundList: wounds})
+    }
+
+    handleWoundChanged(data) {
+        var woundId = data.id;
+        return rest.patch(this.state.url + `wounds/${woundId}/`,
+            data).then((json) => {
+            var index = StatBlock.findItemIndex(
+                this.state.woundList, data);
+            var wound = Object.assign(this.state.woundList[index], data);
+            this.state.woundList.splice(index, 1, wound);
+            this.setState({woundList: this.state.woundList});
+        }).catch((err) => console.log(err));
+    }
+
+    handleWoundRemoved(data) {
+        var woundId = data.id;
+        return rest.delete(this.state.url + `wounds/${woundId}/`).then(
+            (json) => {
+            var index = StatBlock.findItemIndex(
+                this.state.woundList, data);
+            this.state.woundList.splice(index, 1);
+            this.setState({woundList: this.state.woundList});
+            }
+        ).catch((err) => console.log(err));
+    }
+
+    handleWoundAdded(data) {
+        return rest.post(this.state.url + `wounds/`, data).then((json) => {
+            this.state.woundList.push(json);
+            this.setState({woundList: this.state.woundList});
+        }).then((err) => console.log(err));
+    }
+
     getCharacterEdgeURL(edge) {
         var baseURL = this.state.url + 'characteredges/';
         if (edge) {
@@ -267,6 +306,12 @@ class StatBlock extends React.Component {
                 }).catch(function (err) {
                     console.log("Failed to load edges", err)});
 
+            rest.getData(this.state.url + 'wounds/').then(
+                (wounds) => {
+                    this.handleWoundsLoaded(wounds);
+                }).catch(function (err) {
+                    console.log("Failed to load wounds", err)});
+
             rest.getData(this.state.url)
                 .then((character) => {
                     console.log("Character loaded");
@@ -291,19 +336,6 @@ class StatBlock extends React.Component {
                 });
 
         });
-    }
-
-    baseBody(baseStats) {
-        return util.roundup(baseStats.fit / 4);
-    }
-
-    toughness(skillHandler) {
-        return skillHandler.edgeLevel("Toughness");
-    }
-
-    stamina(baseStats) {
-        return util.roundup((baseStats.ref + baseStats.wil)/ 4)
-            + this.state.char.bought_stamina;
     }
 
     mana(baseStats) {
@@ -416,6 +448,23 @@ class StatBlock extends React.Component {
             this.setState({char: data});
         }).then((err) => console.log(err));
     }
+
+    /* TODO:  I think this is the best way to handle the update.  The
+       sub-components request the update from the character, which does the
+       actual rest call and propagates the update back downward.  Handling
+       API call failures can then be handled by sending messages from
+       here in a unified manner. */
+    handleCharacterUpdate(field, oldValue, newValue) {
+        var data = this.state.char;
+
+        var update = {};
+        update[field] = newValue;
+        return rest.patch(this.state.url, update).then((json) => {
+            data[field] = newValue;
+            this.setState({char: data});
+        }).catch((err) => console.log(err));
+    }
+
 
     static findItemIndex(itemList, givenItem) {
         for (var ii = 0; ii < itemList.length; ii++) {
@@ -719,7 +768,7 @@ class StatBlock extends React.Component {
             </tr>
         </tbody>;
 
-        var toughness = this.toughness(skillHandler);
+        var toughness = skillHandler.edgeLevel("Toughness");
         if (toughness) {
             toughness = (<span>+<span
                 style={{ fontWeight: "bold"}}>{toughness}</span></span>);
@@ -734,11 +783,11 @@ class StatBlock extends React.Component {
 
         expendable = <tbody>
         <tr><td style={statStyle}>B</td>
-            <td style={baseStyle}>{this.baseBody(baseStats)
+            <td style={baseStyle}>{baseStats.baseBody
             }{toughness}</td>
             <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
-            <td style={baseStyle}>{this.stamina(baseStats)}</td>
+            <td style={baseStyle}>{baseStats.stamina}</td>
             <td style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
             }</td></tr>
         <tr><td style={statStyle}>M</td>
@@ -826,6 +875,7 @@ class StatBlock extends React.Component {
             edges: this.state.edgeList,
             effects: this.getAllEffects(),
             weightCarried: this.getCarriedWeight(),
+            wounds: this.state.woundList,
             armor: this.state.armor,
             helm: this.state.helm
         });
@@ -1125,6 +1175,23 @@ class StatBlock extends React.Component {
         return <MovementRates skillHandler={skillHandler} />;
     }
 
+    renderDamages(skillHandler) {
+        if (!skillHandler) {
+            return <Loading>Damage controls</Loading>;
+        }
+        return <Panel header={<h4>Stamina damage and wounds</h4>}>
+            <DamageControl
+                character={skillHandler.props.character}
+                handler={skillHandler}
+                wounds={this.state.woundList}
+                onWoundMod={this.handleWoundChanged.bind(this)}
+                onWoundRemove={this.handleWoundRemoved.bind(this)}
+                onWoundAdd={this.handleWoundAdded.bind(this)}
+                onMod={this.handleCharacterUpdate.bind(this)}
+            />
+        </Panel>;
+    }
+
     renderHeader() {
         if (!this.state.char || !this.state.sheet) {
             return <Loading>Header</Loading>;
@@ -1173,9 +1240,6 @@ class StatBlock extends React.Component {
                             <Row>
                                 Weight carried: {this.getCarriedWeight().toFixed(2)} kg
                             </Row>
-                            <Row>
-                                {this.renderArmor()}
-                            </Row>
                         </Col>
                         <Col md={6}>
                             <Row style={{paddingBottom: 5}}>
@@ -1190,7 +1254,15 @@ class StatBlock extends React.Component {
                         </Col>
                     </Row>
                     <Row>
-                        {this.renderMovementRates(skillHandler)}
+                        <Col md={6}>
+                            {this.renderArmor()}
+                        </Col>
+                        <Col md={6} style={{fontSize: "60%"}}>
+                            {this.renderMovementRates(skillHandler)}
+                        </Col>
+                    </Row>
+                    <Row>
+                        {this.renderDamages(skillHandler)}
                     </Row>
                     <Row>
                         {this.renderCCWeapons(skillHandler)}

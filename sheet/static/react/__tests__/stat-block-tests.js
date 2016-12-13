@@ -27,7 +27,12 @@ jest.dontMock('../EdgeRow');
 jest.dontMock('../AddCharacterEdgeControl');
 jest.dontMock('../CharacterNotes');
 jest.dontMock('../MovementRates');
+jest.dontMock('../DamageControl');
+jest.dontMock('../WoundRow');
+jest.dontMock('../AddWoundControl');
+jest.dontMock('../WoundPenaltyBox');
 jest.dontMock('../sheet-util');
+jest.dontMock('./testutils');
 jest.dontMock('./factories');
 
 import React from 'react';
@@ -37,17 +42,23 @@ import TestUtils from 'react-addons-test-utils';
 var rest = require('sheet-rest');
 
 var factories = require('./factories');
-var getAllArgumentsByPosition = require('./testutils').getAllArgumentsByPosition;
+
+const getAllArgumentsByPosition = require('./testutils').getAllArgumentsByPosition;
 
 const StatBlock = require('../StatBlock').default;
 const NoteBlock = require('../NoteBlock').default;
 const AddSPControl = require('../AddSPControl').default;
 const XPControl = require('../XPControl').default;
 const Inventory = require('../Inventory').default;
+const DamageControl = require('../DamageControl').default;
 
 
 describe('stat block', function() {
     "use strict";
+
+    // beforeEach(function() {
+    //
+    // });
 
     it('fetched initial data', function (done) {
         var block = factories.statBlockFactory();
@@ -62,67 +73,6 @@ describe('stat block', function() {
                         .toContain('/rest/characters/2/');
 
             expect(block.state.char).not.toBe(undefined);
-            done();
-        });
-    });
-
-    it('calculates MOV', function (done) {
-        var block = factories.statBlockFactory({character: {cur_fit: 49, cur_ref: 51}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            var effStats = block.getSkillHandler().getEffStats();
-            expect(baseStats.mov).toEqual(50);
-            expect(effStats.mov).toEqual(50);
-            done();
-        });
-    });
-
-    it('calculates DEX', function (done) {
-        var block = factories.statBlockFactory({character: {
-            cur_int: 49, cur_ref: 51}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            var effStats = block.getSkillHandler().getEffStats();
-            expect(baseStats.dex).toEqual(50);
-            expect(effStats.dex).toEqual(50);
-            done();
-        });
-    });
-
-    it('calculates IMM', function (done) {
-        var block = factories.statBlockFactory({character: {
-            cur_fit: 49, cur_psy: 51}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            var effStats = block.getSkillHandler().getEffStats();
-            expect(baseStats.imm).toEqual(50);
-            expect(effStats.imm).toEqual(50);
-            done();
-        });
-    });
-
-    it('calculates stamina', function (done) {
-        var block = factories.statBlockFactory({character: {
-            cur_ref: 53, cur_wil: 50}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.stamina(baseStats)).toEqual(26);
-            done();
-        });
-    });
-
-    it('calculates stamina with bought stamina', function (done) {
-        var block = factories.statBlockFactory({
-            character: {
-            cur_ref: 53, cur_wil: 50, bought_stamina: 5}});
-
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.stamina(baseStats)).toEqual(31);
             done();
         });
     });
@@ -144,26 +94,6 @@ describe('stat block', function() {
         block.afterLoad(function () {
             var baseStats = block.getSkillHandler().getBaseStats();
             expect(block.mana(baseStats)).toEqual(29);
-            done();
-        });
-    });
-
-    it('calculates body upwards', function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_fit: 41})});
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.baseBody(baseStats)).toEqual(11);
-            done();
-        });
-    });
-
-    it('calculates body', function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_fit: 39})});
-        block.afterLoad(function () {
-            var baseStats = block.getSkillHandler().getBaseStats();
-            expect(block.baseBody(baseStats)).toEqual(10);
             done();
         });
     });
@@ -238,10 +168,7 @@ describe('stat block', function() {
         });
     });
 
-    xit('should not indicate negative XP with unbought free edges');
     xit('handles edge removal');
-    xit('handles edge point calculation after edge removal');
-
 
     var getSkillHandler = function (block) {
         // TODO: skills need to be loaded because edges are handled by
@@ -264,22 +191,6 @@ describe('stat block', function() {
         }
         block.handleEdgesLoaded(edgeList);
     };
-
-    it('can indicate toughness', function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_fit: 40})});
-        block.afterLoad(function () {
-            var skillHandler = getSkillHandler(block);
-            expect(block.toughness(skillHandler)).toEqual(0);
-
-            addEdge(block, "Toughness", 1);
-
-            skillHandler = getSkillHandler(block);
-            expect(block.toughness(skillHandler)).toEqual(1);
-            expect(block.baseBody(skillHandler.getBaseStats())).toEqual(10);
-            done();
-        });
-    });
 
     it('can indicate stamina recovery', function (done) {
         var block = factories.statBlockFactory();
@@ -572,6 +483,28 @@ describe('stat block', function() {
                 expect(block.state.char.gained_sp).toEqual(8);
                 done();
             }).catch(err => fail(err));
+        });
+    });
+
+    it("handles stamina changes", function (done) {
+        var block = factories.statBlockFactory({
+            character: factories.characterFactory({cur_wil: 40, cur_ref: 40})
+        });
+
+        block.afterLoad(function () {
+
+            rest.patch.mockClear();
+
+            var control = TestUtils.findRenderedComponentWithType(
+                block, DamageControl);
+
+            TestUtils.Simulate.change(control._inputField,
+                {target: {value: 8}});
+            TestUtils.Simulate.click(control._changeButton);
+
+            expect(rest.patch.mock.calls[0][1]).toEqual({stamina_damage: 12});
+
+            done();
         });
     });
 });
