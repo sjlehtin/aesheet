@@ -143,6 +143,8 @@ class AddWoundControl extends React.Component {
                           value={this.state.effect}
                           filter="contains"
                           onChange={(value) => this.handleEffectChange(value)} />
+            </td>
+            <td>
                 <Button bsSize="small"
                         disabled={!this.isValid()}
                         ref={(c) => { if (c) { this._addButton = ReactDOM.findDOMNode(c)}}}
