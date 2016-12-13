@@ -530,11 +530,17 @@ class SkillHandler {
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
             // in the excel combat sheet.
-            var encumbrancePenalty = util.roundup(
-                (-10 * this.props.weightCarried) / this._effStats.fit);
+            if (this._effStats.fit > 0) {
+                var encumbrancePenalty = util.roundup(
+                    (-10 * this.props.weightCarried) / this._effStats.fit);
 
-            this._effStats.fit += encumbrancePenalty;
-            this._effStats.ref += encumbrancePenalty;
+                this._effStats.fit += encumbrancePenalty;
+                this._effStats.ref += encumbrancePenalty;
+            } else {
+                // Effective FIT zero or negative, the character cannot move.
+                this._effStats.fit = -100;
+                this._effStats.ref = -100;
+            }
 
             this._effStats.mov = util.roundup((this._effStats.fit +
                 this._effStats.ref)/2) + this._hardMods.mov +

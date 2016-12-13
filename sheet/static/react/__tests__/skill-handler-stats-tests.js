@@ -66,6 +66,26 @@ describe('SkillHandler stats', function() {
         expect(handler.getEffStats().mov).toEqual(44);
     });
 
+    it('handles zero eff fit on weight penalty calculation', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 50},
+            weightCarried: 26,
+            wounds: [{location: "H", damage: 5}]
+        });
+        expect(handler.getWoundPenalties().aa).toEqual(-50);
+        expect(handler.getEffStats().fit).toEqual(-100);
+    });
+
+    it('handles negative eff fit on weight penalty calculation', function () {
+        var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 50},
+            weightCarried: 26,
+            wounds: [{location: "H", damage: 6}]
+        });
+        expect(handler.getWoundPenalties().aa).toEqual(-60);
+        expect(handler.getEffStats().fit).toEqual(-100);
+    });
+
     it('takes transient effects into account in encumbrance', function () {
         // Transient effect should affect; +10 fit should decrease
         // penalties.
