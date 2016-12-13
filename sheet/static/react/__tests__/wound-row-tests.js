@@ -84,4 +84,60 @@ describe('WoundRow', function() {
 
         expect(woundRow._healButton).not.toBeDefined();
     });
+
+    it("allows wound effects to be changed", function (done) {
+        var resolve = Promise.resolve({});
+        var callback = jasmine.createSpy("callback").and.returnValue(resolve);
+        var tree = getWoundRowTree({
+            wound: {damage: 5, location: "H", healed: 0,
+                    id: 2, effect: "Throat punctured."},
+            onMod: callback
+            });
+        var woundRow = TestUtils.findRenderedComponentWithType(tree,
+            WoundRow);
+
+        TestUtils.Simulate.click(woundRow._effectField);
+
+        TestUtils.Simulate.change(woundRow._effectInputField,
+            {target: {value: "Fuzzbazz"}});
+
+        TestUtils.Simulate.keyDown(woundRow._effectInputField,
+                {key: "Enter", keyCode: 13, which: 13});
+
+        expect(callback).toHaveBeenCalledWith({
+            id: 2,
+            effect: "Fuzzbazz"
+        });
+        resolve.then(function () {
+            expect(woundRow.state.editingEffect).toEqual(false);
+            done();
+        }).catch((err) => {console.log(err)});
+    });
+
+    it("allows wound effect changing to be canceled", function () {
+        var resolve = Promise.resolve({});
+        var callback = jasmine.createSpy("callback").and.returnValue(resolve);
+        var tree = getWoundRowTree({
+            wound: {
+                damage: 5, location: "H", healed: 0,
+                id: 2, effect: "Throat punctured."
+            },
+            onMod: callback
+        });
+        var woundRow = TestUtils.findRenderedComponentWithType(tree,
+            WoundRow);
+
+        TestUtils.Simulate.click(woundRow._effectField);
+
+        TestUtils.Simulate.change(woundRow._effectInputField,
+            {target: {value: "Fuzzbazz"}});
+
+        TestUtils.Simulate.keyDown(woundRow._effectInputField,
+            {key: "Esc", keyCode: 27, which: 27});
+
+        expect(woundRow.state.editingEffect).toEqual(false);
+        expect(woundRow.state.effect).toEqual("Throat punctured.");
+    });
+
+    // TODO: test componentWillReceiveProps
 });

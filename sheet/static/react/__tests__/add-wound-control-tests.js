@@ -99,7 +99,6 @@ describe('AddWoundControl', function() {
             AddWoundControl);
 
         // Allows zero wounds.  The effect should be fillable afterwards.
-        //  TODO: not yet modifiable after the fact.
         expect(addControl.isValid()).toEqual(true);
 
         TestUtils.Simulate.change(addControl._damageInputField,

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Octicon from 'react-octicon'
-import {Button} from 'react-bootstrap';
+import {Button, Input} from 'react-bootstrap';
 
 var util = require('sheet-util');
 var rest = require('sheet-rest');
@@ -9,6 +9,15 @@ var rest = require('sheet-rest');
 class WoundRow extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {editingEffect: false,
+            effect: this.props.wound.effect
+        };
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (this.props.wound.effect !== nextProps.wound.effect) {
+            this.setState({effect: nextProps.wound.effect});
+        }
     }
 
     handleWorsen() {
@@ -28,6 +37,30 @@ class WoundRow extends React.Component {
     handleRemove() {
         if (this.props.onRemove) {
             this.props.onRemove({id: this.props.wound.id});
+        }
+    }
+
+    handleEffectFieldClicked() {
+        this.setState({editingEffect: !this.state.editingEffect});
+    }
+
+    handleEffectChanged(e) {
+        this.setState({effect: e.target.value});
+    }
+
+    cancelEdit(e) {
+        this.setState({effect: this.props.wound.effect,
+                       editingEffect: false});
+    }
+
+    handleKeyDown(e) {
+        if (e.keyCode === 13) {
+            /* Enter. */
+            this.props.onMod({id: this.props.wound.id, effect: this.state.effect})
+                .then(() => this.setState({editingEffect: false}));
+        } else if (e.keyCode === 27) {
+            /* Escape. */
+            this.cancelEdit();
         }
     }
 
@@ -53,12 +86,22 @@ class WoundRow extends React.Component {
             <Octicon name="arrow-down"/></span>;
         }
 
+        var effectField = this.props.wound.effect;
+        if (this.state.editingEffect) {
+            effectField = <Input ref={(c) => {if (c) {this._effectInputField = c.getInputDOMNode(); this._effectInputField.focus(); }}}
+                                 type="text"
+                                 onChange={(value) => this.handleEffectChanged(value)}
+                                 onKeyDown={(e) => this.handleKeyDown(e)}
+                                 onClick={(c) => c.stopPropagation()}
+                                 value={this.state.effect} />;
+        }
         return <tr style={this.props.style}>
             <td>{this.props.wound.location}</td>
             <td>{this.props.wound.damage_type}</td>
             <td>{this.props.wound.damage - this.props.wound.healed}
             <span style={{position: "relative"}}>{worsenButton}{decreaseButton}</span></td>
-            <td>{this.props.wound.effect}
+            <td onClick={() => this.handleEffectFieldClicked()} ref={(c) => this._effectField = c}>
+                {effectField}
                 <Button bsSize="xsmall"
                         ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleRemove()}>Heal</Button>
