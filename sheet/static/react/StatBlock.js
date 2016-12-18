@@ -1249,7 +1249,7 @@ class StatBlock extends React.Component {
                             <Row>
                                 Weight carried: {this.getCarriedWeight().toFixed(2)} kg
                             </Row>
-                            <Row style={{fontSize: "70%"}}>
+                            <Row style={{fontSize: "60%"}}>
                                 {this.renderSenseTable(skillHandler)}
                             </Row>
                         </Col>
