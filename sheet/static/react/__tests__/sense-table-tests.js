@@ -88,4 +88,50 @@ describe('SenseTable', function() {
         expect(checks.length).toEqual(1);
     });
 
+    it('displays night vision checks for DL -2', function () {
+        let table = getSenseTable({character: {cur_int: 50}});
+        let checks = Array.from(ReactDOM.findDOMNode(table._nightVision2CheckRow).querySelectorAll("td.check"));
+        checks = checks.map((el) => {return parseInt(el.textContent);});
+        expect(checks[checks.length - 1]).toEqual(30);
+        // 1k => 9, DL -2 => 7.
+        expect(checks.length).toEqual(7);
+    });
+
+    it('displays night vision checks for DL -2 with Night Vision 3', function () {
+        let table = getSenseTable({character: {cur_int: 50},
+                    edges: [{edge: "Night Vision", level: 3}]});
+        let checks = Array.from(ReactDOM.findDOMNode(table._nightVision2CheckRow).querySelectorAll("td.check"));
+        checks = checks.map((el) => {return parseInt(el.textContent);});
+        expect(checks[checks.length - 1]).toEqual(50);
+        // 1k => 9, DL -2 => 7.
+        expect(checks.length).toEqual(9);
+    });
+
+    it('displays night vision checks for DL -4 with Night Vision 2 and Acute Vision 2', function () {
+        let table = getSenseTable({character: {cur_int: 50},
+                    edges: [{edge: "Night Vision", level: 2}, {edge: "Acute Vision", level: 2}]});
+        let checks = Array.from(ReactDOM.findDOMNode(table._nightVision4CheckRow).querySelectorAll("td.check"));
+        checks = checks.map((el) => {return parseInt(el.textContent);});
+        expect(checks[checks.length - 1]).toEqual(30);
+        // 1k => 9, DL -2 + 1 => 8.
+        expect(checks.length).toEqual(8);
+    });
+
+    it('recognizes total darkness', function () {
+        let table = getSenseTable({character: {cur_int: 50},
+                    edges: [{edge: "Night Vision", level: 3}]});
+        let checks = Array.from(ReactDOM.findDOMNode(table._nightVision7CheckRow).querySelectorAll("td.check"));
+        expect(checks.length).toEqual(0);
+    });
+
+    it('recognizes total darkness with darkvision', function () {
+        let table = getSenseTable({character: {cur_int: 50},
+                    edges: [{edge: "Night Vision", level: 4}]});
+        let checks = Array.from(ReactDOM.findDOMNode(table._nightVision7CheckRow).querySelectorAll("td.check"));
+        checks = checks.map((el) => {return parseInt(el.textContent);});
+        expect(checks[checks.length - 1]).toEqual(20);
+        // 1k => 9, total DL -3 => 6.
+        expect(checks.length).toEqual(6);
+    });
+
 });

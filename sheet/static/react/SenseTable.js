@@ -35,14 +35,19 @@ import {Table, Panel} from 'react-bootstrap';
 
 class SenseTable extends React.Component {
 
-    static getCheckCells(baseCheck, baseNumChecks) {
+    static getChecks(baseNumChecks, baseCheck) {
         let checks = [];
         for (let ii = 0; ii < baseNumChecks + baseCheck.detectionLevel; ii++) {
             checks.push(baseCheck.check + ii * 10);
         }
         checks.reverse();
+        return checks;
+    }
 
-        return SenseTable.renderCheckCells(checks, baseCheck);
+    static getCheckCells(baseCheck, baseNumChecks) {
+        const checks = this.getChecks(baseNumChecks, baseCheck);
+
+        return SenseTable.renderCheckCells(checks, baseCheck.detectionLevel);
     }
 
     static getPadCells(numPad) {
@@ -53,40 +58,64 @@ class SenseTable extends React.Component {
         return cells;
     }
 
-    static renderCheckCells(checks, baseCheck) {
+    static renderCheckCells(checks, relevantDetectionLevel) {
         checks = checks.map((chk, ii) => {
             return <td className="check" key={"chk-" + ii}>{chk}</td>;
         });
 
-
         const numPad = 12 - checks.length;
         checks = checks.concat(SenseTable.getPadCells(numPad));
 
-        checks.splice(0, 0, <td key="level">{baseCheck.detectionLevel}</td>);
+        checks.splice(0, 0, <td key="level">{relevantDetectionLevel}</td>);
         return checks;
     }
 
-    getVisionChecks() {
+    renderVisionChecks() {
         return SenseTable.getCheckCells(this.props.handler.dayVisionCheck(),
             SenseTable.BASE_VISION_RANGE);
     }
 
-    getHearingChecks() {
+    renderNightVisionChecks(detectionLevel) {
+        const check = this.props.handler.nightVisionCheck();
+
+        let checks;
+        if (detectionLevel < -4 && check.darknessDetectionLevel < 4) {
+            // "Night Vision 4 indicates full darkvision (ability to see
+            // even in complete darkness)."
+            checks = [];
+        } else {
+
+            const totalDarknessDL = Math.min(0,
+                detectionLevel + check.darknessDetectionLevel);
+
+            checks = SenseTable.getChecks(
+                SenseTable.BASE_VISION_RANGE + totalDarknessDL,
+                check);
+            checks = checks.map((chk) => {
+                return chk + 10 * totalDarknessDL;
+            });
+        }
+        return SenseTable.renderCheckCells(checks,
+            check.darknessDetectionLevel);
+    }
+
+    renderHearingChecks() {
         return SenseTable.getCheckCells(this.props.handler.hearingCheck(),
             SenseTable.BASE_HEARING_RANGE);
     }
 
-    getSmellChecks() {
+    renderSmellChecks() {
         return SenseTable.getCheckCells(this.props.handler.hearingCheck(),
             SenseTable.BASE_SMELL_RANGE);
     }
 
-    getTouchChecks() {
+    renderTouchChecks() {
         let baseCheck = this.props.handler.touchCheck();
-        return SenseTable.renderCheckCells([baseCheck.check], baseCheck);
+        return SenseTable.renderCheckCells([baseCheck.check],
+            baseCheck.detectionLevel);
     }
 
-    getSurpriseChecks() {
+    renderSurpriseChecks() {
         let baseCheck = this.props.handler.surpriseCheck();
         return [<td key="empty"/>,
             <td className="check" key="check">{baseCheck}</td>]
@@ -94,6 +123,7 @@ class SenseTable extends React.Component {
     }
 
     render() {
+        const noteStyle = {fontSize: "60%", color: "gray"};
         return <Panel header={<h4>Senses</h4>}>
             <Table condensed fill>
         <thead>
@@ -108,16 +138,24 @@ class SenseTable extends React.Component {
             </tr>
         </thead>
         <tbody>
-        <tr ref={(c) => this._visionCheckRow = c}><th>Day vision</th>
-            {this.getVisionChecks()}<td/></tr>
+        <tr ref={(c) => this._visionCheckRow = c}><th>Day</th>
+            {this.renderVisionChecks()}<td/></tr>
+        <tr ref={(c) => this._nightVision2CheckRow = c} style={{}}><th>Night</th>
+            {this.renderNightVisionChecks(-2)}<td style={noteStyle}>-2, Artificial light</td></tr>
+        <tr ref={(c) => this._nightVision3CheckRow = c} style={{}}><th>Night</th>
+            {this.renderNightVisionChecks(-3)}<td style={noteStyle}>-3, Moonlight</td></tr>
+        <tr ref={(c) => this._nightVision4CheckRow = c} style={{}}><th>Night</th>
+            {this.renderNightVisionChecks(-4)}<td style={noteStyle}>-4, Darkness</td></tr>
+        <tr ref={(c) => this._nightVision7CheckRow = c} style={{}}><th>Night</th>
+            {this.renderNightVisionChecks(-7)}<td style={noteStyle}>-7, Pitch black</td></tr>
         <tr ref={(c) => this._hearingCheckRow = c}><th>Hearing</th>
-            {this.getHearingChecks()}<td/></tr>
+            {this.renderHearingChecks()}<td/></tr>
         <tr ref={(c) => this._smellCheckRow = c}><th>Smell</th>
-            {this.getSmellChecks()}<td/></tr>
+            {this.renderSmellChecks()}<td/></tr>
         <tr ref={(c) => this._touchCheckRow = c}><th>Touch</th>
-            {this.getTouchChecks()}<td/></tr>
+            {this.renderTouchChecks()}<td/></tr>
         <tr ref={(c) => this._surpriseCheckRow = c}><th>Surprise</th>
-            {this.getSurpriseChecks()}<td/></tr>
+            {this.renderSurpriseChecks()}<td/></tr>
         </tbody>
         </Table>
     </Panel>;

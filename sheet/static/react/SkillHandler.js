@@ -575,12 +575,11 @@ class SkillHandler {
     }
 
     nightVisionCheck() {
-        let detectionLevel = this.detectionLevel("Night Vision",
-            "Night Blindness");
-        detectionLevel += util.rounddown(
-            this.detectionLevel("Acute Vision", "Poor Vision") / 2);
         return {check: this.getEffStats().int + this.getTotalModifier("vision"),
-            detectionLevel: detectionLevel};
+            detectionLevel: util.rounddown(
+                this.detectionLevel("Acute Vision", "Poor Vision") / 2),
+            darknessDetectionLevel: this.detectionLevel("Night Vision",
+                "Night Blindness")};
     }
 
     surpriseCheck() {

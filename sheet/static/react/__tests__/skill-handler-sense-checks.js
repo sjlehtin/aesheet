@@ -20,42 +20,48 @@ describe('SkillHandler edge skill bonuses', function() {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Night Vision", level: 1}]});
 
-        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 1});
+        expect(handler.nightVisionCheck()).toEqual({check: 50,
+            darknessDetectionLevel: 1, detectionLevel: 0});
     });
 
     it('recognizes Night Blindness for detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Night Blindness", level: 1}]});
 
-        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: -1});
+        expect(handler.nightVisionCheck()).toEqual({check: 50,
+            darknessDetectionLevel: -1, detectionLevel: 0});
     });
 
     it('recognizes Acute Vision for detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Acute Vision", level: 3}]});
 
-        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 1});
+        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 1,
+                    darknessDetectionLevel: 0});
     });
 
     it('correctly rounds Acute Vision down for detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Acute Vision", level: 1}]});
 
-        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 0});
+        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 0,
+                    darknessDetectionLevel: 0});
     });
 
-    it('adds Acute Vision and Night Vision for detection level', function () {
+    it('handles Acute Vision and Night Vision in detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Acute Vision", level: 2}, {edge: "Night Vision", level: 1}]});
 
-        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 2});
+        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 1,
+                    darknessDetectionLevel: 1});
     });
 
     it('adds Poor Vision and Night Vision for detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Poor Vision", level: 2}, {edge: "Night Vision", level: 1}]});
 
-        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: 0});
+        expect(handler.nightVisionCheck()).toEqual({check: 50, detectionLevel: -1,
+                    darknessDetectionLevel: 1});
     });
 
     it('recognizes Acute Vision for detection level', function () {
