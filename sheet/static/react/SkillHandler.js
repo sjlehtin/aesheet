@@ -35,25 +35,24 @@ class SkillHandler {
         this._hardMods = {};
         this._softMods = {};
 
-        for (let st of SkillHandler.allStatNames) {
+        for (const st of SkillHandler.allStatNames) {
             this._hardMods[st] = 0;
             this._softMods[st] = 0;
         }
 
-        for (let mod of this.props.edges) {
+        for (const mod of this.props.edges) {
             for (let st of SkillHandler.allStatNames) {
                 this._hardMods[st] += mod[st];
             }
         }
 
-        for (let mod of this.props.effects) {
+        for (const mod of this.props.effects) {
             for (let st of SkillHandler.allStatNames) {
                 this._softMods[st] += mod[st];
             }
         }
 
-        for (let st of ["fit", "ref", "psy"]) {
-
+        for (const st of SkillHandler.allStatNames) {
             this._softMods[st] += this.getArmorMod(this.props.helm, st) +
                  this.getArmorMod(this.props.armor, st);
         }
@@ -435,7 +434,7 @@ class SkillHandler {
     }
 
     getEffectModifier(mod, effects) {
-        // Return the sum of modifiers from edges for modifier `mod`.
+        // Return the sum of modifiers from effects for modifier `mod`.
         if (!effects) {
             effects = this.props.effects;
             if (!effects) {
@@ -554,12 +553,48 @@ class SkillHandler {
         }
         return this._effStats;
     }
+
+    dayVisionCheck() {
+        let level = -this.edgeLevel("Poor Vision");
+        if (!level) {
+            level = this.edgeLevel("Acute Vision");
+        }
+        let check = this.getEffStats().int;
+        check -= 5 * this.edgeLevel("Color Blind");
+        check += this._hardMods.vision;
+        check += this._softMods.vision;
+        return {check: check, detectionLevel: level};
+    }
+
+    surpriseCheck() {
+        return this.getEffStats().psy + this._hardMods.surprise +
+            this._softMods.surprise;
+    }
+
+    smellCheck() {
+        let level = -this.edgeLevel("Poor Smell and Taste");
+        if (!level) {
+            level = this.edgeLevel("Acute Smell and Taste");
+        }
+        return {check: this.getEffStats().int + this._hardMods.smell +
+            this._softMods.smell, detectionLevel: level};
+    }
+
+    hearingCheck() {
+        let level = -this.edgeLevel("Poor Hearing");
+        if (!level) {
+            level = this.edgeLevel("Acute Hearing");
+        }
+        return {check: this.getEffStats().int + this._hardMods.hear +
+            this._softMods.hear, detectionLevel: level};
+    }
+
 }
 
 SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
 SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
-    ["mov", "dex", "imm"]);
+    ["mov", "dex", "imm", "vision", "hear", "smell", "surprise"]);
 
 // SkillHandler.props = {
 //     character: React.PropTypes.object.isRequired,
