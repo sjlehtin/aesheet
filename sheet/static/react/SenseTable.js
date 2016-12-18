@@ -45,13 +45,18 @@ class SenseTable extends React.Component {
     }
 
     getVisionChecks() {
-        let baseCheck = this.props.handler.dayVisionCheck();
-        return SenseTable.getCheckCells(baseCheck, SenseTable.BASE_VISION_RANGE);
+        return SenseTable.getCheckCells(this.props.handler.dayVisionCheck(),
+            SenseTable.BASE_VISION_RANGE);
     }
 
     getHearingChecks() {
-        let baseCheck = this.props.handler.hearingCheck();
-        return SenseTable.getCheckCells(baseCheck, SenseTable.BASE_HEARING_RANGE);
+        return SenseTable.getCheckCells(this.props.handler.hearingCheck(),
+            SenseTable.BASE_HEARING_RANGE);
+    }
+
+    getSmellChecks() {
+        return SenseTable.getCheckCells(this.props.handler.hearingCheck(),
+            SenseTable.BASE_SMELL_RANGE);
     }
 
     render() {
@@ -66,6 +71,8 @@ class SenseTable extends React.Component {
             {this.getVisionChecks()}</tr>
         <tr ref={(c) => this._hearingCheckRow = c}><th>Hearing</th>
             {this.getHearingChecks()}</tr>
+        <tr ref={(c) => this._smellCheckRow = c}><th>Smell</th>
+            {this.getSmellChecks()}</tr>
         </tbody>
         </Table>;
     }
