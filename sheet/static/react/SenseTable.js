@@ -1,0 +1,83 @@
+/*
+Baseline ranges:
+- Vision: 1000 m
+- Hearing: 100 m
+- Smell: 10 m
+
+At baseline, INT is directly used.
+Daylight: Acute Vision (+DL) or Poor Vision (-DL)
+Night Vision: Night Vision (+DL)
+Hearing: Acute Hearing, Poor Hearing
+
+In night vision, the DL for the darkness incurs a penalty in addition to
+reducing the range.  Acute vision helps, but is halved and rounded down.
+
+Negative total DL prevents detection.  Thus, a person without Acute Vision
+cannot detect beyond a range of 1km in daylight.
+
+close-2-5-10- 20-50-100 -200-500-1000- 2000-5000-10000
+
+Armor and various bonuses may or may not affect the detection chances.
+Sometimes the check is wanted without a helmet, for example.
+
+Basically, all checks follow the same pattern; the last check is the
+actual INT check, modified by armor or edges (etc), with darkness DL
+modifying the check as well.  The check type and the DL just change the
+"length" of the check row, with Acute Vision 2, we have 2 steps more
+checks than without the edge.  All check rows follow the same heading
+(2-...-10k or something), and thus we can just print all starting from
+the shortest distance.
+
+*/
+import React from 'react';
+
+import {Table} from 'react-bootstrap';
+
+class SenseTable extends React.Component {
+
+    getVisionChecks() {
+        let baseCheck = this.props.handler.dayVisionCheck(),
+            checks = [];
+        for (let ii = 0; ii < SenseTable.BASE_VISION_RANGE + baseCheck.detectionLevel; ii++) {
+            checks.push(baseCheck.check + ii * 10);
+        }
+        checks.reverse();
+        return checks.map((chk, ii) => {return <td key={"chk" + ii}>{chk}</td>;});
+    }
+
+    getHearingChecks() {
+        let baseCheck = this.props.handler.hearingCheck(),
+            checks = [];
+        for (let ii = 0; ii < SenseTable.BASE_HEARING_RANGE + baseCheck.detectionLevel; ii++) {
+            checks.push(baseCheck.check + ii * 10);
+        }
+        checks.reverse();
+        return checks.map((chk, ii) => {return <td key={"chk" + ii}>{chk}</td>;});
+    }
+
+    render() {
+        return <Table><thead><tr>
+            <th>2</th><th>5</th><th>10</th>
+            <th>20</th><th>50</th><th>100</th>
+            <th>200</th><th>500</th><th>1k</th>
+            <th>2k</th><th>5k</th><th>10k</th>
+        </tr></thead>
+        <tbody>
+        <tr ref={(c) => this._visionCheckRow = c}><th>Day vision</th>
+            {this.getVisionChecks()}</tr>
+        <tr ref={(c) => this._hearingCheckRow = c}><th>Hearing</th>
+            {this.getHearingChecks()}</tr>
+        </tbody>
+        </Table>;
+    }
+}
+
+SenseTable.BASE_VISION_RANGE = 9;
+SenseTable.BASE_HEARING_RANGE = 6;
+SenseTable.BASE_SMELL_RANGE  = 3;
+
+SenseTable.propTypes = {
+    handler: React.PropTypes.object.isRequired
+};
+
+export default SenseTable;
