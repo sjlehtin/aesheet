@@ -562,31 +562,32 @@ class SkillHandler {
         return level;
     }
 
+    getTotalModifier(target) {
+        return this._hardMods[target] + this._softMods[target];
+    }
+
     dayVisionCheck() {
         let check = this.getEffStats().int;
-        check += this._hardMods.vision;
-        check += this._softMods.vision;
+        check += this.getTotalModifier("vision");
         check -= 5 * this.edgeLevel("Color Blind");
         return {check: check,
             detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
     }
 
     surpriseCheck() {
-        return this.getEffStats().psy + this._hardMods.surprise +
-            this._softMods.surprise;
+        return this.getEffStats().psy + this.getTotalModifier("surprise");
     }
 
     smellCheck() {
-        return {check: this.getEffStats().int + this._hardMods.smell +
-            this._softMods.smell,
+        return {check: this.getEffStats().int + this.getTotalModifier("smell"),
             detectionLevel: this.detectionLevel("Acute Smell and Taste",
                             "Poor Smell and Taste")};
     }
 
     hearingCheck() {
         const level = this.detectionLevel("Acute Hearing", "Poor Hearing")
-        return {check: this.getEffStats().int + this._hardMods.hear +
-            this._softMods.hear, detectionLevel: level};
+        return {check: this.getEffStats().int + this.getTotalModifier("hear"),
+            detectionLevel: level};
     }
 
 }
