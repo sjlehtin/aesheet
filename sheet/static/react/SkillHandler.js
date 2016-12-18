@@ -598,6 +598,11 @@ class SkillHandler {
             detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
     }
 
+    touchCheck() {
+        return {check: this.getEffStats().int +
+                        util.roundup(this.getSkillMod("climb") / 2),
+                detectionLevel: this.edgeLevel("Acute Touch")};
+    }
 }
 
 SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",

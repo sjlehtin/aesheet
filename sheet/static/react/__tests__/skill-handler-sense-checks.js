@@ -163,4 +163,19 @@ describe('SkillHandler edge skill bonuses', function() {
         expect(handler.hearingCheck()).toEqual({check: 50, detectionLevel: -1});
     });
 
+    it('recognizes Acute Touch for detection level', function () {
+        const handler = factories.skillHandlerFactory({character: {cur_int: 50},
+        edges: [{edge: "Acute Touch", level: 1}]});
+
+        expect(handler.touchCheck()).toEqual({check: 50, detectionLevel: 1});
+    });
+
+    it('handles armor touch modifiers', function () {
+        const handler = factories.skillHandlerFactory({
+                            character: {cur_int: 50},
+                            armor: {base: {mod_climb: -5}}});
+        expect(handler.touchCheck()).toEqual({check: 47, detectionLevel: 0});
+    });
+
+
 });
