@@ -60,7 +60,7 @@ describe('SenseTable', function() {
         expect(checks.length).toEqual(3);
     });
 
-    it('displays touch checks', function () {
+    it('displays touch check', function () {
         let table = getSenseTable({character: {cur_int: 50}});
         let checks = Array.from(ReactDOM.findDOMNode(table._touchCheckRow).querySelectorAll("td.check"));
         checks = checks.map((el) => {return parseInt(el.textContent);});
@@ -73,6 +73,15 @@ describe('SenseTable', function() {
         let table = getSenseTable({character: {cur_int: 50},
             edges: [{edge: "Acute Touch", level: 1}]});
         let checks = Array.from(ReactDOM.findDOMNode(table._touchCheckRow).querySelectorAll("td.check"));
+        checks = checks.map((el) => {return parseInt(el.textContent);});
+        expect(checks[checks.length - 1]).toEqual(50);
+        // Just one check (close).
+        expect(checks.length).toEqual(1);
+    });
+
+    it('displays surprise check', function () {
+        let table = getSenseTable({character: {cur_psy: 50}});
+        let checks = Array.from(ReactDOM.findDOMNode(table._surpriseCheckRow).querySelectorAll("td.check"));
         checks = checks.map((el) => {return parseInt(el.textContent);});
         expect(checks[checks.length - 1]).toEqual(50);
         // Just one check (close).
