@@ -574,6 +574,15 @@ class SkillHandler {
             detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
     }
 
+    nightVisionCheck() {
+        let detectionLevel = this.detectionLevel("Night Vision",
+            "Night Blindness");
+        detectionLevel += util.rounddown(
+            this.detectionLevel("Acute Vision", "Poor Vision") / 2);
+        return {check: this.getEffStats().int + this.getTotalModifier("vision"),
+            detectionLevel: detectionLevel};
+    }
+
     surpriseCheck() {
         return this.getEffStats().psy + this.getTotalModifier("surprise");
     }
@@ -585,9 +594,8 @@ class SkillHandler {
     }
 
     hearingCheck() {
-        const level = this.detectionLevel("Acute Hearing", "Poor Hearing")
         return {check: this.getEffStats().int + this.getTotalModifier("hear"),
-            detectionLevel: level};
+            detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
     }
 
 }
