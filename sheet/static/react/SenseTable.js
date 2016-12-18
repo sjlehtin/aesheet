@@ -31,17 +31,25 @@ the shortest distance.
 */
 import React from 'react';
 
-import {Table} from 'react-bootstrap';
+import {Table, Panel} from 'react-bootstrap';
 
 class SenseTable extends React.Component {
 
     static getCheckCells(baseCheck, baseNumChecks) {
         let checks = [];
-       for (let ii = 0; ii < baseNumChecks + baseCheck.detectionLevel; ii++) {
+        for (let ii = 0; ii < baseNumChecks + baseCheck.detectionLevel; ii++) {
             checks.push(baseCheck.check + ii * 10);
         }
         checks.reverse();
-        return checks.map((chk, ii) => {return <td key={"chk" + ii}>{chk}</td>;});
+        checks = checks.map((chk, ii) => {return <td className="check" key={"chk-" + ii}>{chk}</td>;});
+
+        checks.splice(0, 0, <td key="level">{baseCheck.detectionLevel}</td>);
+
+        var numPad = 12 - checks.length;
+        for (let ii = 0; ii < numPad; ii++) {
+            checks.push(<td key={"pad-" + ii} />);
+        }
+        return checks;
     }
 
     getVisionChecks() {
@@ -60,21 +68,29 @@ class SenseTable extends React.Component {
     }
 
     render() {
-        return <Table><thead><tr>
-            <th>2</th><th>5</th><th>10</th>
-            <th>20</th><th>50</th><th>100</th>
-            <th>200</th><th>500</th><th>1k</th>
-            <th>2k</th><th>5k</th><th>10k</th>
-        </tr></thead>
+        return <Panel header={<h4>Senses</h4>}>
+            <Table condensed fill>
+        <thead>
+            <tr>
+                <th />
+                <th>Lvl</th>
+                <th>2</th><th>5</th><th>10</th>
+                <th>20</th><th>50</th><th>100</th>
+                <th>200</th><th>500</th><th>1k</th>
+                <th>2k</th><th>5k</th><th>10k</th>
+                <th />
+            </tr>
+        </thead>
         <tbody>
         <tr ref={(c) => this._visionCheckRow = c}><th>Day vision</th>
-            {this.getVisionChecks()}</tr>
+            {this.getVisionChecks()}<td/></tr>
         <tr ref={(c) => this._hearingCheckRow = c}><th>Hearing</th>
-            {this.getHearingChecks()}</tr>
+            {this.getHearingChecks()}<td/></tr>
         <tr ref={(c) => this._smellCheckRow = c}><th>Smell</th>
-            {this.getSmellChecks()}</tr>
+            {this.getSmellChecks()}<td/></tr>
         </tbody>
-        </Table>;
+        </Table>
+    </Panel>;
     }
 }
 

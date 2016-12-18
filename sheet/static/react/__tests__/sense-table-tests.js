@@ -34,7 +34,7 @@ describe('SenseTable', function() {
     it('displays vision checks', function () {
         let table = getSenseTable({character: {cur_int: 50},
             edges: [{edge: "Acute Vision", level: 1}]});
-        let checks = Array.from(ReactDOM.findDOMNode(table._visionCheckRow).querySelectorAll("td"));
+        let checks = Array.from(ReactDOM.findDOMNode(table._visionCheckRow).querySelectorAll("td.check"));
         checks = checks.map((el) => {return parseInt(el.textContent);});
         expect(checks[checks.length - 1]).toEqual(50);
         // Distance of 2k with Acute Vision.
@@ -44,7 +44,7 @@ describe('SenseTable', function() {
     it('displays hearing checks', function () {
         let table = getSenseTable({character: {cur_int: 50},
             edges: [{edge: "Poor Hearing", level: 1}]});
-        let checks = Array.from(ReactDOM.findDOMNode(table._hearingCheckRow).querySelectorAll("td"));
+        let checks = Array.from(ReactDOM.findDOMNode(table._hearingCheckRow).querySelectorAll("td.check"));
         checks = checks.map((el) => {return parseInt(el.textContent);});
         expect(checks[checks.length - 1]).toEqual(50);
         // Distance of 50m with Poor Hearing.
@@ -53,7 +53,7 @@ describe('SenseTable', function() {
 
     it('displays smell checks', function () {
         let table = getSenseTable({character: {cur_int: 50}});
-        let checks = Array.from(ReactDOM.findDOMNode(table._smellCheckRow).querySelectorAll("td"));
+        let checks = Array.from(ReactDOM.findDOMNode(table._smellCheckRow).querySelectorAll("td.check"));
         checks = checks.map((el) => {return parseInt(el.textContent);});
         expect(checks[checks.length - 1]).toEqual(50);
         // Distance of 10m by default.
