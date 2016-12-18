@@ -35,24 +35,23 @@ import {Table} from 'react-bootstrap';
 
 class SenseTable extends React.Component {
 
-    getVisionChecks() {
-        let baseCheck = this.props.handler.dayVisionCheck(),
-            checks = [];
-        for (let ii = 0; ii < SenseTable.BASE_VISION_RANGE + baseCheck.detectionLevel; ii++) {
+    static getCheckCells(baseCheck, baseNumChecks) {
+        let checks = [];
+       for (let ii = 0; ii < baseNumChecks + baseCheck.detectionLevel; ii++) {
             checks.push(baseCheck.check + ii * 10);
         }
         checks.reverse();
         return checks.map((chk, ii) => {return <td key={"chk" + ii}>{chk}</td>;});
     }
 
+    getVisionChecks() {
+        let baseCheck = this.props.handler.dayVisionCheck();
+        return SenseTable.getCheckCells(baseCheck, SenseTable.BASE_VISION_RANGE);
+    }
+
     getHearingChecks() {
-        let baseCheck = this.props.handler.hearingCheck(),
-            checks = [];
-        for (let ii = 0; ii < SenseTable.BASE_HEARING_RANGE + baseCheck.detectionLevel; ii++) {
-            checks.push(baseCheck.check + ii * 10);
-        }
-        checks.reverse();
-        return checks.map((chk, ii) => {return <td key={"chk" + ii}>{chk}</td>;});
+        let baseCheck = this.props.handler.hearingCheck();
+        return SenseTable.getCheckCells(baseCheck, SenseTable.BASE_HEARING_RANGE);
     }
 
     render() {
