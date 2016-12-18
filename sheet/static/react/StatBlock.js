@@ -25,6 +25,7 @@ import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
 import CharacterNotes from 'CharacterNotes';
 import MovementRates from 'MovementRates';
 import DamageControl from 'DamageControl';
+import SenseTable from 'SenseTable';
 
 import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
@@ -857,7 +858,7 @@ class StatBlock extends React.Component {
             return <Loading>SP</Loading>
         }
 
-    var ageSP = util.roundup(baseStats.lrn/15 +
+        var ageSP = util.roundup(baseStats.lrn/15 +
             baseStats.int/25 + baseStats.psy/50);
         return <AddSPControl initialAgeSP={ageSP}
                              onAdd={(sp) => this.handleAddGainedSP(sp)} />;
@@ -1216,6 +1217,14 @@ class StatBlock extends React.Component {
             </Row>;
     }
 
+    renderSenseTable(handler) {
+        if (!handler) {
+            return <Loading>Senses</Loading>
+        }
+
+        return <SenseTable handler={handler}/>;
+    }
+
     render() {
         var skillHandler = this.getSkillHandler();
         if (skillHandler) {
@@ -1239,6 +1248,9 @@ class StatBlock extends React.Component {
                             </Row>
                             <Row>
                                 Weight carried: {this.getCarriedWeight().toFixed(2)} kg
+                            </Row>
+                            <Row style={{fontSize: "70%"}}>
+                                {this.renderSenseTable(skillHandler)}
                             </Row>
                         </Col>
                         <Col md={6}>
