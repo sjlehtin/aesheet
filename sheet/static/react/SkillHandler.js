@@ -554,16 +554,21 @@ class SkillHandler {
         return this._effStats;
     }
 
-    dayVisionCheck() {
-        let level = -this.edgeLevel("Poor Vision");
+    detectionLevel(goodEdge, badEdge) {
+        let level = -this.edgeLevel(badEdge);
         if (!level) {
-            level = this.edgeLevel("Acute Vision");
+            level = this.edgeLevel(goodEdge);
         }
+        return level;
+    }
+
+    dayVisionCheck() {
         let check = this.getEffStats().int;
-        check -= 5 * this.edgeLevel("Color Blind");
         check += this._hardMods.vision;
         check += this._softMods.vision;
-        return {check: check, detectionLevel: level};
+        check -= 5 * this.edgeLevel("Color Blind");
+        return {check: check,
+            detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
     }
 
     surpriseCheck() {
@@ -572,19 +577,14 @@ class SkillHandler {
     }
 
     smellCheck() {
-        let level = -this.edgeLevel("Poor Smell and Taste");
-        if (!level) {
-            level = this.edgeLevel("Acute Smell and Taste");
-        }
         return {check: this.getEffStats().int + this._hardMods.smell +
-            this._softMods.smell, detectionLevel: level};
+            this._softMods.smell,
+            detectionLevel: this.detectionLevel("Acute Smell and Taste",
+                            "Poor Smell and Taste")};
     }
 
     hearingCheck() {
-        let level = -this.edgeLevel("Poor Hearing");
-        if (!level) {
-            level = this.edgeLevel("Acute Hearing");
-        }
+        const level = this.detectionLevel("Acute Hearing", "Poor Hearing")
         return {check: this.getEffStats().int + this._hardMods.hear +
             this._softMods.hear, detectionLevel: level};
     }
