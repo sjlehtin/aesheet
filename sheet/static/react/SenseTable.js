@@ -41,14 +41,22 @@ class SenseTable extends React.Component {
             checks.push(baseCheck.check + ii * 10);
         }
         checks.reverse();
-        checks = checks.map((chk, ii) => {return <td className="check" key={"chk-" + ii}>{chk}</td>;});
+
+        return SenseTable.renderCheckCells(checks, baseCheck);
+    }
+
+    static renderCheckCells(checks, baseCheck) {
+        checks = checks.map((chk, ii) => {
+            return <td className="check" key={"chk-" + ii}>{chk}</td>;
+        });
 
         checks.splice(0, 0, <td key="level">{baseCheck.detectionLevel}</td>);
 
         var numPad = 12 - checks.length;
         for (let ii = 0; ii < numPad; ii++) {
-            checks.push(<td key={"pad-" + ii} />);
+            checks.push(<td key={"pad-" + ii}/>);
         }
+        return checks;
         return checks;
     }
 
@@ -65,6 +73,11 @@ class SenseTable extends React.Component {
     getSmellChecks() {
         return SenseTable.getCheckCells(this.props.handler.hearingCheck(),
             SenseTable.BASE_SMELL_RANGE);
+    }
+
+    getTouchChecks() {
+        let baseCheck = this.props.handler.touchCheck();
+        return SenseTable.renderCheckCells([baseCheck.check], baseCheck);
     }
 
     render() {
@@ -88,6 +101,8 @@ class SenseTable extends React.Component {
             {this.getHearingChecks()}<td/></tr>
         <tr ref={(c) => this._smellCheckRow = c}><th>Smell</th>
             {this.getSmellChecks()}<td/></tr>
+        <tr ref={(c) => this._touchCheckRow = c}><th>Touch</th>
+            {this.getTouchChecks()}<td/></tr>
         </tbody>
         </Table>
     </Panel>;
