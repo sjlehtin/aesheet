@@ -47,7 +47,7 @@ var factories = require('./factories');
 const testutils = require('./testutils');
 const StatBlock = require('../StatBlock').default;
 
-describe('stat block armor handling', function(done) {
+describe('stat block armor handling', function() {
     "use strict";
 
     it("can load armor", function (done) {
