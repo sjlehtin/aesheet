@@ -48,7 +48,7 @@ const StatBlock = require('../StatBlock').default;
 const WoundRow = require('../WoundRow').default;
 const AddWoundControl = require('../AddWoundControl').default;
 
-describe('stat block wounds handling', function(done) {
+describe('stat block wounds handling', function() {
     "use strict";
 
     it("can load wounds", function (done) {
