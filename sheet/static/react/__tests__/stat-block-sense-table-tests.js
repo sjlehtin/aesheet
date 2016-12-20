@@ -37,8 +37,9 @@ jest.dontMock('./testutils');
 jest.dontMock('./factories');
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
+
+jest.mock('../sheet-rest');
 
 const factories = require('./factories');
 

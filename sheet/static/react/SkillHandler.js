@@ -17,7 +17,7 @@
  * TODO: study Redux for handling state in a cleaner fashion.
  */
 
-var util = require('sheet-util');
+var util = require('./sheet-util');
 
 class SkillHandler {
     constructor(props) {

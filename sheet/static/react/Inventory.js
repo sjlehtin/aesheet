@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom';
 
 import {Table, Button, Input} from 'react-bootstrap';
 
-var util = require('sheet-util');
-var rest = require('sheet-rest');
+var util = require('./sheet-util');
+var rest = require('./sheet-rest');
 
-import InventoryRow from 'InventoryRow';
+import InventoryRow from './InventoryRow';
 
 /*
  * Inventory component holds the inventory items by itself.  As the items

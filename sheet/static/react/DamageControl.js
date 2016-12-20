@@ -31,13 +31,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
 import Octicon from 'react-octicon'
-import SkillHandler from 'SkillHandler';
-import WoundRow from 'WoundRow';
-import WoundPenaltyBox from 'WoundPenaltyBox';
-import AddWoundControl from 'AddWoundControl';
 
-var util = require('sheet-util');
-var rest = require('sheet-rest');
+import SkillHandler from './SkillHandler';
+import WoundRow from './WoundRow';
+import WoundPenaltyBox from './WoundPenaltyBox';
+import AddWoundControl from './AddWoundControl';
+
+const util = require('./sheet-util');
+const rest = require('./sheet-rest');
 
 class DamageControl extends React.Component {
     constructor(props) {

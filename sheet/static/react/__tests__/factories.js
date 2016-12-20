@@ -25,7 +25,7 @@ jest.dontMock('./factories');
 import React from 'react';
 import TestUtils from 'react-addons-test-utils';
 
-var rest = require('sheet-rest');
+var rest = require('../sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
 const SkillHandler = require('../SkillHandler').default;

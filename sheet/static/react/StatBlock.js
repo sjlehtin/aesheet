@@ -1,36 +1,36 @@
 import React from 'react';
 
-import StatRow from 'StatRow';
-import XPControl from 'XPControl';
-import AddSPControl from 'AddSPControl';
-import NoteBlock from 'NoteBlock';
-import InitiativeBlock from 'InitiativeBlock';
-import SkillTable from 'SkillTable';
-import Loading from 'Loading';
-import FirearmControl from 'FirearmControl';
-import AddFirearmControl from 'AddFirearmControl';
-import WeaponRow from 'WeaponRow';
-import RangedWeaponRow from 'RangedWeaponRow';
-import AddWeaponControl from 'AddWeaponControl';
-import AddRangedWeaponControl from 'AddRangedWeaponControl';
-import TransientEffectRow from 'TransientEffectRow';
-import AddTransientEffectControl from 'AddTransientEffectControl';
-import SkillHandler from 'SkillHandler';
-import Inventory from 'Inventory';
-import ArmorControl from 'ArmorControl';
-import MiscellaneousItemRow from 'MiscellaneousItemRow';
-import AddMiscellaneousItemControl from 'AddMiscellaneousItemControl';
-import EdgeRow from 'EdgeRow';
-import AddCharacterEdgeControl from 'AddCharacterEdgeControl';
-import CharacterNotes from 'CharacterNotes';
-import MovementRates from 'MovementRates';
-import DamageControl from 'DamageControl';
-import SenseTable from 'SenseTable';
+import StatRow from './StatRow';
+import XPControl from './XPControl';
+import AddSPControl from './AddSPControl';
+import NoteBlock from './NoteBlock';
+import InitiativeBlock from './InitiativeBlock';
+import SkillTable from './SkillTable';
+import Loading from './Loading';
+import FirearmControl from './FirearmControl';
+import AddFirearmControl from './AddFirearmControl';
+import WeaponRow from './WeaponRow';
+import RangedWeaponRow from './RangedWeaponRow';
+import AddWeaponControl from './AddWeaponControl';
+import AddRangedWeaponControl from './AddRangedWeaponControl';
+import TransientEffectRow from './TransientEffectRow';
+import AddTransientEffectControl from './AddTransientEffectControl';
+import SkillHandler from './SkillHandler';
+import Inventory from './Inventory';
+import ArmorControl from './ArmorControl';
+import MiscellaneousItemRow from './MiscellaneousItemRow';
+import AddMiscellaneousItemControl from './AddMiscellaneousItemControl';
+import EdgeRow from './EdgeRow';
+import AddCharacterEdgeControl from './AddCharacterEdgeControl';
+import CharacterNotes from './CharacterNotes';
+import MovementRates from './MovementRates';
+import DamageControl from './DamageControl';
+import SenseTable from './SenseTable';
 
 import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
-var rest = require('sheet-rest');
-var util = require('sheet-util');
+var rest = require('./sheet-rest');
+var util = require('./sheet-util');
 
 /**
  * TODO: controls to add bought_mana, bought_stamina, change

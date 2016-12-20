@@ -1,7 +1,7 @@
 import React from 'react';
 import Octicon from 'react-octicon';
 
-var rest = require('sheet-rest');
+var rest = require('./sheet-rest');
 
 class StatRow extends React.Component {
     constructor(props) {

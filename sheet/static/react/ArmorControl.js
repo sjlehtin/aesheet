@@ -1,8 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Button, Input } from 'react-bootstrap';
-import AddArmorControl from 'AddArmorControl';
-var util = require('sheet-util');
+import AddArmorControl from './AddArmorControl';
+var util = require('./sheet-util');
 
 class ArmorControl extends React.Component {
     constructor(props) {

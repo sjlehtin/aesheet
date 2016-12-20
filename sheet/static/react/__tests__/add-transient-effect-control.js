@@ -6,7 +6,8 @@ import TestUtils from 'react-addons-test-utils';
 
 const AddTransientEffectControl = require('../AddTransientEffectControl').default;
 
-var rest = require('sheet-rest');
+jest.mock('../sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 

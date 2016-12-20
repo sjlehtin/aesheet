@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-var rest = require('sheet-rest');
-var util = require('sheet-util');
+var rest = require('./sheet-rest');
+var util = require('./sheet-util');
 
 import {Panel, Table} from 'react-bootstrap';
-import SkillRow from 'SkillRow';
-import AddSkillControl from 'AddSkillControl';
+import SkillRow from './SkillRow';
+import AddSkillControl from './AddSkillControl';
 
 class SkillTable extends React.Component {
     handleCharacterSkillAdd(skill) {

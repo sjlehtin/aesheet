@@ -6,7 +6,8 @@ import TestUtils from 'react-addons-test-utils';
 
 const AddWeaponControl = require('../AddWeaponControl').default;
 
-var rest = require('sheet-rest');
+jest.mock('../sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 
