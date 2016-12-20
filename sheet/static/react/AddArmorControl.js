@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { Button, Input, Row } from 'react-bootstrap';
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('sheet-rest');
+var rest = require('./sheet-rest');
 
 class AddArmorControl extends React.Component {
     constructor(props) {

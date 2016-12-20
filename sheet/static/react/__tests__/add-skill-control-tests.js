@@ -9,7 +9,7 @@ import TestUtils from 'react-addons-test-utils';
 const SkillTable = require('../SkillTable').default;
 const AddSkillControl = require('../AddSkillControl').default;
 
-var rest = require('sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 

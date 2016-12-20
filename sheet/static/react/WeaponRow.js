@@ -1,5 +1,5 @@
 import React from 'react';
-var util = require('sheet-util');
+var util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
 class WeaponRow extends React.Component {

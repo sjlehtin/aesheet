@@ -1,7 +1,7 @@
 import React from 'react';
 import {Table, Panel} from 'react-bootstrap';
 
-var util = require('sheet-util');
+var util = require('./sheet-util');
 
 class MovementRates extends React.Component {
     constructor(props) {

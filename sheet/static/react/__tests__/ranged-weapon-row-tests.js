@@ -10,7 +10,7 @@ import TestUtils from 'react-addons-test-utils';
 const RangedWeaponRow = require('../RangedWeaponRow').default;
 const SkillHandler = require('../SkillHandler').default;
 
-var rest = require('sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 

@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import Octicon from 'react-octicon'
 import {Button, Input} from 'react-bootstrap';
 
-var util = require('sheet-util');
-var rest = require('sheet-rest');
+var util = require('./sheet-util');
+var rest = require('./sheet-rest');
 
 class WoundRow extends React.Component {
     constructor(props) {

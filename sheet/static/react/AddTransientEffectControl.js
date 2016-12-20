@@ -3,7 +3,7 @@ import React from 'react';
 import {Button} from 'react-bootstrap';
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('sheet-rest');
+var rest = require('./sheet-rest');
 
 class AddTransientEffectRow extends React.Component {
     constructor(props) {

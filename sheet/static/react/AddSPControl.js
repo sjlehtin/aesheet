@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Input } from 'react-bootstrap';
 
-var util = require('sheet-util');
+var util = require('./sheet-util');
 
 class AddSPControl extends React.Component {
     constructor(props) {

@@ -40,7 +40,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
-var rest = require('sheet-rest');
+jest.mock('../sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 

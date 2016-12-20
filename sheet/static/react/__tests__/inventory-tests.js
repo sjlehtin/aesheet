@@ -9,6 +9,7 @@ import TestUtils from 'react-addons-test-utils';
 
 const inventoryEntryFactory = require('./factories').inventoryEntryFactory;
 
+jest.mock('../sheet-rest');
 var rest = require('../sheet-rest');
 
 const Inventory = require('../Inventory').default;
@@ -25,9 +26,6 @@ describe('Inventory', function() {
     };
 
     beforeEach(function () {
-        rest.getData = jest.genMockFunction();
-        rest.patch = jest.genMockFunction();
-        rest.post = jest.genMockFunction();
         promises = [];
     });
 

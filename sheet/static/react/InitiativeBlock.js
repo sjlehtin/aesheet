@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Panel, Table, Input} from 'react-bootstrap';
 
-var util = require('sheet-util');
+var util = require('./sheet-util');
 
 class InitiativeBlock extends React.Component {
 

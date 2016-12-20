@@ -8,7 +8,7 @@ import TestUtils from 'react-addons-test-utils';
 const TransientEffectRow = require('../TransientEffectRow').default;
 const SkillHandler = require('../SkillHandler').default;
 
-var rest = require('sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 

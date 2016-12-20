@@ -10,7 +10,7 @@ import {Button, Input} from 'react-bootstrap';
      performed by this component, how will the reorderings be handled?
 */
 
-var util = require('sheet-util');
+var util = require('./sheet-util');
 
 class InventoryRow extends React.Component {
     constructor(props) {

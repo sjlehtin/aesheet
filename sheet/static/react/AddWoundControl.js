@@ -5,8 +5,8 @@ import Octicon from 'react-octicon'
 
 import Combobox from 'react-widgets/lib/Combobox';
 
-var util = require('sheet-util');
-var rest = require('sheet-rest');
+var util = require('./sheet-util');
+var rest = require('./sheet-rest');
 
 class AddWoundControl extends React.Component {
     constructor(props) {

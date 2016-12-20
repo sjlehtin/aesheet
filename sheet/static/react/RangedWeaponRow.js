@@ -1,6 +1,6 @@
 import React from 'react';
-import WeaponRow from 'WeaponRow';
-var util = require('sheet-util');
+import WeaponRow from './WeaponRow';
+var util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
 class RangedWeaponRow extends WeaponRow {

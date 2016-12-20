@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
 
-var util = require('sheet-util');
-var rest = require('sheet-rest');
+var util = require('./sheet-util');
+var rest = require('./sheet-rest');
 
 class XPControl extends React.Component {
     constructor(props) {

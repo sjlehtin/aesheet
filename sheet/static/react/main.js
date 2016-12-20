@@ -13,7 +13,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 import 'react-widgets/lib/less/react-widgets.less';
 
-var rest = require('sheet-rest');
+var rest = require('./sheet-rest');
 
 /* This is what this would look like in JSX.  We cannot use this directly, or
    it would be even more awkward, as we need to get the URL for the REST API

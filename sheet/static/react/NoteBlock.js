@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Row, Col, Image} from 'react-bootstrap';
 
-var rest = require('sheet-rest');
+var rest = require('./sheet-rest');
 
 class NoteBlock extends React.Component {
     constructor(props) {

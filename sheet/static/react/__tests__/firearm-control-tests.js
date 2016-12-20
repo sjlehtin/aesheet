@@ -12,7 +12,7 @@ const FirearmControl = require('../FirearmControl').default;
 const SkillTable = require('../SkillTable').default;
 const SkillHandler = require('../SkillHandler').default;
 
-var rest = require('sheet-rest');
+var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 
