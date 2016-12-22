@@ -252,7 +252,7 @@ class FirearmControl extends RangedWeaponRow {
         return <div>
         <table style={{fontSize: "inherit"}}>
             <thead>
-            <tr><th colSpan={4}>Sweep fire</th></tr>
+            <tr><th colSpan={4}>Sweep fire {this.props.weapon.base.autofire_rpm}{this.props.weapon.base.autofire_class}</th></tr>
             <tr><th>RPT</th><th>TGT</th></tr></thead>
             <tbody>
             {sweepRows}
