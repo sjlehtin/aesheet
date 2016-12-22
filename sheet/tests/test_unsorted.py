@@ -136,16 +136,13 @@ class SheetOrganizationTestCase(TestCase):
 
     def test_character_view(self):
         response = self.client.get(reverse('characters_index'))
-        self.assertIsInstance(response.context['campaigns'][0],
-                              sheet.models.CampaignItem)
         # Verify the headings are present.
         self.assertContains(response, 'FRP')
         self.assertContains(response, 'MR')
 
     def test_sheet_view(self):
         response = self.client.get(reverse('sheets_index'))
-        self.assertIsInstance(response.context['campaigns'][0],
-                              sheet.models.CampaignItem)
+
         # Verify the headings are present.
         self.assertContains(response, 'FRP')
         self.assertContains(response, 'MR')
