@@ -1,4 +1,5 @@
 import csv
+import sys
 from io import StringIO, BytesIO
 from django.shortcuts import render
 from django.db.models.fields import FieldDoesNotExist
@@ -166,6 +167,11 @@ def sort_by_dependencies(header, rows):
 
 
 def import_text(data):
+    if sys.version_info >= (3,):
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
+    else:
+        data = data.decode('utf-8')
     reader = csv.reader(StringIO(data))
     data_type = next(reader)
     if not len(data_type) or not data_type[0]:
@@ -364,17 +370,30 @@ def import_data(request):
 
 def csv_export(exported_type):
     results = exported_type.objects.all()
-    f = BytesIO()
+    if sys.version_info >= (3,):
+        def should_encode(data):
+            return False
+
+        f = StringIO()
+    else:
+        def should_encode(data):
+            return isinstance(data, basestring)
+
+        f = BytesIO()
+
+    def encode(data):
+        if should_encode(data):
+            return data.encode('utf-8')
+        else:
+            return data
+
     w = csv.writer(f)
-    w.writerow([exported_type.__name__.encode('utf-8')])
+    w.writerow([encode(exported_type.__name__)])
     fields = exported_type.get_exported_fields()
     w.writerow(fields)
 
     def to_utf8(data):
-        if isinstance(data, basestring):
-            return data.encode('utf-8')
-        else:
-            return data
+        return encode(data)
 
     for row in get_data_rows(results, fields):
         w.writerow([to_utf8(col) for col in row])
