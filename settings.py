@@ -18,7 +18,8 @@ LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
 
 DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 
-ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org"]
+ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org",
+                 'localhost', '127.0.0.1', '[::1]']
 
 BASEDIR = os.path.dirname(__file__)
 PRODUCTION = os.path.exists(os.path.join(BASEDIR, "auth"))
