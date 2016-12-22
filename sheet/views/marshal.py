@@ -1,5 +1,5 @@
 import csv
-import StringIO
+from io import StringIO, BytesIO
 from django.shortcuts import render
 from django.db.models.fields import FieldDoesNotExist
 import django.db.models
@@ -29,6 +29,7 @@ def get_data_rows(results, fields):
                 value = getattr(obj, field)
             except AttributeError:
                 return ""
+
             tag = "{model}.{field}".format(model=obj.__class__.__name__,
                                            field=field)
             if tag == "BaseFirearm.ammunition_types":
@@ -52,8 +53,8 @@ def get_data_rows(results, fields):
 def browse(request, data_type):
     try:
         cls = getattr(sheet.models, data_type)
-    except AttributeError, e:
-        raise Http404, "%s is not a supported type." % data_type
+    except AttributeError as e:
+        raise Http404("%s is not a supported type." % data_type)
     results = cls.objects.all()
     fields = cls.get_exported_fields()
     rows = get_data_rows(results, fields)
@@ -97,7 +98,6 @@ def update_id_sequence(model_class):
             pass
 
 
-
 def sort_by_dependencies(header, rows):
     """
     Sort the list of rows, so that dependencies are satisfied as well as
@@ -106,10 +106,10 @@ def sort_by_dependencies(header, rows):
     logger.debug("Sorting skill rows rows by dependencies")
     name_index = header.index("name")
     if name_index < 0:
-        raise ValueError, "No name column"
+        raise ValueError("No name column")
     required_index = header.index("required_skills")
     if required_index < 0:
-        raise ValueError, "No required_skills column"
+        raise ValueError("No required_skills column")
 
     ordered = []
     unsatisfied = {}
@@ -118,7 +118,7 @@ def sort_by_dependencies(header, rows):
     def all_satisfied(required_skills):
         for ss in required_skills:
             logger.debug("Checking for '{skill}'".format(skill=ss))
-            if not satisfied.has_key(ss):
+            if ss not in satisfied:
                 return False
         logger.debug("all satisfied for {0}".format(required_skills))
         return True
@@ -166,17 +166,18 @@ def sort_by_dependencies(header, rows):
 
 
 def import_text(data):
-    reader = csv.reader(StringIO.StringIO(data))
-    data_type = reader.next()
+    reader = csv.reader(StringIO(data))
+    data_type = next(reader)
     if not len(data_type) or not data_type[0]:
-        raise TypeError, "CSV is in invalid format, first row is the data type"
+        raise TypeError("CSV is in invalid format, first row "
+                        "is the data type")
     data_type = data_type[0]
     try:
         modelcls = getattr(sheet.models, data_type)
-    except AttributeError, e:
-        raise TypeError, "Invalid data type %s" % data_type
+    except AttributeError:
+        raise TypeError("Invalid data type %s" % data_type)
 
-    header = reader.next()
+    header = next(reader)
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
 
@@ -217,18 +218,18 @@ def import_text(data):
                 continue
             try:
                 field = modelcls._meta.get_field(field_name)
-            except FieldDoesNotExist, e:
-                raise ValueError, str(e)
+            except FieldDoesNotExist(e):
+                raise ValueError(str(e))
 
             if field_name == "tech_level":
                 try:
                     value = sheet.models.TechLevel.objects.get(name=value)
                 except sheet.models.TechLevel.DoesNotExist:
-                    raise ValueError, "No matching TechLevel with name %s." % (
-                        value)
+                    raise ValueError("No matching TechLevel with name %s." % (
+                        value))
             elif field_name == "ammunition_types":
                 if modelcls != sheet.models.BaseFirearm:
-                    raise ValueError, "Invalid model for ammunition_types"
+                    raise ValueError("Invalid model for ammunition_types")
                 ammunition_types = value.split('|')
                 continue
             # If the field is a reference to another object, try to find
@@ -239,8 +240,9 @@ def import_text(data):
                         value = \
                             field.remote_field.model.objects.get(pk=value)
                     except field.remote_field.model.DoesNotExist:
-                        raise ValueError, "No matching %s with name %s." % (
-                            field.remote_field.model._meta.object_name, value)
+                        raise ValueError("No matching %s with name %s." % (
+                            field.remote_field.model._meta.object_name,
+                            value))
                 else:
                     value = None
             else:
@@ -272,7 +274,7 @@ def import_text(data):
                         try:
                             obj = field.rel.to.objects.get(name=name)
                         except field.rel.to.DoesNotExist:
-                            raise ValueError, (
+                            raise ValueError(
                                 "Requirement `{req}' for line {line} "
                                 "does not exist.".format(req=name, line=tag))
                         ll.append(obj)
@@ -289,8 +291,8 @@ def import_text(data):
                         value = True
                     try:
                         value = field.to_python(value)
-                    except Exception, e:
-                        raise type(e), ("Failed to import field \"%s\", "
+                    except Exception as e:
+                        raise ValueError("Failed to import field \"%s\", "
                                         "value \"%s\" (%s)" % (
                             field_name, value,
                             str(e)))
@@ -298,10 +300,9 @@ def import_text(data):
         try:
             mdl.full_clean()
             mdl.save()
-        except Exception, e:
-            raise type(e), ("Line %d: Failed to import field \"%s\", "
-                            "value \"%s\" (%s)" % (line, field_name, value,
-                                                   str(e)))
+        except Exception as e:
+            raise Exception("Line %d: Failed to import row\"%s\" (%s)" % (
+                line, row, str(e)))
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
                         (mdl, mdl.__class__.__name__, kk, vv))
@@ -313,7 +314,6 @@ def import_text(data):
             # clear old ammunition types out.
             mdl.ammunition_types.all().delete()
 
-            sheet.models.FirearmAmmunitionType.objects.filter()
             for ammo_type in ammunition_types:
                 sheet.models.FirearmAmmunitionType.objects \
                     .get_or_create(firearm=mdl,
@@ -341,7 +341,7 @@ def import_data(request):
                 import_text(import_data)
                 messages.success(request, "Import successful.")
                 return HttpResponseRedirect(reverse('import'))
-            except (TypeError, ValueError, ValidationError), e:
+            except (TypeError, ValueError, ValidationError) as e:
                 logger.exception("failed.")
                 el = form._errors.setdefault('__all__',
                                              ErrorList())
@@ -364,9 +364,9 @@ def import_data(request):
 
 def csv_export(exported_type):
     results = exported_type.objects.all()
-    f = StringIO.StringIO()
+    f = BytesIO()
     w = csv.writer(f)
-    w.writerow([exported_type.__name__])
+    w.writerow([exported_type.__name__.encode('utf-8')])
     fields = exported_type.get_exported_fields()
     w.writerow(fields)
 
@@ -384,8 +384,8 @@ def csv_export(exported_type):
 def export_data(request, data_type):
     try:
         cls = getattr(sheet.models, data_type)
-    except AttributeError, e:
-        raise Http404, "%s is not a supported type." % data_type
+    except AttributeError as e:
+        raise Http404("%s is not a supported type." % data_type)
     csv_data = csv_export(cls)
 
     response = HttpResponse(csv_data, content_type="text/csv")
