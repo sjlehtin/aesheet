@@ -1,7 +1,7 @@
 # Django settings for aesheet project.
 
 import os
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
+import sys
 
 ADMINS = (
     ('Sami J. Lehtinen', 'sjl@iki.fi'),
@@ -99,6 +99,10 @@ TIME_ZONE = 'Europe/Helsinki'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = [
+    ('en', 'English'),
+]
+
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
@@ -166,16 +170,24 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 ROOT_URLCONF = 'urls'
 
-import sys
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(os.path.dirname(__file__), "templates"),],
         'APP_DIRS': True,
         'OPTIONS': {'context_processors':
-                        TEMPLATE_CONTEXT_PROCESSORS +
-                        ["context_processors.variables",
+        [
+                # default
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+
+                # extra.
+                "context_processors.variables",
                          "django.template.context_processors.request",],
                      }
     },
