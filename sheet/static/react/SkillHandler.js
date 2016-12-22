@@ -35,25 +35,24 @@ class SkillHandler {
         this._hardMods = {};
         this._softMods = {};
 
-        for (let st of SkillHandler.allStatNames) {
+        for (const st of SkillHandler.allStatNames) {
             this._hardMods[st] = 0;
             this._softMods[st] = 0;
         }
 
-        for (let mod of this.props.edges) {
+        for (const mod of this.props.edges) {
             for (let st of SkillHandler.allStatNames) {
                 this._hardMods[st] += mod[st];
             }
         }
 
-        for (let mod of this.props.effects) {
+        for (const mod of this.props.effects) {
             for (let st of SkillHandler.allStatNames) {
                 this._softMods[st] += mod[st];
             }
         }
 
-        for (let st of ["fit", "ref", "psy"]) {
-
+        for (const st of SkillHandler.allStatNames) {
             this._softMods[st] += this.getArmorMod(this.props.helm, st) +
                  this.getArmorMod(this.props.armor, st);
         }
@@ -435,7 +434,7 @@ class SkillHandler {
     }
 
     getEffectModifier(mod, effects) {
-        // Return the sum of modifiers from edges for modifier `mod`.
+        // Return the sum of modifiers from effects for modifier `mod`.
         if (!effects) {
             effects = this.props.effects;
             if (!effects) {
@@ -554,12 +553,61 @@ class SkillHandler {
         }
         return this._effStats;
     }
+
+    detectionLevel(goodEdge, badEdge) {
+        let level = -this.edgeLevel(badEdge);
+        if (!level) {
+            level = this.edgeLevel(goodEdge);
+        }
+        return level;
+    }
+
+    getTotalModifier(target) {
+        return this._hardMods[target] + this._softMods[target];
+    }
+
+    dayVisionCheck() {
+        let check = this.getEffStats().int;
+        check += this.getTotalModifier("vision");
+        check -= 5 * this.edgeLevel("Color Blind");
+        return {check: check,
+            detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
+    }
+
+    nightVisionCheck() {
+        return {check: this.getEffStats().int + this.getTotalModifier("vision"),
+            detectionLevel: util.rounddown(
+                this.detectionLevel("Acute Vision", "Poor Vision") / 2),
+            darknessDetectionLevel: this.detectionLevel("Night Vision",
+                "Night Blindness")};
+    }
+
+    surpriseCheck() {
+        return this.getEffStats().psy + this.getTotalModifier("surprise");
+    }
+
+    smellCheck() {
+        return {check: this.getEffStats().int + this.getTotalModifier("smell"),
+            detectionLevel: this.detectionLevel("Acute Smell and Taste",
+                            "Poor Smell and Taste")};
+    }
+
+    hearingCheck() {
+        return {check: this.getEffStats().int + this.getTotalModifier("hear"),
+            detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
+    }
+
+    touchCheck() {
+        return {check: this.getEffStats().int +
+                        util.roundup(this.getSkillMod("climb") / 2),
+                detectionLevel: this.edgeLevel("Acute Touch")};
+    }
 }
 
 SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
 SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
-    ["mov", "dex", "imm"]);
+    ["mov", "dex", "imm", "vision", "hear", "smell", "surprise"]);
 
 // SkillHandler.props = {
 //     character: React.PropTypes.object.isRequired,

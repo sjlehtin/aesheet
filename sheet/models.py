@@ -437,6 +437,17 @@ class StatModifier(models.Model):
     fly_multiplier = models.DecimalField(default=0,
                                          max_digits=4, decimal_places=2)
 
+    vision = models.IntegerField(
+        default=0, help_text="Modifier for the general vision INT check")
+
+    hear = models.IntegerField(
+        default=0, help_text="Modifier for the general hearing INT check")
+    smell = models.IntegerField(
+        default=0, help_text="Modifier for the general smell & taste INT "
+                             "check")
+    surprise = models.IntegerField(
+        default=0, help_text="Modifier for the surprise check")
+
     # TODO: link through to EdgeLevel to allow boosting edges with effects,
     # items, etc.
     class Meta:

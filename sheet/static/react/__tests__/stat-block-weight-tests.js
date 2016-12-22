@@ -31,6 +31,7 @@ jest.dontMock('../DamageControl');
 jest.dontMock('../WoundRow');
 jest.dontMock('../AddWoundControl');
 jest.dontMock('../WoundPenaltyBox');
+jest.dontMock('../SenseTable');
 jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 

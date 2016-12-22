@@ -4,144 +4,152 @@
 
 {% block content %}
 
-<h2>TODO</h2>
-<pre>
-+ = done
-- = not done
+    <h2>TODO</h2>
+    <pre>
+    + = done
+    - = not done
 
-Priority list by JW:
+    Priority list by JW:
 
-+ 0) restrict ammo by chosen weapon dynamically with JS
-+ 1) basic skill checks
-+ 2) movement rates
-- 3) berettas akimbo
-+ 4) overland
-- 5) spell skill cheks
+    + 0) restrict ammo by chosen weapon dynamically with JS
+    + 1) basic skill checks
+    + 2) movement rates
+    - 3) berettas akimbo
+    + 4) overland
+    - 5) spell skill cheks
 
-+ inventory
-- damage taken
--- stamina
--- lethal
--- incurred to character, with approriate wounds
--- healing damage
--- bleeding damage, retain original wound, but incurs AA etc penalties
-   as per bleeding.
+    + inventory
+    + damage taken
+    ++ stamina
+    ++ lethal
+    ++ incurred to character, with approriate wounds
+    ++ healing damage
+    ++ bleeding damage, retain original wound, but incurs AA etc penalties
+       as per bleeding.
 
-- notes changes should perhaps not be logged.
+    - fix toughness (now 1 pt per level, should be 2)
 
-- suspended weight
-- marking weapons as having no weight; useful for alternate weapons, or
-  weapons with larger sizes (Martel enlarged).
+    - notes changes should perhaps not be logged.
 
-- sense modifiers from armor
-+ skill modifiers from armor
+    - suspended weight
+    - check that power armor fit bonus works.
 
-- senses (SM)
-- spell skill checks (SM)
+    - acute vision counters penalty in ranged combat (-10 -> -5 etc)
 
-- edge levels from items (toughness, darkvision, etc)
-+ automatic used edge point calculation
+    + skill modifiers from armor
 
-- tiring: show tiring durations in the sheet
-- tiring: account for armor encumbrance class
-- tiring: allow adding turns fought, sprinted etc
+    - surprise check
 
-- finalize initial robot tests.
+    - senses (SM)
+    - sense modifiers from armor
 
-+ armor modifiers to skill checks.  These should work for the physical skills
-  where the check is shown even without the character having the skill.
-+ edge skillbonuses back to sheet, they are missing after moving skills to
-  react.
+    - spell skill checks (SM)
 
-- environment effects on movement as an overlay
-- environment effects on overland movement as an overlay
-- overland movement double time
+    - edge levels from items (toughness, darkvision, etc)
+    + automatic used edge point calculation
 
-- show character height, weight in sheet.
-- "add xp used ingame" with a possibility to enter description (to log)
--- if a log entry is added, entry should not be coalesced.
-- "add xp" with an optional log entry, allowing for in-game notes.
-- shield damages
-- tiring
-- bootstrap data pop-up links for armor, effects in edit area
--- show basic info.
-- reordering weapons.  possible to do with ajax, so it would be faster.
+    - tiring: show tiring durations in the sheet
+    - tiring: account for armor encumbrance class
+    - tiring: allow adding turns fought, sprinted etc
 
-- save bonuses (M)
+    - finalize initial robot tests.
 
-- character addition form layout for easier "intake"
-  + group cur, starting stats
-  - show raises
-+/- adding weapon inplace ("add row" functionality), instead of the large set of
-    controls.  Might already be sufficient with the condensed layout, verify with
-    JW.
+    - marking weapons as having no weight; useful for alternate weapons, or
+      weapons with larger sizes (Martel enlarged).
+
+    + armor modifiers to skill checks.  These should work for the physical skills
+      where the check is shown even without the character having the skill.
+    + edge skillbonuses back to sheet, they are missing after moving skills to
+      react.
+
+    - environment effects on movement as an overlay
+    - environment effects on overland movement as an overlay
+    - overland movement double time
+
+    - show character height, weight in sheet.
+    - "add xp used ingame" with a possibility to enter description (to log)
+    -- if a log entry is added, entry should not be coalesced.
+    - "add xp" with an optional log entry, allowing for in-game notes.
+    - shield damages
+    - tiring
+    - bootstrap data pop-up links for armor, effects in edit area
+    -- show basic info.
+    - reordering weapons.  possible to do with ajax, so it would be faster.
+
+    - save bonuses (M)
+
+    - character addition form layout for easier "intake"
+      + group cur, starting stats
+      - show raises
+    +/- adding weapon inplace ("add row" functionality), instead of the large set of
+        controls.  Might already be sufficient with the condensed layout, verify with
+        JW.
 
 
-- you should be able to leave current stats empty on character creation,
-  in which case the stats would be filled in from the initial stats.
+    - you should be able to leave current stats empty on character creation,
+      in which case the stats would be filled in from the initial stats.
 
--- xl and e range dependent on user FIT (SM)
--- password change (SM)
-+ wondrous items
-- magic item location (only one item to each location)
-+ change log for sheet (stat modifications etc)
-++ skills
--- edges
+    -- xl and e range dependent on user FIT (SM)
+    -- password change (SM)
+    + wondrous items
+    - magic item location (only one item to each location)
+    + change log for sheet (stat modifications etc)
+    ++ skills
+    -- edges
 
-- encumbrance breakdown (M)
-- sheet styling
+    - encumbrance breakdown (M)
+    - sheet styling
 
-- short description of spell effect (+50 FIT etc)
-- stats, armors etc if the character is larger sized.
+    - short description of spell effect (+50 FIT etc)
+    - stats, armors etc if the character is larger sized.
 
-- Partial skills.  This is a larger item than it sounds, as the current design
-  assumes whole skill levels.  Investigate if could be done as a skill level
-  model field.
+    - Partial skills.  This is a larger item than it sounds, as the current design
+      assumes whole skill levels.  Investigate if could be done as a skill level
+      model field.
 
-- Inserting None as skill cost to the sheet should work to allow resetting
-  skill costs from CSV import.
+    - Inserting None as skill cost to the sheet should work to allow resetting
+      skill costs from CSV import.
 
-- creating new objects should be ajaxiced and redirects should occur in a
-  sensible manner.
+    - creating new objects should be ajaxiced and redirects should occur in a
+      sensible manner.
 
-- hardened skin + toughness -> natural weapons durability.
--- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
-- size field for weapons (huge cretin with Large bite)
+    - hardened skin + toughness -> natural weapons durability.
+    -- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
+    - size field for weapons (huge cretin with Large bite)
 
-- free edges based on campaign (probably should think about race
-  in this context, for FRP at least)
+    - free edges based on campaign (probably should think about race
+      in this context, for FRP at least)
 
-- it should be really easy to bootstrap the sheet system.  There should be
-  some initial data, like tech-levels and campaigns.
+    - it should be really easy to bootstrap the sheet system.  There should be
+      some initial data, like tech-levels and campaigns.
 
-Minor:
+    Minor:
 
-- adding missing skills (helps in just allowing inserting primary skills
-  and autofilling rest)
+    - adding missing skills (helps in just allowing inserting primary skills
+      and autofilling rest)
 
-Firearms:
+    Firearms:
 
-- using two Berettas akimbo.  Check rule situation regarding instinctive fire.
--- fireams are assigned to hands (right, left, both).  Penalties/bonuses should
-   be applied based on weapon type.  If both hands are occupied, apply penalty
-   for two guns.
-- firearms in CC.
+    - using two Berettas akimbo.  Check rule situation regarding instinctive fire.
+    -- fireams are assigned to hands (right, left, both).  Penalties/bonuses should
+       be applied based on weapon type.  If both hands are occupied, apply penalty
+       for two guns.
+    - firearms in CC.
 
-Edges:
+    Edges:
 
-- superior balance effect on ref/mov balance checks
+    - superior balance effect on ref/mov balance checks
 
-Skills:
+    Skills:
 
-- jumping/tumbling synergy, see AEN skills and edges.
+    - jumping/tumbling synergy, see AEN skills and edges.
+    </pre>
 
-</pre>
-
-<h2>BUGS</h2>
-<pre>
-- Adding skills with multiple prereqs doesn't work.
-- Better error messages on importing completely invalid CSV (heading line or
-  data type broken)
-</pre>
+    <h2>BUGS</h2>
+    <pre>
+    - Adding skills with multiple prereqs doesn't work.
+    - Better error messages on importing completely invalid CSV (heading line or
+          data type broken)
+    </pre>
 
 {% endblock %}
