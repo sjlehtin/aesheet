@@ -7,6 +7,11 @@ import sheet.factories as factories
 import sheet.rest.views as views
 import sheet.models as models
 
+import sys
+if sys.version_info < (3,):
+    from urllib import quote
+else:
+    from urllib.parse import quote
 
 class SheetTestCase(TestCase):
     def setUp(self):
@@ -525,6 +530,33 @@ class SkillTestCase(TestCase):
         self.assertIn('min_level', response.data)
         self.assertEqual(response.data['max_level'], 2)
         self.assertEqual(response.data['min_level'], 0)
+
+
+class FirearmAmmunitionTypeTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.owner = factories.UserFactory(username="luke")
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.pistol = factories.BaseFirearmFactory(
+            name="Glock 19", ammunition_types=["9Pb", "9Pb+"])
+        self.rifle = factories.BaseFirearmFactory(
+            name="Lahti-Saloranta PK/26", ammunition_types=["7.62x53R"])
+        factories.AmmunitionFactory(label="9Pb")
+        factories.AmmunitionFactory(label="9Pb+")
+        factories.AmmunitionFactory(label="7.62x53R")
+
+    def test_correct_types_for_pistol(self):
+        response = self.client.get('/rest/ammunition/firearm/{}/'.format(
+            quote(self.pistol.pk)), format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
+
+    def test_correct_types_for_complex_url(self):
+        response = self.client.get('/rest/ammunition/firearm/{}/'.format(
+            quote(self.rifle.pk)), format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
 
 
 class FirearmTestCase(TestCase):

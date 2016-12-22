@@ -5,6 +5,7 @@ import sheet.models
 class AmmunitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Ammunition
+        fields = "__all__"
 
 
 class SheetSerializer(serializers.ModelSerializer):
