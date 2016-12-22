@@ -1,43 +1,43 @@
-from django.conf.urls import patterns, include, url
-import sheet.views as views
+from django.conf.urls import include, url
+import sheet.views
 import sheet.views.marshal
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
 from sheet.rest.urls import urlpatterns as rest_urls
 
 marshal_urls = [
-    url(r'^import/$', views.marshal.import_data, name='import'),
-    url(r'^export/(?P<data_type>\w+)/$', views.marshal.export_data,
+    url(r'^import/$', sheet.views.marshal.import_data, name='import'),
+    url(r'^export/(?P<data_type>\w+)/$', sheet.views.marshal.export_data,
         name='export'),
-    url(r'^browse/(?P<data_type>\w+)/$', views.marshal.browse, name='browse'),
+    url(r'^browse/(?P<data_type>\w+)/$', sheet.views.marshal.browse, name='browse'),
 ]
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url=reverse_lazy('sheets_index'))),
-    url(r'^characters/$', views.characters_index, name='characters_index'),
+    url(r'^characters/$', sheet.views.characters_index, name='characters_index'),
 
-    url(r'^characters/add_char/$', views.AddCharacterView.as_view(),
+    url(r'^characters/add_char/$', sheet.views.AddCharacterView.as_view(),
         name="add_char"),
 
     url(r'^characters/edit_char/(?P<pk>\d+)/$',
-        views.EditCharacterView.as_view(),
+        sheet.views.EditCharacterView.as_view(),
         name='edit_character'),
 
     url(r'^characters/edit_sheet/(?P<pk>\d+)/$',
-        views.EditSheetView.as_view(),
+        sheet.views.EditSheetView.as_view(),
         name='edit_sheet'),
 
     # Specific sheets for the characters.
-    url(r'^sheets/$', views.sheets_index, name='sheets_index'),
-    url(r'^sheets/(?P<sheet_id>\d+)/$', views.sheet_detail, name='sheet_detail'),
+    url(r'^sheets/$', sheet.views.sheets_index, name='sheets_index'),
+    url(r'^sheets/(?P<sheet_id>\d+)/$', sheet.views.sheet_detail, name='sheet_detail'),
 
     url(r'^sheets/copy/(?P<sheet_id>\d+)?$',
-        views.CopySheetView.as_view(), name='copy_sheet'),
+        sheet.views.CopySheetView.as_view(), name='copy_sheet'),
 
     url(r'^import-export/', include(marshal_urls)),
 
-    url(r'^ChangeLog$', views.version_history, name='version_history'),
-    url(r'^TODO$', views.TODOView.as_view(), name="todo"),
+    url(r'^ChangeLog$', sheet.views.version_history, name='version_history'),
+    url(r'^TODO$', sheet.views.TODOView.as_view(), name="todo"),
 
    url(r'^rest/', include(rest_urls)),
    url(r'^api-auth/', include('rest_framework.urls',
@@ -47,7 +47,7 @@ urlpatterns = [
 def class_from_name(name):
     components = name.split('_')
     components = [cc.capitalize() for cc in components]
-    return getattr(views, ''.join(components) + "View")
+    return getattr(sheet.views, ''.join(components) + "View")
 
 
 CREATE_NAMES = ["add_sheet", "add_edge", "add_edge_level",

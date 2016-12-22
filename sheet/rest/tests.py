@@ -4,9 +4,8 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 import sheet.factories as factories
-import views
+import sheet.rest.views as views
 import sheet.models as models
-from serializers import SheetSerializer, CharacterSerializer
 
 
 class SheetTestCase(TestCase):

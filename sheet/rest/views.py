@@ -32,7 +32,7 @@ class WeaponAmmunitionList(generics.ListAPIView):
         try:
             weapon = sheet.models.BaseFirearm.objects.get(name=weapon)
         except sheet.models.BaseFirearm.DoesNotExist:
-            raise Http404, "Specified firearm does not exist"
+            raise Http404("Specified firearm does not exist")
 
         return sheet.models.Ammunition.objects.filter(
             label__in=weapon.get_ammunition_types())

@@ -45,7 +45,7 @@ class ExportedModel(models.Model):
         if "name" in names:
             names.remove("name")
             names.insert(0, "name")
-        return filter(lambda xx: xx not in cls.dont_export(), names)
+        return list(filter(lambda xx: xx not in cls.dont_export(), names))
 
     class Meta:
         abstract = True

@@ -22,7 +22,7 @@ ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org"]
 
 BASEDIR = os.path.dirname(__file__)
 PRODUCTION = os.path.exists(os.path.join(BASEDIR, "auth"))
-if os.environ.has_key('PRODUCTION'):
+if 'PRODUCTION' in os.environ:
     PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
 if PRODUCTION:

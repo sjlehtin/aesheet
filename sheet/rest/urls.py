@@ -1,5 +1,5 @@
 from django.conf.urls import url
-import views
+import sheet.rest.views as views
 from rest_framework import routers
 
 router = routers.SimpleRouter()
