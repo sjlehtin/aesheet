@@ -224,7 +224,7 @@ def import_text(data):
                 continue
             try:
                 field = modelcls._meta.get_field(field_name)
-            except FieldDoesNotExist(e):
+            except FieldDoesNotExist as e:
                 raise ValueError(str(e))
 
             if field_name == "tech_level":
