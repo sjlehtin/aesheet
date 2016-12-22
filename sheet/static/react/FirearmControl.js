@@ -246,7 +246,7 @@ class FirearmControl extends RangedWeaponRow {
             var checkCells = checks.map((chk) => {
                 return <td style={cellStyle} key={ii++}>{chk}</td>;
             });
-            sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{" "}</td>{checkCells}</tr>);
+            sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{util.roundup(this.props.weapon.base.autofire_rpm/(6*sweep))}</td>{checkCells}</tr>);
         }
 
         return <div>
