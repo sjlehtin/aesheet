@@ -232,7 +232,7 @@ class Character(PrivateMixin, models.Model):
     DERIVED_STATS = ["mov", "dex", "imm"]
     ALL_STATS = BASE_STATS + DERIVED_STATS
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s: %s %s" % (self.name, self.race, self.occupation)
 
     @classmethod
@@ -283,7 +283,7 @@ class Edge(ExportedModel):
     def dont_export(self):
         return ['skill', 'edgelevel']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % (self.name)
 
     class Meta:
@@ -380,7 +380,7 @@ class Skill(ExportedModel):
                 'skill', 'edgeskillbonus', 'characterlogentry',
                 'edgelevel']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.name
 
 
@@ -392,7 +392,7 @@ class CharacterSkill(PrivateMixin, models.Model):
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s: %s %s" % (self.character, self.skill, self.level)
 
     class Meta:
@@ -506,7 +506,7 @@ class EdgeLevel(ExportedModel, StatModifier):
         return ['characteredge', 'edgeskillbonus', 'skill_bonuses',
                 'edge_skill_bonuses', 'characterlogentry']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s %s (%s)" % (self.edge, self.level, self.cost)
 
     class Meta:
@@ -525,7 +525,7 @@ class EdgeSkillBonus(ExportedModel):
     skill = models.ForeignKey(Skill)
     bonus = models.IntegerField(default=15)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
 
@@ -536,7 +536,7 @@ class CharacterEdge(PrivateMixin, models.Model):
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s: %s" % (self.character, self.edge)
 
 
@@ -586,7 +586,7 @@ class WeaponQuality(BaseWeaponQuality):
     def dont_export(cls):
         return ['weapon', 'rangedweapon', 'rangedweaponammo_set']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -627,7 +627,7 @@ class BaseArmament(ExportedModel):
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
                                related_name="secondary_for_%(class)s")
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.name
 
 
@@ -741,7 +741,7 @@ class Ammunition(ExportedModel, BaseDamager):
     def dont_export(cls):
         return ['firearm']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"{label} {type})".format(label=self.label,
                                          type=self.bullet_type)
 
@@ -752,7 +752,7 @@ class FirearmAmmunitionType(models.Model):
     short_label = models.CharField(max_length=20,
                                    help_text="Matches the respective field in "
                                              "ammunition")
-    def __unicode__(self):
+    def __str__(self):
         return u"{firearm} {label})".format(firearm=self.firearm,
                                             label=self.short_label)
 
@@ -763,7 +763,7 @@ class Firearm(models.Model):
     ammo = models.ForeignKey(Ammunition)
 
 
-    def __unicode__(self):
+    def __str__(self):
         return u"{base} w/ {ammo}".format(base=self.base,
                                           ammo=self.ammo)
 
@@ -828,7 +828,7 @@ class Effect(StatModifier):
         ordering = ['name']
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % (self.name)
 
 
@@ -840,7 +840,7 @@ class WeaponSpecialQuality(ExportedModel, Effect):
     def dont_export(cls):
         return ['weapon', 'rangedweapon', 'miscellaneousitem']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.name
 
 
@@ -916,7 +916,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
 
     # Effects come with the foreign key in ArmorEffect() class to the
     # name "effects".
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.name
 
 
@@ -935,7 +935,7 @@ class BaseWeapon(ExportedModel):
                                                      (3, "triple"),
                                                      (4, "quadruple")))
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name:
             return self.name
         quality = ""
@@ -1115,7 +1115,7 @@ class ArmorTemplate(ExportedModel):
     def dont_export(cls):
         return ['armor']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % (self.name)
 
 
@@ -1157,7 +1157,7 @@ class ArmorQuality(ExportedModel):
     def dont_export(cls):
         return ['armor']
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s" % self.name
 
 
@@ -1179,7 +1179,7 @@ class Armor(ExportedModel):
     def dont_export(cls):
         return ['sheet', 'helm_for']
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name:
             return self.name
         return u"%s %s" % (self.base.name, self.quality)
@@ -1216,7 +1216,7 @@ class MiscellaneousItem(ExportedModel):
     weight = models.DecimalField(max_digits=5, decimal_places=2,
                                  default=1.0)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1265,7 +1265,7 @@ class Sheet(PrivateMixin, models.Model):
         return get_by_campaign(get_sheets(user),
                                lambda sheet: sheet.character)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"sheet for {name}{descr}".format(
             name=self.character.name,
             descr=(": %s" % self.description) if self.description else "")
@@ -1334,7 +1334,7 @@ class CharacterLogEntry(models.Model):
         ordering = ["-timestamp"]
         get_latest_by = "timestamp"
 
-    def __unicode__(self):
+    def __str__(self):
         if self.entry_type == self.STAT:
             if self.amount:
                 return u"Added %d to %s." % (self.amount, self.field)
