@@ -75,7 +75,7 @@ class TechLevel(ExportedModel):
 
     name = models.CharField(max_length=10, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @classmethod
@@ -98,7 +98,7 @@ class Campaign(ExportedModel):
     has_firearms = models.BooleanField(default=False)
     has_spells = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @classmethod
