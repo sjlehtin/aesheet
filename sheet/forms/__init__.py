@@ -338,7 +338,7 @@ class CreateBaseFirearmForm(RequestForm):
         ammo_types = self.cleaned_data.get('ammo_types')
         if ammo_types:
             ammo_types = ammo_types.split('|')
-            ammo_types = filter(None, [tok.strip() for tok in ammo_types])
+            ammo_types = list(filter(None, [tok.strip() for tok in ammo_types]))
             for ammo_type in ammo_types:
                 if not re.match('^[.\w+/-]*$', ammo_type):
                     raise forms.ValidationError(
