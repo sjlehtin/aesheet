@@ -37,7 +37,7 @@ class AddFirearmControl extends React.Component {
 
         if (typeof(value) === "object") {
 
-            rest.getData(`/rest/ammunition/firearm/${value.name}/`).then(
+            rest.getData(`/rest/ammunition/firearm/${encodeURIComponent(value.name)}/`).then(
                 (json) => {
                     this.setState({ammoChoices: json})
                 }

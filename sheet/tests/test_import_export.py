@@ -16,11 +16,12 @@ import sheet.factories as factories
 import django.db
 from django.conf import settings
 import csv
-import StringIO
+from io import BytesIO, StringIO
+import sys
 
 logger = logging.getLogger(__name__)
 
-class ImportExport(TestCase):
+class ImportExportTestCase(TestCase):
     def setUp(self):
         self.admin = factories.UserFactory(username='admin')
 
@@ -28,14 +29,20 @@ class ImportExport(TestCase):
         factories.SkillFactory(name="Unarmed combat")
         factories.BaseFirearmFactory(name="Glock 19")
 
+    def test_exported_fields(self):
+        fields = sheet.models.BaseFirearm.get_exported_fields()
+        self.assertIn("stock", fields)
+        self.assertIn("autofire_class", fields)
+        self.assertIn("ammunition_types", fields)
+
     def test_add_new_skill_with_required_skills(self):
         det_url = reverse("import")
         response = self.client.post(det_url, { 'import_data' :
-        "Skill\n"
+                                                   ("Skill\n"
         "name,tech_level,description,notes,can_be_defaulted,"
         "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
         "skill_cost_3,type,stat,required_edges,required_skills\n"
-        "Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat",
+        "Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat"),
                                                })
         self.assertRedirects(response, reverse("import"))
         response = self.client.get(reverse("browse",
@@ -52,12 +59,12 @@ class ImportExport(TestCase):
         # Missing a skill should be an error.
         response = self.client.post(det_url, {
             'import_data' :
-            "Skill\n"
+                ("Skill\n"
             "name,tech_level,description,notes,can_be_defaulted,"
             "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
             "skill_cost_3,type,stat,required_edges,required_skills\n"
             "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
-            "Unarmed combat|Surgery",
+            "Unarmed combat|Surgery"),
             })
         self.assertContains(response, "Requirement `Surgery")
 
@@ -65,12 +72,12 @@ class ImportExport(TestCase):
 
         response = self.client.post(det_url, {
             'import_data' :
-            "Skill\n"
+                ("Skill\n"
             "name,tech_level,description,notes,can_be_defaulted,"
             "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
             "skill_cost_3,type,stat,required_edges,required_skills\n"
             "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
-            "Unarmed combat|Surgery",
+            "Unarmed combat|Surgery"),
             })
         self.assertRedirects(response, reverse("import"))
         sk = Skill.objects.get(name="Surgical strike")
@@ -81,12 +88,12 @@ class ImportExport(TestCase):
         # Try it again.
         response = self.client.post(det_url, {
             'import_data' :
-                "Skill\n"
+                ("Skill\n"
                 "name,tech_level,description,notes,can_be_defaulted,"
                 "is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,"
                 "skill_cost_3,type,stat,required_edges,required_skills\n"
                 "Surgical strike,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,"
-                "Unarmed combat | Surgery",
+                "Unarmed combat | Surgery"),
             })
         self.assertRedirects(response, reverse("import"))
 
@@ -108,18 +115,19 @@ class ImportExport(TestCase):
         response = self.client.get(reverse("export", args=[data_type]))
         self.assertIn("attachment", response.get('Content-Disposition'))
         self.assertContains(response, data_type)
+
         def mangle(data):
             for index, ll in enumerate(data.splitlines()):
                 if index >= 2:
-                    yield ll + "," + "\n"
+                    yield ll + ",\n"
                 elif index == 1:
-                    yield ll + ",edgelevel" + "\n"
+                    yield ll + ",edgelevel\n"
                 else:
                     yield ll + "\n"
 
-        post_response = self.client.post(reverse("import"),
-                                    { "import_data":
-                                      ''.join(mangle(response.content)) })
+        post_data = ''.join(mangle(response.content.decode('utf-8')))
+        post_response = self.client.post(
+            reverse("import"),{"import_data": post_data})
         self.assertRedirects(post_response, reverse("import"))
 
     def test_export_unicode(self):
@@ -131,9 +139,11 @@ class ImportExport(TestCase):
                                    uword=unicode_word
                                ))
         data = marshal.csv_export(sheet.models.Skill)
+        if sys.version_info < (3,):
+            data = data.decode('utf-8')
         self.assertTrue(data.startswith('Skill'),
                         msg="The data should start with the table name")
-        self.assertIn(unicode_word, data.decode('utf-8'))
+        self.assertIn(unicode_word, data)
 
     def test_exported_data_types(self):
         """
@@ -157,7 +167,7 @@ class ImportExportDependencies(TestCase):
         factories.TechLevelFactory(name="all")
 
     def test_import_with_deps(self):
-        csv_data = """\
+        csv_data = u"""\
 Skill
 name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
 Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
@@ -165,7 +175,7 @@ Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
 Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
 Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
 """
-        marshal.import_text(csv_data)
+        marshal.import_text(csv_data.encode('utf-8'))
         self.assertListEqual(
             sorted([sk.name for sk in sheet.models.Skill.objects.all()]),
             sorted(["Nutcasing", "Throw", "Unarmed combat", "Jackadeering"]))
@@ -174,12 +184,12 @@ Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
         """
         Verify that importing with selfloops works.
         """
-        self_loop = """\
+        self_loop = u"""\
 Skill
 name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
 Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
 """
-        marshal.import_text(self_loop)
+        marshal.import_text(self_loop.encode('utf-8'))
         self.assertListEqual(
             [sk.name for sk in sheet.models.Skill.objects.all()],
             ["Nutcasing"])
@@ -187,7 +197,7 @@ Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
         self.assertEqual(len(skill.required_skills.all()), 0)
 
     def test_import_with_deps_with_self_loops(self):
-        csv_data = """\
+        csv_data = u"""\
 Skill
 name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
 Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
@@ -195,7 +205,7 @@ Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
 Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
 Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
 """
-        marshal.import_text(csv_data)
+        marshal.import_text(csv_data.encode('utf-8'))
         self.assertListEqual(
             sorted([sk.name for sk in sheet.models.Skill.objects.all()]),
             sorted(["Nutcasing", "Throw", "Unarmed combat", "Jackadeering"]))
@@ -225,23 +235,28 @@ class ImportExportPostgresSupport(TestCase):
 
 
 class FirearmImportExportTestcase(TestCase):
-    firearm_csv_data = """\
+    firearm_csv_data = u"""\
 "BaseFirearm",,,,,,,,,,,,,,,,,,,,
 "name","description","notes","tech_level","draw_initiative","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
 "Glock 19",,,"2K",-3,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
 
-"""
+""".encode('utf-8')
 
-    ammo_csv_data = """\
+    ammo_csv_data = u"""\
 "Ammunition",,,,,,,,,,
 "id","num_dice","dice","extra_damage","leth","plus_leth","label","bullet_type","tech_level","weight","velocity","bypass"
 ,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400,0
 
-"""
+""".encode('utf-8')
 
     def setUp(self):
         factories.TechLevelFactory(name="2K")
         factories.SkillFactory(name="Handguns", tech_level__name="2K")
+
+        if sys.version_info >= (3,):
+            self.stream_type = StringIO
+        else:
+            self.stream_type = BytesIO
 
     def test_import_firearms(self):
         marshal.import_text(self.firearm_csv_data)
@@ -251,15 +266,15 @@ class FirearmImportExportTestcase(TestCase):
                              sorted(firearm.get_ammunition_types()))
 
     def test_export_firearms(self):
-        marshal.import_text(self.firearm_csv_data)
-
+        factories.BaseFirearmFactory(name="Glock 19", ammunition_types=['9Pb', '9Pb+'])
         csv_data = marshal.csv_export(sheet.models.BaseFirearm)
-        reader = csv.reader(StringIO.StringIO(csv_data))
-        data_type = reader.next()
+
+        reader = csv.reader(self.stream_type(csv_data))
+        data_type = next(reader)
         self.assertEqual(data_type[0], "BaseFirearm")
 
-        header = reader.next()
-        data_row = reader.next()
+        header = next(reader)
+        data_row = next(reader)
         idx = header.index("ammunition_types")
         self.assertGreaterEqual(idx, 0, msg="Required column should be found")
         # Correct ammunition_types should be available.
@@ -276,12 +291,12 @@ class FirearmImportExportTestcase(TestCase):
         marshal.import_text(self.ammo_csv_data)
 
         csv_data = marshal.csv_export(sheet.models.Ammunition)
-        reader = csv.reader(StringIO.StringIO(csv_data))
-        data_type = reader.next()
+        reader = csv.reader(self.stream_type(csv_data))
+        data_type = next(reader)
         self.assertEqual(data_type[0], "Ammunition")
 
-        header = reader.next()
-        data_row = reader.next()
+        header = next(reader)
+        data_row = next(reader)
 
         idx = header.index("label")
         self.assertGreaterEqual(idx, 0, msg="Required column should be found")

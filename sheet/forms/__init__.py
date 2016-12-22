@@ -338,10 +338,10 @@ class CreateBaseFirearmForm(RequestForm):
         ammo_types = self.cleaned_data.get('ammo_types')
         if ammo_types:
             ammo_types = ammo_types.split('|')
-            ammo_types = filter(None, [tok.strip() for tok in ammo_types])
+            ammo_types = list(filter(None, [tok.strip() for tok in ammo_types]))
             for ammo_type in ammo_types:
                 if not re.match('^[.\w+/-]*$', ammo_type):
-                    raise forms.ValidationError, (
+                    raise forms.ValidationError(
                            "Invalid ammo type `{ammo_type}'".format(
                                ammo_type=ammo_type))
             return ammo_types
@@ -375,9 +375,9 @@ class CopySheetForm(RequestFormMixin, forms.Form):
         if to_name:
             qs = sheet.models.Character.objects.filter(name=to_name)
             if qs.exists():
-                raise forms.ValidationError, \
+                raise forms.ValidationError(
                     "Character {to_name} already exists.".format(
-                        to_name=to_name)
+                        to_name=to_name))
             else:
                 return to_name
 

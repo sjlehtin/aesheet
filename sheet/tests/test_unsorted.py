@@ -136,16 +136,13 @@ class SheetOrganizationTestCase(TestCase):
 
     def test_character_view(self):
         response = self.client.get(reverse('characters_index'))
-        self.assertIsInstance(response.context['campaigns'][0],
-                              sheet.models.CampaignItem)
         # Verify the headings are present.
         self.assertContains(response, 'FRP')
         self.assertContains(response, 'MR')
 
     def test_sheet_view(self):
         response = self.client.get(reverse('sheets_index'))
-        self.assertIsInstance(response.context['campaigns'][0],
-                              sheet.models.CampaignItem)
+
         # Verify the headings are present.
         self.assertContains(response, 'FRP')
         self.assertContains(response, 'MR')
@@ -326,7 +323,7 @@ class SheetCopyTestCase(TestCase):
                 for edge in character.edges.all()]
 
     def get_item_list(self, sheet, accessor):
-        return ["{item}".format(item=unicode(item))
+        return ["{item}".format(item=str(item))
                 for item in getattr(sheet, accessor).all()]
 
     def test_copy_sheet(self):
@@ -396,7 +393,7 @@ class SheetCopyTestCase(TestCase):
         self.assertTrue(form.is_valid())
         new_sheet = form.save()
 
-        log = "/".join([unicode(e) for e in
+        log = "/".join([str(e) for e in
                         new_sheet.character.characterlogentry_set.all()])
         self.assertIn("Copied from {original_name}.".format(
             original_name=self.original_character.name), log)
