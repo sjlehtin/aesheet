@@ -182,7 +182,14 @@ class SheetMiscellaneousItemListSerializer(serializers.ModelSerializer):
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
-        skill = data['skill']
+        if 'skill' in data:
+            skill = data['skill']
+        else:
+            skill = self.instance.skill
+
+        if not skill:
+            raise serializers.ValidationError("Skill not available")
+
         minimum = skill.get_minimum_level()
         maximum = skill.get_maximum_level()
         if 'level' not in data:
