@@ -7,16 +7,16 @@ var plugins = [
         })
     ];
 
-var minimize = process.argv.indexOf('--no-minimize') === -1 ? true : false;
+const minimize = process.argv.indexOf('--no-minimize') === -1;
 
 if (minimize) {
     plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
 }
 
 module.exports = {
-    entry: "./main.js",
+    entry: "main.js",
     output: {
-        path: __dirname,
+        path: __dirname + '/sheet/static/react',
         filename: "bundle.js",
         // Expose the bundle to a var for the Django templates.
         libraryTarget: "var",
@@ -27,7 +27,7 @@ module.exports = {
     plugins: plugins,
 
     resolve: {
-        root: path.resolve('.'),
+        root: path.resolve('sheet/static/react'),
         extensions: ['', '.js', '.jsx', '.css']
     },
     module: {
