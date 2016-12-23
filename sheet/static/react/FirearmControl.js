@@ -349,8 +349,6 @@ class FirearmControl extends RangedWeaponRow {
                                   {actionCells}
                                 <th style={headerStyle}>TI</th>
                                 <th style={headerStyle}>DI</th>
-                                {/*<th style={headerStyle}>Damage</th>*/}
-                                {/*<th style={headerStyle}>S/M/L</th>*/}
                               </tr>
                             </thead>
                             <tbody>
@@ -367,11 +365,6 @@ class FirearmControl extends RangedWeaponRow {
                                 {skillChecks}
                                 <td style={cellStyle}>{ weapon.target_initiative }</td>
                                 <td style={cellStyle}>{ weapon.draw_initiative }</td>
-                                {/*<td style={cellStyle} rowSpan="2">{ this.renderDamage() } {ammo.type}*/}
-                                    {/*<div>{ ammoIdentifier }</div></td>*/}
-                                {/*<td style={cellStyle} rowSpan="2">*/}
-                                    {/*{weapon.range_s } / {weapon.range_m } / {weapon.range_l }*/}
-                                {/*</td>*/}
                             </tr>
                             <tr>
                                 <td style={helpStyle} colSpan={2}>

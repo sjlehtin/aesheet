@@ -1,9 +1,3 @@
-jest.dontMock('../FirearmControl');
-jest.dontMock('../WeaponRow');
-jest.dontMock('../RangedWeaponRow');
-jest.dontMock('../SkillHandler');
-jest.dontMock('../sheet-util');
-jest.dontMock('./factories');
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
@@ -11,8 +5,6 @@ import TestUtils from 'react-addons-test-utils';
 const FirearmControl = require('../FirearmControl').default;
 const SkillTable = require('../SkillTable').default;
 const SkillHandler = require('../SkillHandler').default;
-
-var rest = require('../sheet-rest');
 
 var factories = require('./factories');
 
