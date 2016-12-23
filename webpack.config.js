@@ -27,7 +27,7 @@ module.exports = {
     plugins: plugins,
 
     resolve: {
-        root: path.resolve('sheet/static/react'),
+        root: path.resolve('react'),
         extensions: ['', '.js', '.jsx', '.css']
     },
     module: {

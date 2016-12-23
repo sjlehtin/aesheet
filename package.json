@@ -2,7 +2,7 @@
   "name": "aesheet",
   "version": "0.7.0",
   "description": "Client-side presentation and manipulation of the server-side sheet data.",
-  "main": "sheet/static/react/main.js",
+  "main": "react/main.js",
   "scripts": {
     "test": "jest"
   },
@@ -47,8 +47,8 @@
       "/testutils.js"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/sheet/static/react/__mocks__/fileMock.js",
-      "\\.(css|less)$": "<rootDir>/sheet/static/react/__mocks__/styleMock.js"
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/react/__mocks__/fileMock.js",
+      "\\.(css|less)$": "<rootDir>/react/__mocks__/styleMock.js"
     }
   }
 }
