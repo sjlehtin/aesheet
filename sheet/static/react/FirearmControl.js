@@ -224,9 +224,13 @@ class FirearmControl extends RangedWeaponRow {
         return checks;
     }
 
+    hasSweep() {
+        return this.props.weapon.base.autofire_rpm &&
+            !this.props.weapon.base.sweep_fire_disabled;
+    }
+
     renderSweepTable() {
-        if (!this.props.weapon.base.autofire_rpm ||
-            this.props.weapon.base.sweep_fire_disabled) {
+        if (!this.hasSweep()) {
             return '';
         }
 
@@ -249,6 +253,7 @@ class FirearmControl extends RangedWeaponRow {
             sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{util.roundup(this.props.weapon.base.autofire_rpm/(6*sweep))}</td>{checkCells}</tr>);
         }
 
+        const footCellStyle = {textAlign: "center"};
         return <div>
         <table style={{fontSize: "inherit"}}>
             <thead>
@@ -258,32 +263,23 @@ class FirearmControl extends RangedWeaponRow {
             {sweepRows}
             </tbody>
             <tfoot>
-            <tr><th colSpan={2}>Lethality</th><th>0</th>
-        <th>+2</th><th>-2</th><th>0</th>
-        <th>+2</th><th>-2</th><th>0</th>
-        <th>+2</th><th>-2</th><th>0</th>
-        <th>+2</th><th>-2</th><th>0</th>
-        <th>+2</th><th>-2</th><th>0</th></tr>
-            <tr><th colSpan={2}>Location</th><th>0</th>
-        <th>+2</th><th>+2</th><th>+2</th>
-        <th>-2</th><th>-2</th><th>-2</th>
-        <th>+1</th><th>+1</th><th>+1</th>
-        <th>-1</th><th>-1</th><th>-1</th>
-        <th>0</th><th>0</th><th>0</th></tr>
+            <tr><th colSpan={2}>Lethality</th>
+                <th style={footCellStyle}>0</th>
+        <th style={footCellStyle}>+2</th><th style={footCellStyle}>-2</th><th style={footCellStyle}>0</th>
+        <th style={footCellStyle}>+2</th><th style={footCellStyle}>-2</th><th style={footCellStyle}>0</th>
+        <th style={footCellStyle}>+2</th><th style={footCellStyle}>-2</th><th style={footCellStyle}>0</th>
+        <th style={footCellStyle}>+2</th><th style={footCellStyle}>-2</th><th style={footCellStyle}>0</th>
+        <th style={footCellStyle}>+2</th><th style={footCellStyle}>-2</th><th style={footCellStyle}>0</th></tr>
+            <tr><th colSpan={2}>Location</th>
+        <th style={footCellStyle}>0</th>
+        <th style={footCellStyle}>+2</th><th style={footCellStyle}>+2</th><th style={footCellStyle}>+2</th>
+        <th style={footCellStyle}>-2</th><th style={footCellStyle}>-2</th><th style={footCellStyle}>-2</th>
+        <th style={footCellStyle}>+1</th><th style={footCellStyle}>+1</th><th style={footCellStyle}>+1</th>
+        <th style={footCellStyle}>-1</th><th style={footCellStyle}>-1</th><th style={footCellStyle}>-1</th>
+        <th style={footCellStyle}>0</th><th style={footCellStyle}>0</th><th style={footCellStyle}>0</th></tr>
             </tfoot>
         </table>
 
-            <div style={{color: "hotpink"}}>
-                <p>
-                    The distance between sweep targets may be up to
-                    1 m (-5 penalty / target), or up to 2 m
-                    (-10 penalty / target).
-                </p>
-                <p>
-                    All range penalties are doubled in sweep fire
-                    (i.e. M -20, L -40, XL -60, E -80)
-                </p>
-            </div>
         </div>;
     }
 
@@ -302,6 +298,7 @@ class FirearmControl extends RangedWeaponRow {
         var actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
         var headerStyle = {padding: 2};
+        const inlineHeaderStyle = Object.assign({}, headerStyle, {textAlign: 'center'});
         var actionCells = actions.map((act, ii) =>
         {return <th key={`act-${ii}`} style={headerStyle}>{act}</th>});
 
@@ -319,10 +316,30 @@ class FirearmControl extends RangedWeaponRow {
         var skillChecks = this.skillChecks(actions).map((chk, ii) =>
         {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
 
+        const marginRightStyle = {marginRight: "1em"};
+        const labelStyle = {marginRight: "0.5em"};
+
+        let sweepInstructions = '';
+        if (this.hasSweep()) {
+            sweepInstructions = <Row style={{color: "hotpink"}}>
+                <div >
+                    The distance between sweep targets may be up to
+                    1 m (-5 penalty / target), or up to 2 m
+                    (-10 penalty / target).
+                </div>
+
+                <div>
+                All range penalties are doubled in sweep fire
+                    (i.e. M -20, L -40, XL -60, E -80)
+                </div>
+            </Row>;
+        }
+
         return <div style={this.props.style}>
             <Row>
-                <Col md={9}>
+                <Col md={8}>
                     <Row>
+                        <div>
                         <table style={{fontSize: 'inherit'}}>
                             <thead>
                             <tr>
@@ -332,8 +349,8 @@ class FirearmControl extends RangedWeaponRow {
                                   {actionCells}
                                 <th style={headerStyle}>TI</th>
                                 <th style={headerStyle}>DI</th>
-                                <th style={headerStyle}>Damage</th>
-                                <th style={headerStyle}>S/M/L</th>
+                                {/*<th style={headerStyle}>Damage</th>*/}
+                                {/*<th style={headerStyle}>S/M/L</th>*/}
                               </tr>
                             </thead>
                             <tbody>
@@ -341,7 +358,7 @@ class FirearmControl extends RangedWeaponRow {
                                 <td rowSpan="2" style={cellStyle}>
                                     <div>
                                         {weapon.name}
-                                        {ammoIdentifier}
+
                                         {unskilled}
                                     </div>
                                 </td>
@@ -350,27 +367,41 @@ class FirearmControl extends RangedWeaponRow {
                                 {skillChecks}
                                 <td style={cellStyle}>{ weapon.target_initiative }</td>
                                 <td style={cellStyle}>{ weapon.draw_initiative }</td>
-                                <td style={cellStyle} rowSpan="2">{ this.renderDamage() } {ammo.type}
-                                    <div>{ ammoIdentifier }</div></td>
-                                <td style={cellStyle} rowSpan="2">
-                                    {weapon.range_s } / {weapon.range_m } / {weapon.range_l }
-                                </td>
+                                {/*<td style={cellStyle} rowSpan="2">{ this.renderDamage() } {ammo.type}*/}
+                                    {/*<div>{ ammoIdentifier }</div></td>*/}
+                                {/*<td style={cellStyle} rowSpan="2">*/}
+                                    {/*{weapon.range_s } / {weapon.range_m } / {weapon.range_l }*/}
+                                {/*</td>*/}
                             </tr>
                             <tr>
                                 <td style={helpStyle} colSpan={2}>
                                     I vs. 1 target
                                 </td>
                                 {initiatives}
-                                <td></td>
-                                <td></td>
+                            </tr>
+                            <tr><td style={cellStyle} rowSpan={2}>{ammoIdentifier}</td>
+                                <th style={inlineHeaderStyle} colSpan={3}>Damage</th>
+                                <th style={inlineHeaderStyle} colSpan={2}>Dtype</th>
+                                <th style={inlineHeaderStyle} colSpan={2}>S</th>
+                                <th style={inlineHeaderStyle} colSpan={2}>M</th>
+                                <th style={inlineHeaderStyle} colSpan={2}>L</th>
+                            </tr>
+                            <tr>
+                                <td style={cellStyle} colSpan={3}>{this.renderDamage()}</td>
+                                <td style={cellStyle} colSpan={2}>{ammo.type}</td>
+                                <td style={cellStyle} colSpan={2}>{weapon.range_s }</td>
+                                <td style={cellStyle} colSpan={2}>{weapon.range_m }</td>
+                                <td style={cellStyle} colSpan={2}>{weapon.range_l }</td>
                             </tr>
                             </tbody>
                         </table>
-                        <div className="durability">
-                            <label>Durability:</label>{weapon.durability}</div>
+                        <div><span style={marginRightStyle}><label style={labelStyle}>Durability:</label>{weapon.durability}</span>
+                            <span style={marginRightStyle}><label style={labelStyle}>Weight:</label>{weapon.weight}</span>
+                        </div>
                         <Button onClick={(e) => this.handleRemove()}
                                 ref={(c) => this._removeButton = c}
                                 bsSize="xsmall">Remove</Button>
+                        </div>
                     </Row>
                     <Row>
                         {this.renderSweepTable()}
@@ -380,6 +411,7 @@ class FirearmControl extends RangedWeaponRow {
                     {this.renderBurstTable()}
                 </Col>
             </Row>
+            {sweepInstructions}
         </div>;
     }
 }
