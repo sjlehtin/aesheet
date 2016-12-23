@@ -37,4 +37,4 @@ module.exports = {
     "InitiativeBlock": InitiativeBlock,
     "SkillTable": SkillTable,
     "render": render
-}
+};
