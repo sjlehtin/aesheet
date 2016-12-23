@@ -44,10 +44,11 @@ class SenseTable extends React.Component {
         return checks;
     }
 
-    static getCheckCells(baseCheck, baseNumChecks) {
+    static getCheckCells(baseCheck, baseNumChecks, isVision) {
         const checks = this.getChecks(baseNumChecks, baseCheck);
 
-        return SenseTable.renderCheckCells(checks, baseCheck.detectionLevel);
+        return SenseTable.renderCheckCells(checks, baseCheck.detectionLevel,
+            isVision);
     }
 
     static getPadCells(numPad) {
@@ -58,9 +59,22 @@ class SenseTable extends React.Component {
         return cells;
     }
 
-    static renderCheckCells(checks, relevantDetectionLevel) {
+    static renderCheckCells(checks, relevantDetectionLevel, isVision) {
+        const baseStyle = {};
         checks = checks.map((chk, ii) => {
-            return <td className="check" key={"chk-" + ii}>{chk}</td>;
+            let props = {}, extras = {};
+            if (typeof(isVision) !== "undefined" && isVision) {
+                if (chk >= 100) {
+                    extras.fontWeight = 'bold';
+                }
+
+                if (chk <= 75) {
+                    extras.color = 'hotpink';
+                    props = {title: `Ranged penalty: ${75 - chk}`};
+                }
+            }
+            let style = Object.assign({}, baseStyle, extras);
+            return <td className="check" key={"chk-" + ii} style={style} {...props}>{chk}</td>;
         });
 
         const numPad = 12 - checks.length;
@@ -72,7 +86,7 @@ class SenseTable extends React.Component {
 
     renderVisionChecks() {
         return SenseTable.getCheckCells(this.props.handler.dayVisionCheck(),
-            SenseTable.BASE_VISION_RANGE);
+            SenseTable.BASE_VISION_RANGE, true);
     }
 
     renderNightVisionChecks(detectionLevel) {
@@ -96,7 +110,7 @@ class SenseTable extends React.Component {
             });
         }
         return SenseTable.renderCheckCells(checks,
-            check.darknessDetectionLevel);
+            check.darknessDetectionLevel, true);
     }
 
     renderHearingChecks() {
@@ -158,6 +172,12 @@ class SenseTable extends React.Component {
             {this.renderSurpriseChecks()}<td/></tr>
         </tbody>
         </Table>
+            <div style={{fontStyle: "italic"}}>
+                <div><span style={{fontWeight: 'bold'}}>Bold</span> means you can bump with ranged attacks.</div>
+                <div><span style={{color: 'hotpink'}}>Hotpink</span> means you will suffer a penalty to your ranged attacks to this range.</div>
+                <div>Passive observation checks can be attempted every 6 minutes.</div>
+                <div>Active observation checks can be attempted every 3 minutes.</div>
+            </div>
     </Panel>;
     }
 }
