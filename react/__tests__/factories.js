@@ -208,11 +208,13 @@ var characterSkillFactory = function (overrideFields) {
     return newSkill
 };
 
-var firearmFactory = function (overrideFields) {
+const baseFirearmFactory = (props) => {
     "use strict";
-    var firearm ={
-        "id": 5,
-        "base": {
+    if (!props) {
+        props = {};
+    }
+
+    let _base = {
             "name": "Glock 19",
             "short_name": "",
             "description": "",
@@ -236,35 +238,49 @@ var firearmFactory = function (overrideFields) {
             "base_skill": "Handguns",
             "skill": null,
             "skill2": null
-        },
-        "ammo": {
-            "id": 256,
-            "num_dice": 1,
-            "dice": 6,
-            "extra_damage": 0,
-            "leth": 5,
-            "plus_leth": 0,
-            "label": "9Pb",
-            "type": "P",
-            "bullet_type": "FMJ",
-            "bypass": 0,
-            "weight": "7.500",
-            "velocity": 440,
-            "tech_level": 4
-        }
     };
+    return Object.assign(_base, props);
+};
 
-    var overrides = Object.assign({}, overrideFields ? overrideFields : {});
-    if ('ammo' in overrides) {
-        firearm.ammo = Object.assign(firearm.ammo, overrideFields.ammo);
-        delete overrides.ammo;
-    }
-    if ('base' in overrides) {
-        firearm.base = Object.assign(firearm.base, overrideFields.base);
-        delete overrides.base;
+const ammunitionFactory = (props) => {
+    "use strict";
+    if (!props) {
+        props = {};
     }
 
-    return Object.assign(firearm, overrides);
+    let _base = {
+        "id": objectId,
+        "num_dice": 1,
+        "dice": 6,
+        "extra_damage": 0,
+        "leth": 5,
+        "plus_leth": 0,
+        "label": "9Pb",
+        "type": "P",
+        "bullet_type": "FMJ",
+        "bypass": 0,
+        "weight": "7.500",
+        "velocity": 440,
+        "tech_level": 4
+    };
+    let newAmmo = Object.assign(_base, props);
+    objectId = newAmmo.id + 1;
+    return newAmmo;
+};
+
+const firearmFactory = function (overrideFields) {
+    "use strict";
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    let id = objectId++;
+    if (overrideFields.id) {
+        id = overrideFields.id;
+    }
+    return {id: id,
+            base: baseFirearmFactory(overrideFields.base),
+            ammo: ammunitionFactory(overrideFields.ammo)};
+
 };
 
 
@@ -856,6 +872,8 @@ module.exports = {
     edgeLevelFactory: edgeLevelFactory,
     edgeFactory: edgeFactory,
     characterEdgeFactory: characterEdgeFactory,
+    ammunitionFactory: ammunitionFactory,
+    baseFirearmFactory: baseFirearmFactory,
     firearmFactory: firearmFactory,
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,
