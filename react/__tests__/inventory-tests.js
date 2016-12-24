@@ -1,8 +1,3 @@
-jest.dontMock('../Inventory');
-jest.dontMock('../InventoryRow');
-jest.dontMock('../sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
