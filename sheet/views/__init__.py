@@ -260,6 +260,7 @@ def version_history(request):
     def logiter(output):
         acc = ""
         for ll in output:
+            ll = ll.decode()
             if ll.startswith("commit ") and acc:
                 yield acc
                 acc = ""
