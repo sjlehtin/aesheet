@@ -14,17 +14,17 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     roa() {
-        var ammo = this.props.weapon.ammo;
-        var base = this.props.weapon.base;
-        var impulse = (parseFloat(ammo.weight) *
-            parseFloat(ammo.velocity))/1000;
+        const base = this.props.weapon.base;
+        const impulse = (parseFloat(this.props.weapon.ammo.weight) *
+            parseFloat(this.props.weapon.ammo.velocity))/1000;
 
-        var recoil = impulse / (parseFloat(base.duration) *
+        const recoil = impulse / (parseFloat(base.duration) *
             parseFloat(base.stock) *
             (parseFloat(base.weight) + 6));
 
-        var skillLevel = this.skillLevel();
-        var rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
+        const skillLevel = this.skillLevel();
+
+        let rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
 
         if (skillLevel > 0) {
             rof *= 1 + 0.1 * skillLevel;
