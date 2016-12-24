@@ -235,6 +235,10 @@ class Character(PrivateMixin, models.Model):
     def __str__(self):
         return u"%s: %s %s" % (self.name, self.race, self.occupation)
 
+    # TODO: Remove after python 2.7 support no longer needed.
+    def __unicode__(self):
+        return self.__str__()
+
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_characters(user))
@@ -1270,6 +1274,10 @@ class Sheet(PrivateMixin, models.Model):
             name=self.character.name,
             descr=(": %s" % self.description) if self.description else "")
 
+    # TODO: Remove after python 2.7 support no longer needed.
+    def __unicode__(self):
+        return self.__str__()
+
     class Meta:
         ordering = ('character__name', )
 
@@ -1356,6 +1364,10 @@ class CharacterLogEntry(models.Model):
                 return u"Added skill %s %d." % (self.skill, self.skill_level)
         elif self.entry_type == self.NON_FIELD:
             return self.entry
+
+    # TODO: Remove after python 2.7 support no longer needed.
+    def __unicode__(self):
+        return self.__str__()
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)
