@@ -332,6 +332,9 @@ class FirearmControl extends RangedWeaponRow {
                 All range penalties are doubled in sweep fire
                     (i.e. M -20, L -40, XL -60, E -80)
                 </div>
+                <div>
+                    Bumping is not allowed in sweep fire.
+                </div>
             </Row>;
         }
 
