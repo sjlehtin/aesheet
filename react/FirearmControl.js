@@ -1,6 +1,8 @@
 import React from 'react';
 import RangedWeaponRow from './RangedWeaponRow';
-var util = require('./sheet-util');
+import AmmoControl from './AmmoControl';
+
+const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
 class FirearmControl extends RangedWeaponRow {
@@ -293,7 +295,6 @@ class FirearmControl extends RangedWeaponRow {
                              title={`Missing skills: ${missing.join(' ,')}`}>
                 Unskilled</div>;
         }
-        var ammoIdentifier = <div>{ammo.label} {ammo.bullet_type}</div>;
 
         var actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -375,7 +376,9 @@ class FirearmControl extends RangedWeaponRow {
                                 </td>
                                 {initiatives}
                             </tr>
-                            <tr><td style={cellStyle} rowSpan={2}>{ammoIdentifier}</td>
+                            <tr><td style={cellStyle} rowSpan={2}>
+                                <AmmoControl ammo={this.props.weapon.ammo} />
+                            </td>
                                 <th style={inlineHeaderStyle} colSpan={3}>Damage</th>
                                 <th style={inlineHeaderStyle} colSpan={2}>Dtype</th>
                                 <th style={inlineHeaderStyle} colSpan={2}>S</th>
