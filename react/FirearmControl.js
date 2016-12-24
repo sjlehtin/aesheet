@@ -190,7 +190,7 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     sweepChecks(sweepType) {
-        var sweeps = {
+        const sweeps = {
             5: [0, 2, 5, 10],
             10: [0, 1, 2, 2, 5, 5, 10, 10],
             15: [0, 1, 1, 2, 2, 2, 5, 5, 5, 10, 10, 10],
@@ -199,18 +199,18 @@ class FirearmControl extends RangedWeaponRow {
         if (!(sweepType in sweeps)) {
             throw Error("Invalid sweep type: " + sweepType);
         }
-        var autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
+        const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
-        var klass = autofireClasses[this.props.weapon.base.autofire_class];
+        const klass = autofireClasses[this.props.weapon.base.autofire_class];
 
-        var autofirePenalty = -10;
+        let autofirePenalty = -10;
         if (!this.props.skillHandler.hasSkill("Autofire")) {
             autofirePenalty = -20;
         }
 
-        var baseSkillCheck = this.skillCheck();
-        var checks = [];
-        var penaltyMultiplier = 0;
+        const baseSkillCheck = this.skillCheck();
+        let checks = [];
+        let penaltyMultiplier = 0;
         for (let multiplier of sweeps[sweepType]) {
             penaltyMultiplier += multiplier;
             checks.push(
