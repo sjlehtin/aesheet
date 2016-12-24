@@ -6,69 +6,20 @@ const FirearmControl = require('../FirearmControl').default;
 const SkillTable = require('../SkillTable').default;
 const SkillHandler = require('../SkillHandler').default;
 
-var factories = require('./factories');
+const factories = require('./factories');
 
 describe('FirearmControl', function() {
     "use strict";
 
-    var getFirearmControl = function (givenProps) {
-        var handlerProps = {
-            skills: [],
-            allSkills: [
-                {
-                    name: "Pistol", stat: "dex",
-                    required_skills: ["Basic Firearms"]
-                },
-                {
-                    name: "Basic Firearms",
-                    stat: "dex"
-                },
-                {
-                    name: "Wheeled",
-                    stat: "dex"
-                },
-                {
-                    name: "Handguns",
-                    stat: "dex",
-                    required_skills: ["Basic Firearms"]
-                },
-                {
-                    name: "Long guns",
-                    stat: "dex",
-                    required_skills: ["Basic Firearms"]
-                }
-            ],
-            character: {cur_int: 45, cur_ref: 45}
-        };
-        if (givenProps && 'handlerProps' in givenProps) {
-            handlerProps = Object.assign(handlerProps,
-                givenProps.handlerProps);
-            delete givenProps.handlerProps;
-        }
+    const getFirearmControl = factories.firearmControlTreeFactory;
 
-        var props = {
-            weapon: factories.firearmFactory({base: {base_skill: "Pistol"}}),
-            skillHandler: factories.skillHandlerFactory(handlerProps)
-        };
-        if (givenProps) {
-            props = Object.assign(props, givenProps);
-        }
-        var table = TestUtils.renderIntoDocument(
-            <FirearmControl {...props}/>
-        );
-
-        return TestUtils.findRenderedComponentWithType(table,
-            FirearmControl);
-    };
-
-    it("can calculate single fire skill checks", function () {
-        var firearm = getFirearmControl();
+    it("can calculate single fire skill checks", () => {
+        const firearm = getFirearmControl();
         expect(firearm.skillCheck()).toEqual(11);
     });
 
-    it("can calculate effect of missing specialization skill checks",
-        function () {
-        var firearm = getFirearmControl({
+    it("can calculate effect of missing specialization skill checks", () => {
+        const firearm = getFirearmControl({
             handlerProps: {
                 skills: [{
                     skill: "Handguns",

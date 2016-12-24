@@ -1,14 +1,15 @@
 import React from 'react';
 import TestUtils from 'react-addons-test-utils';
 
-var rest = require('../sheet-rest');
+const rest = require('../sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
 const SkillHandler = require('../SkillHandler').default;
+const FirearmControl = require('../FirearmControl').default;
 
-var objectId = 1;
+let objectId = 1;
 
-var characterFactory = function (statOverrides) {
+const characterFactory = function (statOverrides) {
     var _charData = {
         id: 2,
 
@@ -283,6 +284,58 @@ const firearmFactory = function (overrideFields) {
 
 };
 
+const firearmControlTreeFactory = function (givenProps) {
+    if (!givenProps) {
+        givenProps = {};
+    }
+    let handlerProps = {
+        skills: [],
+        allSkills: [
+            {
+                name: "Pistol", stat: "dex",
+                required_skills: ["Basic Firearms"]
+            },
+            {
+                name: "Basic Firearms",
+                stat: "dex"
+            },
+            {
+                name: "Wheeled",
+                stat: "dex"
+            },
+            {
+                name: "Handguns",
+                stat: "dex",
+                required_skills: ["Basic Firearms"]
+            },
+            {
+                name: "Long guns",
+                stat: "dex",
+                required_skills: ["Basic Firearms"]
+            }
+        ],
+        character: {cur_int: 45, cur_ref: 45}
+    };
+    let weaponProps = {base: {base_skill: "Pistol"}};
+    if (givenProps.handlerProps) {
+        handlerProps = Object.assign(handlerProps,
+            givenProps.handlerProps);
+    }
+    if (givenProps.weapon) {
+        weaponProps = Object.assign(weaponProps, givenProps.weapon);
+    }
+    let props = {
+        weapon: firearmFactory(weaponProps),
+        skillHandler: skillHandlerFactory(handlerProps)
+    };
+    props = Object.assign(givenProps, props);
+    const table = TestUtils.renderIntoDocument(
+        <FirearmControl {...props}/>
+    );
+
+    return TestUtils.findRenderedComponentWithType(table,
+        FirearmControl);
+};
 
 var miscellaneousItemFactory = function (overrideFields) {
     "use strict";
@@ -296,7 +349,7 @@ var miscellaneousItemFactory = function (overrideFields) {
         "armor_qualities": [
         ],
         "weapon_qualities": []
-        };
+    };
     if (!overrideFields) {
         overrideFields = {};
     }
@@ -875,6 +928,7 @@ module.exports = {
     ammunitionFactory: ammunitionFactory,
     baseFirearmFactory: baseFirearmFactory,
     firearmFactory: firearmFactory,
+    firearmControlTreeFactory: firearmControlTreeFactory,
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,
     transientEffectFactory: transientEffectFactory,
