@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
-import Combobox from 'react-widgets/lib/Combobox';
+import DropdownList from 'react-widgets/lib/DropdownList';
 
 var rest = require('./sheet-rest');
 
@@ -73,21 +73,17 @@ class AddFirearmControl extends React.Component {
         if (typeof(this.state.selectedFirearm) !== "object") {
             return false;
         }
-        if (typeof(this.state.selectedAmmo) === "object") {
-            return true;
-        } else {
-            return false;
-        }
+        return typeof(this.state.selectedAmmo) === "object";
     }
 
-    formatAmmo(ammo) {
+    static formatAmmo(ammo) {
         if (!ammo) {
             return '';
         }
         if (typeof(ammo) !== "object") {
             return ammo;
         }
-        var impulse = parseFloat(ammo.weight) * ammo.velocity / 1000;
+        const impulse = parseFloat(ammo.weight) * ammo.velocity / 1000;
         return `${ammo.label} ${ammo.bullet_type} (${impulse.toFixed(2)})`;
     }
 
@@ -98,7 +94,7 @@ class AddFirearmControl extends React.Component {
                 <tbody>
                 <tr>
                     <td><label>Firearm</label></td>
-                    <td><Combobox data={this.state.firearmChoices}
+                    <td style={{minWidth: "20em"}}><DropdownList data={this.state.firearmChoices}
                                   textField='name'
                                   open={this.state.isOpen}
                                   busy={this.state.isBusy}
@@ -116,9 +112,9 @@ class AddFirearmControl extends React.Component {
                 <tr>
                     <td><label>Ammo</label></td>
                     <td>
-                        <Combobox data={this.state.ammoChoices}
+                        <DropdownList data={this.state.ammoChoices}
                                   value={this.state.selectedAmmo}
-                                  textField={(obj) => {return this.formatAmmo(obj);}}
+                                  textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
                                   onChange={
                                   (value) => this.handleAmmoChange(value)} />
                     </td>
