@@ -13,7 +13,6 @@ var factories = require('./factories');
 const StatRow = require('../StatRow').default;
 
 var statRowFactory = function(givenProps) {
-    // TODO: React TestUtils suck a bit of a balls.
     var Wrapper = React.createClass({
         render: function() {
             return <table><tbody>{this.props.children}</tbody></table>;
@@ -107,34 +106,19 @@ describe('stat row', function() {
 describe('StatRow updates', function (){
     "use strict";
 
-    var promises;
-    var row;
-
-    beforeEach(function () {
-        rest.getData = jest.genMockFunction();
-        rest.patch = jest.genMockFunction();
-        promises = [];
-    });
-
-    var patchOk = function () {
-        var response = Promise.resolve({"mockedPatch": 1});
+    it('calls parent component set change callback', function () {
+        rest.patch.mockClear();
+        let response = Promise.resolve({"mockedPatch": 1});
         rest.patch.mockReturnValue(response);
-        promises.push(response);
-    };
 
-    it('calls parent component set change callback', function (done) {
-        patchOk({});
-        var callback = jasmine.createSpy("callback");
-        row = statRowFactory({onMod: callback});
+        let callback = jest.fn();
+        let row = statRowFactory({onMod: callback});
         TestUtils.Simulate.click(row._decreaseButton);
-        Promise.all(promises).then(function () {
-            expect(rest.patch.mock.calls[0][0]).toEqual('/rest/characters/1/');
-            Promise.all(promises).then(function () {
-                Promise.all(promises).then(function () {
+
+        expect(rest.patch).toBeCalledWith('/rest/characters/1/', {cur_fit: 54});
+
+        return response.then(() => {
                 expect(callback).toHaveBeenCalledWith("fit", 55, 54);
-                done();
-            }).catch(function (err) { fail(err);});;
-            }).catch(function (err) { fail(err);});;
-        }).catch(function (err) { fail(err);});
+        });
     });
 });
