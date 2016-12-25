@@ -29,8 +29,8 @@ import SenseTable from './SenseTable';
 
 import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
 
-var rest = require('./sheet-rest');
-var util = require('./sheet-util');
+const rest = require('./sheet-rest');
+const util = require('./sheet-util');
 
 /**
  * TODO: controls to add bought_mana, bought_stamina, change
@@ -535,6 +535,21 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
+    handleFirearmChanged(data) {
+        let patchData = {id: data.id};
+        if (data.ammo) {
+            patchData.ammo = data.ammo.id;
+        }
+        return rest.patch(this.getFirearmURL(data), patchData).then(() => {
+            const index = StatBlock.findItemIndex(
+                this.state.firearmList, data);
+            let updatedFireArm = Object.assign({}, this.state.firearmList[index],
+                data);
+            this.state.firearmList.splice(index, 1, updatedFireArm);
+            this.setState({firearmList: this.state.firearmList});
+        }).catch(err => {console.log("Error updating firearm: ", err)});
+    }
+
     getWeaponURL(fa) {
         var baseURL = this.props.url + 'sheetweapons/';
         if (fa) {
@@ -967,6 +982,7 @@ class StatBlock extends React.Component {
                 key={idx++} weapon={fa}
                 skillHandler={skillHandler}
                 onRemove={(fa) => this.handleFirearmRemoved(fa) }
+                onChange={(data) => this.handleFirearmChanged(data)}
                 style={{fontSize: "80%", backgroundColor: bgColor}}
             />);
         }
