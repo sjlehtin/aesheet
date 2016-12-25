@@ -1,6 +1,7 @@
 import React from 'react';
 import TestUtils from 'react-addons-test-utils';
 
+jest.mock('../sheet-rest');
 const rest = require('../sheet-rest');
 
 const StatBlock = require('../StatBlock').default;
@@ -743,7 +744,7 @@ var sheetFactory = function (statOverrides) {
 var statBlockTreeFactory = function (overrides) {
     var characterOverrides = undefined;
     var sheetOverrides = undefined;
-    var wounds = [], edges = [];
+    let wounds = [], edges = [], firearms = [];
     if (overrides) {
         characterOverrides = overrides.character;
         sheetOverrides = overrides.sheet;
@@ -752,7 +753,12 @@ var statBlockTreeFactory = function (overrides) {
                 (props) => { return woundFactory(props); });
         }
         if (overrides.edges) {
-            edges = overrides.edges.map((props) => {return characterEdgeFactory(props)})
+            edges = overrides.edges.map(
+                (props) => {return characterEdgeFactory(props)});
+        }
+        if (overrides.firearms) {
+            firearms = overrides.firearms.map(
+                (props) => {return firearmFactory(props)});
         }
     }
 
@@ -798,7 +804,7 @@ var statBlockTreeFactory = function (overrides) {
         } else if (url === "/rest/weapons/campaign/2/") {
             return jsonResponse([]);
         } else if (url === "/rest/sheets/1/sheetfirearms/") {
-            return jsonResponse([]);
+            return jsonResponse(firearms);
         } else if (url === "/rest/sheets/1/sheetweapons/") {
             return jsonResponse([]);
         } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
