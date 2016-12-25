@@ -262,11 +262,15 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         const footCellStyle = {textAlign: "center"};
+
+        const hits = new Array(16).fill().map((_, ii) =>
+            <th style={{fontSize: "60%", textAlign: "center"}}
+                key={"header-" + ii}>{16 - ii} hit</th>);
         return <div>
         <table style={{fontSize: "inherit"}}>
             <thead>
             <tr><th colSpan={4}>Sweep fire {this.props.weapon.base.autofire_rpm}{this.props.weapon.base.autofire_class}</th></tr>
-            <tr><th>RPT</th><th>TGT</th></tr></thead>
+            <tr><th>RPT</th><th>TGT</th>{hits}</tr></thead>
             <tbody>
             {sweepRows}
             </tbody>
