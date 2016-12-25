@@ -26,7 +26,7 @@ class StatRow extends React.Component {
 
         if (this.state.updating) {
             console.log("waiting server to respond to last event...")
-            return;
+            return Promise.resolve({});
         }
         this.setState({updating: true})
 
@@ -47,9 +47,10 @@ class StatRow extends React.Component {
         var data = {};
         data['cur_' + this.state.stat] = newValue;
 
-        rest.patch(this.props.url, data).then((response) => {
-            this.setState({updating: false})
-            if (typeof(this.props.onMod) !== "undefined") {
+        // TODO: this should be handled in StatBlock.
+        return rest.patch(this.props.url, data).then((response) => {
+            this.setState({updating: false});
+            if (this.props.onMod) {
                 this.props.onMod(this.state.stat, oldValue, newValue);
             }
         }).catch((reason) => {
@@ -58,11 +59,11 @@ class StatRow extends React.Component {
     }
 
     handleIncrease(event) {
-        this.handleModification(event, 1);
+        return this.handleModification(event, 1);
     }
 
     handleDecrease(event) {
-        this.handleModification(event, -1);
+        return this.handleModification(event, -1);
     }
 
     handleTouchEnd(event) {
@@ -135,11 +136,11 @@ class StatRow extends React.Component {
                     <div style={controlStyle}>
                         <span style={incStyle}
                               ref={(c) => this._increaseButton = c}
-                              onClick={(e) => this.handleIncrease(e)}
+                              onClick={(e) => {return this.handleIncrease(e)}}
                         ><Octicon name="arrow-up" /></span>
                         <span style={decStyle}
                               ref={(c) => this._decreaseButton = c}
-                              onClick={(e) => this.handleDecrease(e)}
+                              onClick={(e) => {return this.handleDecrease(e)}}
                         ><Octicon name="arrow-down" /></span>
                     </div>
                 </td>
