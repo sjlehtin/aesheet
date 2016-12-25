@@ -51,12 +51,8 @@ class AmmoControl extends React.Component {
         this.setState({selectedAmmo: value});
     }
 
-    isValid() {
-        return this.state.ammoChoices.indexOf(this.state.selectedAmmo) >= 0;
-    }
-
     handleSubmit() {
-        if (this.props.onChange && this.isValid()) {
+        if (this.props.onChange) {
             this.props.onChange(this.state.selectedAmmo).then(
                 () => this.cancelEdit());
         }
