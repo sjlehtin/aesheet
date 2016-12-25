@@ -134,40 +134,38 @@ class FirearmControl extends RangedWeaponRow {
         if (!this.props.weapon.base.autofire_rpm) {
             return '';
         }
-        var actions = [0.5, 1, 2, 3, 4];
-        var burstChecks = this.burstChecks(actions);
-        var lethalities = [0, -2, 2, 0, -2];
-        var hitLocations = [0, 0, 0, -1, -1];
-        var burstRows = [];
+        const actions = [0.5, 1, 2, 3, 4];
+        const burstChecks = this.burstChecks(actions);
+        const lethalities = [0, -2, 2, 0, -2];
+        const hitLocations = [0, 0, 0, -1, -1];
+        const burstRows = [];
 
-        var baseStyle = {padding: 2, borderWidth: 1, minWidth: "2em",
-        textAlign: "center"};
-        var cellStyle = Object.assign({borderStyle: "dotted"}, baseStyle);
+        const baseStyle = {padding: 2, borderWidth: 1, minWidth: "2em",
+                           textAlign: "center"};
+        const cellStyle = Object.assign({borderStyle: "dotted"}, baseStyle);
 
-        var idx = 0;
-        var actionCells = actions.map((act) => {
-            return <th key={idx++} style={baseStyle}>{act}</th>;});
+        const actionCells = actions.map((act, ii) => {
+            return <th key={ii} style={baseStyle}>{act}</th>;});
 
-        for (var ii = 0; ii < 5; ii++) {
-            var checkCells = [];
-            for (var jj = 0; jj < burstChecks.length; jj++) {
-                var burst = burstChecks[jj];
-                checkCells.push(<td key={jj} style={cellStyle}
-                >{burst[ii]}</td>);
+        for (let ii = 0; ii < 5; ii++) {
+            const checkCells = [];
+            for (let jj = 0; jj < burstChecks.length; jj++) {
+                checkCells.push(<td key={jj} style={cellStyle}>
+                    {burstChecks[jj][ii]}</td>);
             }
-            burstRows.push(<tr key={`chk-${ii}-${jj}`}>
+            burstRows.push(<tr key={`chk-${ii}`}>
                 <td style={cellStyle}>{lethalities[ii]}</td>
                 <td style={cellStyle}>{hitLocations[ii]}</td>
                 {checkCells}
             </tr>)
         }
-        idx = 0;
-        var inits = this.burstInitiatives(actions).map((init) => {
-            return <th key={"init-" + idx++}>
+
+        const inits = this.burstInitiatives(actions).map((init, ii) => {
+            return <th key={"init-" + ii}>
                 {this.renderInt(init)}
             </th>});
 
-        var autoUnskilled = '';
+        let autoUnskilled = '';
         if (!this.props.skillHandler.hasSkill("Autofire")) {
             autoUnskilled = <div style={{color:"red"}}
                              title="Missing skill Autofire">
@@ -189,14 +187,13 @@ class FirearmControl extends RangedWeaponRow {
             </tbody>
             <tfoot>
             <tr>
-                <th></th>
-                <th></th>
+                <th />
+                <th />
                 {inits}
             </tr>
             </tfoot>
         </table>
             {autoUnskilled}
-
         </div>;
     }
 
