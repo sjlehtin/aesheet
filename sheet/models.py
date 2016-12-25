@@ -766,7 +766,6 @@ class Firearm(models.Model):
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
 
-
     def __str__(self):
         return u"{base} w/ {ammo}".format(base=self.base,
                                           ammo=self.ammo)
