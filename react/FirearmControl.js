@@ -122,6 +122,13 @@ class FirearmControl extends RangedWeaponRow {
             extraDamage}/{ammo.leth}{plusLeth}</span>;
     }
 
+    handleAmmoChanged(value) {
+        if (this.props.onChange) {
+            return this.props.onChange({id: this.props.weapon.id,
+                ammo: value});
+        }
+    }
+
     renderBurstTable() {
         if (!this.props.weapon.base.autofire_rpm) {
             return '';
@@ -380,8 +387,8 @@ class FirearmControl extends RangedWeaponRow {
                             <tr><td style={cellStyle} rowSpan={2}>
                                 <AmmoControl
                                     ammo={this.props.weapon.ammo}
-                                    url={`/rest/ammunition/firearm/${encodeURIComponent(this.props.weapon.base.name)}/`
-                                    }
+                                    url={`/rest/ammunition/firearm/${encodeURIComponent(this.props.weapon.base.name)}/`}
+                                    onChange={this.handleAmmoChanged.bind(this)}
                                 />
                             </td>
                                 <th style={inlineHeaderStyle} colSpan={3}>Damage</th>
@@ -423,7 +430,8 @@ class FirearmControl extends RangedWeaponRow {
 FirearmControl.props = {
     skillHandler: React.PropTypes.object.isRequired,
     weapon: React.PropTypes.object.isRequired,
-    onRemove: React.PropTypes.func
+    onRemove: React.PropTypes.func,
+    onChange: React.PropTypes.func
 };
 
 export default FirearmControl;

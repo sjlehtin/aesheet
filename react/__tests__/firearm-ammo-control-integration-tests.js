@@ -16,7 +16,7 @@ describe('FirearmControl -- AmmoControl', () => {
         expect(ReactDOM.findDOMNode(ammoControl).textContent).toContain("Test Ammo");
     });
 
-    it('integrates AmmoControl', () => {
+    it('integrates AmmoControl for listing URL', () => {
         // Check that url for firearm gets propagated correctly.
         const control = factories.firearmControlTreeFactory({weapon:
             {base: {name: "Nabu tussari"},
@@ -25,4 +25,25 @@ describe('FirearmControl -- AmmoControl', () => {
             control, AmmoControl);
         expect(ammoControl.props.url).toEqual('/rest/ammunition/firearm/Nabu%20tussari/');
     });
+
+    it('integrates AmmoControl for changing ammmo', () => {
+        const spy = jest.fn().mockReturnValue(Promise.resolve({}));
+
+        const control = factories.firearmControlTreeFactory({weapon:
+            {id: 19,
+                base: {name: "Nabu tussari"},
+                ammo: {"label": "Test Ammo"}},
+            onChange: spy
+        });
+        let ammoControl = TestUtils.findRenderedComponentWithType(
+            control, AmmoControl);
+
+        let newAmmo = factories.ammunitionFactory({id: 56});
+        ammoControl.handleChange(newAmmo);
+        ammoControl.handleSubmit();
+
+        expect(spy).toBeCalledWith({id: 19, ammo: newAmmo});
+    });
+
+
 });
