@@ -9,6 +9,7 @@ class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
 
+        // XXX move to class statics
         this.readiedBaseI = -1;
         this.baseCheckBonusForSlowActions = 10;
         this.extraActionModifier = 15;
@@ -377,7 +378,11 @@ class FirearmControl extends RangedWeaponRow {
                                 {initiatives}
                             </tr>
                             <tr><td style={cellStyle} rowSpan={2}>
-                                <AmmoControl ammo={this.props.weapon.ammo} />
+                                <AmmoControl
+                                    ammo={this.props.weapon.ammo}
+                                    url={`/rest/ammunition/firearm/${encodeURIComponent(this.props.weapon.base.name)}/`
+                                    }
+                                />
                             </td>
                                 <th style={inlineHeaderStyle} colSpan={3}>Damage</th>
                                 <th style={inlineHeaderStyle} colSpan={2}>Dtype</th>

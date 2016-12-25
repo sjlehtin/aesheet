@@ -16,7 +16,13 @@ describe('FirearmControl -- AmmoControl', () => {
         expect(ReactDOM.findDOMNode(ammoControl).textContent).toContain("Test Ammo");
     });
 
-    xit('integrates AmmoControl', () => {
+    it('integrates AmmoControl', () => {
         // Check that url for firearm gets propagated correctly.
+        const control = factories.firearmControlTreeFactory({weapon:
+            {base: {name: "Nabu tussari"},
+             ammo: {"label": "Test Ammo"}}});
+        let ammoControl = TestUtils.findRenderedComponentWithType(
+            control, AmmoControl);
+        expect(ammoControl.props.url).toEqual('/rest/ammunition/firearm/Nabu%20tussari/');
     });
 });
