@@ -63,7 +63,7 @@ class AmmoControl extends React.Component {
                               busy={this.state.busy}
                               textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
                               onChange={(value) => this.handleChange(value)}
-                              onToggle={() => this.setState({open: !this.state.open})}
+                              onToggle={(isOpen) => this.setState({open: isOpen})}
                               filter="contains"
                               data={this.state.ammoChoices}
 
