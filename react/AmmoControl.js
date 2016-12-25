@@ -1,7 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-import {Button} from 'react-bootstrap';
+import {Button, Col, Row} from 'react-bootstrap';
 import DropdownList from 'react-widgets/lib/DropdownList';
 import AddFirearmControl from './AddFirearmControl';
 
@@ -53,16 +52,22 @@ class AmmoControl extends React.Component {
 
     handleSubmit() {
         if (this.props.onChange) {
-            this.props.onChange(this.state.selectedAmmo).then(
-                () => this.cancelEdit());
+            this.props.onChange(this.state.selectedAmmo)
+                .then(() => this.cancelEdit());
         }
     }
 
     render() {
         let content;
         if (this.state.editing) {
-            content = <div><DropdownList
-                                defaultValue={this.props.ammo}
+            content = <Row>
+                <Col>
+            <Button onClick={(e) => {e.stopPropagation(); this.handleSubmit()}}
+                                ref={(c) => this._submitButton = c}
+                                bsSize="xsmall">Set</Button>
+                </Col>
+                <Col>
+                <DropdownList
                                 open={this.state.open}
                                 value={this.state.selectedAmmo}
                                 busy={this.state.busy}
@@ -70,14 +75,10 @@ class AmmoControl extends React.Component {
                                 onChange={(value) => this.handleChange(value)}
                                 onToggle={() => this.setState({open: !this.state.open})}
                                 filter="contains"
-                                ref={c => {if (c) ReactDOM.findDOMNode(c).focus() }}
                                 data={this.state.ammoChoices}
 
-            />
-            <Button onClick={(e) => this.handleSubmit()}
-                                ref={(c) => this._submitButton = c}
-                                bsSize="xsmall">Change</Button>
-            </div>;
+                /></Col>
+            </Row>;
         } else {
             content = <div><span>{this.props.ammo.label} {this.props.ammo.bullet_type}</span>
             <Button onClick={(e) => this.handleChangeClick()}
