@@ -127,6 +127,7 @@ class FirearmControl extends RangedWeaponRow {
             return this.props.onChange({id: this.props.weapon.id,
                 ammo: value});
         }
+        return Promise.resolve({});
     }
 
     renderBurstTable() {
