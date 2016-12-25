@@ -762,7 +762,12 @@ class FirearmAmmunitionType(models.Model):
 
 
 class Firearm(models.Model):
-    # modification, such as scopes could be added here.
+    # This is the SheetFirearm.  This could be renamed and changed to work in
+    # same fashion as similar items, currently causes Django to have an extra
+    # table for the relationship.  Change would require adding a link to the
+    # sheet from here, data migration, and little work for the REST viewset.
+
+    # modifications, such as scopes could be added here.
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
 

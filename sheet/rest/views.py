@@ -353,31 +353,21 @@ class SheetViewSetMixin(ListPermissionMixin):
 
 
 class SheetFirearmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
-    #serializer_class = serializers.SheetFirearmListSerializer
-
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == 'list' or self.action == 'retrieve':
+            return serializers.SheetFirearmListSerializer
+        else:
             # When creating new, we do not want the full nested
             # representation, just id's.
             return serializers.SheetFirearmCreateSerializer
-        else:
-            return serializers.SheetFirearmListSerializer
 
     def get_queryset(self):
         return self.sheet.firearms.all()
-
-    def perform_update(self, serializer):
-        # TODO: not supported for Firearm.  Will be supported for
-        # SheetFirearm.
-        raise exceptions.MethodNotAllowed("Update not supported yet")
 
     def perform_create(self, serializer):
         super(SheetFirearmViewSet, self).perform_create(serializer)
         self.sheet.firearms.add(serializer.instance)
 
-    def perform_destroy(self, instance):
-        self.sheet.firearms.remove(instance)
-        
 
 class SheetWeaponViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
 

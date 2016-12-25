@@ -240,18 +240,6 @@ class SheetFirearmListSerializer(serializers.ModelSerializer):
 
 
 class SheetFirearmCreateSerializer(serializers.ModelSerializer):
-
-    def create(self, validated_data):
-        if set(validated_data.keys()) == {'base', 'ammo'}:
-            objs = sheet.models.Firearm.objects.filter(
-                    base=validated_data['base'],
-                    ammo=validated_data['ammo'])
-            if objs:
-                return objs[0]
-
-        return super(SheetFirearmCreateSerializer, self).create(
-                validated_data)
-
     class Meta:
         model = sheet.models.Firearm
         fields = "__all__"

@@ -638,7 +638,10 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
 
-    def test_adding_items_should_reuse_existing(self):
+    def test_adding_items_should_not_reuse_existing(self):
+        """
+        Firearms are sheet specific (TODO: will be renamed to SheetFirearm).
+        """
         firearm = factories.BaseFirearmFactory(name="AK-47")
         ammo = factories.AmmunitionFactory(label="7.62x39")
 
@@ -650,7 +653,7 @@ class SheetFirearmTestCase(TestCase):
                       'base': firearm.pk}, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
-        self.assertEqual(self.sheet.firearms.all()[0].pk, fa.pk)
+        self.assertNotEqual(self.sheet.firearms.all()[0].pk, fa.pk)
 
     def test_deleting_items(self):
         firearm = factories.FirearmFactory()
@@ -659,11 +662,27 @@ class SheetFirearmTestCase(TestCase):
         response = self.client.delete(
                 "{}{}/".format(self.url, firearm.pk), format='json')
         self.assertEqual(response.status_code, 204)
-        # Should still be found.
-        models.Firearm.objects.get(pk=firearm.pk)
+        # Should still be found. TODO: should actually be deleted.
+        self.assertEqual(len(models.Firearm.objects.filter(pk=firearm.pk)), 0)
         self.assertEqual(len(self.sheet.firearms.all()), 0)
 
-    # TODO: With SheetFirearms, modifications make sense.
+    def test_changing_ammo(self):
+        firearm = factories.FirearmFactory()
+        ammo = factories.AmmunitionFactory(label="7.62x39")
+        self.sheet.firearms.add(firearm)
+
+        self.assertNotEqual(models.Firearm.objects.get(pk=firearm.pk).ammo.pk,
+                            ammo.pk)
+
+        response = self.client.patch(
+            "{}{}/".format(self.url, firearm.pk),
+            data={'ammo': ammo.pk},
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).ammo.pk,
+                         ammo.pk)
+
 
 # TODO: add test for checking private sheets restrict access to
 # sheetfirearms, sheetweapons, and sheetrangedweapons correctly.
