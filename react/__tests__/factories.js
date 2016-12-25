@@ -839,6 +839,7 @@ var statBlockTreeFactory = function (overrides) {
     );
 
     table.afterLoad = afterLoad;
+    table.loaded = Promise.all(promises);
     return table;
 };
 
@@ -848,6 +849,7 @@ var statBlockFactory = function (overrides) {
     var statBlock = TestUtils.findRenderedComponentWithType(table,
         StatBlock);
     statBlock.afterLoad = table.afterLoad;
+    statBlock.loaded = table.loaded;
     return statBlock;
 };
 
