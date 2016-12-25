@@ -23,7 +23,6 @@ describe('StatBlock -- AmmoControl', () => {
             expect(ammoControl.props.ammo.id).toEqual(12);
             let newValue = factories.ammunitionFactory({id: 42, label: "Foo"});
             ammoControl.handleChange(newValue);
-            ammoControl.handleSubmit();
 
             expect(rest.patch).toBeCalledWith('/rest/sheets/1/sheetfirearms/5/', {id: 5, ammo: 42});
             return patchResolve.then(() => {

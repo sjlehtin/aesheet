@@ -40,7 +40,6 @@ describe('FirearmControl -- AmmoControl', () => {
 
         let newAmmo = factories.ammunitionFactory({id: 56});
         ammoControl.handleChange(newAmmo);
-        ammoControl.handleSubmit();
 
         expect(spy).toBeCalledWith({id: 19, ammo: newAmmo});
     });

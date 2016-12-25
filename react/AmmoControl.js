@@ -13,18 +13,20 @@ class AmmoControl extends React.Component {
         this.state = {
             busy: false,
             editing: false,
-            open: true,
+            open: false,
             ammoChoices: [],
             selectedAmmo: undefined
         };
     }
 
-    updateAmmoSelection() {
-        return rest.getData(this.props.url).then(json => {
-            let selectedAmmo = json.find((el) => {return this.props.ammo.id === el.id});
+    componentDidMount() {
+        this.updateAmmoSelection();
+    }
 
-            this.setState({busy: false, ammoChoices: json,
-                           selectedAmmo: selectedAmmo});
+    updateAmmoSelection() {
+        this.setState({busy: true});
+        return rest.getData(this.props.url).then(json => {
+            this.setState({busy: false, ammoChoices: json});
         });
     }
 
@@ -42,50 +44,30 @@ class AmmoControl extends React.Component {
     handleKeyDown(e) {
         if (e.keyCode === 27) {
             /* Escape. */
-            this.cancelEdit();
+            this.setState({open: false});
         }
     }
 
     handleChange(value) {
-        this.setState({selectedAmmo: value});
-    }
 
-    handleSubmit() {
-        if (this.props.onChange) {
-            this.props.onChange(this.state.selectedAmmo)
-                .then(() => this.cancelEdit());
-        }
+        this.setState({busy: true});
+        this.props.onChange(value).then(() => this.setState({busy: false}))
+            .catch((err) => { console.log("Failed change");
+                              this.setState({busy: false}) });
     }
 
     render() {
-        let content;
-        if (this.state.editing) {
-            content = <Row>
-                <Col>
-            <Button onClick={(e) => {e.stopPropagation(); this.handleSubmit()}}
-                                ref={(c) => this._submitButton = c}
-                                bsSize="xsmall">Set</Button>
-                </Col>
-                <Col>
-                <DropdownList
-                                open={this.state.open}
-                                value={this.state.selectedAmmo}
-                                busy={this.state.busy}
-                                textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
-                                onChange={(value) => this.handleChange(value)}
-                                onToggle={() => this.setState({open: !this.state.open})}
-                                filter="contains"
-                                data={this.state.ammoChoices}
+        let content =
+                <DropdownList open={this.state.open}
+                              value={this.props.ammo}
+                              busy={this.state.busy}
+                              textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
+                              onChange={(value) => this.handleChange(value)}
+                              onToggle={() => this.setState({open: !this.state.open})}
+                              filter="contains"
+                              data={this.state.ammoChoices}
 
-                /></Col>
-            </Row>;
-        } else {
-            content = <div><span>{this.props.ammo.label} {this.props.ammo.bullet_type}</span>
-            <Button onClick={(e) => this.handleChangeClick()}
-                                ref={(c) => this._changeButton = c}
-                                bsSize="xsmall">Change</Button>
-            </div>;
-        }
+                />;
         return <div onKeyDown={this.handleKeyDown.bind(this)}>
             {content}
         </div>;

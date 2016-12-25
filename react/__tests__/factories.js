@@ -829,6 +829,8 @@ var statBlockTreeFactory = function (overrides) {
             return jsonResponse([]);
         } else if (url === "/rest/edgelevels/campaign/2/") {
             return jsonResponse([]);
+        } else if (url.match(new RegExp('/rest/ammunition/firearm/.*/'))) {
+            return jsonResponse([]);
         } else {
             /* Throwing errors here do not cancel the test. */
             fail("this is an unsupported url:" + url);
