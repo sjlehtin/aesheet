@@ -704,6 +704,17 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
         help_text="ROF modifier for weapon class.  Generally from 6-15, "
                   "smaller is better.")
 
+    accuracy = models.DecimalField(max_digits=4, decimal_places=2,
+                                   default=1,
+                                   help_text="Weapon's inherent accurace "
+                                             "modifier.  Larger is better.")
+    sight = models.IntegerField(default=100,
+                                help_text="Weapon's sight modifier in "
+                                          "millimeters")
+    barrel_length = models.IntegerField(default=100,
+                                        help_text="Weapon's barrel length in "
+                                                  "millimeters")
+
     def get_ammunition_types(self):
         """
         Return the accepted ammunition types for the firearm.
