@@ -1,6 +1,6 @@
 import React from 'react';
-var util = require('./sheet-util');
-import {Col, Row, Button} from 'react-bootstrap';
+const util = require('./sheet-util');
+import {Button} from 'react-bootstrap';
 
 class WeaponRow extends React.Component {
     constructor(props) {
@@ -17,8 +17,8 @@ class WeaponRow extends React.Component {
     }
 
     missingSkills() {
-        var missing = [];
-        var checkSkill = (skillName) => {
+        const missing = [];
+        const checkSkill = (skillName) => {
             if (skillName) {
                 if (!this.props.skillHandler.hasSkill(skillName)) {
                     missing.push(skillName);
@@ -42,7 +42,7 @@ class WeaponRow extends React.Component {
     }
 
     skillROAMultiplier() {
-        var level = this.props.skillHandler.skillLevel(
+        const level = this.props.skillHandler.skillLevel(
             this.props.weapon.base.base_skill);
         if (level > 0) {
             return (1 + 0.1 * level);
@@ -54,9 +54,9 @@ class WeaponRow extends React.Component {
         if (!useType) {
             useType = WeaponRow.FULL;
         }
-        var roa = this.baseROA();
+        let roa = this.baseROA();
 
-        var specLevel;
+        let specLevel;
         if (useType === WeaponRow.SPECIAL || useType === WeaponRow.FULL) {
             specLevel = this.props.skillHandler.skillLevel(
                 "Single-weapon style");
@@ -70,7 +70,7 @@ class WeaponRow extends React.Component {
             if (!util.isInt(specLevel)) {
                 specLevel = 0;
             }
-            var mod;
+            let mod;
             if (useType === WeaponRow.PRI) {
                 mod = -0.25;
             } else if (useType === WeaponRow.SEC) {
@@ -107,7 +107,7 @@ class WeaponRow extends React.Component {
     }
 
     skillCheck() {
-        var check = this.props.skillHandler.skillCheck(
+        let check = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
 
         check += this.ccv();
@@ -147,16 +147,15 @@ class WeaponRow extends React.Component {
     }
 
     skillChecks(actions, givenProps) {
-        var props = {useType: WeaponRow.FULL, counterPenalty: true}
+        let props = {useType: WeaponRow.FULL, counterPenalty: true};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
 
-        var roa = this.roa(props.useType);
-        var baseCheck = this.skillCheck();
+        const roa = this.roa(props.useType);
+        let baseCheck = this.skillCheck();
 
-        var checks = [];
-
+        const checks = [];
 
         if (props.useType === WeaponRow.SEC) {
             if (!this.props.weapon.base.is_shield) {
@@ -168,7 +167,7 @@ class WeaponRow extends React.Component {
             if (act > 2 * roa) {
                 checks.push(null);
             } else {
-                var mod = Math.round(WeaponRow.checkMod(roa, act,
+                let mod = Math.round(WeaponRow.checkMod(roa, act,
                     this.baseCheckBonusForSlowActions,
                     this.extraActionModifier));
 
@@ -183,7 +182,7 @@ class WeaponRow extends React.Component {
     }
 
     defenseInitiatives(actions, givenProps) {
-        var props = {canReady: false,
+        let props = {canReady: false,
             maxActionMultiplier: 4,
             baseIMultipliers: [0, 3, 6, 0, 3, 6, 0, 3, 6]};
         if (givenProps) {
@@ -193,7 +192,7 @@ class WeaponRow extends React.Component {
     }
 
     initiatives(actions, givenProps) {
-        var props = {
+        let props = {
             /* Whether the weapon can be readied with a multi-turn action. */
             canReady: true,
             /* 2 for attacks, 4 for defenses. */
@@ -204,17 +203,16 @@ class WeaponRow extends React.Component {
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
-        var rof = this.roa(props.useType);
-        var baseI = -5 / rof;
-        var readiedBaseI = this.readiedBaseI;
-        var base = this.props.weapon.base;
-        var targetI = base.target_initiative;
+        const rof = this.roa(props.useType);
+        const baseI = -5 / rof;
+        const readiedBaseI = this.readiedBaseI;
+        let targetI = this.props.weapon.base.target_initiative;
         if (!targetI) {
             targetI = 0;
         }
-        var initiative = this.props.skillHandler.getInitiative();
+        const initiative = this.props.skillHandler.getInitiative();
 
-        var initiatives = [];
+        const initiatives = [];
         for (let act of actions) {
             if (act > props.maxActionMultiplier * rof) {
                 initiatives.push(null);
@@ -255,35 +253,35 @@ class WeaponRow extends React.Component {
 
     fitDamageBonus(useType) {
         /* Martial arts expertise skill grants a bonus to damage. */
-        var maeLevel = this.props.skillHandler.skillLevel("Martial arts" +
+        const maeLevel = this.props.skillHandler.skillLevel("Martial arts" +
             " expertise");
 
-        var ccFITBonus = this.getStat("fit") - 45;
+        let ccFITBonus = this.getStat("fit") - 45;
         if (maeLevel > 0) {
             ccFITBonus += maeLevel * 5;
         }
 
-        var fitBonusDmg = util.rounddown(ccFITBonus /
+        const fitBonusDmg = util.rounddown(ccFITBonus /
             WeaponRow.damageFITModifiers[useType]);
-        var fitLethBonus = util.rounddown(ccFITBonus /
+        const fitLethBonus = util.rounddown(ccFITBonus /
             WeaponRow.lethalityFITModifiers[useType]);
         return {damage: fitBonusDmg, leth: fitLethBonus};
     }
 
     renderDamage(givenProps) {
-        var props = {defense: false, useType: WeaponRow.FULL};
+        let props = {defense: false, useType: WeaponRow.FULL};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
-        var base = this.props.weapon.base;
-        var quality = this.props.weapon.quality;
-        var numDice = base.num_dice * this.props.weapon.size;
+        const base = this.props.weapon.base;
+        const quality = this.props.weapon.quality;
+        const numDice = base.num_dice * this.props.weapon.size;
 
-        var extraDamage = base.extra_damage * this.props.weapon.size
+        let extraDamage = base.extra_damage * this.props.weapon.size
             + quality.damage;
 
-        var leth = base.leth + (this.props.weapon.size - 1) + quality.leth;
-        var plusLeth = base.plus_leth + quality.plus_leth;
+        let leth = base.leth + (this.props.weapon.size - 1) + quality.leth;
+        let plusLeth = base.plus_leth + quality.plus_leth;
         if (props.defense) {
             plusLeth = null;
             leth = base.defense_leth + (this.props.weapon.size - 1) +
@@ -292,8 +290,8 @@ class WeaponRow extends React.Component {
 
         /* Damage is capped to twice the base damage of the weapon (incl.
          size and quality). */
-        var maxDmg = numDice * base.dice + extraDamage;
-        var {damage: fitBonusDmg, leth: fitLethBonus} =
+        const maxDmg = numDice * base.dice + extraDamage;
+        const {damage: fitBonusDmg, leth: fitLethBonus} =
             this.fitDamageBonus(props.useType);
         extraDamage += Math.min(fitBonusDmg, maxDmg);
         leth = Math.min(leth + fitLethBonus, this.durability() + 1);
@@ -330,39 +328,39 @@ class WeaponRow extends React.Component {
                     >Unskilled for one-handed use</td></tr>
             }
         }
-        var cellStyle = {padding: 2, borderStyle: "dotted", borderWidth: 1,
+        const cellStyle = {padding: 2, borderStyle: "dotted", borderWidth: 1,
             minWidth: "2em", textAlign: "center"};
-        var initStyle = Object.assign({color: "red"}, cellStyle);
-        var defenseInitStyle = Object.assign({color: "blue"}, cellStyle);
-        var attackDamageStyle = initStyle;
-        var defenseDamageStyle = defenseInitStyle;
+        const initStyle = Object.assign({color: "red"}, cellStyle);
+        const defenseInitStyle = Object.assign({color: "blue"}, cellStyle);
+        const attackDamageStyle = initStyle;
+        const defenseDamageStyle = defenseInitStyle;
 
-        var roa = this.roa(useType);
-        var checks = this.skillChecks(WeaponRow.ccActions,
+        const checks = this.skillChecks(WeaponRow.ccActions,
             {useType: useType});
-        var checkCells = checks.map((el, ii) => {
+        const checkCells = checks.map((el, ii) => {
             return <td key={`chk-${ii}`} style={cellStyle}>{el}</td>;});
-        var attackInitiatives = this.initiatives([1, 2, 3, 4],
+
+        const attackInitiatives = this.initiatives([1, 2, 3, 4],
             {useType: useType});
-        var attackInitiativeCells = attackInitiatives.map((el, ii) => {
+        const attackInitiativeCells = attackInitiatives.map((el, ii) => {
             return <td key={`ai-${ii}`} style={initStyle}
             >{this.renderInt(el)}</td>;});
-        var defenseInitiatives = this.defenseInitiatives([1, 2, 3],
+
+        const defenseInitiatives = this.defenseInitiatives([1, 2, 3],
             {useType: useType});
-        var defenseInitiativeCells = defenseInitiatives.map((el, ii) => {
-            return <td key={`ai-${ii}`} style={defenseInitStyle}
+        const defenseInitiativeCells = defenseInitiatives.map((el, ii) => {
+            return <td key={`di-${ii}`} style={defenseInitStyle}
             >{this.renderInt(el)}</td>;});
 
-        var damage = this.renderDamage({useType: useType});
-        var defenseDamage = this.renderDamage({useType: useType,
-            defense: true});
-
-        return <tr><td style={cellStyle}>{roa.toFixed(2)}</td>
+        return <tr><td style={cellStyle}>{this.roa(useType).toFixed(2)}</td>
             {checkCells}
             {attackInitiativeCells}
-            <td style={attackDamageStyle}>{damage}</td>
+            <td style={attackDamageStyle}>{
+                this.renderDamage({useType: useType})}</td>
             {defenseInitiativeCells}
-            <td style={defenseDamageStyle}>{defenseDamage}</td>
+            <td style={defenseDamageStyle}>{
+                this.renderDamage({useType: useType,
+                                   defense: true})}</td>
         </tr>;
     }
 
@@ -371,11 +369,11 @@ class WeaponRow extends React.Component {
     }
 
     render() {
-        var headerStyle = {padding: 2};
-        var nameStyle = Object.assign({}, headerStyle, {width: "10em"});
-        var cellStyle = {padding: 2};
-        var infoStyle = {marginRight: 5};
-        var actionCells = WeaponRow.ccActions.map((el, ii) => {
+        const headerStyle = {padding: 2};
+        const nameStyle = Object.assign({}, headerStyle, {width: "10em"});
+        const cellStyle = {padding: 2};
+        const infoStyle = {marginRight: 5};
+        const actionCells = WeaponRow.ccActions.map((el, ii) => {
             return <th style={headerStyle} key={`act-${ii}`}>{el.toFixed(1)}</th>;
         });
 

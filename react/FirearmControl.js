@@ -306,7 +306,7 @@ class FirearmControl extends RangedWeaponRow {
                 Unskilled</div>;
         }
 
-        var actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        const actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
         var headerStyle = {padding: 2};
         const inlineHeaderStyle = Object.assign({}, headerStyle, {textAlign: 'center'});
@@ -316,11 +316,11 @@ class FirearmControl extends RangedWeaponRow {
         var renderInit = (init) => {
             return this.renderInt(init);
         };
-        var cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
-        var helpStyle = Object.assign({color: "hotpink"}, cellStyle);
-        var initStyle = Object.assign({color: "red"}, cellStyle);
+        const cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
+        const helpStyle = Object.assign({color: "hotpink"}, cellStyle);
+        const initStyle = Object.assign({color: "red"}, cellStyle);
 
-        var initiatives = this.initiatives(actions).map((init, ii) => {
+        const initiatives = this.initiatives(actions).map((init, ii) => {
             return <td key={`init-${ii}`} style={initStyle}>{
                 renderInit(init)}</td>
         });
