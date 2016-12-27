@@ -48,6 +48,7 @@ class BaseFirearmFormTestCase(TestCase):
                        'range_l': 45, 'tech_level': self.tech_level.pk,
                        'weight': 0.6, 'base_skill': self.pistol, 'bypass': -1,
                        'dp': 10, 'durability': 5, 'duration': 0.1, 'stock': 1,
+                       'accuracy': 1.0, 'barrel_length': 100, 'sight': 100,
                        'target_initiative': -1, 'weapon_class_modifier': 6,
                        'restricted_burst_rounds': 0,
                        'sweep_fire_disabled': False,
