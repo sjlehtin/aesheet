@@ -13,6 +13,9 @@ import {Col, Row, Button} from 'react-bootstrap';
  * Firearm can have a single scope.  There may be other add-ons, and the sheet
  * will not restrict the add-ons in any way, use common sense on what add-ons
  * you put to a firearm (no sense in, e.g., adding both bipod and a tripod).
+ *
+ * The add-ons may affect the user's senses when using the firearm, notably
+ * sight, which is used to calculate the range penalties for the weapon.
  */
 class FirearmControl extends RangedWeaponRow {
     constructor(props) {
@@ -45,32 +48,32 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     singleBurstChecks(check) {
-        var base = this.props.weapon.base;
-        var checks = [];
+        const base = this.props.weapon.base;
+        const checks = [];
 
-        var maxHits = Math.min(util.rounddown(base.autofire_rpm/120), 5);
+        let maxHits = Math.min(util.rounddown(base.autofire_rpm/120), 5);
 
         if (base.restricted_burst_rounds > 0) {
             maxHits = Math.min(maxHits, base.restricted_burst_rounds);
         }
-        var baseSkillCheck = this.skillCheck();
+        const baseSkillCheck = this.skillCheck();
 
-        var burstMultipliers = [0, 1, 3, 6, 10];
-        var autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
+        const burstMultipliers = [0, 1, 3, 6, 10];
+        const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
-        var autofirePenalty = 0;
+        let autofirePenalty = 0;
         if (!this.props.skillHandler.hasSkill("Autofire")) {
             autofirePenalty = -10;
         }
-        for (var ii = 0; ii < 5; ii++) {
+        for (let ii = 0; ii < 5; ii++) {
             if (ii >= maxHits || check === null) {
                 checks.push(null);
             } else {
                 // The modifier might be positive at this point, and penalty
                 // countering could leave the overall mod as positive.
-                var mod = check - baseSkillCheck;
+                let mod = check - baseSkillCheck;
 
-                var bonus = 0;
+                let bonus = 0;
                 if (mod > 0) {
                     bonus = mod;
                     mod = 0;
@@ -100,20 +103,18 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     burstChecks(actions) {
-        var base = this.props.weapon.base;
-        if (!base.autofire_rpm) {
+        if (!this.props.weapon.base.autofire_rpm) {
             /* No burst fire with this weapon. */
             return null;
         }
 
-        var checks = this.skillChecks(this.mapBurstActions(actions),
+        const checks = this.skillChecks(this.mapBurstActions(actions),
             {counterPenalty: false});
         return checks.map((chk) => {return this.singleBurstChecks(chk);});
     }
 
     burstInitiatives(actions) {
-        var base = this.props.weapon.base;
-        if (!base.autofire_rpm) {
+        if (!this.props.weapon.base.autofire_rpm) {
             /* No burst fire with this weapon. */
             return null;
         }
@@ -121,14 +122,13 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     renderDamage() {
-        var ammo = this.props.weapon.ammo;
-        var extraDamage = this.renderInt(ammo.extra_damage);
-        var plusLeth = '';
+        const ammo = this.props.weapon.ammo;
+        let plusLeth = '';
         if (ammo.plus_leth) {
             plusLeth = ` (${this.renderInt(ammo.plus_leth)})`;
         }
         return <span className="damage">{ammo.num_dice}d{ammo.dice}{
-            extraDamage}/{ammo.leth}{plusLeth}</span>;
+            util.renderInt(ammo.extra_damage)}/{ammo.leth}{plusLeth}</span>;
     }
 
     handleAmmoChanged(value) {
@@ -317,10 +317,9 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     render () {
-        var weapon = this.props.weapon.base;
-        var ammo = this.props.weapon.ammo;
-        var missing = this.missingSkills();
-        var unskilled = '';
+        const weapon = this.props.weapon.base;
+        const missing = this.missingSkills();
+        let unskilled = '';
         if (missing.length > 0) {
             unskilled = <div style={{color:"red"}}
                              title={`Missing skills: ${missing.join(' ,')}`}>
@@ -329,23 +328,21 @@ class FirearmControl extends RangedWeaponRow {
 
         const actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-        var headerStyle = {padding: 2};
+        const headerStyle = {padding: 2};
         const inlineHeaderStyle = Object.assign({}, headerStyle, {textAlign: 'center'});
-        var actionCells = actions.map((act, ii) =>
+
+        const actionCells = actions.map((act, ii) =>
         {return <th key={`act-${ii}`} style={headerStyle}>{act}</th>});
 
-        var renderInit = (init) => {
-            return this.renderInt(init);
-        };
         const cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
         const helpStyle = Object.assign({color: "hotpink"}, cellStyle);
         const initStyle = Object.assign({color: "red"}, cellStyle);
 
         const initiatives = this.initiatives(actions).map((init, ii) => {
             return <td key={`init-${ii}`} style={initStyle}>{
-                renderInit(init)}</td>
+                util.renderInt(init)}</td>
         });
-        var skillChecks = this.skillChecks(actions).map((chk, ii) =>
+        const skillChecks = this.skillChecks(actions).map((chk, ii) =>
         {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
 
         const marginRightStyle = {marginRight: "1em"};
@@ -398,8 +395,8 @@ class FirearmControl extends RangedWeaponRow {
                                 <td style={cellStyle}>{this.skillLevel()}</td>
                                 <td style={cellStyle}>{ this.rof().toFixed(2) }</td>
                                 {skillChecks}
-                                <td style={cellStyle}>{ weapon.target_initiative }</td>
-                                <td style={cellStyle}>{ weapon.draw_initiative }</td>
+                                <td style={cellStyle}>{weapon.target_initiative}</td>
+                                <td style={cellStyle}>{weapon.draw_initiative}</td>
                             </tr>
                             <tr>
                                 <td style={helpStyle} colSpan={2}>
@@ -422,7 +419,7 @@ class FirearmControl extends RangedWeaponRow {
                             </tr>
                             <tr>
                                 <td style={cellStyle} colSpan={3}>{this.renderDamage()}</td>
-                                <td style={cellStyle} colSpan={2}>{ammo.type}</td>
+                                <td style={cellStyle} colSpan={2}>{this.props.weapon.ammo.type}</td>
                                 <td style={cellStyle} colSpan={2}>{weapon.range_s }</td>
                                 <td style={cellStyle} colSpan={2}>{weapon.range_m }</td>
                                 <td style={cellStyle} colSpan={2}>{weapon.range_l }</td>
