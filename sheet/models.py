@@ -736,7 +736,7 @@ class Ammunition(ExportedModel, BaseDamager):
                                        "and such.")
     type = models.CharField(max_length=10, default="P",
                             help_text="Damage type of the ammo.")
-    bullet_type = models.CharField(max_length=10,
+    bullet_type = models.CharField(max_length=20,
                                    help_text="Make of the ammo, such as "
                                              "full metal jacket.")
 
