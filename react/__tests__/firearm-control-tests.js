@@ -44,6 +44,60 @@ describe('FirearmControl', () => {
         expect(firearm.skillCheck()).toEqual(50);
     });
 
+    it ("calculates range for pistols", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {sight: 153, barrel_length: 102, accuracy: 1.0}}
+        });
+        expect(firearm.baseRange()).toEqual(12);
+    });
+
+    it ("calculates range for assault rifles", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {sight: 378, barrel_length: 415, accuracy: 1.0}}
+        });
+        expect(firearm.baseRange()).toEqual(39);
+    });
+
+    it ("calculates range for a good SMG", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {sight: 340, barrel_length: 225, accuracy: 1.08}}
+        });
+        expect(firearm.baseRange()).toEqual(30);
+    });
+
+    it ("calculates long range multiplier for pistols", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {stock: 1}, ammo: {velocity: 359}}
+        });
+        expect(firearm.longRangeMultiplier()).toEqual(3);
+    });
+
+    it ("calculates long range multiplier for assault rifles", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {stock: 1.25}, ammo: {velocity: 715}}
+        });
+        expect(firearm.longRangeMultiplier()).toEqual(5);
+    });
+
+    it ("calculates long range multiplier for a sniper rifle", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {stock: 1.50}, ammo: {velocity: 900}}
+        });
+        expect(firearm.longRangeMultiplier()).toEqual(6);
+    });
+
+    // it ("should indicate no penalty for short range", () => {
+    //     const firearm = factories.firearmControlTreeFactory({
+    //         handlerProps: {
+    //             skills: [{
+    //                 skill: "Pistol",
+    //                 level: 0
+    //             }]},
+    //         weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
+    //     });
+    //     expect(firearm.rof()).toBeCloseTo(2.86, 2);
+    // });
+
     it ("calculates correct ROF", () => {
         const firearm = factories.firearmControlTreeFactory({
             handlerProps: {

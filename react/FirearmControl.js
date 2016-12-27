@@ -5,6 +5,15 @@ import AmmoControl from './AmmoControl';
 const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
+/*
+ * Firearms are sheet specific.  Firearms can contain add-ons, most
+ * notably scopes.  Add-ons affect weapon range, to-hit and target initiative,
+ * among other factors.
+ *
+ * Firearm can have a single scope.  There may be other add-ons, and the sheet
+ * will not restrict the add-ons in any way, use common sense on what add-ons
+ * you put to a firearm (no sense in, e.g., adding both bipod and a tripod).
+ */
 class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
@@ -209,7 +218,7 @@ class FirearmControl extends RangedWeaponRow {
         }
         const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
-        const klass = autofireClasses[this.props.weapon.base.autofire_class];
+        const afClass = autofireClasses[this.props.weapon.base.autofire_class];
 
         let autofirePenalty = -10;
         if (!this.props.skillHandler.hasSkill("Autofire")) {
@@ -225,7 +234,7 @@ class FirearmControl extends RangedWeaponRow {
                 baseSkillCheck +
                 sweepType +
                 FirearmControl.counterPenalty(
-                    penaltyMultiplier * klass, this.getStat("fit")) +
+                    penaltyMultiplier * afClass, this.getStat("fit")) +
                 autofirePenalty
             );
         }
@@ -235,6 +244,18 @@ class FirearmControl extends RangedWeaponRow {
     hasSweep() {
         return this.props.weapon.base.autofire_rpm &&
             !this.props.weapon.base.sweep_fire_disabled;
+    }
+
+    baseRange() {
+        // TODO: scope changes sight.
+        const base = this.props.weapon.base;
+        return util.rounddown(((base.sight + base.barrel_length)
+                               * base.accuracy) / 20);
+    }
+
+    longRangeMultiplier() {
+        let ref600 = Math.min(1, this.props.weapon.ammo.velocity/600);
+        return Math.max(3, 4 * ref600 * this.props.weapon.base.stock)
     }
 
     renderSweepTable() {
