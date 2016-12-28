@@ -167,6 +167,32 @@ class MiscellaneousItemListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class FirearmAddOnCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.FirearmAddOn
+        fields = "__all__"
+
+
+class FirearmAddOnListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.FirearmAddOn
+        fields = "__all__"
+        depth = 1
+
+
+class ScopeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Scope
+        fields = "__all__"
+
+
+class ScopeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Scope
+        fields = "__all__"
+        depth = 1
+
+
 class SheetMiscellaneousItemCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.SheetMiscellaneousItem

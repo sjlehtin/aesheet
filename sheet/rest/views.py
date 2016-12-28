@@ -236,6 +236,33 @@ class MiscellaneousItemViewSet(ArmorViewSet):
         return qs
 
 
+class FirearmAddOnViewSet(ArmorViewSet):
+    create_serializer = serializers.FirearmAddOnCreateSerializer
+    list_serializer = serializers.FirearmAddOnListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = models.FirearmAddOn.objects.select_related().all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                self.tech_levels))
+            qs = qs.filter(tech_level__in=self.tech_levels)
+        return qs
+
+
+class ScopeViewSet(ArmorViewSet):
+    create_serializer = serializers.ScopeCreateSerializer
+    list_serializer = serializers.ScopeListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = models.Scope.objects.select_related().all()
+        if self.tech_levels:
+            logger.info("filtering with tech_levels: {}".format(
+                self.tech_levels))
+            qs = qs.filter(tech_level__in=self.tech_levels)
+        return qs
+
 
 class ListPermissionMixin(object):
     """

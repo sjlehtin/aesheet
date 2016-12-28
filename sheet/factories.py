@@ -269,6 +269,26 @@ class BaseFirearmFactory(factory.DjangoModelFactory):
                                              short_label=ammo_type)
 
 
+class FirearmAddOnFactory(factory.DjangoModelFactory):
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+    name = factory.Sequence(lambda n: "firearm-addon-%03d" % n)
+
+    class Meta:
+        model = models.FirearmAddOn
+        django_get_or_create = ('name', )
+
+
+class ScopeFactory(factory.DjangoModelFactory):
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+    name = factory.Sequence(lambda n: "scope-%03d" % n)
+
+    class Meta:
+        model = models.Scope
+        django_get_or_create = ('name', )
+
+
 class FirearmFactory(factory.DjangoModelFactory):
     base = factory.SubFactory(BaseFirearmFactory, name="Glock 19")
     ammo = factory.SubFactory(AmmunitionFactory, label="9x19+")

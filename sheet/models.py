@@ -83,7 +83,7 @@ class TechLevel(ExportedModel):
         return ["weapontemplate", "campaign", "armortemplate", "armorquality",
                 "miscellaneousitem", "weaponquality", "skill",
                 "rangedweapontemplate", "basefirearm", "transienteffect",
-                "ammunition", "id"]
+                "ammunition", "firearmaddon", "scope", "id"]
 
 
 class Campaign(ExportedModel):
@@ -676,6 +676,42 @@ class RangedWeaponMixin(models.Model):
         ordering = ['name']
 
 
+# class FirearmAddonEdgeMods(ExportedModel):
+#     """
+#
+#     """
+#     add_on = models.ForeignKey(FirearmAddon)
+#     edge = models.ForeignKey(Edge)
+#     level_mod = models.IntegerField(default=0)
+
+
+class FirearmAddOn(ExportedModel):
+    name = models.CharField(max_length=32, unique=True)
+
+    target_i_mod = models.IntegerField(default=0)
+    to_hit_mod = models.IntegerField(default=0)
+
+    tech_level = models.ForeignKey(TechLevel)
+
+    weight = models.DecimalField(max_digits=5, decimal_places=2,
+                                 default=1.0)
+
+    notes = models.CharField(max_length=256, blank=True)
+
+    @classmethod
+    def dont_export(cls):
+        return ['firearm', "scope"]
+
+
+class Scope(FirearmAddOn):
+    sight = models.IntegerField(default=1000,
+                                help_text="Overrides weapon's "
+                                          "sight modifier")
+    @classmethod
+    def dont_export(cls):
+        return ['firearm', "firearms_using_scope", "firearmaddon_ptr"]
+
+
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
     """
     """
@@ -690,24 +726,24 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
     stock = models.DecimalField(max_digits=4, decimal_places=2,
                                 default=1,
                                 help_text="Weapon stock modifier for recoil "
-                                          "calculation.  Larger is better.")
+                                          "calculation. Larger is better.")
 
     duration = models.DecimalField(max_digits=5, decimal_places=3,
                                    default=0.1,
                                    help_text="Modifier for recoil.  In "
                                              "principle, time in seconds from "
                                              "the muzzle break, whatever that "
-                                             "means.  Bigger is better.")
+                                             "means. Bigger is better.")
 
     weapon_class_modifier = models.DecimalField(
         max_digits=4, decimal_places=2, default=6,
-        help_text="ROF modifier for weapon class.  Generally from 6-15, "
+        help_text="ROF modifier for weapon class. Generally from 6-15, "
                   "smaller is better.")
 
     accuracy = models.DecimalField(max_digits=4, decimal_places=2,
                                    default=1,
-                                   help_text="Weapon's inherent accurace "
-                                             "modifier.  Larger is better.")
+                                   help_text="Weapon's inherent accuracy "
+                                             "modifier. Larger is better.")
     sight = models.IntegerField(default=100,
                                 help_text="Weapon's sight modifier in "
                                           "millimeters")
@@ -781,6 +817,10 @@ class Firearm(models.Model):
     # modifications, such as scopes could be added here.
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
+
+    scope = models.ForeignKey(Scope, blank=True, null=True,
+                              related_name="firearms_using_scope")
+    add_ons = models.ManyToManyField(FirearmAddOn, blank=True)
 
     def __str__(self):
         return u"{base} w/ {ammo}".format(base=self.base,
