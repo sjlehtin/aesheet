@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
-import Octicon from 'react-octicon'
+import { Button, FormControl } from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 
@@ -119,7 +118,6 @@ class AddWoundControl extends React.Component {
             <td><Combobox data={AddWoundControl.locations}
                           textField='description'
                           valueField='location'
-                          bsSize="small"
                           value={this.state.selectedLocation}
                           filter="contains"
                           onChange={(value) => this.handleLocationChange(value)}
@@ -128,18 +126,16 @@ class AddWoundControl extends React.Component {
             <td><Combobox data={AddWoundControl.damageTypes}
                           textField='description'
                           valueField='type'
-                          bsSize="small"
                           value={this.state.selectedType}
                           filter="contains"
                           onChange={(value) => this.handleTypeChange(value)}
                           ref={(c) => { if (c) { this._typeField = c }}} />
             </td>
-            <td><Input bsSize="small" type="text" value={this.state.damage} onChange={
+            <td><FormControl bsSize="small" type="text" value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
-                ref={(c) => { if (c) { this._damageInputField = c.getInputDOMNode()}}} />
+                ref={(c) => { if (c) { this._damageInputField = ReactDOM.findDOMNode(c)}}} />
             </td>
             <td><Combobox data={woundChoices}
-                          bsSize="small"
                           value={this.state.effect}
                           filter="contains"
                           onChange={(value) => this.handleEffectChange(value)} />
