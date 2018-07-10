@@ -6,7 +6,7 @@ import TestUtils from 'react-addons-test-utils';
 
 var rest = require('../sheet-rest');
 
-const CharacterNotes = require('../CharacterNotes').default;
+import CharacterNotes from '../CharacterNotes';
 
 describe('character note tests', function (){
     "use strict";

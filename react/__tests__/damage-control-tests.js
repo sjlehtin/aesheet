@@ -10,9 +10,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
-const DamageControl = require('../DamageControl').default;
+import DamageControl from '../DamageControl';
 const WoundRow = require('../WoundRow').default;
-const AddWoundControl = require('../AddWoundControl').default;
+import AddWoundControl from '../AddWoundControl';
 
 var factories = require('./factories');
 
