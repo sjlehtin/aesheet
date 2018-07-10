@@ -108,7 +108,6 @@ class SkillRow extends React.Component {
         if (this.canDecrease()) {
             decreaseButton = <span style={{color: "red", position: "absolute", left: 22, bottom: -3, cursor: "pointer"}} ref={(c) => this._decreaseButton = c}
                                          onClick={() => this.handleDecrease()}
-                                         bsSize="xsmall"
             ><Octicon name="arrow-down" /></span>;
         } else {
             decreaseButton = '';
@@ -123,9 +122,10 @@ class SkillRow extends React.Component {
                 cs._missingRequired.join(", ")}`;
             skillStyle.color = 'red';
         }
-        return <tr style={skillStyle} title={missing}><td><span style={{paddingLeft: indent}}>{
+        return <tr style={skillStyle} title={missing}>
+            <td><span style={{paddingLeft: indent}}>{
               this.props.skillName}</span><span style={{position: "relative"}}>{remove}</span></td>
-            <td>{this.skillLevel()}<span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
+            <td><span>{this.skillLevel()}</span><span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
             <td className="skill-check">{checks}</td></tr>;
     }
