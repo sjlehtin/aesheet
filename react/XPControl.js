@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Button, Modal, Input, ButtonInput } from 'react-bootstrap';
+import { Button, Modal, FormControl } from 'react-bootstrap';
 
 var util = require('./sheet-util');
 var rest = require('./sheet-rest');
@@ -61,7 +61,7 @@ class XPControl extends React.Component {
     }
 
     getInputDOMNode() {
-        return this._inputField.getInputDOMNode();
+        return ReactDOM.findDOMNode(this._inputField);
     }
 
     getAddDOMNode() {
@@ -124,24 +124,24 @@ class XPControl extends React.Component {
                 <Modal.Header closeButton={true}><Modal.Title>Add XP</Modal.Title></Modal.Header>
                 <form onSubmit={(e) => { this.handleSubmit(e);}}>
                 <Modal.Body>
-                    <Input ref={(c) => { this._inputField = c;
+                     {/*TODO: fix hasFeedback*/}
+                    <FormControl type="text" ref={(c) => { this._inputField = c;
                     /* Set focus initially here. */
                     if (c) {
-                    c.getInputDOMNode().focus();
+                    ReactDOM.findDOMNode(c).focus();
                     }
                     }}
                            type="text"
                            label="Add XP"
                            onChange={this.handleChange.bind(this)}
                            bsStyle={this.validationState()}
-                           hasFeedback
-                           labelClassName="col-xs-2"
+                           className="col-xs-2"
                            value={this.state.addXP} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <ButtonInput type="submit" ref={(c) => this._submitButton = c}
+                    <Button type="submit" ref={(c) => this._submitButton = c}
                                  onClick={(e) => { this.handleSubmit(e);}}
-                                 bsStyle="primary">Add</ButtonInput>
+                                 bsStyle="primary">Add</Button>
                 </Modal.Footer>
                 </form>
             </Modal>
