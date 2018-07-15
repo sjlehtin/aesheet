@@ -2,8 +2,9 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+import django.utils.deprecation
 
-class RequireLoginMiddleware(object):
+class RequireLoginMiddleware(django.utils.deprecation.MiddlewareMixin):
     """
     Middleware component that wraps the login_required decorator around
     matching URL patterns. To use, add the class to MIDDLEWARE_CLASSES and
@@ -24,13 +25,14 @@ class RequireLoginMiddleware(object):
     LOGIN_REQUIRED_URLS_EXCEPTIONS is, conversely, where you explicitly
     define any exceptions (like login and logout URLs).
     """
-    def __init__(self):
+    def __init__(self, get_response=None):
         self.required = tuple(
             [re.compile(url)
              for url in settings.LOGIN_REQUIRED_URLS])
         self.exceptions = tuple(
             [re.compile(url)
              for url in settings.LOGIN_REQUIRED_URLS_EXCEPTIONS])
+        super(RequireLoginMiddleware, self).__init__(get_response=get_response)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # No need to process URLs if user already logged in

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import {Button, Input} from 'react-bootstrap';
+import {Button, FormControl, FormGroup} from 'react-bootstrap';
 
 /* Handling reordering, additions... perhaps most convenient to signal
    updates towards parent.
@@ -175,25 +175,26 @@ class InventoryRow extends React.Component {
         var description, unitWeight, quantity, location;
 
         if (this.state.show.description) {
-            description = <Input type="text"
+            description = <FormGroup validationState={this.descriptionValidationState()}>
+                <FormControl type="text"
                            ref={(c) => { this._descriptionInputField = c ?
-                           c.getInputDOMNode() : undefined}}
+                           ReactDOM.findDOMNode(c) : undefined}}
                            bsStyle={this.descriptionValidationState()}
-                           hasFeedback
                            onChange={(e) => this.handleDescriptionChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "description")}
                            value={this.state.description} />;
+                <FormControl.Feedback />
+            </FormGroup>;
         } else {
             description = this.state.description;
         }
 
         if (this.state.show.quantity) {
-            quantity = <Input type="text"
+            quantity = <FormControl type="text"
                            ref={(c) => { this._quantityInputField = c ?
-                           c.getInputDOMNode() : undefined}}
+                           ReactDOM.findDOMNode(c) : undefined}}
                            bsStyle={this.quantityValidationState()}
-                           hasFeedback
                            onChange={(e) => this.handleQuantityChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "quantity")}
@@ -203,9 +204,9 @@ class InventoryRow extends React.Component {
         }
 
         if (this.state.show.location) {
-            location = <Input type="text"
+            location = <FormControl type="text"
                            ref={(c) => { this._locationInputField = c ?
-                           c.getInputDOMNode() : undefined}}
+                           ReactDOM.findDOMNode(c) : undefined}}
                            onChange={(e) => this.handleLocationChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "location")}
@@ -215,11 +216,11 @@ class InventoryRow extends React.Component {
         }
         
         if (this.state.show.unitWeight) {
-            unitWeight = <Input type="text"
+            // TODO: add feedback
+            unitWeight = <FormControl type="text"
                            ref={(c) => { this._unitWeightInputField = c ?
-                           c.getInputDOMNode() : undefined}}
+                           ReactDOM.findDOMNode(c) : undefined}}
                            bsStyle={this.unitWeightValidationState()}
-                           hasFeedback
                            onChange={(e) => this.handleUnitWeightChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "unitWeight")}

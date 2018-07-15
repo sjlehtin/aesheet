@@ -331,6 +331,7 @@ class CharacterSkillViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                                                serializer.validated_data[
                                                    'level'],
                                                request=self.request)
+            serializer.validated_data['character'] = self.character
             super(CharacterSkillViewSet, self).perform_create(serializer)
 
     def perform_destroy(self, instance):
@@ -538,6 +539,7 @@ class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
         raise exceptions.MethodNotAllowed("Update not supported yet")
 
     def perform_create(self, serializer):
+        serializer.validated_data['sheet'] = self.sheet
         super(SheetTransientEffectViewSet, self).perform_create(
             serializer)
 
@@ -584,6 +586,7 @@ class CharacterEdgeViewSet(ListPermissionMixin, viewsets.ModelViewSet):
 
 
     def perform_create(self, serializer):
+        serializer.validated_data['character'] = self.character
         super(CharacterEdgeViewSet, self).perform_create(
             serializer)
 
@@ -604,8 +607,6 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         if isinstance(serializer, serializers.WoundSerializer):
             serializer.fields['character'].default = self.character
             serializer.fields['character'].read_only = True
-            # serializer.fields['location'].read_only = True
-            # serializer.fields['location'].read_only = True
 
         return serializer
 
@@ -657,6 +658,7 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                                            'location']),
                          serializer.validated_data['damage']),
                 request=self.request)
+            serializer.validated_data['character'] = self.character
             super(WoundViewSet, self).perform_create(serializer)
 
     def perform_destroy(self, instance):

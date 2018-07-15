@@ -1,4 +1,4 @@
-Django
+Django==1.10
 South
 factory_boy
 django-debug-toolbar
@@ -10,4 +10,4 @@ docopt
 Pillow
 django-widget-tweaks
 djangorestframework
-
+pytest-django

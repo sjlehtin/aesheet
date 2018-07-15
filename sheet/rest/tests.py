@@ -13,6 +13,7 @@ if sys.version_info < (3,):
 else:
     from urllib.parse import quote
 
+
 class SheetTestCase(TestCase):
     def setUp(self):
         self.request_factory = APIRequestFactory()

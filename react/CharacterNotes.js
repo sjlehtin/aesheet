@@ -60,13 +60,12 @@ class CharacterNotes extends React.Component {
         };
         var notesField;
         if (!this.state.editing) {
-            notesField = (<div>
+            notesField = (<form onClick={(e) => this.handleEdit(e)}>
                 <textarea style={fieldStyle}
-                          onClick={this.handleEdit.bind(this)}
-                 disabled value={this.state.notes} />
-                <a href="#" onClick={this.handleEdit.bind(this)}
+                          disabled value={this.state.notes} />
+                <a href="#"
                    className="edit-control">Edit</a>
-            </div>);
+            </form>);
         } else {
             notesField = (
                 <form><textarea

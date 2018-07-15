@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Octicon from 'react-octicon'
-import {Button, Input} from 'react-bootstrap';
+import {Button, FormControl} from 'react-bootstrap';
 
 var util = require('./sheet-util');
 var rest = require('./sheet-rest');
@@ -88,7 +88,7 @@ class WoundRow extends React.Component {
 
         var effectField = this.props.wound.effect;
         if (this.state.editingEffect) {
-            effectField = <Input ref={(c) => {if (c) {this._effectInputField = c.getInputDOMNode(); this._effectInputField.focus(); }}}
+            effectField = <FormControl ref={(c) => {if (c) {this._effectInputField = ReactDOM.findDOMNode(c); this._effectInputField.focus(); }}}
                                  type="text"
                                  onChange={(value) => this.handleEffectChanged(value)}
                                  onKeyDown={(e) => this.handleKeyDown(e)}

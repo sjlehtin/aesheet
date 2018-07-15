@@ -9,8 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 
-const SkillTable = require('../SkillTable').default;
-const SkillHandler = require('../SkillHandler').default;
+import SkillTable from '../SkillTable';
 
 var factories = require('./factories');
 
@@ -112,8 +111,11 @@ describe('SkillTable', function() {
         ];
         expect(getSkillList(table).slice(0, 9)).toEqual(expectedSkills);
         var row = findSkillRow(table, "Search");
+        expect(row).not.toBe(undefined);
+        expect(row.length).not.toEqual(0);
+
         var cells = row.querySelectorAll('td');
-        
+
         expect(getSkillLevel(cells)).toEqual('0');
         expect(getSkillCheck(cells)).toEqual('50');
     });
