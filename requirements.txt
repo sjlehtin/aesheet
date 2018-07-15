@@ -10,4 +10,4 @@ docopt
 Pillow
 django-widget-tweaks
 djangorestframework
-
+pytest-django
