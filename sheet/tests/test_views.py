@@ -9,6 +9,7 @@ from sheet.models import Sheet, Character
 
 from django.core.urlresolvers import reverse
 import sheet.factories as factories
+import codecs
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class CharactersViewTestCase(TestCase):
 
     def test_view(self):
         response = self.client.get(reverse('characters_index'))
-        self.assertIn("Örkki".encode('utf-8'), response.content)
+        self.assertIn(u"Örkki", codecs.decode(response.content, 'utf-8'))
 
 
 class SheetOrganizationTestCase(TestCase):
