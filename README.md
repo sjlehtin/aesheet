@@ -1,5 +1,7 @@
 ## What is this?
 
+[![Build Status](https://travis-ci.org/sjlehtin/aesheet.svg?branch=master)](https://travis-ci.org/sjlehtin/aesheet)
+
 ## Installing
 
 ### In production use
