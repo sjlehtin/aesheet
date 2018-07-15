@@ -23,7 +23,7 @@ class CharactersViewTestCase(TestCase):
 
     def test_view(self):
         response = self.client.get(reverse('characters_index'))
-        self.assertIn("Örkki", response.content)
+        self.assertIn("Örkki".encode('utf-8'), response.content)
 
 
 class SheetOrganizationTestCase(TestCase):
