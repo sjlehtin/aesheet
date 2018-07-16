@@ -39,6 +39,7 @@ if 'RDS_HOSTNAME' in os.environ:
     PASSWORD = os.environ['RDS_PASSWORD']
     HOST = os.environ['RDS_HOSTNAME']
     PORT = os.environ['RDS_PORT']
+    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 elif PRODUCTION:
 
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
