@@ -18,3 +18,9 @@ sheet/tests/report.html
 sheet/tests/selenium-screenshot-*.png
 npm-debug.log
 /upload
+
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
