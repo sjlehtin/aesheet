@@ -21,12 +21,25 @@ DBHOST = os.getenv("DBHOST", default='127.0.0.1')
 ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org",
                  'localhost', '127.0.0.1', '[::1]']
 
+if 'ALLOWED_HOSTS' in os.environ:
+    ALLOWED_HOSTS += os.environ['ALLOWED_HOSTS'].split(',')
+
 BASEDIR = os.path.dirname(__file__)
 PRODUCTION = os.path.exists(os.path.join(BASEDIR, "auth"))
 if 'PRODUCTION' in os.environ:
     PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
-if PRODUCTION:
+DEBUG = False
+DEBUG_TOOLBAR_ENABLED = False
+
+if 'RDS_HOSTNAME' in os.environ:
+    DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
+    DB_NAME = os.environ['RDS_DB_NAME']
+    USER = os.environ['RDS_USERNAME']
+    PASSWORD = os.environ['RDS_PASSWORD']
+    HOST = os.environ['RDS_HOSTNAME']
+    PORT = os.environ['RDS_PORT']
+elif PRODUCTION:
 
     DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
     # Allow overriding database with a file and environment variable.
@@ -43,8 +56,6 @@ if PRODUCTION:
 
     SECRET_KEY = open(os.path.join(BASEDIR, "secret"), "r").read().strip()
 
-    DEBUG = False
-    DEBUG_TOOLBAR_ENABLED = False
 else:
     DB_ENGINE = 'django.db.backends.sqlite3'
     DB_NAME = os.path.join(os.path.dirname(__file__), 'sql.db')
