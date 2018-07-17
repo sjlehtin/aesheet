@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django-debug-toolbar = "*"
+django-webtest = "*"
+"psycopg2" = "*"
+gunicorn = "*"
+docopt = "*"
+django-widget-tweaks = "*"
+djangorestframework = "*"
+Django = "==1.10"
+South = "*"
+factory_boy = "*"
+WebTest = "*"
+Pillow = "*"
+tox = "*"
+pytest-django = "*"
+awsebcli = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"
