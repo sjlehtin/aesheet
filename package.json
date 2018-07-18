@@ -4,7 +4,8 @@
   "description": "Client-side presentation and manipulation of the server-side sheet data.",
   "main": "react/main.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "webpack"
   },
   "author": "Sami J. Lehtinen <sjl@iki.fi>",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "imports-loader": "^0.7.0",
     "less": "^2.5.3",
     "less-loader": "^2.2.2",
+    "npm": "^6.2.0",
     "react": "^15.4.1",
     "react-addons-css-transition-group": "^15.4.1",
     "react-bootstrap": "^0.30.7",
