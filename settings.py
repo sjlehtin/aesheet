@@ -66,8 +66,6 @@ else:
     DEBUG = True
     if os.path.exists(os.path.join(BASEDIR, "secret")):
         SECRET_KEY = open(os.path.join(BASEDIR, "secret"), "r").read().strip()
-    else:
-        SECRET_KEY = "XXXXsecretnotsetXXXX"
 
 val = os.getenv('DEBUG_TOOLBAR')
 if val is not None:
