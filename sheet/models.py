@@ -656,6 +656,7 @@ class BaseWeaponTemplate(BaseArmament, BaseDamager):
         abstract = True
         ordering = ['name']
 
+
 Range = namedtuple('Range', ('pb', 'xs', 'vs', 's', 'm', 'l', 'xl', 'e'))
 
 
@@ -1434,7 +1435,7 @@ def _collect_exportable_classes(start_model):
     been declared abstract.
     """
     subclasses = start_model.__subclasses__()
-    models = []
+    exportable = []
     processed = []
     while subclasses:
         cc = subclasses[0]
@@ -1443,8 +1444,8 @@ def _collect_exportable_classes(start_model):
         subclasses.extend(
             set(cc.__subclasses__()) - set(processed))
         if not cc._meta.abstract:
-            models.append(cc)
-    return models
+            exportable.append(cc)
+    return exportable
 
 
 EXPORTABLE_MODELS = sorted([cc.__name__
