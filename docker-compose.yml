@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+#version: "2"
+#services:
+#  nginx:
+#    image: nginx:latest
+#    container_name: NGINXDOCKERNAME
+#    ports:
+#      - "8000:8000"
+#    volumes:
+#      - ./src:/src
+#      - ./config/nginx:/etc/nginx/conf.d
+#      - /static:/static  <--- HERE
+#    depends_on:
+#      - web
+#  web:
+#    build: .
+#    container_name: DJANGOXDOCKERNAME
+#    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn mydjango.wsgi -b 0.0.0.0:8000"
+#    depends_on:
+#      - db
+#    volumes:
+#      - ./src:/src
+#      - /static:/static    <---- HERE
+#    expose:
+#      - "8000"

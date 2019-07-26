@@ -18,6 +18,15 @@ need to exist and be owned by www-data.
 
 ## Administering
 
+*out of date, update update.sh and instructions for pipenv usage*
+
+Regenerate `requirements.txt` and `dev-requirements.txt`
+
+```
+ % pipenv lock -r > requirements.txt
+ % pipenv lock --dev -r > dev-requirements.txt
+```
+
 ### On update
 
 After updating sources, run

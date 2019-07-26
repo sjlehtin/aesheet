@@ -4,14 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django-debug-toolbar = "*"
-django-webtest = "*"
 "psycopg2" = "*"
 gunicorn = "*"
 docopt = "*"
 django-widget-tweaks = "*"
-djangorestframework = "*"
-Django = "==1.10"
+djangorestframework = "<3.9"
+Django = "<1.11"
 South = "*"
 factory_boy = "*"
 WebTest = "*"
@@ -19,8 +17,11 @@ Pillow = "*"
 tox = "*"
 pytest-django = "*"
 awsebcli = "*"
+pytz = "*"
 
 [dev-packages]
+django-debug-toolbar = "<1.10"
+django-webtest = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
