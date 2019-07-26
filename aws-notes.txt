@@ -1,0 +1,56 @@
+% eb init
+# region 5 (eu-central-1)
+# app name: aesheet
+# Python 3.6
+# codecommit: no
+# keypair aws-eb
+
+% eb create aesheet-dev -i t2.micro
+
+% eb deploy
+# will only use committed code
+
+https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.RDS.html
+
+# RDS instance
+# PostgreSQL free tier
+# instance identifier: aesheet-dev
+# master username: sheetadm
+
+# database name: ebdb port 5432
+
+# endpoint: aesheet-dev.cmlohvd7jrba.eu-central-1.rds.amazonaws.com
+# security groups: rds-launch-wizard (sg-a08e24cc)
+# Subnets: subnet-722d191a
+# subnet-a31363d9
+# subnet-87360fcd
+
+# inbound PostgreSQL from rule
+# Custom TCP Rule TCP 5432 sg-a08e24cc (rds-launch-wizard) Inbound PostgreSQL
+
+# In ELB environment -> instances -> added rds-launch-wizard security
+# group
+  
+# Database details and DJANGO_SECRET_KEY set with "eb setenv"
+
+# Fails to run, due to an exception in psycopg2
+#  psycopg2.OperationalError: could not connect to server: Connection refused
+#  Is the server running on host "127.0.0.1" and accepting
+#  TCP/IP connections on port 5432?
+
+# Mistake in settings.py
+
+# Getting 400 from every url, googling around this is because the public
+# dns is used without ALLOWED_HOSTS
+eb setenv ALLOWED_HOSTS=aesheet-dev.mv4mph846u.eu-central-1.elasticbeanstalk.com
+
+# setting up npm and node
+
+curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
+sudo yum -y install nodejs
+
+# Taking a db dump of sheet
+
+sudo -u postgres pg_dump sheet -f /tmp/sheet.dump  -Fc
+sudo mv /tmp/sheet.dump .
+sudo chown sjl:sjl sheet.dump 
