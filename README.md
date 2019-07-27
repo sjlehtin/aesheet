@@ -27,6 +27,12 @@ Regenerate `requirements.txt` and `dev-requirements.txt`
  % pipenv lock --dev -r > dev-requirements.txt
 ```
 
+## Using the docker images
+
+```
+docker-compose down --remove-orphans --volumes
+```
+
 ### On update
 
 After updating sources, run
