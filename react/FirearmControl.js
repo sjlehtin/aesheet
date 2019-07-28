@@ -1,6 +1,7 @@
 import React from 'react';
 import RangedWeaponRow from './RangedWeaponRow';
 import AmmoControl from './AmmoControl';
+import ScopeControl from './ScopeControl';
 
 const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
@@ -316,6 +317,10 @@ class FirearmControl extends RangedWeaponRow {
         </div>;
     }
 
+    handleScopeRemove() {
+        console.log("scope would be removed");
+    }
+
     render () {
         const weapon = this.props.weapon.base;
         const missing = this.missingSkills();
@@ -366,6 +371,8 @@ class FirearmControl extends RangedWeaponRow {
                 </div>
             </Row>;
         }
+
+        let scope = this.props.weapon.scope || {};
 
         return <div style={this.props.style}>
             <Row>
@@ -423,6 +430,28 @@ class FirearmControl extends RangedWeaponRow {
                                 <td style={cellStyle} colSpan={2}>{weapon.range_s }</td>
                                 <td style={cellStyle} colSpan={2}>{weapon.range_m }</td>
                                 <td style={cellStyle} colSpan={2}>{weapon.range_l }</td>
+                            </tr>
+                            <tr><td style={cellStyle} rowSpan={2}>
+                                <ScopeControl
+                                    scope={this.props.weapon.scope}
+                                    url={`/rest/scopes/campaing/${this.props.campaign}/`}
+                                    onChange={this.handleAmmoChanged.bind(this)}
+                                />
+                            </td>
+                                <th style={inlineHeaderStyle}>Weigth</th>
+                                <th style={inlineHeaderStyle}>Sight</th>
+                                <th style={inlineHeaderStyle}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
+                                <th style={inlineHeaderStyle}></th>
+                            </tr>
+                            <tr>
+                                <td style={cellStyle}>{scope.sight}</td>
+                                <td style={cellStyle}>{scope.weight}</td>
+                                <td style={cellStyle}>{scope.target_i_mod}</td>
+                                <td style={cellStyle}>
+                                <Button onClick={(e) => this.handleScopeRemove()}
+                                    ref={(c) => this._scopeRemoveButton}
+                                    bsSize="xsmall">Remove</Button>
+                                </td>
                             </tr>
                             </tbody>
                         </table>

@@ -57,7 +57,7 @@ var exports = function () {
                 }).then((response) => {
                     response.json().then((json) => {
                         resolved(json);
-                    });
+                    }).catch((e) => rejected(e));
                 }).catch((e) => {
                     rejected(e)
                 });

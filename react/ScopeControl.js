@@ -1,12 +1,10 @@
 import React from 'react';
 
-import {Button, Col, Row} from 'react-bootstrap';
 import DropdownList from 'react-widgets/lib/DropdownList';
-import AddFirearmControl from './AddFirearmControl';
 
 const rest = require('./sheet-rest');
 
-class AmmoControl extends React.Component {
+class ScopeControl extends React.Component {
     constructor(props) {
         super(props);
 
@@ -14,25 +12,23 @@ class AmmoControl extends React.Component {
             busy: false,
             editing: false,
             open: false,
-            ammoChoices: [],
-            selectedAmmo: undefined
+            scopeChoices: [],
+            selectedScope: undefined
         };
     }
 
     componentDidMount() {
-        this.updateAmmoSelection();
+        this.updateScopeSelection();
     }
 
-    updateAmmoSelection() {
-        if (this.props.url) {
-            this.setState({busy: true});
-            return rest.getData(this.props.url).then(json => {
-                this.setState({busy: false, ammoChoices: json});
-            }).catch(e => {
-                console.log("got error", e);
+    updateScopeSelection() {
+        this.setState({busy: true});
+        return rest.getData(this.props.url).then(json => {
+            this.setState({busy: false, scopeChoices: json});
+        }).catch(e => {
+                console.log("got error", e.message);
                 this.setState({busy: false});
             });
-        }
     }
 
     handleKeyDown(e) {
@@ -53,13 +49,16 @@ class AmmoControl extends React.Component {
     render() {
         let content =
                 <DropdownList open={this.state.open}
-                              value={this.props.ammo}
+                              value={this.props.scope}
                               busy={this.state.busy}
-                              textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
+                              textField={(obj) => {
+                                  console.log("obj?", obj);
+                                  return obj.name;}}
                               onChange={(value) => this.handleChange(value)}
                               onToggle={(isOpen) => this.setState({open: isOpen})}
                               filter="contains"
-                              data={this.state.ammoChoices}
+                              data={this.state.scopeChoices}
+
                 />;
         return <div onKeyDown={this.handleKeyDown.bind(this)}>
             {content}
@@ -67,11 +66,11 @@ class AmmoControl extends React.Component {
     }
 }
 
-AmmoControl.props = {
-    ammo: React.PropTypes.object.isRequired,
+ScopeControl.props = {
+    scope: React.PropTypes.object.isRequired,
     url: React.PropTypes.string,
     onChange: React.PropTypes.func
 };
 
-export {AmmoControl};
-export default AmmoControl;
+export {ScopeControl};
+export default ScopeControl;

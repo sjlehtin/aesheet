@@ -1,6 +1,8 @@
 import React from 'react';
 import TestUtils from 'react-addons-test-utils';
 
+// TODO: it seems this does not do much, instead you need to add this mock
+// to the individual test files using these factories.
 jest.mock('../sheet-rest');
 const rest = require('../sheet-rest');
 
@@ -273,6 +275,26 @@ const ammunitionFactory = (props) => {
     return newAmmo;
 };
 
+const scopeFactory = (props) => {
+    "use strict";
+    if (!props) {
+        props = {};
+    }
+
+    let _base = {
+        "id": objectId,
+        "name": "Bronze sights",
+        "target_i_mod": 0,
+        "to_hit_mod": 0,
+        "tech_level": 4,
+        "weight": "7.500",
+        "sight": 100
+    };
+    let newScope = Object.assign(_base, props);
+    objectId = newScope.id + 1;
+    return newScope;
+};
+
 const firearmFactory = function (overrideFields) {
     "use strict";
     if (!overrideFields) {
@@ -284,8 +306,8 @@ const firearmFactory = function (overrideFields) {
     }
     return {id: id,
             base: baseFirearmFactory(overrideFields.base),
-            ammo: ammunitionFactory(overrideFields.ammo)};
-
+            ammo: ammunitionFactory(overrideFields.ammo),
+            scope: scopeFactory(overrideFields.scope)};
 };
 
 const firearmControlTreeFactory = function (givenProps) {
@@ -328,10 +350,30 @@ const firearmControlTreeFactory = function (givenProps) {
     if (givenProps.weapon) {
         weaponProps = Object.assign(weaponProps, givenProps.weapon);
     }
+    let promises = [];
+
+    let jsonResponse = function (json) {
+        let promise = Promise.resolve(json);
+        promises.push(promise);
+        return promise;
+    };
+
+    rest.getData.mockImplementation(function (url) {
+        if (url.match(new RegExp('/rest/ammunition/firearm/.*/'))) {
+            return jsonResponse([]);
+        } else
+            {
+            /* Throwing errors here do not cancel the test. */
+            fail("this is an unsupported url:" + url);
+        }
+        return [];
+    });
+
     let props = {
         weapon: firearmFactory(weaponProps),
         skillHandler: skillHandlerFactory(handlerProps)
     };
+    console.log("foo?", props.weapon);
     props = Object.assign(givenProps, props);
     const table = TestUtils.renderIntoDocument(
         <FirearmControl {...props}/>
@@ -939,6 +981,7 @@ module.exports = {
     edgeFactory: edgeFactory,
     characterEdgeFactory: characterEdgeFactory,
     ammunitionFactory: ammunitionFactory,
+    scopeFactory: scopeFactory,
     baseFirearmFactory: baseFirearmFactory,
     firearmFactory: firearmFactory,
     firearmControlTreeFactory: firearmControlTreeFactory,

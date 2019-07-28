@@ -44,6 +44,7 @@ class StatBlock extends React.Component {
             char: undefined,
             edgeList: [],
 
+            characterEdges: [],
             characterSkills: [],
             allSkills: [],
 
