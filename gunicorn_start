@@ -1,9 +1,0 @@
-#!/bin/bash
-
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-NAME="sheet_app"
-DJANGODIR=/home/sjl/p/aesheet
-DB_NAME=sheet
-
-. $SCRIPTDIR/gunicorn_start_dev 

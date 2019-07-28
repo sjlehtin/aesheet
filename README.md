@@ -6,15 +6,31 @@
 
 ### In production use
 
-requires "auth" file with the database access credentials.
-requires "secret" file with the secret key used for Django sessions etc.
+#### Deploying
 
-Directories 
- 
-* logs/
-* devlogs/
+Add an `auth` file with the database access credentials as
+whitespace-separated pair.
 
-need to exist and be owned by www-data.
+Generate a "secret" file with the secret key used for Django sessions and
+the like. Do not checkin to version control or disclose.
+
+#### pipenv in production
+
+Create virtualenv in project directory
+
+```
+ % PIPENV_VENV_IN_PROJECT=1 pipenv --python python3.5 install
+```
+
+#### Using with supervisor
+
+Using the supervisor.conf.tmpl in the package, generate a
+`/etc/supervisor/conf.d/${program}` config by running
+
+```
+ % cat supervisor.conf.template | PROGRAM=sheet WORKDIR=$PWD envsubst \
+    > /etc/supervisor/conf.d/sheet
+```
 
 ## Administering
 
@@ -28,6 +44,8 @@ Regenerate `requirements.txt` and `dev-requirements.txt`
 ```
 
 ## Using the docker images
+
+Nuke traces of old containers:
 
 ```
 docker-compose down --remove-orphans --volumes
