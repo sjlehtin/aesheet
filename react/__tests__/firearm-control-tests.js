@@ -8,6 +8,8 @@ const SkillHandler = require('../SkillHandler').default;
 
 const factories = require('./factories');
 
+jest.mock('../sheet-rest');
+
 describe('FirearmControl', () => {
     "use strict";
 

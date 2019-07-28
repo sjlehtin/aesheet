@@ -4,6 +4,8 @@ import TestUtils from 'react-addons-test-utils';
 
 const factories = require('./factories');
 
+jest.mock('../sheet-rest');
+
 describe('FirearmControl -- AmmoControl', () => {
     "use strict";
 
