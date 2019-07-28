@@ -10,18 +10,17 @@ docopt = "*"
 django-widget-tweaks = "*"
 djangorestframework = "<3.9"
 Django = "<1.11"
-South = "*"
-factory_boy = "*"
-WebTest = "*"
 Pillow = "*"
-tox = "*"
-pytest-django = "*"
 awsebcli = "*"
 pytz = "*"
 
 [dev-packages]
 django-debug-toolbar = "<1.10"
 django-webtest = "*"
+tox = "*"
+pytest-django = "*"
+factory_boy = "*"
+WebTest = "*"
 
-[requires]
-python_version = "3.7"
+#[requires]
+#python_version = "3.7"
