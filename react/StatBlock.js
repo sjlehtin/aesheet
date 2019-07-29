@@ -984,6 +984,7 @@ class StatBlock extends React.Component {
                 skillHandler={skillHandler}
                 onRemove={(fa) => this.handleFirearmRemoved(fa) }
                 onChange={(data) => this.handleFirearmChanged(data)}
+                campaign={this.state.char.campaign}
                 style={{fontSize: "80%", backgroundColor: bgColor}}
             />);
         }

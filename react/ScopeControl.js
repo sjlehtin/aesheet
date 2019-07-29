@@ -26,7 +26,6 @@ class ScopeControl extends React.Component {
         return rest.getData(this.props.url).then(json => {
             this.setState({busy: false, scopeChoices: json});
         }).catch(e => {
-                console.log("got error", e.message);
                 this.setState({busy: false});
             });
     }
@@ -52,8 +51,7 @@ class ScopeControl extends React.Component {
                               value={this.props.scope}
                               busy={this.state.busy}
                               textField={(obj) => {
-                                  console.log("obj?", obj);
-                                  return obj.name;}}
+                                  return obj ? obj.name : "";}}
                               onChange={(value) => this.handleChange(value)}
                               onToggle={(isOpen) => this.setState({open: isOpen})}
                               filter="contains"

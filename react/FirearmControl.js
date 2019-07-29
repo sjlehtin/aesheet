@@ -318,7 +318,15 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     handleScopeRemove() {
-        console.log("scope would be removed");
+        return this.handleScopeChanged(null);
+    }
+
+    handleScopeChanged(value) {
+        if (this.props.onChange) {
+            return this.props.onChange({id: this.props.weapon.id,
+                scope: value});
+        }
+        return Promise.resolve({});
     }
 
     render () {
@@ -434,8 +442,8 @@ class FirearmControl extends RangedWeaponRow {
                             <tr><td style={cellStyle} rowSpan={2}>
                                 <ScopeControl
                                     scope={this.props.weapon.scope}
-                                    url={`/rest/scopes/campaing/${this.props.campaign}/`}
-                                    onChange={this.handleAmmoChanged.bind(this)}
+                                    url={`/rest/scopes/campaign/${this.props.campaign}/`}
+                                    onChange={this.handleScopeChanged.bind(this)}
                                 />
                             </td>
                                 <th style={inlineHeaderStyle}>Weigth</th>
@@ -449,8 +457,9 @@ class FirearmControl extends RangedWeaponRow {
                                 <td style={cellStyle}>{scope.target_i_mod}</td>
                                 <td style={cellStyle}>
                                 <Button onClick={(e) => this.handleScopeRemove()}
-                                    ref={(c) => this._scopeRemoveButton}
-                                    bsSize="xsmall">Remove</Button>
+                                        ref={(c) => this._scopeRemoveButton = c}
+                                        disabled={this.props.weapon.scope === null}
+                                        bsSize="xsmall">Remove</Button>
                                 </td>
                             </tr>
                             </tbody>
@@ -479,6 +488,7 @@ class FirearmControl extends RangedWeaponRow {
 FirearmControl.props = {
     skillHandler: React.PropTypes.object.isRequired,
     weapon: React.PropTypes.object.isRequired,
+    campaign: React.PropTypes.number.isRequired,
     onRemove: React.PropTypes.func,
     onChange: React.PropTypes.func
 };

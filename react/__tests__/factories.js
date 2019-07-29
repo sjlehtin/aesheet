@@ -307,7 +307,7 @@ const firearmFactory = function (overrideFields) {
     return {id: id,
             base: baseFirearmFactory(overrideFields.base),
             ammo: ammunitionFactory(overrideFields.ammo),
-            scope: scopeFactory(overrideFields.scope)};
+            scope: overrideFields.scope === null ? null : scopeFactory(overrideFields.scope)};
 };
 
 const firearmControlTreeFactory = function (givenProps) {
@@ -361,19 +361,20 @@ const firearmControlTreeFactory = function (givenProps) {
     rest.getData.mockImplementation(function (url) {
         if (url.match(new RegExp('/rest/ammunition/firearm/.*/'))) {
             return jsonResponse([]);
+        } else if (url.match(new RegExp("/rest/scopes/campaign/.*/"))) {
+            return jsonResponse([]);
         } else
             {
             /* Throwing errors here do not cancel the test. */
             fail("this is an unsupported url:" + url);
         }
-        return [];
     });
 
     let props = {
+        campaign: givenProps.campaign || 3,
         weapon: firearmFactory(weaponProps),
         skillHandler: skillHandlerFactory(handlerProps)
     };
-    console.log("foo?", props.weapon);
     props = Object.assign(givenProps, props);
     const table = TestUtils.renderIntoDocument(
         <FirearmControl {...props}/>
@@ -875,6 +876,8 @@ var statBlockTreeFactory = function (overrides) {
         } else if (url === "/rest/edgelevels/campaign/2/") {
             return jsonResponse([]);
         } else if (url.match(new RegExp('/rest/ammunition/firearm/.*/'))) {
+            return jsonResponse([]);
+        } else if (url ===  "/rest/scopes/campaign/2/") {
             return jsonResponse([]);
         } else {
             /* Throwing errors here do not cancel the test. */
