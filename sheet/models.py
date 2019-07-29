@@ -703,6 +703,9 @@ class FirearmAddOn(ExportedModel):
     def dont_export(cls):
         return ['firearm', "scope"]
 
+    def __str__(self):
+        return self.name
+
 
 class Scope(FirearmAddOn):
     sight = models.IntegerField(default=1000,

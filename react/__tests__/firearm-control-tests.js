@@ -48,23 +48,42 @@ describe('FirearmControl', () => {
 
     it ("calculates range for pistols", function() {
         const firearm = factories.firearmControlTreeFactory({
-            weapon: {base: {sight: 153, barrel_length: 102, accuracy: 1.0}}
+            weapon: {base: {sight: 153, barrel_length: 102, accuracy: 1.0},
+                     scope: null}
         });
-        expect(firearm.baseRange()).toEqual(12);
+        expect(firearm.shortRange()).toEqual(12);
+    });
+
+    it ("calculates scope into range", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {sight: 153, barrel_length: 102, accuracy: 0.6},
+            scope: {sight: 600}}
+        });
+        expect(firearm.shortRange()).toEqual(21);
+    });
+
+    it ("calculates scope into target initiative", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {sight: 153, barrel_length: 102, accuracy: 0.6, target_initiative: -2},
+            scope: {sight: 600, target_i_mod: -2}}
+        });
+        expect(firearm.targetInitiative()).toEqual(-4);
     });
 
     it ("calculates range for assault rifles", function() {
         const firearm = factories.firearmControlTreeFactory({
-            weapon: {base: {sight: 378, barrel_length: 415, accuracy: 1.0}}
+            weapon: {base: {sight: 378, barrel_length: 415, accuracy: 1.0},
+            scope: null}
         });
-        expect(firearm.baseRange()).toEqual(39);
+        expect(firearm.shortRange()).toEqual(39);
     });
 
     it ("calculates range for a good SMG", function() {
         const firearm = factories.firearmControlTreeFactory({
-            weapon: {base: {sight: 340, barrel_length: 225, accuracy: 1.08}}
+            weapon: {base: {sight: 340, barrel_length: 225, accuracy: 1.08},
+                scope: null}
         });
-        expect(firearm.baseRange()).toEqual(30);
+        expect(firearm.shortRange()).toEqual(30);
     });
 
     it ("calculates long range multiplier for pistols", function() {

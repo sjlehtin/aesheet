@@ -247,11 +247,22 @@ class FirearmControl extends RangedWeaponRow {
             !this.props.weapon.base.sweep_fire_disabled;
     }
 
-    baseRange() {
-        // TODO: scope changes sight.
+    shortRange() {
         const base = this.props.weapon.base;
-        return util.rounddown(((base.sight + base.barrel_length)
+        let sight = base.sight;
+        if (this.props.weapon.scope) {
+            sight = this.props.weapon.scope.sight;
+        }
+        return util.rounddown(((sight + base.barrel_length)
                                * base.accuracy) / 20);
+    }
+
+    mediumRange() {
+        return this.shortRange() * 2;
+    }
+
+    longRange() {
+        return util.rounddown(this.shortRange() * this.longRangeMultiplier());
     }
 
     longRangeMultiplier() {
@@ -327,6 +338,14 @@ class FirearmControl extends RangedWeaponRow {
                 scope: value});
         }
         return Promise.resolve({});
+    }
+
+    targetInitiative() {
+        let targetInitiative = this.props.weapon.base.target_initiative;
+        if (this.props.weapon.scope) {
+            targetInitiative += this.props.weapon.scope.target_i_mod;
+        }
+        return targetInitiative;
     }
 
     render () {
@@ -410,7 +429,7 @@ class FirearmControl extends RangedWeaponRow {
                                 <td style={cellStyle}>{this.skillLevel()}</td>
                                 <td style={cellStyle}>{ this.rof().toFixed(2) }</td>
                                 {skillChecks}
-                                <td style={cellStyle}>{weapon.target_initiative}</td>
+                                <td style={cellStyle}>{this.targetInitiative()}</td>
                                 <td style={cellStyle}>{weapon.draw_initiative}</td>
                             </tr>
                             <tr>
@@ -435,9 +454,9 @@ class FirearmControl extends RangedWeaponRow {
                             <tr>
                                 <td style={cellStyle} colSpan={3}>{this.renderDamage()}</td>
                                 <td style={cellStyle} colSpan={2}>{this.props.weapon.ammo.type}</td>
-                                <td style={cellStyle} colSpan={2}>{weapon.range_s }</td>
-                                <td style={cellStyle} colSpan={2}>{weapon.range_m }</td>
-                                <td style={cellStyle} colSpan={2}>{weapon.range_l }</td>
+                                <td style={cellStyle} colSpan={2} title={`Old value: ${this.shortRange()}`}>{weapon.range_s}</td>
+                                <td style={cellStyle} colSpan={2} title={`Old value: ${this.mediumRange()}`}>{weapon.range_m}</td>
+                                <td style={cellStyle} colSpan={2} title={`Old value: ${this.longRange()}`}>{weapon.range_l}</td>
                             </tr>
                             <tr><td style={cellStyle} rowSpan={2}>
                                 <ScopeControl
@@ -451,7 +470,7 @@ class FirearmControl extends RangedWeaponRow {
                                 <th style={inlineHeaderStyle}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
                                 <th style={inlineHeaderStyle}></th>
                             </tr>
-                            <tr>
+                            <tr title={"Modifiers counted into checks already"}>
                                 <td style={cellStyle}>{scope.sight}</td>
                                 <td style={cellStyle}>{scope.weight}</td>
                                 <td style={cellStyle}>{scope.target_i_mod}</td>

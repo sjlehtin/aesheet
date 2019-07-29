@@ -114,7 +114,7 @@ class RangedWeaponRow extends WeaponRow {
                     <td style={cellStyle}>{this.skillLevel()}</td>
                     <td style={cellStyle}>{this.rof().toFixed(2)}</td>
                     {checkCells}
-                    <td style={cellStyle}>{this.props.weapon.base.target_initiative}</td>
+                    <td style={cellStyle}>{this.targetInitiative()}</td>
                     <td style={cellStyle}>{this.drawInitiative()}</td>
                     <td style={cellStyle}>{this.renderDamage()}</td>
                     <td style={cellStyle}>{ranges}</td>

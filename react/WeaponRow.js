@@ -191,6 +191,15 @@ class WeaponRow extends React.Component {
         return this.initiatives(actions, props);
     }
 
+
+    targetInitiative() {
+        let targetI = this.props.weapon.base.target_initiative;
+        if (!targetI) {
+            targetI = 0;
+        }
+        return targetI;
+    }
+
     initiatives(actions, givenProps) {
         let props = {
             /* Whether the weapon can be readied with a multi-turn action. */
@@ -206,10 +215,7 @@ class WeaponRow extends React.Component {
         const rof = this.roa(props.useType);
         const baseI = -5 / rof;
         const readiedBaseI = this.readiedBaseI;
-        let targetI = this.props.weapon.base.target_initiative;
-        if (!targetI) {
-            targetI = 0;
-        }
+        let targetI = this.targetInitiative();
         const initiative = this.props.skillHandler.getInitiative();
 
         const initiatives = [];
