@@ -541,6 +541,13 @@ class StatBlock extends React.Component {
         if (data.ammo) {
             patchData.ammo = data.ammo.id;
         }
+
+        if (data.scope) {
+            patchData.scope = data.scope.id;
+        } else if (data.scope === null) {
+            patchData.scope = null;
+        }
+
         return rest.patch(this.getFirearmURL(data), patchData).then(() => {
             const index = StatBlock.findItemIndex(
                 this.state.firearmList, data);

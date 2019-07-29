@@ -684,6 +684,38 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).ammo.pk,
                          ammo.pk)
 
+    def test_changing_scope(self):
+        firearm = factories.FirearmFactory()
+        scope = factories.ScopeFactory(name="Foo Scope")
+        self.sheet.firearms.add(firearm)
+
+        self.assertIsNone(models.Firearm.objects.get(pk=firearm.pk).scope)
+
+        response = self.client.patch(
+            "{}{}/".format(self.url, firearm.pk),
+            data={'scope': scope.pk},
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).scope.pk,
+                         scope.pk)
+
+    def test_removing_scope(self):
+        scope = factories.ScopeFactory(name="Foo Scope")
+        firearm = factories.FirearmFactory(scope=scope)
+        self.sheet.firearms.add(firearm)
+
+        self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).scope.pk,
+                         scope.pk)
+
+        response = self.client.patch(
+            "{}{}/".format(self.url, firearm.pk),
+            data={'scope': None},
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIsNone(models.Firearm.objects.get(pk=firearm.pk).scope)
+
 
 # TODO: add test for checking private sheets restrict access to
 # sheetfirearms, sheetweapons, and sheetrangedweapons correctly.

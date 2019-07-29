@@ -42,7 +42,7 @@ describe('FirearmControl -- ScopeControl', () => {
         expect(scopeControl.props.url).toEqual('/rest/scopes/campaign/4/');
     });
 
-    it('integrates ScopeControl for changing ammmo', () => {
+    it('integrates ScopeControl for changing scope', () => {
         const spy = jest.fn().mockReturnValue(Promise.resolve({}));
 
         const control = factories.firearmControlTreeFactory({weapon:
