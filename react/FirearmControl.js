@@ -458,28 +458,28 @@ class FirearmControl extends RangedWeaponRow {
                                 <td style={cellStyle} colSpan={2} title={`Old value: ${this.mediumRange()}`}>{weapon.range_m}</td>
                                 <td style={cellStyle} colSpan={2} title={`Old value: ${this.longRange()}`}>{weapon.range_l}</td>
                             </tr>
-                            <tr><td style={cellStyle} rowSpan={2}>
+                            <tr>
+                                <td style={cellStyle} rowSpan={2}>
                                 <ScopeControl
                                     scope={this.props.weapon.scope}
                                     url={`/rest/scopes/campaign/${this.props.campaign}/`}
                                     onChange={this.handleScopeChanged.bind(this)}
                                 />
-                            </td>
-                                <th style={inlineHeaderStyle}>Weigth</th>
-                                <th style={inlineHeaderStyle}>Sight</th>
-                                <th style={inlineHeaderStyle}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
-                                <th style={inlineHeaderStyle}></th>
-                            </tr>
-                            <tr title={"Modifiers counted into checks already"}>
-                                <td style={cellStyle}>{scope.sight}</td>
-                                <td style={cellStyle}>{scope.weight}</td>
-                                <td style={cellStyle}>{scope.target_i_mod}</td>
-                                <td style={cellStyle}>
-                                <Button onClick={(e) => this.handleScopeRemove()}
+                                </td>
+                                <th style={inlineHeaderStyle} colSpan={2}>Weigth</th>
+                                <th style={inlineHeaderStyle} colSpan={2}>Sight</th>
+                                <th style={inlineHeaderStyle} colSpan={2}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
+                                <td style={cellStyle} rowSpan={2}>
+                                    <Button onClick={(e) => this.handleScopeRemove()}
                                         ref={(c) => this._scopeRemoveButton = c}
                                         disabled={this.props.weapon.scope === null}
                                         bsSize="xsmall">Remove</Button>
                                 </td>
+                            </tr>
+                            <tr title={"Modifiers counted into checks already"}>
+                                <td style={cellStyle} colSpan={2}>{scope.weight}</td>
+                                <td style={cellStyle} colSpan={2}>{scope.sight}</td>
+                                <td style={cellStyle} colSpan={2}>{scope.target_i_mod}</td>
                             </tr>
                             </tbody>
                         </table>
