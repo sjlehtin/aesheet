@@ -250,7 +250,7 @@ class FirearmControl extends RangedWeaponRow {
     shortRange() {
         const base = this.props.weapon.base;
         let sight = base.sight;
-        if (this.props.weapon.scope) {
+        if (this.props.weapon.scope && this.props.weapon.scope.sight !== 0) {
             sight = this.props.weapon.scope.sight;
         }
         return util.rounddown(((sight + base.barrel_length)

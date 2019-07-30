@@ -70,6 +70,16 @@ describe('FirearmControl', () => {
         expect(firearm.targetInitiative()).toEqual(-4);
     });
 
+    it ("does not use sight equal to zero from scope, only initiative", function() {
+        const firearm = factories.firearmControlTreeFactory({
+            weapon: {base: {sight: 153, barrel_length: 102, accuracy: 1.0, target_initiative: -2},
+            scope: {sight: 0, target_i_mod: 1}}
+        });
+        expect(firearm.shortRange()).toEqual(12);
+        expect(firearm.targetInitiative()).toEqual(-1);
+    });
+
+
     it ("calculates range for assault rifles", function() {
         const firearm = factories.firearmControlTreeFactory({
             weapon: {base: {sight: 378, barrel_length: 415, accuracy: 1.0},
