@@ -53,6 +53,15 @@ docker-compose down --remove-orphans --volumes
 
 ### On update
 
+```
+ % npm install
+ % pipenv install
+ % ./node_modules/.bin/webpack
+ % python manage.py migrate
+ % python manage.py collectstatic -l -i /node_modules/
+```
+
+
 After updating sources, run
 
 ```

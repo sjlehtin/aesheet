@@ -454,9 +454,9 @@ class FirearmControl extends RangedWeaponRow {
                             <tr>
                                 <td style={cellStyle} colSpan={3}>{this.renderDamage()}</td>
                                 <td style={cellStyle} colSpan={2}>{this.props.weapon.ammo.type}</td>
-                                <td style={cellStyle} colSpan={2} title={`Old value: ${this.shortRange()}`}>{weapon.range_s}</td>
-                                <td style={cellStyle} colSpan={2} title={`Old value: ${this.mediumRange()}`}>{weapon.range_m}</td>
-                                <td style={cellStyle} colSpan={2} title={`Old value: ${this.longRange()}`}>{weapon.range_l}</td>
+                                <td style={cellStyle} colSpan={2} title={`New value: ${this.shortRange()}`}>{weapon.range_s}</td>
+                                <td style={cellStyle} colSpan={2} title={`New value: ${this.mediumRange()}`}>{weapon.range_m}</td>
+                                <td style={cellStyle} colSpan={2} title={`New value: ${this.longRange()}`}>{weapon.range_l}</td>
                             </tr>
                             <tr>
                                 <td style={cellStyle} rowSpan={2}>
@@ -469,7 +469,7 @@ class FirearmControl extends RangedWeaponRow {
                                 <th style={inlineHeaderStyle} colSpan={2}>Weigth</th>
                                 <th style={inlineHeaderStyle} colSpan={2}>Sight</th>
                                 <th style={inlineHeaderStyle} colSpan={2}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
-                                <td style={cellStyle} rowSpan={2}>
+                                <td style={cellStyle} rowSpan={2} colSpan={3}>
                                     <Button onClick={(e) => this.handleScopeRemove()}
                                         ref={(c) => this._scopeRemoveButton = c}
                                         disabled={this.props.weapon.scope === null}
