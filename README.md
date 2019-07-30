@@ -34,33 +34,26 @@ Using the supervisor.conf.tmpl in the package, generate a
 
 ## Administering
 
-*out of date, update update.sh and instructions for pipenv usage*
-
-Regenerate `requirements.txt` and `dev-requirements.txt`
-
-```
- % pipenv lock -r > requirements.txt
- % pipenv lock --dev -r > dev-requirements.txt
-```
-
-## Using the docker images
-
-Nuke traces of old containers:
-
-```
-docker-compose down --remove-orphans --volumes
-```
-
 ### On update
+
+After updating sources, run
 
 ```
  % npm install
+ % . .venv/ve/bin/activate
  % pipenv install
  % ./node_modules/.bin/webpack
  % python manage.py migrate
  % python manage.py collectstatic -l -i /node_modules/
+ % sudo supervisorctl reload sheet
 ```
 
+If nginx configuration needed to be updated, you also need to reload nginx configuration.
+
+
+```
+ % sudo systemctl reload nginx
+```
 
 After updating sources, run
 
@@ -69,21 +62,13 @@ After updating sources, run
  % supervisorctl reload (sheet|devsheet)
 ```
 
-#### Updating python packages
+## Using the Docker images
+
+Nuke traces of old containers:
 
 ```
- % pip install -U -r requirements.txt
+docker-compose down --remove-orphans --volumes
 ```
-
-and run update.sh as above.
-
-#### Updating npm packages
-
-```
- % npm install
-```
-
-and run update.sh as above.
 
 ## Developing
 ### Running tests
