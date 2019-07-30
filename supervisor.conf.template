@@ -1,0 +1,7 @@
+[program:${PROGRAM}]
+command = ${WORKDIR}/.venv/bin/gunicorn --bind unix:${WORKDIR}/run/gunicorn.sock --timeout 90 --workers 3 sheet.wsgi
+user = www-data
+stdout_logfile = /var/log/gunicorn_supervisor_${PROGRAM}.log
+redirect_stderr = true
+directory = ${WORKDIR}
+environment = DJANGO_SETTINGS_MODULE="settings"
