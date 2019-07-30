@@ -22,6 +22,18 @@ Create virtualenv in project directory
  % PIPENV_VENV_IN_PROJECT=1 pipenv --python python3.5 install
 ```
 
+#### nginx configuration
+
+Using the supervisor.conf.tmpl in the package, generate a
+`/etc/nginx/sites-available/${program}` config by running
+
+```
+ % cat nginx.conf.template | \
+    SERVERNAME=devsheet.liskot.org TAG=dev PROJECTDIR=$PWD \
+    envsubst '${PROJECTDIR},${TAG},${SERVERNAME}' \
+    > /etc/nginx/sites-available/devsheet
+```
+
 #### Using with supervisor
 
 Using the supervisor.conf.tmpl in the package, generate a

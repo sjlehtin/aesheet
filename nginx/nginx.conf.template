@@ -1,34 +1,34 @@
-upstream sheet_app_server_prod {
+upstream sheet_app_server_${TAG} {
   # fail_timeout=0 means we always retry an upstream even if it failed
   # to return a good HTTP response (in case the Unicorn master nukes a
   # single worker for timing out).
  
-  server unix:/home/sjl/p/aesheet/run/gunicorn.sock fail_timeout=0;
+  server unix:${PROJECTDIR}/run/gunicorn.sock fail_timeout=0;
 }
 
 server {
     listen 443 ssl;
 
-    server_name aesheet.liskot.org;
+    server_name ${SERVERNAME};
 
     include /etc/nginx/ssl.conf;
  
     client_max_body_size 4G;
  
-    access_log /home/sjl/p/aesheet/logs/nginx-access.log;
-    error_log /home/sjl/p/aesheet/logs/nginx-error.log;
+    access_log ${PROJECTDIR}/logs/nginx-access.log;
+    error_log ${PROJECTDIR}/logs/nginx-error.log;
 
     location /static/ {
-        alias   /home/sjl/p/aesheet/static/;
+        alias   ${PROJECTDIR}/static/;
     }
     
     location /media/ {
-        alias   /home/sjl/p/aesheet/upload/;
+        alias   ${PROJECTDIR}/upload/;
     }
  
     error_page 500 502 503 504 /500.html;
     location = /500.html {
-        root /home/sjl/p/aesheet/static/;
+        root ${PROJECTDIR}/static/;
     }
 
     location / {
@@ -51,7 +51,7 @@ server {
         # Try to serve static files from nginx, no point in making an
         # *application* server like Unicorn/Rainbows! serve static files.
         if (!-f $request_filename) {
-            proxy_pass http://sheet_app_server_prod;
+            proxy_pass http://sheet_app_server_${TAG};
             break;
         }
     }
