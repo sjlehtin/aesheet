@@ -1,5 +1,6 @@
 import csv
-import sys
+import codecs
+import chardet
 from io import StringIO, BytesIO
 from django.shortcuts import render
 from django.db.models.fields import FieldDoesNotExist
@@ -167,13 +168,33 @@ def sort_by_dependencies(header, rows):
 
 
 def import_text(data):
-    if sys.version_info >= (3,):
-        if isinstance(data, bytes):
-            data = data.decode('utf-8')
-    else:
-        data = data.decode('utf-8')
-    reader = csv.reader(StringIO(data))
-    data_type = next(reader)
+    def detect_delim(data):
+        """
+        Try to guess file delimiter based on the first line of the data.
+
+        European version of Excel often saves with semi-colon format.
+        :param data: the input import data.
+        :return: The guessed delimiter, default is comma ','
+        """
+        lines = data.split('\n')
+        if ';' in lines[0]:
+            return ';'
+        else:
+            return ','
+
+    if isinstance(data, bytes):
+        if data[0:3] == codecs.BOM_UTF8:
+            data = data[3:]
+            encoding = 'utf-8'
+        else:
+            result = chardet.detect(data)
+            encoding = result['encoding']
+
+        data = data.decode(encoding)
+    delim = detect_delim(data)
+
+    reader = enumerate(csv.reader(StringIO(data), delimiter=delim), start=1)
+    _, data_type = next(reader)
     if not len(data_type) or not data_type[0]:
         raise TypeError("CSV is in invalid format, first row "
                         "is the data type")
@@ -183,12 +204,12 @@ def import_text(data):
     except AttributeError:
         raise TypeError("Invalid data type %s" % data_type)
 
-    header = next(reader)
+    _, header = next(reader)
 
     header = [yy.lower() for yy in ['_'.join(xx.split(' ')) for xx in header]]
 
     changed_models = set()
-    rows = enumerate(reader)
+    rows = reader
     if modelcls == sheet.models.Skill:
         rows = sort_by_dependencies(header, rows)
 
@@ -197,6 +218,10 @@ def import_text(data):
         if len(row) < len(header):
             logger.info("Ignoring too short row: {0}".format(row))
             continue
+        if sum([len(col) for col in row]) == 0:
+            # spacer row.
+            continue
+
         tag = line
         mdl = None
         fields = {}
@@ -231,8 +256,8 @@ def import_text(data):
                 try:
                     value = sheet.models.TechLevel.objects.get(name=value)
                 except sheet.models.TechLevel.DoesNotExist:
-                    raise ValueError("No matching TechLevel with name %s." % (
-                        value))
+                    raise ValueError("Line %d: No matching TechLevel with name %s. (\"%s\")" % (
+                        tag, value, row))
             elif field_name == "ammunition_types":
                 if modelcls != sheet.models.BaseFirearm:
                     raise ValueError("Invalid model for ammunition_types")
@@ -295,20 +320,22 @@ def import_text(data):
                         value = False
                     elif value == "TRUE":
                         value = True
+                    # elif isinstance(field,
+                    #                 django.db.models.fields.DecimalField):
+                    #     value = ','.join(value.split('.'))
                     try:
                         value = field.to_python(value)
                     except Exception as e:
                         raise ValueError("Failed to import field \"%s\", "
-                                        "value \"%s\" (%s)" % (
-                            field_name, value,
-                            str(e)))
+                                        "value \"%s\" (error: %s)" % (
+                            field_name, value, str(e))) from e
             setattr(mdl, field_name, value)
         try:
             mdl.full_clean()
             mdl.save()
         except Exception as e:
-            raise Exception("Line %d: Failed to import row\"%s\" (%s)" % (
-                line, row, str(e)))
+            raise ValueError("Line %d: Failed to import row \"%s\" (error: %s)" % (
+                line, row, str(e))) from e
         for kk, vv in m2m_values.items():
             logger.info("Setting m2m values for %s(%s) %s to %s" %
                         (mdl, mdl.__class__.__name__, kk, vv))
@@ -370,33 +397,16 @@ def import_data(request):
 
 def csv_export(exported_type):
     results = exported_type.objects.all()
-    if sys.version_info >= (3,):
-        def should_encode(data):
-            return False
 
-        f = StringIO()
-    else:
-        def should_encode(data):
-            return isinstance(data, basestring)
-
-        f = BytesIO()
-
-    def encode(data):
-        if should_encode(data):
-            return data.encode('utf-8')
-        else:
-            return data
+    f = StringIO()
 
     w = csv.writer(f)
-    w.writerow([encode(exported_type.__name__)])
+    w.writerow([exported_type.__name__])
     fields = exported_type.get_exported_fields()
     w.writerow(fields)
 
-    def to_utf8(data):
-        return encode(data)
-
     for row in get_data_rows(results, fields):
-        w.writerow([to_utf8(col) for col in row])
+        w.writerow([col for col in row])
     return f.getvalue()
 
 

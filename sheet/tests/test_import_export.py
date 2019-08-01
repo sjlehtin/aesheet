@@ -3,6 +3,7 @@
 from __future__ import division
 
 import logging
+import os
 
 from django.test import TestCase
 import django.test
@@ -305,3 +306,24 @@ class FirearmImportExportTestcase(TestCase):
 
         idx = header.index("id")
         self.assertGreaterEqual(idx, 0, msg="Required column should be found")
+
+
+class FirearmImportFromExcelTestcase(TestCase):
+    def setUp(self):
+        factories.SkillFactory(name="Handguns", tech_level__name="2K")
+
+    def test_import_handgun_weight_gives_good_error_message(self):
+        self.admin = factories.UserFactory(username='admin')
+
+        self.assertTrue(self.client.login(username="admin", password="foobar"))
+
+        det_url = reverse("import")
+        response = self.client.post(det_url, { 'import_data' :
+                                                   ("BaseFirearm\n"
+        "name,description,notes,tech_level,draw_initiative,durability,dp,weight,base_skill,skill,skill2,target_initiative,range_s,range_m,range_l,autofire_rpm,autofire_class,sweep_fire_disabled,restricted_burst_rounds,stock,duration,weapon_class_modifier,accuracy,sight,barrel_length,ammunition_types\n"
+        "Colt SA Army 1873 4.8\",,,2K,-3,4,4,1.021,Handguns,,,-1,12,24,36,,,FALSE,0,1,0.08,10,0.85,170,121,45Clt"),
+                                               })
+        self.assertRedirects(response, reverse("import"))
+
+    def test_import_semicolon_csv_should_work(self):
+        marshal.import_text(open(os.path.join(os.path.dirname(__file__), 'win-excel-with-semicolons-utf8.csv'), 'rb').read())
