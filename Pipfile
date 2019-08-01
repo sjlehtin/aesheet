@@ -12,6 +12,7 @@ djangorestframework = "<3.9"
 Django = "<1.11"
 Pillow = "*"
 pytz = "*"
+chardet = "*"
 
 [dev-packages]
 django-debug-toolbar = "<1.10"
@@ -22,6 +23,5 @@ factory_boy = "*"
 WebTest = "*"
 awsebcli = "*"
 pathlib2 = "*"
-
 #[requires]
 #python_version = "3.7"
