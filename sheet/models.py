@@ -621,7 +621,7 @@ class BaseArmament(ExportedModel):
     durability = models.IntegerField(default=5)
     dp = models.IntegerField(default=10)
 
-    weight = models.DecimalField(max_digits=5, decimal_places=2,
+    weight = models.DecimalField(max_digits=7, decimal_places=4,
                                  default=1.0)
 
     base_skill = models.ForeignKey(Skill,
