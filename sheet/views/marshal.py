@@ -291,7 +291,7 @@ def import_text(data):
                     ll = []
 
                     def is_self_loop(cls, field):
-                        if cls == field.rel.to and fields['name'] == name:
+                        if cls == field.remote_field.model and fields['name'] == name:
                             return True
                         else:
                             return False
@@ -303,8 +303,8 @@ def import_text(data):
                             continue
 
                         try:
-                            obj = field.rel.to.objects.get(name=name)
-                        except field.rel.to.DoesNotExist:
+                            obj = field.remote_field.model.objects.get(name=name)
+                        except field.remote_field.model.DoesNotExist:
                             raise ValueError(
                                 "Requirement `{req}' for line {line} "
                                 "does not exist.".format(req=name, line=tag))
