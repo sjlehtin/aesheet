@@ -1,6 +1,6 @@
 import sheet.models as sm
-
 from django.contrib import admin
+
 
 class WeaponTemplateAdmin(admin.ModelAdmin):
     list_display = ('name', 'tech_level', 'ccv', 'draw_initiative', 'roa',
@@ -8,6 +8,20 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
                     'dice', 'extra_damage', 'leth', 'plus_leth',
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
                     'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
+
+
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ('name', 'has_firearms', 'has_spells')
+
+
+class SkillAdmin(admin.ModelAdmin):
+    list_display = ('name', 'tech_level','description', 'notes',
+                    'can_be_defaulted',
+                    'is_specialization',
+                    'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
+                    'skill_cost_3', 'stat', 'type')
+
+
 admin.site.register(sm.Armor)
 admin.site.register(sm.ArmorQuality)
 admin.site.register(sm.ArmorTemplate)
@@ -20,25 +34,12 @@ admin.site.register(sm.EdgeLevel)
 admin.site.register(sm.EdgeSkillBonus)
 admin.site.register(sm.Sheet)
 admin.site.register(sm.TechLevel)
-
-class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('name', 'has_firearms', 'has_spells')
 admin.site.register(sm.Campaign, CampaignAdmin)
-
 admin.site.register(sm.MiscellaneousItem)
-
 admin.site.register(sm.BaseFirearm)
 admin.site.register(sm.FirearmAmmunitionType)
 admin.site.register(sm.Firearm)
 admin.site.register(sm.Ammunition)
-
-class SkillAdmin(admin.ModelAdmin):
-    list_display = ('name', 'tech_level','description', 'notes',
-                    'can_be_defaulted',
-                    'is_specialization',
-                    'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
-                    'skill_cost_3', 'stat', 'type')
-
 admin.site.register(sm.Skill, SkillAdmin)
 admin.site.register(sm.TransientEffect)
 admin.site.register(sm.WeaponSpecialQuality)
