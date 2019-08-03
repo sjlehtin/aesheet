@@ -180,7 +180,7 @@ describe('XPControl', function() {
         var spy = spyOn(control, 'handleSubmit');
 
         TestUtils.Simulate.click(control.getAddDOMNode());
-        TestUtils.Simulate.submit(control.getSubmitDOMNode());
+        TestUtils.Simulate.click(control.getSubmitDOMNode());
         response.then(function () {
             expect(spy).toHaveBeenCalled();
             done();

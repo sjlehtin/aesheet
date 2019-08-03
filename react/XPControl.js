@@ -124,7 +124,6 @@ class XPControl extends React.Component {
             <Modal show={this.state.showDialog} keyboard
                    onHide={this.handleCancel.bind(this)}>
                 <Modal.Header closeButton={true}><Modal.Title>Add XP</Modal.Title></Modal.Header>
-                <form onSubmit={(e) => { this.handleSubmit(e);}}>
                 <Modal.Body>
                      {/*TODO: fix hasFeedback*/}
                     <FormControl type="text" ref={(c) => { this._inputField = c;
@@ -141,11 +140,10 @@ class XPControl extends React.Component {
                            value={this.state.addXP} />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button type="submit" ref={(c) => this._submitButton = c}
+                    <Button ref={(c) => this._submitButton = c}
                                  onClick={(e) => { this.handleSubmit(e);}}
                                  variant="primary">Add</Button>
                 </Modal.Footer>
-                </form>
             </Modal>
             {xpWarning}
         </div>);
