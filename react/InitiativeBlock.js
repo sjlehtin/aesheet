@@ -28,12 +28,12 @@ class InitiativeBlock extends React.Component {
         var getItems = function (initiatives) {
             return initiatives.map((init, ii) => { return <td key={ii}>{init}</td>; });
         }
-        return <Card style={this.props.style}>
+        return <Card className={"m-1"} style={this.props.style}>
             <Card.Header>
                 <h4>Initiative penalty for advancing in combat</h4>
             </Card.Header>
-            <Card.Body>
-            <Table style={{fontSize: "inherit"}}>
+            <Card.Body class={"table-responsive"}>
+            <Table style={{fontSize: "inherit"}} size={"sm"}>
                 <thead>
                     <tr>
                         <th>Distance</th>

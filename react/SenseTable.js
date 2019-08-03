@@ -139,12 +139,12 @@ class SenseTable extends React.Component {
 
     render() {
         const noteStyle = {fontSize: "60%", color: "gray"};
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Senses</h4>
             </Card.Header>
-            <Card.Body>
-            <Table>
+            <Card.Body class={"table-responsive"}>
+            <Table size={"sm"}>
         <thead>
             <tr>
                 <th />

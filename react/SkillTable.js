@@ -209,7 +209,7 @@ class SkillTable extends React.Component {
             <Card.Header>
                 <h4>Skills</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             <Table style={{fontSize: "inherit"}} striped>
             <thead>
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
@@ -236,11 +236,13 @@ class SkillTable extends React.Component {
             </tr>
             </tfoot>
         </Table>
+            </Card.Body>
+            <Card.Footer>
             <AddSkillControl characterSkillMap={csMap}
                              allSkills={this.props.skillHandler.props.allSkills}
                              onCharacterSkillAdd={this.props.onCharacterSkillAdd}
                              style={this.props.style}/>
-            </Card.Body>
+            </Card.Footer>
         </Card>;
     }
 }

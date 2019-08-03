@@ -67,7 +67,8 @@ class AddEdgeLevelControl extends React.Component {
     }
 
     render () {
-        return <tfoot>
+        return <table>
+            <tbody>
                 <tr>
                     <td><label>EdgeLevel</label><Combobox data={this.state.edgeLevelChoices}
                                   textField={(obj) => {
@@ -89,7 +90,8 @@ class AddEdgeLevelControl extends React.Component {
                 </div>
                         </td>
          </tr>
-       </tfoot>;
+            </tbody>
+        </table>;
     }
 }
 

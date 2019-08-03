@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { Button, FormControl } from 'react-bootstrap';
+import { Button, FormControl, Table } from 'react-bootstrap';
 
-import Combobox from 'react-widgets/lib/Combobox';
+import {DropdownList, Combobox} from 'react-widgets';
 
 const util = require('./sheet-util');
 const rest = require('./sheet-rest');
@@ -114,37 +114,63 @@ class AddWoundControl extends React.Component {
             this.state.selectedLocation, this.state.selectedType);
 
 
-        return <tr>
-            <td><Combobox data={AddWoundControl.locations}
+        return <div>
+            <Table>
+            <tbody>
+            <tr>
+                <th>
+                   Location
+                </th>
+            <td //style={{minWidth: "10em"}}
+
+            ><DropdownList data={AddWoundControl.locations}
                           textField='description'
                           valueField='location'
                           value={this.state.selectedLocation}
                           filter="contains"
                           onChange={(value) => this.handleLocationChange(value)} />
             </td>
-            <td><Combobox data={AddWoundControl.damageTypes}
+            </tr>
+            <tr>
+                <th>
+                   Type
+                </th>
+            <td //style={{minWidth: "10em"}}
+            ><DropdownList data={AddWoundControl.damageTypes}
                           textField='description'
                           valueField='type'
                           value={this.state.selectedType}
                           filter="contains"
                           onChange={(value) => this.handleTypeChange(value)} />
             </td>
+            </tr>
+            <tr>
+                <th>
+                   Damage
+                </th>
             <td><FormControl size="sm" type="text" value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
                 ref={(c) => { if (c) { this._damageInputField = ReactDOM.findDOMNode(c)}}} />
             </td>
-            <td><Combobox data={woundChoices}
+            </tr>
+            <tr>
+                <th>
+                   Effect
+                </th>
+            <td //style={{minWidth: "10em"}}
+            ><Combobox data={woundChoices}
                           value={this.state.effect}
                           filter="contains"
                           onChange={(value) => this.handleEffectChange(value)} />
             </td>
-            <td>
-                <Button size="sm"
+            </tr>
+            </tbody>
+        </Table>
+        <Button size="sm"
                         disabled={!this.isValid()}
                         ref={(c) => { if (c) { this._addButton = ReactDOM.findDOMNode(c)}}}
-                        onClick={() => this.handleSubmit()}
-            >Add wound</Button></td>
-        </tr>;
+                        onClick={() => this.handleSubmit()}>Add wound</Button>
+    </div>;
     }
 }
 

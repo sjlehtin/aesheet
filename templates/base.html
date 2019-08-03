@@ -9,7 +9,6 @@
 
     <link rel="stylesheet" type="text/css"
           href="{{ STATIC_URL}}style.css" />
-{#    <script src="{{ STATIC_URL}}jquery.js"></script>#}
     <title>{% block title %}AE Sheet{% endblock %}</title>
 </head>
 
@@ -68,7 +67,7 @@
           </div>
       {% endfor %}
   </div>
-  <div id="content" class="container">
+  <div id="content" class="container-fluid">
     {% block content %}{% endblock %}
   </div>
   {% block script %}

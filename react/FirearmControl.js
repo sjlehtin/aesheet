@@ -407,7 +407,7 @@ class FirearmControl extends RangedWeaponRow {
             <Row>
                 <Col md={8}>
                     <Row>
-                        <div>
+                        <Col>
                         <table style={{fontSize: 'inherit'}}>
                             <thead>
                             <tr>
@@ -471,6 +471,7 @@ class FirearmControl extends RangedWeaponRow {
                                 <th style={inlineHeaderStyle} colSpan={2}>Weigth</th>
                                 <th style={inlineHeaderStyle} colSpan={2}>Sight</th>
                                 <th style={inlineHeaderStyle} colSpan={2}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
+                                <th style={inlineHeaderStyle} colSpan={6}>Notes</th>
                                 <td style={cellStyle} rowSpan={2} colSpan={3}>
                                     <Button onClick={(e) => this.handleScopeRemove()}
                                         ref={(c) => this._scopeRemoveButton = c}
@@ -482,6 +483,7 @@ class FirearmControl extends RangedWeaponRow {
                                 <td style={cellStyle} colSpan={2}>{scope.weight}</td>
                                 <td style={cellStyle} colSpan={2}>{scope.sight}</td>
                                 <td style={cellStyle} colSpan={2}>{scope.target_i_mod}</td>
+                                <td style={cellStyle} colSpan={6}>{scope.notes}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -491,10 +493,12 @@ class FirearmControl extends RangedWeaponRow {
                         <Button onClick={(e) => this.handleRemove()}
                                 ref={(c) => this._removeButton = c}
                                 size="sm">Remove</Button>
-                        </div>
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderSweepTable()}
+                        </Col>
                     </Row>
                 </Col>
                 <Col md={3}>

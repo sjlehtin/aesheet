@@ -39,7 +39,8 @@ class AddMiscellaneousItemRow extends React.Component {
     }
 
     render() {
-        return <tfoot>
+        return <table>
+            <tbody>
         <tr style={this.props.style}>
             <td>
             <Combobox data={this.state.choices}
@@ -59,7 +60,8 @@ class AddMiscellaneousItemRow extends React.Component {
                 <a href="/sheets/add_miscellaneous_item/">Create a new item</a>
             </td>
         </tr>
-        </tfoot>
+            </tbody>
+        </table>;
     }
 }
 

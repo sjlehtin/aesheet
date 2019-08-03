@@ -824,7 +824,7 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Advancing initiatives</Loading>;
         }
-        return <InitiativeBlock style={{fontSize: "80%"}}
+        return <InitiativeBlock className="m-1" style={{fontSize: "80%"}}
                                 stats={skillHandler} />;
     }
 
@@ -834,7 +834,7 @@ class StatBlock extends React.Component {
         }
 
         if (this.state.char.portrait) {
-            return <Image style={{maxWidth: 300}}
+            return <Image className={"align-middle m-1"} fluid style={{maxWidth: 300, alignSelf: "center"}}
                                   src={this.state.char.portrait} rounded />;
         } else {
             var editURL = `/characters/edit_char/${this.state.char.id}/`;
@@ -984,12 +984,13 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Firearms</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             {rows}
-
-            <AddFirearmControl campaign={this.state.char.campaign}
-            onFirearmAdd={(fa) => this.handleFirearmAdded(fa) }/>
             </Card.Body>
+            <Card.Footer>
+            <AddFirearmControl campaign={this.state.char.campaign}
+                onFirearmAdd={(fa) => this.handleFirearmAdded(fa) }/>
+            </Card.Footer>
         </Card>;
     }
 
@@ -1021,11 +1022,13 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Close combat</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             {rows}
+            </Card.Body>
+            <Card.Footer>
             <AddWeaponControl campaign={this.state.char.campaign}
             onAdd={(fa) => this.handleWeaponAdded(fa) }/>
-            </Card.Body>
+            </Card.Footer>
         </Card>;
 
     }
@@ -1058,12 +1061,14 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Ranged weapons</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             {rows}
+            </Card.Body>
+            <Card.Footer>
             <AddRangedWeaponControl campaign={this.state.char.campaign}
                               onAdd={
                               (rw) => this.handleRangedWeaponAdded(rw) }/>
-            </Card.Body>
+            </Card.Footer>
         </Card>;
 
     }
@@ -1089,7 +1094,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Transient effects</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             <Table striped>
                 <thead>
                 <tr><th>Effect</th></tr>
@@ -1097,11 +1102,13 @@ class StatBlock extends React.Component {
                 <tbody>
                 {rows}
                 </tbody>
+            </Table>
+            </Card.Body>
+            <Card.Footer>
                 <AddTransientEffectControl
                     campaign={this.state.char.campaign}
                     onAdd={(eff) => this.handleTransientEffectAdded(eff) }/>
-            </Table>
-            </Card.Body>
+            </Card.Footer>
         </Card>;
     }
 
@@ -1126,7 +1133,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Miscellaneous items</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             <Table striped>
                 <thead>
                 <tr><th>Item</th></tr>
@@ -1134,11 +1141,13 @@ class StatBlock extends React.Component {
                 <tbody>
                 {rows}
                 </tbody>
+            </Table>
+            </Card.Body>
+            <Card.Footer>
                 <AddMiscellaneousItemControl
                     campaign={this.state.char.campaign}
                     onAdd={(eff) => this.handleMiscellaneousItemAdded(eff) }/>
-            </Table>
-            </Card.Body>
+            </Card.Footer>
         </Card>;
     }
 
@@ -1163,7 +1172,7 @@ class StatBlock extends React.Component {
             <Card.Body>
                 <h4>Edges</h4>
             </Card.Body>
-            <Card.Body>
+            <Card.Body class={"table-responsive"}>
             <Table striped>
                 <thead>
                 <tr><th>Edge</th></tr>
@@ -1171,11 +1180,13 @@ class StatBlock extends React.Component {
                 <tbody>
                 {rows}
                 </tbody>
+            </Table>
+            </Card.Body>
+            <Card.Footer>
                 <AddCharacterEdgeControl
                     campaign={this.state.char.campaign}
                     onAdd={(edge) => this.handleEdgeAdded(edge) }/>
-            </Table>
-            </Card.Body>
+            </Card.Footer>
         </Card>;
     }
 
@@ -1199,7 +1210,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Armor</h4>
             </Card.Header>
-            <Card.Body>
+            <Card.Body className={"table-responsive"}>
             <ArmorControl
                 campaign={this.state.char.campaign}
                 armor={this.state.armor}
@@ -1207,6 +1218,7 @@ class StatBlock extends React.Component {
                 miscellaneousItems={this.state.miscellaneousItemList}
                 onHelmChange={(value) => this.handleHelmChanged(value)}
                 onArmorChange={(value) => this.handleArmorChanged(value)}
+                style={{fontSize: "80%"}}
                 />
             </Card.Body>
             </Card>;
@@ -1223,12 +1235,7 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Damage controls</Loading>;
         }
-        return <Card>
-            <Card.Header>
-                <h4>Stamina damage and wounds</h4>
-            </Card.Header>
-            <Card.Body>
-            <DamageControl
+        return <DamageControl
                 character={skillHandler.props.character}
                 handler={skillHandler}
                 wounds={this.state.woundList}
@@ -1236,9 +1243,7 @@ class StatBlock extends React.Component {
                 onWoundRemove={this.handleWoundRemoved.bind(this)}
                 onWoundAdd={this.handleWoundAdded.bind(this)}
                 onMod={this.handleCharacterUpdate.bind(this)}
-            />
-            </Card.Body>
-        </Card>;
+            />;
     }
 
     renderHeader() {
@@ -1275,7 +1280,7 @@ class StatBlock extends React.Component {
             return <Loading>Senses</Loading>
         }
 
-        return <SenseTable handler={handler}/>;
+        return <SenseTable class={"m-1"} handler={handler}/>;
     }
 
     render() {
@@ -1288,6 +1293,7 @@ class StatBlock extends React.Component {
         return (
             <Container fluid={true}>
                 {this.renderHeader()}
+                <Row>
                 <Col md={8}>
                     <Row>
                         <Col md={6}>
@@ -1307,7 +1313,7 @@ class StatBlock extends React.Component {
                             </Row>
                         </Col>
                         <Col md={6}>
-                            <Row style={{paddingBottom: 5}}>
+                            <Row>
                                 {this.renderPortrait()}
                             </Row>
                             <Row>
@@ -1327,36 +1333,55 @@ class StatBlock extends React.Component {
                         </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderDamages(skillHandler)}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderCCWeapons(skillHandler)}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderFirearms(skillHandler)}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderRangedWeapons(skillHandler)}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderEdges()}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderMiscellaneousItems()}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderTransientEffects()}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderInventory()}
+                        </Col>
                     </Row>
                     <Row>
+                        <Col>
                         {this.renderCharacterNotes()}
+                        </Col>
                     </Row>
                 </Col>
                 <Col md={4}>
                     {this.renderSkills(skillHandler)}
                 </Col>
+                </Row>
             </Container>
         )
     }

@@ -88,13 +88,13 @@ class AddFirearmControl extends React.Component {
     }
 
     render () {
-        return <div>
-            <Row>
+        return <Row >
+            <Col>
             <table>
                 <tbody>
                 <tr>
                     <td><label>Firearm</label></td>
-                    <td style={{minWidth: "20em"}}><DropdownList data={this.state.firearmChoices}
+                    <td style={{minWidth: "15em"}}><DropdownList data={this.state.firearmChoices}
                                   textField='name'
                                   open={this.state.isOpen}
                                   busy={this.state.isBusy}
@@ -128,8 +128,8 @@ class AddFirearmControl extends React.Component {
                 <div><a href="/sheets/add_firearm/">Create a new firearm</a>
                     <a href="/sheets/add_ammunition/">Create new ammo</a>
                 </div>
+            </Col>
             </Row>
-        </div>
     }
 }
 

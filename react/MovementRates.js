@@ -33,12 +33,12 @@ class MovementRates extends React.Component {
         milesPerHourRow.push(<td key="mph-fly">{util.roundup(flySpeed/15)}</td>);
 
         return <div>
-            <Card>
+            <Card className={"m-1"}>
                 <Card.Header>
                     <h4>Movement rates per turn</h4>
                 </Card.Header>
-                <Card.Body>
-            <Table>
+                <Card.Body class={"table-responsive"}>
+            <Table size={"sm"}>
                 <thead><tr><th>Jump</th><th>Climb</th><th>Swim</th>
                     <th>Sneak</th><th>Run</th><th>Sprint</th><th>Fly</th>
                 </tr></thead>
@@ -56,12 +56,12 @@ class MovementRates extends React.Component {
             </Table>
             </Card.Body>
         </Card>
-        <Card>
+        <Card className={"m-1"}>
             <Card.Header>
                 <h4>Overland movement</h4>
             </Card.Header>
-            <Card.Body>
-                <Table>
+            <Card.Body class={"table-responsive"}>
+                <Table size={"sm"}>
                     <thead><tr>
                         <td/>
                         {terrainsRow}

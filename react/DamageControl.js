@@ -31,7 +31,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
+import { Button, Table, Card } from 'react-bootstrap';
 import Octicon from 'react-octicon'
 
 import SkillHandler from './SkillHandler';
@@ -81,7 +81,7 @@ class DamageControl extends React.Component {
     }
 
     isValid() {
-        return this.validationState() == "success";
+        return this.validationState() === "success";
     }
 
     handleKeyDown(e) {
@@ -144,12 +144,10 @@ class DamageControl extends React.Component {
             />;});
         var wounds = <Table>
                 <thead>
-                <tr><th style={{width: "12em"}}>Loc</th><th style={{width: "8em"}}>Type</th><th style={{width: "5em"}}>Dmg</th><th colSpan={2}>Effect</th></tr>
+                <tr><th style={{width: "8em"}}>Loc</th><th style={{width: "8em"}}>Type</th><th style={{width: "5em"}}>Dmg</th><th colSpan={2} style={{minWidth: "10em"}}>Effect</th></tr>
                 </thead>
                 <tbody>
                 {rows}
-                <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)}
-                                 toughness={this.props.handler.edgeLevel("Toughness")}/>
                 </tbody>
             </Table>;
 
@@ -161,7 +159,12 @@ class DamageControl extends React.Component {
                                 title="The character is dead due to massive damage">✟</span>;
         }
 
-        return (<div style={this.props.style}>
+        return (<Card>
+            <Card.Header>
+                <h4>Stamina damage and wounds</h4>
+            </Card.Header>
+            <Card.Body className={"table-responsive"}>
+                <div style={this.props.style}>
             <div><label>Body: </label><span style={{marginLeft: "1em"}}>{stats.body - bodyDamage} / {stats.body} {deathSymbol}</span></div>
             {damage}
             <label>Stamina: </label>
@@ -192,7 +195,13 @@ class DamageControl extends React.Component {
                     onClick={(e) => this.handleClear()}>Clear{loading}</Button>
             <WoundPenaltyBox handler={this.props.handler}/>
             {wounds}
-        </div>);
+        </div>
+                </Card.Body>
+            <Card.Footer>
+                <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)}
+                                 toughness={this.props.handler.edgeLevel("Toughness")}/>
+            </Card.Footer>
+        </Card>);
     }
 }
 

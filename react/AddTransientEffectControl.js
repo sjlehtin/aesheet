@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {Button} from 'react-bootstrap';
+import {Button, Row, Col} from 'react-bootstrap';
 import Combobox from 'react-widgets/lib/Combobox';
 
 const rest = require('./sheet-rest');
@@ -39,27 +39,23 @@ class AddTransientEffectRow extends React.Component {
     }
 
     render() {
-        return <tfoot>
-        <tr style={this.props.style}>
-            <td>
+        return <Row>
+            <Col>
             <Combobox data={this.state.choices}
                       value={this.state.selectedEffect}
                       busy={this.state.isBusy}
                       textField="name"
                       filter="contains"
                       onChange={(value) => this.handleChange(value)} />
-            </td>
-        </tr>
-        <tr>
-            <td>
+            </Col>
+            <Col>
             <Button size="sm" disabled={!this.isValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Effect</Button>
                 <a href="/sheets/add_transient_effect/">Create a new effect</a>
-            </td>
-        </tr>
-        </tfoot>
+            </Col>
+        </Row>;
     }
 }
 

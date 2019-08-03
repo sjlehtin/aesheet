@@ -108,7 +108,7 @@ class ArmorControl extends React.Component {
         }
         armorStats.push(<tbody key={0}>{locations}</tbody>);
 
-        return <div><div>{armors.join(', ')}
+        return <div style={this.props.style}><div>{armors.join(', ')}
             <Button ref={(c) => this._editButton = c} onClick={
                 () => this.setState({editing: !this.state.editing})}>Edit</Button>
         </div>
