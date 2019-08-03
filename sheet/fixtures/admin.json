@@ -1,0 +1,20 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$30000$YtfPdivhIfzh$tHQa8SqBJikb15ovn4rX9MVZjC562v5iUzlcI90hIbQ=",
+      "last_login": "2019-07-26T03:50:38.645",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "sjl@iki.fi",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2015-12-10T22:40:50.147",
+      "groups": [],
+      "user_permissions": []
+    }
+  }
+]
