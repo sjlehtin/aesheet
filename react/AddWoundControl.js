@@ -6,8 +6,8 @@ import { Button, FormControl } from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 
-var util = require('./sheet-util');
-var rest = require('./sheet-rest');
+const util = require('./sheet-util');
+const rest = require('./sheet-rest');
 
 class AddWoundControl extends React.Component {
     constructor(props) {
@@ -21,10 +21,10 @@ class AddWoundControl extends React.Component {
     }
 
     findEffect(wound) {
-        var choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
+        const choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
 
 
-        var effDamage = wound.damage - this.props.toughness;
+        const effDamage = wound.damage - this.props.toughness;
         if (effDamage < 0) {
             return choices[0];
         }
@@ -73,11 +73,8 @@ class AddWoundControl extends React.Component {
             return false;
         }
 
-        if (!AddWoundControl.isLocationValid(this.state.selectedLocation) ||
-            !AddWoundControl.isDamageTypeValid(this.state.selectedType)) {
-            return false;
-        }
-        return true;
+        return AddWoundControl.isLocationValid(this.state.selectedLocation) &&
+            AddWoundControl.isDamageTypeValid(this.state.selectedType);
     }
 
     static isDamageTypeValid(type) {
@@ -113,8 +110,9 @@ class AddWoundControl extends React.Component {
     }
 
     render() {
-        var woundChoices = AddWoundControl.getWoundChoices(
+        const woundChoices = AddWoundControl.getWoundChoices(
             this.state.selectedLocation, this.state.selectedType);
+
 
         return <tr>
             <td><Combobox data={AddWoundControl.locations}
@@ -122,16 +120,14 @@ class AddWoundControl extends React.Component {
                           valueField='location'
                           value={this.state.selectedLocation}
                           filter="contains"
-                          onChange={(value) => this.handleLocationChange(value)}
-                          ref={(c) => { if (c) { this._locationField = c }}} />
+                          onChange={(value) => this.handleLocationChange(value)} />
             </td>
             <td><Combobox data={AddWoundControl.damageTypes}
                           textField='description'
                           valueField='type'
                           value={this.state.selectedType}
                           filter="contains"
-                          onChange={(value) => this.handleTypeChange(value)}
-                          ref={(c) => { if (c) { this._typeField = c }}} />
+                          onChange={(value) => this.handleTypeChange(value)} />
             </td>
             <td><FormControl size="sm" type="text" value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}

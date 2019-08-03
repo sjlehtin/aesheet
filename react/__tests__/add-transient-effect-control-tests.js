@@ -63,7 +63,7 @@ describe('AddTransientEffectControl', function() {
             TestUtils.Simulate.click(node);
             expect(callback).toHaveBeenCalled();
             done();
-        }).then((err) => fail(err));
+        }).catch((err) => done.fail(err));
     });
 
     it("does not allow invalid values to be added", function () {

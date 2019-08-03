@@ -82,7 +82,6 @@ describe('AddWoundControl', function() {
         TestUtils.Simulate.change(addControl._damageInputField,
             {target: {value: 5}});
 
-        console.log("testing foo?");
         // Cannot easily trigger change with the Combobox.
         addControl.handleLocationChange("Foo");
 
