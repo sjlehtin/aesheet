@@ -1,9 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {Button} from 'react-bootstrap';
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class AddTransientEffectRow extends React.Component {
     constructor(props) {
@@ -51,7 +52,7 @@ class AddTransientEffectRow extends React.Component {
         </tr>
         <tr>
             <td>
-            <Button bsSize="small" disabled={!this.isValid()}
+            <Button size="sm" disabled={!this.isValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Effect</Button>
@@ -63,8 +64,8 @@ class AddTransientEffectRow extends React.Component {
 }
 
 AddTransientEffectRow.props = {
-    campaign: React.PropTypes.number.isRequired,
-    onAdd: React.PropTypes.func
+    campaign: PropTypes.number.isRequired,
+    onAdd: PropTypes.func
 };
 
 export default AddTransientEffectRow;

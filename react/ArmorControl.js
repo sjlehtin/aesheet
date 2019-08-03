@@ -1,7 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Button, Input } from 'react-bootstrap';
+
 import AddArmorControl from './AddArmorControl';
-var util = require('./sheet-util');
+const util = require('./sheet-util');
 
 class ArmorControl extends React.Component {
     constructor(props) {
@@ -119,14 +121,14 @@ class ArmorControl extends React.Component {
 }
 
 ArmorControl.propTypes = {
-    tag: React.PropTypes.string,
-    armor: React.PropTypes.object,
-    helm: React.PropTypes.object,
-    miscellaneousItems: React.PropTypes.arrayOf(React.PropTypes.object),
-    effects: React.PropTypes.arrayOf(React.PropTypes.object),
-    campaign: React.PropTypes.number.isRequired,
-    onHelmChange: React.PropTypes.func,
-    onArmorChange: React.PropTypes.func
+    tag: PropTypes.string,
+    armor: PropTypes.object,
+    helm: PropTypes.object,
+    miscellaneousItems: PropTypes.arrayOf(PropTypes.object),
+    effects: PropTypes.arrayOf(PropTypes.object),
+    campaign: PropTypes.number.isRequired,
+    onHelmChange: PropTypes.func,
+    onArmorChange: PropTypes.func
 };
 
 ArmorControl.defaultProps = {miscellaneousItems: []}

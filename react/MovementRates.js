@@ -1,7 +1,9 @@
 import React from 'react';
-import {Table, Panel} from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
-var util = require('./sheet-util');
+import {Table, Card} from 'react-bootstrap';
+
+const util = require('./sheet-util');
 
 class MovementRates extends React.Component {
     constructor(props) {
@@ -30,8 +32,13 @@ class MovementRates extends React.Component {
         milesPerDayRow.push(<td key="mpd-fly">{util.roundup(flySpeed/2)}</td>);
         milesPerHourRow.push(<td key="mph-fly">{util.roundup(flySpeed/15)}</td>);
 
-        return <div><Panel header={<h4>Movement rates per turn</h4>}>
-            <Table condensed fill>
+        return <div>
+            <Card>
+                <Card.Header>
+                    <h4>Movement rates per turn</h4>
+                </Card.Header>
+                <Card.Body>
+            <Table>
                 <thead><tr><th>Jump</th><th>Climb</th><th>Swim</th>
                     <th>Sneak</th><th>Run</th><th>Sprint</th><th>Fly</th>
                 </tr></thead>
@@ -47,9 +54,14 @@ class MovementRates extends React.Component {
                 </tr>
                 </tbody>
             </Table>
-        </Panel>
-            <Panel header={<h4>Overland movement</h4>}>
-                <Table condensed fill>
+            </Card.Body>
+        </Card>
+        <Card>
+            <Card.Header>
+                <h4>Overland movement</h4>
+            </Card.Header>
+            <Card.Body>
+                <Table>
                     <thead><tr>
                         <td/>
                         {terrainsRow}
@@ -59,13 +71,14 @@ class MovementRates extends React.Component {
                     <tr><td>mph</td>{milesPerHourRow}</tr>
                     </tbody>
                 </Table>
-            </Panel>
+            </Card.Body>
+        </Card>
         </div>;
     }
 }
 
 MovementRates.propTypes = {
-    skillHandler: React.PropTypes.object.isRequired
+    skillHandler: PropTypes.object.isRequired
 };
 
 export default MovementRates;

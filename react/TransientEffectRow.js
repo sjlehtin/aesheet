@@ -1,7 +1,8 @@
 import React from 'react';
-var util = require('./sheet-util');
-import {Col, Row, Button} from 'react-bootstrap';
+import PropTypes from 'prop-types';
 import Octicon from 'react-octicon';
+
+const util = require('./sheet-util');
 
 class TransientEffectRow extends React.Component {
     constructor(props) {
@@ -59,8 +60,8 @@ class TransientEffectRow extends React.Component {
 }
 
 TransientEffectRow.props = {
-    effect: React.PropTypes.object.isRequired,
-    onRemove: React.PropTypes.func
+    effect: PropTypes.object.isRequired,
+    onRemove: PropTypes.func
 };
 
 export default TransientEffectRow;

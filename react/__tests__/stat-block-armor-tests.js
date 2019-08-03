@@ -94,7 +94,7 @@ describe('stat block armor handling', function() {
             expect(block.state.helm.base.weight).toEqual(8);
 
             var promise = Promise.resolve({});
-            rest.delete.mockReturnValue(promise);
+            rest.del.mockReturnValue(promise);
 
             block.handleHelmChanged(null);
 
@@ -112,7 +112,7 @@ describe('stat block armor handling', function() {
             expect(block.state.armor.base.weight).toEqual(8);
 
             var promise = Promise.resolve({});
-            rest.delete.mockReturnValue(promise);
+            rest.del.mockReturnValue(promise);
 
             block.handleArmorChanged(null);
 
@@ -130,7 +130,7 @@ describe('stat block armor handling', function() {
             expect(block.state.armor.base.weight).toEqual(8);
 
             var promise = Promise.resolve({});
-            rest.delete.mockReturnValue(promise);
+            rest.del.mockReturnValue(promise);
 
             block.handleArmorChanged(null);
 

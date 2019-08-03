@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import RangedWeaponRow from './RangedWeaponRow';
 import AmmoControl from './AmmoControl';
 import ScopeControl from './ScopeControl';
@@ -473,7 +475,7 @@ class FirearmControl extends RangedWeaponRow {
                                     <Button onClick={(e) => this.handleScopeRemove()}
                                         ref={(c) => this._scopeRemoveButton = c}
                                         disabled={this.props.weapon.scope === null}
-                                        bsSize="xsmall">Remove</Button>
+                                        size="sm">Remove</Button>
                                 </td>
                             </tr>
                             <tr title={"Modifiers counted into checks already"}>
@@ -488,7 +490,7 @@ class FirearmControl extends RangedWeaponRow {
                         </div>
                         <Button onClick={(e) => this.handleRemove()}
                                 ref={(c) => this._removeButton = c}
-                                bsSize="xsmall">Remove</Button>
+                                size="sm">Remove</Button>
                         </div>
                     </Row>
                     <Row>
@@ -505,11 +507,11 @@ class FirearmControl extends RangedWeaponRow {
 }
 
 FirearmControl.props = {
-    skillHandler: React.PropTypes.object.isRequired,
-    weapon: React.PropTypes.object.isRequired,
-    campaign: React.PropTypes.number.isRequired,
-    onRemove: React.PropTypes.func,
-    onChange: React.PropTypes.func
+    skillHandler: PropTypes.object.isRequired,
+    weapon: PropTypes.object.isRequired,
+    campaign: PropTypes.number.isRequired,
+    onRemove: PropTypes.func,
+    onChange: PropTypes.func
 };
 
 export default FirearmControl;

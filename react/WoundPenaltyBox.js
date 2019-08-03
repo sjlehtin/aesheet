@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class WoundPenaltyBox extends React.Component {
     constructor(props) {
@@ -68,7 +69,7 @@ class WoundPenaltyBox extends React.Component {
 }
 
 WoundPenaltyBox.propTypes = {
-    handler: React.PropTypes.object.isRequired,
+    handler: PropTypes.object.isRequired,
 };
 
 export default WoundPenaltyBox;

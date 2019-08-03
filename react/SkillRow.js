@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Octicon from 'react-octicon';
 
@@ -132,17 +133,17 @@ class SkillRow extends React.Component {
 }
 
 SkillRow.propTypes = {
-    skillName: React.PropTypes.string.isRequired,
-    skillHandler: React.PropTypes.object.isRequired,
+    skillName: PropTypes.string.isRequired,
+    skillHandler: PropTypes.object.isRequired,
 
     /* Defaults to stat in the skill, but can be overridden for
        special cases. */
-    renderForStats: React.PropTypes.array,
+    renderForStats: PropTypes.array,
 
-    indent: React.PropTypes.number,
+    indent: PropTypes.number,
 
-    onCharacterSkillRemove: React.PropTypes.func,
-    onCharacterSkillModify: React.PropTypes.func,
+    onCharacterSkillRemove: PropTypes.func,
+    onCharacterSkillModify: PropTypes.func,
 
 
     // TODO: Rest of the props should be unnecessary with skillHandler as
@@ -151,10 +152,10 @@ SkillRow.propTypes = {
     /* Either characterSkill of skillName must be given.  If
        characterSkill is missing, it is assumed that the character does not
        possess the skill. */
-    characterSkill: React.PropTypes.object,
-    skill: React.PropTypes.object.isRequired,
+    characterSkill: PropTypes.object,
+    skill: PropTypes.object.isRequired,
 
-    skillPoints: React.PropTypes.number
+    skillPoints: PropTypes.number
 };
 
 SkillRow.defaultProps = {indent: 0, skillPoints: 0}

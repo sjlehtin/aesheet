@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import { Button, Modal, FormControl } from 'react-bootstrap';
 
 var util = require('./sheet-util');
@@ -115,7 +117,7 @@ class XPControl extends React.Component {
             </span>
             </span>
             <span style={{paddingLeft: 5}}>
-                <Button bsSize="xsmall"
+                <Button size="sm"
                         ref={(c) => this._addButton = c}
                         onClick={this.showEditControl.bind(this)}>
                     Add XP</Button></span>
@@ -151,10 +153,10 @@ class XPControl extends React.Component {
 }
 
 XPControl.propTypes = {
-    url: React.PropTypes.string.isRequired,
-    edgesBought: React.PropTypes.number.isRequired,
-    initialChar: React.PropTypes.object.isRequired,
-    onMod: React.PropTypes.func
+    url: PropTypes.string.isRequired,
+    edgesBought: PropTypes.number.isRequired,
+    initialChar: PropTypes.object.isRequired,
+    onMod: PropTypes.func
 };
 
 export default XPControl;

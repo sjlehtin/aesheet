@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import StatRow from './StatRow';
 import XPControl from './XPControl';
@@ -27,7 +28,7 @@ import MovementRates from './MovementRates';
 import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
 
-import {Grid, Row, Col, Table, Image, Panel, Label} from 'react-bootstrap';
+import {Container, Row, Col, Table, Image, Card, Badge} from 'react-bootstrap';
 
 const rest = require('./sheet-rest');
 const util = require('./sheet-util');
@@ -64,38 +65,32 @@ class StatBlock extends React.Component {
     }
 
     handleFirearmsLoaded(firearmList) {
-        console.log("Firearms loaded");
         this.setState({firearmList: firearmList});
     }
 
     handleWeaponsLoaded(weapons) {
-        console.log("Weapons loaded");
         this.setState({weaponList: weapons});
     }
 
     handleRangedWeaponsLoaded(weapons) {
-        console.log("Ranged weapons loaded");
         this.setState({rangedWeaponList: weapons});
     }
 
     handleTransientEffectsLoaded(effects) {
-        console.log("Transient effects loaded");
         this.setState({transientEffectList: effects});
     }
 
     handleMiscellaneousItemsLoaded(items) {
-        console.log("Miscellaneous items loaded");
         this.setState({miscellaneousItemList: items});
     }
 
     handleSkillsLoaded(skillList, allSkills) {
-        console.log("Skills loaded");
         this.setState({characterSkills: skillList,
         allSkills: allSkills});
     }
 
     getArmorURL(item) {
-        var baseURL = this.props.url + 'sheetarmor/';
+        let baseURL = this.props.url + 'sheetarmor/';
         if (item) {
             return baseURL + item.id + '/';
         } else {
@@ -104,12 +99,11 @@ class StatBlock extends React.Component {
     }
 
     handleArmorLoaded(armor) {
-        console.log("Armor loaded");
         this.setState({armor: armor})
     }
 
     changeArmor(armor, url, finalizer) {
-        var data;
+        let data;
         if ('id' in armor) {
             data = {item: armor.id};
         } else {
@@ -118,9 +112,7 @@ class StatBlock extends React.Component {
                 quality: armor.quality.name
             };
         }
-        console.log("Adding: ", data, armor);
         rest.post(url, data).then((json) => {
-            console.log("POST success", json);
             armor.id = json.id;
             armor.name = json.name;
             finalizer(armor);
@@ -133,7 +125,7 @@ class StatBlock extends React.Component {
         var finalizer = (item) => { this.setState({armor: item}); };
 
         if (armor === null) {
-            rest.delete(this.getArmorURL(this.state.armor)).then(function (json) {
+            rest.del(this.getArmorURL(this.state.armor)).then(function (json) {
                 finalizer({});
             }).catch((err) => {console.log("error", err)});
             return;
@@ -142,7 +134,7 @@ class StatBlock extends React.Component {
     }
 
     getHelmURL(item) {
-        var baseURL = this.props.url + 'sheethelm/';
+        let baseURL = this.props.url + 'sheethelm/';
         if (item) {
             return baseURL + item.id + '/';
         } else {
@@ -151,14 +143,13 @@ class StatBlock extends React.Component {
     }
 
     handleHelmLoaded(helm) {
-        console.log("Helm loaded");
         this.setState({helm: helm})
     }
 
     handleHelmChanged(armor) {
-        var finalizer = (helm) => {this.setState({helm: helm});};
+        let finalizer = (helm) => {this.setState({helm: helm});};
         if (armor === null) {
-            rest.delete(this.getHelmURL(this.state.helm)).then(function (json) {
+            rest.del(this.getHelmURL(this.state.helm)).then(function (json) {
                 finalizer({});
             }).catch((err) => {console.log("error", err)});
             return;
@@ -167,7 +158,6 @@ class StatBlock extends React.Component {
     }
 
     handleEdgesLoaded(characterEdges) {
-        console.log("Edges loaded");
         this.setState({
             characterEdges: characterEdges,
             edgeList: characterEdges.map(
@@ -176,27 +166,26 @@ class StatBlock extends React.Component {
     }
 
     handleWoundsLoaded(wounds) {
-        console.log("Wounds loaded");
         this.setState({woundList: wounds})
     }
 
     handleWoundChanged(data) {
-        var woundId = data.id;
+        let woundId = data.id;
         return rest.patch(this.state.url + `wounds/${woundId}/`,
             data).then((json) => {
-            var index = StatBlock.findItemIndex(
+            let index = StatBlock.findItemIndex(
                 this.state.woundList, data);
-            var wound = Object.assign(this.state.woundList[index], data);
+            let wound = Object.assign(this.state.woundList[index], data);
             this.state.woundList.splice(index, 1, wound);
             this.setState({woundList: this.state.woundList});
         }).catch((err) => console.log(err));
     }
 
     handleWoundRemoved(data) {
-        var woundId = data.id;
-        return rest.delete(this.state.url + `wounds/${woundId}/`).then(
+        let woundId = data.id;
+        return rest.del(this.state.url + `wounds/${woundId}/`).then(
             (json) => {
-            var index = StatBlock.findItemIndex(
+            let index = StatBlock.findItemIndex(
                 this.state.woundList, data);
             this.state.woundList.splice(index, 1);
             this.setState({woundList: this.state.woundList});
@@ -212,7 +201,7 @@ class StatBlock extends React.Component {
     }
 
     getCharacterEdgeURL(edge) {
-        var baseURL = this.state.url + 'characteredges/';
+        let baseURL = this.state.url + 'characteredges/';
         if (edge) {
             return baseURL + edge.id + '/';
         } else {
@@ -221,26 +210,26 @@ class StatBlock extends React.Component {
     }
 
     handleEdgeAdded(data) {
-        // TODO: push data via REST, update characterEdges and regenerate
+        // push data via REST, update characterEdges and regenerate
         // edgeList.
         rest.post(this.getCharacterEdgeURL(), {edge: data.id}).then((json) => {
-            console.log("POST success:", json);
-            var ce = Object.assign({}, json, {edge: data});
-            var newList = this.state.edgeList;
+            let ce = Object.assign({}, json, {edge: data});
+            let newList = this.state.edgeList;
             newList.push(data);
-            var newCEList = this.state.characterEdges;
+            let newCEList = this.state.characterEdges;
             newCEList.push(ce);
             this.setState({
                 edgeList: newList,
                 characterEdges: newCEList
             });
-        }).catch((err) => console.log(err));
+        }).catch((err) =>
+            console.log("Failed adding edge to character:", err));
     }
 
     handleEdgeRemoved(givenEdge) {
         console.log("Removed: ", givenEdge);
-        rest.delete(this.getCharacterEdgeURL(givenEdge)).then((json) => {
-            var index = StatBlock.findItemIndex(
+        rest.del(this.getCharacterEdgeURL(givenEdge)).then((json) => {
+            let index = StatBlock.findItemIndex(
                 this.state.characterEdges, givenEdge);
             this.state.characterEdges.splice(index, 1);
             this.handleEdgesLoaded(this.state.characterEdges);
@@ -276,7 +265,7 @@ class StatBlock extends React.Component {
             err)});
 
         rest.getData(this.props.url + 'sheetarmor/').then((json) => {
-            var obj = {};
+            let obj = {};
             if (json.length > 0) {
                 obj = json[0];
             }
@@ -285,7 +274,7 @@ class StatBlock extends React.Component {
             err)});
 
         rest.getData(this.props.url + 'sheethelm/').then((json) => {
-            var obj = {};
+            let obj = {};
             if (json.length > 0) {
                 obj = json[0];
             }
@@ -294,7 +283,6 @@ class StatBlock extends React.Component {
             err)});
 
         rest.getData(this.props.url).then((sheet) => {
-            console.log("Sheet loaded");
 
             this.setState({
                 sheet: sheet,
@@ -316,11 +304,8 @@ class StatBlock extends React.Component {
 
             rest.getData(this.state.url)
                 .then((character) => {
-                    console.log("Character loaded");
-                    console.log("Loading skills");
                     rest.getData(this.state.url + 'characterskills/').then(
                         (characterSkills) => {
-                            console.log("CS loaded");
                             rest.getData(
                                 `/rest/skills/campaign/${character.campaign}/`)
                                 .then((allSkills) => {
@@ -331,10 +316,6 @@ class StatBlock extends React.Component {
                         }).catch(function (err) {
                             console.log("Failed CS load", err)});
                     this.setState({char: character});
-                    // TODO: for some reason this fails to be called when
-                    // the sheet is loaded for real.  A bug somewhere,
-                    // surely, but where?
-                    console.log("Character set");
                 });
 
         });
@@ -346,9 +327,9 @@ class StatBlock extends React.Component {
     }
 
     bodyHealing(skillHandler) {
-        var level = skillHandler.edgeLevel("Fast Healing");
+        let level = skillHandler.edgeLevel("Fast Healing");
         if (level > 0) {
-            var _lookupFastHealing = {
+            let _lookupFastHealing = {
                 1: "3/8d",
                 2: "3/4d",
                 3: "3/2d",
@@ -438,17 +419,17 @@ class StatBlock extends React.Component {
             var skillList = this.state.characterSkills;
             skillList.push(json);
             this.setState({characterSkills: skillList});
-        }).then((err) => console.log(err));
+        }).catch((err) => console.log("Failed skill add:", err));
     }
 
     handleAddGainedSP(addedSP) {
-        var data = this.state.char,
+        let data = this.state.char,
             newGained = data.gained_sp + addedSP;
 
         rest.patch(this.state.url, {gained_sp: newGained}).then((json) => {
             data.gained_sp = newGained;
             this.setState({char: data});
-        }).then((err) => console.log(err));
+        }).catch((err) => console.log("Failed adding gained sp:", err));
     }
 
     /* TODO:  I think this is the best way to handle the update.  The
@@ -479,9 +460,8 @@ class StatBlock extends React.Component {
     }
 
     handleCharacterSkillRemove(skill) {
-        console.log("Removed: ", skill);
-        rest.delete(this.getCharacterSkillURL(skill)).then((json) => {
-            var index = StatBlock.findItemIndex(
+        rest.del(this.getCharacterSkillURL(skill)).then((json) => {
+            let index = StatBlock.findItemIndex(
                 this.state.characterSkills, skill);
             this.state.characterSkills.splice(index, 1);
             this.setState({characterSkills: this.state.characterSkills});
@@ -527,7 +507,7 @@ class StatBlock extends React.Component {
     }
 
     handleFirearmRemoved(firearm) {
-        rest.delete(this.getFirearmURL(firearm), firearm).then(
+        rest.del(this.getFirearmURL(firearm), firearm).then(
             (json) => {
                 var index = StatBlock.findItemIndex(
                     this.state.firearmList, firearm);
@@ -589,7 +569,7 @@ class StatBlock extends React.Component {
     }
 
     handleWeaponRemoved(weapon) {
-        rest.delete(this.getWeaponURL(weapon), weapon).then(
+        rest.del(this.getWeaponURL(weapon), weapon).then(
             (json) => {
                 var index = StatBlock.findItemIndex(
                     this.state.weaponList, weapon);
@@ -629,7 +609,7 @@ class StatBlock extends React.Component {
     }
 
     handleRangedWeaponRemoved(weapon) {
-        rest.delete(this.getRangedWeaponURL(weapon), weapon).then(
+        rest.del(this.getRangedWeaponURL(weapon), weapon).then(
             (json) => {
                 var index = StatBlock.findItemIndex(
                     this.state.rangedWeaponList, weapon);
@@ -661,7 +641,7 @@ class StatBlock extends React.Component {
     }
 
     handleTransientEffectRemoved(effect) {
-        rest.delete(this.getTransientEffectURL(effect), effect).then(
+        rest.del(this.getTransientEffectURL(effect), effect).then(
             (json) => {
                 var index = StatBlock.findItemIndex(
                     this.state.transientEffectList, effect);
@@ -693,7 +673,7 @@ class StatBlock extends React.Component {
     }
 
     handleMiscellaneousItemRemoved(item) {
-        rest.delete(this.getMiscellaneousItemURL(item), item).then(
+        rest.del(this.getMiscellaneousItemURL(item), item).then(
             (json) => {
                 var index = StatBlock.findItemIndex(
                     this.state.miscellaneousItemList, item);
@@ -720,9 +700,13 @@ class StatBlock extends React.Component {
     }
 
     renderNotes() {
-        return <Panel header={<h4>Notes</h4>}>
+        return <Card>
+            <Card.Header><h4>Notes</h4></Card.Header>
+            <Card.Body>
                     <NoteBlock edges={this.state.edgeList}
-                        effects={this.getAllEffects()} /></Panel>;
+                        effects={this.getAllEffects()} />
+            </Card.Body>
+        </Card>;
     }
 
     renderSkills(skillHandler) {
@@ -996,12 +980,17 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Panel header={<h4>Firearms</h4>}>
+        return <Card>
+            <Card.Header>
+                <h4>Firearms</h4>
+            </Card.Header>
+            <Card.Body>
             {rows}
 
             <AddFirearmControl campaign={this.state.char.campaign}
             onFirearmAdd={(fa) => this.handleFirearmAdded(fa) }/>
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 
     renderCCWeapons(skillHandler) {
@@ -1028,12 +1017,16 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Panel header={<h4>Close combat</h4>}>
+        return <Card>
+            <Card.Header>
+                <h4>Close combat</h4>
+            </Card.Header>
+            <Card.Body>
             {rows}
             <AddWeaponControl campaign={this.state.char.campaign}
             onAdd={(fa) => this.handleWeaponAdded(fa) }/>
-
-        </Panel>;
+            </Card.Body>
+        </Card>;
 
     }
 
@@ -1061,12 +1054,17 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Panel header={<h4>Ranged weapons</h4>}>
+        return <Card>
+            <Card.Header>
+                <h4>Ranged weapons</h4>
+            </Card.Header>
+            <Card.Body>
             {rows}
             <AddRangedWeaponControl campaign={this.state.char.campaign}
                               onAdd={
                               (rw) => this.handleRangedWeaponAdded(rw) }/>
-        </Panel>;
+            </Card.Body>
+        </Card>;
 
     }
 
@@ -1087,8 +1085,12 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Panel header={<h4>Transient effects</h4>}>
-            <Table striped fill>
+        return <Card>
+            <Card.Header>
+                <h4>Transient effects</h4>
+            </Card.Header>
+            <Card.Body>
+            <Table striped>
                 <thead>
                 <tr><th>Effect</th></tr>
                 </thead>
@@ -1099,7 +1101,8 @@ class StatBlock extends React.Component {
                     campaign={this.state.char.campaign}
                     onAdd={(eff) => this.handleTransientEffectAdded(eff) }/>
             </Table>
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 
     renderMiscellaneousItems() {
@@ -1119,8 +1122,12 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Panel header={<h4>Miscellaneous items</h4>}>
-            <Table striped fill>
+        return <Card>
+            <Card.Header>
+                <h4>Miscellaneous items</h4>
+            </Card.Header>
+            <Card.Body>
+            <Table striped>
                 <thead>
                 <tr><th>Item</th></tr>
                 </thead>
@@ -1131,7 +1138,8 @@ class StatBlock extends React.Component {
                     campaign={this.state.char.campaign}
                     onAdd={(eff) => this.handleMiscellaneousItemAdded(eff) }/>
             </Table>
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 
     renderEdges() {
@@ -1151,8 +1159,12 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Panel header={<h4>Edges</h4>}>
-            <Table striped fill>
+        return <Card>
+            <Card.Body>
+                <h4>Edges</h4>
+            </Card.Body>
+            <Card.Body>
+            <Table striped>
                 <thead>
                 <tr><th>Edge</th></tr>
                 </thead>
@@ -1163,7 +1175,8 @@ class StatBlock extends React.Component {
                     campaign={this.state.char.campaign}
                     onAdd={(edge) => this.handleEdgeAdded(edge) }/>
             </Table>
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 
     renderInventory() {
@@ -1182,7 +1195,11 @@ class StatBlock extends React.Component {
         if (!this.state.char || !this.state.armor || !this.state.helm) {
             return <Loading>Armor</Loading>;
         }
-        return <Panel header={<h4>Armor</h4>}>
+        return <Card>
+            <Card.Header>
+                <h4>Armor</h4>
+            </Card.Header>
+            <Card.Body>
             <ArmorControl
                 campaign={this.state.char.campaign}
                 armor={this.state.armor}
@@ -1191,7 +1208,8 @@ class StatBlock extends React.Component {
                 onHelmChange={(value) => this.handleHelmChanged(value)}
                 onArmorChange={(value) => this.handleArmorChanged(value)}
                 />
-            </Panel>;
+            </Card.Body>
+            </Card>;
     }
 
     renderMovementRates(skillHandler) {
@@ -1205,7 +1223,11 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Damage controls</Loading>;
         }
-        return <Panel header={<h4>Stamina damage and wounds</h4>}>
+        return <Card>
+            <Card.Header>
+                <h4>Stamina damage and wounds</h4>
+            </Card.Header>
+            <Card.Body>
             <DamageControl
                 character={skillHandler.props.character}
                 handler={skillHandler}
@@ -1215,7 +1237,8 @@ class StatBlock extends React.Component {
                 onWoundAdd={this.handleWoundAdded.bind(this)}
                 onMod={this.handleCharacterUpdate.bind(this)}
             />
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 
     renderHeader() {
@@ -1225,19 +1248,24 @@ class StatBlock extends React.Component {
 
         var privateNotification = '';
         if (this.state.char.private) {
-            privateNotification = <Label bsStyle="danger">Private</Label>;
+            privateNotification = <Badge variant="danger">Private</Badge>;
         }
 
         return <Row>
-                <Col md={2}><h1>{this.state.char.name}</h1></Col>
-                <Col md={2}><a href={`/characters/edit_char/${this.state.char.id}/`}>Edit base character</a></Col>
-                <Col md={2}><a href={`/characters/edit_sheet/${this.state.sheet.id}/`}>Edit base sheet</a></Col>
-                <Col md={2}><a href={`/sheets/copy/${this.state.sheet.id}`}>Copy this sheet</a></Col>
-                <Col md={2}>
-                    <Panel header={<h4>Owner</h4>}>
+                <Col><h1>{this.state.char.name}</h1></Col>
+                <Col><a href={`/characters/edit_char/${this.state.char.id}/`}>Edit base character</a></Col>
+                <Col><a href={`/characters/edit_sheet/${this.state.sheet.id}/`}>Edit base sheet</a></Col>
+                <Col><a href={`/sheets/copy/${this.state.sheet.id}`}>Copy this sheet</a></Col>
+                <Col>
+                    <Card>
+                    <Card.Header>
+                        <h4>Owner</h4>
+                    </Card.Header>
+                        <Card.Body>
                         <span style={{marginRight: "1em"}}>{this.state.sheet.owner}</span>
                         {privateNotification}
-                    </Panel>
+                        </Card.Body>
+                    </Card>
                 </Col>
             </Row>;
     }
@@ -1258,7 +1286,7 @@ class StatBlock extends React.Component {
         }
 
         return (
-            <Grid>
+            <Container fluid={true}>
                 {this.renderHeader()}
                 <Col md={8}>
                     <Row>
@@ -1329,16 +1357,16 @@ class StatBlock extends React.Component {
                 <Col md={4}>
                     {this.renderSkills(skillHandler)}
                 </Col>
-            </Grid>
+            </Container>
         )
     }
 }
 
 StatBlock.propTypes = {
-    url: React.PropTypes.string.isRequired,
-    onCharacterSkillAdd: React.PropTypes.func,
-    onCharacterSkillRemove: React.PropTypes.func,
-    onCharacterSkillModify: React.PropTypes.func
+    url: PropTypes.string.isRequired,
+    onCharacterSkillAdd: PropTypes.func,
+    onCharacterSkillRemove: PropTypes.func,
+    onCharacterSkillModify: PropTypes.func
 };
 
 export default StatBlock;

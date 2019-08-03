@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import DropdownList from 'react-widgets/lib/DropdownList';
 
@@ -65,9 +66,9 @@ class ScopeControl extends React.Component {
 }
 
 ScopeControl.props = {
-    scope: React.PropTypes.object.isRequired,
-    url: React.PropTypes.string,
-    onChange: React.PropTypes.func
+    scope: PropTypes.object.isRequired,
+    url: PropTypes.string,
+    onChange: PropTypes.func
 };
 
 export {ScopeControl};

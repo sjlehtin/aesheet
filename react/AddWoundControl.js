@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import { Button, FormControl } from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
@@ -131,7 +133,7 @@ class AddWoundControl extends React.Component {
                           onChange={(value) => this.handleTypeChange(value)}
                           ref={(c) => { if (c) { this._typeField = c }}} />
             </td>
-            <td><FormControl bsSize="small" type="text" value={this.state.damage} onChange={
+            <td><FormControl size="sm" type="text" value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
                 ref={(c) => { if (c) { this._damageInputField = ReactDOM.findDOMNode(c)}}} />
             </td>
@@ -141,7 +143,7 @@ class AddWoundControl extends React.Component {
                           onChange={(value) => this.handleEffectChange(value)} />
             </td>
             <td>
-                <Button bsSize="small"
+                <Button size="sm"
                         disabled={!this.isValid()}
                         ref={(c) => { if (c) { this._addButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleSubmit()}
@@ -151,8 +153,8 @@ class AddWoundControl extends React.Component {
 }
 
 AddWoundControl.propTypes = {
-    onAdd: React.PropTypes.func,
-    toughness: React.PropTypes.number
+    onAdd: PropTypes.func,
+    toughness: PropTypes.number
 };
 
 AddWoundControl.defaultProps = {

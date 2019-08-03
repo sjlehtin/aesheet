@@ -58,14 +58,14 @@ describe('stat block wounds handling', function() {
         var tree = factories.statBlockTreeFactory({wounds: [
             {id: 2, damage: 5, healed: 0},
             {id: 5, damage: 3, healed: 2}]});
-        rest.delete.mockClear();
+        rest.del.mockClear();
         var patchPromise = Promise.resolve({});
-        rest.delete.mockReturnValue(patchPromise);
+        rest.del.mockReturnValue(patchPromise);
         tree.afterLoad(function () {
             var woundRows = TestUtils.scryRenderedComponentsWithType(tree, WoundRow);
             TestUtils.Simulate.click(woundRows[0]._removeButton);
 
-            expect(rest.delete.mock.calls[0]).toEqual(['/rest/characters/2/wounds/2/']);
+            expect(rest.del.mock.calls[0]).toEqual(['/rest/characters/2/wounds/2/']);
 
             patchPromise.then(() => {
                 var statBlock = TestUtils.findRenderedComponentWithType(tree, StatBlock);

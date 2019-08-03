@@ -1,9 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import { Button, Input, Row } from 'react-bootstrap';
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class AddArmorControl extends React.Component {
     constructor(props) {
@@ -131,7 +132,7 @@ class AddArmorControl extends React.Component {
                 </tr>
                 </tbody>
             </table>
-            <Button bsSize="small" disabled={!this.fieldsValid()}
+            <Button size="sm" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Set</Button>
@@ -142,8 +143,8 @@ class AddArmorControl extends React.Component {
 }
 
 AddArmorControl.propTypes = {
-    tag: React.PropTypes.string,
-    onChange: React.PropTypes.func
+    tag: PropTypes.string,
+    onChange: PropTypes.func
 };
 
 AddArmorControl.defaultProps = {tag: "Armor"}

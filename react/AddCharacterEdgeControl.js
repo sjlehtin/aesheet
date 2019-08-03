@@ -1,11 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class AddEdgeLevelControl extends React.Component {
     constructor(props) {
@@ -19,7 +19,6 @@ class AddEdgeLevelControl extends React.Component {
 
     loadEdgeLevels() {
         this.setState({isBusy: true});
-        console.log("Campaign:", this.props.campaign);
         rest.getData(`/rest/edgelevels/campaign/${this.props.campaign}/`).then(
             (json) => {
                 this.setState({
@@ -80,7 +79,7 @@ class AddEdgeLevelControl extends React.Component {
                                   value={this.state.selectedEdgeLevel}
                                   onChange={(value) => this.handleEdgeLevelChange(value) }
                 />
-            <Button bsSize="small" disabled={!this.fieldsValid()}
+            <Button size="sm" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add EdgeLevel</Button>
@@ -95,8 +94,8 @@ class AddEdgeLevelControl extends React.Component {
 }
 
 AddEdgeLevelControl.propTypes = {
-    campaign: React.PropTypes.number.isRequired,
-    onAdd: React.PropTypes.func
+    campaign: PropTypes.number.isRequired,
+    onAdd: PropTypes.func
 };
 
 export default AddEdgeLevelControl;

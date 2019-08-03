@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
@@ -110,7 +110,7 @@ class AddSkillControl extends React.Component {
                 </tr>
                 </tbody>
             </table>
-            <Button bsSize="small" disabled={!this.skillValid()}
+            <Button size="sm" disabled={!this.skillValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Skill</Button>
@@ -119,9 +119,9 @@ class AddSkillControl extends React.Component {
 }
 
 AddSkillControl.propTypes = {
-    characterSkillMap: React.PropTypes.object.isRequired,
-    allSkills: React.PropTypes.array.isRequired,
-    onCharacterSkillAdd: React.PropTypes.func
+    characterSkillMap: PropTypes.object.isRequired,
+    allSkills: PropTypes.array.isRequired,
+    onCharacterSkillAdd: PropTypes.func
 };
 
 export default AddSkillControl;

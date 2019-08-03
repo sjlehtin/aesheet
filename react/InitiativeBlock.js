@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import {Panel, Table, Input} from 'react-bootstrap';
+import {Card, Table} from 'react-bootstrap';
 
-var util = require('./sheet-util');
+const util = require('./sheet-util');
 
 class InitiativeBlock extends React.Component {
 
@@ -27,9 +28,12 @@ class InitiativeBlock extends React.Component {
         var getItems = function (initiatives) {
             return initiatives.map((init, ii) => { return <td key={ii}>{init}</td>; });
         }
-        return <Panel style={this.props.style} header={
-          <h4>Initiative penalty for advancing in combat</h4>}>
-            <Table style={{fontSize: "inherit"}} fill>
+        return <Card style={this.props.style}>
+            <Card.Header>
+                <h4>Initiative penalty for advancing in combat</h4>
+            </Card.Header>
+            <Card.Body>
+            <Table style={{fontSize: "inherit"}}>
                 <thead>
                     <tr>
                         <th>Distance</th>
@@ -49,12 +53,13 @@ class InitiativeBlock extends React.Component {
                 <tr><td>Ranged / casting</td>{getItems(ranged)}</tr>
                 </tbody>
             </Table>
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 }
 
 InitiativeBlock.propTypes = {
-    stats: React.PropTypes.object.isRequired,
+    stats: PropTypes.object.isRequired,
 };
 
 export default InitiativeBlock;

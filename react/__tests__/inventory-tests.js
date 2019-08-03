@@ -144,15 +144,15 @@ describe('Inventory', function() {
 
             //TestUtils.Simulate.click(inventory._addButton);
             //
-            rest.delete.mockReturnValue(jsonResponse());
+            rest.del.mockReturnValue(jsonResponse());
 
             inventory.handleRemove(0);
 
             Promise.all(promises).then((data) => {
-                expect(rest.delete.mock.calls.length).toEqual(1);
-                expect(rest.delete.mock.calls[0][0]).toEqual(
+                expect(rest.del.mock.calls.length).toEqual(1);
+                expect(rest.del.mock.calls[0][0]).toEqual(
                     '/rest/sheets/1/inventory/1/');
-                expect(rest.delete.mock.calls[0][1]).toEqual(
+                expect(rest.del.mock.calls[0][1]).toEqual(
                     initialElem);
                 expect(inventory.state.inventory.length).toEqual(0);
                 done();
@@ -224,7 +224,7 @@ describe('Inventory', function() {
         var inventory = getInventory({onWeightChange: callback});
 
         Promise.all(promises).then((data) => {
-            rest.delete.mockReturnValue(jsonResponse());
+            rest.del.mockReturnValue(jsonResponse());
 
             inventory.handleRemove(0);
 

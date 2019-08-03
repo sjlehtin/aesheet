@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import {Button, Col, Row} from 'react-bootstrap';
 import DropdownList from 'react-widgets/lib/DropdownList';
 import AddFirearmControl from './AddFirearmControl';
 
@@ -68,9 +68,9 @@ class AmmoControl extends React.Component {
 }
 
 AmmoControl.props = {
-    ammo: React.PropTypes.object.isRequired,
-    url: React.PropTypes.string,
-    onChange: React.PropTypes.func
+    ammo: PropTypes.object.isRequired,
+    url: PropTypes.string,
+    onChange: PropTypes.func
 };
 
 export {AmmoControl};

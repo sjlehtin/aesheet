@@ -29,6 +29,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import { Button, Modal, Input, ButtonInput, Table } from 'react-bootstrap';
 import Octicon from 'react-octicon'
 
@@ -176,14 +178,14 @@ class DamageControl extends React.Component {
             <span> / {stats.stamina}</span>
             <Button
                 style={{marginLeft: "1em"}}
-                bsSize="xsmall"
+                size="sm"
                     ref={(c) =>
                       c ? this._changeButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
 
             <Button style={{marginLeft: ".5em"}}
-                    bsSize="xsmall"
+                    size="sm"
                     ref={(c) =>
                       c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
@@ -195,12 +197,12 @@ class DamageControl extends React.Component {
 }
 
 DamageControl.propTypes = {
-    handler: React.PropTypes.object.isRequired,
-    wounds: React.PropTypes.arrayOf(React.PropTypes.object),
-    onMod: React.PropTypes.func,
-    onWoundMod: React.PropTypes.func,
-    onWoundRemove: React.PropTypes.func,
-    onWoundAdd: React.PropTypes.func
+    handler: PropTypes.object.isRequired,
+    wounds: PropTypes.arrayOf(PropTypes.object),
+    onMod: PropTypes.func,
+    onWoundMod: PropTypes.func,
+    onWoundRemove: PropTypes.func,
+    onWoundAdd: PropTypes.func
 };
 
 DamageControl.defaultProps = {

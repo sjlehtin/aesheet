@@ -1,6 +1,8 @@
 import React from 'react';
-var util = require('./sheet-util');
-import {Col, Row, Button} from 'react-bootstrap';
+import PropTypes from 'prop-types';
+
+const util = require('./sheet-util');
+
 import Octicon from 'react-octicon';
 
 class MiscellaneousItemRow extends React.Component {
@@ -27,8 +29,8 @@ class MiscellaneousItemRow extends React.Component {
 }
 
 MiscellaneousItemRow.props = {
-    item: React.PropTypes.object.isRequired,
-    onRemove: React.PropTypes.func
+    item: PropTypes.object.isRequired,
+    onRemove: PropTypes.func
 };
 
 export default MiscellaneousItemRow;

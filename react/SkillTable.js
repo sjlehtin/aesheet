@@ -1,10 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
-var rest = require('./sheet-rest');
-var util = require('./sheet-util');
+const rest = require('./sheet-rest');
+const util = require('./sheet-util');
 
-import {Panel, Table} from 'react-bootstrap';
+import {Card, Table} from 'react-bootstrap';
 import SkillRow from './SkillRow';
 import AddSkillControl from './AddSkillControl';
 
@@ -204,7 +204,12 @@ class SkillTable extends React.Component {
         }
         var opt = this.optimizeAgeSP();
 
-        return <Panel style={this.props.style} header={<h4>Skills</h4>}><Table style={{fontSize: "inherit"}} striped fill>
+        return <Card style={this.props.style}>
+            <Card.Header>
+                <h4>Skills</h4>
+            </Card.Header>
+            <Card.Body>
+            <Table style={{fontSize: "inherit"}} striped>
             <thead>
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
             </thead>
@@ -234,15 +239,16 @@ class SkillTable extends React.Component {
                              allSkills={this.props.skillHandler.props.allSkills}
                              onCharacterSkillAdd={this.props.onCharacterSkillAdd}
                              style={this.props.style}/>
-        </Panel>;
+            </Card.Body>
+        </Card>;
     }
 }
 
 SkillTable.propTypes = {
-    skillHandler: React.PropTypes.object.isRequired,
-    onCharacterSkillAdd: React.PropTypes.func,
-    onCharacterSkillRemove: React.PropTypes.func,
-    onCharacterSkillModify: React.PropTypes.func,
+    skillHandler: PropTypes.object.isRequired,
+    onCharacterSkillAdd: PropTypes.func,
+    onCharacterSkillRemove: PropTypes.func,
+    onCharacterSkillModify: PropTypes.func,
 };
 
 SkillTable.prefilledPhysicalSkills = ["Endurance / run",

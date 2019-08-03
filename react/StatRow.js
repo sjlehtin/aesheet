@@ -1,7 +1,8 @@
 import React from 'react';
 import Octicon from 'react-octicon';
+import PropTypes from 'prop-types';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class StatRow extends React.Component {
     constructor(props) {
@@ -149,12 +150,12 @@ class StatRow extends React.Component {
 }
 
 StatRow.propTypes = {
-    stat: React.PropTypes.string.isRequired,
-    initialChar: React.PropTypes.object.isRequired,
-    effStats: React.PropTypes.object.isRequired,
-    baseStats: React.PropTypes.object.isRequired,
-    url: React.PropTypes.string.isRequired,
-    onMod: React.PropTypes.func
+    stat: PropTypes.string.isRequired,
+    initialChar: PropTypes.object.isRequired,
+    effStats: PropTypes.object.isRequired,
+    baseStats: PropTypes.object.isRequired,
+    url: PropTypes.string.isRequired,
+    onMod: PropTypes.func
 };
 
 export default StatRow;

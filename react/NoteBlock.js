@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {Row, Col, Image} from 'react-bootstrap';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class NoteBlock extends React.Component {
     constructor(props) {
@@ -68,8 +69,8 @@ class NoteBlock extends React.Component {
 }
 
 NoteBlock.propTypes = {
-    edges: React.PropTypes.array,
-    effects: React.PropTypes.array
+    edges: PropTypes.array,
+    effects: PropTypes.array
 };
 
 NoteBlock.defaultProps = {

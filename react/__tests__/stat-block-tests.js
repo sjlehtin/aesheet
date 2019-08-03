@@ -278,11 +278,11 @@ describe('stat block', function() {
             ], []);
 
             var promise = Promise.resolve({});
-            rest.delete.mockReturnValue(promise);
+            rest.del.mockReturnValue(promise);
 
             block.handleCharacterSkillRemove({id: 1});
 
-            expect(rest.delete.mock.calls[0][0]).toEqual(
+            expect(rest.del.mock.calls[0][0]).toEqual(
                 '/rest/characters/2/characterskills/1/');
 
             promise.then(() => {
@@ -391,7 +391,7 @@ describe('stat block', function() {
             factories.firearmFactory({id: 5})]);
 
             var promise = Promise.resolve({});
-            rest.delete.mockReturnValue(promise);
+            rest.del.mockReturnValue(promise);
 
             block.handleFirearmRemoved({id: 3});
 
@@ -399,7 +399,7 @@ describe('stat block', function() {
                 expect(block.state.firearmList.length).toEqual(1);
                 expect(block.state.firearmList[0].id).toEqual(5);
 
-                expect(getAllArgumentsByPosition(rest.delete.mock.calls, 0)).toContain(
+                expect(getAllArgumentsByPosition(rest.del.mock.calls, 0)).toContain(
                     '/rest/sheets/1/sheetfirearms/3/');
                 done();
             }).catch((err) => {fail(err)});

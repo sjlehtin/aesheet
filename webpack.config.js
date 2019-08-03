@@ -1,17 +1,17 @@
 var path = require('path');
 var webpack = require('webpack');
 
-var plugins = [
-        new webpack.ProvidePlugin({
-            'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
-        })
-    ];
+// var plugins = [
+//         new webpack.ProvidePlugin({
+//             'fetch': 'imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch'
+//         })
+//     ];
 
-const minimize = process.argv.indexOf('--no-minimize') === -1;
-
-if (minimize) {
-    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
-}
+// const minimize = process.argv.indexOf('--no-minimize') === -1;
+//
+// if (minimize) {
+//     plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
+// }
 
 module.exports = {
     entry: "main.js",
@@ -24,32 +24,70 @@ module.exports = {
         publicPath: "/static/react/"
     },
 
-    plugins: plugins,
+    // plugins: plugins,
 
     resolve: {
-        root: path.resolve('react'),
-        extensions: ['', '.js', '.jsx', '.css']
+        modules: [path.resolve(__dirname, 'react'), 'node_modules'],
+        extensions: ['.js', '.jsx', '.css']
     },
     module: {
-        loaders: [
+        rules: [
             {
-                test: /\.jsx?$/,
-                loader: "babel",
+                test: /\.m?jsx?$/,
                 exclude: /node_modules/,
-                query: {
-                    presets: ['react', "es2015"]
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["@babel/preset-env", "@babel/preset-react"]
+                    }
                 }
             },
-            { test: /\.css$/, loader: 'style-loader!css-loader?importLoaders=1' },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            importLoaders: 1
+                        }
+                    }
+                ]
+            },
 
             // From React-widgets documentation.
-            { test: /\.less$/, loader: "style-loader!css-loader!less-loader" },
+            {
+                test: /\.less$/,
+                use: [
+                "style-loader",
+                "css-loader",
+                "less-loader"
+                ]
+            },
+            // {
+            //     test: /\.scss$/,
+            //     use: [
+            //     "style-loader",
+            //     "css-loader",
+            //     "scss-loader"
+            //     ]
+            // },
+
+             {
+                test: /\.(sass|scss)$/,
+        loader: [
+          'style-loader',
+          'css-loader',
+            'sass-loader'
+        ]
+      },
+
             { test: /\.gif$/, loader: "url-loader?mimetype=image/png" },
 
-            {test: /\.woff(2)?(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/font-woff" },
-            {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
-            {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
-            {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" }
+            {test: /\.woff(2)?(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=application/font-woff" },
+            {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=application/octet-stream" },
+            {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file-loader" },
+            {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=image/svg+xml" }
 
 //            //{ test: /\.(otf|eot|svg|ttf|woff|woff2).*$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
 //            { test: /\.woff(2)?(\?v=[0-9].[0-9].[0-9])?$/, loader: "url-loader?mimetype=application/font-woff" },

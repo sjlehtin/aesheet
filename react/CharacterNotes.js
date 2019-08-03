@@ -1,6 +1,6 @@
 import React from 'react';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class CharacterNotes extends React.Component {
     constructor(props) {

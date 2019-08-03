@@ -30,8 +30,9 @@ the shortest distance.
 
 */
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import {Table, Panel} from 'react-bootstrap';
+import {Table, Card} from 'react-bootstrap';
 
 class SenseTable extends React.Component {
 
@@ -138,8 +139,12 @@ class SenseTable extends React.Component {
 
     render() {
         const noteStyle = {fontSize: "60%", color: "gray"};
-        return <Panel header={<h4>Senses</h4>}>
-            <Table condensed fill>
+        return <Card>
+            <Card.Header>
+                <h4>Senses</h4>
+            </Card.Header>
+            <Card.Body>
+            <Table>
         <thead>
             <tr>
                 <th />
@@ -178,7 +183,8 @@ class SenseTable extends React.Component {
                 <div>Passive observation checks can be attempted every 6 minutes.</div>
                 <div>Active observation checks can be attempted every 3 minutes.</div>
             </div>
-    </Panel>;
+            </Card.Body>
+    </Card>;
     }
 }
 
@@ -187,7 +193,7 @@ SenseTable.BASE_HEARING_RANGE = 6;
 SenseTable.BASE_SMELL_RANGE  = 3;
 
 SenseTable.propTypes = {
-    handler: React.PropTypes.object.isRequired
+    handler: PropTypes.object.isRequired
 };
 
 export default SenseTable;

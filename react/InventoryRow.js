@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Button, FormControl, FormGroup} from 'react-bootstrap';
 
@@ -234,7 +235,7 @@ class InventoryRow extends React.Component {
             removeButton =
                 <Button
                     ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
-                    bsSize="xsmall"
+                    size="sm"
                     onClick={(e) => {this.handleRemove(e); }}>
                     Remove</Button>;
         } else {
@@ -270,11 +271,11 @@ class InventoryRow extends React.Component {
 }
 
 InventoryRow.propTypes = {
-    onDelete: React.PropTypes.func,
-    onMod: React.PropTypes.func,
-    onChange: React.PropTypes.func,
-    initialEntry: React.PropTypes.object,
-    createNew: React.PropTypes.bool
+    onDelete: PropTypes.func,
+    onMod: PropTypes.func,
+    onChange: PropTypes.func,
+    initialEntry: PropTypes.object,
+    createNew: PropTypes.bool
 };
 
 InventoryRow.defaultProps = { createNew: false };

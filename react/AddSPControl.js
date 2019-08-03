@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import { Button, Input } from 'react-bootstrap';
 
 var util = require('./sheet-util');
@@ -59,7 +61,7 @@ class AddSPControl extends React.Component {
                    onKeyDown={(e) => this.handleKeyDown(e)}
                    style={inputStyle}
             />
-            <Button bsSize="xsmall"
+            <Button size="sm"
                     ref={(c) =>
                       c ? this._addButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid()}
@@ -70,8 +72,8 @@ class AddSPControl extends React.Component {
 }
 
 AddSPControl.propTypes = {
-    initialAgeSP: React.PropTypes.number.isRequired,
-    onAdd: React.PropTypes.func.isRequired
+    initialAgeSP: PropTypes.number.isRequired,
+    onAdd: PropTypes.func.isRequired
 };
 
 export default AddSPControl;

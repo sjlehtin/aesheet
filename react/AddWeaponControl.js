@@ -1,11 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class AddWeaponControl extends React.Component {
     constructor(props) {
@@ -152,7 +152,7 @@ class AddWeaponControl extends React.Component {
                 </tr>
                 </tbody>
             </table>
-            <Button bsSize="small" disabled={!this.fieldsValid()}
+            <Button size="sm" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Weapon</Button>
@@ -167,8 +167,8 @@ class AddWeaponControl extends React.Component {
 }
 
 AddWeaponControl.propTypes = {
-    campaign: React.PropTypes.number.isRequired,
-    onAdd: React.PropTypes.func
+    campaign: PropTypes.number.isRequired,
+    onAdd: PropTypes.func
 };
 
 export default AddWeaponControl;

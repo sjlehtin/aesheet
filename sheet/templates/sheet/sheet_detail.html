@@ -20,11 +20,14 @@
 {% endblock %}
 
 {% block script %}
-<script src="{% static "react/bundle.js" %}"></script>
+<script src="{% static "react/bundle.js" %}">
+</script>
 <script type="application/javascript">
-    var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,
-            {url: '/rest/sheets/{{ sheet.pk }}/'});
-    SheetApp.render(statBlock, document.getElementById('stat-block-container'));
+    var sheetId = {{ sheet.pk }};
+    SheetApp.render(sheetId, document.getElementById('stat-block-container'));
+    {#var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,#}
+    {#        {url: '/rest/sheets/{{ sheet.pk }}/'});#}
+    {#SheetApp.ReactDOM.render(statBlock, document.getElementById('stat-block-container'));#}
 </script>
 
 {% endblock %}

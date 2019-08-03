@@ -1,10 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
+
 import Octicon from 'react-octicon'
 import {Button, FormControl} from 'react-bootstrap';
 
-var util = require('./sheet-util');
-var rest = require('./sheet-rest');
+const util = require('./sheet-util');
+const rest = require('./sheet-rest');
 
 class WoundRow extends React.Component {
     constructor(props) {
@@ -103,7 +105,7 @@ class WoundRow extends React.Component {
             <td onClick={() => this.handleEffectFieldClicked()} ref={(c) => this._effectField = c}>
                 {effectField}</td>
             <td style={{widht: "3em"}}>
-                <Button bsSize="xsmall"
+                <Button size="sm"
                         ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleRemove()}>Heal</Button>
             </td>
@@ -112,9 +114,9 @@ class WoundRow extends React.Component {
 }
 
 WoundRow.propTypes = {
-    wound: React.PropTypes.object.isRequired,
-    onMod: React.PropTypes.func,
-    onRemove: React.PropTypes.func
+    wound: PropTypes.object.isRequired,
+    onMod: PropTypes.func,
+    onRemove: PropTypes.func
 };
 
 export default WoundRow;

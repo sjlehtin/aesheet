@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Table, Button, Input} from 'react-bootstrap';
 
-var util = require('./sheet-util');
-var rest = require('./sheet-rest');
+const util = require('./sheet-util');
+const rest = require('./sheet-rest');
 
 import InventoryRow from './InventoryRow';
 
@@ -72,7 +73,7 @@ class Inventory extends React.Component {
 
     handleRemove(idx) {
         var elem = this.state.inventory[idx];
-        rest.delete(`${this.props.url}${elem.id}/`,
+        rest.del(`${this.props.url}${elem.id}/`,
             this.state.inventory[idx])
             .then((json) => {
                 var removed = this.state.inventory.splice(idx, 1);
@@ -135,7 +136,7 @@ class Inventory extends React.Component {
                 >Cancel</Button>
             </InventoryRow>);
         }
-        return <Table striped condensed style={{fontSize: "80%"}}>
+        return <Table striped condensed={"true"} style={{fontSize: "80%"}}>
             <thead>
             <tr><th>Item</th><th>Location</th><th>Qty</th><th>Wt.</th><th style={weightStyle}>Total Wt.</th></tr>
             </thead>
@@ -161,8 +162,8 @@ class Inventory extends React.Component {
 }
 
 Inventory.propTypes = {
-    url: React.PropTypes.string.isRequired,
-    onWeightChange: React.PropTypes.func
+    url: PropTypes.string.isRequired,
+    onWeightChange: PropTypes.func
 };
 
 export default Inventory;

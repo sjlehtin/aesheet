@@ -1,6 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import WeaponRow from './WeaponRow';
-var util = require('./sheet-util');
+const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
 class RangedWeaponRow extends WeaponRow {
@@ -134,7 +136,7 @@ class RangedWeaponRow extends WeaponRow {
             <span style={infoStyle}><label>Size:</label> {this.props.weapon.size}</span>
                     <Button onClick={(e) => this.handleRemove()}
                             ref={(c) => this._removeButton = c}
-                            bsSize="xsmall"
+                            size="sm"
                     >Remove</Button>
             </div>
         </div>;
@@ -143,9 +145,9 @@ class RangedWeaponRow extends WeaponRow {
 }
 
 RangedWeaponRow.props = {
-    skillHandler: React.PropTypes.object.isRequired,
-    weapon: React.PropTypes.object.isRequired,
-    onRemove: React.PropTypes.func
+    skillHandler: PropTypes.object.isRequired,
+    weapon: PropTypes.object.isRequired,
+    onRemove: PropTypes.func
 };
 
 export default RangedWeaponRow;

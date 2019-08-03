@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
@@ -121,7 +121,7 @@ class AddFirearmControl extends React.Component {
                 </tr>
                 </tbody>
             </table>
-            <Button bsSize="small" disabled={!this.fieldsValid()}
+            <Button size="sm" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Firearm</Button>
@@ -134,8 +134,8 @@ class AddFirearmControl extends React.Component {
 }
 
 AddFirearmControl.propTypes = {
-    campaign: React.PropTypes.number.isRequired,
-    onFirearmAdd: React.PropTypes.func
+    campaign: PropTypes.number.isRequired,
+    onFirearmAdd: PropTypes.func
 };
 
 export default AddFirearmControl;

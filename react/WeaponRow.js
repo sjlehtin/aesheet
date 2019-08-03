@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
 
@@ -414,7 +416,7 @@ class WeaponRow extends React.Component {
             <span style={infoStyle}><label>Bypass:</label> {this.bypass()}</span>
                     <Button onClick={(e) => this.handleRemove()}
                             ref={(c) => this._removeButton = c}
-                            bsSize="xsmall"
+                            size="sm"
                     >Remove</Button>
             </div>
         </div>;
@@ -442,9 +444,9 @@ WeaponRow.lethalityFITModifiers = {
 };
 
 WeaponRow.props = {
-    skillHandler: React.PropTypes.object.isRequired,
-    weapon: React.PropTypes.object.isRequired,
-    onRemove: React.PropTypes.func
+    skillHandler: PropTypes.object.isRequired,
+    weapon: PropTypes.object.isRequired,
+    onRemove: PropTypes.func
 };
 
 export default WeaponRow;

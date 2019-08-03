@@ -1,6 +1,7 @@
 import React from 'react';
-var util = require('./sheet-util');
-import {Col, Row, Button} from 'react-bootstrap';
+import PropTypes from 'prop-types';
+
+const util = require('./sheet-util');
 import Octicon from 'react-octicon';
 
 class EdgeRow extends React.Component {
@@ -26,9 +27,9 @@ class EdgeRow extends React.Component {
     }
 }
 
-EdgeRow.props = {
-    edge: React.PropTypes.object.isRequired,
-    onRemove: React.PropTypes.func
+EdgeRow.propTypes = {
+    edge: PropTypes.object.isRequired,
+    onRemove: PropTypes.func
 };
 
 export default EdgeRow;

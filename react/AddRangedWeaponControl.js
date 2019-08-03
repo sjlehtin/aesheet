@@ -1,11 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 
-var rest = require('./sheet-rest');
+const rest = require('./sheet-rest');
 
 class AddRangedWeaponControl extends React.Component {
     constructor(props) {
@@ -112,7 +112,7 @@ class AddRangedWeaponControl extends React.Component {
             quality = <Combobox
                 data={this.state.qualityChoices}
                 value={this.state.selectedQuality}
-                textField='name' suggest
+                textField={'name'} suggest={"true"}
                 onChange={(value) => this.handleQualityChange(value)}/>;
         }
 
@@ -128,14 +128,7 @@ class AddRangedWeaponControl extends React.Component {
                     <td><label>Weapon</label></td>
                     <td><Combobox data={choices}
                                   textField='name'
-                                  //open={this.state.isOpen}
                                   busy={this.state.isBusy}
-                                  //onToggle={(isOpen) => {
-                                  //this.setState({isOpen: isOpen});
-                                  //if (isOpen) {
-                                  //  this.handleOpen();
-                                  //}
-                                  //}}
                                   filter="contains"
                                   value={this.state.selectedWeapon}
                                   groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
@@ -150,7 +143,7 @@ class AddRangedWeaponControl extends React.Component {
                 </tr>
                 </tbody>
             </table>
-            <Button bsSize="small" disabled={!this.fieldsValid()}
+            <Button size="sm" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Weapon</Button>
@@ -165,8 +158,8 @@ class AddRangedWeaponControl extends React.Component {
 }
 
 AddRangedWeaponControl.propTypes = {
-    campaign: React.PropTypes.number.isRequired,
-    onAdd: React.PropTypes.func
+    campaign: PropTypes.number.isRequired,
+    onAdd: PropTypes.func
 };
 
 export default AddRangedWeaponControl;
