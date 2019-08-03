@@ -3,8 +3,8 @@ jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
 
 jest.mock('../sheet-rest');
 var rest = require('../sheet-rest');
@@ -13,7 +13,7 @@ var factories = require('./factories');
 const StatRow = require('../StatRow').default;
 
 var statRowFactory = function(givenProps) {
-    var Wrapper = React.createClass({
+    var Wrapper = createReactClass({
         render: function() {
             return <table><tbody>{this.props.children}</tbody></table>;
         }
@@ -59,8 +59,8 @@ describe('stat row', function() {
     };
 
     beforeEach(function () {
-        rest.getData = jest.genMockFunction();
-        rest.patch = jest.genMockFunction();
+        rest.getData = jest.fn();
+        rest.patch = jest.fn();
         promises = [];
 
         row = statRowFactory();

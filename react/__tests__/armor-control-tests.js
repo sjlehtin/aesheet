@@ -5,7 +5,7 @@ jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 const ArmorControl = require('../ArmorControl').default;
 const AddArmorControl = require('../AddArmorControl').default;

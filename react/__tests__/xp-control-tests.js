@@ -3,7 +3,7 @@ jest.dontMock('../sheet-util');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 var rest = require('../sheet-rest');
 
@@ -63,8 +63,8 @@ describe('XPControl', function() {
     };
 
     beforeEach(function () {
-        rest.getData = jest.genMockFunction();
-        rest.patch = jest.genMockFunction();
+        rest.getData = jest.fn();
+        rest.patch = jest.fn();
         promises = [];
     });
 

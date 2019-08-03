@@ -2,7 +2,8 @@ jest.dontMock('../AddTransientEffectControl');
 jest.dontMock('./factories');
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
 
 const AddTransientEffectControl = require('../AddTransientEffectControl').default;
 
@@ -21,7 +22,7 @@ describe('AddTransientEffectControl', function() {
     });
 
     var getAddTransientEffectControl = function (givenProps) {
-        var Wrapper = React.createClass({
+        var Wrapper = createReactClass({
             render: function () {
                 return <table>
                     {this.props.children}

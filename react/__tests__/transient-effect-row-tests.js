@@ -3,7 +3,8 @@ jest.dontMock('../sheet-util');
 jest.dontMock('./factories');
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
 
 const TransientEffectRow = require('../TransientEffectRow').default;
 const SkillHandler = require('../SkillHandler').default;
@@ -16,7 +17,7 @@ describe('TransientEffectRow', function() {
     "use strict";
 
     var getTransientEffectRow = function (givenProps) {
-        var Wrapper = React.createClass({
+        var Wrapper = createReactClass({
             render: function () {
                 return <table>
                     <tbody>{this.props.children}</tbody>

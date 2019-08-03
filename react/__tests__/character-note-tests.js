@@ -2,7 +2,7 @@ jest.dontMock('../CharacterNotes');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 var rest = require('../sheet-rest');
 
@@ -21,8 +21,8 @@ describe('character note tests', function (){
 
     beforeEach(function () {
         var mockPromise = Promise.resolve({"notes": "this is char pk 42 notes"});
-        rest.getData = jest.genMockFunction();
-        rest.patch = jest.genMockFunction();
+        rest.getData = jest.fn();
+        rest.patch = jest.fn();
         rest.getData.mockReturnValue(mockPromise);
         promises = [];
         promises.push(mockPromise);

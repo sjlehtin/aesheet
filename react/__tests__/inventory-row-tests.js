@@ -2,8 +2,8 @@ jest.dontMock('../InventoryRow');
 jest.dontMock('../sheet-util');
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
 
 const InventoryRow = require('../InventoryRow').default;
 
@@ -20,7 +20,7 @@ var inventoryEntryFactory = function (overrides) {
 };
 
 var inventoryRowFactory = function(givenProps) {
-    var Wrapper = React.createClass({
+    var Wrapper = createReactClass({
         render: function () {
             return <table>
                 <tbody>{this.props.children}</tbody>

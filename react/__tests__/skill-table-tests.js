@@ -7,7 +7,7 @@ jest.dontMock('./factories');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 import SkillTable from '../SkillTable';
 
@@ -175,47 +175,46 @@ describe('SkillTable', function() {
 
 
     // -> to skillrow.  Here we just pass the callbacks forward.
-    xit("allows adding a physical skill level from the start set");
-    xit("allows increasing a skill level from the start set");
-    xit("allows removing skills");
+    xit("allows adding a physical skill level from the start set", test.todo);
+    xit("allows increasing a skill level from the start set", test.todo);
+    xit("allows removing skills", test.todo);
 
-    xit("allows adding a new skill");
-
+    xit("allows adding a new skill", test.todo);
 
     it("calls the passed onCharacterSkillModify handler", function () {
-        var spy = jasmine.createSpy("callback");
-        var table = getSkillTable({
+        let spy = jasmine.createSpy("callback");
+        let table = getSkillTable({
             onCharacterSkillModify: spy
         });
-        var data = {id: 2, level: 3, skill: "Gardening", character: 1};
+        const data = {id: 2, level: 3, skill: "Gardening", character: 1};
         table.handleCharacterSkillModify(Object.assign({}, data));
         expect(spy).toHaveBeenCalledWith(data);
     });
 
     it("calls the passed onCharacterSkillRemove handler", function () {
-        var spy = jasmine.createSpy("callback");
-        var table = getSkillTable({
+        let spy = jasmine.createSpy("callback");
+        let table = getSkillTable({
             onCharacterSkillRemove: spy
         });
-        var data = {id: 2};
+        const data = {id: 2};
         table.handleCharacterSkillRemove(Object.assign({}, data));
         expect(spy).toHaveBeenCalledWith(data);
     });
 
     it("calls the passed onCharacterSkillAdd handler", function () {
-        var spy = jasmine.createSpy("callback");
-        var table = getSkillTable({
+        let spy = jasmine.createSpy("callback");
+        let table = getSkillTable({
             onCharacterSkillAdd: spy
         });
-        var data = {level: 3, skill: "Gardening", character: 1};
+        const data = {level: 3, skill: "Gardening", character: 1};
         table.handleCharacterSkillAdd(Object.assign({}, data));
         expect(spy).toHaveBeenCalledWith(data);
     });
 
     it("can calculate sp costs", function () {
-        var skill = factories.skillFactory({name: "Gardening", skill_cost_0: 1,
+        const skill = factories.skillFactory({name: "Gardening", skill_cost_0: 1,
         skill_cost_1: 1, skill_cost_2: 2, skill_cost_3: 3});
-        var cs = factories.characterSkillFactory({skill: "Gardening",
+        const cs = factories.characterSkillFactory({skill: "Gardening",
             level: 3});
 
         expect(SkillTable.spCost(cs, skill)).toEqual(7);
@@ -231,13 +230,14 @@ describe('SkillTable', function() {
     // if the parent stores the passed object directly, state should not
     // get passed over.  TODO: test for sanitizeSkillObject usage in
     // handleCharacterSkillModify.
-    xit("should clean away internal fields from parent notifications");
+    xit("should clean away internal fields from parent notifications",
+        test.todo);
     xit("calculates edge skill bonuses correctly and passes them to" +
-        " skillrows");
-    xit("passes armor modifiers them to skillrows");
+        " skillrows", test.todo);
+    xit("passes armor modifiers them to skillrows", test.todo);
 
     it("calculates SPs from edges", function () {
-        var table = getSkillTable({
+        let table = getSkillTable({
             edges: [factories.edgeLevelFactory({extra_skill_points: 6}),
                 factories.edgeLevelFactory({extra_skill_points: 8})
             ]
@@ -246,19 +246,19 @@ describe('SkillTable', function() {
     });
 
     it("calculates starting SP", function () {
-        var table = getSkillTable({character: {
+        let table = getSkillTable({character: {
             start_lrn: 50, start_int: 38, start_psy: 47}
         });
         expect(table.initialSkillPoints()).toEqual(30);
     });
 
     it("processes age SP", function () {
-        var table = getSkillTable({character: {gained_sp: 23}});
+        let table = getSkillTable({character: {gained_sp: 23}});
         expect(table.earnedSkillPoints()).toEqual(23);
     });
 
     it("can give hints to optimize skill point accumulation", function () {
-        var table = getSkillTable({character: {
+        let table = getSkillTable({character: {
             cur_lrn: 50, cur_int: 38, cur_psy: 47}
         });
         expect(table.optimizeAgeSP()).toEqual({lrn: 3, int: 0, psy: 1});

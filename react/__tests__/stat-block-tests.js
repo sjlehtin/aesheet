@@ -1,6 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 jest.mock('../sheet-rest');
 var rest = require('../sheet-rest');
@@ -132,7 +131,7 @@ describe('stat block', function() {
         });
     });
 
-    xit('handles edge removal');
+    xit('handles edge removal', test.todo);
 
     var getSkillHandler = function (block) {
         // TODO: skills need to be loaded because edges are handled by

@@ -1,6 +1,6 @@
 import {AmmoControl} from '../AmmoControl';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 const factories = require('./factories');
 

@@ -5,7 +5,8 @@ jest.dontMock('../SkillHandler');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
 
 var factories = require('./factories');
 
@@ -24,7 +25,7 @@ describe('SkillRow', function() {
         }
 
         // TODO: React TestUtils suck a bit of a balls.
-        var Wrapper = React.createClass({
+        var Wrapper = createReactClass({
             render: function() {
                 return <table><tbody>{this.props.children}</tbody></table>;
             }
@@ -134,8 +135,8 @@ describe('SkillRow', function() {
         expect(cell.textContent).toContain("MOV: 60");
     });
 
-    xit("shows skill with obsoleted skill level");
-    xit("highlight skill with missing required skills");
+    xit("shows skill with obsoleted skill level", test.todo);
+    xit("highlight skill with missing required skills", test.todo);
 
     it('has controls to increase skill levels', function () {
         var spy = jasmine.createSpy("callback");
