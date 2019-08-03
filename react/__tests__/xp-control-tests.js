@@ -2,12 +2,12 @@ jest.dontMock('../XPControl');
 jest.dontMock('../sheet-util');
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
 
-var rest = require('../sheet-rest');
+const rest = require('../sheet-rest');
 
 const XPControl = require('../XPControl').default;
+import factories from './factories';
 
 describe('XPControl', function() {
     "use strict";
@@ -15,17 +15,7 @@ describe('XPControl', function() {
     var promises;
 
     var charDataFactory = function (statOverrides) {
-        var _charData = {
-            id: 2,
-
-            "start_fit": 43,
-            "start_ref": 43,
-            "start_lrn": 43,
-            "start_int": 43,
-            "start_psy": 43,
-            "start_wil": 43,
-            "start_cha": 43,
-            "start_pos": 43,
+        let overrides = {
             "cur_fit": 80,
             "cur_ref": 50,
             "cur_lrn": 47,
@@ -34,14 +24,9 @@ describe('XPControl', function() {
             "cur_wil": 44,
             "cur_cha": 62,
             "cur_pos": 48,
-            bought_mana: 0,
-            bought_stamina: 0,
-            free_edges: 0,
-
-            total_xp: 0
         };
 
-        return Object.assign(_charData, statOverrides);
+        return factories.characterFactory(Object.assign(overrides, statOverrides));
     };
 
 
@@ -155,19 +140,19 @@ describe('XPControl', function() {
         var input = control.getInputDOMNode();
         TestUtils.Simulate.change(input, {target: {value: "20a"}});
 
-        expect(control.validationState()).toEqual("error");
+        expect(control.isValid()).toBe(false);
 
         TestUtils.Simulate.change(input, {target: {value: "tsap"}});
 
-        expect(control.validationState()).toEqual("error");
+        expect(control.isValid()).toBe(false);
 
         TestUtils.Simulate.change(input, {target: {value: 10}});
 
-        expect(control.validationState()).toEqual("success");
+        expect(control.isValid()).toBe(true);
 
         TestUtils.Simulate.change(input, {target: {value: "10"}});
 
-        expect(control.validationState()).toEqual("success");
+        expect(control.isValid()).toBe(true);
     });
 
     it('allows adding to be canceled', function () {

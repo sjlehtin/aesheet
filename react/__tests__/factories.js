@@ -50,6 +50,10 @@ const characterFactory = function (statOverrides) {
         bought_mana: 0,
         bought_stamina: 0,
         stamina_damage: 0,
+        total_xp: 0,
+        free_edges: 0,
+        xp_used_ingame: 0,
+
         edges: [],
         "campaign": 2
     };

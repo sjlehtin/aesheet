@@ -82,8 +82,8 @@ class XPControl extends React.Component {
         this.setState({addXP: 0, showDialog: false});
     }
 
-    validationState() {
-        return util.isInt(this.state.addXP) ? "success" : "error";
+    isValid() {
+        return util.isInt(this.state.addXP);
     }
 
     render() {
@@ -136,14 +136,14 @@ class XPControl extends React.Component {
                            type="text"
                            label="Add XP"
                            onChange={this.handleChange.bind(this)}
-                           bsStyle={this.validationState()}
+                           isValid={this.isValid()}
                            className="col-xs-2"
                            value={this.state.addXP} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button type="submit" ref={(c) => this._submitButton = c}
                                  onClick={(e) => { this.handleSubmit(e);}}
-                                 bsStyle="primary">Add</Button>
+                                 variant="primary">Add</Button>
                 </Modal.Footer>
                 </form>
             </Modal>
