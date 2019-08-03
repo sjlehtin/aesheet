@@ -1,5 +1,5 @@
 import React from 'react';
-import TestUtils from 'react-addons-test-utils';
+import TestUtils from 'react-dom/test-utils';
 
 // TODO: it seems this does not do much, instead you need to add this mock
 // to the individual test files using these factories.
@@ -16,6 +16,15 @@ const characterFactory = function (statOverrides) {
     var _charData = {
         id: 2,
 
+        "start_fit": 43,
+        "start_ref": 43,
+        "start_lrn": 43,
+        "start_int": 43,
+        "start_psy": 43,
+        "start_wil": 43,
+        "start_cha": 43,
+        "start_pos": 43,
+
         "cur_fit": 43,
         "cur_ref": 43,
         "cur_lrn": 43,
@@ -24,6 +33,8 @@ const characterFactory = function (statOverrides) {
         "cur_wil": 43,
         "cur_cha": 43,
         "cur_pos": 43,
+
+        "gained_sp": 0,
 
         "base_mod_fit": 0,
         "base_mod_ref": 0,

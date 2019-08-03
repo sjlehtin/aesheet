@@ -32,7 +32,6 @@ class SkillTable extends React.Component {
     }
 
     handleCharacterSkillRemove(skill) {
-        console.log("Removed: ", skill);
         if (this.props.onCharacterSkillRemove) {
             this.props.onCharacterSkillRemove(SkillTable.sanitizeSkillObject(skill));
         }
@@ -53,7 +52,7 @@ class SkillTable extends React.Component {
         if (!skillList) {
             return {};
         }
-        var csMap = {};
+        let csMap = {};
         for (let cs of skillList) {
             csMap[cs.skill] = cs;
         }
@@ -109,7 +108,8 @@ class SkillTable extends React.Component {
 
     initialSkillPoints() {
         // TODO: data privacy.
-        var char = this.props.skillHandler.props.character;
+        const char = this.props.skillHandler.props.character;
+        console.assert(typeof(char) !== "undefined");
         return util.roundup(char.start_lrn/3) + util.roundup(char.start_int/5) +
                 util.roundup(char.start_psy/10);
     }
@@ -192,17 +192,18 @@ class SkillTable extends React.Component {
             }
         }
 
-        var edgeSP = this.edgeSkillPoints(),
+        const edgeSP = this.edgeSkillPoints(),
             initialSP = this.initialSkillPoints(),
-            ageSP = this.earnedSkillPoints(),
-            gainedSP = edgeSP + initialSP + ageSP;
+            ageSP = this.earnedSkillPoints();
+        const gainedSP = edgeSP + initialSP + ageSP;
 
-        var totalStyle = {};
+        let totalStyle = {};
+        let totalTitle = "";
         if (totalSP > gainedSP) {
-            var totalTitle = "Too much SP used!";
+            totalTitle = "Too much SP used!";
             totalStyle.color = "red";
         }
-        var opt = this.optimizeAgeSP();
+        const opt = this.optimizeAgeSP();
 
         return <Card style={this.props.style}>
             <Card.Header>
