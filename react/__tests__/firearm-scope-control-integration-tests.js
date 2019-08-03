@@ -28,7 +28,7 @@ describe('FirearmControl -- ScopeControl', () => {
     it('shows a disabled remove button without a scope', () => {
         const control = factories.firearmControlTreeFactory({weapon:
             {scope: null}});
-        expect(control._scopeRemoveButton.props.disabled).toBe(true);
+        expect(ReactDOM.findDOMNode(control._scopeRemoveButton).disabled).toBe(true);
     });
 
     it('integrates scopeControl for listing URL', () => {
