@@ -18,6 +18,212 @@ describe('FirearmControl', () => {
         expect(firearm.skillCheck()).toEqual(11);
     });
 
+    function rangeFirearm(givenProps) {
+
+        let props = {
+            base: {base_skill: "Handguns", skill: "Pistol"},
+            handlerProps: {
+                skills: [{
+                    skill: "Handguns",
+                    level: 1
+                }]
+            },
+            weapon: {base: {sight: 600, barrel_length: 602, accuracy: 1.0},
+                scope: null}
+        };
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+        return factories.firearmControlTreeFactory(props);
+    }
+
+    it("can calculate contact range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(0.4);
+        expect(rangeEffect.check).toEqual(60);
+        expect(rangeEffect.targetInitiative).toEqual(2);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(2);
+        expect(rangeEffect.leth).toEqual(2);
+        expect(rangeEffect.name).toEqual("Contact");
+    });
+
+    it("can calculate close range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(1);
+        expect(rangeEffect.check).toEqual(50);
+        expect(rangeEffect.targetInitiative).toEqual(2);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(2);
+        expect(rangeEffect.leth).toEqual(2);
+        expect(rangeEffect.name).toEqual("Close");
+    });
+
+    it("can calculate point-blank range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(3);
+        expect(rangeEffect.check).toEqual(40);
+        expect(rangeEffect.targetInitiative).toEqual(1);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(1);
+        expect(rangeEffect.leth).toEqual(1);
+        expect(rangeEffect.name).toEqual("Point-blank");
+    });
+
+    it("can calculate XXS range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(7);
+        expect(rangeEffect.check).toEqual(30);
+        expect(rangeEffect.targetInitiative).toEqual(1);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(1);
+        expect(rangeEffect.leth).toEqual(1);
+        expect(rangeEffect.name).toEqual("XXS");
+    });
+
+    it("can calculate extra-short range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(15);
+        expect(rangeEffect.check).toEqual(20);
+        expect(rangeEffect.targetInitiative).toEqual(0);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(0);
+        expect(rangeEffect.leth).toEqual(0);
+        expect(rangeEffect.name).toEqual("Extra-short");
+    });
+
+    it("can calculate very short range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(30);
+        expect(rangeEffect.check).toEqual(10);
+        expect(rangeEffect.targetInitiative).toEqual(0);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(0);
+        expect(rangeEffect.leth).toEqual(0);
+        expect(rangeEffect.name).toEqual("Very short");
+    });
+
+    it("can calculate short range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(60);
+        expect(rangeEffect.check).toEqual(0);
+        expect(rangeEffect.targetInitiative).toEqual(0);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(0);
+        expect(rangeEffect.leth).toEqual(0);
+        expect(rangeEffect.name).toEqual("Short");
+    });
+
+    it("can calculate medium range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(61);
+        expect(rangeEffect.check).toEqual(-10);
+        expect(rangeEffect.targetInitiative).toEqual(0);
+        expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(0);
+        expect(rangeEffect.leth).toEqual(0);
+        expect(rangeEffect.name).toEqual("Medium");
+    });
+
+    it("can calculate long range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(180);
+        expect(rangeEffect.check).toEqual(-20);
+        expect(rangeEffect.targetInitiative).toEqual(0);
+        // TODO: should be false
+        //expect(rangeEffect.bumpingAllowed).toBe(true);
+        expect(rangeEffect.damage).toEqual(0);
+        expect(rangeEffect.leth).toEqual(0);
+        expect(rangeEffect.name).toEqual("Long");
+    });
+
+    it("can calculate extra long range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(270);
+        expect(rangeEffect.check).toEqual(-30);
+        expect(rangeEffect.targetInitiative).toEqual(-1);
+        expect(rangeEffect.bumpingAllowed).toBe(false);
+        expect(rangeEffect.damage).toEqual(-1);
+        expect(rangeEffect.leth).toEqual(-1);
+        expect(rangeEffect.name).toEqual("Extra-long");
+    });
+
+    it("can calculate XXL range effects", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(360);
+        expect(rangeEffect.check).toEqual(-40);
+        expect(rangeEffect.targetInitiative).toEqual(-2);
+        expect(rangeEffect.bumpingAllowed).toBe(false);
+        expect(rangeEffect.damage).toEqual(-2);
+        expect(rangeEffect.leth).toEqual(-2);
+        expect(rangeEffect.name).toEqual("XXL");
+    });
+
+    it("can recognizes too long range", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(400);
+        expect(rangeEffect).toBe(null);
+    });
+
+    // it("can calculate bumping based on range", () => {
+    //     const firearm = rangeFirearm();
+    //     let rangeEffect = firearm.rangeEffect(25);
+    //     expect(rangeEffect.check).toEqual(-10);
+    //     expect(rangeEffect.targetInitiative).toEqual(0);
+    //     // TODO: should be false
+    //     //expect(rangeEffect.bumpingAllowed).toBe(true);
+    // });
+
+    // it("takes Acute Vision into account", () => {
+    //     const firearm = rangeFirearm();
+    //     let rangeEffect = firearm.rangeEffect(25);
+    //     expect(rangeEffect.check).toEqual(-10);
+    //     expect(rangeEffect.targetInitiative).toEqual(0);
+    //     // TODO: should be false
+    //     //expect(rangeEffect.bumpingAllowed).toBe(true);
+    // });
+
+    // it("takes scope's Acute Vision into account", () => {
+    //     const firearm = rangeFirearm();
+    //     let rangeEffect = firearm.rangeEffect(25);
+    //     expect(rangeEffect.check).toEqual(-10);
+    //     expect(rangeEffect.targetInitiative).toEqual(0);
+    //     // TODO: should be false
+    //     //expect(rangeEffect.bumpingAllowed).toBe(true);
+    // });
+
+    it ("can calculate a row of checks to implicit short range", () => {
+        const firearm = rangeFirearm();
+        expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+            .toEqual([60, 53, 50, 50, 40, 33, 27, null, null, null]);
+    });
+
+    it ("can calculate a row of checks to short range", () => {
+        const firearm = rangeFirearm({toRange: 60});
+        expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+            .toEqual([60, 53, 50, 50, 40, 33, 27, null, null, null]);
+    });
+
+    it ("can calculate a row of checks to medium range", () => {
+        const firearm = rangeFirearm({toRange: 61});
+        expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+            .toEqual([50, 43, 40, 40, 30, 23, 17, null, null, null]);
+    });
+
+    it ("can calculate a row of initiatives to short range", () => {
+        const firearm = rangeFirearm({toRange: 60});
+        expect(firearm.initiatives([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+            .toEqual([8, 6, 2, -3, 5, -0, -5, null, null, null]);
+    });
+
+    it ("can calculate a row of initiatives to extra-long range", () => {
+        const firearm = rangeFirearm({toRange: 181}); // 4.5 * 21
+        expect(firearm.longRangeMultiplier()).toEqual(3);
+
+        expect(firearm.initiatives([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
+            .toEqual([8, 5, 1, -4, 4, -1, -6, null, null, null]);
+    });
+
     it("can calculate effect of missing specialization skill checks", () => {
         const firearm = factories.firearmControlTreeFactory({
             handlerProps: {

@@ -9,7 +9,7 @@ const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
 
 /*
- * Firearms are sheet specific.  Firearms can contain add-ons, most
+ * Firearms are sheet specific.  TODO: Firearms can contain add-ons, most
  * notably scopes.  Add-ons affect weapon range, to-hit and target initiative,
  * among other factors.
  *
@@ -23,6 +23,18 @@ import {Col, Row, Button} from 'react-bootstrap';
 class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
+
+        // // TODO: if need to load edgelevels etc, only set after that.
+        // let range = this.shortRange();
+        // this.state = {
+        //     range: range,
+        //     currentValue: range
+        // };
+
+        // TODO: get range from props, it allows rendering all weapons
+        // at the same time.
+
+        this._rangeEffect = this.rangeEffect(this.props.toRange);
 
         // XXX move to class statics
         this.readiedBaseI = -1;
@@ -48,6 +60,160 @@ class FirearmControl extends RangedWeaponRow {
             rof *= 1 + 0.1 * skillLevel;
         }
         return rof;
+    }
+
+    rangeEffect(toRange) {
+        // Range
+        // +2 TI, D/L (+2 to target initiative and damage and lethality)
+        //
+        // Contact
+        // +60 (+2 TI, D/L) (Firearms only)
+        // Close (0.5–1 m)
+        // +50 (+2 TI, D/L) (Firearms only)
+        // Point-blank (1–3 m)
+        // +40 (+1 TI, D/L)
+        // XXS (⅛ x S)
+        // +30 (+1 TI, D/L)
+        // Extra-short (¼ x S)
+        // +20
+        // Very short (½ x S)
+        // +10
+        // Short
+        // 0
+        // Medium
+        // -10
+        // Long
+        // -20
+        // Extra-long (1½ x L)
+        // -30 (-1 TI, D/L)
+        // XXL (2 x L)
+        // -40 (-2 TI, D/L)
+        // XXXL (2½ x L)
+        // -50 (-3 TI, D/L) (telescopic sight only)
+        // Extreme (3x L)
+        // -60 (-4 TI, D/L) (telescopic sight only)
+        const shortRangeEffect = {
+            check: 0,
+            targetInitiative: 0,
+            damage: 0,
+            leth: 0,
+            bumpingAllowed: true,
+            name: "Short"
+        };
+
+        if (typeof(toRange) === "undefined" || Number.isNaN(toRange)) {
+            return shortRangeEffect;
+        }
+        const shortRange = this.shortRange();
+        const longRange = this.longRange();
+
+        if (toRange < 0.5) {
+            return {
+                check: 60,
+                targetInitiative: 2,
+                damage: 2,
+                leth: 2,
+                bumpingAllowed: true,
+                name: "Contact"
+            };
+        } else if (toRange <= 1) {
+            return {
+                check: 50,
+                targetInitiative: 2,
+                damage: 2,
+                leth: 2,
+                bumpingAllowed: true,
+                name: "Close"
+            };
+        } else if (toRange <= 3) {
+            return {
+                check: 40,
+                targetInitiative: 1,
+                damage: 1,
+                leth: 1,
+                bumpingAllowed: true,
+                name: "Point-blank"
+            };
+        } else if (toRange <= shortRange/8) {
+            return {
+                check: 30,
+                targetInitiative: 1,
+                damage: 1,
+                leth: 1,
+                bumpingAllowed: true,
+                name: "XXS"
+            };
+        } else if (toRange <= shortRange/4) {
+            return {
+                check: 20,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                bumpingAllowed: true,
+                name: "Extra-short"
+            };
+
+        } else if (toRange <= shortRange/2) {
+            return {
+                check: 10,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                bumpingAllowed: true,
+                name: "Very short"
+            };
+
+        } else if (toRange <= shortRange) {
+            return shortRangeEffect;
+        } else if (toRange <= this.mediumRange()) {
+            return {
+                check: -10,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                bumpingAllowed: true,
+                name: "Medium"
+            };
+        } else if (toRange <= longRange) {
+            return {
+                check: -20,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                bumpingAllowed: false,
+                name: "Long"
+            };
+        } else if (toRange <= 1.5*longRange) {
+            return {
+                check: -30,
+                targetInitiative: -1,
+                damage: -1,
+                leth: -1,
+                bumpingAllowed: false,
+                name: "Extra-long"
+            };
+        } else if (toRange <= 2*longRange) {
+            return {
+                check: -40,
+                targetInitiative: -2,
+                damage: -2,
+                leth: -2,
+                bumpingAllowed: false,
+                name: "XXL"
+            };
+        } else if (toRange <= 2.5*longRange) {
+            // TODO: check scope
+            return null;
+        } else if (toRange <= 3*longRange) {
+            // TODO: check scope
+            return null;
+        }
+
+        return null;
+    }
+
+    skillCheck() {
+        return super.skillCheck() + this._rangeEffect.check;
     }
 
     singleBurstChecks(check) {
@@ -130,6 +296,8 @@ class FirearmControl extends RangedWeaponRow {
         if (ammo.plus_leth) {
             plusLeth = ` (${this.renderInt(ammo.plus_leth)})`;
         }
+
+        // TODO: range effects
         return <span className="damage">{ammo.num_dice}d{ammo.dice}{
             util.renderInt(ammo.extra_damage)}/{ammo.leth}{plusLeth}</span>;
     }
@@ -347,6 +515,9 @@ class FirearmControl extends RangedWeaponRow {
         if (this.props.weapon.scope) {
             targetInitiative += this.props.weapon.scope.target_i_mod;
         }
+
+        targetInitiative += this._rangeEffect.targetInitiative;
+
         return targetInitiative;
     }
 
@@ -476,7 +647,7 @@ class FirearmControl extends RangedWeaponRow {
                                     <Button onClick={(e) => this.handleScopeRemove()}
                                         ref={(c) => this._scopeRemoveButton = c}
                                         disabled={this.props.weapon.scope === null}
-                                        size="sm">Remove</Button>
+                                        size="sm">Remove scope</Button>
                                 </td>
                             </tr>
                             <tr title={"Modifiers counted into checks already"}>
@@ -492,7 +663,7 @@ class FirearmControl extends RangedWeaponRow {
                         </div>
                         <Button onClick={(e) => this.handleRemove()}
                                 ref={(c) => this._removeButton = c}
-                                size="sm">Remove</Button>
+                                size="sm">Remove firearm</Button>
                         </Col>
                     </Row>
                     <Row>
@@ -514,6 +685,7 @@ FirearmControl.props = {
     skillHandler: PropTypes.object.isRequired,
     weapon: PropTypes.object.isRequired,
     campaign: PropTypes.number.isRequired,
+    toRange: PropTypes.number,
     onRemove: PropTypes.func,
     onChange: PropTypes.func
 };
