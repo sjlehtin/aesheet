@@ -67,7 +67,7 @@ class AmmoControl extends React.Component {
     }
 }
 
-AmmoControl.props = {
+AmmoControl.propTypes = {
     ammo: PropTypes.object.isRequired,
     url: PropTypes.string,
     onChange: PropTypes.func
