@@ -508,7 +508,8 @@ class EdgeLevel(ExportedModel, StatModifier):
     @classmethod
     def dont_export(cls):
         return ['characteredge', 'edgeskillbonus', 'skill_bonuses',
-                'edge_skill_bonuses', 'characterlogentry']
+                'edge_skill_bonuses', 'characterlogentry',
+                "character", "firearmaddon"]
 
     def __str__(self):
         return u"%s %s (%s)" % (self.edge, self.level, self.cost)
@@ -698,6 +699,8 @@ class FirearmAddOn(ExportedModel):
                                  default=1.0)
 
     notes = models.CharField(max_length=256, blank=True)
+
+    perks = models.ManyToManyField(EdgeLevel, blank=True)
 
     @classmethod
     def dont_export(cls):
