@@ -37,7 +37,7 @@ class MovementRates extends React.Component {
                 <Card.Header>
                     <h4>Movement rates per turn</h4>
                 </Card.Header>
-                <Card.Body class={"table-responsive"}>
+                <Card.Body className={"table-responsive p-0"}>
             <Table size={"sm"}>
                 <thead><tr><th>Jump</th><th>Climb</th><th>Swim</th>
                     <th>Sneak</th><th>Run</th><th>Sprint</th><th>Fly</th>
@@ -60,7 +60,7 @@ class MovementRates extends React.Component {
             <Card.Header>
                 <h4>Overland movement</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
                 <Table size={"sm"}>
                     <thead><tr>
                         <td/>

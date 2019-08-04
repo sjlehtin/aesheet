@@ -29,7 +29,14 @@ describe('FirearmControl', () => {
                 }]
             },
             weapon: {base: {sight: 600, barrel_length: 602, accuracy: 1.0},
-                scope: null}
+                scope: null,
+            ammo: {
+                num_dice: 2,
+                dice: 6,
+                extra_damage: 2,
+                leth: 5,
+                plus_leth: 1
+            }}
         };
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -159,10 +166,36 @@ describe('FirearmControl', () => {
         expect(rangeEffect.name).toEqual("XXL");
     });
 
+    it("renders damage with XXL range effects", () => {
+        const firearm = rangeFirearm({toRange: 360});
+        expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
+            .textContent).toEqual("2d6+0/3 (+1)");
+    });
+
+    it("renders damage with contact range effects", () => {
+        const firearm = rangeFirearm({toRange: 0.3});
+        expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
+            .textContent).toEqual("2d6+4/7 (+1)");
+    });
+
     it("can recognizes too long range", () => {
         const firearm = rangeFirearm();
         let rangeEffect = firearm.rangeEffect(400);
         expect(rangeEffect).toBe(null);
+    });
+
+    it("renders even with impossible range", () => {
+        const firearm = rangeFirearm({toRange: 20000});
+        expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
+            .textContent).toEqual("range too long!");
+    });
+
+    it("renders even with impossible range and burst capable weapon", () => {
+        const firearm = rangeFirearm({weapon:
+                {base: { autofire_rpm: 600, autofire_class: "C"}},
+            toRange: 20000});
+        expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
+            .textContent).toEqual("range too long!");
     });
 
     // it("can calculate bumping based on range", () => {

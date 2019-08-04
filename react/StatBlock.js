@@ -27,6 +27,7 @@ import CharacterNotes from './CharacterNotes';
 import MovementRates from './MovementRates';
 import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
+import RangeControl from './RangeControl';
 
 import {Container, Row, Col, Table, Image, Card, Badge} from 'react-bootstrap';
 
@@ -60,7 +61,10 @@ class StatBlock extends React.Component {
             armor: undefined,
             helm: undefined,
 
-            woundList: []
+            woundList: [],
+
+            // Apply range on firearms.
+            firearmRange: ""
         };
     }
 
@@ -957,6 +961,11 @@ class StatBlock extends React.Component {
         return weight + this.state.carriedInventoryWeight;
     }
 
+    rangeChanged(newRange) {
+        this.setState({firearmRange: newRange.range,
+                       firearmDarknessDetectionLevel: newRange.darknessDetectionLevel});
+    }
+
     renderFirearms(skillHandler) {
         if (!this.state.firearmList || !skillHandler) {
             return <Loading>Firearms</Loading>;
@@ -977,6 +986,8 @@ class StatBlock extends React.Component {
                 onChange={(data) => this.handleFirearmChanged(data)}
                 campaign={this.state.char.campaign}
                 style={{fontSize: "80%", backgroundColor: bgColor}}
+                toRange={this.state.firearmRange}
+                darknessDetectionLevel={this.state.firearmDarknessDetectionLevel}
             />);
         }
 
@@ -984,7 +995,10 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Firearms</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body>
+                <RangeControl onChange={(e) => this.rangeChanged(e)}/>
+            </Card.Body>
+            <Card.Body className={"table-responsive p-0 m-1"}>
             {rows}
             </Card.Body>
             <Card.Footer>
@@ -1022,7 +1036,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Close combat</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
             {rows}
             </Card.Body>
             <Card.Footer>
@@ -1061,7 +1075,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Ranged weapons</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
             {rows}
             </Card.Body>
             <Card.Footer>
@@ -1094,7 +1108,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Transient effects</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
             <Table striped>
                 <thead>
                 <tr><th>Effect</th></tr>
@@ -1133,7 +1147,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Miscellaneous items</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0 m-1"}>
             <Table striped>
                 <thead>
                 <tr><th>Item</th></tr>
@@ -1172,7 +1186,7 @@ class StatBlock extends React.Component {
             <Card.Body>
                 <h4>Edges</h4>
             </Card.Body>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0 m-1"}>
             <Table striped>
                 <thead>
                 <tr><th>Edge</th></tr>
@@ -1280,7 +1294,7 @@ class StatBlock extends React.Component {
             return <Loading>Senses</Loading>
         }
 
-        return <SenseTable class={"m-1"} handler={handler}/>;
+        return <SenseTable handler={handler}/>;
     }
 
     render() {

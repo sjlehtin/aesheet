@@ -112,7 +112,7 @@ class AddRangedWeaponControl extends React.Component {
             quality = <Combobox
                 data={this.state.qualityChoices}
                 value={this.state.selectedQuality}
-                textField={'name'} suggest={"true"}
+                textField={'name'} suggest={true}
                 onChange={(value) => this.handleQualityChange(value)}/>;
         }
 

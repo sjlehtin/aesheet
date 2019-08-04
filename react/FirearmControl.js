@@ -26,15 +26,9 @@ class FirearmControl extends RangedWeaponRow {
 
         // // TODO: if need to load edgelevels etc, only set after that.
         // let range = this.shortRange();
-        // this.state = {
-        //     range: range,
-        //     currentValue: range
-        // };
 
         // TODO: get range from props, it allows rendering all weapons
         // at the same time.
-
-        this._rangeEffect = this.rangeEffect(this.props.toRange);
 
         // XXX move to class statics
         this.readiedBaseI = -1;
@@ -62,6 +56,8 @@ class FirearmControl extends RangedWeaponRow {
         return rof;
     }
 
+    // Return range effect to the given range. If unable to act to the range,
+    // this returns null.
     rangeEffect(toRange) {
         // Range
         // +2 TI, D/L (+2 to target initiative and damage and lethality)
@@ -101,7 +97,7 @@ class FirearmControl extends RangedWeaponRow {
             name: "Short"
         };
 
-        if (typeof(toRange) === "undefined" || Number.isNaN(toRange)) {
+        if (toRange === "" || typeof(toRange) === "undefined" || isNaN(toRange)) {
             return shortRangeEffect;
         }
         const shortRange = this.shortRange();
@@ -213,7 +209,12 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     skillCheck() {
-        return super.skillCheck() + this._rangeEffect.check;
+
+        let effect = this.rangeEffect(this.props.toRange);
+        if (effect === null) {
+            return null;
+        }
+        return super.skillCheck() + effect.check;
     }
 
     singleBurstChecks(check) {
@@ -226,7 +227,6 @@ class FirearmControl extends RangedWeaponRow {
             maxHits = Math.min(maxHits, base.restricted_burst_rounds);
         }
         const baseSkillCheck = this.skillCheck();
-
         const burstMultipliers = [0, 1, 3, 6, 10];
         const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
@@ -279,6 +279,10 @@ class FirearmControl extends RangedWeaponRow {
 
         const checks = this.skillChecks(this.mapBurstActions(actions),
             {counterPenalty: false});
+        if (checks === null) {
+            // no actions available.
+            return actions.map((el) => {return [];});
+        }
         return checks.map((chk) => {return this.singleBurstChecks(chk);});
     }
 
@@ -297,9 +301,15 @@ class FirearmControl extends RangedWeaponRow {
             plusLeth = ` (${this.renderInt(ammo.plus_leth)})`;
         }
 
-        // TODO: range effects
+        let rangeEffect = this.rangeEffect(this.props.toRange);
+
+        if (rangeEffect === null) {
+            return <span className="damage"><strong>range too long!</strong></span>;
+        }
+
         return <span className="damage">{ammo.num_dice}d{ammo.dice}{
-            util.renderInt(ammo.extra_damage)}/{ammo.leth}{plusLeth}</span>;
+            util.renderInt(ammo.extra_damage + rangeEffect.damage)}/{
+            ammo.leth + rangeEffect.leth}{plusLeth}</span>;
     }
 
     handleAmmoChanged(value) {
@@ -516,7 +526,11 @@ class FirearmControl extends RangedWeaponRow {
             targetInitiative += this.props.weapon.scope.target_i_mod;
         }
 
-        targetInitiative += this._rangeEffect.targetInitiative;
+        let rangeEffect = this.rangeEffect(this.props.toRange);
+        if (rangeEffect === null) {
+            return null;
+        }
+        targetInitiative += rangeEffect.targetInitiative;
 
         return targetInitiative;
     }
@@ -547,8 +561,14 @@ class FirearmControl extends RangedWeaponRow {
             return <td key={`init-${ii}`} style={initStyle}>{
                 util.renderInt(init)}</td>
         });
-        const skillChecks = this.skillChecks(actions).map((chk, ii) =>
-        {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
+
+        let skillChecks = this.skillChecks(actions);
+        if (skillChecks == null) {
+            skillChecks = <td colSpan={9}><strong>Range too long!</strong></td>;
+        } else {
+            skillChecks = skillChecks.map((chk, ii) =>
+                {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
+        }
 
         const marginRightStyle = {marginRight: "1em"};
         const labelStyle = {marginRight: "0.5em"};
@@ -627,9 +647,9 @@ class FirearmControl extends RangedWeaponRow {
                             <tr>
                                 <td style={cellStyle} colSpan={3}>{this.renderDamage()}</td>
                                 <td style={cellStyle} colSpan={2}>{this.props.weapon.ammo.type}</td>
-                                <td style={cellStyle} colSpan={2} title={`New value: ${this.shortRange()}`}>{weapon.range_s}</td>
-                                <td style={cellStyle} colSpan={2} title={`New value: ${this.mediumRange()}`}>{weapon.range_m}</td>
-                                <td style={cellStyle} colSpan={2} title={`New value: ${this.longRange()}`}>{weapon.range_l}</td>
+                                <td style={cellStyle} colSpan={2} title={`Old value: ${weapon.range_s}`}>{this.shortRange()}</td>
+                                <td style={cellStyle} colSpan={2} title={`Old value: ${weapon.range_m}`}>{this.mediumRange()}</td>
+                                <td style={cellStyle} colSpan={2} title={`Old value: ${weapon.range_l}`}>{this.longRange()}</td>
                             </tr>
                             <tr>
                                 <td style={cellStyle} rowSpan={2}>
@@ -686,6 +706,7 @@ FirearmControl.props = {
     weapon: PropTypes.object.isRequired,
     campaign: PropTypes.number.isRequired,
     toRange: PropTypes.number,
+    darknessDetectionLevel: PropTypes.number,
     onRemove: PropTypes.func,
     onChange: PropTypes.func
 };

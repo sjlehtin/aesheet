@@ -143,7 +143,7 @@ class SenseTable extends React.Component {
             <Card.Header>
                 <h4>Senses</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
             <Table size={"sm"}>
         <thead>
             <tr>
@@ -159,13 +159,15 @@ class SenseTable extends React.Component {
         <tbody>
         <tr ref={(c) => this._visionCheckRow = c}><th>Day</th>
             {this.renderVisionChecks()}<td/></tr>
-        <tr ref={(c) => this._nightVision2CheckRow = c} style={{}}><th>Night</th>
+        <tr style={{}}><th>Night 1</th>
+            {this.renderNightVisionChecks(-1)}<td style={noteStyle}>-1, Dusk</td></tr>
+        <tr ref={(c) => this._nightVision2CheckRow = c} style={{}}><th>Night 2</th>
             {this.renderNightVisionChecks(-2)}<td style={noteStyle}>-2, Artificial light</td></tr>
-        <tr ref={(c) => this._nightVision3CheckRow = c} style={{}}><th>Night</th>
+        <tr ref={(c) => this._nightVision3CheckRow = c} style={{}}><th>Night 3</th>
             {this.renderNightVisionChecks(-3)}<td style={noteStyle}>-3, Moonlight</td></tr>
-        <tr ref={(c) => this._nightVision4CheckRow = c} style={{}}><th>Night</th>
+        <tr ref={(c) => this._nightVision4CheckRow = c} style={{}}><th>Night 4</th>
             {this.renderNightVisionChecks(-4)}<td style={noteStyle}>-4, Darkness</td></tr>
-        <tr ref={(c) => this._nightVision7CheckRow = c} style={{}}><th>Night</th>
+        <tr ref={(c) => this._nightVision7CheckRow = c} style={{}}><th>Night 7</th>
             {this.renderNightVisionChecks(-7)}<td style={noteStyle}>-7, Pitch black</td></tr>
         <tr ref={(c) => this._hearingCheckRow = c}><th>Hearing</th>
             {this.renderHearingChecks()}<td/></tr>

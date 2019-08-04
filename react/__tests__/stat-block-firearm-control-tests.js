@@ -2,6 +2,7 @@ import TestUtils from 'react-dom/test-utils';
 import AmmoControl from '../AmmoControl';
 import ScopeControl from '../ScopeControl';
 import FirearmControl from '../FirearmControl';
+import RangeControl from '../RangeControl';
 
 const factories = require('./factories');
 
@@ -47,6 +48,29 @@ describe('StatBlock -- FirearmControl', () => {
         });
     });
 
+    it('allows changing range to shoot to', () => {
+        // Check that changing the firearm gets propagated up, and REST API is
+        // invoked.
+        const block = factories.statBlockFactory({
+            firearms: [{
+                id: 5,
+                ammo: {id: 12},
+                scope: null
+            }]
+        });
+
+        return block.loaded.then(() => {
+            let rangeControl = TestUtils.findRenderedComponentWithType(block, RangeControl);
+            let spy = jest.spyOn(block, 'rangeChanged');
+
+            TestUtils.Simulate.change(rangeControl._inputField, {target: {value: 19}});
+
+            expect(spy).toHaveBeenCalledWith({range: 19,
+                darknessDetectionLevel: 0});
+        });
+    });
+
+
     it('allows removing a scope from a firearm', () => {
         // Check that changing the firearm gets propagated up, and REST API is
         // invoked.
@@ -67,7 +91,7 @@ describe('StatBlock -- FirearmControl', () => {
             expect(scopeControl.props.scope).not.toBe(null);
 
             let fireArmControl = TestUtils.findRenderedComponentWithType(block, FirearmControl);
-            fireArmControl.handleScopeRemove()
+            fireArmControl.handleScopeRemove();
             expect(rest.patch).toBeCalledWith('/rest/sheets/1/sheetfirearms/5/', {id: 5, scope: null});
 
             return scopePatchRemoveResolve.then(() => {

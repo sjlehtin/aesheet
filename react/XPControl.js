@@ -132,7 +132,6 @@ class XPControl extends React.Component {
                     ReactDOM.findDOMNode(c).focus();
                     }
                     }}
-                           type="text"
                            label="Add XP"
                            onChange={this.handleChange.bind(this)}
                            isValid={this.isValid()}

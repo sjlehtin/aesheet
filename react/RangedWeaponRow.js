@@ -87,8 +87,14 @@ class RangedWeaponRow extends WeaponRow {
         var actionCells = actions.map((el, ii) => {
             return <th style={headerStyle} key={`act-${ii}`}>{el}</th>;
         });
-        var checkCells = this.skillChecks(actions).map((el, ii) =>
-        { return <td style={cellStyle} key={`chk-${ii}`}>{el}</td>; });
+        let checkCells = this.skillChecks(actions);
+        if (checkCells === null) {
+            checkCells = <td colSpan={6}>Unable to use weapon</td>;
+        } else {
+            checkCells = checkCells.map((el, ii) => {
+                return <td style={cellStyle} key={`chk-${ii}`}>{el}</td>;
+            });
+        }
         var initCells = this.initiatives(actions).map((el, ii) =>
         { return <td style={initStyle} key={`init-${ii}`}>{util.renderInt(el)}</td>; });
 

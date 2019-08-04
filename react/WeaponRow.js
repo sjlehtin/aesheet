@@ -156,7 +156,10 @@ class WeaponRow extends React.Component {
 
         const roa = this.roa(props.useType);
         let baseCheck = this.skillCheck();
-
+        if (baseCheck === null) {
+            // Actions not available.
+            return null; //actions.map((e) => {return null;});
+        }
         const checks = [];
 
         if (props.useType === WeaponRow.SEC) {
@@ -218,6 +221,10 @@ class WeaponRow extends React.Component {
         const baseI = -5 / rof;
         const readiedBaseI = this.readiedBaseI;
         let targetI = this.targetInitiative();
+        if (targetI === null) {
+            // Range too long, actions are not available.
+            return actions.map((e) => {return null;});
+        }
         const initiative = this.props.skillHandler.getInitiative();
 
         const initiatives = [];
@@ -345,9 +352,15 @@ class WeaponRow extends React.Component {
 
         const checks = this.skillChecks(WeaponRow.ccActions,
             {useType: useType});
-        const checkCells = checks.map((el, ii) => {
-            return <td key={`chk-${ii}`} style={cellStyle}>{el}</td>;});
 
+        let checkCells;
+        if (checks == null) {
+            checkCells = <td colSpan={9}><strong>Range too long!</strong></td>;
+        } else {
+            checkCells = checks.map((el, ii) => {
+                return <td key={`chk-${ii}`} style={cellStyle}>{el}</td>;
+            });
+        }
         const attackInitiatives = this.initiatives([1, 2, 3, 4],
             {useType: useType});
         const attackInitiativeCells = attackInitiatives.map((el, ii) => {

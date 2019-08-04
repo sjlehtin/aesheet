@@ -32,7 +32,7 @@ class InitiativeBlock extends React.Component {
             <Card.Header>
                 <h4>Initiative penalty for advancing in combat</h4>
             </Card.Header>
-            <Card.Body class={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
             <Table style={{fontSize: "inherit"}} size={"sm"}>
                 <thead>
                     <tr>
