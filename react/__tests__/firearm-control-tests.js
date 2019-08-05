@@ -155,6 +155,49 @@ describe('FirearmControl', () => {
         expect(rangeEffect.name).toEqual("XXL");
     });
 
+    it("can calculate instinctive fire", () => {
+        const firearm = rangeFirearm({handlerProps: {
+                skills: [{
+                    skill: "Handguns",
+                    level: 1
+                }, {skill: "Instinctive fire", level: 2}],
+                character: {cur_int: 50}
+        }});
+        expect(firearm.props.skillHandler.getStat("int")).toEqual(50);
+        const rangeEffect = firearm.rangeEffect(25);
+        expect(rangeEffect.targetInitiative).toEqual(2);
+        expect(firearm.props.skillHandler.getStat("int")).toEqual(50);
+    });
+
+    it("recognizes INT for instinctive fire range", () => {
+        const firearm = rangeFirearm({handlerProps: {
+                skills: [{
+                    skill: "Handguns",
+                    level: 1
+                }, {skill: "Instinctive fire", level: 2}],
+                character: {cur_int: 50}
+            }});
+        const rangeEffect = firearm.rangeEffect(26);
+        expect(rangeEffect.targetInitiative).toEqual(0);
+    });
+
+    it("respects that Instinctive fire can only raise target-I up to zero", () => {
+        const firearm = rangeFirearm({handlerProps: {
+                skills: [{
+                    skill: "Handguns",
+                    level: 1
+                }, {skill: "Instinctive fire", level: 2}],
+                character: {cur_int: 50},
+                weapon: {base: {sight: 600, barrel_length: 602, accuracy: 1.0,
+                    target_initiative: -1},
+                         scope: null}
+        }});
+        expect(firearm.props.skillHandler.getStat("int")).toEqual(50);
+        const rangeEffect = firearm.rangeEffect(25);
+        expect(rangeEffect.targetInitiative).toEqual(2);
+        expect(firearm.targetInitiative()).toEqual(0);
+    });
+
     it("renders damage with XXL range effects", () => {
         const firearm = rangeFirearm({toRange: 360});
         expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')

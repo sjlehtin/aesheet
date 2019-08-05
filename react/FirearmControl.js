@@ -201,6 +201,7 @@ class FirearmControl extends RangedWeaponRow {
     rangeEffect(toRange) {
         let effect = this.weaponRangeEffect(toRange);
         let perks = [];
+        // TODO: tests missing
         if (this.props.weapon.scope) {
             perks = this.props.weapon.scope.perks;
         }
@@ -218,11 +219,20 @@ class FirearmControl extends RangedWeaponRow {
             effect.check += visionCheck - 75;
         }
 
-        // TODO:
         // Instinctive Fire
-        // Although listed under the Throwing weapons skill, the Instinctive fire enhancement is applicable to all missile weapons. The Inst fire skill level cannot be higher than the highest missile weapon skill level.
-        // Instinctive fire grants the PC a +1 bonus per level to Target-I with ranged weapons. The skill cannot raise the Target-I above 0. The skill can be used up to INT/2 m range.
+        // Although listed under the Throwing weapons skill, the Instinctive
+        // fire enhancement is applicable to all missile weapons. The Inst
+        // fire skill level cannot be higher than the highest missile weapon
+        // skill level.
+        // Instinctive fire grants the PC a +1 bonus per level to Target-I
+        // with ranged weapons. The skill cannot raise the Target-I above 0.
+        // The skill can be used up to INT/2 m range.
 
+        if (toRange <= util.rounddown(
+            this.props.skillHandler.getStat("int") / 2)) {
+            effect.targetInitiative +=
+                this.props.skillHandler.skillLevel("Instinctive fire");
+        }
         effect.bumpingAllowed = visionCheck >= 100;
         return effect;
     }
@@ -548,9 +558,11 @@ class FirearmControl extends RangedWeaponRow {
         if (rangeEffect === null) {
             return null;
         }
+
         targetInitiative += rangeEffect.targetInitiative;
 
-        return targetInitiative;
+        // Target-I can be at most zero.
+        return Math.min(0, targetInitiative);
     }
 
     render () {
