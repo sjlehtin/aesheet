@@ -15,6 +15,9 @@ describe('RangeControl', () => {
         if (!props) {
             props = {};
         }
+        if (!props.skillHandler) {
+            props.skillHandler = factories.skillHandlerFactory();
+        }
         return TestUtils.renderIntoDocument(<RangeControl {...props}/>);
     };
 

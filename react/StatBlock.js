@@ -996,7 +996,8 @@ class StatBlock extends React.Component {
                 <h4>Firearms</h4>
             </Card.Header>
             <Card.Body>
-                <RangeControl onChange={(e) => this.rangeChanged(e)}/>
+                <RangeControl onChange={(e) => this.rangeChanged(e)}
+                              skillHandler={skillHandler}/>
             </Card.Body>
             <Card.Body className={"table-responsive p-0 m-1"}>
             {rows}

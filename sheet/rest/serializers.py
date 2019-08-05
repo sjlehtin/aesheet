@@ -258,7 +258,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
 
 
 class SheetFirearmListSerializer(serializers.ModelSerializer):
-
+    scope = ScopeListSerializer()
     class Meta:
         model = sheet.models.Firearm
         fields = "__all__"

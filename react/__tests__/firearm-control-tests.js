@@ -23,6 +23,7 @@ describe('FirearmControl', () => {
         let props = {
             base: {base_skill: "Handguns", skill: "Pistol"},
             handlerProps: {
+                character: {cur_int: 50},
                 skills: [{
                     skill: "Handguns",
                     level: 1
@@ -46,10 +47,9 @@ describe('FirearmControl', () => {
 
     it("can calculate contact range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(0.4);
+        let rangeEffect = firearm.weaponRangeEffect(0.4);
         expect(rangeEffect.check).toEqual(60);
         expect(rangeEffect.targetInitiative).toEqual(2);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(2);
         expect(rangeEffect.leth).toEqual(2);
         expect(rangeEffect.name).toEqual("Contact");
@@ -57,10 +57,9 @@ describe('FirearmControl', () => {
 
     it("can calculate close range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(1);
+        let rangeEffect = firearm.weaponRangeEffect(1);
         expect(rangeEffect.check).toEqual(50);
         expect(rangeEffect.targetInitiative).toEqual(2);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(2);
         expect(rangeEffect.leth).toEqual(2);
         expect(rangeEffect.name).toEqual("Close");
@@ -68,10 +67,9 @@ describe('FirearmControl', () => {
 
     it("can calculate point-blank range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(3);
+        let rangeEffect = firearm.weaponRangeEffect(3);
         expect(rangeEffect.check).toEqual(40);
         expect(rangeEffect.targetInitiative).toEqual(1);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(1);
         expect(rangeEffect.leth).toEqual(1);
         expect(rangeEffect.name).toEqual("Point-blank");
@@ -79,10 +77,9 @@ describe('FirearmControl', () => {
 
     it("can calculate XXS range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(7);
+        let rangeEffect = firearm.weaponRangeEffect(7);
         expect(rangeEffect.check).toEqual(30);
         expect(rangeEffect.targetInitiative).toEqual(1);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(1);
         expect(rangeEffect.leth).toEqual(1);
         expect(rangeEffect.name).toEqual("XXS");
@@ -90,10 +87,9 @@ describe('FirearmControl', () => {
 
     it("can calculate extra-short range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(15);
+        let rangeEffect = firearm.weaponRangeEffect(15);
         expect(rangeEffect.check).toEqual(20);
         expect(rangeEffect.targetInitiative).toEqual(0);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(0);
         expect(rangeEffect.leth).toEqual(0);
         expect(rangeEffect.name).toEqual("Extra-short");
@@ -101,10 +97,9 @@ describe('FirearmControl', () => {
 
     it("can calculate very short range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(30);
+        let rangeEffect = firearm.weaponRangeEffect(30);
         expect(rangeEffect.check).toEqual(10);
         expect(rangeEffect.targetInitiative).toEqual(0);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(0);
         expect(rangeEffect.leth).toEqual(0);
         expect(rangeEffect.name).toEqual("Very short");
@@ -112,10 +107,9 @@ describe('FirearmControl', () => {
 
     it("can calculate short range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(60);
+        let rangeEffect = firearm.weaponRangeEffect(60);
         expect(rangeEffect.check).toEqual(0);
         expect(rangeEffect.targetInitiative).toEqual(0);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(0);
         expect(rangeEffect.leth).toEqual(0);
         expect(rangeEffect.name).toEqual("Short");
@@ -123,10 +117,9 @@ describe('FirearmControl', () => {
 
     it("can calculate medium range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(61);
+        let rangeEffect = firearm.weaponRangeEffect(61);
         expect(rangeEffect.check).toEqual(-10);
         expect(rangeEffect.targetInitiative).toEqual(0);
-        expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(0);
         expect(rangeEffect.leth).toEqual(0);
         expect(rangeEffect.name).toEqual("Medium");
@@ -134,11 +127,9 @@ describe('FirearmControl', () => {
 
     it("can calculate long range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(180);
+        let rangeEffect = firearm.weaponRangeEffect(180);
         expect(rangeEffect.check).toEqual(-20);
         expect(rangeEffect.targetInitiative).toEqual(0);
-        // TODO: should be false
-        //expect(rangeEffect.bumpingAllowed).toBe(true);
         expect(rangeEffect.damage).toEqual(0);
         expect(rangeEffect.leth).toEqual(0);
         expect(rangeEffect.name).toEqual("Long");
@@ -146,10 +137,9 @@ describe('FirearmControl', () => {
 
     it("can calculate extra long range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(270);
+        let rangeEffect = firearm.weaponRangeEffect(270);
         expect(rangeEffect.check).toEqual(-30);
         expect(rangeEffect.targetInitiative).toEqual(-1);
-        expect(rangeEffect.bumpingAllowed).toBe(false);
         expect(rangeEffect.damage).toEqual(-1);
         expect(rangeEffect.leth).toEqual(-1);
         expect(rangeEffect.name).toEqual("Extra-long");
@@ -157,10 +147,9 @@ describe('FirearmControl', () => {
 
     it("can calculate XXL range effects", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(360);
+        let rangeEffect = firearm.weaponRangeEffect(360);
         expect(rangeEffect.check).toEqual(-40);
         expect(rangeEffect.targetInitiative).toEqual(-2);
-        expect(rangeEffect.bumpingAllowed).toBe(false);
         expect(rangeEffect.damage).toEqual(-2);
         expect(rangeEffect.leth).toEqual(-2);
         expect(rangeEffect.name).toEqual("XXL");
@@ -180,7 +169,7 @@ describe('FirearmControl', () => {
 
     it("can recognizes too long range", () => {
         const firearm = rangeFirearm();
-        let rangeEffect = firearm.rangeEffect(400);
+        let rangeEffect = firearm.weaponRangeEffect(400);
         expect(rangeEffect).toBe(null);
     });
 
@@ -196,6 +185,30 @@ describe('FirearmControl', () => {
             toRange: 20000});
         expect(ReactDOM.findDOMNode(firearm).querySelector('.damage')
             .textContent).toEqual("range too long!");
+    });
+
+    it("can calculate XXL range effects and include effect of " +
+        "vision penalty", () => {
+        const firearm = rangeFirearm();
+        let rangeEffect = firearm.rangeEffect(360);
+        expect(rangeEffect.check).toEqual(-55);
+        expect(rangeEffect.targetInitiative).toEqual(-2);
+        expect(rangeEffect.bumpingAllowed).toBe(false);
+        expect(rangeEffect.damage).toEqual(-2);
+        expect(rangeEffect.leth).toEqual(-2);
+        expect(rangeEffect.name).toEqual("XXL");
+    });
+
+    it("can calculate XXL range effects and include effect of " +
+        "darkness penalty", () => {
+        const firearm = rangeFirearm({darknessDetectionLevel: -3});
+        let rangeEffect = firearm.rangeEffect(360);
+        expect(rangeEffect.check).toEqual(-55);
+        expect(rangeEffect.targetInitiative).toEqual(-2);
+        expect(rangeEffect.bumpingAllowed).toBe(false);
+        expect(rangeEffect.damage).toEqual(-2);
+        expect(rangeEffect.leth).toEqual(-2);
+        expect(rangeEffect.name).toEqual("XXL");
     });
 
     // it("can calculate bumping based on range", () => {

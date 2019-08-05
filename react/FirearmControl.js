@@ -58,7 +58,7 @@ class FirearmControl extends RangedWeaponRow {
 
     // Return range effect to the given range. If unable to act to the range,
     // this returns null.
-    rangeEffect(toRange) {
+    weaponRangeEffect(toRange) {
         // Range
         // +2 TI, D/L (+2 to target initiative and damage and lethality)
         //
@@ -109,7 +109,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 2,
                 damage: 2,
                 leth: 2,
-                bumpingAllowed: true,
                 name: "Contact"
             };
         } else if (toRange <= 1) {
@@ -118,7 +117,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 2,
                 damage: 2,
                 leth: 2,
-                bumpingAllowed: true,
                 name: "Close"
             };
         } else if (toRange <= 3) {
@@ -127,7 +125,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 1,
                 damage: 1,
                 leth: 1,
-                bumpingAllowed: true,
                 name: "Point-blank"
             };
         } else if (toRange <= shortRange/8) {
@@ -136,7 +133,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 1,
                 damage: 1,
                 leth: 1,
-                bumpingAllowed: true,
                 name: "XXS"
             };
         } else if (toRange <= shortRange/4) {
@@ -145,7 +141,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 0,
                 damage: 0,
                 leth: 0,
-                bumpingAllowed: true,
                 name: "Extra-short"
             };
 
@@ -155,7 +150,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 0,
                 damage: 0,
                 leth: 0,
-                bumpingAllowed: true,
                 name: "Very short"
             };
 
@@ -167,7 +161,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 0,
                 damage: 0,
                 leth: 0,
-                bumpingAllowed: true,
                 name: "Medium"
             };
         } else if (toRange <= longRange) {
@@ -176,7 +169,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 0,
                 damage: 0,
                 leth: 0,
-                bumpingAllowed: false,
                 name: "Long"
             };
         } else if (toRange <= 1.5*longRange) {
@@ -185,7 +177,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: -1,
                 damage: -1,
                 leth: -1,
-                bumpingAllowed: false,
                 name: "Extra-long"
             };
         } else if (toRange <= 2*longRange) {
@@ -194,7 +185,6 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: -2,
                 damage: -2,
                 leth: -2,
-                bumpingAllowed: false,
                 name: "XXL"
             };
         } else if (toRange <= 2.5*longRange) {
@@ -206,6 +196,28 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         return null;
+    }
+
+    rangeEffect(toRange) {
+        let effect = this.weaponRangeEffect(toRange);
+        let perks = [];
+        if (this.props.weapon.scope) {
+            perks = this.props.weapon.scope.perks;
+        }
+        const visionCheck = this.props.skillHandler.nightVisionCheck(toRange,
+            this.props.darknessDetectionLevel,
+            perks);
+
+        if (effect === null || visionCheck === null) {
+            return null;
+        }
+
+        if (visionCheck < 75) {
+            effect.check += visionCheck - 75;
+        }
+
+        effect.bumpingAllowed = visionCheck >= 100;
+        return effect;
     }
 
     skillCheck() {
@@ -696,19 +708,27 @@ class FirearmControl extends RangedWeaponRow {
                     {this.renderBurstTable()}
                 </Col>
             </Row>
+            <Row>
+                <Col>
             {sweepInstructions}
+                </Col>
+            </Row>
         </div>;
     }
 }
 
-FirearmControl.props = {
+FirearmControl.propTypes = {
     skillHandler: PropTypes.object.isRequired,
     weapon: PropTypes.object.isRequired,
     campaign: PropTypes.number.isRequired,
-    toRange: PropTypes.number,
+    toRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     darknessDetectionLevel: PropTypes.number,
     onRemove: PropTypes.func,
     onChange: PropTypes.func
+};
+
+FirearmControl.defaultProps = {
+    darknessDetectionLevel: 0
 };
 
 export default FirearmControl;

@@ -2,13 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Form, Col, Row} from 'react-bootstrap';
 import {DropdownList} from 'react-widgets';
+const util = require('./sheet-util');
 
 class RangeControl extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            currentValue: ""
+            currentValue: "",
+            currentRange: null,
+            currentDetectionLevel: 0
         };
     }
 
@@ -27,17 +30,42 @@ class RangeControl extends React.Component {
         let val = event.target.value;
         this.setState({currentValue: event.target.value});
         if (this.isValid(val)) {
+            let range = val === "" ? "" : parseFloat(val);
+            this.setState({currentRange: range});
             this.props.onChange({
-                range: val === ""? "" : parseFloat(val),
-                darknessDetectionLevel: 0
-            })
+                range: range,
+                darknessDetectionLevel: this.state.currentDetectionLevel
+            });
         }
     }
 
-    handleDetectionLevelChange(event) {
+    handleDetectionLevelChange(value) {
+        console.log(value);
+        this.setState({currentDetectionLevel: value.detectionLevel});
+        this.props.onChange({
+            range: this.state.currentRange,
+            darknessDetectionLevel: value.detectionLevel
+        });
     }
 
     render() {
+        let visionCheck = '';
+        if (util.isFloat(this.state.currentRange)) {
+            const check = this.props.skillHandler.nightVisionCheck(this.state.currentRange,
+                this.state.currentDetectionLevel);
+
+            let style = {};
+            let verbose = '';
+            if (check < 75) {
+                style.color = 'hotpink';
+                verbose = `Ranged penalty: ${75 - check}`;
+            } else if (check >= 100) {
+                style.fontWeight = 'bold';
+                verbose = "Bumping enabled";
+            }
+            visionCheck = <span>Vision check: <span style={style}>{check}</span>
+                <span className={"ml-2"} style={{fontStyle: "italic"}}>{verbose}</span></span>;
+        }
         return <div>
             <Form.Group aas={Row}>
             <Form.Label column sm={"2"}>Range</Form.Label>
@@ -57,17 +85,23 @@ class RangeControl extends React.Component {
                 <DropdownList data={RangeControl.detectionLevels}
                           textField={item => `${item.description} (${item.detectionLevel})`}
                           valueField='detectionLevel'
-                          value={this.state.selectedLevel}
+                          value={this.state.currentDetectionLevel}
                               defaultValue={RangeControl.detectionLevels[0]}
                           onChange={(value) => this.handleDetectionLevelChange(value)} />
                 </Col>
             </Form.Group>
+            <Row>
+                <Col>
+                    {visionCheck}
+                </Col>
+            </Row>
         </div>;
     }
 }
 
 RangeControl.propTypes = {
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    skillHandler: PropTypes.object.isRequired
 };
 
 RangeControl.detectionLevels = [

@@ -198,6 +198,21 @@ describe('SkillHandler edge skill bonuses', function() {
 
     });
 
+    it('allows using weapon perks for night vision', function (){
+        const handler = factories.skillHandlerFactory({character: {cur_int: 50}});
+        const perks = [{edge: "Night Vision", level: 1}];
+
+        expect(handler.nightVisionCheck(90, 0, perks)).toEqual(80);
+        // night vision should cancel one level of darkness.
+        expect(handler.nightVisionCheck(90, -1, perks)).toEqual(80);
+        expect(handler.nightVisionCheck(90, -2, perks)).toEqual(60);
+
+        //
+        expect(handler.nightVisionCheck(300, -3, perks)).toBe(null);
+        expect(handler.nightVisionCheck(200, -3, perks)).toEqual(30);
+
+    });
+
     it('allows checking against a distance with both night and ' +
         'acute vision', function () {
         const handler = factories.skillHandlerFactory({
@@ -209,5 +224,16 @@ describe('SkillHandler edge skill bonuses', function() {
         expect(handler.nightVisionCheck(510, -3)).toBe(null);
         expect(handler.nightVisionCheck(300, -3)).toEqual(30);
         expect(handler.nightVisionCheck(200, -3)).toEqual(40);
+    });
+
+    it('allows using weapon perks for both night vision and acute vision', function (){
+        const handler = factories.skillHandlerFactory({character: {cur_int: 50}});
+        const perks = [{edge: "Night Vision", level: 1},
+        {edge: "Acute Vision", level: 2}];
+
+        expect(handler.nightVisionCheck(90, -1, perks)).toEqual(90);
+        expect(handler.nightVisionCheck(510, -3, perks)).toBe(null);
+        expect(handler.nightVisionCheck(300, -3, perks)).toEqual(30);
+        expect(handler.nightVisionCheck(200, -3, perks)).toEqual(40);
     });
 });

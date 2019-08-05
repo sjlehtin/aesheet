@@ -197,9 +197,12 @@ class SkillHandler {
         }
     }
 
-    edgeLevel(edgeName) {
-        if (edgeName in this.state.edgeMap) {
-            return this.state.edgeMap[edgeName].level;
+    edgeLevel(edgeName, givenMap) {
+        if (typeof(givenMap) === "undefined") {
+            givenMap = this.state.edgeMap;
+        }
+        if (edgeName in givenMap) {
+            return givenMap[edgeName].level;
         } else {
             return 0;
         }
@@ -556,10 +559,10 @@ class SkillHandler {
         return this._effStats;
     }
 
-    detectionLevel(goodEdge, badEdge) {
-        let level = -this.edgeLevel(badEdge);
+    detectionLevel(goodEdge, badEdge, givenMap) {
+        let level = -this.edgeLevel(badEdge, givenMap);
         if (!level) {
-            level = this.edgeLevel(goodEdge);
+            level = this.edgeLevel(goodEdge, givenMap);
         }
         return level;
     }
@@ -568,10 +571,15 @@ class SkillHandler {
         return this._hardMods[target] + this._softMods[target];
     }
 
-    nightVisionCheck(range, detectionLevel) {
+    nightVisionCheck(range, detectionLevel, givenPerks) {
         const ranges = [2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
             10000];
-        const baseCheck = this.nightVisionBaseCheck();
+        let perks = {};
+        if (typeof(givenPerks) !== "undefined") {
+            perks = SkillHandler.getItemMap(givenPerks, (item) => { return item.edge; });
+        }
+        console.log(givenPerks, perks);
+        const baseCheck = this.nightVisionBaseCheck(perks);
         const darknessDL = Math.min(0,
             baseCheck.darknessDetectionLevel + detectionLevel);
 
@@ -605,12 +613,17 @@ class SkillHandler {
             detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
     }
 
-    nightVisionBaseCheck() {
+    nightVisionBaseCheck(givenPerks) {
+        let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
+        let nightVision = this.detectionLevel("Night Vision",
+            "Night Blindness");
+        if (typeof(givenPerks) !== "undefined") {
+            acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", givenPerks);
+            nightVision += this.detectionLevel("Night Vision", "Night Blindness", givenPerks);
+        }
         return {check: this.getEffStats().int + this.getTotalModifier("vision"),
-            detectionLevel: util.rounddown(
-                this.detectionLevel("Acute Vision", "Poor Vision") / 2),
-            darknessDetectionLevel: this.detectionLevel("Night Vision",
-                "Night Blindness")};
+            detectionLevel: util.rounddown(acuteVision / 2),
+            darknessDetectionLevel: nightVision};
     }
 
     surpriseCheck() {
