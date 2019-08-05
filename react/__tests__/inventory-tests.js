@@ -7,7 +7,7 @@ const inventoryEntryFactory = require('./factories').inventoryEntryFactory;
 jest.mock('../sheet-rest');
 var rest = require('../sheet-rest');
 
-const Inventory = require('../Inventory').default;
+import Inventory from '../Inventory';
 
 describe('Inventory', function() {
     "use strict";
@@ -100,6 +100,55 @@ describe('Inventory', function() {
             }).catch((err) => {
                 fail(err)
             });
+        }).catch((err) => fail(err));
+    });
+
+    it('allows addition to be canceled', function () {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
+        const inventory = getInventory();
+
+        return Promise.all(promises).then((data) => {
+
+            TestUtils.Simulate.click(inventory._addButton);
+            expect(inventory._addButton.disabled).toBe(true);
+            let cancelButton = ReactDOM.findDOMNode(inventory)
+                .querySelector('#cancelButton');
+            expect(cancelButton).not.toBe(null);
+            expect(inventory._addButton.disabled).toBe(true);
+
+            // Enter a valid description.
+            let node = ReactDOM.findDOMNode(inventory._inputRow)
+                .querySelector('td input');
+            TestUtils.Simulate.change(node, {target: {value: "foo"}});
+            expect(inventory._inputRow.isValid()).toBe(true);
+
+            TestUtils.Simulate.click(cancelButton);
+
+            // Add button should be active again.
+            expect(inventory._addButton.disabled).toBe(false);
+        }).catch((err) => fail(err));
+    });
+
+    it('allows addition to be canceled without data entry', function () {
+        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
+        const inventory = getInventory();
+
+        return Promise.all(promises).then((data) => {
+
+            TestUtils.Simulate.click(inventory._addButton);
+            expect(inventory._addButton.disabled).toBe(true);
+            let cancelButton = ReactDOM.findDOMNode(inventory)
+                .querySelector('#cancelButton');
+            expect(cancelButton).not.toBe(null);
+
+            TestUtils.Simulate.click(cancelButton);
+
+            // Add button should be active again.
+            expect(inventory._addButton.disabled).toBe(false);
+
+            cancelButton = ReactDOM.findDOMNode(inventory)
+                .querySelector('#cancelButton');
+            expect(cancelButton).toBe(null);
         }).catch((err) => fail(err));
     });
 

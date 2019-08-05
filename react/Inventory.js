@@ -57,7 +57,6 @@ class Inventory extends React.Component {
 
         rest.post(this.props.url, data)
             .then((json) => {
-                console.log("Add successful:", json);
                 /* The returned id will be used as the key, and can also
                    be used to immediately update or delete the new item. */
                 data.id = json.id;
@@ -72,21 +71,18 @@ class Inventory extends React.Component {
     }
 
     handleRemove(idx) {
-        var elem = this.state.inventory[idx];
+        const elem = this.state.inventory[idx];
         rest.del(`${this.props.url}${elem.id}/`,
             this.state.inventory[idx])
             .then((json) => {
-                var removed = this.state.inventory.splice(idx, 1);
-                console.log("removed:", idx, removed);
-                console.log("new inventory:", this.state.inventory);
+                this.state.inventory.splice(idx, 1);
                 this.updateInventory(this.state.inventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); })
     }
 
     handleEdit(idx, newElem) {
-        console.log(`Updated ${idx}:`, newElem);
-        var newInventory = this.state.inventory;
+        const newInventory = this.state.inventory;
         newInventory[idx] = newElem;
 
         rest.put(`${this.props.url}${newElem.id}/`,
@@ -98,7 +94,6 @@ class Inventory extends React.Component {
     }
 
     handleInputRowChanged() {
-        console.log("Changed ", this._inputRow.isValid());
         this.setState({addButtonEnabled: this._inputRow.isValid()});
     }
 
@@ -114,9 +109,9 @@ class Inventory extends React.Component {
     }
 
     render() {
-        var total = 0;
-        var weightStyle = {textAlign: "left", paddingLeft: 20};
-        var rows = this.state.inventory.map((elem, ii) => {
+        let total = 0;
+        const weightStyle = {textAlign: "left", paddingLeft: 20};
+        const rows = this.state.inventory.map((elem, ii) => {
             total += parseFloat(elem.unit_weight)
                 * parseInt(elem.quantity);
             return <InventoryRow key={elem.id} initialEntry={elem}
@@ -132,8 +127,8 @@ class Inventory extends React.Component {
                 createNew={true}
                 onMod={(newElem) => this.handleNew(newElem)}
                 onChange={() => this.handleInputRowChanged()}>
-                <Button onClick={() => this.setState({addEnabled: false})}
-                >Cancel</Button>
+                <Button id={"cancelButton"}
+                        onClick={() => this.setState({addEnabled: false, addButtonEnabled: true})}>Cancel</Button>
             </InventoryRow>);
         }
         return <Table striped condensed={"true"} style={{fontSize: "80%"}}>

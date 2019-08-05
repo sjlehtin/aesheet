@@ -47,34 +47,32 @@ describe('InventoryRow', function() {
     var promises = [];
 
     it('renders also as empty', function () {
-        var row = inventoryRowFactory();
-        var table = TestUtils.findRenderedDOMComponentWithTag(row,
-            "tr");
-        expect(row.descriptionValidationState()).toEqual("success");
-        expect(row.unitWeightValidationState()).toEqual("success");
+        const row = inventoryRowFactory();
+        expect(row.descriptionValidationState()).toBe(true);
+        expect(row.unitWeightValidationState()).toBe(true);
     });
 
     it('validates description field', function () {
-        var row = inventoryRowFactory();
+        const row = inventoryRowFactory();
 
         TestUtils.Simulate.click(row._descriptionField);
 
         TestUtils.Simulate.change(row._descriptionInputField,
             {target: {value: ""}});
 
-        expect(row.descriptionValidationState()).toEqual("error");
+        expect(row.descriptionValidationState()).toBe(false);
         expect(row.isValid()).toBe(false);
 
         TestUtils.Simulate.change(row._descriptionInputField,
             {target: {value: "Tsup"}});
-        expect(row.descriptionValidationState()).toEqual("success");
+        expect(row.descriptionValidationState()).toBe(true);
         expect(row.isValid()).toBe(true);
     });
 
-    it('allows canceling edit', function (done) {
-        var row = inventoryRowFactory();
+    it('allows canceling edit', function () {
+        const row = inventoryRowFactory();
 
-        Promise.all(promises).then(function () {
+        return Promise.all(promises).then(function () {
             TestUtils.Simulate.click(row._descriptionField);
 
             expect(row.state.description).toEqual("Item");
@@ -88,49 +86,47 @@ describe('InventoryRow', function() {
                 {key: "Esc", keyCode: 27, which: 27});
 
             expect(row.state.description).toEqual("Item");
-            done();
         }).catch((err) => fail(err));
-
     });
 
     it('validates unit weight field', function () {
-        var row = inventoryRowFactory();
+        const row = inventoryRowFactory();
 
-            TestUtils.Simulate.click(row._unitWeightField);
+        TestUtils.Simulate.click(row._unitWeightField);
 
-            TestUtils.Simulate.change(row._unitWeightInputField,
-                {target: {value: "a2.1"}});
+        TestUtils.Simulate.change(row._unitWeightInputField,
+            {target: {value: "a2.1"}});
 
-            expect(row.unitWeightValidationState()).toEqual("error");
-            expect(row.isValid()).toBe(false);
+        expect(row.unitWeightValidationState()).toBe(false);
+        expect(row.isValid()).toBe(false);
 
-            TestUtils.Simulate.change(row._unitWeightInputField,
-                {target: {value: "2.1"}});
+        TestUtils.Simulate.change(row._unitWeightInputField,
+            {target: {value: "2.1"}});
 
-            expect(row.unitWeightValidationState()).toEqual("success");
-            expect(row.isValid()).toBe(true);
+        expect(row.unitWeightValidationState()).toBe(true);
+        expect(row.isValid()).toBe(true);
     });
 
     it('validates quantity field', function () {
-        var row = inventoryRowFactory();
+        const row = inventoryRowFactory();
 
         TestUtils.Simulate.click(row._quantityField);
 
         TestUtils.Simulate.change(row._quantityInputField,
             {target: {value: "a2"}});
 
-        expect(row.quantityValidationState()).toEqual("error");
+        expect(row.quantityValidationState()).toBe(false);
         expect(row.isValid()).toBe(false);
 
         TestUtils.Simulate.change(row._quantityInputField,
             {target: {value: "2"}});
 
-        expect(row.quantityValidationState()).toEqual("success");
+        expect(row.quantityValidationState()).toBe(true);
         expect(row.isValid()).toBe(true);
     });
 
     it('allows edit of location field', function () {
-        var row = inventoryRowFactory();
+        const row = inventoryRowFactory();
 
         TestUtils.Simulate.click(row._locationField);
 
@@ -146,12 +142,12 @@ describe('InventoryRow', function() {
     });
 
     it('calls onDelete on clicking remove', function () {
-        var spy = jasmine.createSpy("remove");
-        var row = inventoryRowFactory({onDelete: spy});
+        const spy = jasmine.createSpy("remove");
+        const row = inventoryRowFactory({onDelete: spy});
 
         TestUtils.Simulate.click(row._descriptionField);
 
-        var button = TestUtils.findRenderedDOMComponentWithTag(row, "button");
+        const button = TestUtils.findRenderedDOMComponentWithTag(row, "button");
         expect(typeof(button)).not.toEqual("undefined");
 
         TestUtils.Simulate.click(row._removeButton);

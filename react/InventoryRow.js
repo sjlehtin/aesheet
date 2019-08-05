@@ -70,7 +70,7 @@ class InventoryRow extends React.Component {
     }
 
     cancelEdit(field) {
-        var update = {};
+        const update = {};
         update[field] = this.state.old[field];
         this.state.show[field] = false;
         this.setState(Object.assign(update, {show: this.state.show}));
@@ -103,31 +103,21 @@ class InventoryRow extends React.Component {
     }
 
     unitWeightValidationState() {
-        return util.isFloat(this.state.unitWeight) ? "success" : "error";
+        return util.isFloat(this.state.unitWeight);
     }
 
     quantityValidationState() {
-        return util.isInt(this.state.quantity) ? "success" : "error";
+        return util.isInt(this.state.quantity);
     }
 
     descriptionValidationState() {
-        return this.state.description.length > 0 ? "success" : "error";
+        return this.state.description.length > 0;
     }
 
     isValid() {
-        if (this.descriptionValidationState() != "success") {
-            return false;
-        }
-
-        if (this.quantityValidationState() != "success") {
-            return false;
-        }
-
-        if (this.unitWeightValidationState() != "success") {
-            return false;
-        }
-
-        return true;
+        return this.descriptionValidationState() &&
+            this.quantityValidationState() &&
+            this.unitWeightValidationState();
     }
 
     submit() {
@@ -136,7 +126,7 @@ class InventoryRow extends React.Component {
         }
 
         if (this.props.onMod) {
-            var initial;
+            let initial;
             if (!this.props.initialEntry) {
                 initial = {};
             } else {
@@ -176,15 +166,15 @@ class InventoryRow extends React.Component {
         var description, unitWeight, quantity, location;
 
         if (this.state.show.description) {
-            description = <FormGroup validationState={this.descriptionValidationState()}>
+            description = <FormGroup>
                 <FormControl type="text"
                            ref={(c) => { this._descriptionInputField = c ?
                            ReactDOM.findDOMNode(c) : undefined}}
-                           bsStyle={this.descriptionValidationState()}
+                           isValid={this.descriptionValidationState()}
                            onChange={(e) => this.handleDescriptionChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "description")}
-                           value={this.state.description} />;
+                           value={this.state.description} />
                 <FormControl.Feedback />
             </FormGroup>;
         } else {
@@ -195,7 +185,7 @@ class InventoryRow extends React.Component {
             quantity = <FormControl type="text"
                            ref={(c) => { this._quantityInputField = c ?
                            ReactDOM.findDOMNode(c) : undefined}}
-                           bsStyle={this.quantityValidationState()}
+                           isValid={this.quantityValidationState()}
                            onChange={(e) => this.handleQuantityChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "quantity")}
@@ -217,11 +207,10 @@ class InventoryRow extends React.Component {
         }
         
         if (this.state.show.unitWeight) {
-            // TODO: add feedback
             unitWeight = <FormControl type="text"
                            ref={(c) => { this._unitWeightInputField = c ?
                            ReactDOM.findDOMNode(c) : undefined}}
-                           bsStyle={this.unitWeightValidationState()}
+                           isValid={this.unitWeightValidationState()}
                            onChange={(e) => this.handleUnitWeightChange(e)}
                            onKeyDown={(e) =>
                              this.handleKeyDown(e, "unitWeight")}
