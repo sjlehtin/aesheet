@@ -199,16 +199,19 @@ describe('FirearmControl', () => {
         expect(rangeEffect.name).toEqual("XXL");
     });
 
-    it("can calculate XXL range effects and include effect of " +
+    it("can calculate range effects and include effect of " +
         "darkness penalty", () => {
         const firearm = rangeFirearm({darknessDetectionLevel: -3});
         let rangeEffect = firearm.rangeEffect(360);
-        expect(rangeEffect.check).toEqual(-55);
-        expect(rangeEffect.targetInitiative).toEqual(-2);
+        expect(rangeEffect).toBe(null);
+
+        rangeEffect = firearm.rangeEffect(100);
+        expect(rangeEffect.check).toEqual(-65);
+        expect(rangeEffect.targetInitiative).toEqual(0);
         expect(rangeEffect.bumpingAllowed).toBe(false);
-        expect(rangeEffect.damage).toEqual(-2);
-        expect(rangeEffect.leth).toEqual(-2);
-        expect(rangeEffect.name).toEqual("XXL");
+        expect(rangeEffect.damage).toEqual(0);
+        expect(rangeEffect.leth).toEqual(0);
+        expect(rangeEffect.name).toEqual("Medium");
     });
 
     // it("can calculate bumping based on range", () => {
@@ -241,25 +244,25 @@ describe('FirearmControl', () => {
     it ("can calculate a row of checks to implicit short range", () => {
         const firearm = rangeFirearm();
         expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
-            .toEqual([60, 53, 50, 50, 40, 33, 27, null, null, null]);
+            .toEqual([62, 55, 52, 52, 42, 35, 29, null, null, null]);
     });
 
     it ("can calculate a row of checks to short range", () => {
         const firearm = rangeFirearm({toRange: 60});
         expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
-            .toEqual([60, 53, 50, 50, 40, 33, 27, null, null, null]);
+            .toEqual([62, 55, 52, 52, 42, 35, 29, null, null, null]);
     });
 
     it ("can calculate a row of checks to medium range", () => {
         const firearm = rangeFirearm({toRange: 61});
         expect(firearm.skillChecks([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
-            .toEqual([50, 43, 40, 40, 30, 23, 17, null, null, null]);
+            .toEqual([52, 45, 42, 42, 32, 25, 19, null, null, null]);
     });
 
     it ("can calculate a row of initiatives to short range", () => {
         const firearm = rangeFirearm({toRange: 60});
         expect(firearm.initiatives([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9]))
-            .toEqual([8, 6, 2, -3, 5, -0, -5, null, null, null]);
+            .toEqual([8, 6, 2, -3, 5, 0, -5, null, null, null]);
     });
 
     it ("can calculate a row of initiatives to extra-long range", () => {

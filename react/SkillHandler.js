@@ -578,7 +578,7 @@ class SkillHandler {
         if (typeof(givenPerks) !== "undefined") {
             perks = SkillHandler.getItemMap(givenPerks, (item) => { return item.edge; });
         }
-        console.log(givenPerks, perks);
+
         const baseCheck = this.nightVisionBaseCheck(perks);
         const darknessDL = Math.min(0,
             baseCheck.darknessDetectionLevel + detectionLevel);
