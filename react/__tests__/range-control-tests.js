@@ -54,4 +54,5 @@ describe('RangeControl', () => {
         expect(spy).not.toHaveBeenCalled();
     });
 
+    // TODO: detection level tests.
 });
