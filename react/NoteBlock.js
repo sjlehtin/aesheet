@@ -35,12 +35,9 @@ class NoteBlock extends React.Component {
 
             return <ul style={{fontSize: "80%", color: color}}>
                 {edgeList.map((elem, ii) => {
-                    var title = formatItem(elem);
-                    if (title) {
-                        title += ": ";
-                    }
+                    let title = <strong>{formatItem(elem)}:</strong>;
                     return <li key={ii}>
-                        {`${title}${elem.notes}`}</li>;
+                        {title} {`${elem.notes}`}</li>;
                 })}</ul>;
         };
 
