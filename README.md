@@ -54,10 +54,10 @@ After updating sources, run
  % npm install
  % . .venv/bin/activate
  % pipenv install
- % ./node_modules/.bin/webpack
+ % ./node_modules/.bin/webpack --mode production
  % python manage.py migrate
  % python manage.py collectstatic -l -i node_modules
- % sudo supervisorctl reload sheet
+ % z
 ```
 
 If nginx configuration needed to be updated, you also need to reload nginx configuration.

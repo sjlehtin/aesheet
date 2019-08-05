@@ -6,7 +6,7 @@ import AmmoControl from './AmmoControl';
 import ScopeControl from './ScopeControl';
 
 const util = require('./sheet-util');
-import {Col, Row, Button} from 'react-bootstrap';
+import {Col, Row, Button, Table} from 'react-bootstrap';
 
 /*
  * Firearms are sheet specific.  TODO: Firearms can contain add-ons, most
@@ -608,6 +608,29 @@ class FirearmControl extends RangedWeaponRow {
 
         let scope = this.props.weapon.scope || {};
 
+        let rangeEffect = this.rangeEffect(this.props.toRange);
+
+        let rangeInfo;
+        if (rangeEffect) {
+            rangeInfo = <div>
+                <Table>
+                    <tbody>
+                    <tr>
+                        <th >Range effect</th>
+                        <td className={"mx-2"}>{`${rangeEffect.name}`}</td>
+                        <th className={"ml-5"}>Bumping</th>
+                        <td className={"mx-2"}>{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
+                        <th className={"ml-5"}>Check</th>
+                        <td className={"mx-2"}>{`${rangeEffect.check}`}</td>
+                        <th className={"ml-5"}>TI, Dmg/Leth</th>
+                        <td className={"mx-2"}>{`${rangeEffect.targetInitiative}`}/{`${rangeEffect.damage}`}/{`${rangeEffect.leth}`}</td>
+                    </tr>
+                    </tbody>
+                </Table>
+            </div>;
+        } else {
+            rangeInfo = <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
+        }
         return <div style={this.props.style}>
             <Row>
                 <Col md={8}>
@@ -634,7 +657,7 @@ class FirearmControl extends RangedWeaponRow {
                                     </div>
                                 </td>
                                 <td style={cellStyle}>{this.skillLevel()}</td>
-                                <td style={cellStyle}>{ this.rof().toFixed(2) }</td>
+                                <td style={cellStyle}>{this.rof().toFixed(2)}</td>
                                 {skillChecks}
                                 <td style={cellStyle}>{this.targetInitiative()}</td>
                                 <td style={cellStyle}>{weapon.draw_initiative}</td>
@@ -698,6 +721,11 @@ class FirearmControl extends RangedWeaponRow {
                         <Button onClick={(e) => this.handleRemove()}
                                 ref={(c) => this._removeButton = c}
                                 size="sm">Remove firearm</Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            {rangeInfo}
                         </Col>
                     </Row>
                     <Row>
