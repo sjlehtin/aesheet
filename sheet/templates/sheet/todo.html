@@ -32,9 +32,9 @@
     - language skills to a separate section in the skills
     - make "standard skills" stand out a bit in the selection
     - apply instinctive fire on low ranges
-    - touch devices "missing skills"
+    - UI: touch devices "missing skills" not showing up, can't see the reason for the missing skill indicator
 
-    - fix toughness (now 1 pt per level, should be 2)
+    + fix toughness (now 1 pt per level, should be 2)
 
     + notes changes should perhaps not be logged.
 
@@ -53,6 +53,9 @@
     - spell skill checks (SM)
 
     - edge levels from items (toughness, darkvision, etc)
+        - done for scopes
+        - missing for miscellaneous items, firearm addons, special weapon qualities
+
     + automatic used edge point calculation
 
     - tiring: show tiring durations in the sheet
@@ -102,10 +105,10 @@
     - magic item location (only one item to each location)
     + change log for sheet (stat modifications etc)
     ++ skills
-    -- edges
+    ++ edges
 
     - encumbrance breakdown (M)
-    - sheet styling
+    + sheet styling
 
     - short description of spell effect (+50 FIT etc)
     - stats, armors etc if the character is larger sized.
@@ -155,10 +158,10 @@
     <h2>BUGS</h2>
     <pre>
     - Adding skills with multiple prereqs doesn't work.
-    - Better error messages on importing completely invalid CSV (heading line or
+    + Better error messages on importing completely invalid CSV (heading line or
           data type broken)
-    - sweep fire description
-    - wound addition controls
+    + sweep fire description
+    + wound addition controls
     </pre>
 
 {% endblock %}
