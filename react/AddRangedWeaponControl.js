@@ -12,7 +12,10 @@ class AddRangedWeaponControl extends React.Component {
         super(props);
         this.state = {
             isBusy: true,
-            isOpen: false
+            isOpen: false,
+            qualityChoices: [],
+            weaponChoices: [],
+            weaponTemplateChoices: []
         }
     }
 
@@ -21,7 +24,8 @@ class AddRangedWeaponControl extends React.Component {
         rest.getData(`/rest/weaponqualities/campaign/${this.props.campaign}/`).then(
             (json) => {
                 this.setState({
-                    qualityChoices: json})
+                    qualityChoices: json});
+
             }
         ).catch((err) => console.log(err));
         rest.getData(`/rest/rangedweapons/campaign/${this.props.campaign}/`).then(
@@ -61,15 +65,9 @@ class AddRangedWeaponControl extends React.Component {
         this.setState({selectedQuality: value})
     }
 
-    //handleOpen() {
-    //    this.loadWeapons();
-    //}
-
     handleAdd() {
-        console.log("adding:",
-            this.state.selectedWeapon, this.state.selectedQuality);
         if (this.props.onAdd) {
-            var weapon;
+            let weapon;
             if ('id' in this.state.selectedWeapon) {
                 weapon = this.state.selectedWeapon;
             } else {
@@ -96,11 +94,7 @@ class AddRangedWeaponControl extends React.Component {
         if (this.state.selectedWeapon.base) {
             return true;
         }
-        if (typeof(this.state.selectedQuality) === "object") {
-            return true;
-        } else {
-            return false;
-        }
+        return typeof(this.state.selectedQuality) === "object";
     }
 
     render () {
@@ -112,7 +106,7 @@ class AddRangedWeaponControl extends React.Component {
             quality = <Combobox
                 data={this.state.qualityChoices}
                 value={this.state.selectedQuality}
-                textField={'name'} suggest={true}
+                textField={'name'}
                 onChange={(value) => this.handleQualityChange(value)}/>;
         }
 
