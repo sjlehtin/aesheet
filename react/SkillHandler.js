@@ -17,6 +17,8 @@
  * TODO: study Redux for handling state in a cleaner fashion.
  */
 
+import SenseTable from "./SenseTable";
+
 const util = require('./sheet-util');
 
 class SkillHandler {
@@ -566,7 +568,36 @@ class SkillHandler {
         return this._hardMods[target] + this._softMods[target];
     }
 
-    dayVisionCheck() {
+    nightVisionCheck(range, detectionLevel) {
+        const ranges = [2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
+            10000];
+        const baseCheck = this.nightVisionBaseCheck();
+        const darknessDL = Math.min(0,
+            baseCheck.darknessDetectionLevel + detectionLevel);
+
+        const maxRangeIndex = baseCheck.detectionLevel + darknessDL +
+            SkillHandler.BASE_VISION_RANGE;
+
+        let index = 1; // Max bonus for under two meters = +80
+        for (let curRange of ranges) {
+            if (range <= curRange) {
+                break;
+            }
+            index++;
+        }
+        // Too far, cannot see.
+        if (index > maxRangeIndex) {
+            return null;
+        }
+        // See SenseTable for the calculation of the senses. Basically,
+        // the last of the checks is the basic check, with each range
+        // increment below getting a +10 bump; for night detection levels, the
+        // total detection level is also added as a penalty (* 10).
+        return baseCheck.check + (maxRangeIndex - index) * 10 +
+            darknessDL * 10;
+    }
+
+    dayVisionBaseCheck() {
         let check = this.getEffStats().int;
         check += this.getTotalModifier("vision");
         check -= 5 * this.edgeLevel("Color Blind");
@@ -574,7 +605,7 @@ class SkillHandler {
             detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
     }
 
-    nightVisionCheck() {
+    nightVisionBaseCheck() {
         return {check: this.getEffStats().int + this.getTotalModifier("vision"),
             detectionLevel: util.rounddown(
                 this.detectionLevel("Acute Vision", "Poor Vision") / 2),
@@ -624,5 +655,9 @@ SkillHandler.defaultProps = {
     edges: [],
     wounds: []
 };
+
+SkillHandler.BASE_VISION_RANGE = 9;
+SkillHandler.BASE_HEARING_RANGE = 6;
+SkillHandler.BASE_SMELL_RANGE  = 3;
 
 export default SkillHandler;

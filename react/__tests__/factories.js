@@ -303,9 +303,19 @@ const scopeFactory = (props) => {
         "to_hit_mod": 0,
         "tech_level": 4,
         "weight": "7.500",
-        "sight": 100
+        "sight": 100,
+        perks: []
     };
+
+    let perks = [];
+    if (props.perks) {
+        for (let edge of props.perks) {
+            perks.push(edgeLevelFactory(edge));
+        }
+    }
+
     let newScope = Object.assign(_base, props);
+    newScope.perks = perks;
     objectId = newScope.id + 1;
     return newScope;
 };

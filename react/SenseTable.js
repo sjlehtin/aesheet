@@ -86,12 +86,12 @@ class SenseTable extends React.Component {
     }
 
     renderVisionChecks() {
-        return SenseTable.getCheckCells(this.props.handler.dayVisionCheck(),
+        return SenseTable.getCheckCells(this.props.handler.dayVisionBaseCheck(),
             SenseTable.BASE_VISION_RANGE, true);
     }
 
     renderNightVisionChecks(detectionLevel) {
-        const check = this.props.handler.nightVisionCheck();
+        const check = this.props.handler.nightVisionBaseCheck();
 
         let checks;
         if (detectionLevel < -4 && check.darknessDetectionLevel < 4) {
