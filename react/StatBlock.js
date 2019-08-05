@@ -780,14 +780,15 @@ class StatBlock extends React.Component {
             </tr>
         </tbody>;
 
-        var toughness = skillHandler.edgeLevel("Toughness");
-        if (toughness) {
-            toughness = (<span>+<span
-                style={{ fontWeight: "bold"}}>{toughness}</span></span>);
+        const bodyFromToughness = skillHandler.edgeLevel("Toughness") * 2;
+        let toughness;
+        if (bodyFromToughness) {
+            toughness = <span>+<span style={{ fontWeight: "bold"}}
+                                     id={"bodyFromToughness"}
+            >{bodyFromToughness}</span></span>;
         } else {
             toughness = "";
         }
-
         var recoveryStyle = {
             color: "grey",
             paddingLeft: 5
@@ -795,8 +796,7 @@ class StatBlock extends React.Component {
 
         expendable = <tbody>
         <tr><td style={statStyle}>B</td>
-            <td style={baseStyle}>{baseStats.baseBody
-            }{toughness}</td>
+            <td style={baseStyle}>{baseStats.baseBody}{toughness}</td>
             <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
             <td style={baseStyle}>{baseStats.stamina}</td>
@@ -1232,7 +1232,7 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Armor</h4>
             </Card.Header>
-            <Card.Body className={"table-responsive p-0"}>
+            <Card.Body className={"table-responsive"}>
             <ArmorControl
                 campaign={this.state.char.campaign}
                 armor={this.state.armor}

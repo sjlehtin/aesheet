@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
 
 jest.mock('../sheet-rest');
@@ -16,12 +17,8 @@ const Inventory = require('../Inventory').default;
 const DamageControl = require('../DamageControl').default;
 
 
-describe('stat block', function() {
+describe('StatBlock', function() {
     "use strict";
-
-    // beforeEach(function() {
-    //
-    // });
 
     it('fetched initial data', function (done) {
         var block = factories.statBlockFactory();
@@ -81,6 +78,25 @@ describe('stat block', function() {
                 expect(skillHandler.edgeLevel('Toughness')).toEqual(2);
                 done();
             }).catch((err) => {this.fail("err occurred:", err)});
+        });
+    });
+
+    it('does not add body for no toughness', function () {
+        let block = factories.statBlockFactory({character: {
+            cur_wil: 53, cur_psy: 42, bought_mana: 5}});
+
+        return block.loaded.then(function () {
+            expect(ReactDOM.findDOMNode(block).querySelector('#bodyFromToughness')).toBe(null);
+        });
+    });
+
+    it('adds correct body for Toughness', function () {
+        let block = factories.statBlockFactory({character: {
+            cur_wil: 53, cur_psy: 42, bought_mana: 5},
+            edges: [{edge: {edge: {name: "Toughness"}, level: 2}}]});
+
+        return block.loaded.then(function () {
+            expect(ReactDOM.findDOMNode(block).querySelector('#bodyFromToughness').textContent).toEqual("4");
         });
     });
 
