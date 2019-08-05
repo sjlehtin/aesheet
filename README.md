@@ -57,7 +57,7 @@ After updating sources, run
  % ./node_modules/.bin/webpack --mode production
  % python manage.py migrate
  % python manage.py collectstatic -l -i node_modules
- % z
+ % sudo supervisorctl reload sheet
 ```
 
 If nginx configuration needed to be updated, you also need to reload nginx configuration.
