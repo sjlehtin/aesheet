@@ -11,7 +11,7 @@ import {Button, FormControl, FormGroup} from 'react-bootstrap';
      performed by this component, how will the reorderings be handled?
 */
 
-var util = require('./sheet-util');
+const util = require('./sheet-util');
 
 class InventoryRow extends React.Component {
     constructor(props) {
@@ -265,7 +265,7 @@ class InventoryRow extends React.Component {
                 onClick={(e) => this.startEdit("unitWeight")}>
                 {unitWeight}</td>
 
-            <td className="weight">{ parseFloat(this.state.unitWeight) * parseInt(this.state.quantity) }</td>
+            <td className="weight">{ (parseFloat(this.state.unitWeight) * parseInt(this.state.quantity)).toFixed(2) }</td>
         </tr>);
     }
 }
