@@ -588,6 +588,7 @@ class FirearmControl extends RangedWeaponRow {
         let sweepInstructions = '';
         if (this.hasSweep()) {
             sweepInstructions = <Row style={{color: "hotpink"}}>
+                <Col>
                 <div >
                     The distance between sweep targets may be up to
                     1 m (-5 penalty / target), or up to 2 m
@@ -601,6 +602,7 @@ class FirearmControl extends RangedWeaponRow {
                 <div>
                     Bumping is not allowed in sweep fire.
                 </div>
+                </Col>
             </Row>;
         }
 
@@ -708,11 +710,7 @@ class FirearmControl extends RangedWeaponRow {
                     {this.renderBurstTable()}
                 </Col>
             </Row>
-            <Row>
-                <Col>
             {sweepInstructions}
-                </Col>
-            </Row>
         </div>;
     }
 }
@@ -728,6 +726,7 @@ FirearmControl.propTypes = {
 };
 
 FirearmControl.defaultProps = {
+    toRange: "",
     darknessDetectionLevel: 0
 };
 
