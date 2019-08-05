@@ -212,6 +212,8 @@ class FirearmControl extends RangedWeaponRow {
             return null;
         }
 
+        // If vision check is under 75, the difference is penalty to the
+        // ranged skill check.
         if (visionCheck < 75) {
             effect.check += visionCheck - 75;
         }
@@ -221,7 +223,6 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     skillCheck() {
-
         let effect = this.rangeEffect(this.props.toRange);
         if (effect === null) {
             return null;
@@ -633,7 +634,7 @@ class FirearmControl extends RangedWeaponRow {
         }
         return <div style={this.props.style}>
             <Row>
-                <Col md={8}>
+                <Col xs={"auto"}>
                     <Row>
                         <Col>
                         <table style={{fontSize: 'inherit'}}>

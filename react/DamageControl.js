@@ -159,7 +159,7 @@ class DamageControl extends React.Component {
                                 title="The character is dead due to massive damage">✟</span>;
         }
 
-        return (<Card>
+        return (<Card className={"m-1"}>
             <Card.Header>
                 <h4>Stamina damage and wounds</h4>
             </Card.Header>

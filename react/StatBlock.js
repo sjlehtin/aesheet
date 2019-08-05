@@ -704,7 +704,7 @@ class StatBlock extends React.Component {
     }
 
     renderNotes() {
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header><h4>Notes</h4></Card.Header>
             <Card.Body>
                     <NoteBlock edges={this.state.edgeList}
@@ -991,7 +991,7 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Firearms</h4>
             </Card.Header>
@@ -1033,7 +1033,7 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Close combat</h4>
             </Card.Header>
@@ -1072,7 +1072,7 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Ranged weapons</h4>
             </Card.Header>
@@ -1105,7 +1105,7 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Transient effects</h4>
             </Card.Header>
@@ -1144,11 +1144,11 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Miscellaneous items</h4>
             </Card.Header>
-            <Card.Body className={"table-responsive p-0 m-1"}>
+            <Card.Body className={"table-responsive p-0"}>
             <Table striped>
                 <thead>
                 <tr><th>Item</th></tr>
@@ -1183,7 +1183,7 @@ class StatBlock extends React.Component {
             />);
         }
 
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Body>
                 <h4>Edges</h4>
             </Card.Body>
@@ -1206,8 +1206,15 @@ class StatBlock extends React.Component {
     }
 
     renderInventory() {
-        return <Inventory url={this.props.url + "inventory/"}
-                          onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>;
+        return <Card className={"m-1"}>
+            <Card.Header>
+                <h4>Inventory</h4>
+            </Card.Header>
+            <Card.Body className={"table-responsive p-0"}>
+                <Inventory url={this.props.url + "inventory/"}
+                          onWeightChange={ (newWeight) => this.inventoryWeightChanged(newWeight) }/>
+            </Card.Body>
+        </Card>;
     }
 
     renderCharacterNotes() {
@@ -1221,11 +1228,11 @@ class StatBlock extends React.Component {
         if (!this.state.char || !this.state.armor || !this.state.helm) {
             return <Loading>Armor</Loading>;
         }
-        return <Card>
+        return <Card className={"m-1"}>
             <Card.Header>
                 <h4>Armor</h4>
             </Card.Header>
-            <Card.Body className={"table-responsive"}>
+            <Card.Body className={"table-responsive p-0"}>
             <ArmorControl
                 campaign={this.state.char.campaign}
                 armor={this.state.armor}
@@ -1323,27 +1330,36 @@ class StatBlock extends React.Component {
                             <Row>
                                 Weight carried: {this.getCarriedWeight().toFixed(2)} kg
                             </Row>
-                            <Row style={{fontSize: "60%"}}>
-                                {this.renderSenseTable(skillHandler)}
-                            </Row>
                         </Col>
                         <Col md={6}>
                             <Row>
                                 {this.renderPortrait()}
                             </Row>
-                            <Row>
-                                {this.renderNotes()}
-                            </Row>
-                            <Row>
-                                {this.renderAdvancingInitiatives(skillHandler)}
-                            </Row>
                         </Col>
                     </Row>
                     <Row>
-                        <Col md={6}>
+                        <Col md={6} style={{fontSize: "60%"}}>
+                            {this.renderSenseTable(skillHandler)}
+                        </Col>
+                        <Col>
+                            <Row>
+                                <Col>
+                                {this.renderNotes()}
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col>
+                                {this.renderAdvancingInitiatives(skillHandler)}
+                                </Col>
+                            </Row>
+                        </Col>
+
+                    </Row>
+                    <Row>
+                        <Col>
                             {this.renderArmor()}
                         </Col>
-                        <Col md={6} style={{fontSize: "60%"}}>
+                        <Col style={{fontSize: "60%"}}>
                             {this.renderMovementRates(skillHandler)}
                         </Col>
                     </Row>
