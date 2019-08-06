@@ -22,6 +22,11 @@ class SkillAdmin(admin.ModelAdmin):
                     'skill_cost_3', 'stat', 'type')
 
 
+class EdgeSkillBonusAdmin(admin.ModelAdmin):
+    list_filter = ('edge_level',)
+    ordering = ('edge_level__edge__name', 'edge_level__level',)
+
+
 admin.site.register(sm.Armor)
 admin.site.register(sm.ArmorQuality)
 admin.site.register(sm.ArmorTemplate)
@@ -31,7 +36,7 @@ admin.site.register(sm.CharacterEdge)
 admin.site.register(sm.CharacterSkill)
 admin.site.register(sm.Edge)
 admin.site.register(sm.EdgeLevel)
-admin.site.register(sm.EdgeSkillBonus)
+admin.site.register(sm.EdgeSkillBonus, EdgeSkillBonusAdmin)
 admin.site.register(sm.Sheet)
 admin.site.register(sm.TechLevel)
 admin.site.register(sm.Campaign, CampaignAdmin)
