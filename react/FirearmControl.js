@@ -228,7 +228,7 @@ class FirearmControl extends RangedWeaponRow {
         // with ranged weapons. The skill cannot raise the Target-I above 0.
         // The skill can be used up to INT/2 m range.
 
-        if (toRange <= util.rounddown(
+        if (util.isFloat(toRange) && toRange <= util.rounddown(
             this.props.skillHandler.getStat("int") / 2)) {
             effect.targetInitiative +=
                 this.props.skillHandler.skillLevel("Instinctive fire");

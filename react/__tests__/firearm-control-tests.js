@@ -181,6 +181,18 @@ describe('FirearmControl', () => {
         expect(rangeEffect.targetInitiative).toEqual(0);
     });
 
+    it("does not use instinctive fire for default range", () => {
+        const firearm = rangeFirearm({handlerProps: {
+                skills: [{
+                    skill: "Handguns",
+                    level: 1
+                }, {skill: "Instinctive fire", level: 2}],
+                character: {cur_int: 50}
+            }});
+        const rangeEffect = firearm.rangeEffect("");
+        expect(rangeEffect.targetInitiative).toEqual(0);
+    });
+
     it("respects that Instinctive fire can only raise target-I up to zero", () => {
         const firearm = rangeFirearm({handlerProps: {
                 skills: [{
@@ -191,7 +203,7 @@ describe('FirearmControl', () => {
                 weapon: {base: {sight: 600, barrel_length: 602, accuracy: 1.0,
                     target_initiative: -1},
                          scope: null}
-        }});
+        }, toRange: 25});
         expect(firearm.props.skillHandler.getStat("int")).toEqual(50);
         const rangeEffect = firearm.rangeEffect(25);
         expect(rangeEffect.targetInitiative).toEqual(2);
