@@ -952,6 +952,9 @@ class StatBlock extends React.Component {
 
         for (let wpn of this.state.firearmList){
             weight += parseFloat(wpn.base.weight);
+            if (wpn.scope) {
+                weight += parseFloat(wpn.scope.weight)
+            }
         }
 
         for (let item of this.state.miscellaneousItemList){

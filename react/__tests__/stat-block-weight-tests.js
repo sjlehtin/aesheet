@@ -123,16 +123,25 @@ describe('stat block weight handling', function() {
         });
     });
 
-    it("adds firearms weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
+    it("adds firearms weight", function () {
+        const block = factories.statBlockFactory();
+        return block.loaded.then(function () {
             block.handleFirearmsLoaded([factories.firearmFactory({
-                base: {weight: 6}})]);
+                base: {weight: 6},
+                scope: null})]);
             expect(block.getCarriedWeight()).toEqual(6.0);
-            done();
         });
     });
 
+    it("adds firearms weight", function () {
+        const block = factories.statBlockFactory();
+        return block.loaded.then(function () {
+            block.handleFirearmsLoaded([factories.firearmFactory({
+                base: {weight: 1},
+                scope: {weight: 0.5}})]);
+            expect(block.getCarriedWeight()).toEqual(1.5);
+        });
+    });
     it("adds miscellaneous items weight", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
