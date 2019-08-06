@@ -678,15 +678,6 @@ class RangedWeaponMixin(models.Model):
         ordering = ['name']
 
 
-# class FirearmAddonEdgeMods(ExportedModel):
-#     """
-#
-#     """
-#     add_on = models.ForeignKey(FirearmAddon)
-#     edge = models.ForeignKey(Edge)
-#     level_mod = models.IntegerField(default=0)
-
-
 class FirearmAddOn(ExportedModel):
     name = models.CharField(max_length=32, unique=True)
 
