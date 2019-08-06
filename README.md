@@ -2,6 +2,33 @@
 
 [![Build Status](https://travis-ci.org/sjlehtin/aesheet.svg?branch=master)](https://travis-ci.org/sjlehtin/aesheet)
 
+## Features
+
+Calculates effects from stats, edges, flaws, encumbrance, armor and
+wounding to skill and weapon checks.
+
+See new features from the Changelog.
+
+### Implementation
+
+The most intensive page or the character sheet, is pretty much
+completely written with the React JS framework, allowing for a fairly
+responsive page. The backend for the sheet are REST APIs written with
+Django Rest Framework.
+
+### Rules
+
+The ruleset is pretty much fully homegrown fork of the Amazing Engine.
+Nowadays only thing left is the stat names and some concepts, with
+skills being brought into the system either from house rules or
+or the d20 system, adapted here. Licensing situation of the rules is
+not entirely clear, but the data should be ok to use for non-commercial
+purposes.
+
+## In the roadmap
+
+Full list of all todo items in the TODO.
+
 ## Installing
 
 ### In production use
