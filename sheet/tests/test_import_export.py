@@ -327,3 +327,24 @@ class FirearmImportFromExcelTestcase(TestCase):
 
     def test_import_semicolon_csv_should_work(self):
         marshal.import_text(open(os.path.join(os.path.dirname(__file__), 'win-excel-with-semicolons-utf8.csv'), 'rb').read())
+
+
+class ScopeImportTestCase(TestCase):
+    def setUp(self):
+        factories.TechLevelFactory(name="2K")
+        self.edge_level = factories.EdgeLevelFactory(edge__name="Night vision", level=1)
+
+        self.scope_csv_data = """\
+Scope
+name,id,target_i_mod,to_hit_mod,tech_level,weight,notes,sight,perks
+Optical sight,1,0,0,2K,0.10,,750,
+Scope 2x,2,-1,0,2K,0.50,+1L to acute vision,1000,
+Night-vision sight I,3,-1,0,2K,1.00,+1L to Night Vision,500,{edge_level}
+""".format(edge_level=self.edge_level.id)
+
+    def test_import_scope_csv(self):
+        marshal.import_text(self.scope_csv_data)
+        scope = sheet.models.Scope.objects.get(name="Night-vision sight I")
+        perks = scope.perks.all()
+        assert len(perks) == 1
+        assert perks[0].id == self.edge_level.id

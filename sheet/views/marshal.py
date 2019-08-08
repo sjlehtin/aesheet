@@ -303,7 +303,10 @@ def import_text(data):
                             continue
 
                         try:
-                            obj = field.remote_field.model.objects.get(name=name)
+                            if 'name' in field.remote_field.model._meta.fields:
+                                obj = field.remote_field.model.objects.get(name=name)
+                            else:
+                                obj = field.remote_field.model.objects.get(pk=name)
                         except field.remote_field.model.DoesNotExist:
                             raise ValueError(
                                 "Requirement `{req}' for line {line} "
