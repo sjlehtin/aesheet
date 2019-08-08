@@ -1,11 +1,7 @@
-from __future__ import division
 from django.db import models
 import django.contrib.auth as auth
-import math
 import logging
-from functools import wraps
 from collections import namedtuple, OrderedDict
-import itertools
 from django.db.models import Q
 
 
