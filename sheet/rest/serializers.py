@@ -180,17 +180,17 @@ class FirearmAddOnListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-# class ScopeCreateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = sheet.models.Scope
-#         fields = "__all__"
-#
-#
-# class ScopeListSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = sheet.models.Scope
-#         fields = "__all__"
-#         depth = 1
+class ScopeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Scope
+        fields = "__all__"
+
+
+class ScopeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Scope
+        fields = "__all__"
+        depth = 1
 
 
 class SheetMiscellaneousItemCreateSerializer(serializers.ModelSerializer):
@@ -258,7 +258,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
 
 
 class SheetFirearmListSerializer(serializers.ModelSerializer):
-#    scope = ScopeListSerializer()
+    scope = ScopeListSerializer()
     class Meta:
         model = sheet.models.Firearm
         fields = "__all__"

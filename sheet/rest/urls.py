@@ -125,10 +125,10 @@ router.register(r'firearmaddons', views.FirearmAddOnViewSet,
 router.register(r'firearmaddons/campaign/(?P<campaign_pk>[0-9]+)',
                 views.FirearmAddOnViewSet, base_name='campaign-firearmaddon')
 
-# router.register(r'scopes', views.ScopeViewSet,
-#                 base_name='scope')
-# router.register(r'scopes/campaign/(?P<campaign_pk>[0-9]+)',
-#                 views.ScopeViewSet, base_name='campaign-scope')
+router.register(r'scopes', views.ScopeViewSet,
+                base_name='scope')
+router.register(r'scopes/campaign/(?P<campaign_pk>[0-9]+)',
+                views.ScopeViewSet, base_name='campaign-scope')
 
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,

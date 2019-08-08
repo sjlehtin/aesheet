@@ -714,16 +714,16 @@ class FirearmAddOn(BaseFirearmAddOn):
     """
 
 
-# class Scope(FirearmAddOn):
-#     """
-#     Scopes
-#     """
-#     sight = models.IntegerField(default=1000,
-#                                 help_text="Overrides weapon's "
-#                                           "sight modifier")
-#     @classmethod
-#     def dont_export(cls):
-#         return ['firearm', "firearms_using_scope", "firearmaddon_ptr"]
+class Scope(BaseFirearmAddOn):
+    """
+    Scopes
+    """
+    sight = models.IntegerField(default=1000,
+                                help_text="Overrides weapon's "
+                                          "sight modifier")
+    @classmethod
+    def dont_export(cls):
+        return ['firearm', "firearms_using_scope", "firearmaddon_ptr"]
 
 
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
@@ -832,8 +832,8 @@ class Firearm(models.Model):
     base = models.ForeignKey(BaseFirearm)
     ammo = models.ForeignKey(Ammunition)
 
-    # scope = models.ForeignKey(Scope, blank=True, null=True,
-    #                           related_name="firearms_using_scope")
+    scope = models.ForeignKey(Scope, blank=True, null=True,
+                              related_name="firearms_using_scope")
     add_ons = models.ManyToManyField(FirearmAddOn, blank=True)
 
     def __str__(self):
