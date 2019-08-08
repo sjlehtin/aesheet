@@ -2,6 +2,10 @@
 
 Scope weights are calculated to total weight.
 
+Severed link between FirearmAddOns and Scopes; the link was originally
+accidental due to the use of direct concrete inheritance between the
+classes.
+
 ## Version 0.9 -- 2019-08-05
 
 Added scopes, with possibility of assigning "perks", or edge levels, to
