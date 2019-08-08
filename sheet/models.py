@@ -509,7 +509,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     def dont_export(cls):
         return ['characteredge', 'edgeskillbonus', 'skill_bonuses',
                 'edge_skill_bonuses', 'characterlogentry',
-                "character", "firearmaddon"]
+                "character", "firearmaddon", "scope"]
 
     def __str__(self):
         return u"%s %s (%s)" % (self.edge, self.level, self.cost)
@@ -1266,7 +1266,7 @@ class TransientEffect(ExportedModel, Effect):
     tech_level = models.ForeignKey(TechLevel)
     @classmethod
     def dont_export(cls):
-        return ['sheet']
+        return ['sheet', 'sheettransienteffect']
 
 
 class SheetTransientEffect(models.Model):
@@ -1291,6 +1291,10 @@ class MiscellaneousItem(ExportedModel):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def dont_export(cls):
+        return ['sheetmiscellaneousitem']
 
 
 class SheetMiscellaneousItem(models.Model):
