@@ -1,4 +1,4 @@
-## Version 0.9.1 -- TBD
+## Version 0.9.1 -- 2019-08-09
 
 Scope weights are calculated to total weight.
 
