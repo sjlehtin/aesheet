@@ -678,7 +678,10 @@ class RangedWeaponMixin(models.Model):
         ordering = ['name']
 
 
-class FirearmAddOn(ExportedModel):
+class BaseFirearmAddOn(ExportedModel):
+    """
+
+    """
     name = models.CharField(max_length=32, unique=True)
 
     target_i_mod = models.IntegerField(default=0)
@@ -700,8 +703,21 @@ class FirearmAddOn(ExportedModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        abstract = True
+        ordering = ['name']
+
+
+class FirearmAddOn(BaseFirearmAddOn):
+    """
+
+    """
+
 
 class Scope(FirearmAddOn):
+    """
+    Scopes
+    """
     sight = models.IntegerField(default=1000,
                                 help_text="Overrides weapon's "
                                           "sight modifier")
