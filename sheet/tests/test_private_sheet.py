@@ -5,7 +5,7 @@ import logging
 from django.test import TestCase
 import django.test
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from sheet.models import Sheet, Character
 from django_webtest import WebTest
 import django.http

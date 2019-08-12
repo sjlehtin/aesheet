@@ -1,17 +1,13 @@
 from rest_framework.test import APIClient, APIRequestFactory
 from rest_framework.test import force_authenticate
 from django.test import TestCase
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 import sheet.factories as factories
 import sheet.rest.views as views
 import sheet.models as models
 
-import sys
-if sys.version_info < (3,):
-    from urllib import quote
-else:
-    from urllib.parse import quote
+from urllib.parse import quote
 
 
 class SheetTestCase(TestCase):
@@ -182,10 +178,10 @@ class EdgeSkillBonusTestCase(TestCase):
         self.assertIn("edge", response.data)
         self.assertEqual(response.data['edge']['name'], "Acute Touch")
         self.assertIn("edge_skill_bonuses", response.data)
-        self.assertEquals(response.data['edge_skill_bonuses'],
-                          [{'id': 1,
-                            'skill': "Surgery",
-                            'bonus': 13}])
+        self.assertEqual(response.data['edge_skill_bonuses'],
+                         [{'id': 1,
+                           'skill': "Surgery",
+                           'bonus': 13}])
 
 
 class InventoryTestCase(TestCase):

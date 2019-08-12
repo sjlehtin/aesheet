@@ -3,7 +3,6 @@ from sheet.rest import serializers
 from rest_framework import generics, viewsets, mixins, permissions, status
 from django.http import Http404
 import sheet.models as models
-from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 from rest_framework import exceptions

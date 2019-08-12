@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 import sheet.views
 import sheet.views.marshal
 from django.views.generic import RedirectView
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from sheet.rest.urls import urlpatterns as rest_urls
 
 marshal_urls = [

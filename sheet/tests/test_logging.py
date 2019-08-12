@@ -4,7 +4,7 @@ import logging
 
 import django.test
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from sheet.models import Character, CharacterLogEntry
 import sheet.forms as forms
 from django_webtest import WebTest

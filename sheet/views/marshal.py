@@ -8,7 +8,7 @@ import django.db.models
 import django.db.models.fields.related
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms import ValidationError
 from django.forms.utils import ErrorList
 import sheet.models

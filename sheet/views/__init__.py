@@ -1,12 +1,9 @@
-from __future__ import division
-
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from sheet.models import *
 from sheet.forms import *
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.conf import settings
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import UpdateView, CreateView, FormView
 import sheet.models
 import sheet.forms

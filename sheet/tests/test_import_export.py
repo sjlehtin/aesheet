@@ -1,14 +1,10 @@
-# encoding: utf-8
-
-from __future__ import division
-
 import logging
 import os
 
 from django.test import TestCase
 import django.test
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from sheet.models import Skill
 from sheet.views import marshal
 import sheet.models

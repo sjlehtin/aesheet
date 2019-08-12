@@ -9,7 +9,7 @@ from collections import namedtuple
 from django.test import TestCase
 import django.test
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
 from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
 import sheet.forms as forms

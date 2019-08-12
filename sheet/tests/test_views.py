@@ -7,7 +7,7 @@ import logging
 from django.test import TestCase
 from sheet.models import Sheet, Character
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import sheet.factories as factories
 import codecs
 
