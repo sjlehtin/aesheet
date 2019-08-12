@@ -81,7 +81,7 @@ After updating sources, run
  % npm install
  % . .venv/bin/activate
  % pipenv install
- % ./node_modules/.bin/webpack --mode production
+ % npx webpack --mode production
  % python manage.py migrate
  % python manage.py collectstatic -l -i node_modules
  % sudo supervisorctl reload sheet
