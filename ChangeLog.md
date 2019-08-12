@@ -1,3 +1,9 @@
+## Version 0.9.x -- TBR
+
+### Housekeeping
+
+Upgraded python packages to current versions.
+
 ## Version 0.9.1 -- 2019-08-09
 
 Scope weights are calculated to total weight.

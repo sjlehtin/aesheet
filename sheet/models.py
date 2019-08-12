@@ -136,7 +136,8 @@ class Character(PrivateMixin, models.Model):
     """
     name = models.CharField(max_length=256, unique=True)
     owner = models.ForeignKey(auth.models.User,
-                              related_name="characters")
+                              related_name="characters",
+                              on_delete=models.CASCADE)
     private = models.BooleanField(
             default=False,
             help_text="If set, access to the character "
@@ -147,7 +148,7 @@ class Character(PrivateMixin, models.Model):
             " as private.")
 
     occupation = models.CharField(max_length=256)
-    campaign = models.ForeignKey(Campaign)
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
 
     portrait = models.ImageField(blank=True, upload_to='portraits')
 
@@ -321,7 +322,7 @@ class Skill(ExportedModel):
     can_be_defaulted = models.BooleanField(default=True)
     is_specialization = models.BooleanField(default=False)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     # XXX Should be any of these? See Construction.  Add another
     # attribute for another required skill?
@@ -385,8 +386,9 @@ class Skill(ExportedModel):
 
 
 class CharacterSkill(PrivateMixin, models.Model):
-    character = models.ForeignKey(Character, related_name='skills')
-    skill = models.ForeignKey(Skill)
+    character = models.ForeignKey(Character, related_name='skills',
+                                  on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
     level = models.IntegerField(default=0)
 
     def access_allowed(self, user):
@@ -461,7 +463,8 @@ class Wound(models.Model):
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
-    character = models.ForeignKey(Character, related_name="wounds")
+    character = models.ForeignKey(Character, related_name="wounds",
+                                  on_delete=models.CASCADE)
 
     LOCATION_CHOICES = [("H", "Head"),
                         ("T", "Torso"),
@@ -495,7 +498,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     This stores the actual modifiers for a specific edge at a certain
     level, like Eye-Hand Coordination 2.
     """
-    edge = models.ForeignKey(Edge)
+    edge = models.ForeignKey(Edge, on_delete=models.CASCADE)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
@@ -522,8 +525,9 @@ class EdgeSkillBonus(ExportedModel):
     bonus (or penalty, if negative).
     """
     edge_level = models.ForeignKey(EdgeLevel,
-                                   related_name='edge_skill_bonuses')
-    skill = models.ForeignKey(Skill)
+                                   related_name='edge_skill_bonuses',
+                                   on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
     bonus = models.IntegerField(default=15)
 
     def __str__(self):
@@ -531,8 +535,8 @@ class EdgeSkillBonus(ExportedModel):
 
 
 class CharacterEdge(PrivateMixin, models.Model):
-    character = models.ForeignKey(Character)
-    edge = models.ForeignKey(EdgeLevel)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    edge = models.ForeignKey(EdgeLevel, on_delete=models.CASCADE)
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)
@@ -545,7 +549,7 @@ class BaseWeaponQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ccv = models.IntegerField(default=0)
 
@@ -611,7 +615,7 @@ class BaseArmament(ExportedModel):
     description = models.TextField(blank=True)
     notes = models.CharField(max_length=64, blank=True)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
 
@@ -622,11 +626,14 @@ class BaseArmament(ExportedModel):
                                  default=1.0)
 
     base_skill = models.ForeignKey(Skill,
-                                   related_name="base_skill_for_%(class)s")
+                                   related_name="base_skill_for_%(class)s",
+                                   on_delete=models.CASCADE)
     skill = models.ForeignKey(Skill, blank=True, null=True,
-                              related_name="primary_for_%(class)s")
+                              related_name="primary_for_%(class)s",
+                              on_delete=models.SET_NULL)
     skill2 = models.ForeignKey(Skill, blank=True, null=True,
-                               related_name="secondary_for_%(class)s")
+                               related_name="secondary_for_%(class)s",
+                               on_delete=models.SET_NULL)
 
     def __str__(self):
         return u"%s" % self.name
@@ -683,7 +690,7 @@ class BaseFirearmAddOn(ExportedModel):
     target_i_mod = models.IntegerField(default=0)
     to_hit_mod = models.IntegerField(default=0)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     weight = models.DecimalField(max_digits=5, decimal_places=2,
                                  default=1.0)
@@ -786,7 +793,7 @@ class Ammunition(ExportedModel, BaseDamager):
                                    help_text="Make of the ammo, such as "
                                              "full metal jacket.")
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     bypass = models.IntegerField(default=0)
 
@@ -809,7 +816,8 @@ class Ammunition(ExportedModel, BaseDamager):
 
 class FirearmAmmunitionType(models.Model):
     firearm = models.ForeignKey(BaseFirearm,
-                                related_name="ammunition_types")
+                                related_name="ammunition_types",
+                                on_delete=models.CASCADE)
     short_label = models.CharField(max_length=20,
                                    help_text="Matches the respective field in "
                                              "ammunition")
@@ -825,11 +833,12 @@ class Firearm(models.Model):
     # sheet from here, data migration, and little work for the REST viewset.
 
     # modifications, such as scopes could be added here.
-    base = models.ForeignKey(BaseFirearm)
-    ammo = models.ForeignKey(Ammunition)
+    base = models.ForeignKey(BaseFirearm, on_delete=models.CASCADE)
+    ammo = models.ForeignKey(Ammunition, on_delete=models.CASCADE)
 
     scope = models.ForeignKey(Scope, blank=True, null=True,
-                              related_name="firearms_using_scope")
+                              related_name="firearms_using_scope",
+                              on_delete=models.SET_NULL)
     add_ons = models.ManyToManyField(FirearmAddOn, blank=True)
 
     def __str__(self):
@@ -996,7 +1005,7 @@ class BaseWeapon(ExportedModel):
     # verify this.
     name = models.CharField(max_length=256, blank=True)
     description = models.TextField(blank=True)
-    quality = models.ForeignKey(WeaponQuality)
+    quality = models.ForeignKey(WeaponQuality, on_delete=models.CASCADE)
 
     size = models.PositiveSmallIntegerField(default=1,
                                             choices=((1, "normal"),
@@ -1033,7 +1042,7 @@ class BaseWeapon(ExportedModel):
 class Weapon(BaseWeapon):
     """
     """
-    base = models.ForeignKey(WeaponTemplate)
+    base = models.ForeignKey(WeaponTemplate, on_delete=models.CASCADE)
     special_qualities = models.ManyToManyField(WeaponSpecialQuality,
                                                blank=True)
 
@@ -1052,9 +1061,10 @@ class Weapon(BaseWeapon):
 class RangedWeapon(BaseWeapon):
     """
     """
-    base = models.ForeignKey(RangedWeaponTemplate)
+    base = models.ForeignKey(RangedWeaponTemplate, on_delete=models.CASCADE)
     ammo_quality = models.ForeignKey(WeaponQuality, blank=True, null=True,
-                                     related_name="rangedweaponammo_set")
+                                     related_name="rangedweaponammo_set",
+                                     on_delete=models.SET_NULL)
     special_qualities = models.ManyToManyField(WeaponSpecialQuality,
                                                blank=True)
 
@@ -1077,7 +1087,7 @@ class ArmorTemplate(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     is_helm = models.BooleanField(default=False)
 
@@ -1194,7 +1204,7 @@ class ArmorQuality(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(max_length=5, blank=True)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     # TODO: this is from size, which should be handled specially in code.
     dp_multiplier = models.DecimalField(max_digits=4, decimal_places=1,
@@ -1239,8 +1249,8 @@ class Armor(ExportedModel):
     # verify this.
     name = models.CharField(max_length=256, blank=True)
     description = models.TextField(blank=True)
-    base = models.ForeignKey(ArmorTemplate)
-    quality = models.ForeignKey(ArmorQuality)
+    base = models.ForeignKey(ArmorTemplate, on_delete=models.CASCADE)
+    quality = models.ForeignKey(ArmorQuality, on_delete=models.CASCADE)
     special_qualities = models.ManyToManyField(ArmorSpecialQuality,
                                                blank=True)
 
@@ -1259,21 +1269,21 @@ class TransientEffect(ExportedModel, Effect):
     Temporary effects, like spells or drugs, affecting character
     performance in the short term.
     """
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
     @classmethod
     def dont_export(cls):
         return ['sheet', 'sheettransienteffect']
 
 
 class SheetTransientEffect(models.Model):
-    sheet = models.ForeignKey('Sheet')
-    effect = models.ForeignKey(TransientEffect)
+    sheet = models.ForeignKey('Sheet', on_delete=models.CASCADE)
+    effect = models.ForeignKey(TransientEffect, on_delete=models.CASCADE)
 
 
 class MiscellaneousItem(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
 
-    tech_level = models.ForeignKey(TechLevel)
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -1294,14 +1304,15 @@ class MiscellaneousItem(ExportedModel):
 
 
 class SheetMiscellaneousItem(models.Model):
-    sheet = models.ForeignKey('Sheet')
-    item = models.ForeignKey(MiscellaneousItem)
+    sheet = models.ForeignKey('Sheet', on_delete=models.CASCADE)
+    item = models.ForeignKey(MiscellaneousItem, on_delete=models.CASCADE)
 
 
 class Sheet(PrivateMixin, models.Model):
-    character = models.ForeignKey(Character)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
     # TODO: Remove this.  It should be determined from the Character.owner.
-    owner = models.ForeignKey(auth.models.User, related_name="sheets")
+    owner = models.ForeignKey(auth.models.User, related_name="sheets",
+                              on_delete=models.CASCADE)
     description = models.TextField(blank=True)
     size = models.CharField(max_length=1, choices=SIZE_CHOICES, default='M')
 
@@ -1352,7 +1363,8 @@ class Sheet(PrivateMixin, models.Model):
 
 
 class InventoryEntry(PrivateMixin, models.Model):
-    sheet = models.ForeignKey(Sheet, related_name='inventory_entries')
+    sheet = models.ForeignKey(Sheet, related_name='inventory_entries',
+                              on_delete=models.CASCADE)
 
     quantity = models.PositiveIntegerField(default=1)
     description = models.CharField(max_length=100)
@@ -1375,8 +1387,8 @@ class InventoryEntry(PrivateMixin, models.Model):
 
 class CharacterLogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
-    user = models.ForeignKey(auth.models.User)
-    character = models.ForeignKey(Character)
+    user = models.ForeignKey(auth.models.User, on_delete=models.CASCADE)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
 
     STAT, SKILL, EDGE, NON_FIELD = range(0, 4)
     entry_type = models.PositiveIntegerField(
@@ -1396,10 +1408,12 @@ class CharacterLogEntry(models.Model):
     # zero when the skill has been added or removed.
     amount = models.IntegerField(default=0)
 
-    skill = models.ForeignKey(Skill, blank=True, null=True)
+    skill = models.ForeignKey(Skill, blank=True, null=True,
+                              on_delete=models.SET_NULL)
     skill_level = models.PositiveIntegerField(default=0)
 
-    edge = models.ForeignKey(EdgeLevel, blank=True, null=True)
+    edge = models.ForeignKey(EdgeLevel, blank=True, null=True,
+                             on_delete=models.SET_NULL)
     edge_level = models.IntegerField(default=0)
 
     removed = models.BooleanField(default=False,
