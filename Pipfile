@@ -15,7 +15,7 @@ pytz = "*"
 chardet = "*"
 
 [dev-packages]
-django-debug-toolbar = "<1.10"
+django-debug-toolbar = "<1.12"
 django-webtest = "*"
 tox = "*"
 pytest-django = "*"
