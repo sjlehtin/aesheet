@@ -22,3 +22,7 @@ https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 
 I'm left with a bunch of warnings about anti-patterns in React usage, those 
 need to be sorted also.
+
+## Nuked Pipfile
+
+It was only causing problems.
