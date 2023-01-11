@@ -450,8 +450,6 @@ class StatModifier(models.Model):
     surprise = models.IntegerField(
         default=0, help_text="Modifier for the surprise check")
 
-    # TODO: link through to EdgeLevel to allow boosting edges with effects,
-    # items, etc.
     class Meta:
         abstract = True
 
@@ -814,7 +812,7 @@ class Ammunition(ExportedModel, BaseDamager):
                                          type=self.bullet_type)
 
 
-class FirearmAmmunitionType(models.Model):
+class FirearmAmmunitionType(ExportedModel, models.Model):
     firearm = models.ForeignKey(BaseFirearm,
                                 related_name="ammunition_types",
                                 on_delete=models.CASCADE)
