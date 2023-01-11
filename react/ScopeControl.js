@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import DropdownList from 'react-widgets/lib/DropdownList';
+import DropdownList from 'react-widgets/DropdownList';
 
 const rest = require('./sheet-rest');
 

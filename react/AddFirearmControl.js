@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
-import DropdownList from 'react-widgets/lib/DropdownList';
+import DropdownList from 'react-widgets/DropdownList';
 
 var rest = require('./sheet-rest');
 

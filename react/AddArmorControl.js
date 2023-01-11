@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { Button, Input, Row } from 'react-bootstrap';
-import Combobox from 'react-widgets/lib/Combobox';
+import Combobox from 'react-widgets/Combobox';
 
 const rest = require('./sheet-rest');
 
