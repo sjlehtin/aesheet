@@ -31,8 +31,9 @@
     - telescopic sight x16 xxxxl extreme range options
     - language skills to a separate section in the skills
     - make "standard skills" stand out a bit in the selection
+    -- allow "upgrading skill" (which will add the corresponding skill
     + apply instinctive fire on low ranges
-    - double range penalties for sweep fire missing
+    - double range penalties for sweep fire missing in range view
     - UI: touch devices "missing skills" not showing up, can't see the reason for the missing skill indicator
 
     + fix toughness (now 1 pt per level, should be 2)
@@ -60,6 +61,10 @@
     - edge levels from items (toughness, darkvision, etc)
         + done for scopes (acute vision, night vision)
         - missing for miscellaneous items, firearm addons, special weapon qualities
+        - misc items, armor, affect all the time, weapons only when used
+            - calculate effects from addons on checks with the particular
+              weapon, any extra benefits if used (TBD how "being used" is
+              handled)
     - more modifiers from add ons, scopes, like to_hit
 
     + automatic used edge point calculation
@@ -168,6 +173,7 @@
           data type broken)
     + sweep fire description
     + wound addition controls
+    - color blind not calculated in range calculations correctly
     </pre>
 
 {% endblock %}
