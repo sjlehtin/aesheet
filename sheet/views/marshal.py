@@ -34,6 +34,7 @@ def get_data_rows(results, fields):
 
             tag = "{model}.{field}".format(model=obj.__class__.__name__,
                                            field=field)
+            # TODO: ugly special case
             if tag == "BaseFirearm.ammunition_types":
                 return '|'.join([ammo.short_label
                                  for ammo in obj.ammunition_types.all()])
