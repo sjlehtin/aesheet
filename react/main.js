@@ -4,7 +4,7 @@ import StatBlock from 'StatBlock';
 
 // Needed for getting the stylesheets loaded for bootstrap.
 import 'bootstrap/scss/bootstrap.scss';
-import 'react-widgets/lib/scss/react-widgets.scss';
+import "react-widgets/scss/styles.scss";
 
 /* Django template entrypoint. Pass sheetId as integer and DOM element to
    mount the sheet to.
