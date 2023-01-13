@@ -16,12 +16,6 @@ class WoundRow extends React.Component {
         };
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (this.props.wound.effect !== nextProps.wound.effect) {
-            this.setState({effect: nextProps.wound.effect});
-        }
-    }
-
     handleWorsen() {
         if (this.props.onMod) {
             this.props.onMod({id: this.props.wound.id,
