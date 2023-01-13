@@ -12,11 +12,6 @@ class AddSPControl extends React.Component {
         this.state = {ageSP: this.props.initialAgeSP}
     }
 
-    /* Without this, the component will not react to property changes. */
-    componentWillReceiveProps(props) {
-        this.setState({ageSP: props.initialAgeSP});
-    }
-
     handleChange(e) {
         this.setState({ageSP: e.target.value});
     }
