@@ -120,7 +120,7 @@ class AddWoundControl extends React.Component {
                 <Form.Label>Location</Form.Label>
             <DropdownList style={{minWidth: "10em"}} data={AddWoundControl.locations}
                           textField='description'
-                          valueField='location'
+                          dataKey='location'
                           value={this.state.selectedLocation}
                           filter="contains"
                           onChange={(value) => this.handleLocationChange(value)} />
@@ -129,7 +129,7 @@ class AddWoundControl extends React.Component {
                 <Form.Label>Type</Form.Label>
                 <DropdownList style={{minWidth: "8em"}} data={AddWoundControl.damageTypes}
                           textField='description'
-                          valueField='type'
+                          dataKey='type'
                           value={this.state.selectedType}
                           filter="contains"
                           onChange={(value) => this.handleTypeChange(value)} />

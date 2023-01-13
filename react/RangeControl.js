@@ -84,7 +84,7 @@ class RangeControl extends React.Component {
                 <Col>
                 <DropdownList data={RangeControl.detectionLevels}
                           textField={item => `${item.description} (${item.detectionLevel})`}
-                          valueField='detectionLevel'
+                          dataKey='detectionLevel'
                           value={this.state.currentDetectionLevel}
                               defaultValue={RangeControl.detectionLevels[0]}
                           onChange={(value) => this.handleDetectionLevelChange(value)} />
