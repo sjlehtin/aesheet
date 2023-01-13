@@ -18,13 +18,14 @@ import sys
 
 logger = logging.getLogger(__name__)
 
+
 class ImportExportTestCase(TestCase):
     def setUp(self):
         self.admin = factories.UserFactory(username='admin')
 
         self.assertTrue(self.client.login(username="admin", password="foobar"))
         factories.SkillFactory(name="Unarmed combat")
-        factories.BaseFirearmFactory(name="Glock 19")
+        factories.BaseFirearmFactory(name="Glock 19", ammunition_types=["9Pb"])
 
     def test_exported_fields(self):
         fields = sheet.models.BaseFirearm.get_exported_fields()
