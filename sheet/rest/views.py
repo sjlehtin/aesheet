@@ -583,7 +583,6 @@ class CharacterEdgeViewSet(ListPermissionMixin, viewsets.ModelViewSet):
 
         return serializer
 
-
     def perform_create(self, serializer):
         serializer.validated_data['character'] = self.character
         super(CharacterEdgeViewSet, self).perform_create(
