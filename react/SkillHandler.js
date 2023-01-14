@@ -6,18 +6,15 @@
  */
 
 /*
- * props: stats: statHandler
+ * props:
  * characterSkills
  * allSkills
  * edges
  *
- * StatHandler functionality to SkillHandler, nuke StatHandler,
  * TODO: rename SkillHandler to CheckHandler (or CheckController).
  *
  * TODO: study Redux for handling state in a cleaner fashion.
  */
-
-import SenseTable from "./SenseTable";
 
 const util = require('./sheet-util');
 
@@ -571,6 +568,8 @@ class SkillHandler {
         return this._hardMods[target] + this._softMods[target];
     }
 
+    // TODO: there should be a visionCheck() call which incorporates day and
+    // night vision checks
     nightVisionCheck(range, detectionLevel, givenPerks) {
         const ranges = [2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
             10000];
