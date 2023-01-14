@@ -93,7 +93,6 @@ class FirearmControl extends RangedWeaponRow {
             targetInitiative: 0,
             damage: 0,
             leth: 0,
-            bumpingAllowed: true,
             name: "Short"
         };
 
@@ -201,7 +200,7 @@ class FirearmControl extends RangedWeaponRow {
     rangeEffect(toRange) {
         let effect = this.weaponRangeEffect(toRange);
         let perks = [];
-        // TODO: tests missing
+
         if (this.props.weapon.scope) {
             perks = this.props.weapon.scope.perks;
         }
