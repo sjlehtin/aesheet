@@ -147,6 +147,21 @@ describe('StatBlock', function() {
         });
     });
 
+    it('handles edge point calculation with some costs ignored', function (done) {
+        var block = factories.statBlockFactory();
+        block.afterLoad(function () {
+            var control = TestUtils.findRenderedComponentWithType(block,
+                XPControl);
+            expect(control.props.edgesBought).toEqual(0);
+
+            addEdge(block, "Toughness", 2, {cost: 4});
+            addEdge(block, "Acute Touch", 1, {cost: 1}, true);
+
+            expect(control.props.edgesBought).toEqual(5);
+            done();
+        });
+    });
+
     xit('handles edge removal', test.todo);
 
     var getSkillHandler = function (block) {
@@ -157,14 +172,14 @@ describe('StatBlock', function() {
         return block.getSkillHandler();
     };
 
-    var addEdge = function (block, edgeName, edgeLevel, props) {
+    const addEdge = function (block, edgeName, edgeLevel, props, ignoreCost) {
         if (!props){
             props = {};
         }
         props = Object.assign({ edge: {name: edgeName},
                                 level: edgeLevel }, props);
-        var edgeList = [factories.characterEdgeFactory({
-                edge: props})];
+        let edgeList = [factories.characterEdgeFactory({
+                edge: props, ignoreCost: !!ignoreCost})];
         if (block.state.characterEdges.length > 0) {
             edgeList = block.state.characterEdges.concat(edgeList);
         }

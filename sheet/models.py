@@ -536,6 +536,8 @@ class CharacterEdge(PrivateMixin, models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     edge = models.ForeignKey(EdgeLevel, on_delete=models.CASCADE)
 
+    ignore_cost = models.BooleanField(default=False,
+                                      help_text="Whether edge cost counts against")
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
@@ -817,8 +819,9 @@ class FirearmAmmunitionType(ExportedModel, models.Model):
                                 related_name="ammunition_types",
                                 on_delete=models.CASCADE)
     short_label = models.CharField(max_length=20,
-                                   help_text="Matches the respective field in "
-                                             "ammunition")
+                                   help_text="Matches the respective field "
+                                             "in ammunition")
+
     def __str__(self):
         return u"{firearm} {label})".format(firearm=self.firearm,
                                             label=self.short_label)

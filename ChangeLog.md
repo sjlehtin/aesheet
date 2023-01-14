@@ -1,6 +1,10 @@
-## Version 0.9.x -- TBR
+## Version 0.10.0 -- TBR
 
-### Housekeeping
+### Added
+
+* Allow ignoring cost for edges. This makes it possible to acquire edges (mostly flaws) during play without XP ramifications.
+
+### Changed
 
 Upgraded python packages to current versions.
 

@@ -10,6 +10,12 @@ class EdgeRow extends React.Component {
     }
 
     render() {
+        let costIgnored;
+        if (this.props.edge.ignore_cost) {
+            costIgnored = <span style={{color: "blue", fontStyle: "italic"}}>Cost ignored</span>;
+        } else {
+            costIgnored = "";
+        }
 
         return <tr style={this.props.style}
                    title={this.props.edge.edge.edge.description}>
@@ -17,6 +23,8 @@ class EdgeRow extends React.Component {
             {this.props.edge.edge.edge.name} {this.props.edge.edge.level}
                 <span style={{marginLeft: 10}}>
                 </span>
+                <span style={{color: "red"}}>{this.props.edge.edge.cost}</span>
+                {costIgnored}
             <span style={{color: "red", cursor: "pointer", float: "right",
             paddingRight: 5}}
                   ref={(c) => this._removeButton = c }

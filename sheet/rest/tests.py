@@ -1711,16 +1711,20 @@ class CharacterEdgeTestCase(TestCase):
             id=self.sheet.character.id).edges.all()[0].edge.name,
                          "Natural climber")
 
-    # def test_modifying_items(self):
-    #     sheet_effect = factories.SheetMiscellaneousItemFactory(
-    #         sheet=self.sheet, order=2)
-    #     response = self.client.patch(
-    #             "{}/{}".format(self.url, sheet_effect.pk),
-    #             data={'order': 3}, format='json')
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
-    #                      .transient_effects()[0].order, 3)
+    def test_modifying_items(self):
+        character_edge = factories.CharacterEdgeFactory(
+            character=self.sheet.character,
+            edge__edge__name="Short winded")
+        item_id = character_edge.id
+        assert not character_edge.ignore_cost
 
+        response = self.client.patch(
+                "{}{}/".format(self.url, item_id),
+                data={'ignore_cost': True}, format='json')
+        self.assertEqual(response.status_code, 200)
+        character_edge = models.CharacterEdge.objects.get(
+            id=item_id)
+        assert character_edge.ignore_cost
 
     def test_deleting_items(self):
         char_edge = factories.CharacterEdgeFactory(
@@ -1730,7 +1734,7 @@ class CharacterEdgeTestCase(TestCase):
                 "{}{}/".format(self.url, char_edge.pk), format='json')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(models.CharacterEdge.objects.count(), 0,
-                         "The tying row should get deleted")
+                         "The row should get deleted")
 
 
 class EdgeLevelTestCase(TestCase):

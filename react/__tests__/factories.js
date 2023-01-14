@@ -191,7 +191,7 @@ var edgeLevelFactory = function (overrideFields) {
     return newEdge;
 };
 
-var characterEdgeFactory = function (overrideFields) {
+const characterEdgeFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
     }
@@ -204,7 +204,9 @@ var characterEdgeFactory = function (overrideFields) {
     var _baseCharacterEdge = {
         "id": objectId,
         "edge": edge,
-        "character": 1 };
+        "character": 1,
+        "ignore_cost": false
+    };
     var newEdge = Object.assign(_baseCharacterEdge, overrideFields);
     /* Overriding ID is possible. */
     objectId = newEdge.id + 1;

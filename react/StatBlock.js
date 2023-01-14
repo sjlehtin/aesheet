@@ -854,10 +854,13 @@ class StatBlock extends React.Component {
             return <Loading>XP</Loading>
         }
 
-        var edgesBought = 0;
-        for (let edge of this.state.edgeList) {
-            edgesBought += parseFloat(edge.cost);
+        let edgesBought = 0;
+        for (let ce of this.state.characterEdges) {
+            if (!ce.ignore_cost) {
+                edgesBought += parseFloat(ce.edge.cost);
+            }
         }
+
         return <XPControl
             url={this.state.url} edgesBought={edgesBought}
             initialChar={this.state.char}
