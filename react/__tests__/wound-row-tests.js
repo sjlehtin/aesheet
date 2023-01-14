@@ -138,6 +138,4 @@ describe('WoundRow', function() {
         expect(woundRow.state.editingEffect).toEqual(false);
         expect(woundRow.state.effect).toEqual("Throat punctured.");
     });
-
-    // TODO: test componentWillReceiveProps
 });
