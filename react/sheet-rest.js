@@ -23,7 +23,6 @@ export function patch(url, data, method) {
             // TODO: should use more generic handling for the error values,
             // see, e.g., fetch README.md.
             if (response.status >= 200 && response.status < 300) {
-                console.log("Got response: ", response);
                 if (response.status !== 204) {
                     response.json().then((json) => {
                         resolved(json);
