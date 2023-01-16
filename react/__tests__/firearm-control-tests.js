@@ -40,6 +40,15 @@ describe('FirearmControl', () => {
             }}
         };
         if (givenProps) {
+            if (typeof(givenProps.handlerProps) === "object") {
+                props.handlerProps = Object.assign(props.handlerProps,
+                    givenProps.handlerProps);
+                delete givenProps.handlerProps;
+            }
+            if (typeof(givenProps.weapon) === "object") {
+                props.weapon = Object.assign(props.weapon, givenProps.weapon);
+                delete givenProps.weapon;
+            }
             props = Object.assign(props, givenProps);
         }
         return factories.firearmControlTreeFactory(props);
@@ -279,12 +288,13 @@ describe('FirearmControl', () => {
     // });
 
     // it("takes Acute Vision into account", () => {
-    //     const firearm = rangeFirearm();
-    //     let rangeEffect = firearm.rangeEffect(25);
-    //     expect(rangeEffect.check).toEqual(-10);
-    //     expect(rangeEffect.targetInitiative).toEqual(0);
-    //     // TODO: should be false
-    //     //expect(rangeEffect.bumpingAllowed).toBe(true);
+    //     const firearm = rangeFirearm({handlerProps: {
+    //         edges: [{edge: "Acute Vision", level: 2}]}});
+    //     let rangeEffect = firearm.rangeEffect(360);
+    //     // Acute vision 2 equals +1DL -> +10,
+    //     // Acute vision 2 should lower range penalties by +10
+    //     expect(rangeEffect.check).toEqual(-35);
+    //     expect(rangeEffect.targetInitiative).toEqual(-2);
     // });
 
     // it("takes scope's Acute Vision into account", () => {
@@ -294,7 +304,26 @@ describe('FirearmControl', () => {
     //     expect(rangeEffect.targetInitiative).toEqual(0);
     //     // TODO: should be false
     //     //expect(rangeEffect.bumpingAllowed).toBe(true);
+    //
+    //     // there should be only one call to the skillHandler.visionCheck TODO: TBC
     // });
+
+    // it('accounts for the Color blind flaw correctly in daylight', () => {
+    //     const spy = jest.fn().mockReturnValue(Promise.resolve({}));
+    //
+    //     const control = factories.firearmControlTreeFactory({weapon:
+    //         {id: 19,
+    //             base: {name: "Nabu tussari"},
+    //             scope: {name: "Test scope"}},
+    //         onChange: spy
+    //     });
+    //     TestUtils.Simulate.click(ReactDOM.findDOMNode(control._scopeRemoveButton));
+    //     expect(spy).toBeCalledWith({id: 19, scope: null});
+    // });
+    //
+    // it('ignores for the Color blind flaw correctly in night time', () => {
+    // });
+
 
     it ("can calculate a row of checks to implicit short range", () => {
         const firearm = rangeFirearm();
