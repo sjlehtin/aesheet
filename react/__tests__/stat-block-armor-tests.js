@@ -1,5 +1,4 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
 jest.mock('../sheet-rest');
 var rest = require('../sheet-rest');
@@ -10,7 +9,6 @@ const testutils = require('./testutils');
 const StatBlock = require('../StatBlock').default;
 
 describe('stat block armor handling', function() {
-    "use strict";
 
     it("can load armor", function (done) {
         var block = factories.statBlockFactory();
