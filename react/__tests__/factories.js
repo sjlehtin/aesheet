@@ -108,8 +108,8 @@ var edgeFactory = function (overrideFields) {
 
     var edge = {
         "name": "Acute Hearing",
-        "description": "",
-        "notes": ""
+        "description": "Can hear very well",
+        "notes": "No notes to talk about"
     };
     return Object.assign(edge, props);
 };
