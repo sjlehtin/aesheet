@@ -230,14 +230,26 @@ class StatBlock extends React.Component {
             console.log("Failed adding edge to character:", err));
     }
 
+    handleEdgeChanged(data) {
+        rest.patch(this.getCharacterEdgeURL(data), data).then((json) => {
+            let index = StatBlock.findItemIndex(
+                this.state.characterEdges, json);
+            let edge = Object.assign(this.state.characterEdges[index], json);
+            this.state.characterEdges.splice(index, 1, edge);
+
+            this.handleEdgesLoaded(this.state.characterEdges);
+            console.log("Changed ", json);
+        }).catch((err) => console.log("Failed to change edge:", err));
+    }
+
     handleEdgeRemoved(givenEdge) {
-        console.log("Removed: ", givenEdge);
         rest.del(this.getCharacterEdgeURL(givenEdge)).then((json) => {
             let index = StatBlock.findItemIndex(
                 this.state.characterEdges, givenEdge);
             this.state.characterEdges.splice(index, 1);
             this.handleEdgesLoaded(this.state.characterEdges);
-        }).catch((err) => console.log(err));
+            console.log("Removed ", givenEdge);
+        }).catch((err) => console.log("Failed to remove edge:", err));
     }
 
     componentDidMount() {
@@ -288,27 +300,29 @@ class StatBlock extends React.Component {
 
         rest.getData(this.props.url).then((sheet) => {
 
+            const characterUrl = `/rest/characters/${sheet.character}/`;
+
             this.setState({
                 sheet: sheet,
                 // Updates occur towards the character.
-                url: `/rest/characters/${sheet.character}/`
+                url: characterUrl
             });
 
-            rest.getData(this.state.url + 'characteredges/').then(
+            rest.getData(characterUrl + 'characteredges/').then(
                 (characterEdges) => {
                     this.handleEdgesLoaded(characterEdges);
                 }).catch(function (err) {
                     console.log("Failed to load edges", err)});
 
-            rest.getData(this.state.url + 'wounds/').then(
+            rest.getData(characterUrl + 'wounds/').then(
                 (wounds) => {
                     this.handleWoundsLoaded(wounds);
                 }).catch(function (err) {
                     console.log("Failed to load wounds", err)});
 
-            rest.getData(this.state.url)
+            rest.getData(characterUrl)
                 .then((character) => {
-                    rest.getData(this.state.url + 'characterskills/').then(
+                    rest.getData(characterUrl + 'characterskills/').then(
                         (characterSkills) => {
                             rest.getData(
                                 `/rest/skills/campaign/${character.campaign}/`)
@@ -460,7 +474,7 @@ class StatBlock extends React.Component {
                 return ii;
             }
         }
-        throw Error("No such item: " + givenItem);
+        throw Error("No such item", givenItem);
     }
 
     handleCharacterSkillRemove(skill) {
@@ -1177,24 +1191,25 @@ class StatBlock extends React.Component {
             return <Loading>Edges</Loading>;
         }
 
-        var rows = [];
+        let rows = [];
 
-        var idx = 0;
+        let idx = 0;
 
         for (let item of this.state.characterEdges) {
             rows.push(<EdgeRow
                 key={idx++}
                 edge={item}
-                onRemove={(item) => this.handleEdgeRemoved(item) }
+                onChange={(item) => this.handleEdgeChanged(item)}
+                onRemove={(item) => this.handleEdgeRemoved(item)}
             />);
         }
 
-        return <Card className={"m-1"}>
+        return <Card id="edges" className={"m-1"}>
             <Card.Body>
                 <h4>Edges</h4>
             </Card.Body>
             <Card.Body className={"table-responsive p-0 m-1"}>
-            <Table striped>
+            <Table striped >
                 <thead>
                 <tr><th>Edge</th></tr>
                 </thead>

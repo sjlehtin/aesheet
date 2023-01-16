@@ -23,6 +23,10 @@ https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 I'm left with a bunch of warnings about anti-patterns in React usage, those 
 need to be sorted also.
 
+### React 18
+
+`react-dom/test-utils` starts to generate warnings. It is being retired in favor of [Testing Library](https://testing-library.com/docs/react-testing-library/).
+
 ## Nuked Pipfile
 
 It was only causing problems.

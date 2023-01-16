@@ -9,7 +9,7 @@ class Loading extends React.Component {
         } else {
             content = 'Loading...';
         }
-        return <div><Octicon mega spin name="sync"/>{content}</div>;
+        return <div><Octicon id={"loading"} mega spin name="sync"/>{content}</div>;
     }
 }
 
