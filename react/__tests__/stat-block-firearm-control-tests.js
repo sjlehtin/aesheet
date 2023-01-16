@@ -49,8 +49,6 @@ describe('StatBlock -- FirearmControl', () => {
     });
 
     it('allows changing range to shoot to', () => {
-        // Check that changing the firearm gets propagated up, and REST API is
-        // invoked.
         const block = factories.statBlockFactory({
             firearms: [{
                 id: 5,
