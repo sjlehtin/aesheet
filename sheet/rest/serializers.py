@@ -52,8 +52,9 @@ class CharacterEdgeCreateSerializer(serializers.ModelSerializer):
 
 
 class CharacterEdgeListSerializer(serializers.ModelSerializer):
-    edge = EdgeLevelSerializer()
+    edge = EdgeLevelSerializer(read_only=True)
     character = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = sheet.models.CharacterEdge
         fields = "__all__"

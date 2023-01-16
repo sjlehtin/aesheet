@@ -1711,7 +1711,7 @@ class CharacterEdgeTestCase(TestCase):
             id=self.sheet.character.id).edges.all()[0].edge.name,
                          "Natural climber")
 
-    def test_modifying_items(self):
+    def test_patch(self):
         character_edge = factories.CharacterEdgeFactory(
             character=self.sheet.character,
             edge__edge__name="Short winded")
@@ -1722,9 +1722,29 @@ class CharacterEdgeTestCase(TestCase):
                 "{}{}/".format(self.url, item_id),
                 data={'ignore_cost': True}, format='json')
         self.assertEqual(response.status_code, 200)
+
         character_edge = models.CharacterEdge.objects.get(
             id=item_id)
         assert character_edge.ignore_cost
+
+    def test_patch_should_not_change_edge(self):
+        character_edge = factories.CharacterEdgeFactory(
+            character=self.sheet.character,
+            edge__edge__name="Short winded")
+        ce_id = character_edge.id
+        edge_id = character_edge.edge.id
+
+        edge_level = factories.EdgeLevelFactory(edge__name="Test edge")
+
+        response = self.client.patch(
+                "{}{}/".format(self.url, edge_id),
+                data={'edge': {'id': edge_level.id}},
+                format='json')
+        self.assertEqual(response.status_code, 200)
+
+        character_edge = models.CharacterEdge.objects.get(
+            id=ce_id)
+        assert character_edge.edge.id == edge_id
 
     def test_deleting_items(self):
         char_edge = factories.CharacterEdgeFactory(
