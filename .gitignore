@@ -24,3 +24,8 @@ npm-debug.log
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+/.pytest_cache/v/cache/
+/.tox/
+/sheet/static/react/
+/aesheet.egg-info/
+/coverage/
