@@ -576,6 +576,40 @@ var armorFactory = function(overrideFields) {
     return Object.assign(armor, overrideFields);
 };
 
+var weaponTemplateFactory = function (overrideFields) {
+    var template = {
+            "name": "Broadsword",
+            "short_name": "Spatha",
+            "description": "",
+            "notes": "",
+            "draw_initiative": -4,
+            "durability": 7,
+            "dp": 7,
+            "weight": "1.4",
+            "num_dice": 1,
+            "dice": 8,
+            "extra_damage": 0,
+            "leth": 5,
+            "plus_leth": 0,
+            "roa": "1.000",
+            "bypass": -1,
+            "type": "S",
+            "ccv": 13,
+            "ccv_unskilled_modifier": -10,
+            "defense_leth": 5,
+            "is_lance": false,
+            "is_shield": false,
+            "tech_level": 3,
+            "base_skill": "Sword",
+            "skill": null,
+            "skill2": null
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    return Object.assign(template, overrideFields);
+};
+
 var weaponQualityFactory = function (overrideFields) {
     "use strict";
     var quality = {
@@ -1015,6 +1049,8 @@ module.exports = {
     baseFirearmFactory: baseFirearmFactory,
     firearmFactory: firearmFactory,
     firearmControlTreeFactory: firearmControlTreeFactory,
+    weaponTemplateFactory: weaponTemplateFactory,
+    weaponQualityFactory: weaponQualityFactory,
     weaponFactory: weaponFactory,
     rangedWeaponFactory: rangedWeaponFactory,
     transientEffectFactory: transientEffectFactory,
