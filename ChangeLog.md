@@ -3,6 +3,7 @@
 ### Added
 
 * Allow ignoring cost for edges. This makes it possible to acquire edges (mostly flaws) during play without XP ramifications.
+* Select `normal` quality as the default for melee weapons.
 
 ### Changed
 

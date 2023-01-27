@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
+import {Col, Row, Button} from 'react-bootstrap';
 
 import Loading from './Loading';
 
@@ -87,15 +87,20 @@ class AddWeaponControl extends React.Component {
         if (this.state.selectedWeapon && this.state.selectedWeapon.quality) {
             quality = <span>{this.state.selectedWeapon.quality.name}</span>;
         } else {
+            let selectedQuality = this.state.selectedQuality;
+            if (!selectedQuality) {
+                // Find the normal quality for default.
+                selectedQuality = this.state.qualityChoices.find((q) => {return /normal/i.exec(q.name);});
+            }
             quality = <Combobox
                 data={this.state.qualityChoices}
-                value={this.state.selectedQuality}
+                value={selectedQuality}
                 textField='name'
                 filter="contains"
                 onChange={(value) => this.handleQualityChange(value)}/>;
         }
 
-        var choices = [];
+        let choices = [];
         if (this.state.weaponTemplateChoices && this.state.weaponChoices) {
             choices = this.state.weaponTemplateChoices.concat(this.state.weaponChoices);
         }

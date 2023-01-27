@@ -9,14 +9,23 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
+const longSwordTemplate = factories.weaponTemplateFactory({name: "Long sword"});
+
+const normalQuality = factories.weaponQualityFactory({name: "normal"});
+const awesomeQuality = factories.weaponQualityFactory({name: "awesome"});
+
+const awesomeLongSword = factories.weaponFactory({base: longSwordTemplate, quality: awesomeQuality, name: "Awesome long sword"});
+
 const server = setupServer(
   rest.get('http://localhost/rest/weapontemplates/campaign/1/', (req, res, ctx) => {
-    return res(ctx.json([factories.weaponTemplateFactory({name: "Long sword"})]));
+      return res(ctx.json([longSwordTemplate]));
   }),
   rest.get('http://localhost/rest/weaponqualities/campaign/1/', (req, res, ctx) => {
-    return res(ctx.json([factories.weaponQualityFactory({name: "normal"}),
-        factories.weaponQualityFactory({name: "awesome"})
+      return res(ctx.json([normalQuality, awesomeQuality
     ]))
+  }),
+  rest.get('http://localhost/rest/weapons/campaign/1/', (req, res, ctx) => {
+      return res(ctx.json([awesomeLongSword]));
   }),
   rest.get('http://localhost/rest/*/campaign/1/', (req, res, ctx) => {
     return res(ctx.json([]));
@@ -28,18 +37,22 @@ describe('add weapon control', function() {
     afterEach(() => server.resetHandlers());
     afterAll(() => server.close());
 
-    it("can render", async () => {
+    it("can choose weapon templates and qualities", async () => {
         const spy = jasmine.createSpy();
         render(<AddWeaponControl campaign={1} onAdd={spy}/>);
         await waitForElementToBeRemoved(document.querySelector("#loading"));
+
         const user = userEvent.setup();
         await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
-        await user.click(screen.getByText("Long sword"));
+        await user.click(screen.getByText("Awesome long sword"));
+        screen.getByText("awesome");
 
-        //screen.getByText("normal");
+        await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
+        await user.click(screen.getByRole('option', {name: "Long sword"}));
+        screen.getByDisplayValue("normal");
 
         await user.click(screen.getAllByRole('button', {name: /open combobox/})[1]);
-        await user.click(screen.getByText("awesome"));
+        await user.click(screen.getByRole('option', {name: "awesome"}));
         await user.click(screen.getByRole('button', {name: /Add Weapon/}));
 
         expect(spy).toHaveBeenCalled();
