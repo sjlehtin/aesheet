@@ -470,14 +470,14 @@ class Wound(models.Model):
                         ("LA", "Left arm"),
                         ("RL", "Right leg"),
                         ("LL", "Left leg")]
-    location = models.CharField(max_length=2,
+    location = models.CharField(max_length=10,
                                 choices=LOCATION_CHOICES,
                                 default="T")
     DAMAGE_TYPE_CHOICES = [("S", "Slash"),
                            ("P", "Pierce"),
                            ("B", "Bludgeon"),
                            ("R", "Burn")]
-    damage_type = models.CharField(max_length=1,
+    damage_type = models.CharField(max_length=10,
                                    choices=DAMAGE_TYPE_CHOICES,
                                    default="S")
     damage = models.PositiveIntegerField(

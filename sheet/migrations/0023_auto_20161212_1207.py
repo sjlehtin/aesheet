@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='wound',
             name='damage_type',
-            field=models.CharField(choices=[(b'S', b'Slash'), (b'P', b'Pierce'), (b'B', b'Bludgeon'), (b'R', b'Burn')], default=b'S', max_length=1),
+            field=models.CharField(choices=[(b'S', b'Slash'), (b'P', b'Pierce'), (b'B', b'Bludgeon'), (b'R', b'Burn')], default=b'S', max_length=10),
         ),
         migrations.AlterField(
             model_name='wound',
             name='location',
-            field=models.CharField(choices=[(b'H', b'Head'), (b'T', b'Torso'), (b'RA', b'Right arm'), (b'LA', b'Left arm'), (b'RL', b'Right leg'), (b'LL', b'Left leg')], default=b'T', max_length=2),
+            field=models.CharField(choices=[(b'H', b'Head'), (b'T', b'Torso'), (b'RA', b'Right arm'), (b'LA', b'Left arm'), (b'RL', b'Right leg'), (b'LL', b'Left leg')], default=b'T', max_length=10),
         ),
     ]
