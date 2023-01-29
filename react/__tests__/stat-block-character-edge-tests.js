@@ -4,7 +4,7 @@ const StatBlock = require('../StatBlock').default;
 
 const factories = require('./factories');
 
-import {render, fireEvent, waitFor, waitForElementToBeRemoved, screen, within} from '@testing-library/react'
+import {render, waitFor, waitForElementToBeRemoved, screen, within} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
