@@ -1,57 +1,32 @@
-version: '3'
+version: '3.8'
 
 services:
   db:
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sheet
-    # Use this to connect to the db from host. Comment out if not needed.
-    ports:
-      - 5432:5432
-    image: postgres
-    restart: always
+      - POSTGRES_USER=sheetie
+      - POSTGRES_PASSWORD=sheetie
+      - POSTGRES_DB=sheet_dev
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
   web:
     build: .
-    command: |
-      bash -c "
-      python manage.py migrate &&
-      python manage.py loaddata admin &&
-      python manage.py runserver 0.0.0.0:8000
-      "
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./dockeraux/phonyauth:/code/auth
-      - .:/code
+      - .:/usr/src/aesheet
     ports:
       - "8000:8000"
     environment:
-      PRODUCTION: 1
-      DBHOST: db
+      DEBUG: 1
+      DB_HOST: db
+      SECRET_KEY: foobar
+      DB_USERNAME: sheetie
+      DB_PASSWORD: sheetie
+      DB_ENGINE: django.db.backends.postgresql
+      DB_NAME: sheet_dev
     depends_on:
       - db
     links:
       - db
-
-#version: "2"
-#services:
-#  nginx:
-#    image: nginx:latest
-#    container_name: NGINXDOCKERNAME
-#    ports:
-#      - "8000:8000"
-#    volumes:
-#      - ./src:/src
-#      - ./config/nginx:/etc/nginx/conf.d
-#      - /static:/static  <--- HERE
-#    depends_on:
-#      - web
-#  web:
-#    build: .
-#    container_name: DJANGOXDOCKERNAME
-#    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn mydjango.wsgi -b 0.0.0.0:8000"
-#    depends_on:
-#      - db
-#    volumes:
-#      - ./src:/src
-#      - /static:/static    <---- HERE
-#    expose:
-#      - "8000"
+volumes:
+  postgres_data:
