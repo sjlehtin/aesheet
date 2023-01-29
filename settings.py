@@ -1,7 +1,6 @@
 # Django settings for aesheet project.
 
 import os
-import sys
 
 ADMINS = (
     ('Sami J. Lehtinen', 'sjl@iki.fi'),
@@ -9,92 +8,43 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-ROOT_URL = os.environ.get('ROOT_URL')
-if not ROOT_URL:
-    ROOT_URL = "/"
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/accounts/profile/"
 
-LOGIN_URL = ROOT_URL + "accounts/login/"
-LOGIN_REDIRECT_URL = ROOT_URL + "accounts/profile/"
+ALLOWED_HOSTS=["localhost", "127.0.0.1", "[::1]"]
 
-DBHOST = os.getenv("DBHOST", default='127.0.0.1')
-
-ALLOWED_HOSTS = ["devsheet.liskot.org", "aesheet.liskot.org",
-                 'localhost', '127.0.0.1', '[::1]']
-
-if 'ALLOWED_HOSTS' in os.environ:
-    ALLOWED_HOSTS += os.environ['ALLOWED_HOSTS'].split(',')
+if "ALLOWED_HOSTS" in os.environ:
+    ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split()
 
 BASEDIR = os.path.dirname(__file__)
-PRODUCTION = os.path.exists(os.path.join(BASEDIR, "auth"))
-if 'PRODUCTION' in os.environ:
-    PRODUCTION = True if os.environ.get('PRODUCTION') else False
 
-DEBUG = False
-DEBUG_TOOLBAR_ENABLED = False
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-if 'RDS_HOSTNAME' in os.environ:
-    DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
-    DB_NAME = os.environ['RDS_DB_NAME']
-    USER = os.environ['RDS_USERNAME']
-    PASSWORD = os.environ['RDS_PASSWORD']
-    DBHOST = os.environ['RDS_HOSTNAME']
-    PORT = os.environ['RDS_PORT']
-    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
-elif PRODUCTION:
-
-    DB_ENGINE = 'django.db.backends.postgresql_psycopg2'
-    # Allow overriding database with a file and environment variable.
-    DB_NAME='sheet'
-    try:
-        with open(os.path.join(BASEDIR, "DATABASE")) as fp:
-            DB_NAME = fp.read().strip()
-    except IOError:
-        pass
-    DB_NAME = os.getenv("DB_NAME", DB_NAME)
-    f = open(os.path.join(BASEDIR, "auth"), "r")
-    auth_details = f.read()
-    (USER, PASSWORD) = auth_details.strip().split()
-
-    SECRET_KEY = open(os.path.join(BASEDIR, "secret"), "r").read().strip()
-
+DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
+if DB_ENGINE == 'django.db.backends.sqlite3':
+    DEFAULT_DB = os.path.join(os.path.dirname(__file__), "sql.db")
 else:
-    DB_ENGINE = 'django.db.backends.sqlite3'
-    DB_NAME = os.path.join(os.path.dirname(__file__), 'sql.db')
-    DB_NAME = os.getenv("DB_NAME", DB_NAME)
-    (USER, PASSWORD) = "", ""
-    DEBUG_TOOLBAR_ENABLED = True
-    DEBUG = True
-    if os.path.exists(os.path.join(BASEDIR, "secret")):
-        SECRET_KEY = open(os.path.join(BASEDIR, "secret"), "r").read().strip()
+    DEFAULT_DB = "sheet"
 
-val = os.getenv('DEBUG_TOOLBAR')
-if val is not None:
-    if val in ["1", "yes"]:
-        val = True
-    else:
-        val = False
-    DEBUG_TOOLBAR_ENABLED = val
+DB_NAME = os.environ.get('DB_NAME', DEFAULT_DB)
+DB_USER = os.environ.get('DB_USERNAME')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_HOST = os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT', "5432")
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-try:
-    import debug_toolbar
-except ImportError:
-    DEBUG_TOOLBAR_ENABLED = False
+DEBUG_TOOLBAR_ENABLED = int(os.environ.get('DEBUG_TOOLBAR', default=0))
 
 DATABASES = {
     'default': {
         'ENGINE': DB_ENGINE,
         'ATOMIC_REQUESTS': True,
-        'NAME': DB_NAME, # Or path to database file if using sqlite3.
-        'USER': USER,                      # Not used with sqlite3.
-        'PASSWORD': PASSWORD,     # Not used with sqlite3.
-        'HOST': DBHOST,                  # Set to empty string for
-                                         # localhost. Not used with
-                                         # sqlite3.
-        'PORT': '',                      # Set to empty string for
-                                         # default. Not used with
-                                         # sqlite3.
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
-
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -144,12 +94,12 @@ STATIC_ROOT = os.path.join(os.path.dirname(__file__), "static")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = ROOT_URL + 'static/'
+STATIC_URL = "/static/"
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = ROOT_URL + 'static/admin/'
+ADMIN_MEDIA_PREFIX = "/static/admin/"
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -163,7 +113,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 MIDDLEWARE = [
@@ -186,11 +135,10 @@ ROOT_URLCONF = 'urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(os.path.dirname(__file__), "templates"),],
+        'DIRS': [os.path.join(os.path.dirname(__file__), "templates"), ],
         'APP_DIRS': True,
-        'OPTIONS': {'context_processors':
-        [
-                # default
+        'OPTIONS': {
+            'context_processors': [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
@@ -198,11 +146,9 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-
-                # extra.
-                "context_processors.variables",
-                         "django.template.context_processors.request",],
-                     }
+                "django.template.context_processors.request",
+            ],
+        }
     },
 ]
 
@@ -211,8 +157,8 @@ LOGIN_REQUIRED_URLS = (
 )
 
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
-    ROOT_URL + r'accounts/login/.*$',
-    ROOT_URL + r'accounts/logout/.*$'
+    '/accounts/login/.*$',
+    '/accounts/logout/.*$'
 )
 
 INSTALLED_APPS = (
@@ -234,41 +180,4 @@ if DEBUG_TOOLBAR_ENABLED:
     INSTALLED_APPS += ('debug_toolbar',)
 
 DEBUG_TOOLBAR_CONFIG = {
-    }
-
-if os.getenv('LOG_TO_CONSOLE'):
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'simple': {
-                'format': '%(levelname).1s[%(relativeCreated)d] '
-                '%(filename)s:%(lineno)s: %(message)s'
-            },
-        },
-        'handlers': {
-            'console':{
-                'level':'DEBUG',
-                'class':'logging.StreamHandler',
-                'formatter': 'simple'
-            },
-        },
-        'loggers': {
-            'sheet' : {
-                'handlers' : ['console'],
-                'level' : 'DEBUG'
-                },
-            'django' : {
-                'handlers' : ['console'],
-                'level' : 'INFO'
-            },
-            'factory': {
-                'handlers' : ['console'],
-                'level' : 'INFO'
-            },
-            '' : {
-                'handlers' : ['console'],
-                'level' : 'DEBUG'
-            }
-        },
     }
