@@ -35,19 +35,7 @@ Full list of all todo items in the TODO.
 
 #### Deploying
 
-Add an `auth` file with the database access credentials as
-whitespace-separated pair.
-
-Generate a "secret" file with the secret key used for Django sessions and
-the like. Do not checkin to version control or disclose.
-
-#### pipenv in production
-
-Create virtualenv in project directory
-
-```
- % PIPENV_VENV_IN_PROJECT=1 pipenv --python python3.5 install
-```
+TODO
 
 #### nginx configuration
 
@@ -103,13 +91,52 @@ After updating sources, run
 
 ## Using the Docker images
 
-Nuke traces of old containers:
+TODO: rule dump to root
 
-```
-docker-compose down --remove-orphans --volumes
+Create containers
+
+```zsh
+docker-compose -f docker-compose.yml up -d --build
 ```
 
-## Developing
+Setup database
+
+```zsh 
+docker-compose -f docker-compose.yml exec web python manage.py migrate --noinput
+```
+
+Create the superuser
+
+```zsh
+docker-compose -f docker-compose.yml exec web python manage.py createsuperuser
+```
+
+Build web assets
+
+```zsh
+docker-compose -f docker-compose.yml exec web npm run build -- --mode=development
+```
+
+Collect static web assets
+
+```zsh
+docker-compose -f docker-compose.yml exec web python manage.py collectstatic --noinput --clear
+```
+
+Add standard rules package
+```zsh
+docker-compose -f docker-compose.yml exec web python manage.py loaddata basedata
+```
+
+The sheet is now usable in `http://localhost:8000/`.
+
+### Starting over
+
+
+```zsh
+docker-compose down -v
+```
+
 ### Running tests
 
 ```
