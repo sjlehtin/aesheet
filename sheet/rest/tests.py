@@ -1737,7 +1737,7 @@ class CharacterEdgeTestCase(TestCase):
         edge_level = factories.EdgeLevelFactory(edge__name="Test edge")
 
         response = self.client.patch(
-                "{}{}/".format(self.url, edge_id),
+                "{}{}/".format(self.url, ce_id),
                 data={'edge': {'id': edge_level.id}},
                 format='json')
         self.assertEqual(response.status_code, 200)
