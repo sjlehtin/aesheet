@@ -17,13 +17,22 @@ Update to Django 2.2 went relatively painlessly. Newest versions start to requir
 
 ## Nuked Pipfile
 
-It was only causing problems.
+It was only causing problems. In case package pinning outside of requirements.txt is needed, study [Poetry](https://python-poetry.org).
 
 ## TODO: Update all packages 
 ## TODO: Move to new server/Lambda/etc
+
+Dockerizing the deployment for testing and easy of development for other people is the first step. From here, modifying the environment to be also deployable in production in containers is good continuation, as that will reduce the dependency to the host environment, be it in AWS or UpCloud.
+
+In production, the docker web servers need to handle crashes gracefully, enter [restart policies](https://docs.docker.com/config/containers/start-containers-automatically/).
+
+The server needs to have Let's Encrypt running for HTTPS certs, as it is currently.
+
 ## TODO: staticfiles and uploads to S3
 https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
 ## TODO: Use src layout for package
+
+Django has moved settings.py etc. to one level above the base directory. That change is a good starting point.
 
 ## Updating to current React etc
 
@@ -39,5 +48,7 @@ need to be sorted also.
 Biggest problem is `TestUtils.renderIntoDocument`. Current rage seems to be to use Testing Library and Mock Service Workers.
 
 First tests done with `add-weapon-control-tests.js` and `stat-block-character-edge-tests.js`.
+
+Having tests on top of MSW and StatBlock seems to be almost like a system-level integration test. Very nice!
 
 ## TODO: JavaScript to TypeScript or whatever is the latest rage
