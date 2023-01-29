@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {Col, Row, Button} from 'react-bootstrap';
+import {Button, Col, Row} from 'react-bootstrap';
 
 import Loading from './Loading';
 
@@ -18,15 +18,20 @@ class AddWeaponControl extends React.Component {
     }
 
     async componentDidMount() {
-        let promises = []
-        promises.push(rest.getData(`/rest/weaponqualities/campaign/${this.props.campaign}/`))
-        promises.push(rest.getData(`/rest/weapons/campaign/${this.props.campaign}/`))
-        promises.push(rest.getData(`/rest/weapontemplates/campaign/${this.props.campaign}/`))
-        let [qualities, weapons, templates] = await Promise.all(promises)
+        let promises = [];
+        promises.push(rest.getData(`/rest/weaponqualities/campaign/${this.props.campaign}/`));
+        promises.push(rest.getData(`/rest/weapons/campaign/${this.props.campaign}/`));
+        promises.push(rest.getData(`/rest/weapontemplates/campaign/${this.props.campaign}/`));
+        let [qualities, weapons, templates] = await Promise.all(promises);
+
+        const normalQuality = qualities.find((q) => {return /normal/i.exec(q.name);});
+
         this.setState({
             weaponChoices: weapons,
             qualityChoices: qualities,
             weaponTemplateChoices: templates,
+            selectedQuality: normalQuality,
+            defaultQuality: normalQuality,
             isBusy: false
         })
     }
@@ -56,7 +61,8 @@ class AddWeaponControl extends React.Component {
             }
             this.props.onAdd(weapon);
 
-            this.setState({selectedQuality: null, selectedWeapon: null});
+            this.setState({selectedQuality: this.state.defaultQuality,
+                selectedWeapon: null});
         }
     }
 
@@ -87,14 +93,9 @@ class AddWeaponControl extends React.Component {
         if (this.state.selectedWeapon && this.state.selectedWeapon.quality) {
             quality = <span>{this.state.selectedWeapon.quality.name}</span>;
         } else {
-            let selectedQuality = this.state.selectedQuality;
-            if (!selectedQuality) {
-                // Find the normal quality for default.
-                selectedQuality = this.state.qualityChoices.find((q) => {return /normal/i.exec(q.name);});
-            }
             quality = <Combobox
                 data={this.state.qualityChoices}
-                value={selectedQuality}
+                value={this.state.selectedQuality}
                 textField='name'
                 filter="contains"
                 onChange={(value) => this.handleQualityChange(value)}/>;

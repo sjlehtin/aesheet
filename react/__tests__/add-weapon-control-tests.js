@@ -43,14 +43,30 @@ describe('add weapon control', function() {
         await waitForElementToBeRemoved(document.querySelector("#loading"));
 
         const user = userEvent.setup();
+
+        // Default quality should allow adding the weapon immediately.
+        await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
+        await user.click(screen.getByRole('option', {name: "Long sword"}));
+        screen.getByDisplayValue("normal");
+        const button = screen.getByRole('button', {name: /Add Weapon/});
+        expect(button).not.toHaveAttribute("disabled");
+        await user.click(button);
+        expect(spy).toHaveBeenCalled();
+        const firstWeapon = spy.calls.argsFor(0)[0];
+        expect(firstWeapon.base.name).toEqual("Long sword");
+        expect(firstWeapon.quality.name).toEqual("normal");
+        spy.calls.reset();
+
+        // Default quality field should still be filled.
+        screen.getByDisplayValue("normal");
+
+        // Existing weapon (with template and quality) should show immutable quality.
         await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
         await user.click(screen.getByText("Awesome long sword"));
         screen.getByText("awesome");
 
-        await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
         await user.click(screen.getByRole('option', {name: "Long sword"}));
         screen.getByDisplayValue("normal");
-
         await user.click(screen.getAllByRole('button', {name: /open combobox/})[1]);
         await user.click(screen.getByRole('option', {name: "awesome"}));
         await user.click(screen.getByRole('button', {name: /Add Weapon/}));
