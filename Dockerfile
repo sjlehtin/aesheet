@@ -23,3 +23,5 @@ RUN pip install -r requirements.txt
 
 # copy project
 COPY . .
+
+ENTRYPOINT ["/opt/aesheet/entrypoint.sh"]
