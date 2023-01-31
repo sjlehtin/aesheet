@@ -91,8 +91,6 @@ After updating sources, run
 
 ## Using the Docker images
 
-TODO: rule dump to root
-
 Create containers
 
 ```zsh
