@@ -7,8 +7,6 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import UpdateView, CreateView, FormView
 import sheet.models
 import sheet.forms
-import os.path
-import subprocess
 from django.views.generic import TemplateView
 from django.forms.models import modelform_factory
 import logging
@@ -251,24 +249,6 @@ class CopySheetView(RequestMixin, FormView):
             new_char=new_sheet.character.name
         ))
         return super(CopySheetView, self).form_valid(form)
-
-
-def version_history(request):
-    def logiter(output):
-        acc = ""
-        for ll in output:
-            ll = ll.decode()
-            if ll.startswith("commit ") and acc:
-                yield acc
-                acc = ""
-            acc += ll
-        yield acc
-
-    proc = subprocess.Popen(['git', 'log'], stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            cwd=os.path.dirname(__file__))
-    return render(request, 'sheet/changelog.html',
-                  {'log': logiter(proc.stdout)})
 
 
 class TODOView(TemplateView):

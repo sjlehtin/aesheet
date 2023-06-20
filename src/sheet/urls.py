@@ -36,7 +36,6 @@ urlpatterns = [
 
     url(r'^import-export/', include(marshal_urls)),
 
-    url(r'^ChangeLog$', sheet.views.version_history, name='version_history'),
     url(r'^TODO$', sheet.views.TODOView.as_view(), name="todo"),
 
    url(r'^rest/', include(rest_urls)),
