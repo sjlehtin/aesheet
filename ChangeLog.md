@@ -8,7 +8,11 @@
 
 ### Changed
 
-Upgraded python packages to current versions.
+* Upgraded python packages to current versions.
+
+### Removed
+
+* `git log` is not used as the dynamic ChangeLog anymore; it is not available when installing from packages.
 
 ## Version 0.9.1 -- 2019-08-09
 
