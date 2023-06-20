@@ -16,6 +16,8 @@ RUN mkdir -p /opt/aesheet && cp -a /tmp/node_modules /opt/aesheet/
 # set work directory
 WORKDIR /opt/aesheet
 
+RUN mkdir /opt/aesheet/static
+
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
