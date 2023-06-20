@@ -1,3 +1,5 @@
+# Development time settings, DO NOT USE IN PROD!
+#
 # Django settings for aesheet project.
 
 import os
@@ -19,7 +21,7 @@ if "ALLOWED_HOSTS" in os.environ:
 
 BASEDIR = os.path.dirname(__file__)
 
-DEBUG = int(os.environ.get("DEBUG", default=0))
+DEBUG = int(os.environ.get("DEBUG", default=1))
 
 DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
 if DB_ENGINE == 'django.db.backends.sqlite3':
