@@ -3,7 +3,7 @@ var path = require('path');
 module.exports = {
     entry: "main.js",
     output: {
-        path: __dirname + '/sheet/static/react',
+        path: __dirname + '/npmbuild/static/react',
         filename: "bundle.js",
         // Expose the bundle to a var for the Django templates.
         libraryTarget: "var",

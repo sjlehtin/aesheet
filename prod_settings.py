@@ -1,7 +1,6 @@
 # Django settings for aesheet project.
 
 import os
-import secrets
 
 ADMINS = (
     ('Sami J. Lehtinen', 'sjl@iki.fi'),
@@ -17,26 +16,19 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 if "ALLOWED_HOSTS" in os.environ:
     ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split()
 
+DEBUG = False
+DEBUG_TOOLBAR_ENABLED = False
+
 BASEDIR = os.path.dirname(__file__)
 
-DEBUG = int(os.environ.get("DEBUG", default=0))
-
-DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
-if DB_ENGINE == 'django.db.backends.sqlite3':
-    DEFAULT_DB = os.path.join(os.path.dirname(__file__), "sql.db")
-else:
-    DEFAULT_DB = "sheet"
-
-DB_NAME = os.environ.get('DB_NAME', DEFAULT_DB)
+DB_ENGINE = os.environ.get("DB_ENGINE", 'django.db.backends.postgresql')
+DB_NAME = os.environ.get('DB_NAME')
 DB_USER = os.environ.get('DB_USERNAME')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DB_HOST = os.environ.get('DB_HOST')
 DB_PORT = os.environ.get('DB_PORT', "5432")
 
-SECRET_KEY = os.environ.get('SECRET_KEY',
-                            secrets.token_hex())
-
-DEBUG_TOOLBAR_ENABLED = int(os.environ.get('DEBUG_TOOLBAR', default=0))
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DATABASES = {
     'default': {
@@ -81,7 +73,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(os.path.dirname(__file__), "upload")
+MEDIA_ROOT = os.path.join(BASEDIR, "upload")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -93,7 +85,7 @@ MEDIA_URL = '/media/'
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 # STATIC_ROOT = ''
-STATIC_ROOT = os.path.join(os.path.dirname(__file__), "static")
+STATIC_ROOT = os.path.join(BASEDIR, "static")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -106,10 +98,6 @@ ADMIN_MEDIA_PREFIX = "/static/admin/"
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(__file__), "npmbuild/static/"),
 )
 
 # List of finder classes that know how to find static files in
@@ -127,10 +115,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
-
-if DEBUG_TOOLBAR_ENABLED:
-    MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-    INTERNAL_IPS = ("127.0.0.1",)
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
@@ -179,9 +163,3 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'rest_framework',
 )
-
-if DEBUG_TOOLBAR_ENABLED:
-    INSTALLED_APPS += ('debug_toolbar',)
-
-DEBUG_TOOLBAR_CONFIG = {
-}

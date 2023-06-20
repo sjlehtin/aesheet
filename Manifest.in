@@ -1,0 +1,5 @@
+include README.md
+include ChangeLog.md
+recursive-include src/sheet/static *
+recursive-include src/sheet/templates *
+recursive-include src/accounts/templates *

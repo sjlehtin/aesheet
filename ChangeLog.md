@@ -1,9 +1,10 @@
-## Version 0.10.0 -- TBR
+## Version 0.10.0 -- 2023-06-21
 
 ### Added
 
 * Allow ignoring cost for edges. This makes it possible to acquire edges (mostly flaws) during play without XP ramifications.
 * Select `normal` quality as the default for melee weapons.
+* Use a standard package layout. This allows to install the sheet from packages without cloning the source code.
 
 ### Changed
 
