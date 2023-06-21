@@ -136,7 +136,7 @@ if DEBUG_TOOLBAR_ENABLED:
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'sheet.urls'
 
 TEMPLATES = [
     {

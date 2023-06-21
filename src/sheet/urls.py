@@ -4,6 +4,12 @@ import sheet.views.marshal
 from django.views.generic import RedirectView
 from django.urls import reverse_lazy
 from sheet.rest.urls import urlpatterns as rest_urls
+from django.conf.urls.static import static
+from django.conf import settings
+
+from django.contrib import admin
+admin.autodiscover()
+
 
 marshal_urls = [
     url(r'^import/$', sheet.views.marshal.import_data, name='import'),
@@ -40,8 +46,13 @@ urlpatterns = [
 
    url(r'^rest/', include(rest_urls)),
    url(r'^api-auth/', include('rest_framework.urls',
-                              namespace='rest_framework'))
+                              namespace='rest_framework')),
+
+    url(r'^accounts/', include('accounts.urls')),
+
+    url('^admin/', admin.site.urls),
 ]
+
 
 def class_from_name(name):
     components = name.split('_')
@@ -64,3 +75,6 @@ for name in CREATE_NAMES:
     urlpatterns.append(url("^sheets/%s/" % name,
                            class_from_name(name).as_view(),
                            name=name))
+
+# In development, serve the uploaded media files.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
