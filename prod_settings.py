@@ -1,4 +1,4 @@
-# Django settings for aesheet project.
+# Production Django settings for aesheet project.
 
 import os
 
@@ -11,6 +11,9 @@ MANAGERS = ADMINS
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/accounts/profile/"
 
+# ALLOWED_HOSTS is required, without this setting the requests will always
+# get response with status code 400. This should have all the values that
+# should be able to connect the host externally.
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 
 if "ALLOWED_HOSTS" in os.environ:
@@ -67,10 +70,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # to load the internationalization machinery.
 USE_I18N = True
 
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale
-USE_L10N = True
-
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = os.path.join(BASEDIR, "upload")
@@ -96,17 +95,6 @@ STATIC_URL = "/static/"
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
 ADMIN_MEDIA_PREFIX = "/static/admin/"
 
-# Additional locations of static files
-STATICFILES_DIRS = (
-)
-
-# List of finder classes that know how to find static files in
-# various locations.
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
-
 MIDDLEWARE = [
     'loginreqd.middleware.RequireLoginMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -118,7 +106,7 @@ MIDDLEWARE = [
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'sheet.urls'
 
 TEMPLATES = [
     {
@@ -158,8 +146,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'widget_tweaks',
-    'sheet',
-    'accounts',
     'django.contrib.humanize',
     'rest_framework',
+    'sheet',
+    'accounts',
 )
