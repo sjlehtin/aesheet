@@ -261,7 +261,6 @@ class Character(PrivateMixin, models.Model):
         entry.removed = removed
         entry.save()
 
-
     def add_log_entry(self, entry_text, request=None):
         entry = CharacterLogEntry()
         entry.character = self
@@ -537,7 +536,8 @@ class CharacterEdge(PrivateMixin, models.Model):
     edge = models.ForeignKey(EdgeLevel, on_delete=models.CASCADE)
 
     ignore_cost = models.BooleanField(default=False,
-                                      help_text="Whether edge cost counts against")
+                                      help_text="Whether edge cost counts as used XP")
+
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
