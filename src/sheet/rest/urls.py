@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 import sheet.rest.views as views
 from rest_framework import routers
 
@@ -135,7 +135,6 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 basename='sheet-inventory-item')
 
 urlpatterns = router.urls + [
-    url(r'^ammunition/firearm/(?P<firearm>.+)/$',
-        views.WeaponAmmunitionList.as_view()),
-
+    re_path(r'^ammunition/firearm/(?P<firearm>.+)/$',
+            views.WeaponAmmunitionList.as_view()),
     ]
