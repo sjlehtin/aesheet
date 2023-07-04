@@ -1,9 +1,9 @@
 import csv
 import codecs
 import chardet
-from io import StringIO, BytesIO
+from io import StringIO
 from django.shortcuts import render
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 import django.db.models
 import django.db.models.fields.related
 from django.contrib import messages
@@ -80,6 +80,7 @@ def update_id_sequence(model_class):
     """
     # Only with postgres.
 
+    # TODO: this is broken with Django >= 2.2
     if (settings.DATABASES['default']['ENGINE'] ==
             "django.db.backends.postgresql_psycopg2"):
 

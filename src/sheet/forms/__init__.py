@@ -8,6 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ImportForm(forms.Form):
     import_data = forms.CharField(widget=forms.Textarea, required=False)
     file = forms.FileField(required=False)
@@ -362,13 +363,14 @@ class CreateBaseFirearmForm(RequestForm):
 
 
 class CopySheetForm(RequestFormMixin, forms.Form):
+    sheet = forms.ModelChoiceField(queryset=sheet.models.Sheet.objects.all())
     to_name = forms.CharField(max_length=256)
 
     def __init__(self, *args, **kwargs):
         super(CopySheetForm, self).__init__(*args, **kwargs)
+        # Override the field with only selection for the current user.
         self.fields['sheet'] = forms.ModelChoiceField(
             queryset=sheet.models.get_sheets(self.request.user))
-        self.fields.keyOrder = ['sheet', 'to_name']
 
     def clean_to_name(self):
         to_name = self.cleaned_data.get('to_name', None)
@@ -389,26 +391,24 @@ class CopySheetForm(RequestFormMixin, forms.Form):
         miscellaneous_items = original_sheet.miscellaneous_items.all()
         transient_effects = original_sheet.transient_effects.all()
 
-        new_sheet = original_sheet
-        new_sheet.pk = None
-        skills = original_sheet.character.skills.all()
-        edges = original_sheet.character.edges.all()
-
-
-        new_char = new_sheet.character
+        original_character_id = original_sheet.character.pk
+        new_char = original_sheet.character
         original_name = new_char.name
         new_char.name = self.cleaned_data['to_name']
         new_char.pk = None
         new_char.owner = self.request.user
         new_char.save()
 
-        for skill in skills:
-            new_char.skills.create(skill=skill.skill,
-                                   level=skill.level)
+        for skill in sheet.models.CharacterSkill.objects.filter(
+                character=original_character_id):
+            sheet.models.CharacterSkill.objects.create(character=new_char,
+                                                       skill=skill.skill,
+                                                       level=skill.level)
 
-        for edge in edges:
+        for edge in sheet.models.CharacterEdge.objects.filter(
+                character=original_character_id):
             sheet.models.CharacterEdge.objects.create(character=new_char,
-                                                      edge=edge)
+                                                      edge=edge.edge)
 
         sheet.models.CharacterLogEntry.objects.create(
             character=new_char,
@@ -417,8 +417,10 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             entry_type=sheet.models.CharacterLogEntry.NON_FIELD
         )
 
+        new_sheet = original_sheet
         new_sheet.character = new_char
         new_sheet.owner = self.request.user
+        new_sheet.pk = None
         new_sheet.save()
 
         for weapon in weapons:

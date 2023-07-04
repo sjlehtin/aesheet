@@ -2,7 +2,7 @@ psycopg2
 gunicorn
 django-widget-tweaks
 djangorestframework
-Django==2.2
+Django
 Pillow
 pytz
 chardet

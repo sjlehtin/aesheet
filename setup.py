@@ -2,8 +2,9 @@
 import setuptools
 
 setuptools.setup(name='aesheet',
-                 version='0.10',
-                 install_requires=["Django==2.2",
+                 version='0.11-alpha-0',
+                 python_requires=">=3.8",
+                 install_requires=["Django",
                                    "django-widget-tweaks",
                                    "djangorestframework",
                                    "chardet",
