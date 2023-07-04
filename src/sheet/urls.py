@@ -1,4 +1,4 @@
-from django.conf.urls import include, url
+from django.urls import include, path
 import sheet.views
 import sheet.views.marshal
 from django.views.generic import RedirectView
@@ -12,45 +12,47 @@ admin.autodiscover()
 
 
 marshal_urls = [
-    url(r'^import/$', sheet.views.marshal.import_data, name='import'),
-    url(r'^export/(?P<data_type>\w+)/$', sheet.views.marshal.export_data,
-        name='export'),
-    url(r'^browse/(?P<data_type>\w+)/$', sheet.views.marshal.browse, name='browse'),
+    path('import/', sheet.views.marshal.import_data, name='import'),
+    path('export/<str:data_type>/', sheet.views.marshal.export_data,
+         name='export'),
+    path('browse/<str:data_type>/', sheet.views.marshal.browse, name='browse'),
 ]
 
 urlpatterns = [
-    url(r'^$', RedirectView.as_view(url=reverse_lazy('sheets_index'))),
-    url(r'^characters/$', sheet.views.characters_index, name='characters_index'),
+    path('', RedirectView.as_view(url=reverse_lazy('sheets_index'))),
+    path('characters/', sheet.views.characters_index, name='characters_index'),
 
-    url(r'^characters/add_char/$', sheet.views.AddCharacterView.as_view(),
-        name="add_char"),
+    path('characters/add_char/', sheet.views.AddCharacterView.as_view(),
+         name="add_char"),
 
-    url(r'^characters/edit_char/(?P<pk>\d+)/$',
-        sheet.views.EditCharacterView.as_view(),
-        name='edit_character'),
+    path('characters/edit_char/<int:pk>/',
+         sheet.views.EditCharacterView.as_view(),
+         name='edit_character'),
 
-    url(r'^characters/edit_sheet/(?P<pk>\d+)/$',
-        sheet.views.EditSheetView.as_view(),
-        name='edit_sheet'),
+    path('characters/edit_sheet/<int:pk>/',
+         sheet.views.EditSheetView.as_view(),
+         name='edit_sheet'),
 
     # Specific sheets for the characters.
-    url(r'^sheets/$', sheet.views.sheets_index, name='sheets_index'),
-    url(r'^sheets/(?P<sheet_id>\d+)/$', sheet.views.sheet_detail, name='sheet_detail'),
+    path('sheets/', sheet.views.sheets_index, name='sheets_index'),
+    path('sheets/<int:sheet_id>/', sheet.views.sheet_detail, name='sheet_detail'),
 
-    url(r'^sheets/copy/(?P<sheet_id>\d+)?$',
-        sheet.views.CopySheetView.as_view(), name='copy_sheet'),
+    path('sheets/copy/<int:sheet_id>',
+         sheet.views.CopySheetView.as_view(), name='copy_sheet'),
+    path('sheets/copy/',
+         sheet.views.CopySheetView.as_view(), name='copy_sheet'),
 
-    url(r'^import-export/', include(marshal_urls)),
+    path('import-export/', include(marshal_urls)),
 
-    url(r'^TODO$', sheet.views.TODOView.as_view(), name="todo"),
+    path('TODO', sheet.views.TODOView.as_view(), name="todo"),
 
-   url(r'^rest/', include(rest_urls)),
-   url(r'^api-auth/', include('rest_framework.urls',
+    path('rest/', include(rest_urls)),
+    path('api-auth/', include('rest_framework.urls',
                               namespace='rest_framework')),
 
-    url(r'^accounts/', include('accounts.urls')),
+    path('accounts/', include('accounts.urls')),
 
-    url('^admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 ]
 
 
@@ -72,9 +74,9 @@ CREATE_NAMES = ["add_sheet", "add_edge", "add_edge_level",
 CREATE_URLS = ["sheets/{0}/".format(name) for name in CREATE_NAMES]
 
 for name in CREATE_NAMES:
-    urlpatterns.append(url("^sheets/%s/" % name,
-                           class_from_name(name).as_view(),
-                           name=name))
+    urlpatterns.append(path("sheets/%s/" % name,
+                            class_from_name(name).as_view(),
+                            name=name))
 
 # In development, serve the uploaded media files.
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
