@@ -84,7 +84,7 @@ class AddFirearmControl extends React.Component {
             return ammo;
         }
         const impulse = parseFloat(ammo.weight) * ammo.velocity / 1000;
-        return `${ammo.label} ${ammo.bullet_type} (${impulse.toFixed(2)})`;
+        return `${ammo.calibre.name} ${ammo.bullet_type} (${impulse.toFixed(2)})`;
     }
 
     render () {

@@ -279,13 +279,15 @@ const ammunitionFactory = (props) => {
         "extra_damage": 0,
         "leth": 5,
         "plus_leth": 0,
-        "label": "9Pb",
         "type": "P",
         "bullet_type": "FMJ",
         "bypass": 0,
         "weight": "7.500",
         "velocity": 440,
-        "tech_level": 4
+        "tech_level": 4,
+        "calibre": {
+            "name": "9Pb"
+        }
     };
     let newAmmo = Object.assign(_base, props);
     objectId = newAmmo.id + 1;

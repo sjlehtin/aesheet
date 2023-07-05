@@ -1,50 +1,101 @@
-import {AmmoControl} from 'AmmoControl';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-
 const factories = require('./factories');
 
-jest.mock('sheet-rest');
+import { render, screen } from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
+import FirearmControl from "../../react/FirearmControl";
+import {prettyDOM} from '@testing-library/dom'
+import React from "react";
+
+const server = setupServer(
+    rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {
+        return res(ctx.json([]))
+    }),
+    rest.get('http://localhost/rest/scopes/campaign/*/', (req, res, ctx) => {
+        return res(ctx.json([]))
+    }),
+)
+
+// jest.mock('sheet-rest');
 
 describe('FirearmControl -- AmmoControl', () => {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    it('renders AmmoControl', () => {
-        const control = factories.firearmControlTreeFactory({weapon:
-            {ammo: {label: "Test Ammo"}}});
-        let ammoControl = TestUtils.findRenderedComponentWithType(
-            control, AmmoControl);
-        expect(ammoControl).toBeDefined();
-        expect(ReactDOM.findDOMNode(ammoControl).textContent).toContain("Test Ammo");
+    it('renders AmmoControl', async () => {
+        const props = factories.firearmControlPropsFactory({weapon:
+            {ammo: {calibre: {name: "Test Ammo"}}}});
+
+        const control = render(<FirearmControl {...props}/>)
+
+        await control.findByText(/Test Ammo/)
+        const elem_arr = await control.queryAllByDisplayValue(/undefined/)
+        console.log(prettyDOM(document.getRootNode()))
+        expect(elem_arr.length).toBe(0)
     });
 
-    it('integrates AmmoControl for listing URL', () => {
-        // Check that url for firearm gets propagated correctly.
-        const control = factories.firearmControlTreeFactory({weapon:
+    it('integrates AmmoControl for listing URL', async () => {
+        const user = userEvent.setup()
+
+        server.use(
+            rest.get('http://localhost/rest/ammunition/firearm/Nabu%20tussari/', (req, res, ctx) => {
+                return res(ctx.json([factories.ammunitionFactory({calibre: {name: "Roblox"}, bullet_type: "FMJ-CHROME"})]))
+            }),
+        )
+        const props = factories.firearmControlPropsFactory({weapon:
             {base: {name: "Nabu tussari"},
-             ammo: {"label": "Test Ammo"}}});
-        let ammoControl = TestUtils.findRenderedComponentWithType(
-            control, AmmoControl);
-        expect(ammoControl.props.url).toEqual('/rest/ammunition/firearm/Nabu%20tussari/');
+             ammo: {calibre: {name: "Test Ammo"}}}});
+
+        const control = render(<FirearmControl {...props}/>)
+
+        const elem_arr = await control.findAllByRole('combobox', {busy: false})
+        await user.click(elem_arr[0].querySelector('.rw-picker-caret'));
+
+        await control.findByText(/Roblox/)
+        await control.findByText(/FMJ-CHROME/)
     });
 
-    it('integrates AmmoControl for changing ammmo', () => {
-        const spy = jest.fn().mockReturnValue(Promise.resolve({}));
+    it('integrates AmmoControl for changing ammmo', async () => {
+        const user = userEvent.setup()
 
-        const control = factories.firearmControlTreeFactory({weapon:
-            {id: 19,
-                base: {name: "Nabu tussari"},
-                ammo: {"label": "Test Ammo"}},
+        const newAmmo = factories.ammunitionFactory({calibre: {name: "Skudaa"}, bullet_type: "AR-SON"})
+
+        server.use(
+            rest.get('http://localhost/rest/ammunition/firearm/Nabu%20tussari/', (req, res, ctx) => {
+                return res(ctx.json([factories.ammunitionFactory({calibre: {name: "Roblox"}, bullet_type: "FMJ-CHROME"}),
+                    newAmmo
+                ]))
+            }),
+        )
+
+        let spy = jest.fn().mockResolvedValue({});
+
+        const props = factories.firearmControlPropsFactory({
+            weapon:
+                {
+                    id: 52,
+                    base: {name: "Nabu tussari"},
+                    ammo: {calibre: {name: "Test Ammo"}}
+                },
             onChange: spy
         });
-        let ammoControl = TestUtils.findRenderedComponentWithType(
-            control, AmmoControl);
 
-        let newAmmo = factories.ammunitionFactory({id: 56});
-        ammoControl.handleChange(newAmmo);
+        const control = render(<FirearmControl {...props}/>)
 
-        expect(spy).toBeCalledWith({id: 19, ammo: newAmmo});
+        expect(spy).not.toHaveBeenCalled()
+
+        const elem_arr = await control.findAllByRole('combobox', {busy: false})
+        await user.click(elem_arr[0].querySelector('.rw-picker-caret'));
+
+        let options = await control.findAllByRole('option', {});
+
+        expect(options.length).toEqual(2)
+
+        await user.click(options[1])
+
+        // Check that the control passes the correct value up.
+        expect(spy).toHaveBeenCalledWith({id: 52, ammo: newAmmo})
     });
-
-
 });
