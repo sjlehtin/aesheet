@@ -267,7 +267,6 @@ const baseFirearmFactory = (props) => {
 };
 
 const ammunitionFactory = (props) => {
-    "use strict";
     if (!props) {
         props = {};
     }
@@ -339,7 +338,7 @@ const firearmFactory = function (overrideFields) {
             scope: overrideFields.scope === null ? null : scopeFactory(overrideFields.scope)};
 };
 
-const firearmControlTreeFactory = function (givenProps) {
+function firearmControlPropsFactory(givenProps) {
     if (!givenProps) {
         givenProps = {};
     }
@@ -379,6 +378,18 @@ const firearmControlTreeFactory = function (givenProps) {
     if (givenProps.weapon) {
         weaponProps = Object.assign(weaponProps, givenProps.weapon);
     }
+    let props = {
+        campaign: givenProps.campaign || 3,
+        weapon: firearmFactory(weaponProps),
+        skillHandler: skillHandlerFactory(handlerProps)
+    };
+
+    return Object.assign(givenProps, props);
+}
+
+const firearmControlTreeFactory = function (givenProps) {
+    let props = firearmControlPropsFactory(givenProps);
+
     let promises = [];
 
     let jsonResponse = function (json) {
@@ -393,18 +404,12 @@ const firearmControlTreeFactory = function (givenProps) {
         } else if (url.match(new RegExp("/rest/scopes/campaign/.*/"))) {
             return jsonResponse([]);
         } else
-            {
+        {
             /* Throwing errors here do not cancel the test. */
             fail("this is an unsupported url:" + url);
         }
     });
 
-    let props = {
-        campaign: givenProps.campaign || 3,
-        weapon: firearmFactory(weaponProps),
-        skillHandler: skillHandlerFactory(handlerProps)
-    };
-    props = Object.assign(givenProps, props);
     const table = TestUtils.renderIntoDocument(
         <FirearmControl {...props}/>
     );
@@ -1049,6 +1054,7 @@ module.exports = {
     ammunitionFactory: ammunitionFactory,
     scopeFactory: scopeFactory,
     baseFirearmFactory: baseFirearmFactory,
+    firearmControlPropsFactory: firearmControlPropsFactory,
     firearmFactory: firearmFactory,
     firearmControlTreeFactory: firearmControlTreeFactory,
     weaponTemplateFactory: weaponTemplateFactory,
