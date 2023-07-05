@@ -807,6 +807,81 @@ class Scope(BaseFirearmAddOn):
         return ["firearm", "firearms_using_scope", "firearmaddon_ptr"]
 
 
+class Calibre(models.Model):
+    """
+
+    """
+    name = models.CharField(
+        unique=True,
+        max_length=20,
+        help_text="Ammunition calibre, which should "
+                  "also distinguish between barrel "
+                  "lengths and such.",
+    )
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Ammunition(ExportedModel, BaseDamager):
+    """ """
+
+    calibre = models.ForeignKey(
+        Calibre, blank=True, null=True, on_delete=models.CASCADE
+    )
+    label = models.CharField(
+        max_length=20,
+        help_text="Ammunition caliber, which should also distinguish between "
+                  "barrel lengths and such.",
+    )
+    type = models.CharField(
+        max_length=10, default="P", help_text="Damage type of the ammo."
+    )
+    bullet_type = models.CharField(
+        max_length=20,
+        help_text="Make of the ammo, such as full metal jacket.",
+    )
+
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
+
+    bypass = models.IntegerField(default=0)
+
+    weight = models.DecimalField(
+        decimal_places=3,
+        max_digits=7,
+        help_text="Weight of a single round in grams. Used to calculate "
+                  "recoil.",
+    )
+
+    velocity = models.IntegerField(
+        help_text="Velocity of the bullet at muzzle in meters per second. "
+                  "Used to calculate recoil."
+    )
+
+    @classmethod
+    def dont_export(cls):
+        return ["firearm"]
+
+    def __str__(self):
+        return f"{self.calibre.name} {self.bullet_type} {self.type}"
+
+
+class FirearmAmmunitionType(models.Model):
+    firearm = models.ForeignKey(
+        "BaseFirearm", on_delete=models.CASCADE
+    )
+    short_label = models.CharField(
+        max_length=20,
+        help_text="Matches the respective field in ammunition",
+    )
+    calibre = models.ForeignKey(
+        Calibre, blank=True, null=True, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return f"{self.firearm} {self.calibre.name})"
+
+
 class BaseFirearm(BaseArmament, RangedWeaponMixin):
     """ """
 
@@ -844,27 +919,32 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
         decimal_places=2,
         default=6,
         help_text="ROF modifier for weapon class. Generally from 6-15, "
-        "smaller is better.",
+                  "smaller is better.",
     )
 
     accuracy = models.DecimalField(
         max_digits=4,
         decimal_places=2,
         default=1,
-        help_text="Weapon's inherent accuracy " "modifier. Larger is better.",
+        help_text="Weapon's inherent accuracy modifier. Larger is better.",
     )
     sight = models.IntegerField(
-        default=100, help_text="Weapon's sight modifier in " "millimeters"
+        default=100, help_text="Weapon's sight modifier in millimeters"
     )
     barrel_length = models.IntegerField(
-        default=100, help_text="Weapon's barrel length in " "millimeters"
+        default=100, help_text="Weapon's barrel length in millimeters"
+    )
+
+    ammunition_types = models.ManyToManyField(
+        Calibre, through=FirearmAmmunitionType
     )
 
     def get_ammunition_types(self):
         """
         Return the accepted ammunition types for the firearm.
         """
-        return [ammo.short_label for ammo in self.ammunition_types.all()]
+        # TODO: get rid of this indirection, wasteful.
+        return [ammo.name for ammo in self.ammunition_types.all()]
 
     @classmethod
     def dont_export(cls):
@@ -876,66 +956,8 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
             "range_xl",
             "range_e",
             "firearm",
+            "firearmammunitiontype",
         ]
-
-
-class Ammunition(ExportedModel, BaseDamager):
-    """ """
-
-    label = models.CharField(
-        max_length=20,
-        help_text="Ammunition caliber, which should "
-        "also "
-        "distinguish between barrel lengths "
-        "and such.",
-    )
-    type = models.CharField(
-        max_length=10, default="P", help_text="Damage type of the ammo."
-    )
-    bullet_type = models.CharField(
-        max_length=20,
-        help_text="Make of the ammo, such as full metal " "jacket.",
-    )
-
-    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
-
-    bypass = models.IntegerField(default=0)
-
-    weight = models.DecimalField(
-        decimal_places=3,
-        max_digits=7,
-        help_text="Weight of a single round in grams. Used to calculate "
-        "recoil.",
-    )
-
-    velocity = models.IntegerField(
-        help_text="Velocity of the bullet at muzzle in meters per second.  "
-        "Used to calculate recoil."
-    )
-
-    @classmethod
-    def dont_export(cls):
-        return ["firearm"]
-
-    def __str__(self):
-        return "{label} {type})".format(
-            label=self.label, type=self.bullet_type
-        )
-
-
-class FirearmAmmunitionType(ExportedModel, models.Model):
-    firearm = models.ForeignKey(
-        BaseFirearm, related_name="ammunition_types", on_delete=models.CASCADE
-    )
-    short_label = models.CharField(
-        max_length=20,
-        help_text="Matches the respective field " "in ammunition",
-    )
-
-    def __str__(self):
-        return "{firearm} {label})".format(
-            firearm=self.firearm, label=self.short_label
-        )
 
 
 class Firearm(models.Model):

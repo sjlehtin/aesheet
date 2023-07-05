@@ -539,15 +539,15 @@ class FirearmAmmunitionTypeTestCase(TestCase):
             name="Glock 19", ammunition_types=["9Pb", "9Pb+"])
         self.rifle = factories.BaseFirearmFactory(
             name="Lahti-Saloranta PK/26", ammunition_types=["7.62x53R"])
-        factories.AmmunitionFactory(label="9Pb")
-        factories.AmmunitionFactory(label="9Pb+")
-        factories.AmmunitionFactory(label="7.62x53R")
+        factories.AmmunitionFactory(calibre__name="9Pb")
+        factories.AmmunitionFactory(calibre__name="9Pb+")
+        factories.AmmunitionFactory(calibre__name="7.62x53R")
 
     def test_correct_types_for_pistol(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
             quote(self.pistol.pk)), format='json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 2)
+        assert response.status_code == 200
+        assert len(response.data) == 2
 
     def test_correct_types_for_complex_url(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
@@ -626,7 +626,7 @@ class SheetFirearmTestCase(TestCase):
 
     def test_adding_items(self):
         firearm = factories.BaseFirearmFactory(name="AK-47")
-        ammo = factories.AmmunitionFactory(label="7.62x39")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
 
         response = self.client.post(
                 self.url,
@@ -640,7 +640,7 @@ class SheetFirearmTestCase(TestCase):
         Firearms are sheet specific (TODO: will be renamed to SheetFirearm).
         """
         firearm = factories.BaseFirearmFactory(name="AK-47")
-        ammo = factories.AmmunitionFactory(label="7.62x39")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
 
         fa = factories.FirearmFactory(base=firearm, ammo=ammo)
 
@@ -665,7 +665,7 @@ class SheetFirearmTestCase(TestCase):
 
     def test_changing_ammo(self):
         firearm = factories.FirearmFactory()
-        ammo = factories.AmmunitionFactory(label="7.62x39")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
         self.sheet.firearms.add(firearm)
 
         self.assertNotEqual(models.Firearm.objects.get(pk=firearm.pk).ammo.pk,

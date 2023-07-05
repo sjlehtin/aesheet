@@ -26,29 +26,23 @@ def get_data_rows(results, fields):
     parameters, one row at a time.
     """
     for obj in results:
+
         def get_field_value(field):
             try:
                 value = getattr(obj, field)
             except AttributeError:
                 return ""
 
-            tag = "{model}.{field}".format(model=obj.__class__.__name__,
-                                           field=field)
-            # TODO: ugly special case
-            if tag == "BaseFirearm.ammunition_types":
-                return '|'.join([ammo.short_label
-                                 for ammo in obj.ammunition_types.all()])
-            else:
-                def get_descr(mdl):
-                    if hasattr(mdl, 'name'):
-                        return mdl.name
-                    return str(mdl.pk)
+            def get_descr(mdl):
+                if hasattr(mdl, "name"):
+                    return mdl.name
+                return str(mdl.pk)
 
-                if isinstance(value, django.db.models.Model):
-                    value = get_descr(value)
-                elif isinstance(value, django.db.models.Manager):
-                    value = "|".join([get_descr(val) for val in value.all()])
-                return value
+            if isinstance(value, django.db.models.Model):
+                value = get_descr(value)
+            elif isinstance(value, django.db.models.Manager):
+                value = "|".join([get_descr(val) for val in value.all()])
+            return value
 
         yield [get_field_value(field) for field in fields]
 
@@ -349,12 +343,13 @@ def import_text(data):
 
         if ammunition_types:
             # clear old ammunition types out.
-            mdl.ammunition_types.all().delete()
+            mdl.ammunition_types.clear()
 
             for ammo_type in ammunition_types:
-                sheet.models.FirearmAmmunitionType.objects \
-                    .get_or_create(firearm=mdl,
-                                   short_label=ammo_type)
+                calibre, _ = sheet.models.Calibre.objects.get_or_create(
+                    name=ammo_type
+                )
+                mdl.ammunition_types.add(calibre)
 
         mdl.full_clean()
         mdl.save()

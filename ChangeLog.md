@@ -1,3 +1,11 @@
+## Version 0.11.0 -- 2023-07-05
+
+### Changed
+
+* Use an explicit Caliber model for BaseFirearm instead of just a string type. This simplifies and makes the behavior more standard.
+* Added inline editor for the firearm ammunition types in the admin interface.
+* Compatibility with latest Django versions (current release 4.2).
+
 ## Version 0.10.0 -- 2023-06-21
 
 ### Added

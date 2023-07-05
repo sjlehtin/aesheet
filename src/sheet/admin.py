@@ -27,6 +27,14 @@ class EdgeSkillBonusAdmin(admin.ModelAdmin):
     ordering = ('edge_level__edge__name', 'edge_level__level',)
 
 
+class FirearmAmmunitionTypeInline(admin.TabularInline):
+    model = sm.FirearmAmmunitionType
+
+
+class BaseFirearmAdmin(admin.ModelAdmin):
+    inlines = [FirearmAmmunitionTypeInline]
+
+
 admin.site.register(sm.Armor)
 admin.site.register(sm.ArmorQuality)
 admin.site.register(sm.ArmorTemplate)
@@ -41,8 +49,9 @@ admin.site.register(sm.Sheet)
 admin.site.register(sm.TechLevel)
 admin.site.register(sm.Campaign, CampaignAdmin)
 admin.site.register(sm.MiscellaneousItem)
-admin.site.register(sm.BaseFirearm)
+admin.site.register(sm.BaseFirearm, BaseFirearmAdmin)
 admin.site.register(sm.FirearmAmmunitionType)
+admin.site.register(sm.Calibre)
 admin.site.register(sm.Firearm)
 admin.site.register(sm.FirearmAddOn)
 admin.site.register(sm.Ammunition)

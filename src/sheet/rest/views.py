@@ -34,7 +34,7 @@ class WeaponAmmunitionList(generics.ListAPIView):
             raise Http404("Specified firearm does not exist")
 
         return sheet.models.Ammunition.objects.filter(
-            label__in=weapon.get_ammunition_types())
+            calibre__in=weapon.ammunition_types.all())
 
 
 class SheetViewSet(mixins.RetrieveModelMixin,

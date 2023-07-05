@@ -84,7 +84,7 @@ class BaseFirearmFormTestCase(TestCase):
 
     def test_changing_ammo_type(self):
         firearm = factories.FirearmFactory(base__name="M29 (OICW)",
-                                           ammo__label='5.56Nto',
+                                           ammo__calibre__name='5.56Nto',
                                            ammo__bullet_type='FMJ')
         self.assertEqual(firearm.base.get_ammunition_types(), [u"5.56Nto"])
 

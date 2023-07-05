@@ -350,16 +350,19 @@ class CreateBaseFirearmForm(RequestForm):
     def save(self, commit=True):
         instance = super(CreateBaseFirearmForm, self).save(commit=True)
         if commit:
-            instance.ammunition_types.all().delete()
+            instance.ammunition_types.clear()
             for ammo_type in self.cleaned_data.get('ammo_types'):
+                cal, _ = sheet.models.Calibre.objects.get_or_create(
+                    name=ammo_type)
                 sheet.models.FirearmAmmunitionType.objects.create(
                     firearm=instance,
-                    short_label=ammo_type)
+                    calibre=cal)
         return instance
 
     class Meta:
         model = sheet.models.BaseFirearm
-        fields = '__all__'
+        fields = "__all__"
+        exclude = 'ammunition_types',
 
 
 class CopySheetForm(RequestFormMixin, forms.Form):

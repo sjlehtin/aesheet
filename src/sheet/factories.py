@@ -226,6 +226,12 @@ class SheetFactory(DjangoModelFactory):
                 SheetTransientEffectFactory(sheet=self, effect=effect)
 
 
+class CalibreFactory(DjangoModelFactory):
+    class Meta:
+        model = models.Calibre
+        django_get_or_create = ('name', )
+
+
 class AmmunitionFactory(DjangoModelFactory):
     tech_level = factory.SubFactory(TechLevelFactory)
     tech_level__name = "2K"
@@ -233,12 +239,17 @@ class AmmunitionFactory(DjangoModelFactory):
     weight = 5
     velocity = 600
 
+    calibre = factory.SubFactory(CalibreFactory)
+
+    bullet_type = "FMJ"
+
     class Meta:
         model = models.Ammunition
-        django_get_or_create = ('label', )
 
 
 class FirearmAmmunitionTypeFactory(DjangoModelFactory):
+    calibre = factory.SubFactory(CalibreFactory)
+
     class Meta:
         model = models.FirearmAmmunitionType
 
@@ -267,8 +278,9 @@ class BaseFirearmFactory(DjangoModelFactory):
         if extracted:
             # A list of groups were passed in, use them
             for ammo_type in extracted:
-                FirearmAmmunitionTypeFactory(firearm=self,
-                                             short_label=ammo_type)
+                FirearmAmmunitionTypeFactory(
+                    firearm=self, calibre=CalibreFactory(name=ammo_type)
+                )
 
 
 class FirearmAddOnFactory(DjangoModelFactory):
@@ -293,7 +305,7 @@ class ScopeFactory(DjangoModelFactory):
 
 class FirearmFactory(DjangoModelFactory):
     base = factory.SubFactory(BaseFirearmFactory, name="Glock 19")
-    ammo = factory.SubFactory(AmmunitionFactory, label="9x19+")
+    ammo = factory.SubFactory(AmmunitionFactory, calibre__name="9x19+")
     scope = None
 
     class Meta:
@@ -307,10 +319,10 @@ class FirearmFactory(DjangoModelFactory):
         if extracted:
             for ammo_type in extracted:
                 FirearmAmmunitionTypeFactory(firearm=self.base,
-                                             short_label=ammo_type)
+                                             calibre=CalibreFactory(name=ammo_type))
         else:
             FirearmAmmunitionTypeFactory(firearm=self.base,
-                                         short_label=self.ammo.label)
+                                         calibre=self.ammo.calibre)
 
 
 class ArmorTemplateFactory(DjangoModelFactory):
