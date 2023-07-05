@@ -619,14 +619,19 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_firearms(self):
-        self.sheet.firearms.add(factories.FirearmFactory())
+        self.sheet.firearms.add(factories.FirearmFactory(ammo__calibre__name="45FCK"))
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
-        self.assertIsInstance(response.data[0]['base'], dict)
-        self.assertIsInstance(response.data[0]['ammo'], dict)
+        weapon_data = response.data[0]
+        self.assertIsInstance(weapon_data['base'], dict)
+        self.assertIsInstance(weapon_data['ammo'], dict)
+
+        assert 'calibre' in weapon_data['ammo']
+        assert 'name' in weapon_data['ammo']['calibre']
+        assert weapon_data['ammo']['calibre']['name'] == "45FCK"
 
     def test_adding_items(self):
         firearm = factories.BaseFirearmFactory(name="AK-47")
