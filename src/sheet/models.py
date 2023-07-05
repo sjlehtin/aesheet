@@ -826,12 +826,15 @@ class Calibre(ExportedModel):
     def get_exported_fields(cls):
         return ["name", "id"]
 
+    class Meta:
+        ordering = ['name']
+
 
 class Ammunition(ExportedModel, BaseDamager):
     """ """
 
     calibre = models.ForeignKey(
-        Calibre, blank=True, null=True, on_delete=models.CASCADE
+        Calibre, on_delete=models.CASCADE
     )
     type = models.CharField(
         max_length=10, default="P", help_text="Damage type of the ammo."
@@ -864,13 +867,16 @@ class Ammunition(ExportedModel, BaseDamager):
     def __str__(self):
         return f"{self.calibre.name} {self.bullet_type} {self.type}"
 
+    class Meta:
+        ordering = ['calibre__name', 'bullet_type']
+
 
 class FirearmAmmunitionType(models.Model):
     firearm = models.ForeignKey(
         "BaseFirearm", on_delete=models.CASCADE
     )
     calibre = models.ForeignKey(
-        Calibre, blank=True, null=True, on_delete=models.CASCADE
+        Calibre, on_delete=models.CASCADE
     )
 
     def __str__(self):
@@ -1243,7 +1249,7 @@ class RangedWeapon(BaseWeapon):
 class ArmorTemplate(ExportedModel):
     """ """
 
-    name = models.CharField(max_length=256, primary_key=True)
+    name = models.CharField(max_length=256, unique=True, primary_key=True)
     description = models.TextField(blank=True)
 
     tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
@@ -1374,6 +1380,9 @@ class ArmorTemplate(ExportedModel):
 
     def __str__(self):
         return "%s" % (self.name)
+
+    class Meta:
+        ordering = ['name']
 
 
 class ArmorQuality(ExportedModel):
