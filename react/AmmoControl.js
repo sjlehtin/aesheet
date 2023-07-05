@@ -12,33 +12,20 @@ class AmmoControl extends React.Component {
 
         this.state = {
             busy: false,
-            editing: false,
-            open: false,
             ammoChoices: [],
             selectedAmmo: undefined
         };
     }
 
-    componentDidMount() {
-        this.updateAmmoSelection();
+    async componentDidMount() {
+        await this.updateAmmoSelection();
     }
 
-    updateAmmoSelection() {
+    async updateAmmoSelection() {
         if (this.props.url) {
-            this.setState({busy: true});
-            return rest.getData(this.props.url).then(json => {
-                this.setState({busy: false, ammoChoices: json});
-            }).catch(e => {
-                console.log("got error", e);
-                this.setState({busy: false});
-            });
-        }
-    }
-
-    handleKeyDown(e) {
-        if (e.keyCode === 27) {
-            /* Escape. */
-            this.setState({open: false});
+            await this.setState({busy: true});
+            let json = await rest.getData(this.props.url)
+            await this.setState({busy: false, ammoChoices: json})
         }
     }
 
@@ -51,19 +38,15 @@ class AmmoControl extends React.Component {
     }
 
     render() {
-        let content =
-                <DropdownList open={this.state.open}
-                              value={this.props.ammo}
-                              busy={this.state.busy}
-                              textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
-                              onChange={(value) => this.handleChange(value)}
-                              onToggle={(isOpen) => this.setState({open: isOpen})}
-                              filter="contains"
-                              data={this.state.ammoChoices}
-                />;
-        return <div onKeyDown={this.handleKeyDown.bind(this)}>
-            {content}
-        </div>;
+        return <DropdownList value={this.props.ammo}
+                           busy={this.state.busy}
+                           textField={(obj) => {
+                               return AddFirearmControl.formatAmmo(obj);
+                           }}
+                           onChange={(value) => this.handleChange(value)}
+                           filter="contains"
+                           data={this.state.ammoChoices}
+            />;
     }
 }
 
