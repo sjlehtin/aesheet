@@ -263,8 +263,11 @@ def import_text(data):
             elif isinstance(field, django.db.models.ForeignKey):
                 if value:
                     try:
-                        value = \
-                            field.remote_field.model.objects.get(pk=value)
+                        if isinstance(value, int):
+                            value = field.remote_field.model.objects.get(id=value)
+                        else:
+                            value = field.remote_field.model.objects.get(
+                                name=value)
                     except field.remote_field.model.DoesNotExist:
                         raise ValueError("No matching %s with name %s." % (
                             field.remote_field.model._meta.object_name,
