@@ -13,7 +13,7 @@ import sheet.factories as factories
 import django.db
 from django.conf import settings
 import csv
-from io import BytesIO, StringIO
+from io import StringIO
 import sys
 
 logger = logging.getLogger(__name__)
@@ -242,7 +242,7 @@ class FirearmImportExportTestcase(TestCase):
 
     ammo_csv_data = u"""\
 "Ammunition",,,,,,,,,,
-"id","num_dice","dice","extra_damage","leth","plus_leth","label","bullet_type","tech_level","weight","velocity","bypass"
+"id","num_dice","dice","extra_damage","leth","plus_leth","calibre","bullet_type","tech_level","weight","velocity","bypass"
 ,1,6,1,6,2,"9Pb+","FMJ","2K",7.5,400,0
 
 """.encode('utf-8')
@@ -250,11 +250,7 @@ class FirearmImportExportTestcase(TestCase):
     def setUp(self):
         factories.TechLevelFactory(name="2K")
         factories.SkillFactory(name="Handguns", tech_level__name="2K")
-
-        if sys.version_info >= (3,):
-            self.stream_type = StringIO
-        else:
-            self.stream_type = BytesIO
+        factories.CalibreFactory(name="9Pb+")
 
     def test_import_firearms(self):
         marshal.import_text(self.firearm_csv_data)
@@ -267,7 +263,7 @@ class FirearmImportExportTestcase(TestCase):
         factories.BaseFirearmFactory(name="Glock 19", ammunition_types=['9Pb', '9Pb+'])
         csv_data = marshal.csv_export(sheet.models.BaseFirearm)
 
-        reader = csv.reader(self.stream_type(csv_data))
+        reader = csv.reader(StringIO(csv_data))
         data_type = next(reader)
         self.assertEqual(data_type[0], "BaseFirearm")
 
@@ -282,21 +278,21 @@ class FirearmImportExportTestcase(TestCase):
 
     def test_import_ammunition(self):
         marshal.import_text(self.ammo_csv_data)
-        ammo = sheet.models.Ammunition.objects.filter(label='9Pb+')
-        self.assertEqual(ammo[0].label, "9Pb+")
+        ammo = sheet.models.Ammunition.objects.filter(calibre__name='9Pb+')
+        self.assertEqual(ammo[0].calibre.name, "9Pb+")
 
     def test_export_ammunition(self):
         marshal.import_text(self.ammo_csv_data)
 
         csv_data = marshal.csv_export(sheet.models.Ammunition)
-        reader = csv.reader(self.stream_type(csv_data))
+        reader = csv.reader(StringIO(csv_data))
         data_type = next(reader)
         self.assertEqual(data_type[0], "Ammunition")
 
         header = next(reader)
         data_row = next(reader)
 
-        idx = header.index("label")
+        idx = header.index("calibre")
         self.assertGreaterEqual(idx, 0, msg="Required column should be found")
         # Correct ammunition_types should be available.
         self.assertEqual(data_row[idx], "9Pb+")

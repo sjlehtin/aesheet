@@ -231,29 +231,42 @@ class SheetCopyTestCase(TestCase):
             character__name="John Doe",
             character__campaign__name="3K",
             character__owner=self.original_owner,
-
             armor=factories.ArmorFactory(base__name="Hard Leather"),
             helm=factories.HelmFactory(base__name="Leather hood"),
-            weapons=[factories.WeaponFactory(base__name="Short sword"),
-                     factories.WeaponFactory(base__name="Baton")],
+            weapons=[
+                factories.WeaponFactory(base__name="Short sword"),
+                factories.WeaponFactory(base__name="Baton"),
+            ],
             ranged_weapons=[
                 factories.RangedWeaponFactory(base__name="Short bow"),
-                factories.RangedWeaponFactory(base__name="Javelin")],
-            firearms=[factories.FirearmFactory(base__name="M29 (OICW)",
-                                           ammo__label='5.56Nto',
-                                           ammo__bullet_type='FMJ'),
-                      factories.FirearmFactory(base__name="RK95",
-                                           ammo__label='5.56Nto',
-                                           ammo__bullet_type='FMJ')],
+                factories.RangedWeaponFactory(base__name="Javelin"),
+            ],
+            firearms=[
+                factories.FirearmFactory(
+                    base__name="M29 (OICW)",
+                    ammo__calibre__name="5.56Nto",
+                    ammo__bullet_type="FMJ",
+                ),
+                factories.FirearmFactory(
+                    base__name="RK95", ammo__calibre__name="5.56Nto",
+                    ammo__bullet_type="FMJ"
+                ),
+            ],
             transient_effects=[
                 factories.TransientEffectFactory(name="Bless of templars"),
-                factories.TransientEffectFactory(name="Courage of ancients")],
-            character__skills=[("Shooting", 3),
-                               ("Heckling", 2),
-                               ("Drunken boxing", 4)],
-            character__edges=[("Toughness", 3),
-                               ("Athletic ability", 2),
-                               ("Bad eyesight", 4)])
+                factories.TransientEffectFactory(name="Courage of ancients"),
+            ],
+            character__skills=[
+                ("Shooting", 3),
+                ("Heckling", 2),
+                ("Drunken boxing", 4),
+            ],
+            character__edges=[
+                ("Toughness", 3),
+                ("Athletic ability", 2),
+                ("Bad eyesight", 4),
+            ],
+        )
         self.original_character = self.original_sheet.character
         factories.SheetMiscellaneousItemFactory(item__name="Geiger counter",
                                                 sheet=self.original_sheet)
