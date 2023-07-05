@@ -12,29 +12,20 @@ class ScopeControl extends React.Component {
         this.state = {
             busy: false,
             editing: false,
-            open: false,
             scopeChoices: [],
             selectedScope: undefined
         };
     }
 
-    componentDidMount() {
-        this.updateScopeSelection();
+    async componentDidMount() {
+        await this.updateScopeSelection();
     }
 
-    updateScopeSelection() {
-        this.setState({busy: true});
-        return rest.getData(this.props.url).then(json => {
-            this.setState({busy: false, scopeChoices: json});
-        }).catch(e => {
-                this.setState({busy: false});
-            });
-    }
-
-    handleKeyDown(e) {
-        if (e.keyCode === 27) {
-            /* Escape. */
-            this.setState({open: false});
+    async updateScopeSelection() {
+        if (this.props.url) {
+            await this.setState({busy: true})
+            let json = await rest.getData(this.props.url)
+            await this.setState({busy: false, scopeChoices: json})
         }
     }
 
@@ -47,21 +38,16 @@ class ScopeControl extends React.Component {
     }
 
     render() {
-        let content =
-                <DropdownList open={this.state.open}
-                              value={this.props.scope}
-                              busy={this.state.busy}
-                              textField={(obj) => {
-                                  return obj ? obj.name : "";}}
-                              onChange={(value) => this.handleChange(value)}
-                              onToggle={(isOpen) => this.setState({open: isOpen})}
-                              filter="contains"
-                              data={this.state.scopeChoices}
+        return <DropdownList value={this.props.scope}
+                             busy={this.state.busy}
+                             textField={(obj) => {
+                                 return obj ? obj.name : "";
+                             }}
+                             onChange={(value) => this.handleChange(value)}
+                             filter="contains"
+                             data={this.state.scopeChoices}
 
-                />;
-        return <div onKeyDown={this.handleKeyDown.bind(this)}>
-            {content}
-        </div>;
+        />
     }
 }
 
