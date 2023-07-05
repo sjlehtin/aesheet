@@ -1,10 +1,16 @@
 ## Version 0.11.0 -- 2023-07-05
 
+### Added
+
+* Compatibility with latest Django versions (current release 4.2).
+* Added inline editor for the firearm ammunition types in the admin interface.
+
 ### Changed
 
 * Use an explicit Caliber model for BaseFirearm instead of just a string type. This simplifies and makes the behavior more standard.
-* Added inline editor for the firearm ammunition types in the admin interface.
-* Compatibility with latest Django versions (current release 4.2).
+* Tweaked admin interface filters to make objects easier to browse.
+* `react-icons/go` (Github Octicons) used instead of obsoleted `react-octicon`
+* Updated rest of the `npm` packages. There should be no more outdated dependencies.
 
 ## Version 0.10.0 -- 2023-06-21
 
