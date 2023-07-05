@@ -9,12 +9,12 @@ const util = require('./sheet-util');
 import {Col, Row, Button, Table} from 'react-bootstrap';
 
 /*
- * Firearms are sheet specific.  TODO: Firearms can contain add-ons, most
- * notably scopes.  Add-ons affect weapon range, to-hit and target initiative,
+ * Firearms are sheet specific. Firearms can contain add-ons, most
+ * notably scopes. Add-ons affect weapon range, to-hit and target initiative,
  * among other factors.
  *
- * Firearm can have a single scope.  There may be other add-ons, and the sheet
- * will not restrict the add-ons in any way, use common sense on what add-ons
+ * A firearm can have a single scope. There may be other add-ons, and the sheet
+ * will not restrict the add-ons in any way. Use common sense on what add-ons
  * you put to a firearm (no sense in, e.g., adding both bipod and a tripod).
  *
  * The add-ons may affect the user's senses when using the firearm, notably
