@@ -2,9 +2,7 @@ import React, {useId} from 'react';
 
 import PropTypes from 'prop-types';
 
-const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
-import Octicon from 'react-octicon';
 
 class EdgeRow extends React.Component {
     constructor(props) {

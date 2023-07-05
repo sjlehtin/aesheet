@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Octicon from 'react-octicon';
+import {GoArrowUp, GoArrowDown, GoX} from 'react-icons/go';
 
 /*
  * This component handles display of a skill, level, checks.  If the
@@ -92,7 +92,7 @@ class SkillRow extends React.Component {
             remove = <span style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
                     onClick={(e) => {this.props.onCharacterSkillRemove(
                       this.props.characterSkill)}}
-                    ><Octicon name="x" /></span>;
+                    ><GoX /></span>;
         } else {
             remove = '';
         }
@@ -102,14 +102,14 @@ class SkillRow extends React.Component {
             increaseButton = <span style={{color: "green", position: "absolute", left: 10, bottom: 1, cursor: "pointer"}} ref={(c) => this._increaseButton = c}
                                          onClick={() => this.handleIncrease()}
 
-            ><Octicon name="arrow-up" /></span>;
+            ><GoArrowUp /></span>;
         } else {
             increaseButton = '';
         }
         if (this.canDecrease()) {
             decreaseButton = <span style={{color: "red", position: "absolute", left: 22, bottom: -3, cursor: "pointer"}} ref={(c) => this._decreaseButton = c}
                                          onClick={() => this.handleDecrease()}
-            ><Octicon name="arrow-down" /></span>;
+            ><GoArrowDown /></span>;
         } else {
             decreaseButton = '';
         }

@@ -32,7 +32,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { Button, Table, Card } from 'react-bootstrap';
-import Octicon from 'react-octicon'
+import {GoSync} from 'react-icons/go'
 
 import SkillHandler from './SkillHandler';
 import WoundRow from './WoundRow';
@@ -110,7 +110,7 @@ class DamageControl extends React.Component {
 
         var loading = '';
         if (this.state.isBusy) {
-            loading = <Octicon spin name="sync"/>;
+            loading = <GoSync />;
         }
         var damage = '';
         if (this.props.character.stamina_damage) {

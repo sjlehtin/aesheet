@@ -1,5 +1,5 @@
 import React from 'react';
-import Octicon from 'react-octicon'
+import {GoSync} from 'react-icons/go'
 
 class Loading extends React.Component {
     render () {
@@ -9,7 +9,7 @@ class Loading extends React.Component {
         } else {
             content = 'Loading...';
         }
-        return <div><Octicon id={"loading"} mega spin name="sync"/>{content}</div>;
+        return <div><GoSync id={"loading"} mega spin />{content}</div>;
     }
 }
 

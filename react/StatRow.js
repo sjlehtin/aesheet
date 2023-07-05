@@ -1,5 +1,5 @@
 import React from 'react';
-import Octicon from 'react-octicon';
+import {GoArrowUp, GoArrowDown} from 'react-icons/go';
 import PropTypes from 'prop-types';
 
 const rest = require('./sheet-rest');
@@ -138,11 +138,11 @@ class StatRow extends React.Component {
                         <span style={incStyle}
                               ref={(c) => this._increaseButton = c}
                               onClick={(e) => {return this.handleIncrease(e)}}
-                        ><Octicon name="arrow-up" /></span>
+                        ><GoArrowUp /></span>
                         <span style={decStyle}
                               ref={(c) => this._decreaseButton = c}
                               onClick={(e) => {return this.handleDecrease(e)}}
-                        ><Octicon name="arrow-down" /></span>
+                        ><GoArrowDown /></span>
                     </div>
                 </td>
             </tr>)

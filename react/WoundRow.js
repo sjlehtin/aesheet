@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-import Octicon from 'react-octicon'
+import {GoArrowUp, GoArrowDown} from 'react-icons/go'
 import {Button, FormControl} from 'react-bootstrap';
 
 const util = require('./sheet-util');
@@ -67,7 +67,7 @@ class WoundRow extends React.Component {
         worsenButton = <span style={{color: "red", position: "absolute", left: 10, bottom: 1, cursor: "pointer"}}
                                ref={(c) => this._worsenButton = c}
                                onClick={() => this.handleWorsen()}>
-            <Octicon name="arrow-up" /></span>;
+            <GoArrowUp /></span>;
 
         if (this.props.wound.healed < this.props.wound.damage) {
             decreaseButton = <span style={{
@@ -79,7 +79,7 @@ class WoundRow extends React.Component {
             }}
                                    ref={(c) => this._healButton = c}
                                    onClick={() => this.handleHeal()}>
-            <Octicon name="arrow-down"/></span>;
+            <GoArrowDown /></span>;
         }
 
         var effectField = this.props.wound.effect;

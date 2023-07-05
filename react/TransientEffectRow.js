@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Octicon from 'react-octicon';
+import {GoX} from 'react-icons/go';
 
 const util = require('./sheet-util');
 
@@ -53,7 +53,7 @@ class TransientEffectRow extends React.Component {
             paddingRight: 5}}
                   ref={(c) => this._removeButton = c }
                   onClick={(e) => {this.props.onRemove(this.props.effect)}}
-            ><Octicon name="x" /></span>
+            ><GoX /></span>
                 </td>
         </tr>;
     }

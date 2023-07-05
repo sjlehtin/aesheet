@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const util = require('./sheet-util');
-
-import Octicon from 'react-octicon';
+import {GoX} from 'react-icons/go';
 
 class MiscellaneousItemRow extends React.Component {
     constructor(props) {
@@ -22,7 +20,7 @@ class MiscellaneousItemRow extends React.Component {
             paddingRight: 5}}
                   ref={(c) => this._removeButton = c }
                   onClick={(e) => {this.props.onRemove(this.props.item)}}
-            ><Octicon name="x" /></span>
+            ><GoX /></span>
                 </td>
         </tr>;
     }
