@@ -23,21 +23,31 @@ class SkillAdmin(admin.ModelAdmin):
 
 
 class EdgeSkillBonusAdmin(admin.ModelAdmin):
-    list_filter = ('edge_level',)
+    list_filter = ('edge_level__level',)
     ordering = ('edge_level__edge__name', 'edge_level__level',)
 
 
 class FirearmAmmunitionTypeInline(admin.TabularInline):
     model = sm.FirearmAmmunitionType
+    ordering = ('calibre__name', )
 
 
 class BaseFirearmAdmin(admin.ModelAdmin):
     inlines = [FirearmAmmunitionTypeInline]
+    list_filter = ('tech_level',)
 
 
-admin.site.register(sm.Armor)
+class ArmorTemplateAdmin(admin.ModelAdmin):
+    list_filter = ('tech_level',)
+
+
+class ArmorAdmin(admin.ModelAdmin):
+    list_filter = ('base__tech_level',)
+
+
+admin.site.register(sm.Armor, ArmorAdmin)
 admin.site.register(sm.ArmorQuality)
-admin.site.register(sm.ArmorTemplate)
+admin.site.register(sm.ArmorTemplate, ArmorTemplateAdmin)
 admin.site.register(sm.ArmorSpecialQuality)
 admin.site.register(sm.Character)
 admin.site.register(sm.CharacterEdge)
