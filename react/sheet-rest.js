@@ -3,7 +3,6 @@ require('whatwg-fetch');
 import Cookies from 'universal-cookie';
 
 export function patch(url, data, method) {
-    "use strict";
     if (method === undefined) {
         method = "PATCH";
     }
@@ -45,7 +44,6 @@ export function patch(url, data, method) {
 }
 
 export function getData(url) {
-    "use strict";
     return new Promise(function (resolved, rejected) {
         fetch(url, {
             headers: {
@@ -65,16 +63,13 @@ export function getData(url) {
 }
 
 export function post(url, data) {
-    "use strict";
     return patch(url, data, "POST");
 }
 
 export function put(url, data) {
-    "use strict";
     return patch(url, data, "PUT");
 }
 
 export function del(url, data) {
-    "use strict";
     return patch(url, data, "DELETE");
 }

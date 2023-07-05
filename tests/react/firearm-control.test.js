@@ -11,7 +11,6 @@ const factories = require('./factories');
 jest.mock('sheet-rest');
 
 describe('FirearmControl', () => {
-    "use strict";
 
     it("can calculate single fire skill checks", () => {
         const firearm = factories.firearmControlTreeFactory();
