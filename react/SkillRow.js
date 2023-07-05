@@ -124,7 +124,7 @@ class SkillRow extends React.Component {
             skillStyle.color = 'red';
         }
         return <tr style={skillStyle} title={missing}>
-            <td><span style={{paddingLeft: indent}}>{
+            <td><span style={Object.assign(skillStyle, {paddingLeft: indent})}>{
               this.props.skillName}</span><span style={{position: "relative"}}>{remove}</span></td>
             <td><span>{this.skillLevel()}</span><span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
