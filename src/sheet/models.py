@@ -807,7 +807,7 @@ class Scope(BaseFirearmAddOn):
         return ["firearm", "firearms_using_scope", "firearmaddon_ptr"]
 
 
-class Calibre(models.Model):
+class Calibre(ExportedModel):
     """
 
     """
@@ -821,6 +821,10 @@ class Calibre(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    @classmethod
+    def get_exported_fields(cls):
+        return ["name", "id"]
 
 
 class Ammunition(ExportedModel, BaseDamager):
