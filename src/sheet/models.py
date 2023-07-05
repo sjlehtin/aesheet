@@ -829,11 +829,6 @@ class Ammunition(ExportedModel, BaseDamager):
     calibre = models.ForeignKey(
         Calibre, blank=True, null=True, on_delete=models.CASCADE
     )
-    label = models.CharField(
-        max_length=20,
-        help_text="Ammunition caliber, which should also distinguish between "
-                  "barrel lengths and such.",
-    )
     type = models.CharField(
         max_length=10, default="P", help_text="Damage type of the ammo."
     )
@@ -869,10 +864,6 @@ class Ammunition(ExportedModel, BaseDamager):
 class FirearmAmmunitionType(models.Model):
     firearm = models.ForeignKey(
         "BaseFirearm", on_delete=models.CASCADE
-    )
-    short_label = models.CharField(
-        max_length=20,
-        help_text="Matches the respective field in ammunition",
     )
     calibre = models.ForeignKey(
         Calibre, blank=True, null=True, on_delete=models.CASCADE
