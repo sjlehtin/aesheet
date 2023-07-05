@@ -1,77 +1,112 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 import AmmoControl from 'AmmoControl';
 
 const factories = require('./factories');
 
-jest.mock('sheet-rest');
-const rest = require('sheet-rest');
+import { render, screen } from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
+
+const server = setupServer(
+)
 
 describe('AmmoControl', () => {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    const getAmmoControl = (props) => {
+    const renderAmmoControl = (props) => {
         if (!props) {
             props = {};
         }
         props.ammo = factories.ammunitionFactory(props.ammo);
-        return  TestUtils.renderIntoDocument(<AmmoControl {...props}/>);
+        return render(<AmmoControl {...props}/>);
     };
 
-    it('renders the ammo even without a list', () => {
-        rest.getData.mockReturnValue(Promise.resolve([]));
-        const control = getAmmoControl({ammo: {label: 'Skubadoo', bullet_type: "AP-HP"}});
-        expect(ReactDOM.findDOMNode(control).textContent).toContain('Skubadoo');
-        expect(ReactDOM.findDOMNode(control).textContent).toContain('AP-HP');
+    it('renders the ammo even without a list', async () => {
+        renderAmmoControl({ammo: {calibre: {name: 'Skubadoo'}, bullet_type: "AP-HP"}});
+
+        expect(await screen.findByText(/Skubadoo/)).toBeInTheDocument()
+        expect(await screen.findByText(/AP-HP/)).toBeInTheDocument()
     });
 
-    it('loads the ammo selection on mount', () => {
+    it('loads the ammo selection on mount', async () => {
 
         let ammo = factories.ammunitionFactory();
-        const getPromise = Promise.resolve([ammo]);
-        rest.getData.mockClear();
-        rest.getData.mockReturnValue(getPromise);
 
-        const control = getAmmoControl({ammo: {label: 'Skubadoo', bullet_type: "AP-HP"},
-                                        url: "/rest/foo"});
+        function defer() {
+            var res, rej;
 
-        expect(control.state.busy).toBe(true);
+            var promise = new Promise((resolve, reject) => {
+                res = resolve;
+                rej = reject;
+            });
 
-        expect(rest.getData).toBeCalledWith('/rest/foo');
+            promise.resolve = res;
+            promise.reject = rej;
 
-        return getPromise.then(() => {
-            expect(control.state.busy).toBe(false);
-            expect(control.state.ammoChoices).toEqual([ammo]);
-        });
+            return promise;
+        }
+
+        let deferred = defer();
+        server.use(
+            rest.get("http://localhost/rest/foo/", async (req, res, ctx) => {
+                await deferred
+                return res(ctx.json([ammo]))
+            })
+        )
+
+        renderAmmoControl({ammo: {calibre: {name: 'Skubadoo'}, bullet_type: "AP-HP"},
+                                        url: "/rest/foo/"});
+
+        // Combobox should be busy until the API call to the server has been completed.
+        expect(screen.queryByRole('combobox', {busy: false})).toBeNull()
+        screen.getByRole('combobox', {busy: true})
+
+        deferred.resolve();
+
+        await screen.findByRole('combobox', {busy: false})
+
+        // As no options have been provided, there should be none in the DOM.
+        expect(screen.queryAllByRole('option', {}).length).toEqual(0)
     });
 
-    it('allows changing the ammo', () => {
-        let ammo = factories.ammunitionFactory({id: 42});
-        let newAmmo = factories.ammunitionFactory({id: 12});
-        const getPromise = Promise.resolve([
-            newAmmo,
-            Object.assign({}, ammo), // Ensure distinct, but equal otherwise, object.
-            factories.ammunitionFactory({id: 50})]);
+    it('allows changing the ammo', async () => {
 
-        rest.getData.mockClear();
-        rest.getData.mockReturnValue(getPromise);
+        const user = userEvent.setup()
 
-        let spy = jest.fn();
-        let updatePromise = Promise.resolve({});
-        spy.mockReturnValue(updatePromise);
+        const newAmmo = factories.ammunitionFactory({id: 12, bullet_type: "JHP"});
 
-        const control = getAmmoControl({ammo: ammo, url: "/rest/foo",
-            onChange: spy });
+        server.use(
+            rest.get("http://localhost/rest/foo/", async (req, res, ctx) => {
+                return res(ctx.json([newAmmo,
+                    factories.ammunitionFactory({id: 50, bullet_type: "AP-HC"})]))
+            })
+        )
 
-        return getPromise.then(() => {
-            control.handleChange(newAmmo);
+        let spy = jest.fn().mockResolvedValue({});
 
-            expect(spy).toBeCalledWith(newAmmo);
-
-            return updatePromise.then(() => {
-                expect(control.state.editing).toEqual(false);
-            });
+        const control = renderAmmoControl({
+            ammo: factories.ammunitionFactory({id: 42}),
+            url: "/rest/foo/",
+            onChange: spy
         });
+
+        const el = await control.findByRole('combobox', {busy: false})
+
+        expect(spy).not.toHaveBeenCalled()
+
+        // Bit silly that clicking on the control element itself is not enough to open the control.
+        await user.click(el.querySelector('.rw-picker-caret'));
+
+        let options = await control.findAllByRole('option', {});
+
+        expect(options.length).toEqual(2)
+
+        await user.click(options[0])
+
+        // Check that the control passes the correct value up.
+        expect(spy).toHaveBeenCalledWith(newAmmo)
     });
 });
