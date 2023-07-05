@@ -22,7 +22,7 @@ describe('FirearmControl -- ScopeControl', () => {
         let scopeControl = TestUtils.findRenderedComponentWithType(
             control, ScopeControl);
         expect(scopeControl).toBeDefined();
-        expect(ReactDOM.findDOMNode(scopeControl).textContent).toEqual("");
+        expect(ReactDOM.findDOMNode(scopeControl).textContent).toEqual("Add a scope");
     });
 
     it('shows a disabled remove button without a scope', () => {
