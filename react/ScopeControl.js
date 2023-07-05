@@ -45,6 +45,7 @@ class ScopeControl extends React.Component {
                              }}
                              onChange={(value) => this.handleChange(value)}
                              filter="contains"
+                             placeholder={"Add a scope"}
                              data={this.state.scopeChoices}
 
         />
