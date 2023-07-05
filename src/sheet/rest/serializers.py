@@ -2,7 +2,15 @@ from rest_framework import serializers
 import sheet.models
 
 
+class CalibreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Calibre
+        fields = "__all__"
+
+
 class AmmunitionSerializer(serializers.ModelSerializer):
+    calibre = CalibreSerializer()
+
     class Meta:
         model = sheet.models.Ammunition
         fields = "__all__"
@@ -10,6 +18,7 @@ class AmmunitionSerializer(serializers.ModelSerializer):
 
 class SheetSerializer(serializers.ModelSerializer):
     owner = serializers.CharField(source='owner.username', read_only=True)
+
     class Meta:
         model = sheet.models.Sheet
         fields = "__all__"
@@ -40,6 +49,7 @@ class SkillSerializer(serializers.ModelSerializer):
                                          source='get_minimum_level')
     max_level = serializers.IntegerField(read_only=True,
                                          source='get_maximum_level')
+
     class Meta:
         model = sheet.models.Skill
         fields = "__all__"

@@ -548,6 +548,10 @@ class FirearmAmmunitionTypeTestCase(TestCase):
             quote(self.pistol.pk)), format='json')
         assert response.status_code == 200
         assert len(response.data) == 2
+        ammo = response.data[0]
+        assert "calibre" in ammo
+        assert "name" in ammo["calibre"]
+        assert ammo["calibre"]["name"] == "9Pb"
 
     def test_correct_types_for_complex_url(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
