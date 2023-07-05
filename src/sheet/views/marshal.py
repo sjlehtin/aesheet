@@ -82,8 +82,7 @@ def update_id_sequence(model_class):
 
     # TODO: this is broken with Django >= 2.2
     if (settings.DATABASES['default']['ENGINE'] ==
-            "django.db.backends.postgresql_psycopg2"):
-
+            "django.db.backends.postgresql"):
         try:
             if model_class._meta.get_field('id'):
                 # The operation should only be performed for models with a
@@ -98,7 +97,7 @@ def update_id_sequence(model_class):
                                          (SELECT MAX(id) FROM {table}));
                                          """.format(
                     table=model_class._meta.db_table))
-        except django.db.models.FieldDoesNotExist:
+        except django.core.exceptions.FieldDoesNotExist:
             pass
 
 
