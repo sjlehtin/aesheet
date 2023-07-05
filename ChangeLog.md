@@ -1,9 +1,10 @@
-## Version 0.11.0 -- 2023-07-05
+## Version 0.11.0 -- 2023-07-06
 
 ### Added
 
 * Compatibility with latest Django versions (current release 4.2).
 * Added inline editor for the firearm ammunition types in the admin interface.
+* Highlight skills missing pre-requisites in the skill list more prominently.
 
 ### Changed
 
