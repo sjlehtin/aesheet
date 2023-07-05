@@ -20,4 +20,18 @@ class TableWrapper extends React.Component {
     }
 }
 
-export {getAllArgumentsByPosition, TableWrapper};
+function defer() {
+    var res, rej;
+
+    var promise = new Promise((resolve, reject) => {
+        res = resolve;
+        rej = reject;
+    });
+
+    promise.resolve = res;
+    promise.reject = rej;
+
+    return promise;
+}
+
+export {getAllArgumentsByPosition, TableWrapper, defer};

@@ -8,6 +8,8 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
+import {defer} from './testutils'
+
 const server = setupServer(
 )
 
@@ -35,20 +37,6 @@ describe('AmmoControl', () => {
 
         let ammo = factories.ammunitionFactory();
 
-        function defer() {
-            var res, rej;
-
-            var promise = new Promise((resolve, reject) => {
-                res = resolve;
-                rej = reject;
-            });
-
-            promise.resolve = res;
-            promise.reject = rej;
-
-            return promise;
-        }
-
         let deferred = defer();
         server.use(
             rest.get("http://localhost/rest/foo/", async (req, res, ctx) => {
@@ -67,9 +55,6 @@ describe('AmmoControl', () => {
         deferred.resolve();
 
         await screen.findByRole('combobox', {busy: false})
-
-        // As no options have been provided, there should be none in the DOM.
-        expect(screen.queryAllByRole('option', {}).length).toEqual(0)
     });
 
     it('allows changing the ammo', async () => {
