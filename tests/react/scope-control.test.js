@@ -1,77 +1,100 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 import ScopeControl from 'ScopeControl';
 
 const factories = require('./factories');
 
-jest.mock('sheet-rest');
-const rest = require('sheet-rest');
+import { render, screen } from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
+
+import {defer} from './testutils'
+
+const server = setupServer(
+)
 
 describe('ScopeControl', () => {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    const getScopeControl = (props) => {
+    const renderScopeControl = (props) => {
         if (!props) {
             props = {};
         }
         props.scope = factories.scopeFactory(props.scope);
-        return TestUtils.renderIntoDocument(<ScopeControl {...props}/>);
+        return render(<ScopeControl {...props}/>);
     };
 
-    it('renders the scope even without a list', () => {
-        rest.getData.mockReturnValue(Promise.resolve([]));
-        const control = getScopeControl({scope: {name: 'Skubadoo', sight: 700}});
-        expect(ReactDOM.findDOMNode(control).textContent).toContain('Skubadoo');
+    it('renders the scope even without a list', async () => {
+        const control = renderScopeControl({scope: {name: 'Skubadoo', sight: 700}});
+
+        expect(await screen.findByText(/Skubadoo/)).toBeInTheDocument()
     });
 
-    it('loads the scope selection on mount', () => {
+    it('loads the scope selection on mount', async () => {
 
-        let scope = factories.scopeFactory();
-        const getPromise = Promise.resolve([scope]);
-        rest.getData.mockClear();
-        rest.getData.mockReturnValue(getPromise);
+        let scope = factories.scopeFactory()
 
-        const control = getScopeControl({
+        let deferred = defer()
+
+        server.use(
+            rest.get("http://localhost/rest/foo/", async (req, res, ctx) => {
+                await deferred
+                return res(ctx.json([scope]))
+            })
+        )
+
+        const control = renderScopeControl({
             scope: {name: 'Skubadoo', sight: 700},
-            url: "/rest/foo"});
+            url: "/rest/foo/"});
 
-        expect(control.state.busy).toBe(true);
+        // Combobox should be busy until the API call to the server has been completed.
+        expect(screen.queryByRole('combobox', {busy: false})).toBeNull()
+        screen.getByRole('combobox', {busy: true})
 
-        expect(rest.getData).toBeCalledWith('/rest/foo');
+        deferred.resolve();
 
-        return getPromise.then(() => {
-            expect(control.state.busy).toBe(false);
-            expect(control.state.scopeChoices).toEqual([scope]);
-        });
+        await screen.findByRole('combobox', {busy: false})
     });
 
-    it('allows changing the scope', () => {
+    it('allows changing the scope', async () => {
+
+        const user = userEvent.setup()
+
         let scope = factories.scopeFactory({id: 42});
         let newScope = factories.scopeFactory({id: 12});
-        const getPromise = Promise.resolve([
-            newScope,
-            Object.assign({}, scope), // Ensure distinct, but equal otherwise, object.
-            factories.scopeFactory({id: 50})]);
 
-        rest.getData.mockClear();
-        rest.getData.mockReturnValue(getPromise);
+        server.use(
+            rest.get("http://localhost/rest/foo/", async (req, res, ctx) => {
+                return res(ctx.json([
+                    newScope,
+                    Object.assign({}, scope), // Ensure distinct, but equal otherwise, object.
+                    factories.scopeFactory({id: 50})]))
+            })
+        )
 
-        let spy = jest.fn();
-        let updatePromise = Promise.resolve({});
-        spy.mockReturnValue(updatePromise);
 
-        const control = getScopeControl({scope: scope, url: "/rest/foo",
-            onChange: spy });
+        let spy = jest.fn().mockResolvedValue({});
 
-        return getPromise.then(() => {
-            control.handleChange(newScope);
-
-            expect(spy).toBeCalledWith(newScope);
-
-            return updatePromise.then(() => {
-                expect(control.state.editing).toEqual(false);
-            });
+        const control = renderScopeControl({
+            scope: scope, url: "/rest/foo/",
+            onChange: spy
         });
+
+        const el = await control.findByRole('combobox', {busy: false})
+
+        expect(spy).not.toHaveBeenCalled()
+
+        await user.click(el.querySelector('.rw-picker-caret'));
+
+        let options = await control.findAllByRole('option', {});
+
+        expect(options.length).toEqual(3)
+
+        await user.click(options[0])
+
+        // Check that the control passes the correct value up.
+        expect(spy).toHaveBeenCalledWith(newScope)
     });
 });
