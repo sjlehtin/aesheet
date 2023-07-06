@@ -1,18 +1,13 @@
-jest.dontMock('AddSPControl');
-jest.dontMock('sheet-util');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 
-const AddSPControl = require('AddSPControl').default;
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import '@testing-library/jest-dom'
+
+import AddSPControl from 'AddSPControl';
 
 describe('AddSPControl', function() {
-    "use strict";
-
-    var promises;
-
-    var addSPControlFactory = function(givenProps) {
+    const addSPControlFactory = function(givenProps) {
         var props = {
             initialAgeSP: 6
         };
@@ -20,82 +15,97 @@ describe('AddSPControl', function() {
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);
         }
-        var node = TestUtils.renderIntoDocument(<AddSPControl {...props} />);
-        return TestUtils.findRenderedComponentWithType(node,
-            AddSPControl);
+        return render(<AddSPControl {...props} />);
     };
 
-    it('notifies parent of addition', function () {
-        var callback = jasmine.createSpy("callback");
-        var control = addSPControlFactory({onAdd: callback, initialAgeSP: 6});
+    it('notifies parent of addition', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
 
-        TestUtils.Simulate.click(control._addButton);
+        const el = await control.findByRole("button")
+        await user.click(el);
 
-        expect(callback).toHaveBeenCalledWith(6);
+        expect(spy).toHaveBeenCalledWith(6);
     });
 
-    it('validates input and notifies about invalid', function () {
-        var callback = jasmine.createSpy("callback");
-        var control = addSPControlFactory({onAdd: callback, initialAgeSP: 6});
+    it('validates input and notifies about invalid', async () => {
+        const spy = jest.fn().mockResolvedValue({})
+        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: "a2b"}});
-        expect(control.isValid()).toEqual(false);
-        expect(control.validationState()).toEqual("error");
+        expect(control.getByRole("button")).not.toBeDisabled()
+        const input = control.getByRole("textbox")
+
+        fireEvent.change(input, {target: {value: "a2b"}})
+
+        await waitFor(() => { expect(control.getByRole("button")).toBeDisabled() } )
+
+        expect(spy).not.toHaveBeenCalled()
     });
 
-    it('validates input and accepts valid', function () {
-        var callback = jasmine.createSpy("callback");
-        var control = addSPControlFactory({onAdd: callback, initialAgeSP: 6});
+    it('validates input and accepts valid', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: 8}});
-        expect(control.isValid()).toEqual(true);
-        expect(control.validationState()).toEqual("success");
+        expect(control.getByRole("button")).not.toBeDisabled()
 
-        TestUtils.Simulate.click(control._addButton);
+        const input = control.getByRole("textbox")
+        fireEvent.change(input, {target: {value: 8}})
 
-        expect(callback).toHaveBeenCalledWith(8);
+        const button = control.getByRole("button")
+        expect(button).not.toBeDisabled()
+
+        await user.click(button)
+        expect(spy).toHaveBeenCalledWith(8)
     });
 
-    it('validates input and accepts negative', function () {
-        var callback = jasmine.createSpy("callback");
-        var control = addSPControlFactory({onAdd: callback, initialAgeSP: 6});
+    it('validates input and accepts negative', async ()  => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: "-3"}});
-        expect(control.isValid()).toEqual(true);
-        expect(control.validationState()).toEqual("success");
+        expect(control.getByRole("button")).not.toBeDisabled()
 
-        TestUtils.Simulate.click(control._addButton);
+        const input = control.getByRole("textbox")
+        fireEvent.change(input, {target: {value: "-3"}})
 
-        expect(callback).toHaveBeenCalledWith(-3);
+        const button = control.getByRole("button")
+        expect(button).not.toBeDisabled()
+
+        await user.click(button)
+        expect(spy).toHaveBeenCalledWith(-3)
     });
 
-    it('submits on Enter', function () {
-        var callback = jasmine.createSpy("callback");
-        var control = addSPControlFactory({onAdd: callback, initialAgeSP: 6});
+    it('submits on Enter', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: "-3"}});
+        const input = control.getByRole("textbox")
+        fireEvent.change(input, {target: {value: "-3"}})
 
-        TestUtils.Simulate.keyDown(control._inputField,
-                {key: "Enter", keyCode: 13, which: 13});
+        await user.click(input)
+        await user.keyboard('[Enter]')
 
-        expect(callback).toHaveBeenCalledWith(-3);
+        await waitFor(() => { expect(spy).toHaveBeenCalledWith(-3) } )
     });
 
-    it('returns to normal ageSP after submit', function () {
-        var callback = jasmine.createSpy("callback");
-        var control = addSPControlFactory({onAdd: callback, initialAgeSP: 6});
+    it('returns to normal ageSP after submit', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: 8}});
-        TestUtils.Simulate.click(control._addButton);
+        const input = control.getByRole("textbox")
+        fireEvent.change(input, {target: {value: "-3"}})
 
-        expect(callback).toHaveBeenCalledWith(8);
+        const button = control.getByRole("button")
+        expect(button).not.toBeDisabled()
 
-        expect(control.state.ageSP).toEqual(6);
+        await user.click(button)
+        expect(spy).toHaveBeenCalledWith(-3)
+
+        await waitFor(() => expect(control.getByRole("textbox")).toHaveValue("6"))
     });
 
 });
