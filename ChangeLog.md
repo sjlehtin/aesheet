@@ -1,3 +1,15 @@
+## Version 0.12.0 -- 2023-07-06
+
+### Added
+
+* Improvements to Django Admin interface to make it simpler to create alternate versions of weapons and armors with new tech levels.
+* Tech levels rendered in Django Admin Campaign view, making it simpler to compare campaigns.
+* BaseFirearm, WeaponTemplate, ArmorTemplate, and many others to support "Save as new", tech level filtering and searching.
+
+### Removed
+
+* Due to new additions, support in Django 2.2 no longer passes tests and is removed.
+
 ## Version 0.11.0 -- 2023-07-06
 
 ### Added
