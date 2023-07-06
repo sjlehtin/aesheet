@@ -100,6 +100,9 @@ class TechLevel(ExportedModel):
             "id",
         ]
 
+    class Meta:
+        ordering = ["name"]
+
 
 class Campaign(ExportedModel):
     """
@@ -632,7 +635,7 @@ class BaseWeaponQuality(ExportedModel):
 
     class Meta:
         abstract = True
-        ordering = ["roa", "ccv"]
+        ordering = ["name"]
 
 
 class WeaponQuality(BaseWeaponQuality):
@@ -1428,6 +1431,9 @@ class ArmorQuality(ExportedModel):
 
     def __str__(self):
         return "%s" % self.name
+
+    class Meta:
+        ordering = ["name"]
 
 
 class Armor(ExportedModel):
