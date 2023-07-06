@@ -1,6 +1,6 @@
 import React from 'react'
-import ReactDOM from 'react-dom';
 import StatBlock from 'StatBlock';
+import { createRoot } from 'react-dom/client';
 
 // Needed for getting the stylesheets loaded for bootstrap.
 import 'bootstrap/scss/bootstrap.scss';
@@ -10,5 +10,6 @@ import "react-widgets/scss/styles.scss";
    mount the sheet to.
 */
 export function render(sheetId, target) {
-    ReactDOM.render(<StatBlock url={`/rest/sheets/${sheetId}/`}/>, target);
+    const root = createRoot(target)
+    root.render(<StatBlock url={`/rest/sheets/${sheetId}/`}/>);
 }
