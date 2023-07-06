@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { Button, Input } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
 var util = require('./sheet-util');
 
@@ -21,7 +21,7 @@ class AddSPControl extends React.Component {
     }
 
     isValid() {
-        return this.validationState() == "success";
+        return this.validationState() === "success";
     }
 
     handleSubmit() {
@@ -32,7 +32,7 @@ class AddSPControl extends React.Component {
     }
 
     handleKeyDown(e) {
-        if (e.keyCode === 13) {
+        if (e.code === "Enter") {
             /* Enter. */
             this.handleSubmit();
         }
@@ -41,7 +41,7 @@ class AddSPControl extends React.Component {
     render() {
         var inputStyle = {textAlign: "right", marginRight: 5, marginLeft: 5,
             width: "4em"};
-        if (this.validationState() == "error") {
+        if (this.validationState() === "error") {
             inputStyle.color = "red";
         }
         return <div title="Age SP is added every five adventures">
@@ -50,8 +50,6 @@ class AddSPControl extends React.Component {
                      c ? this._inputField = ReactDOM.findDOMNode(c) : null}
                    type="text"
                    onChange={(e) => this.handleChange(e)}
-                   //bsStyle={this.validationState()}
-                   //hasFeedback
                    value={this.state.ageSP}
                    onKeyDown={(e) => this.handleKeyDown(e)}
                    style={inputStyle}
