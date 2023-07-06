@@ -35,7 +35,39 @@ Full list of all todo items in the TODO.
 
 #### Deploying
 
-TODO
+##### On build host
+
+```bash
+tox
+npm test
+npm run build
+python setup.py bdist_wheel
+python manage.py collectstatic --noinput
+gtar zcvf aesheet-0.11-full.tar.xz static/ dist/aesheet-0.11-py3-none-any.whl
+```
+
+##### On application server
+
+Take a backup of your database, e.g.,
+
+```shell
+sudo -i -u postgres pg_dumpall > psql_backup.dump
+```
+
+Check `settings.py` for need of changes due to upgrades or configuration changes.
+
+Update outdated python packages `pip list --outdated` 
+
+```sh
+ve/bin/pip install -U ~sjl/aesheet-0.11/dist/aesheet-0.11-py3-none-any.whl
+sudo -u www-data bash
+. ./env
+django-admin migrate
+```
+
+```shell
+sudo systemctl restart aesheet.<env>
+```
 
 #### nginx configuration
 
