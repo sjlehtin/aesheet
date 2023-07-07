@@ -1,17 +1,15 @@
-jest.dontMock('InventoryRow');
-jest.dontMock('sheet-util');
-
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
-const InventoryRow = require('InventoryRow').default;
+import InventoryRow from 'InventoryRow';
 
-var inventoryEntryFactory = function (overrides) {
-    var _entryData = {
+import { render, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+const inventoryEntryFactory = function (overrides) {
+    const _entryData = {
         quantity: 1,
         unit_weight: "0.5",
-        description: "Item",
+        description: "Inventory item",
         order: 0,
         location: ""
     };
@@ -19,202 +17,213 @@ var inventoryEntryFactory = function (overrides) {
     return Object.assign(_entryData, overrides);
 };
 
-var inventoryRowFactory = function(givenProps) {
-    var Wrapper = createReactClass({
-        render: function () {
-            return <table>
-                <tbody>{this.props.children}</tbody>
-            </table>;
-        }
-    });
+const inventoryRowFactory = function(givenProps) {
+    const props = {initialEntry: inventoryEntryFactory()};
 
-    var props = {initialEntry: inventoryEntryFactory()};
-    var rowElement = React.createElement(InventoryRow,
-        Object.assign(props, givenProps));
-    var table = TestUtils.renderIntoDocument(
-        <Wrapper>
-            {rowElement}
-        </Wrapper>
-    );
-
-    return TestUtils.findRenderedComponentWithType(table,
-        InventoryRow);
+    return render(
+        <table>
+            <tbody>
+                <InventoryRow {...Object.assign(props, givenProps)}/>
+            </tbody>
+        </table>)
 };
 
 describe('InventoryRow', function() {
-    "use strict";
-
-    var promises = [];
-
     it('renders also as empty', function () {
-        const row = inventoryRowFactory();
-        expect(row.descriptionValidationState()).toBe(true);
-        expect(row.unitWeightValidationState()).toBe(true);
+        const row = inventoryRowFactory()
+
+        row.getByText("Inventory item")
+        row.getByRole("button", {name: /Remove/})
     });
 
-    it('validates description field', function () {
-        const row = inventoryRowFactory();
+    it('validates description field', async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(row._descriptionField);
+        const row = inventoryRowFactory()
 
-        TestUtils.Simulate.change(row._descriptionInputField,
-            {target: {value: ""}});
+        await user.click(row.getByText(/Inventory item/))
 
-        expect(row.descriptionValidationState()).toBe(false);
-        expect(row.isValid()).toBe(false);
+        let elems = await row.findAllByRole("textbox")
 
-        TestUtils.Simulate.change(row._descriptionInputField,
-            {target: {value: "Tsup"}});
-        expect(row.descriptionValidationState()).toBe(true);
-        expect(row.isValid()).toBe(true);
+        fireEvent.change(elems[0], {target: {value: ""}})
+
+        elems = await row.findAllByRole("textbox")
+
+        expect(elems[0]).not.toHaveClass("is-valid")
+
+        fireEvent.change(elems[0], {target: {value: "Tsup"}})
+
+        elems = await row.findAllByRole("textbox")
+        expect(elems[0]).toHaveClass("is-valid")
     });
 
-    it('allows canceling edit', function () {
-        const row = inventoryRowFactory();
+    it('allows canceling edit', async () => {
+        const spy = jest.fn().mockResolvedValue({})
+        const user = userEvent.setup()
 
-        return Promise.all(promises).then(function () {
-            TestUtils.Simulate.click(row._descriptionField);
+        const row = inventoryRowFactory({onMod: spy})
 
-            expect(row.state.description).toEqual("Item");
+        await user.click(row.getByText(/Inventory item/))
 
-            TestUtils.Simulate.change(row._descriptionInputField,
-                {target: {value: "Foofaafom"}});
+        const elems = await row.findAllByRole("textbox")
 
-            expect(row.state.description).toEqual("Foofaafom");
+        fireEvent.change(elems[0], {target: {value: "Foo faa fom"}})
 
-            TestUtils.Simulate.keyDown(row._descriptionInputField,
-                {key: "Esc", keyCode: 27, which: 27});
+        await user.keyboard('{Escape}')
 
-            expect(row.state.description).toEqual("Item");
-        }).catch((err) => fail(err));
+        await row.findByText(/Inventory item/)
+        await row.findByText("0.5")
+
+        expect(spy).not.toHaveBeenCalled()
     });
 
-    it('validates unit weight field', function () {
-        const row = inventoryRowFactory();
+    it('validates unit weight field', async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(row._unitWeightField);
+        const row = inventoryRowFactory()
 
-        TestUtils.Simulate.change(row._unitWeightInputField,
-            {target: {value: "a2.1"}});
+        await user.click(row.getByText("0.5"))
 
-        expect(row.unitWeightValidationState()).toBe(false);
-        expect(row.isValid()).toBe(false);
+        const el = await row.findByLabelText("weight");
+        await user.click(el)
 
-        TestUtils.Simulate.change(row._unitWeightInputField,
-            {target: {value: "2.1"}});
+        fireEvent.change(el, {target: {value: "Foo faa fom"}})
 
-        expect(row.unitWeightValidationState()).toBe(true);
-        expect(row.isValid()).toBe(true);
+        expect(row.getByLabelText("weight")).not.toHaveClass('is-valid')
+
+        fireEvent.change(el, {target: {value: "2.1"}})
+
+        expect(row.getByLabelText("weight")).toHaveClass('is-valid')
     });
 
-    it('validates quantity field', function () {
-        const row = inventoryRowFactory();
+    it('validates quantity field', async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(row._quantityField);
+        const row = inventoryRowFactory()
 
-        TestUtils.Simulate.change(row._quantityInputField,
-            {target: {value: "a2"}});
+        await user.click(row.getByText("0.5"))
 
-        expect(row.quantityValidationState()).toBe(false);
-        expect(row.isValid()).toBe(false);
+        const el = await row.findByLabelText("quantity");
+        await user.click(el)
 
-        TestUtils.Simulate.change(row._quantityInputField,
-            {target: {value: "2"}});
+        fireEvent.change(el, {target: {value: "a2"}})
 
-        expect(row.quantityValidationState()).toBe(true);
-        expect(row.isValid()).toBe(true);
+        expect(row.getByLabelText("quantity")).not.toHaveClass('is-valid')
+
+        fireEvent.change(el, {target: {value: "2"}})
+
+        expect(row.getByLabelText("quantity")).toHaveClass('is-valid')
     });
 
-    it('allows edit of location field', function () {
-        const row = inventoryRowFactory();
+    it('allows edit of location field', async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(row._locationField);
+        const row = inventoryRowFactory()
 
-        TestUtils.Simulate.change(row._locationInputField,
-            {target: {value: "a2"}});
+        await user.click(row.getByText("Inventory item"))
 
-        expect(row.isValid()).toBe(true);
+        const el = await row.findByLabelText("location");
+        await user.click(el)
 
-        TestUtils.Simulate.change(row._locationInputField,
-            {target: {value: ""}});
+        fireEvent.change(el, {target: {value: "Head"}})
 
-        expect(row.isValid()).toBe(true);
+        expect(row.getByLabelText("location")).toHaveClass('is-valid')
+
+        fireEvent.change(el, {target: {value: ""}})
+
+        expect(row.getByLabelText("location")).toHaveClass('is-valid')
+
+        fireEvent.change(el, {target: {value: "Foot"}})
     });
 
-    it('calls onDelete on clicking remove', function () {
-        const spy = jasmine.createSpy("remove");
+    it('calls onDelete on clicking remove', async () => {
+        const user = userEvent.setup()
+
+        const spy = jest.fn().mockResolvedValue({})
         const row = inventoryRowFactory({onDelete: spy});
 
-        TestUtils.Simulate.click(row._descriptionField);
+        const el = await row.findByRole("button", {name: "Remove"})
 
-        const button = TestUtils.findRenderedDOMComponentWithTag(row, "button");
-        expect(typeof(button)).not.toEqual("undefined");
-
-        TestUtils.Simulate.click(row._removeButton);
+        await user.click(el)
 
         expect(spy).toHaveBeenCalledWith();
     });
 
-    it('handles submit', function () {
-        var spy = jasmine.createSpy("changed");
-        var row = inventoryRowFactory({onMod: spy});
+    it('handles submit', async () => {
+        const spy = jest.fn().mockResolvedValue({})
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(row._unitWeightField);
+        const entry = inventoryEntryFactory();
+        const row = inventoryRowFactory({
+            initialEntry: entry,
+            onMod: spy})
 
-        TestUtils.Simulate.change(row._unitWeightInputField,
-            {target: {value: "2.1"}});
+        await user.click(row.getByText(/Inventory item/))
 
-        TestUtils.Simulate.keyDown(
-            row._unitWeightInputField,
-            {key: "Enter", keyCode: 13, which: 13});
-        expect(spy).toHaveBeenCalledWith(Object.assign(
-            inventoryEntryFactory(), {unit_weight: "2.1"}));
+        const descrEl = await row.findByLabelText("description")
 
-        expect(row.state.show.unitWeight).toBe(false);
+        fireEvent.change(descrEl, {target: {value: "Foo faa fom"}})
+
+        const locEl = await row.findByLabelText("location")
+
+        fireEvent.change(locEl, {target: {value: "Foot"}})
+
+        const quantityEl = await row.findByLabelText("quantity")
+
+        fireEvent.change(quantityEl, {target: {value: "10"}})
+
+        await user.keyboard('{Enter}')
+
+        expect(spy).toHaveBeenCalledTimes(1)
+        expect(spy).toHaveBeenCalledWith(Object.assign(entry, {description: "Foo faa fom",
+        location: "Foot", quantity: "10"}))
+
+        expect(await row.queryAllByRole("textbox").length).toBe(0)
     });
 
-    it('disables submit on invalid input', function () {
-        var spy = jasmine.createSpy("changed");
-        var row = inventoryRowFactory({onMod: spy});
+    it('disables submit on invalid input', async () => {
+        const spy = jest.fn().mockResolvedValue({})
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(row._unitWeightField);
+        const entry = inventoryEntryFactory();
+        const row = inventoryRowFactory({
+            initialEntry: entry,
+            onMod: spy})
 
-        TestUtils.Simulate.change(row._unitWeightInputField,
-            {target: {value: "a2.1"}});
+        await user.click(row.getByText(/Inventory item/))
 
-        TestUtils.Simulate.keyDown(
-            row._unitWeightInputField,
-            {key: "Enter", keyCode: 13, which: 13});
-         expect(spy).not.toHaveBeenCalled();
+        const el = await row.findByLabelText("weight")
+
+        fireEvent.change(el, {target: {value: "a2.1"}})
+
+        await user.keyboard('{Enter}')
+
+        expect(spy).not.toHaveBeenCalled()
     });
 
-    it ('enables all fields when creating new entry', function (){
-        var row = inventoryRowFactory({createNew: true});
-        expect(row.state.show.description).toBe(true);
-        expect(row.state.show.location).toBe(true);
-        expect(row.state.show.quantity).toBe(true);
-        expect(row.state.show.unitWeight).toBe(true);
+    it ('enables all fields when creating new entry', async () => {
+        const row = inventoryRowFactory({createNew: true})
+        const elems = await row.findAllByRole("textbox")
+        expect(elems.length).toEqual(4)
     });
 
-    it ('allows submit on creating new entry', function () {
-        var spy = jasmine.createSpy("changed");
-        var row = inventoryRowFactory({
+    it ('allows submit on creating new entry', async () => {
+        const spy = jest.fn().mockResolvedValue({})
+        const user = userEvent.setup()
+
+        const row = inventoryRowFactory({
             initialEntry: undefined,
             createNew: true,
             onMod: spy
         });
 
-        var buttons = TestUtils.scryRenderedDOMComponentsWithTag(row, "button");
-        expect(buttons.length).toEqual(0);
+        const el = row.getByLabelText("description")
 
-        TestUtils.Simulate.change(row._descriptionInputField,
-            {target: {value: "Foobar"}});
+        fireEvent.change(el, {target: {value: "Foobar"}})
 
-        TestUtils.Simulate.keyDown(
-            row._descriptionInputField,
-            {key: "Enter", keyCode: 13, which: 13});
+        await user.keyboard('{Enter}')
 
-         expect(spy).toHaveBeenCalledWith({description: "Foobar",
+        expect(spy).toHaveBeenCalledWith({description: "Foobar",
              quantity: "1",
              unit_weight: "1.0",
              location: ""
