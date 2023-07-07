@@ -82,23 +82,8 @@ class TechLevel(ExportedModel):
         return self.name
 
     @classmethod
-    def dont_export(cls):
-        return [
-            "weapontemplate",
-            "campaign",
-            "armortemplate",
-            "armorquality",
-            "miscellaneousitem",
-            "weaponquality",
-            "skill",
-            "rangedweapontemplate",
-            "basefirearm",
-            "transienteffect",
-            "ammunition",
-            "firearmaddon",
-            "scope",
-            "id",
-        ]
+    def get_exported_fields(cls):
+        return ["name", "id"]
 
     class Meta:
         ordering = ["name"]
@@ -1039,6 +1024,9 @@ EFFECT_TYPES = zip(EFFECT_TYPES, EFFECT_TYPES)
 
 class Effect(StatModifier):
     name = models.CharField(primary_key=True, max_length=256)
+
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
+
     description = models.TextField(blank=True)
     type = models.CharField(
         max_length=256,
@@ -1466,8 +1454,6 @@ class TransientEffect(ExportedModel, Effect):
     Temporary effects, like spells or drugs, affecting character
     performance in the short term.
     """
-
-    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     @classmethod
     def dont_export(cls):

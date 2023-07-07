@@ -345,6 +345,9 @@ class ArmorQualityFactory(DjangoModelFactory):
 
 
 class ArmorSpecialQualityFactory(DjangoModelFactory):
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
     class Meta:
         model = models.ArmorSpecialQuality
         django_get_or_create = ('name', )
@@ -396,6 +399,9 @@ class WeaponQualityFactory(DjangoModelFactory):
 
 
 class WeaponSpecialQualityFactory(DjangoModelFactory):
+    tech_level = factory.SubFactory(TechLevelFactory)
+    tech_level__name = "2K"
+
     class Meta:
         model = models.WeaponSpecialQuality
         django_get_or_create = ('name', )

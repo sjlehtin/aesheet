@@ -70,11 +70,8 @@ class QualityAdmin(ItemAdmin):
     pass
 
 
-class EffectAdmin(admin.ModelAdmin):
-    search_fields = ('name', )
-    # TODO: Add tech level to effects.
-    # list_filter = ('tech_level', )
-    save_as = True
+class EffectAdmin(ItemAdmin):
+    pass
 
 
 admin.site.register(sm.Armor, ArmorAdmin)
