@@ -32,7 +32,7 @@ class AddSPControl extends React.Component {
     }
 
     handleKeyDown(e) {
-        if (e.code === "Enter") {
+        if (e.key === "Enter") {
             /* Enter. */
             this.handleSubmit();
         }
