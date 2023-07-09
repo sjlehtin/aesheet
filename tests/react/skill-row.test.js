@@ -13,7 +13,21 @@ var factories = require('./factories');
 var characterSkillFactory = factories.characterSkillFactory;
 var skillFactory = factories.skillFactory;
 
-const SkillRow = require('SkillRow').default;
+import SkillRow from 'SkillRow'
+
+import { render, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+const renderSkillRow = (givenProps) => {
+    let props = {skill: "Unarmed Combat"};
+    if (typeof(givenProps) !== "undefined") {
+        props = Object.assign(props, givenProps);
+    }
+
+    return render(<table><tbody>
+    <SkillRow {...props} />
+    </tbody></table>)
+}
 
 describe('SkillRow', function() {
     "use strict";
@@ -42,8 +56,10 @@ describe('SkillRow', function() {
             SkillRow);
     };
 
+
+
     it('calculates skill check', function () {
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Persuasion",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_cha: 55},
@@ -53,12 +69,12 @@ describe('SkillRow', function() {
 
             characterSkill: characterSkillFactory({level: 1}),
             skill: skillFactory({stat: "CHA"})});
-        expect(row.skillCheck()).toEqual(60);
+        expect(row.getByLabelText("Skill check").textContent).toEqual("60")
     });
 
     it('recognizes base skills', function () {
         // i.e., does not render the skill check.
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Basic Farmhand",
             skillHandler: factories.skillHandlerFactory({
                 skills: [
@@ -71,11 +87,12 @@ describe('SkillRow', function() {
                 skill_cost_2: null,
                 skill_cost_3: null
             })});
-        expect(row.skillCheck()).toEqual(null);
+
+        expect(row.getByLabelText("Skill check").textContent).toEqual("")
     });
 
     it('can render defaulted skills', function () {
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Acting / Bluff",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_cha: 55},
@@ -83,11 +100,11 @@ describe('SkillRow', function() {
             }),
 
             skill: skillFactory({stat: "CHA"})});
-        expect(row.skillCheck()).toEqual(28);
+        expect(row.getByLabelText("Skill check").textContent).toEqual("28")
     });
 
     it('can render skills which are available without cost', function () {
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Acting / Bluff",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_cha: 55},
@@ -97,11 +114,12 @@ describe('SkillRow', function() {
                     stat: "CHA"}]
             }),
             skill: skillFactory({stat: "CHA", skill_cost_0: 0})});
-        expect(row.skillCheck()).toEqual(55);
+        expect(row.getByLabelText("Skill check").textContent).toEqual("55")
     });
 
     it('can find a skill check for a different stat', function () {
-        var row = getSkillRow({
+        const row = renderSkillRow({
+            renderForStats: ["wil"],
             skillName: "Acting / Bluff",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_wil: 60, cur_cha: 45},
@@ -111,11 +129,11 @@ describe('SkillRow', function() {
             characterSkill: characterSkillFactory({level: 1}),
             skill: skillFactory({stat: "CHA"})
         });
-        expect(row.skillCheck("wil")).toEqual(65);
+        expect(row.getByLabelText("Skill check").textContent).toEqual("WIL: 65")
     });
 
     it('can render skill checks for multiple stats', function () {
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_fit: 50, cur_ref: 60},
@@ -128,20 +146,20 @@ describe('SkillRow', function() {
             skill: skillFactory({name: "Balance", stat: "MOV"}),
             renderForStats: ["mov", "ref"]
         });
-        var cell = TestUtils.findRenderedDOMComponentWithClass(row,
-            "skill-check");
 
-        expect(cell.textContent).toContain("REF: 65");
-        expect(cell.textContent).toContain("MOV: 60");
+        let elem = row.getByLabelText("Skill check");
+        expect(elem.textContent).toContain("REF: 65")
+        expect(elem.textContent).toContain("MOV: 60")
     });
 
     xit("shows skill with obsoleted skill level", test.todo);
     xit("highlight skill with missing required skills", test.todo);
 
-    it('has controls to increase skill levels', function () {
-        var spy = jasmine.createSpy("callback");
-        var cs = characterSkillFactory({level: 1});
-        var row = getSkillRow({
+    it('has controls to increase skill levels', async () => {
+        const user = userEvent.setup();
+        const spy = jest.fn().mockResolvedValue();
+        const cs = characterSkillFactory({level: 1});
+        const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
                 skills: [{skill: "Balance", level: 1}]
@@ -151,93 +169,106 @@ describe('SkillRow', function() {
             skill: skillFactory({stat: "CHA"}),
             onCharacterSkillModify: spy
         });
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(row._increaseButton))
+        const el = row.getByRole("button", {name: "Increase skill level"})
+        await user.click(el)
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+
+        // ARIA spec says that the button role should be actionable with Enter and Space keys as well as click.
+        spy.mockClear()
+        expect(spy).not.toHaveBeenCalled()
+        await el.focus()
+        await user.keyboard("{Space}")
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+
+        spy.mockClear()
+        expect(spy).not.toHaveBeenCalled()
+        await el.focus()
+        await user.keyboard("{Enter}")
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+
+    });
+
+    it('has controls to decrease skill levels', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue()
+        const cs = characterSkillFactory({level: 1})
+        const row = renderSkillRow({
+            skillName: "Balance",
+            skillHandler: factories.skillHandlerFactory({
+                skills: [{skill: "Balance", level: 1}]
+            }),
+
+            characterSkill: cs,
+            skill: skillFactory({stat: "CHA"}),
+            onCharacterSkillModify: spy
+        })
+        const el = row.getByRole("button", {name: "Decrease skill level"})
+        await user.click(el)
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
+
+        // ARIA spec says that the button role should be actionable with Enter and Space keys as well as click.
+        spy.mockClear()
+        expect(spy).not.toHaveBeenCalled()
+        await el.focus()
+        await user.keyboard("{Space}")
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+
+        spy.mockClear()
+        expect(spy).not.toHaveBeenCalled()
+        await el.focus()
+        await user.keyboard("{Enter}")
         expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
     });
 
-    it('has controls to decrease skill levels', function () {
-        var spy = jasmine.createSpy("callback");
-        var cs = characterSkillFactory({level: 1});
-        var row = getSkillRow({
-            skillName: "Balance",
-            skillHandler: factories.skillHandlerFactory({
-                skills: [{skill: "Balance", level: 1}]
-            }),
-
-            characterSkill: cs,
-            skill: skillFactory({stat: "CHA"}),
-            onCharacterSkillModify: spy
-        });
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(row._decreaseButton))
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
-    });
-
-    it('should not have a decrease control without a skill', function () {
-        var spy = jasmine.createSpy("callback");
-        var row = getSkillRow({
+    it('should not have a level controls without a skill', function () {
+        const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
                 allSkills: [{name: "Balance", level: 1}]
             }),
 
             characterSkill: undefined,
-            skill: skillFactory({stat: "CHA"}),
-            onCharacterSkillModify: spy
-        });
-        expect('_decreaseButton' in row).toEqual(false);
+            skill: skillFactory({stat: "CHA"})
+        })
+        expect(row.queryByRole("button", {name: "Decrease skill level"})).toBeNull()
+        expect(row.queryByRole("button", {name: "Inccrease skill level"})).toBeNull()
     });
 
     it('should not have a decrease control if skill at minimum level',
         function () {
-        var spy = jasmine.createSpy("callback");
-        var cs = characterSkillFactory({level: 1});
-        var row = getSkillRow({
+        const cs = characterSkillFactory({level: 1});
+        const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
                 skills: [{skill: {name: "Balance", min_level: 1}, level: 1}]
             }),
 
             characterSkill: cs,
-            skill: skillFactory({stat: "CHA", min_level: 1}),
-            onCharacterSkillModify: spy
-        });
-        expect('_decreaseButton' in row).toEqual(false);
-    });
-
-    it('should not have a increase control without a skill', function () {
-        var spy = jasmine.createSpy("callback");
-        var row = getSkillRow({
-            skillName: "Balance",
-            skillHandler: factories.skillHandlerFactory({
-                allSkills: [{name: "Balance"}]
-            }),
-            characterSkill: undefined,
-            skill: skillFactory({stat: "CHA"}),
-            onCharacterSkillModify: spy
-        });
-        expect('_increaseButton' in row).toEqual(false);
+            skill: skillFactory({stat: "CHA", min_level: 1})
+        })
+        expect(row.queryByRole("button", {name: "Decrease skill level"})).toBeNull()
+        expect(row.getByRole("button", {name: "Increase skill level"})).toBeTruthy()
     });
 
     it('should not have a increase control if skill at maximum level',
         function () {
-        var spy = jasmine.createSpy("callback");
-        var cs = characterSkillFactory({level: 3});
-        var row = getSkillRow({
+        const cs = characterSkillFactory({level: 3});
+        const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
                 skills: [{skill: {name: "Balance", max_level: 3}, level: 3}]
             }),
 
             characterSkill: cs,
-            skill: skillFactory({stat: "CHA", max_level: 3}),
-            onCharacterSkillModify: spy
+            skill: skillFactory({stat: "CHA", max_level: 3})
         });
-        expect('_increaseButton' in row).toEqual(false);
+        expect(row.queryByRole("button", {name: "Increase skill level"})).toBeNull()
+        expect(row.getByRole("button", {name: "Decrease skill level"})).toBeTruthy()
     });
 
     it("does not render missing skills if there are none", function () {
-        var cs = characterSkillFactory({level: 3});
-        var row = getSkillRow({
+        const cs = characterSkillFactory({level: 3});
+        const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
                 skills: [{skill: "Balance", level: 3}]
@@ -246,14 +277,14 @@ describe('SkillRow', function() {
             characterSkill: cs,
             skill: skillFactory({stat: "CHA", max_level: 3}),
         });
-        var node = ReactDOM.findDOMNode(row);
-        expect(node.getAttribute('title')).toEqual('');
+        const elems = row.queryAllByTitle(/Missing/)
+        expect(elems.length).toEqual(0)
     });
 
-    it("renders missing skills", function () {
-        var cs = characterSkillFactory({level: 3});
+    it("renders missing skill", function () {
+        const cs = characterSkillFactory({level: 3});
         cs._missingRequired = ["Frozzling"];
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Pistol",
             skillHandler: factories.skillHandlerFactory({
                 skills: [{skill: {name: "Pistol", required_skills: ["Frozzling"]}, level: 3}],
@@ -262,14 +293,16 @@ describe('SkillRow', function() {
             characterSkill: cs,
             skill: skillFactory({stat: "CHA", max_level: 3}),
         });
-        var node = ReactDOM.findDOMNode(row);
-        expect(node.getAttribute('title')).toMatch("Missing skill Frozzling");
+        const elems = row.queryAllByTitle(/Missing/)
+        expect(elems.length).toEqual(1)
+        const el = elems[0]
+        expect(el.title).toMatch("Missing skill Frozzling")
     });
 
-    it("renders missing skills with correct grammar", function () {
-        var cs = characterSkillFactory({level: 3});
+    it("renders all missing skills", function () {
+        let cs = characterSkillFactory({level: 3});
         cs._missingRequired = ["Frozzling", "Foobying"];
-        var row = getSkillRow({
+        const row = renderSkillRow({
             skillName: "Pistol",
             skillHandler: factories.skillHandlerFactory({
                 skills: [{skill: {name: "Pistol", required_skills: ["Frozzling", "Foobying"]}, level: 3}],
@@ -278,9 +311,11 @@ describe('SkillRow', function() {
             characterSkill: cs,
             skill: skillFactory({stat: "CHA", max_level: 3}),
         });
-        var node = ReactDOM.findDOMNode(row);
-        expect(node.getAttribute('title')).toMatch("Missing skills" +
-            " Frozzling, Foobying");
+        const elems = row.queryAllByTitle(/Missing/)
+        expect(elems.length).toEqual(1)
+        const el = row.getByTitle(/Missing skills/)
+        expect(el.title).toContain('Frozzling')
+        expect(el.title).toContain('Foobying')
     })
 
 });

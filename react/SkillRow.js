@@ -100,6 +100,17 @@ class SkillRow extends React.Component {
         var increaseButton, decreaseButton;
         if (this.canIncrease()) {
             increaseButton = <span style={{color: "green", position: "absolute", left: 10, bottom: 1, cursor: "pointer"}} ref={(c) => this._increaseButton = c}
+                                   role={"button"}
+                                   aria-label={"Increase skill level"}
+                                   tabIndex={0}
+                                  onKeyDown={(e) => {
+                                      if (e.key === "Space") {
+                                        this.handleIncrease()
+                                      } else if (e.key === "Enter") {
+                                        this.handleIncrease()
+                                      }
+                                  }}
+
                                          onClick={() => this.handleIncrease()}
 
             ><GoArrowUp /></span>;
@@ -108,6 +119,16 @@ class SkillRow extends React.Component {
         }
         if (this.canDecrease()) {
             decreaseButton = <span style={{color: "red", position: "absolute", left: 22, bottom: -3, cursor: "pointer"}} ref={(c) => this._decreaseButton = c}
+                                   role={"button"}
+                                   aria-label={"Decrease skill level"}
+                                   tabIndex={0}
+                                  onKeyDown={(e) => {
+                                      if (e.key === "Space") {
+                                        this.handleIncrease()
+                                      } else if (e.key === "Enter") {
+                                        this.handleIncrease()
+                                      }
+                                  }}
                                          onClick={() => this.handleDecrease()}
             ><GoArrowDown /></span>;
         } else {
@@ -128,7 +149,7 @@ class SkillRow extends React.Component {
               this.props.skillName}</span><span style={{position: "relative"}}>{remove}</span></td>
             <td><span>{this.skillLevel()}</span><span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
-            <td className="skill-check">{checks}</td></tr>;
+            <td className="skill-check" aria-label={"Skill check"}>{checks}</td></tr>;
     }
 }
 
