@@ -1,11 +1,10 @@
 const factories = require('./factories');
 
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 import FirearmControl from "../../react/FirearmControl";
-import {prettyDOM} from '@testing-library/dom'
 import React from "react";
 
 const server = setupServer(
@@ -16,8 +15,6 @@ const server = setupServer(
         return res(ctx.json([]))
     }),
 )
-
-// jest.mock('sheet-rest');
 
 describe('FirearmControl -- AmmoControl', () => {
     beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
@@ -32,7 +29,6 @@ describe('FirearmControl -- AmmoControl', () => {
 
         await control.findByText(/Test Ammo/)
         const elem_arr = await control.queryAllByDisplayValue(/undefined/)
-        console.log(prettyDOM(document.getRootNode()))
         expect(elem_arr.length).toBe(0)
     });
 
