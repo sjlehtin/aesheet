@@ -1,17 +1,11 @@
-jest.dontMock('SkillRow');
-jest.dontMock('sheet-util');
-jest.dontMock('SkillHandler');
-jest.dontMock('./factories');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
 import createReactClass from 'create-react-class';
 
-var factories = require('./factories');
+const factories = require('./factories');
 
-var characterSkillFactory = factories.characterSkillFactory;
-var skillFactory = factories.skillFactory;
+const characterSkillFactory = factories.characterSkillFactory;
+const skillFactory = factories.skillFactory;
 
 import SkillRow from 'SkillRow'
 
