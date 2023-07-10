@@ -1,21 +1,14 @@
-jest.dontMock('RangedWeaponRow');
-jest.dontMock('WeaponRow');
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
-const RangedWeaponRow = require('RangedWeaponRow').default;
-const SkillHandler = require('SkillHandler').default;
+import RangedWeaponRow from "RangedWeaponRow";
 
-var factories = require('./factories');
+import { render } from '@testing-library/react'
+const factories = require('./factories');
 
 describe('RangedWeaponRow', function() {
-    "use strict";
 
-    var getWeaponRow = function (givenProps) {
-        var handlerProps = {
+    const renderWeaponRow = function (givenProps) {
+        let handlerProps = {
             characterSkills: [],
             edges: [],
             stats: {mov: 45}
@@ -31,20 +24,20 @@ describe('RangedWeaponRow', function() {
             delete givenProps.handlerProps;
         }
 
-        var weaponProps = givenProps.weaponProps;
+        const weaponProps = givenProps.weaponProps;
         delete givenProps.weaponProps;
 
-        var weapon = factories.rangedWeaponFactory(
+        const weapon = factories.rangedWeaponFactory(
                 Object.assign({base: {base_skill: "Bow"}},
                     weaponProps ? weaponProps : {}));
 
-        var allSkills = [];
+        let allSkills = [];
         for (let skill of handlerProps.skills) {
             allSkills.push({
                 name: skill.skill,
                 stat: "dex"});
         }
-        var addExtraSkill = function (skill) {
+        const addExtraSkill = function (skill) {
             if (skill) {
                 allSkills.push({
                     name: skill,
@@ -58,43 +51,39 @@ describe('RangedWeaponRow', function() {
 
         handlerProps.allSkills = allSkills;
 
-        var props = {
+        let props = {
             weapon: weapon,
             skillHandler: factories.skillHandlerFactory(handlerProps)
         };
 
         props = Object.assign(props, givenProps);
-        var table = TestUtils.renderIntoDocument(
-            <RangedWeaponRow {...props}/>
-        );
 
-        return TestUtils.findRenderedComponentWithType(table,
-            RangedWeaponRow);
+        return render(<RangedWeaponRow {...props}/>)
     };
 
     it("caps ROF", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [{skill: "Bow", level: 5}],
             },
             weaponProps: {base: {roa: "4", base_skill: "Bow"}}
         });
-        expect(weapon.rof()).toEqual(5.0);
+        expect(weapon.getByLabelText("Rate of fire").textContent).toEqual("5.00")
     });
 
     it("takes Rapid archery into account", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [{skill: "Bow", level: 0},
                     {skill: "Rapid archery", level: 3}]
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Bow"}}
         });
-        expect(weapon.rof()).toEqual(1.65);
+        expect(weapon.getByLabelText("Rate of fire").textContent).toEqual("1.65")
     });
 
     it("ignores Rapid archery for crossbows", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [
                     {skill: "Bow", level: 0},
@@ -102,22 +91,25 @@ describe('RangedWeaponRow', function() {
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Crossbow"}}
         });
-        expect(weapon.rof()).toEqual(1.5);
+        expect(weapon.getByLabelText("Rate of fire").textContent).toEqual("1.50")
     });
 
     it("counters penalties with FIT", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [{skill: "Bow", level: 0}],
                 character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
             },
             weaponProps: {base: {roa: "1.5", base_skill: "Bow"}}
         });
-        expect(weapon.skillChecks([1, 2, 3, 4])).toEqual([45, 35, 22, null]);
+        let values = []
+        weapon.getByRole("row", {name: /Action/})
+            .querySelectorAll('td').forEach((el) => values.push(el.textContent))
+        expect(values.slice(4, 8)).toEqual(["45", "35", "22", ""])
     });
 
     it("does not give damage bonus for crossbows for high FIT", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [{skill: "Bow", level: 0}],
                 character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
@@ -125,11 +117,11 @@ describe('RangedWeaponRow', function() {
             weaponProps: {base: {roa: "1.5", base_skill: "Crossbow",
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1}}
         });
-        expect(weapon.renderDamage()).toEqual("1d6+2/5+1");
+        expect(weapon.getByLabelText("Damage").textContent).toEqual("1d6+2/5+1")
     });
 
     it("gives damage bonus for bows for high FIT", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [{skill: "Bow", level: 0}],
                 character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
@@ -137,11 +129,11 @@ describe('RangedWeaponRow', function() {
             weaponProps: {base: {roa: "1.5", base_skill: "Bow",
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1}}
         });
-        expect(weapon.renderDamage()).toEqual("1d6+4/5+1");
+        expect(weapon.getByLabelText("Damage").textContent).toEqual("1d6+4/5+1")
     });
 
     it("caps FIT bonus", function () {
-        var weapon = getWeaponRow({
+        const weapon = renderWeaponRow({
             handlerProps: {
                 skills: [{skill: "Bow", level: 0}],
                 character: {cur_ref: 45, cur_int: 45, cur_fit: 190}
@@ -150,7 +142,7 @@ describe('RangedWeaponRow', function() {
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1},
                 quality: {max_fit: 100}}
         });
-        expect(weapon.renderDamage()).toEqual("1d6+7/6+1");
+        expect(weapon.getByLabelText("Damage").textContent).toEqual("1d6+7/6+1")
     });
 
 });

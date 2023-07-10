@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import WeaponRow from './WeaponRow';
+import WeaponRow from 'WeaponRow';
 const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
-import StatBreakdown from "./StatBreakdown";
+import StatBreakdown from "StatBreakdown";
 
 class RangedWeaponRow extends WeaponRow {
     constructor(props) {
@@ -164,15 +164,15 @@ class RangedWeaponRow extends WeaponRow {
                   </tr>
                 </thead>
                 <tbody>
-                <tr>
+                <tr aria-label={"Actions"}>
                     <td style={cellStyle} rowSpan={2}>{
                         this.weaponName()}</td>
                     <td style={cellStyle}>{this.skillLevel()}</td>
-                    <td style={cellStyle}>{this.rof().toFixed(2)}</td>
+                    <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().toFixed(2)}</td>
                     {checkCells}
                     <td style={cellStyle}>{this.targetInitiative()}</td>
                     <td style={cellStyle}>{this.drawInitiative()}</td>
-                    <td style={cellStyle}>{this.renderDamage()}</td>
+                    <td style={cellStyle} aria-label={"Damage"}>{this.renderDamage()}</td>
                     <td style={cellStyle}>{ranges}</td>
                 </tr>
                 <tr>
