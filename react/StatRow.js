@@ -1,7 +1,7 @@
 import React from 'react';
 import {GoArrowUp, GoArrowDown} from 'react-icons/go';
 import PropTypes from 'prop-types';
-
+import StatBreakdown from 'StatBreakdown'
 const rest = require('./sheet-rest');
 
 class StatRow extends React.Component {
@@ -128,7 +128,9 @@ class StatRow extends React.Component {
                 onTouchEnd={this.handleTouchEnd.bind(this)}>
                 <td style={statStyle}>{this.props.stat.toUpperCase()}</td>
                 <td style={baseStyle}>{this.props.baseStats[this.props.stat]}</td>
-                <td style={effStyle}>{this.props.effStats[this.props.stat]}</td>
+                <td style={effStyle}>
+                    <StatBreakdown value={this.props.effStats[this.props.stat]} breakdown={this.props.effStats.breakdown[this.props.stat]} />
+                </td>
                 <td style={changeStyle}>
                     ({change >= 0 ? "+" : ""}{change})
                 </td>

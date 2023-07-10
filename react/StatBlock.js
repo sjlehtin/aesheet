@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import StatRow from './StatRow';
+import StatBreakdown from "./StatBreakdown";
 import XPControl from './XPControl';
 import AddSPControl from './AddSPControl';
 import NoteBlock from './NoteBlock';
@@ -765,7 +766,6 @@ class StatBlock extends React.Component {
         var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
             "pos"];
         rows = stats.map((st, ii) => {
-            /* TODO: hard and soft mods should be passed here. */
             return <StatRow stat={st}
                             key={ii}
                             initialChar={this.state.char}
@@ -780,17 +780,17 @@ class StatBlock extends React.Component {
             <tr>
                 <td style={statStyle}>MOV</td>
                 <td style={baseStyle}>{baseStats.mov}</td>
-                <td style={effStyle}>{effStats.mov}</td>
+                <td style={effStyle}><StatBreakdown value={effStats.mov} breakdown={effStats.breakdown.mov} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>DEX</td>
                 <td style={baseStyle}>{baseStats.dex}</td>
-                <td style={effStyle}>{effStats.dex}</td>
+                <td style={effStyle}><StatBreakdown value={effStats.dex} breakdown={effStats.breakdown.dex} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>IMM</td>
                 <td style={baseStyle}>{baseStats.imm}</td>
-                <td style={effStyle}>{effStats.imm}</td>
+                <td style={effStyle}><StatBreakdown value={effStats.imm} breakdown={effStats.breakdown.imm} /></td>
             </tr>
         </tbody>;
 

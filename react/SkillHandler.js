@@ -84,9 +84,12 @@ class SkillHandler {
         for (let edge of this.props.edges) {
             for (let sb of edge.edge_skill_bonuses) {
                 if (!(sb.skill in skillBonusMap)) {
-                    skillBonusMap[sb.skill] = {bonus: 0};
+                    skillBonusMap[sb.skill] = {bonus: 0
+                        // , breakdown: []
+                    };
                 }
                 skillBonusMap[sb.skill].bonus += sb.bonus;
+                // skillBonusMap[sb.skill]
             }
         }
         return skillBonusMap;
@@ -115,6 +118,7 @@ class SkillHandler {
     }
 
     getACPenalty() {
+        /* TODO: Fix issue with extra stamina, should not give AC bonus. */
         return util.rounddown(this.props.character.stamina_damage/
             this.getBaseStats().stamina * (-20));
     }
@@ -175,7 +179,9 @@ class SkillHandler {
         if (!stat) {
             stat = skill.stat;
         }
-        const ability = this.getStat(stat);
+        const effStats = this.getEffStats();
+        const ability = effStats[stat.toLowerCase()];
+
         const level = this.skillLevel(skillName);
 
         let check = 0;
@@ -193,12 +199,16 @@ class SkillHandler {
         } else {
             let levelBonus = level * 5;
             check = ability + levelBonus;
-            breakdown.push({value: ability,
+            breakdown.push({
+                value: ability,
                 reason: stat
             })
-            breakdown.push({value: levelBonus,
-                reason: `skill level`
-            })
+            if (levelBonus) {
+                breakdown.push({
+                    value: levelBonus,
+                    reason: `skill level`
+                })
+            }
         }
         if (skillName in this.state.skillBonusMap) {
             check += this.state.skillBonusMap[skillName].bonus;
@@ -581,39 +591,122 @@ class SkillHandler {
     getEffStats() {
         if (!this._effStats) {
             this._effStats = {};
-            var baseStats = this.getBaseStats();
+            this._effStats.breakdown = {}
+            const baseStats = this.getBaseStats();
 
-            var woundPenalties = this.getWoundPenalties();
+            const woundPenalties = this.getWoundPenalties();
 
             for (let st of SkillHandler.baseStatNames) {
-                this._effStats[st] = baseStats[st] +
-                    this._softMods[st] + woundPenalties.aa;
+                this._effStats[st] = baseStats[st]
+                this._effStats.breakdown[st] = [
+                    {reason: st.toUpperCase(),
+                     value: baseStats[st]}
+                ]
+                const softMod = this._softMods[st];
+                if (softMod) {
+                    this._effStats[st] += softMod
+                    this._effStats.breakdown[st].push({
+                        reason: "soft mods",
+                        value: softMod
+                    })
+                }
+                this._effStats[st] += woundPenalties.aa;
+                if (woundPenalties.aa) {
+                    this._effStats.breakdown[st].push({
+                        reason: "wound penalties",
+                        value: woundPenalties.aa
+                    })
+                }
             }
 
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
-            // in the excel combat sheet.
+            // in the Excel combat sheet.
             if (this._effStats.fit > 0) {
                 var encumbrancePenalty = util.roundup(
                     (-10 * this.props.weightCarried) / this._effStats.fit);
 
-                this._effStats.fit += encumbrancePenalty;
-                this._effStats.ref += encumbrancePenalty;
+                if (encumbrancePenalty) {
+                    this._effStats.fit += encumbrancePenalty;
+                    this._effStats.breakdown.fit.push({
+                        reason: "encumbrance",
+                        value: encumbrancePenalty
+                    })
+
+                    this._effStats.ref += encumbrancePenalty;
+                    this._effStats.breakdown.ref.push({
+                        reason: "encumbrance",
+                        value: encumbrancePenalty
+                    })
+                }
             } else {
                 // Effective FIT zero or negative, the character cannot move.
                 this._effStats.fit = -100;
                 this._effStats.ref = -100;
             }
 
-            this._effStats.mov = util.roundup((this._effStats.fit +
-                this._effStats.ref)/2) + this._hardMods.mov +
-                this._softMods.mov + woundPenalties.mov;
-            this._effStats.dex = util.roundup((this._effStats.int +
-                this._effStats.ref)/2) + this._hardMods.dex +
-                this._softMods.dex;
-            this._effStats.imm = util.roundup((this._baseStats.fit +
-                this._baseStats.psy)/2) + this._hardMods.imm +
-                this._softMods.imm;
+            const addStatMods = (stat) => {
+                this._effStats[stat] += this._hardMods[stat]
+                if (this._hardMods[stat]) {
+                    this._effStats.breakdown[stat].push(
+                        {
+                            reason: "hard mods",
+                            value: this._hardMods[stat]
+                        }
+                    )
+                }
+                this._effStats[stat] += this._softMods[stat]
+                if (this._softMods[stat]) {
+                    this._effStats.breakdown[stat].push(
+                        {
+                            reason: "soft mods",
+                            value: this._softMods[stat]
+                        }
+                    )
+                }
+            }
+
+            const baseMov = util.roundup((this._effStats.fit +
+                this._effStats.ref) / 2)
+            this._effStats.mov = baseMov
+            this._effStats.breakdown.mov = [
+                {
+                    reason: "(FIT + REF) / 2",
+                    value: baseMov
+                }
+            ]
+            addStatMods('mov')
+            this._effStats.mov += woundPenalties.mov
+            if (woundPenalties.mov) {
+                this._effStats.breakdown.mov.push(
+                    {
+                        reason: "wound penalties",
+                        value: woundPenalties.mov
+                    }
+                )
+            }
+
+            const baseDex = util.roundup((this._effStats.int +
+                this._effStats.ref) / 2);
+            this._effStats.dex = baseDex
+            this._effStats.breakdown.dex = [
+                {
+                    reason: "(INT + REF) / 2",
+                    value: baseDex
+                }
+            ]
+            addStatMods('dex')
+
+            const baseImm = util.roundup((this._baseStats.fit +
+                this._baseStats.psy)/2);
+            this._effStats.imm = baseImm
+            this._effStats.breakdown.imm = [
+                {
+                    reason: "(FIT + PSY) / 2",
+                    value: baseImm
+                }
+            ]
+            addStatMods('imm')
         }
         return this._effStats;
     }
