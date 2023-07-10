@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
+import StatBreakdown from "./StatBreakdown";
 
 class WeaponRow extends React.Component {
     constructor(props) {
@@ -120,6 +121,38 @@ class WeaponRow extends React.Component {
         return check;
     }
 
+    skillCheckV2() {
+        const gottenCheck = this.props.skillHandler.skillCheckV2(
+            this.props.weapon.base.base_skill);
+
+        if (!gottenCheck) {
+            return null;
+        }
+        let check = gottenCheck.value
+        let breakdown = gottenCheck.breakdown.slice()
+        const ccv = this.ccv();
+        check += ccv;
+        if (ccv) {
+            breakdown.push({
+                value: ccv,
+                reason: "CCV"
+            })
+        }
+        if (!this.isSkilled()) {
+            check += this.props.weapon.base.ccv_unskilled_modifier;
+            if (this.props.weapon.base.ccv_unskilled_modifier) {
+                breakdown.push({
+                    value: this.props.weapon.base.ccv_unskilled_modifier,
+                    reason: "unskilled"
+                })
+            }
+        }
+        return {
+            value: check,
+            breakdown: breakdown
+        };
+    }
+
     static checkMod(roa, act, baseBonus, extraActionModifier) {
         if (1 / act >= 1 / roa + 1) {
             return baseBonus;
@@ -142,6 +175,10 @@ class WeaponRow extends React.Component {
             return modifier;
         }
         return Math.min(0, modifier + util.rounddown((stat - 45) / 3))
+    }
+
+    static counterPenaltyV2(stat) {
+        return util.rounddown((stat - 45) / 3)
     }
 
     getStat(stat) {
@@ -181,6 +218,82 @@ class WeaponRow extends React.Component {
                         this.getStat(this.penaltyCounterStat));
                 }
                 checks.push(mod + baseCheck);
+            }
+        }
+        return checks;
+    }
+
+    skillChecksV2(actions, givenProps) {
+        let props = {useType: WeaponRow.FULL, counterPenalty: true};
+        if (givenProps) {
+            props = Object.assign(props, givenProps);
+        }
+
+        const roa = this.roa(props.useType);
+        const baseCheck = this.skillCheckV2();
+        if (!baseCheck) {
+            // Actions not available.
+            return null; //actions.map((e) => {return null;});
+        }
+        const checks = [];
+
+        let check = baseCheck.value
+        let breakdown = baseCheck.breakdown.slice();
+
+        if (props.useType === WeaponRow.SEC) {
+            if (!this.props.weapon.base.is_shield) {
+                const wrongHandPenalty = -25;
+                check += wrongHandPenalty
+                breakdown.push({
+                    value: wrongHandPenalty,
+                    reason: "Wrong hand penalty"
+                })
+
+                const counter = Math.min(this.props.skillHandler
+                    .edgeLevel("Ambidexterity") * 5, -wrongHandPenalty);
+                check += counter;
+                if (counter) {
+                    breakdown.push({
+                        value: counter,
+                        reason: "Counter from Ambidexterity"
+                    })
+                }
+            }
+        }
+
+        for (let act of actions) {
+            if (act > 2 * roa) {
+                checks.push(null);
+            } else {
+                let actionBreakdown = breakdown.slice()
+                let actionCheck = check;
+
+                let mod = Math.round(WeaponRow.checkMod(roa, act,
+                    this.baseCheckBonusForSlowActions,
+                    this.extraActionModifier));
+
+                actionCheck += mod
+                if (mod) {
+                    actionBreakdown.push({
+                        value: mod,
+                        reason: "ROA"
+                    })
+                }
+
+                // TODO: counterPenalty is a bad name, as a bad stat will give actual penalty for actions with these, see AE2K_Weapons_17.xls
+                if (props.counterPenalty) {
+                    const counter = Math.min(WeaponRow.counterPenaltyV2(
+                        this.getStat(this.penaltyCounterStat)), -mod);
+                    if (counter) {
+                        actionCheck += counter
+                        actionBreakdown.push({
+                            value: counter,
+                            reason: `counter from ${this.penaltyCounterStat}`
+                        })
+                    }
+                }
+                checks.push({value: actionCheck,
+                             breakdown: actionBreakdown});
             }
         }
         return checks;
@@ -350,7 +463,7 @@ class WeaponRow extends React.Component {
         const attackDamageStyle = initStyle;
         const defenseDamageStyle = defenseInitStyle;
 
-        const checks = this.skillChecks(WeaponRow.ccActions,
+        const checks = this.skillChecksV2(WeaponRow.ccActions,
             {useType: useType});
 
         let checkCells;
@@ -358,7 +471,14 @@ class WeaponRow extends React.Component {
             checkCells = <td colSpan={9}><strong>Range too long!</strong></td>;
         } else {
             checkCells = checks.map((el, ii) => {
-                return <td key={`chk-${ii}`} style={cellStyle}>{el}</td>;
+                let cellContent;
+                if (el) {
+                    cellContent = <StatBreakdown value={el.value}
+                                                 breakdown={el.breakdown}/>
+                } else {
+                    cellContent = ""
+                }
+                return <td key={`chk-${ii}`} style={cellStyle}>{cellContent}</td>;
             });
         }
         const attackInitiatives = this.initiatives([1, 2, 3, 4],
