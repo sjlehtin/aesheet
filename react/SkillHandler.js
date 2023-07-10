@@ -233,7 +233,7 @@ class SkillHandler {
         }
 
         return {
-            check: check,
+            value: check,
             breakdown: breakdown
         }
     }

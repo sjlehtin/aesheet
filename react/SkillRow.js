@@ -84,7 +84,7 @@ class SkillRow extends React.Component {
                         <td>{stat.toUpperCase()}</td>
                         <td>
                             <SkillCheck skillName={this.props.skillName}
-                                        skillCheck={check.check}
+                                        skillCheck={check.value}
                                         checkBreakdown={check.breakdown}/>
                         </td>
                     </tr>
@@ -95,7 +95,7 @@ class SkillRow extends React.Component {
             const check = this.skillCheckV2()
             if (check) {
                 checks = <SkillCheck skillName={this.props.skillName}
-                                     skillCheck={check.check}
+                                     skillCheck={check.value}
                                      checkBreakdown={check.breakdown}/>
             }
         }
