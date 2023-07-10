@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import WeaponRow from './WeaponRow';
 const util = require('./sheet-util');
 import {Col, Row, Button} from 'react-bootstrap';
+import StatBreakdown from "./StatBreakdown";
 
 class RangedWeaponRow extends WeaponRow {
     constructor(props) {
@@ -35,6 +36,46 @@ class RangedWeaponRow extends WeaponRow {
             }
         }
         return check;
+    }
+
+    skillCheckV2() {
+        const gottenCheck = this.props.skillHandler.skillCheckV2(
+            this.props.weapon.base.base_skill);
+
+        if (!gottenCheck) {
+            return null;
+        }
+        let check = gottenCheck.value
+        let breakdown = gottenCheck.breakdown.slice()
+
+        const unskilledPenalty = -10;
+
+        if (this.props.weapon.base.skill) {
+            if (!this.props.skillHandler.hasSkill(
+                    this.props.weapon.base.skill)) {
+                check += unskilledPenalty;
+                breakdown.push({
+                    value: unskilledPenalty,
+                    reason: `unskilled (${this.props.weapon.base.skill})`
+                })
+            }
+        }
+
+        if (this.props.weapon.base.skill2) {
+            if (!this.props.skillHandler.hasSkill(
+                    this.props.weapon.base.skill2)) {
+                check += unskilledPenalty;
+                breakdown.push({
+                    value: unskilledPenalty,
+                    reason: `unskilled (${this.props.weapon.base.skill2})`
+                })
+            }
+        }
+
+        return {
+            value: check,
+            breakdown: breakdown
+        };
     }
 
     roa() {
@@ -77,29 +118,36 @@ class RangedWeaponRow extends WeaponRow {
     }
 
     render() {
-        var headerStyle = {padding: 2};
-        var cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
-        var initStyle = Object.assign({color: "red"}, cellStyle);
-        var infoStyle = {marginRight: 5};
-        var helpStyle = {color: "hotpink"};
+        const headerStyle = {padding: 2};
+        const cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
+        const initStyle = Object.assign({color: "red"}, cellStyle);
+        const infoStyle = {marginRight: 5};
+        const helpStyle = {color: "hotpink"};
 
-        var actions = [0.5, 1, 2, 3, 4, 5];
-        var actionCells = actions.map((el, ii) => {
+        const actions = [0.5, 1, 2, 3, 4, 5];
+        const actionCells = actions.map((el, ii) => {
             return <th style={headerStyle} key={`act-${ii}`}>{el}</th>;
         });
-        let checkCells = this.skillChecks(actions);
+        let checkCells = this.skillChecksV2(actions);
         if (checkCells === null) {
             checkCells = <td colSpan={6}>Unable to use weapon</td>;
         } else {
             checkCells = checkCells.map((el, ii) => {
-                return <td style={cellStyle} key={`chk-${ii}`}>{el}</td>;
+                let cellContent;
+                if (el) {
+                    cellContent = <StatBreakdown value={el.value}
+                                                 breakdown={el.breakdown}/>
+                } else {
+                    cellContent = ""
+                }
+                return <td style={cellStyle} key={`chk-${ii}`}>{cellContent}</td>;
             });
         }
-        var initCells = this.initiatives(actions).map((el, ii) =>
+        const initCells = this.initiatives(actions).map((el, ii) =>
         { return <td style={initStyle} key={`init-${ii}`}>{util.renderInt(el)}</td>; });
 
-        var base = this.props.weapon.base;
-        var ranges = <span>{base.range_s} / {base.range_m} / {base.range_l}</span>;
+        const base = this.props.weapon.base;
+        const ranges = <span>{base.range_s} / {base.range_m} / {base.range_l}</span>;
 
         return <div style={this.props.style}>
             <table style={{fontSize: 'inherit'}}>
