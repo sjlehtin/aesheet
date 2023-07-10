@@ -1,6 +1,4 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 const factories = require('./factories');
 
@@ -9,7 +7,8 @@ const skillFactory = factories.skillFactory;
 
 import SkillRow from 'SkillRow'
 
-import { render, fireEvent } from '@testing-library/react'
+import { render } from '@testing-library/react'
+import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 
 const renderSkillRow = (givenProps) => {
@@ -24,35 +23,9 @@ const renderSkillRow = (givenProps) => {
 }
 
 describe('SkillRow', function() {
-    "use strict";
 
-    var getSkillRow = function (givenProps) {
-        var props = {skill: "Unarmed Combat"};
-        if (typeof(givenProps) !== "undefined") {
-            props = Object.assign(props, givenProps);
-        }
-
-        // TODO: React TestUtils suck a bit of a balls.
-        var Wrapper = createReactClass({
-            render: function() {
-                return <table><tbody>{this.props.children}</tbody></table>;
-            }
-        });
-
-        var row = <SkillRow {...props}/>;
-        var table = TestUtils.renderIntoDocument(
-            <Wrapper>
-                {row}
-            </Wrapper>
-        );
-
-        return TestUtils.findRenderedComponentWithType(table,
-            SkillRow);
-    };
-
-
-
-    it('calculates skill check', function () {
+    it('calculates skill check', async () => {
+        const user = userEvent.setup()
         const row = renderSkillRow({
             skillName: "Persuasion",
             skillHandler: factories.skillHandlerFactory({
@@ -63,7 +36,13 @@ describe('SkillRow', function() {
 
             characterSkill: characterSkillFactory({level: 1}),
             skill: skillFactory({stat: "CHA"})});
-        expect(row.getByLabelText("Skill check").textContent).toEqual("60")
+        let elem = row.getByLabelText("Skill check");
+        expect(elem.textContent).toEqual("60")
+
+        await user.click(elem)
+
+        row.getByRole('row', {name: /CHA 55/})
+        row.getByRole('row', {name: /skill level 5/})
     });
 
     it('recognizes base skills', function () {
@@ -82,7 +61,7 @@ describe('SkillRow', function() {
                 skill_cost_3: null
             })});
 
-        expect(row.getByLabelText("Skill check").textContent).toEqual("")
+        expect(row.queryByLabelText("Skill check")).toBeNull()
     });
 
     it('can render defaulted skills', function () {
@@ -123,7 +102,7 @@ describe('SkillRow', function() {
             characterSkill: characterSkillFactory({level: 1}),
             skill: skillFactory({stat: "CHA"})
         });
-        expect(row.getByLabelText("Skill check").textContent).toEqual("WIL: 65")
+        expect(within(row.getByRole('table', {name: /explicit/})).getByRole('row', {name: /WIL/}).textContent).toContain("65")
     });
 
     it('can render skill checks for multiple stats', function () {
@@ -141,13 +120,15 @@ describe('SkillRow', function() {
             renderForStats: ["mov", "ref"]
         });
 
-        let elem = row.getByLabelText("Skill check");
-        expect(elem.textContent).toContain("REF: 65")
-        expect(elem.textContent).toContain("MOV: 60")
+        const refRow = within(row.getByRole('table', {name: /explicit/})).getByRole('row', {name: /REF/});
+        expect(refRow.textContent).toContain("65")
+        expect(refRow.textContent).not.toContain("60")
+        expect(within(row.getByRole('table', {name: /explicit/})).getByRole('row', {name: /MOV/}).textContent).toContain("60")
     });
 
     xit("shows skill with obsoleted skill level", test.todo);
     xit("highlight skill with missing required skills", test.todo);
+    xit("test remove button functionality", test.todo);
 
     it('has controls to increase skill levels', async () => {
         const user = userEvent.setup();

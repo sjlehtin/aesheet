@@ -166,6 +166,68 @@ class SkillHandler {
         return check;
     }
 
+    skillCheckV2(skillName, stat) {
+        const skill = this.state.skillMap[skillName];
+        if (!skill || this.isBaseSkill(skillName)) {
+            return null;
+        }
+
+        if (!stat) {
+            stat = skill.stat;
+        }
+        const ability = this.getStat(stat);
+        const level = this.skillLevel(skillName);
+
+        let check = 0;
+        let breakdown = []
+        if (level === "U") {
+            check = Math.round(ability / 4)
+            breakdown.push({value: check,
+                reason: `1/4*${stat} (U)`
+            })
+        } else if (level === "B") {
+            check = Math.round(ability / 2)
+            breakdown.push({value: check,
+                reason: `1/2*${stat} (B)`
+            })
+        } else {
+            let levelBonus = level * 5;
+            check = ability + levelBonus;
+            breakdown.push({value: ability,
+                reason: stat
+            })
+            breakdown.push({value: levelBonus,
+                reason: `skill level`
+            })
+        }
+        if (skillName in this.state.skillBonusMap) {
+            check += this.state.skillBonusMap[skillName].bonus;
+            breakdown.push({value: this.state.skillBonusMap[skillName].bonus,
+                reason: `skill bonuses`
+            })
+        }
+
+        const skillMod = this.getSkillMod(skillName);
+        if (skillMod) {
+            check += skillMod;
+            breakdown.push({value: skillMod,
+                reason: `skill mods`
+            })
+        }
+        const acPenalty = this.getACPenalty();
+        if (acPenalty) {
+            check += acPenalty;
+            breakdown.push({value: acPenalty,
+                reason: `AC penalty`
+            })
+        }
+
+        return {
+            check: check,
+            breakdown: breakdown
+        }
+    }
+
     /* U is quarter-skill, i.e., using a pistol even without Basic
        Firearms.  B is half-skill, i.e., the character has top-level skill,
        but not the skill required.  Otherwise, if the character has the

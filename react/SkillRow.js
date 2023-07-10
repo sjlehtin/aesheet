@@ -1,7 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from 'react'
+import PropTypes from 'prop-types'
 
-import {GoArrowUp, GoArrowDown, GoX} from 'react-icons/go';
+import SkillCheck from 'SkillCheck'
+import {GoArrowUp, GoArrowDown, GoX} from 'react-icons/go'
 
 /*
  * This component handles display of a skill, level, checks.  If the
@@ -31,6 +32,10 @@ class SkillRow extends React.Component {
 
     skillCheck(stat) {
         return this.props.skillHandler.skillCheck(this.props.skillName, stat);
+    }
+
+    skillCheckV2(stat) {
+        return this.props.skillHandler.skillCheckV2(this.props.skillName, stat);
     }
 
     skillLevel() {
@@ -68,18 +73,31 @@ class SkillRow extends React.Component {
     }
 
     render () {
-        var checks;
+        let checks;
         if (this.props.renderForStats) {
             var checkList = [];
             for (var ii = 0; ii < this.props.renderForStats.length; ii++) {
                 var stat = this.props.renderForStats[ii];
-                var check = this.skillCheck(stat);
-                checkList.push(`${stat.toUpperCase()}: ${check}`);
+                var check = this.skillCheckV2(stat);
+                checkList.push(
+                    <tr key={ii}>
+                        <td>{stat.toUpperCase()}</td>
+                        <td>
+                            <SkillCheck skillName={this.props.skillName}
+                                        skillCheck={check.check}
+                                        checkBreakdown={check.breakdown}/>
+                        </td>
+                    </tr>
+                );
             }
-            checks = checkList.join(' ');
+            checks = <table aria-label={"Skill checks for explicitly given stats"}><tbody>{checkList}</tbody></table>;
         } else {
-            var skill = this.props.skill;
-            checks = <span title={skill.stat}>{this.skillCheck()}</span>
+            const check = this.skillCheckV2()
+            if (check) {
+                checks = <SkillCheck skillName={this.props.skillName}
+                                     skillCheck={check.check}
+                                     checkBreakdown={check.breakdown}/>
+            }
         }
         var indent = 0;
         if (this.props.indent > 0) {
@@ -149,7 +167,7 @@ class SkillRow extends React.Component {
               this.props.skillName}</span><span style={{position: "relative"}}>{remove}</span></td>
             <td><span>{this.skillLevel()}</span><span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
-            <td className="skill-check" aria-label={"Skill check"}>{checks}</td></tr>;
+            <td className="skill-check">{checks}</td></tr>;
     }
 }
 
