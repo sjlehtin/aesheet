@@ -288,7 +288,7 @@ class WeaponRow extends React.Component {
                         actionCheck += counter
                         actionBreakdown.push({
                             value: counter,
-                            reason: `counter from ${this.penaltyCounterStat}`
+                            reason: `modifier from ${this.penaltyCounterStat}`
                         })
                     }
                 }
