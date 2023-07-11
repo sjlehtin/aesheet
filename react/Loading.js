@@ -9,7 +9,11 @@ class Loading extends React.Component {
         } else {
             content = 'Loading...';
         }
-        return <div><GoSync id={"loading"} mega spin />{content}</div>;
+        return <div><GoSync id={"loading"} style={{
+            animation: "spin 1s infinite linear",
+            strokeWidth: "2px",
+            scale: "150%"
+        }} />{content}</div>;
     }
 }
 

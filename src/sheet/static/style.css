@@ -142,6 +142,16 @@ ul.changelog .row2 {
     background-color: #f0f0ff;
     }
 
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /*.unskilled { color: red;  font-style: italic; }*/
 /*.skills .check { font-weight: bold; }*/
 /*.specialization td:first-child { font-style: italic; }*/
