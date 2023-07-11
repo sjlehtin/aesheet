@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import RangedWeaponRow from './RangedWeaponRow';
-import AmmoControl from './AmmoControl';
-import ScopeControl from './ScopeControl';
+import RangedWeaponRow from 'RangedWeaponRow';
+import AmmoControl from 'AmmoControl';
+import ScopeControl from 'ScopeControl';
+import StatBreakdown from "StatBreakdown";
 
 const util = require('./sheet-util');
 import {Col, Row, Button, Table} from 'react-bootstrap';
@@ -242,6 +243,32 @@ class FirearmControl extends RangedWeaponRow {
             return null;
         }
         return super.skillCheck() + effect.check;
+    }
+
+    skillCheckV2() {
+        let effect = this.rangeEffect(this.props.toRange)
+        if (effect === null) {
+            return null
+        }
+        const baseCheck = super.skillCheckV2()
+        if (!baseCheck) {
+            return null
+        }
+        let check = baseCheck.value
+        let breakdown = baseCheck.breakdown.slice()
+
+        check += effect.check
+        if (effect.check) {
+            breakdown.push({
+                value: effect.check,
+                reason: "range"
+            })
+        }
+
+        return {
+            value: check,
+            breakdown: breakdown
+        }
     }
 
     singleBurstChecks(check) {
@@ -591,12 +618,20 @@ class FirearmControl extends RangedWeaponRow {
                 util.renderInt(init)}</td>
         });
 
-        let skillChecks = this.skillChecks(actions);
+        let skillChecks = this.skillChecksV2(actions);
         if (skillChecks == null) {
             skillChecks = <td colSpan={9}><strong>Range too long!</strong></td>;
         } else {
-            skillChecks = skillChecks.map((chk, ii) =>
-                {return <td key={`chk-${ii}`} style={cellStyle}>{chk}</td>});
+            skillChecks = skillChecks.map((chk, ii) => {
+                let cellContent;
+                if (chk) {
+                    cellContent = <StatBreakdown value={chk.value}
+                                                 breakdown={chk.breakdown}/>
+                } else {
+                    cellContent = ""
+                }
+                return <td key={`chk-${ii}`} style={cellStyle}>{cellContent}</td>
+            });
         }
 
         const marginRightStyle = {marginRight: "1em"};
