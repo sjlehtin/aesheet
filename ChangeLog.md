@@ -1,9 +1,31 @@
+## Version 0.13.0 -- 2023-07-11
+
+### Added
+
+* Added skill check breakdown in skill table and weapon checks.
+* Added stat breakdown in the stats table.
+* Added field `tech_level` to Effect, from where it is now added to ArmorSpecialQuality and WeaponSpecialQuality. No current campaigns have any of these object, so no backwards compatibility issues should arise.
+* Added field `magazine_size` to BaseFirearm, preparing for handling ammo spend in the sheet.
+* Added list edit controls for Ammunition and BaseFirearms to make it easier to compare and modify firearms en masse.
+
+### Changed
+
+* Simplified inventory user interface.
+
+### Fixed
+
+* Fixed issue with auxiliary stats in combat (i.e., FIT in ranged combat, INT in CC) where low auxiliary stat was ignored. Reading the rules a low stat can clearly incur penalties.
+
+### Removed
+
+* Removed CharacterLogEntry edit from the admin. Really never used and only clutters the list of models.
+
 ## Version 0.12.0 -- 2023-07-06
 
 ### Added
 
-* Improvements to Django Admin interface to make it simpler to create alternate versions of weapons and armors with new tech levels.
-* Tech levels rendered in Django Admin Campaign view, making it simpler to compare campaigns.
+* Improved the Django Admin interface to make it simpler to create alternate versions of weapons and armors with new tech levels.
+* Render Tech levels in Django Admin Campaign view, making it simpler to compare campaigns.
 * BaseFirearm, WeaponTemplate, ArmorTemplate, and many others to support "Save as new", tech level filtering and searching.
 
 ### Removed
