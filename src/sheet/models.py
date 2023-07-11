@@ -928,6 +928,10 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
         Calibre, through=FirearmAmmunitionType
     )
 
+    magazine_size = models.IntegerField(
+        default=8, help_text="Typical clip size for the firearm"
+    )
+
     def get_ammunition_types(self):
         """
         Return the accepted ammunition types for the firearm.

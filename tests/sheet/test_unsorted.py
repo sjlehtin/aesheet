@@ -52,6 +52,7 @@ class BaseFirearmFormTestCase(TestCase):
                        'target_initiative': -1, 'weapon_class_modifier': 6,
                        'restricted_burst_rounds': 0,
                        'sweep_fire_disabled': False,
+                       'magazine_size': 8,
                        'ammo_types': ammo_type}
 
         form = forms.CreateBaseFirearmForm(
