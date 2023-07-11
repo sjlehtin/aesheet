@@ -282,8 +282,15 @@ class WeaponRow extends React.Component {
 
                 // TODO: counterPenalty is a bad name, as a bad stat will give actual penalty for actions with these, see AE2K_Weapons_17.xls
                 if (props.counterPenalty) {
-                    const counter = Math.min(WeaponRow.counterPenaltyV2(
-                        this.getStat(this.penaltyCounterStat)), -mod);
+                    let counter = WeaponRow.counterPenaltyV2(
+                        this.getStat(this.penaltyCounterStat))
+                    if (counter > 0) {
+                        if (mod > 0) {
+                            counter = 0
+                        } else {
+                            counter = Math.min(counter, -mod)
+                        }
+                    }
                     if (counter) {
                         actionCheck += counter
                         actionBreakdown.push({
