@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import WeaponRow from 'WeaponRow';
-const util = require('./sheet-util');
-import {Col, Row, Button} from 'react-bootstrap';
 import StatBreakdown from "StatBreakdown";
+const util = require('./sheet-util');
+import {Button} from 'react-bootstrap';
 
 class RangedWeaponRow extends WeaponRow {
     constructor(props) {
