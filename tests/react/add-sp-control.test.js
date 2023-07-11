@@ -7,7 +7,7 @@ import '@testing-library/jest-dom'
 import AddSPControl from 'AddSPControl';
 
 describe('AddSPControl', function() {
-    const addSPControlFactory = function(givenProps) {
+    const renderAddSPControl = function(givenProps) {
         var props = {
             initialAgeSP: 6
         };
@@ -21,7 +21,7 @@ describe('AddSPControl', function() {
     it('notifies parent of addition', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
+        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
         const el = await control.findByRole("button")
         await user.click(el);
@@ -31,7 +31,7 @@ describe('AddSPControl', function() {
 
     it('validates input and notifies about invalid', async () => {
         const spy = jest.fn().mockResolvedValue({})
-        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
+        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
         expect(control.getByRole("button")).not.toBeDisabled()
         const input = control.getByRole("textbox")
@@ -46,7 +46,7 @@ describe('AddSPControl', function() {
     it('validates input and accepts valid', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
+        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
         expect(control.getByRole("button")).not.toBeDisabled()
 
@@ -63,7 +63,7 @@ describe('AddSPControl', function() {
     it('validates input and accepts negative', async ()  => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
+        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
         expect(control.getByRole("button")).not.toBeDisabled()
 
@@ -80,7 +80,7 @@ describe('AddSPControl', function() {
     it('submits on Enter', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
+        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
         const input = control.getByRole("textbox")
         fireEvent.change(input, {target: {value: "-3"}})
@@ -94,7 +94,7 @@ describe('AddSPControl', function() {
     it('returns to normal ageSP after submit', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = addSPControlFactory({onAdd: spy, initialAgeSP: 6});
+        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
         const input = control.getByRole("textbox")
         fireEvent.change(input, {target: {value: "-3"}})
@@ -108,4 +108,5 @@ describe('AddSPControl', function() {
         await waitFor(() => expect(control.getByRole("textbox")).toHaveValue("6"))
     });
 
+    xit("should toast the user about the added sp", test.todo)
 });
