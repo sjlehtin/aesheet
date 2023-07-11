@@ -9,8 +9,6 @@ var factories = require('./factories');
 const Inventory = require('Inventory').default;
 
 describe('stat block weight handling', function() {
-    "use strict";
-
     it("can calculate weight", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
@@ -132,7 +130,7 @@ describe('stat block weight handling', function() {
         });
     });
 
-    it("adds firearms weight", function () {
+    it("adds scope weight", function () {
         const block = factories.statBlockFactory();
         return block.loaded.then(function () {
             block.handleFirearmsLoaded([factories.firearmFactory({
@@ -141,6 +139,7 @@ describe('stat block weight handling', function() {
             expect(block.getCarriedWeight()).toEqual(1.5);
         });
     });
+
     it("adds miscellaneous items weight", function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {
