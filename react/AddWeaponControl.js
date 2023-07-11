@@ -45,8 +45,6 @@ class AddWeaponControl extends React.Component {
     }
 
     handleAdd() {
-        console.log("adding:",
-            this.state.selectedWeapon, this.state.selectedQuality);
         if (this.props.onAdd) {
             let weapon;
             if ('id' in this.state.selectedWeapon) {
