@@ -309,7 +309,7 @@ class FirearmFactory(DjangoModelFactory):
     scope = None
 
     class Meta:
-        model = models.Firearm
+        model = models.SheetFirearm
 
     @factory.post_generation
     def ammunition_types(self, create, extracted, **kwargs):

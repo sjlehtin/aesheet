@@ -390,7 +390,8 @@ class CopySheetForm(RequestFormMixin, forms.Form):
         original_sheet = self.cleaned_data['sheet']
         weapons = original_sheet.weapons.all()
         ranged_weapons = original_sheet.ranged_weapons.all()
-        firearms = original_sheet.firearms.all()
+        firearms = sheet.models.SheetFirearm.objects.filter(
+            sheet=original_sheet)
         miscellaneous_items = original_sheet.miscellaneous_items.all()
         transient_effects = original_sheet.transient_effects.all()
 
@@ -433,7 +434,9 @@ class CopySheetForm(RequestFormMixin, forms.Form):
             new_sheet.ranged_weapons.add(weapon)
 
         for firearm in firearms:
-            new_sheet.firearms.add(firearm)
+            firearm.pk = None
+            firearm.sheet = new_sheet
+            firearm.save()
 
         for item in miscellaneous_items:
             sheet.models.SheetMiscellaneousItem.objects.create(

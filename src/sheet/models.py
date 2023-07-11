@@ -850,7 +850,7 @@ class Ammunition(ExportedModel, BaseDamager):
 
     @classmethod
     def dont_export(cls):
-        return ["firearm"]
+        return ["firearm", "sheetfirearm"]
 
     def __str__(self):
         return f"{self.calibre.name} {self.bullet_type} {self.type}"
@@ -950,16 +950,13 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
             "range_e",
             "firearm",
             "firearmammunitiontype",
+            "sheetfirearm",
+            "sheet"
         ]
 
 
-class Firearm(models.Model):
-    # This is the SheetFirearm.  This could be renamed and changed to work in
-    # same fashion as similar items, currently causes Django to have an extra
-    # table for the relationship.  Change would require adding a link to the
-    # sheet from here, data migration, and little work for the REST viewset.
-
-    # modifications, such as scopes could be added here.
+class SheetFirearm(models.Model):
+    sheet = models.ForeignKey("Sheet", on_delete=models.CASCADE)
     base = models.ForeignKey(BaseFirearm, on_delete=models.CASCADE)
     ammo = models.ForeignKey(Ammunition, on_delete=models.CASCADE)
 
@@ -1511,8 +1508,9 @@ class Sheet(PrivateMixin, models.Model):
     # or "order".
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
-    firearms = models.ManyToManyField(Firearm, blank=True)
 
+    firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
+                                      blank=True)
     miscellaneous_items = models.ManyToManyField(
         MiscellaneousItem, blank=True, through=SheetMiscellaneousItem
     )

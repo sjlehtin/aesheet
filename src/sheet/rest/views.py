@@ -380,20 +380,42 @@ class SheetViewSetMixin(ListPermissionMixin):
 
 
 class SheetFirearmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
+        return super(SheetFirearmViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
     def get_serializer_class(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            return serializers.SheetFirearmListSerializer
-        else:
+        if self.action == 'create' or self.action == "partial_update":
             # When creating new, we do not want the full nested
             # representation, just id's.
             return serializers.SheetFirearmCreateSerializer
+        else:
+            return serializers.SheetFirearmListSerializer
 
     def get_queryset(self):
-        return self.sheet.firearms.all()
+        return models.SheetFirearm.objects.filter(sheet=self.sheet)
+        # self.sheet.firearms.all()
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(SheetFirearmViewSet, self).get_serializer(
+                *args, **kwargs)
+        if self.action == 'create' or self.action == "partial_update":
+            # ListSerializer does not have the fields.
+            serializer.fields['sheet'].default = self.sheet
+            serializer.fields['sheet'].read_only = True
+            # The effect will not be changed with this API after creation.
+            if serializer.instance is not None:
+                serializer.fields['base'].read_only = True
+
+        return serializer
 
     def perform_create(self, serializer):
-        super(SheetFirearmViewSet, self).perform_create(serializer)
-        self.sheet.firearms.add(serializer.instance)
+        serializer.validated_data['sheet'] = self.sheet
+        super(SheetFirearmViewSet, self).perform_create(
+            serializer)
 
 
 class SheetWeaponViewSet(SheetViewSetMixin, viewsets.ModelViewSet):

@@ -280,14 +280,14 @@ class SheetFirearmListSerializer(serializers.ModelSerializer):
     ammo = AmmunitionListSerializer()
 
     class Meta:
-        model = sheet.models.Firearm
+        model = sheet.models.SheetFirearm
         fields = "__all__"
         depth = 1
 
 
 class SheetFirearmCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = sheet.models.Firearm
+        model = sheet.models.SheetFirearm
         fields = "__all__"
 
 

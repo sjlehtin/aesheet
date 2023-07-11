@@ -84,15 +84,15 @@ class BaseFirearmFormTestCase(TestCase):
                                 ammo_type=ammo_type))
 
     def test_changing_ammo_type(self):
-        firearm = factories.FirearmFactory(base__name="M29 (OICW)",
-                                           ammo__calibre__name='5.56Nto',
-                                           ammo__bullet_type='FMJ')
-        self.assertEqual(firearm.base.get_ammunition_types(), [u"5.56Nto"])
+        firearm = factories.BaseFirearmFactory(name="M29 (OICW)",
+                                               ammunition_types=["5.56Nto"])
 
-        form = self._get_form('7.62x39', instance=firearm.base)
+        self.assertEqual(firearm.get_ammunition_types(), [u"5.56Nto"])
+
+        form = self._get_form('7.62x39', instance=firearm)
         new_firearm = form.save()
 
-        self.assertEqual(firearm.base.pk, new_firearm.pk)
+        self.assertEqual(firearm.pk, new_firearm.pk)
         self.assertEqual(new_firearm.get_ammunition_types(), [u"7.62x39"])
 
 
@@ -242,17 +242,6 @@ class SheetCopyTestCase(TestCase):
                 factories.RangedWeaponFactory(base__name="Short bow"),
                 factories.RangedWeaponFactory(base__name="Javelin"),
             ],
-            firearms=[
-                factories.FirearmFactory(
-                    base__name="M29 (OICW)",
-                    ammo__calibre__name="5.56Nto",
-                    ammo__bullet_type="FMJ",
-                ),
-                factories.FirearmFactory(
-                    base__name="RK95", ammo__calibre__name="5.56Nto",
-                    ammo__bullet_type="FMJ"
-                ),
-            ],
             transient_effects=[
                 factories.TransientEffectFactory(name="Bless of templars"),
                 factories.TransientEffectFactory(name="Courage of ancients"),
@@ -268,6 +257,10 @@ class SheetCopyTestCase(TestCase):
                 ("Bad eyesight", 4),
             ],
         )
+        ammo = factories.AmmunitionFactory(calibre__name="5.56Nto", bullet_type="FMJ")
+        self.original_sheet.firearms.add(factories.BaseFirearmFactory(name="M29 (OICW)"), through_defaults={"ammo": ammo})
+        self.original_sheet.firearms.add(factories.BaseFirearmFactory(name="RK95"), through_defaults={"ammo": ammo})
+
         self.original_character = self.original_sheet.character
         factories.SheetMiscellaneousItemFactory(item__name="Geiger counter",
                                                 sheet=self.original_sheet)

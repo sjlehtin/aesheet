@@ -619,7 +619,8 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_firearms(self):
-        self.sheet.firearms.add(factories.FirearmFactory(ammo__calibre__name="45FCK"))
+        self.sheet.firearms.add(factories.BaseFirearmFactory(name="Glock 19"),
+                                through_defaults={"ammo": factories.AmmunitionFactory(calibre__name="45FCK")})
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
@@ -642,84 +643,76 @@ class SheetFirearmTestCase(TestCase):
                 data={'ammo': ammo.pk,
                       'base': firearm.pk}, format='json')
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
-
-    def test_adding_items_should_not_reuse_existing(self):
-        """
-        Firearms are sheet specific (TODO: will be renamed to SheetFirearm).
-        """
-        firearm = factories.BaseFirearmFactory(name="AK-47")
-        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
-
-        fa = factories.FirearmFactory(base=firearm, ammo=ammo)
-
-        response = self.client.post(
-                self.url,
-                data={'ammo': ammo.pk,
-                      'base': firearm.pk}, format='json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(self.sheet.firearms.all()[0].base.name, "AK-47")
-        self.assertNotEqual(self.sheet.firearms.all()[0].pk, fa.pk)
+        self.assertEqual(models.SheetFirearm.objects.filter(sheet=self.sheet)[0].base.name,
+                         "AK-47")
 
     def test_deleting_items(self):
-        firearm = factories.FirearmFactory()
-        self.sheet.firearms.add(firearm)
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
+        self.sheet.firearms.add(firearm, through_defaults={"ammo": ammo})
+
+        sheet_firearm = models.SheetFirearm.objects.get(base=firearm.pk)
 
         response = self.client.delete(
-                "{}{}/".format(self.url, firearm.pk), format='json')
+                "{}{}/".format(self.url, sheet_firearm.pk), format='json')
         self.assertEqual(response.status_code, 204)
-        # Should still be found. TODO: should actually be deleted.
-        self.assertEqual(len(models.Firearm.objects.filter(pk=firearm.pk)), 0)
+        self.assertEqual(len(models.SheetFirearm.objects.filter(pk=sheet_firearm.pk)), 0)
         self.assertEqual(len(self.sheet.firearms.all()), 0)
 
     def test_changing_ammo(self):
-        firearm = factories.FirearmFactory()
+        firearm = factories.BaseFirearmFactory(name="AK-47")
         ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
-        self.sheet.firearms.add(firearm)
+        self.sheet.firearms.add(firearm, through_defaults={"ammo": ammo})
 
-        self.assertNotEqual(models.Firearm.objects.get(pk=firearm.pk).ammo.pk,
-                            ammo.pk)
+        ammo2 = factories.AmmunitionFactory(calibre__name="7.62x39")
+        sheet_firearm = models.SheetFirearm.objects.get(base=firearm.pk)
+        self.assertNotEqual(sheet_firearm.ammo.pk, ammo2.pk)
 
         response = self.client.patch(
-            "{}{}/".format(self.url, firearm.pk),
-            data={'ammo': ammo.pk},
+            "{}{}/".format(self.url, sheet_firearm.pk),
+            data={'ammo': ammo2.pk},
             format='json')
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).ammo.pk,
-                         ammo.pk)
+        self.assertEqual(models.SheetFirearm.objects.get(pk=sheet_firearm.pk).ammo.pk,
+                         ammo2.pk)
 
     def test_changing_scope(self):
-        firearm = factories.FirearmFactory()
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
         scope = factories.ScopeFactory(name="Foo Scope")
-        self.sheet.firearms.add(firearm)
+        self.sheet.firearms.add(firearm, through_defaults={"ammo": ammo})
 
-        self.assertIsNone(models.Firearm.objects.get(pk=firearm.pk).scope)
+        sheet_firearm = models.SheetFirearm.objects.get(base=firearm.pk)
+        self.assertIsNone(sheet_firearm.scope)
 
         response = self.client.patch(
-            "{}{}/".format(self.url, firearm.pk),
+            "{}{}/".format(self.url, sheet_firearm.pk),
             data={'scope': scope.pk},
             format='json')
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).scope.pk,
+        self.assertEqual(models.SheetFirearm.objects.get(pk=sheet_firearm.pk).scope.pk,
                          scope.pk)
 
     def test_removing_scope(self):
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
         scope = factories.ScopeFactory(name="Foo Scope")
-        firearm = factories.FirearmFactory(scope=scope)
-        self.sheet.firearms.add(firearm)
+        self.sheet.firearms.add(firearm, through_defaults={"ammo": ammo,
+                                                           "scope": scope})
 
-        self.assertEqual(models.Firearm.objects.get(pk=firearm.pk).scope.pk,
+        sheet_firearm = models.SheetFirearm.objects.get(base=firearm.pk)
+        self.assertEqual(sheet_firearm.scope.pk,
                          scope.pk)
 
         response = self.client.patch(
-            "{}{}/".format(self.url, firearm.pk),
+            "{}{}/".format(self.url, sheet_firearm.pk),
             data={'scope': None},
             format='json')
         self.assertEqual(response.status_code, 200)
 
-        self.assertIsNone(models.Firearm.objects.get(pk=firearm.pk).scope)
+        self.assertIsNone(models.SheetFirearm.objects.get(pk=sheet_firearm.pk).scope)
 
 
 # TODO: add test for checking private sheets restrict access to
