@@ -4,8 +4,8 @@
 
 * Added skill check breakdown in skill table and weapon checks.
 * Added stat breakdown in the stats table.
-* Added field `tech_level` to Effect, from where it is now added to ArmorSpecialQuality and WeaponSpecialQuality. No current campaigns have any of these object, so no backwards compatibility issues should arise.
-* Added field `magazine_size` to BaseFirearm, preparing for handling ammo spend in the sheet.
+* Added field `tech_level` to Effect, from where it is now added to ArmorSpecialQuality and WeaponSpecialQuality. No current campaigns have any of these objects, so no backwards compatibility issues should arise.
+* Added field `magazine_size` to BaseFirearm, preparing for handling spent ammo in the sheet.
 * Added list edit controls for Ammunition and BaseFirearms to make it easier to compare and modify firearms en masse.
 
 ### Changed
@@ -18,7 +18,7 @@
 
 ### Removed
 
-* Removed CharacterLogEntry edit from the admin. Really never used and only clutters the list of models.
+* Removed CharacterLogEntry edit from the admin. Never used and only clutters the list of models.
 
 ## Version 0.12.0 -- 2023-07-06
 
