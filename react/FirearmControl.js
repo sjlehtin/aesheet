@@ -394,7 +394,7 @@ class FirearmControl extends RangedWeaponRow {
         for (let ii = 0; ii < 5; ii++) {
             const checkCells = [];
             for (let jj = 0; jj < burstChecks.length; jj++) {
-                checkCells.push(<td key={jj} style={cellStyle}>
+                checkCells.push(<td key={jj} style={cellStyle} aria-label={`Burst ${jj + 1} To-Hit`}>
                     {burstChecks[jj][ii]}</td>);
             }
             burstRows.push(<tr key={`chk-${ii}`}>
@@ -523,7 +523,7 @@ class FirearmControl extends RangedWeaponRow {
             checks.reverse();
             ii = 0;
             var checkCells = checks.map((chk) => {
-                return <td style={cellStyle} key={ii++}>{chk}</td>;
+                return <td style={cellStyle} key={ii++} aria-label={`Sweep ${sweep} to-hit`}>{chk}</td>;
             });
             sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{util.roundup(this.props.weapon.base.autofire_rpm/(6*sweep))}</td>{checkCells}</tr>);
         }
@@ -534,7 +534,7 @@ class FirearmControl extends RangedWeaponRow {
             <th style={{fontSize: "60%", textAlign: "center"}}
                 key={"header-" + ii}>{16 - ii} hit</th>);
         return <div>
-        <table style={{fontSize: "inherit"}}>
+        <table style={{fontSize: "inherit"}} aria-label={"Sweep fire to-hit"}>
             <thead>
             <tr><th colSpan={4}>Sweep fire {this.props.weapon.base.autofire_rpm}{this.props.weapon.base.autofire_class}</th></tr>
             <tr><th>RPT</th><th>TGT</th>{hits}</tr></thead>
@@ -618,6 +618,18 @@ class FirearmControl extends RangedWeaponRow {
                 util.renderInt(init)}</td>
         });
 
+        const baseCheck = super.skillCheckV2();
+
+        let baseCheckContainer;
+        if (baseCheck) {
+            const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
+            baseCheckContainer = <div><label id={"base-check"} style={baseCheckStyle}>Base check</label><span
+                aria-labelledby={"base-check"}><StatBreakdown
+                value={baseCheck.value}
+                breakdown={baseCheck.breakdown}
+                style={baseCheckStyle}/></span></div>
+        }
+
         let skillChecks = this.skillChecksV2(actions);
         if (skillChecks == null) {
             skillChecks = <td colSpan={9}><strong>Range too long!</strong></td>;
@@ -667,15 +679,19 @@ class FirearmControl extends RangedWeaponRow {
             rangeInfo = <div>
                 <Table>
                     <tbody>
-                    <tr>
+                    <tr aria-label={"Range effect"}>
                         <th >Range effect</th>
-                        <td className={"mx-2"}>{`${rangeEffect.name}`}</td>
+                        <td className={"mx-2"} aria-label={"Name"}>{`${rangeEffect.name}`}</td>
                         <th className={"ml-5"}>Bumping</th>
                         <td className={"mx-2"}>{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
                         <th className={"ml-5"}>Check</th>
-                        <td className={"mx-2"}>{`${rangeEffect.check}`}</td>
-                        <th className={"ml-5"}>TI, Dmg/Leth</th>
-                        <td className={"mx-2"}>{`${rangeEffect.targetInitiative}`}/{`${rangeEffect.damage}`}/{`${rangeEffect.leth}`}</td>
+                        <td className={"mx-2"} aria-label={"Check modifier"}>{`${this.renderInt(rangeEffect.check)}`}</td>
+                        <th className={"ml-2"}>TI</th>
+                        <td className={"mx-2"} aria-label={"Target initiative modifier"}>{`${this.renderInt(rangeEffect.targetInitiative)}`}</td>
+                        <th className={"ml-5"}>Dmg</th>
+                        <td className={"mx-2"} aria-label={"Damage modifier"}>{`${this.renderInt(rangeEffect.damage)}`}</td>
+                        <th className={"ml-5"}>Leth</th>
+                        <td className={"mx-2"} aria-label={"Lethality modifier"}>{`${this.renderInt(rangeEffect.leth)}`}</td>
                     </tr>
                     </tbody>
                 </Table>
@@ -700,21 +716,22 @@ class FirearmControl extends RangedWeaponRow {
                               </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr aria-label={"Actions"}>
                                 <td rowSpan="2" style={cellStyle}>
                                     <div>
                                         {weapon.name}
 
                                         {unskilled}
+                                        {baseCheckContainer}
                                     </div>
                                 </td>
                                 <td style={cellStyle}>{this.skillLevel()}</td>
-                                <td style={cellStyle}>{this.rof().toFixed(2)}</td>
+                                <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().toFixed(2)}</td>
                                 {skillChecks}
-                                <td style={cellStyle}>{this.targetInitiative()}</td>
+                                <td style={cellStyle} aria-label={"Target initiative"}>{`${util.renderInt(this.targetInitiative())}`}</td>
                                 <td style={cellStyle}>{weapon.draw_initiative}</td>
                             </tr>
-                            <tr>
+                            <tr aria-label={"Initiatives"}>
                                 <td style={helpStyle} colSpan={2}>
                                     I vs. 1 target
                                 </td>
@@ -734,11 +751,11 @@ class FirearmControl extends RangedWeaponRow {
                                 <th style={inlineHeaderStyle} colSpan={2}>L</th>
                             </tr>
                             <tr>
-                                <td style={cellStyle} colSpan={3}>{this.renderDamage()}</td>
+                                <td style={cellStyle} colSpan={3} aria-label={"Damage"}>{this.renderDamage()}</td>
                                 <td style={cellStyle} colSpan={2}>{this.props.weapon.ammo.type}</td>
-                                <td style={cellStyle} colSpan={2} title={`Old value: ${weapon.range_s}`}>{this.shortRange()}</td>
-                                <td style={cellStyle} colSpan={2} title={`Old value: ${weapon.range_m}`}>{this.mediumRange()}</td>
-                                <td style={cellStyle} colSpan={2} title={`Old value: ${weapon.range_l}`}>{this.longRange()}</td>
+                                <td style={cellStyle} colSpan={2} aria-label={"Short range"}>{this.shortRange()}</td>
+                                <td style={cellStyle} colSpan={2} aria-label={"Medium range"}>{this.mediumRange()}</td>
+                                <td style={cellStyle} colSpan={2} aria-label={"Long range"}>{this.longRange()}</td>
                             </tr>
                             <tr>
                                 <td style={cellStyle} rowSpan={2}>
