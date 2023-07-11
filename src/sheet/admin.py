@@ -44,10 +44,30 @@ class FirearmAmmunitionTypeInline(admin.TabularInline):
 
 
 class BaseFirearmAdmin(admin.ModelAdmin):
+    list_per_page = 50
+    list_select_related = True
+
     inlines = [FirearmAmmunitionTypeInline]
     list_filter = ('tech_level',)
     search_fields = ('name', )
     save_as = True
+    list_display = ['name', 'draw_initiative', 'weight',
+                    'magazine_size',
+                    'autofire_rpm',
+                    'autofire_class', 'sweep_fire_disabled',
+                    'restricted_burst_rounds', 'stock', 'duration',
+                    'weapon_class_modifier', 'accuracy', 'sight',
+                    'barrel_length',
+                    'base_skill', 'skill', 'skill2',
+                    'durability', 'dp']
+    list_editable = ['draw_initiative', 'weight',
+                     'magazine_size',
+                     'autofire_rpm',
+                     'autofire_class', 'sweep_fire_disabled',
+                     'restricted_burst_rounds', 'stock', 'duration',
+                     'weapon_class_modifier', 'accuracy', 'sight',
+                     'barrel_length',
+                     'durability', 'dp']
 
 
 class ArmorAdmin(admin.ModelAdmin):
@@ -55,9 +75,18 @@ class ArmorAdmin(admin.ModelAdmin):
 
 
 class AmmunitionAdmin(admin.ModelAdmin):
+    list_select_related = True
+    list_per_page = 50
+
     search_fields = ('calibre__name', 'bullet_type')
     list_filter = ('tech_level', )
     save_as = True
+    list_display = ['calibre', 'type', 'bullet_type', 'weight', 'velocity', 'damage', 'num_dice', 'dice', 'extra_damage', 'leth', 'plus_leth']
+    list_editable = ['type', 'bullet_type', 'weight', 'velocity', 'num_dice', 'dice', 'extra_damage', 'leth', 'plus_leth']
+
+    @admin.display
+    def damage(self, obj):
+        return sm.format_damage(obj.num_dice, obj.dice, obj.extra_damage, obj.leth, obj.plus_leth)
 
 
 class ItemAdmin(admin.ModelAdmin):
