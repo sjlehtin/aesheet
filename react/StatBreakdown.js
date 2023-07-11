@@ -23,6 +23,7 @@ class StatBreakdown extends React.Component {
                     onClick={() => {
                         this.setState({show: !this.state.show})
                     }}
+                    style={this.props.style}
                     aria-label={"Skill check"}>
             <OverlayTrigger
                 show={this.state.show}
@@ -56,7 +57,8 @@ class StatBreakdown extends React.Component {
 
 StatBreakdown.propTypes = {
     value: PropTypes.number.isRequired,
-    breakdown: PropTypes.arrayOf(Object).isRequired
+    breakdown: PropTypes.arrayOf(Object).isRequired,
+    style: PropTypes.object
 }
 
 export default StatBreakdown
