@@ -1,11 +1,13 @@
-const factories = require('./factories');
+import React from "react";
 
 import { render } from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
-import FirearmControl from "../../react/FirearmControl";
-import React from "react";
+
+import FirearmControl from "FirearmControl";
+
+const factories = require('./factories');
 
 const server = setupServer(
     rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {
