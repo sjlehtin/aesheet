@@ -4,7 +4,7 @@ import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
-const FirearmControl = require('FirearmControl').default;
+import FirearmControl from 'FirearmControl'
 
 const factories = require('./factories');
 
@@ -23,42 +23,6 @@ describe('FirearmControl', () => {
     afterEach(() => server.resetHandlers());
     afterAll(() => server.close());
 
-    function rangeFirearm(givenProps) {
-
-        let props = {
-            base: {base_skill: "Handguns", skill: "Pistol"},
-            handlerProps: {
-                character: {cur_int: 50},
-                skills: [{
-                    skill: "Handguns",
-                    level: 1
-                }]
-            },
-            weapon: {base: {duration: "0.110", sight: 600, barrel_length: 602, accuracy: 1.0},
-                scope: null,
-            ammo: {
-                num_dice: 2,
-                dice: 6,
-                extra_damage: 2,
-                leth: 5,
-                plus_leth: 1
-            }}
-        };
-        if (givenProps) {
-            if (typeof(givenProps.handlerProps) === "object") {
-                props.handlerProps = Object.assign(props.handlerProps,
-                    givenProps.handlerProps);
-                delete givenProps.handlerProps;
-            }
-            if (typeof(givenProps.weapon) === "object") {
-                props.weapon = Object.assign(props.weapon, givenProps.weapon);
-                delete givenProps.weapon;
-            }
-            props = Object.assign(props, givenProps);
-        }
-        return factories.firearmControlTreeFactory(props);
-    }
-
     const renderFirearm = (givenProps) => {
 
         let props = {
@@ -72,13 +36,13 @@ describe('FirearmControl', () => {
             },
             weapon: {base: {sight: 600, barrel_length: 602, accuracy: 1.0},
                 scope: null,
-            ammo: {
-                num_dice: 2,
-                dice: 6,
-                extra_damage: 2,
-                leth: 5,
-                plus_leth: 1
-            }}
+                ammo: {
+                    num_dice: 2,
+                    dice: 6,
+                    extra_damage: 2,
+                    leth: 5,
+                    plus_leth: 1
+                }}
         };
         if (givenProps) {
             if (givenProps.handlerProps) {
@@ -755,6 +719,4 @@ describe('FirearmControl', () => {
         await user.click(firearm.getByRole("button", {name: "Remove firearm"}))
         expect(spy).toHaveBeenCalledWith({id: 5})
     });
-
-    xit("can remove scope", test.todo)
 });
