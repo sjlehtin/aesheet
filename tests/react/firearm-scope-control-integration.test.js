@@ -1,76 +1,93 @@
-import {ScopeControl} from 'ScopeControl';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
+import FirearmControl from 'FirearmControl'
+import {render} from "@testing-library/react";
+import React from "react";
+
+import {rest} from 'msw'
+import {setupServer} from 'msw/node'
+import userEvent from '@testing-library/user-event'
 
 const factories = require('./factories');
 
+const server = setupServer(
+  rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+  rest.get('http://localhost/rest/scopes/campaign/3/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+)
+
 describe('FirearmControl -- ScopeControl', () => {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers());
+    afterAll(() => server.close());
+
+    const renderFirearm = (givenProps) => {
+        return render(<FirearmControl {...factories.firearmControlPropsFactory(givenProps)} />)
+    }
 
     it('renders ScopeControl', () => {
-        const control = factories.firearmControlTreeFactory({weapon:
+        const control = renderFirearm({weapon:
             {scope: {name: "Test Scope"}}});
-        let scopeControl = TestUtils.findRenderedComponentWithType(
-            control, ScopeControl);
-        expect(scopeControl).toBeDefined();
-        expect(ReactDOM.findDOMNode(scopeControl).textContent).toContain("Test Scope");
+        control.getByText("Test Scope")
     });
 
     it('does not barf without a scope', () => {
-        const control = factories.firearmControlTreeFactory({weapon:
+        const control = renderFirearm({weapon:
             {scope: null}});
-        let scopeControl = TestUtils.findRenderedComponentWithType(
-            control, ScopeControl);
-        expect(scopeControl).toBeDefined();
-        expect(ReactDOM.findDOMNode(scopeControl).textContent).toEqual("Add a scope");
+        control.getByRole("button", {name: "Remove scope"})
+        control.getByText("Add a scope")
     });
 
     it('shows a disabled remove button without a scope', () => {
-        const control = factories.firearmControlTreeFactory({weapon:
+        const control = renderFirearm({weapon:
             {scope: null}});
-        expect(ReactDOM.findDOMNode(control._scopeRemoveButton).disabled).toBe(true);
+        expect(control.getByRole("button", {name: "Remove scope"})).toBeDisabled()
     });
 
-    it('integrates scopeControl for listing URL', () => {
-        // Check that url for firearm gets propagated correctly.
-        const control = factories.firearmControlTreeFactory({weapon:
-            {base: {name: "Nabu tussari"},
-             scope: {name: "Test scope"}},
-        campaign: 4});
-        let scopeControl = TestUtils.findRenderedComponentWithType(
-            control, ScopeControl);
-        expect(scopeControl.props.url).toEqual('/rest/scopes/campaign/4/');
+    it('integrates ScopeControl for changing scope', async () => {
+        const user = userEvent.setup()
+
+        const newScope = factories.scopeFactory({id: 42, name: "Fantabulous fahrseher"});
+        server.use(
+            rest.get("http://localhost/rest/scopes/campaign/4/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.scopeFactory({id: 21, name: "Foo"}),
+                    newScope,
+                ]))
+            })
+        )
+        const spy = jest.fn().mockResolvedValue({})
+        const control = renderFirearm({
+            weapon:
+                {
+                    id: 19,
+                    scope: {name: "Test scope"}
+                },
+            onChange: spy,
+            campaign: 4
+        });
+        await user.click(control.getByRole("combobox", {name: "Scope selection"}))
+
+        await user.click(await control.findByText(/Fantabulous/))
+
+        expect(spy).toHaveBeenCalledWith({id: 19, scope: newScope})
     });
 
-    it('integrates ScopeControl for changing scope', () => {
-        const spy = jest.fn().mockReturnValue(Promise.resolve({}));
 
-        const control = factories.firearmControlTreeFactory({weapon:
-            {id: 19,
-                base: {name: "Nabu tussari"},
-                scope: {"label": "Test scope"}},
+    it('allows removing scope', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        const control = renderFirearm({
+            weapon:
+                {
+                    id: 19,
+                    scope: {name: "Test scope"}
+                },
             onChange: spy
         });
-        let scopeControl = TestUtils.findRenderedComponentWithType(
-            control, ScopeControl);
-
-        let newScope = factories.ammunitionFactory({id: 56});
-        scopeControl.handleChange(newScope);
-
-        expect(spy).toBeCalledWith({id: 19, scope: newScope});
-    });
-
-    it('allows removing scope', () => {
-        const spy = jest.fn().mockReturnValue(Promise.resolve({}));
-
-        const control = factories.firearmControlTreeFactory({weapon:
-            {id: 19,
-                base: {name: "Nabu tussari"},
-                scope: {name: "Test scope"}},
-            onChange: spy
-        });
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._scopeRemoveButton));
-        expect(spy).toBeCalledWith({id: 19, scope: null});
+        await user.click(control.getByRole("button", {name: "Remove scope"}))
+        expect(spy).toHaveBeenCalledWith({id: 19, scope: null})
     });
 
 });
