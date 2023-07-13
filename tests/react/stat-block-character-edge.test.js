@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatBlock = require('StatBlock').default;
+import StatBlock from 'StatBlock'
 
 const factories = require('./factories');
 
