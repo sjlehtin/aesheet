@@ -16,28 +16,6 @@ class RangedWeaponRow extends WeaponRow {
         this.penaltyCounterStat = "FIT";
     }
 
-    skillCheck () {
-        var check = this.props.skillHandler.skillCheck(
-            this.props.weapon.base.base_skill);
-
-        /* TODO: This works differently with ranged and close-combat
-           weapons (CCV on unskilled).  Might need a slightly more intricate
-           system to handle this. */
-        if (this.props.weapon.base.skill) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill)) {
-                check -= 10;
-            }
-        }
-        if (this.props.weapon.base.skill2) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill2)) {
-                check -= 10;
-            }
-        }
-        return check;
-    }
-
     skillCheckV2() {
         const gottenCheck = this.props.skillHandler.skillCheckV2(
             this.props.weapon.base.base_skill);
