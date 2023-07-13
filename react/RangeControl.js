@@ -40,7 +40,6 @@ class RangeControl extends React.Component {
     }
 
     handleDetectionLevelChange(value) {
-        console.log(value);
         this.setState({currentDetectionLevel: value.detectionLevel});
         this.props.onChange({
             range: this.state.currentRange,
@@ -63,8 +62,8 @@ class RangeControl extends React.Component {
                 style.fontWeight = 'bold';
                 verbose = "Bumping enabled";
             }
-            visionCheck = <span>Vision check: <span style={style}>{check}</span>
-                <span className={"ml-2"} style={{fontStyle: "italic"}}>{verbose}</span></span>;
+            visionCheck = <div><span>Vision check:</span><span style={style} aria-label={"Vision check"}>{check}</span>
+                <span className={"ml-2"} style={{fontStyle: "italic"}} aria-label={"Vision check detail"}>{verbose}</span></div>;
         }
         return <div>
             <Form.Group aas={Row}>
@@ -73,7 +72,7 @@ class RangeControl extends React.Component {
                 <Form.Control ref={(c) => this._inputField = c}
                           size="sm" type="text"
                           sm={"2"}
-                          label="Target at range"
+                          aria-label="Target at range"
                           placeholder={"Leave empty to shoot to short range"}
                           onChange={(e) => this.handleChange(e)}
                           isValid={this.isValid()}
@@ -83,6 +82,7 @@ class RangeControl extends React.Component {
             <Form.Label column sm={"2"}>Darkness DL</Form.Label>
                 <Col>
                 <DropdownList data={RangeControl.detectionLevels}
+                              aria-label={"Darkness DL"}
                           textField={item => `${item.description} (${item.detectionLevel})`}
                           dataKey='detectionLevel'
                           value={this.state.currentDetectionLevel}

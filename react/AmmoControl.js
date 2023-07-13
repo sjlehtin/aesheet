@@ -38,7 +38,9 @@ class AmmoControl extends React.Component {
     }
 
     render() {
-        return <DropdownList value={this.props.ammo}
+        return <DropdownList
+            aria-label={"Select ammunition"}
+            value={this.props.ammo}
                            busy={this.state.busy}
                            textField={(obj) => {
                                return AddFirearmControl.formatAmmo(obj);

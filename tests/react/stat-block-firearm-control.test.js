@@ -1,101 +1,154 @@
-import TestUtils from 'react-dom/test-utils';
-import AmmoControl from 'AmmoControl';
-import ScopeControl from 'ScopeControl';
-import FirearmControl from 'FirearmControl';
-import RangeControl from 'RangeControl';
+import React from 'react';
+
+import StatBlock from 'StatBlock'
+
+import { render, waitForElementToBeRemoved, within, fireEvent } from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
 
 const factories = require('./factories');
 
-jest.mock('sheet-rest');
-const rest = require('sheet-rest');
+const server = setupServer(
+  rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
+    return res(ctx.json(factories.sheetFactory()))
+  }),
+  rest.get('http://localhost/rest/sheets/1/*/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+  rest.get('http://localhost/rest/characters/2/', (req, res, ctx) => {
+    return res(ctx.json(factories.characterFactory()))
+  }),
+  rest.get('http://localhost/rest/characters/2/*/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+  rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  })
+)
 
 describe('StatBlock -- FirearmControl', () => {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    // TODO: fairly hard to verify REST API call payloads. Try to make this simpler.
-    it('allows changing a firearm', () => {
-        // Check that changing the firearm gets propagated up, and REST API is
-        // invoked.
-        const block = factories.statBlockFactory({firearms: [{id: 5, ammo: {id: 12}, scope: null}]});
+    it('allows changing a firearm', async () => {
+        const user = userEvent.setup()
+        const firearm = factories.firearmFactory({'base': {name: "The Cannon"}});
 
-        return block.loaded.then(() => {
-            let ammoControl = TestUtils.findRenderedComponentWithType(block, AmmoControl);
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.ammunitionFactory({id: 97, calibre: {name: "12FR"}}),
+                    factories.ammunitionFactory({id: 42, calibre: {name: "FooAmmo"}, num_dice: 3, dice: 4, extra_damage: 3, leth: 4, plus_leth: 2}),
+                ]))
+            }),
+            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/", (req, res, ctx) => {
+                return res(ctx.json(
+                    Object.assign({}, firearm, req)
+                ))
+            }),
 
-            let ammoPatchResolve = Promise.resolve({});
-            rest.patch.mockReturnValue(ammoPatchResolve);
+            rest.get("http://localhost/rest/scopes/campaign/2/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.scopeFactory({id: 42, name: "Baff baff", notes: "Awesome scope"}),
+                ]))
+            }),
+        )
 
-            expect(ammoControl.props.ammo.id).toEqual(12);
-            let newAmmo = factories.ammunitionFactory({id: 42, label: "Foo"});
-            ammoControl.handleChange(newAmmo);
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-            expect(rest.patch).toBeCalledWith('/rest/sheets/1/sheetfirearms/5/', {id: 5, ammo: 42});
+        await sheet.findByText("The Cannon")
 
-            rest.patch.mockClear();
-            let scopePatchResolve = Promise.resolve({});
-            rest.patch.mockReturnValue(scopePatchResolve);
+        const input = await sheet.findByRole("combobox", {name: "Select ammunition"})
+        await user.click(input)
 
-            let scopeControl = TestUtils.findRenderedComponentWithType(block, ScopeControl);
-            expect(scopeControl.props.scope).toBe(null);
-            let newScope = factories.scopeFactory({id: 42, name: "Baff baff"});
-            scopeControl.handleChange(newScope);
-            expect(rest.patch).toBeCalledWith('/rest/sheets/1/sheetfirearms/5/', {id: 5, scope: 42});
+        await user.click(await within(input).findByText(/FooAmmo/))
 
-            return Promise.all([ammoPatchResolve, scopePatchResolve]).then((values) => {
-                expect(block.state.firearmList[0].ammo).toEqual(newAmmo);
-                expect(block.state.firearmList[0].scope).toEqual(newScope);
-            });
+        await within(await sheet.findByLabelText(/Firearm/)).findByText("3d4+3/4 (+2)")
 
-        });
+        const scopeInput = await sheet.findByRole("combobox", {name: "Scope selection"})
+        await user.click(scopeInput)
+
+        await user.click(await within(scopeInput).findByText(/Baff baff/))
+
+        await within(await sheet.findByLabelText(/Firearm/)).findByText("Awesome scope")
     });
 
-    it('allows changing range to shoot to', () => {
-        const block = factories.statBlockFactory({
-            firearms: [{
-                id: 5,
-                ammo: {id: 12},
-                scope: null
-            }]
-        });
+    it('allows changing range to shoot to', async () => {
+        const user = userEvent.setup()
 
-        return block.loaded.then(() => {
-            let rangeControl = TestUtils.findRenderedComponentWithType(block, RangeControl);
-            let spy = jest.spyOn(block, 'rangeChanged');
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                ]))
+            }),
+        )
 
-            TestUtils.Simulate.change(rangeControl._inputField, {target: {value: 19}});
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
 
-            expect(spy).toHaveBeenCalledWith({range: 19,
-                darknessDetectionLevel: 0});
-        });
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
+
+        const input = await sheet.findByLabelText("Target at range")
+
+        fireEvent.change(input, {target: {value: "50"}})
+
+        const dlInput = await sheet.findByRole("combobox", {name: "Darkness DL"})
+        await user.click(dlInput)
+
+        await user.click(await within(dlInput).findByText(/Artificial light/))
+
+        expect((await sheet.findByLabelText("Vision check")).textContent).toEqual("43")
+        expect((await sheet.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 32")
     });
 
 
-    it('allows removing a scope from a firearm', () => {
-        // Check that changing the firearm gets propagated up, and REST API is
-        // invoked.
-        const block = factories.statBlockFactory({
-            firearms: [{
-                id: 5,
-                ammo: {id: 12},
-                scope: {id: 42}
-            }]
+    it('allows removing a scope from a firearm', async () => {
+        const user = userEvent.setup()
+        const firearm = factories.firearmFactory({
+            id: 1,
+            'base': {name: "The Cannon"},
+            scope: factories.scopeFactory({name: "Awesome scope", id: 42})
         });
 
-        return block.loaded.then(() => {
-            rest.patch.mockClear();
-            let scopePatchRemoveResolve = Promise.resolve({});
-            rest.patch.mockReturnValue(scopePatchRemoveResolve);
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.ammunitionFactory({id: 97, calibre: {name: "12FR"}}),
+                    factories.ammunitionFactory({id: 42, calibre: {name: "FooAmmo"}, num_dice: 3, dice: 4, extra_damage: 3, leth: 4, plus_leth: 2}),
+                ]))
+            }),
+            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/", (req, res, ctx) => {
+                return res(ctx.json(
+                    Object.assign({}, firearm, req)
+                ))
+            }),
 
-            let scopeControl = TestUtils.findRenderedComponentWithType(block, ScopeControl);
-            expect(scopeControl.props.scope).not.toBe(null);
+            rest.get("http://localhost/rest/scopes/campaign/2/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.scopeFactory({id: 42, name: "Baff baff", notes: "Awesome scope"}),
+                ]))
+            }),
+        )
 
-            let fireArmControl = TestUtils.findRenderedComponentWithType(block, FirearmControl);
-            fireArmControl.handleScopeRemove();
-            expect(rest.patch).toBeCalledWith('/rest/sheets/1/sheetfirearms/5/', {id: 5, scope: null});
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-            return scopePatchRemoveResolve.then(() => {
-                expect(block.state.firearmList[0].scope).toEqual(null);
-            });
 
-        });
+        const firearmBlock = await sheet.findByLabelText(/Firearm/);
+        await within(firearmBlock).findByText("Awesome scope")
+        await user.click(await within(firearmBlock).findByRole("button", {name: "Remove scope"}))
+        expect(await within(await sheet.findByLabelText(/Firearm/)).queryByText("Awesome scope")).toBeNull()
     });
 });
