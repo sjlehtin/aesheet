@@ -52,16 +52,17 @@ class BaseFirearmAdmin(admin.ModelAdmin):
     search_fields = ('name', )
     save_as = True
     list_display = ['name', 'draw_initiative', 'weight',
-                    'magazine_size',
                     'autofire_rpm',
                     'autofire_class', 'sweep_fire_disabled',
-                    'restricted_burst_rounds', 'stock', 'duration',
+                    'restricted_burst_rounds', 'magazine_size',
+                    'magazine_weight',
+                    'stock', 'duration',
                     'weapon_class_modifier', 'accuracy', 'sight',
                     'barrel_length',
                     'base_skill', 'skill', 'skill2',
                     'durability', 'dp']
     list_editable = ['draw_initiative', 'weight',
-                     'magazine_size',
+                     'magazine_size', 'magazine_weight',
                      'autofire_rpm',
                      'autofire_class', 'sweep_fire_disabled',
                      'restricted_burst_rounds', 'stock', 'duration',

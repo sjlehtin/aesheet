@@ -1,5 +1,5 @@
 BaseFirearm;;;;;;;;;;;;;;;;;;;;;;;;;
-name;description;notes;tech_level;draw_initiative;durability;dp;weight;base_skill;skill;skill2;target_initiative;range_s;range_m;range_l;autofire_rpm;autofire_class;sweep_fire_disabled;restricted_burst_rounds;stock;duration;weapon_class_modifier;accuracy;sight;barrel_length;ammunition_types
-"Colt SA Army 1873 4.8""";;;2K;-3;4;4;1.021;Handguns;;;-1;12;24;36;;;FALSE;0;1;0.01;10;0.85;170;121;45Clt
+name;description;notes;tech_level;draw_initiative;durability;dp;magazine_weight;weight;base_skill;skill;skill2;target_initiative;range_s;range_m;range_l;autofire_rpm;autofire_class;sweep_fire_disabled;restricted_burst_rounds;stock;duration;weapon_class_modifier;accuracy;sight;barrel_length;ammunition_types
+"Colt SA Army 1873 4.8""";;;2K;-3;4;4;0.35;1.021;Handguns;;;-1;12;24;36;;;FALSE;0;1;0.01;10;0.85;170;121;45Clt
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-"Colt SA Army 1874 4.8""";;;2K;-3;4;4;1.021;Handguns;;;-1;12;24;36;;;FALSE;0;1;0.01;10;0.85;170;121;45Clt
+"Colt SA Army 1874 4.8""";;;2K;-3;4;4;0.40;1.021;Handguns;;;-1;12;24;36;;;FALSE;0;1;0.01;10;0.85;170;121;45Clt

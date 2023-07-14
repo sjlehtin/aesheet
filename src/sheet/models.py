@@ -931,6 +931,8 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
     magazine_size = models.IntegerField(
         default=8, help_text="Typical clip size for the firearm"
     )
+    magazine_weight = models.DecimalField(max_digits=7, decimal_places=4, default=0.35,
+                                          help_text="Empty magazine weight")
 
     def get_ammunition_types(self):
         """

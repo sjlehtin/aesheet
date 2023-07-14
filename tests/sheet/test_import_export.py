@@ -235,8 +235,8 @@ class ImportExportPostgresSupport(TestCase):
 class FirearmImportExportTestcase(TestCase):
     firearm_csv_data = u"""\
 "BaseFirearm",,,,,,,,,,,,,,,,,,,,
-"name","description","notes","tech_level","draw_initiative","durability","dp","weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
-"Glock 19",,,"2K",-3,5,10,1,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
+"name","description","notes","tech_level","draw_initiative","durability","dp","weight","magazine_weight","duration","stock","base_skill","skill","skill2","type","target_initiative","ammo_weight","range_s","range_m","range_l","ammunition_types"
+"Glock 19",,,"2K",-3,5,10,1,0.35,0.11,1,"Handguns",,,"P",-2,0.1,20,40,60,"9Pb|9Pb+"
 
 """.encode('utf-8')
 
@@ -313,8 +313,8 @@ class FirearmImportFromExcelTestcase(TestCase):
         det_url = reverse("import")
         response = self.client.post(det_url, { 'import_data' :
                                                    ("BaseFirearm\n"
-        "name,description,notes,tech_level,draw_initiative,durability,dp,weight,base_skill,skill,skill2,target_initiative,range_s,range_m,range_l,autofire_rpm,autofire_class,sweep_fire_disabled,restricted_burst_rounds,stock,duration,weapon_class_modifier,accuracy,sight,barrel_length,ammunition_types\n"
-        "Colt SA Army 1873 4.8\",,,2K,-3,4,4,1.021,Handguns,,,-1,12,24,36,,,FALSE,0,1,0.08,10,0.85,170,121,45Clt"),
+        "name,description,notes,tech_level,draw_initiative,durability,dp,weight,magazine_weight,base_skill,skill,skill2,target_initiative,range_s,range_m,range_l,autofire_rpm,autofire_class,sweep_fire_disabled,restricted_burst_rounds,stock,duration,weapon_class_modifier,accuracy,sight,barrel_length,ammunition_types\n"
+        "Colt SA Army 1873 4.8\",,,2K,-3,4,4,1.021,0.35,Handguns,,,-1,12,24,36,,,FALSE,0,1,0.08,10,0.85,170,121,45Clt"),
                                                })
         self.assertRedirects(response, reverse("import"))
 
