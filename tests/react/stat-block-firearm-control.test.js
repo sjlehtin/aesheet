@@ -2,7 +2,7 @@ import React from 'react';
 
 import StatBlock from 'StatBlock'
 
-import { render, waitForElementToBeRemoved, within, fireEvent } from '@testing-library/react'
+import { render, waitForElementToBeRemoved, within, fireEvent, prettyDOM, waitFor } from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
@@ -151,4 +151,154 @@ describe('StatBlock -- FirearmControl', () => {
         await user.click(await within(firearmBlock).findByRole("button", {name: "Remove scope"}))
         expect(await within(await sheet.findByLabelText(/Firearm/)).queryByText("Awesome scope")).toBeNull()
     });
+
+    it('allows removing a clip from a firearm', async () => {
+        const user = userEvent.setup()
+        const firearm = factories.firearmFactory({
+            id: 1,
+            base: {name: "The Cannon"},
+            scope: factories.scopeFactory({name: "Awesome scope", id: 42}),
+            magazines: [
+                factories.magazineFactory({id: 42, capacity: 20, current: 15}),
+                factories.magazineFactory({id: 43, capacity: 20, current: 20}),
+                factories.magazineFactory({id: 45, capacity: 20, current: 19}),
+            ]
+        });
+
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.ammunitionFactory({id: 97, calibre: {name: "12FR"}}),
+                    factories.ammunitionFactory({id: 42, calibre: {name: "FooAmmo"}, num_dice: 3, dice: 4, extra_damage: 3, leth: 4, plus_leth: 2}),
+                ]))
+            }),
+            rest.delete("http://localhost/rest/sheets/1/sheetfirearms/1/magazines/45/", (req, res, ctx) => {
+                return res(ctx.json(
+                    Object.assign({}, firearm, req)
+                ))
+            }),
+
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
+
+        const mag = await sheet.queryByLabelText("Magazine of size 20 with 19 bullets remaining")
+        expect(mag).not.toBeNull()
+
+        const firearmBlock = await sheet.findByLabelText(/Firearm/);
+        const removeButtons = await within(firearmBlock).findAllByRole("button", {name: "Remove magazine"})
+        expect(removeButtons.length).toEqual(3)
+
+        await user.click(removeButtons[2])
+
+        await waitFor( () => {
+            expect(within(sheet.getByLabelText("Firearm The Cannon")).queryByLabelText("Magazine of size 21 with 21 bullets remaining")).toBeNull()
+        })
+
+    });
+
+    it('allows adding a clip to a firearm', async () => {
+        const user = userEvent.setup()
+        const firearm = factories.firearmFactory({
+            id: 1,
+            base: {name: "The Cannon"},
+        });
+
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.ammunitionFactory({
+                        id: 97,
+                        calibre: {name: "12FR"}
+                    }),
+                ]))
+            }),
+
+            rest.post("http://localhost/rest/sheets/1/sheetfirearms/1/magazines/", async (req, res, ctx) => {
+                const json = await req.json();
+                const respData = Object.assign({}, json, {id: 99})
+            return res(ctx.json(respData))
+        }),
+
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
+
+        const input = sheet.getByRole("textbox", {name: "Magazine size"})
+        fireEvent.change(input, {target: {value: "21"}})
+        await user.click(sheet.getByRole("button", {
+                    name: "Add magazine"
+                }))
+        await waitFor( () => {
+            within(sheet.getByLabelText("Firearm The Cannon")).findByLabelText("Magazine of size 21 with 21 bullets remaining")
+        })
+
+    })
+
+    it('allows changing a clip in a firearm', async () => {
+        const user = userEvent.setup()
+        let mag =                 factories.magazineFactory({
+                    id: 42,
+                    capacity: 20,
+                    current: 15
+                })
+
+        const firearm = factories.firearmFactory({
+            id: 1,
+            base: {name: "The Cannon"},
+            magazines: [
+                mag
+            ]
+        });
+
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.ammunitionFactory({
+                        id: 97,
+                        calibre: {name: "12FR"}
+                    }),
+                ]))
+            }),
+
+            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/magazines/42/", async (req, res, ctx) => {
+                return res(ctx.json(
+                    Object.assign({}, mag, await req.json())
+                ))
+            }),
+
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
+
+        const firearmBlock = sheet.getByLabelText("Firearm The Cannon")
+
+        const magNode = await within(firearmBlock).queryByLabelText("Magazine of size 20 with 15 bullets remaining")
+        expect(magNode).not.toBeNull()
+
+        await user.click(await within(firearmBlock).findByRole("button", {name: "Shoot"}))
+
+        await waitFor( () => {
+            within(sheet.getByLabelText("Firearm The Cannon")).findByLabelText("Magazine of size 20 with 14 bullets remaining")
+        })
+    })
+
 });

@@ -380,12 +380,6 @@ class SheetViewSetMixin(ListPermissionMixin):
 
 
 class SheetFirearmViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
-    def initialize_request(self, request, *args, **kwargs):
-        self.sheet = models.Sheet.objects.get(
-                pk=self.kwargs['sheet_pk'])
-        self.containing_object = self.sheet
-        return super(SheetFirearmViewSet, self).initialize_request(
-                request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == "partial_update":
@@ -562,6 +556,50 @@ class SheetTransientEffectViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.validated_data['sheet'] = self.sheet
         super(SheetTransientEffectViewSet, self).perform_create(
+            serializer)
+
+
+class SheetFirearmMagazineViewSet(SheetViewSetMixin, viewsets.ModelViewSet):
+    create_serializer = serializers.SheetFirearmMagazineCreateSerializer
+    list_serializer = serializers.SheetFirearmMagazineListSerializer
+    model = models.SheetFirearmMagazine
+
+    def initialize_request(self, request, *args, **kwargs):
+        request = super(SheetFirearmMagazineViewSet, self).initialize_request(
+                request, *args, **kwargs)
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.sheet_firearm = models.SheetFirearm.objects.get(
+                pk=self.kwargs['firearm_pk'])
+        if self.sheet_firearm.sheet != self.sheet:
+            raise Http404("Invalid magazine")
+        self.containing_object = self.sheet
+        return request
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == "partial_update":
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return self.create_serializer
+        else:
+            return self.list_serializer
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(SheetFirearmMagazineViewSet, self).get_serializer(
+                *args, **kwargs)
+        if not kwargs.get('many'):
+            # ListSerializer does not have the fields.
+            serializer.fields['sheet_firearm'].default = self.sheet_firearm
+            serializer.fields['sheet_firearm'].read_only = True
+
+        return serializer
+
+    def get_queryset(self):
+        return self.model.objects.filter(sheet_firearm=self.sheet_firearm)
+
+    def perform_create(self, serializer):
+        serializer.validated_data['sheet_firearm'] = self.sheet_firearm
+        super(SheetFirearmMagazineViewSet, self).perform_create(
             serializer)
 
 

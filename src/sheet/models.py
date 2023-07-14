@@ -973,6 +973,13 @@ class SheetFirearm(models.Model):
         return "{base} w/ {ammo}".format(base=self.base, ammo=self.ammo)
 
 
+class SheetFirearmMagazine(models.Model):
+    sheet_firearm = models.ForeignKey(SheetFirearm, related_name="magazines",
+                                      on_delete=models.CASCADE)
+    capacity = models.PositiveSmallIntegerField()
+    current = models.PositiveSmallIntegerField()
+
+
 class WeaponTemplate(BaseWeaponTemplate):
     """ """
 

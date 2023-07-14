@@ -191,6 +191,37 @@ class FirearmAddOnListSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class SheetFirearmMagazineCreateSerializer(serializers.ModelSerializer):
+    capacity = serializers.IntegerField(min_value=0)
+    current = serializers.IntegerField(min_value=0)
+
+    def validate(self, attrs):
+        if "capacity" not in attrs:
+            capacity = self.instance.capacity
+        else:
+            capacity = attrs["capacity"]
+
+        if "current" not in attrs:
+            current = self.instance.current
+        else:
+            current = attrs["current"]
+
+        if current > capacity:
+            raise serializers.ValidationError("`current` needs to be lower than `capacity`")
+        return attrs
+
+    class Meta:
+        model = sheet.models.SheetFirearmMagazine
+        fields = "__all__"
+
+
+class SheetFirearmMagazineListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.SheetFirearmMagazine
+        fields = "__all__"
+        depth = 1
+
+
 class ScopeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = sheet.models.Scope
@@ -278,6 +309,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
 class SheetFirearmListSerializer(serializers.ModelSerializer):
     scope = ScopeListSerializer()
     ammo = AmmunitionListSerializer()
+    magazines = SheetFirearmMagazineListSerializer(many=True)
 
     class Meta:
         model = sheet.models.SheetFirearm

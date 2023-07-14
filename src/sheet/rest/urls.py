@@ -35,6 +35,10 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetfirearms',
                 views.SheetFirearmViewSet,
                 basename='sheet-firearm')
 
+router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetfirearms/(?P<firearm_pk>[0-9]+)/magazines',
+                 views.SheetFirearmMagazineViewSet,
+                 basename='sheet-firearm-magazine')
+
 router.register(r'sheets/(?P<sheet_pk>[0-9]+)/sheetrangedweapons',
                 views.SheetRangedWeaponViewSet,
                 basename='sheet-rangedweapon')

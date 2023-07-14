@@ -1,14 +1,10 @@
 import React from 'react';
 import TestUtils from 'react-dom/test-utils';
 
-// TODO: it seems this does not do much, instead you need to add this mock
-// to the individual test files using these factories.
-jest.mock('sheet-rest');
 const rest = require('sheet-rest');
 
 const StatBlock = require('StatBlock').default;
 const SkillHandler = require('SkillHandler').default;
-const FirearmControl = require('FirearmControl').default;
 
 let objectId = 1;
 
@@ -230,7 +226,6 @@ var characterSkillFactory = function (overrideFields) {
 };
 
 const baseFirearmFactory = (props) => {
-    "use strict";
     if (!props) {
         props = {};
     }
@@ -261,7 +256,8 @@ const baseFirearmFactory = (props) => {
             "tech_level": 4,
             "base_skill": "Handguns",
             "skill": null,
-            "skill2": null
+            "skill2": null,
+            "magazine_size": 8
     };
     return Object.assign(_base, props);
 };
@@ -289,12 +285,26 @@ const ammunitionFactory = (props) => {
         }
     };
     let newAmmo = Object.assign(_base, props);
-    objectId = newAmmo.id + 1;
+    objectId += 1;
     return newAmmo;
 };
 
+const magazineFactory = (props) => {
+    if (!props) {
+        props = {};
+    }
+
+    let _base = {
+        "id": objectId,
+        "capacity": 15,
+        "current": 7
+    };
+    let newObject = Object.assign(_base, props);
+    objectId = newObject.id + 1;
+    return newObject;
+};
+
 const scopeFactory = (props) => {
-    "use strict";
     if (!props) {
         props = {};
     }
@@ -307,6 +317,7 @@ const scopeFactory = (props) => {
         "tech_level": 4,
         "weight": "7.500",
         "sight": 100,
+        "notes": "",
         perks: []
     };
 
@@ -324,7 +335,6 @@ const scopeFactory = (props) => {
 };
 
 const firearmFactory = function (overrideFields) {
-    "use strict";
     if (!overrideFields) {
         overrideFields = {};
     }
@@ -332,10 +342,18 @@ const firearmFactory = function (overrideFields) {
     if (overrideFields.id) {
         id = overrideFields.id;
     }
+    let magazines = []
+    if (overrideFields.magazines) {
+        for (const mag of overrideFields.magazines) {
+            magazines.push(magazineFactory(mag))
+        }
+    }
     return {id: id,
             base: baseFirearmFactory(overrideFields.base),
             ammo: ammunitionFactory(overrideFields.ammo),
-            scope: overrideFields.scope === null ? null : scopeFactory(overrideFields.scope)};
+            scope: overrideFields.scope === null ? null : scopeFactory(overrideFields.scope),
+            magazines: magazines
+    };
 };
 
 function firearmControlPropsFactory(givenProps) {
@@ -386,37 +404,6 @@ function firearmControlPropsFactory(givenProps) {
 
     return Object.assign(givenProps, props);
 }
-
-const firearmControlTreeFactory = function (givenProps) {
-    let props = firearmControlPropsFactory(givenProps);
-
-    let promises = [];
-
-    let jsonResponse = function (json) {
-        let promise = Promise.resolve(json);
-        promises.push(promise);
-        return promise;
-    };
-
-    rest.getData.mockImplementation(function (url) {
-        if (url.match(new RegExp('/rest/ammunition/firearm/.*/'))) {
-            return jsonResponse([]);
-        } else if (url.match(new RegExp("/rest/scopes/campaign/.*/"))) {
-            return jsonResponse([]);
-        } else
-        {
-            /* Throwing errors here do not cancel the test. */
-            fail("this is an unsupported url:" + url);
-        }
-    });
-
-    const table = TestUtils.renderIntoDocument(
-        <FirearmControl {...props}/>
-    );
-
-    return TestUtils.findRenderedComponentWithType(table,
-        FirearmControl);
-};
 
 var miscellaneousItemFactory = function (overrideFields) {
     "use strict";
@@ -1055,8 +1042,8 @@ module.exports = {
     scopeFactory: scopeFactory,
     baseFirearmFactory: baseFirearmFactory,
     firearmControlPropsFactory: firearmControlPropsFactory,
+    magazineFactory: magazineFactory,
     firearmFactory: firearmFactory,
-    firearmControlTreeFactory: firearmControlTreeFactory,
     weaponTemplateFactory: weaponTemplateFactory,
     weaponQualityFactory: weaponQualityFactory,
     weaponFactory: weaponFactory,

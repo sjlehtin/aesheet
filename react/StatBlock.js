@@ -514,11 +514,21 @@ class StatBlock extends React.Component {
         }
     }
 
+    getMagazineURL(fa, mag) {
+        var baseURL = `${this.props.url}sheetfirearms/${fa.id}/magazines/`;
+        if (mag) {
+            return baseURL + mag.id + '/';
+        } else {
+            return baseURL;
+        }
+    }
+
     handleFirearmAdded(firearm) {
         rest.post(this.getFirearmURL(), {base: firearm.base.name,
         ammo: firearm.ammo.id}).then((json) => {
             console.log("POST success", json);
             firearm.id = json.id;
+            firearm.magazines = []
             var newList = this.state.firearmList;
             newList.push(firearm);
             this.setState({firearmList: newList});
@@ -555,6 +565,38 @@ class StatBlock extends React.Component {
             this.state.firearmList.splice(index, 1, updatedFireArm);
             this.setState({firearmList: this.state.firearmList});
         }).catch(err => {console.log("Error updating firearm: ", err)});
+    }
+
+    async handleMagazineRemoved(firearm, magazine) {
+        await rest.del(this.getMagazineURL(firearm, magazine), magazine)
+        const faIndex = StatBlock.findItemIndex(
+            this.state.firearmList, firearm);
+        const magIndex = StatBlock.findItemIndex(this.state.firearmList[faIndex].magazines, magazine)
+        this.state.firearmList[faIndex].magazines.splice(magIndex, 1);
+        this.setState({firearmList: this.state.firearmList});
+    }
+
+    async handleMagazineAdded(firearm, magazine) {
+        const json = await rest.post(this.getMagazineURL(firearm), {capacity: magazine.capacity, current: magazine.capacity})
+        let newList = this.state.firearmList.slice()
+        const faIndex = StatBlock.findItemIndex(
+            newList, firearm);
+        newList[faIndex].magazines.push(json);
+        await this.setState({firearmList: newList});
+    }
+
+    async handleMagazineChanged(firearm, magazine) {
+        const json = await rest.patch(this.getMagazineURL(firearm, magazine), Object.assign({}, magazine))
+        let newList = this.state.firearmList.slice()
+        const faIndex = StatBlock.findItemIndex(
+            newList, firearm);
+        const magIndex = StatBlock.findItemIndex(
+            newList[faIndex].magazines, magazine);
+        let newMags = newList[faIndex].magazines.slice()
+        newMags.splice(magIndex, 1, json);
+        newList[faIndex].magazines = newMags
+
+        await this.setState({firearmList: newList});
     }
 
     getWeaponURL(fa) {
@@ -957,24 +999,24 @@ class StatBlock extends React.Component {
             parseFloat(this.state.helm.quality.mod_weight_multiplier);
         }
 
-        for (let wpn of this.state.weaponList){
+        for (let wpn of this.state.weaponList) {
             weight += parseFloat(wpn.base.weight) *
                 parseFloat(wpn.quality.weight_multiplier);
         }
 
-        for (let wpn of this.state.rangedWeaponList){
+        for (let wpn of this.state.rangedWeaponList) {
             weight += parseFloat(wpn.base.weight) *
                 parseFloat(wpn.quality.weight_multiplier);
         }
 
-        for (let wpn of this.state.firearmList){
+        for (let wpn of this.state.firearmList) {
             weight += parseFloat(wpn.base.weight);
             if (wpn.scope) {
                 weight += parseFloat(wpn.scope.weight)
             }
         }
 
-        for (let item of this.state.miscellaneousItemList){
+        for (let item of this.state.miscellaneousItemList) {
             weight += parseFloat(item.item.weight);
         }
 
@@ -1004,6 +1046,9 @@ class StatBlock extends React.Component {
                 skillHandler={skillHandler}
                 onRemove={(fa) => this.handleFirearmRemoved(fa) }
                 onChange={(data) => this.handleFirearmChanged(data)}
+                onMagazineRemove={async (mag) => await this.handleMagazineRemoved(fa, mag)}
+                onMagazineAdd={async (mag) => await this.handleMagazineAdded(fa, mag)}
+                onMagazineChange={async (mag) => await this.handleMagazineChanged(fa, mag)}
                 campaign={this.state.char.campaign}
                 style={{fontSize: "80%", backgroundColor: bgColor}}
                 toRange={this.state.firearmRange}

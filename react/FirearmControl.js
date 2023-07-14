@@ -5,6 +5,7 @@ import RangedWeaponRow from 'RangedWeaponRow';
 import AmmoControl from 'AmmoControl';
 import ScopeControl from 'ScopeControl';
 import StatBreakdown from "StatBreakdown";
+import MagazineControl from 'MagazineControl';
 
 const util = require('./sheet-util');
 import {Col, Row, Button, Table} from 'react-bootstrap';
@@ -237,17 +238,9 @@ class FirearmControl extends RangedWeaponRow {
         return effect;
     }
 
-    skillCheck() {
-        let effect = this.rangeEffect(this.props.toRange);
-        if (effect === null) {
-            return null;
-        }
-        return super.skillCheck() + effect.check;
-    }
-
     skillCheckV2() {
         let effect = this.rangeEffect(this.props.toRange)
-        if (effect === null) {
+        if (!effect) {
             return null
         }
         const baseCheck = super.skillCheckV2()
@@ -280,7 +273,7 @@ class FirearmControl extends RangedWeaponRow {
         if (base.restricted_burst_rounds > 0) {
             maxHits = Math.min(maxHits, base.restricted_burst_rounds);
         }
-        const baseSkillCheck = this.skillCheck();
+        const baseSkillCheck = this.skillCheckV2();
         const burstMultipliers = [0, 1, 3, 6, 10];
         const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
@@ -289,12 +282,12 @@ class FirearmControl extends RangedWeaponRow {
             autofirePenalty = -10;
         }
         for (let ii = 0; ii < 5; ii++) {
-            if (ii >= maxHits || check === null) {
+            if (ii >= maxHits || check === null || baseSkillCheck === null) {
                 checks.push(null);
             } else {
                 // The modifier might be positive at this point, and penalty
                 // countering could leave the overall mod as positive.
-                let mod = check - baseSkillCheck;
+                let mod = check - baseSkillCheck.value;
 
                 let bonus = 0;
                 if (mod > 0) {
@@ -308,7 +301,7 @@ class FirearmControl extends RangedWeaponRow {
                 mod = FirearmControl.counterPenalty(mod,
                         this.getStat("FIT"));
 
-                checks.push(baseSkillCheck + bonus + mod + autofirePenalty);
+                checks.push(baseSkillCheck.value + bonus + mod + autofirePenalty);
             }
         }
         return checks;
@@ -331,13 +324,19 @@ class FirearmControl extends RangedWeaponRow {
             return null;
         }
 
-        const checks = this.skillChecks(this.mapBurstActions(actions),
+        const checks = this.skillChecksV2(this.mapBurstActions(actions),
             {counterPenalty: false});
         if (checks === null) {
             // no actions available.
             return actions.map((el) => {return [];});
         }
-        return checks.map((chk) => {return this.singleBurstChecks(chk);});
+        return checks.map((chk) => {
+            let base = null
+            if (chk !== null) {
+                base = chk.value
+            };
+            return this.singleBurstChecks(base)
+        });
     }
 
     burstInitiatives(actions) {
@@ -460,18 +459,22 @@ class FirearmControl extends RangedWeaponRow {
             autofirePenalty = -20;
         }
 
-        const baseSkillCheck = this.skillCheck();
+        const baseSkillCheck = this.skillCheckV2();
         let checks = [];
         let penaltyMultiplier = 0;
         for (let multiplier of sweeps[sweepType]) {
             penaltyMultiplier += multiplier;
-            checks.push(
-                baseSkillCheck +
-                sweepType +
-                FirearmControl.counterPenalty(
-                    penaltyMultiplier * afClass, this.getStat("fit")) +
-                autofirePenalty
-            );
+            if (baseSkillCheck === null) {
+                checks.push(null)
+            }  else {
+                checks.push(
+                    baseSkillCheck.value +
+                    sweepType +
+                    FirearmControl.counterPenalty(
+                        penaltyMultiplier * afClass, this.getStat("fit")) +
+                    autofirePenalty
+                );
+            }
         }
         return checks;
     }
@@ -699,7 +702,7 @@ class FirearmControl extends RangedWeaponRow {
         } else {
             rangeInfo = <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
         }
-        return <div style={this.props.style}>
+        return <div  aria-label={`Firearm ${this.props.weapon.base.name}`} style={this.props.style}>
             <Row>
                 <Col xs={"auto"}>
                     <Row>
@@ -787,10 +790,11 @@ class FirearmControl extends RangedWeaponRow {
                         <div><span style={marginRightStyle}><label style={labelStyle}>Durability:</label>{weapon.durability}</span>
                             <span style={marginRightStyle}><label style={labelStyle}>Weight:</label>{weapon.weight}</span>
                         </div>
-                        <Button onClick={(e) => this.handleRemove()}
-                                ref={(c) => this._removeButton = c}
-                                size="sm">Remove firearm</Button>
                         </Col>
+                        <Col md={3}>
+                            {this.renderBurstTable()}
+                        </Col>
+
                     </Row>
                     <Row>
                         <Col>
@@ -802,12 +806,23 @@ class FirearmControl extends RangedWeaponRow {
                         {this.renderSweepTable()}
                         </Col>
                     </Row>
-                </Col>
-                <Col md={3}>
-                    {this.renderBurstTable()}
+                    <MagazineControl magazineSize={this.props.weapon.base.magazine_size} magazines={this.props.weapon.magazines}
+                                        onRemove={async (mag) => {
+                                            await this.props.onMagazineRemove(mag)
+                                        }}
+                                     onAdd={async (mag) => {
+                                            await this.props.onMagazineAdd(mag)
+                                        }}
+                                     onChange={async (mag) => {
+                                            await this.props.onMagazineChange(mag)
+                                        }}
+                    />
                 </Col>
             </Row>
             {sweepInstructions}
+            <Button onClick={(e) => this.handleRemove()}
+                    ref={(c) => this._removeButton = c}
+                    size="sm">Remove firearm</Button>
         </div>;
     }
 }
@@ -819,7 +834,10 @@ FirearmControl.propTypes = {
     toRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     darknessDetectionLevel: PropTypes.number,
     onRemove: PropTypes.func,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    onMagazineRemove: PropTypes.func,
+    onMagazineAdd: PropTypes.func,
+    onMagazineChange: PropTypes.func
 };
 
 FirearmControl.defaultProps = {
