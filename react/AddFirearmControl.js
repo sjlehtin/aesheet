@@ -88,48 +88,59 @@ class AddFirearmControl extends React.Component {
     }
 
     render () {
-        return <Row >
-            <Col>
-            <table>
-                <tbody>
-                <tr>
-                    <td><label>Firearm</label></td>
-                    <td style={{minWidth: "15em"}}><DropdownList data={this.state.firearmChoices}
+        return <div>
+            <Row>
+                <Col sm={2}>
+                    <label>Firearm</label>
+                </Col>
+                <Col sm={4}>
+                    <DropdownList data={this.state.firearmChoices}
                                   textField='name'
                                   open={this.state.isOpen}
                                   busy={this.state.isBusy}
                                   onToggle={(isOpen) => {
-                                  this.setState({isOpen: isOpen});
-                                  if (isOpen) {
-                                    this.handleOpen();
-                                  }
+                                      this.setState({isOpen: isOpen});
+                                      if (isOpen) {
+                                          this.handleOpen();
+                                      }
                                   }}
                                   filter="contains"
                                   value={this.state.selectedFirearm}
-                                  onChange={(value) => this.handleFirearmChange(value) }
-                /></td>
-                </tr>
-                <tr>
-                    <td><label>Ammo</label></td>
-                    <td>
-                        <DropdownList data={this.state.ammoChoices}
-                                  value={this.state.selectedAmmo}
-                                  textField={(obj) => {return AddFirearmControl.formatAmmo(obj);}}
-                                  onChange={
-                                  (value) => this.handleAmmoChange(value)} />
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <Button size="sm" disabled={!this.fieldsValid()}
-                    ref={(c) => this._addButton = c}
-                    onClick={() => this.handleAdd()}>
-                Add Firearm</Button>
-                <div><a href="/sheets/add_firearm/">Create a new firearm</a>
-                    <a href="/sheets/add_ammunition/">Create new ammo</a>
-                </div>
-            </Col>
+                                  onChange={(value) => this.handleFirearmChange(value)}
+                    />
+                </Col>
             </Row>
+            <Row>
+                <Col sm={2}>
+                    <label>Ammo</label>
+                </Col>
+                <Col sm={4}>
+                    <DropdownList data={this.state.ammoChoices}
+                                  value={this.state.selectedAmmo}
+                                  textField={(obj) => {
+                                      return AddFirearmControl.formatAmmo(obj);
+                                  }}
+                                  onChange={
+                                      (value) => this.handleAmmoChange(value)}/>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Button size="sm" disabled={!this.fieldsValid()}
+                            ref={(c) => this._addButton = c}
+                            onClick={() => this.handleAdd()}>
+                        Add Firearm</Button>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <div><a href="/sheets/add_firearm/">Create a new
+                        firearm</a>
+                        <a href="/sheets/add_ammunition/">Create new ammo</a>
+                    </div>
+                </Col>
+            </Row>
+        </div>
     }
 }
 

@@ -103,40 +103,52 @@ class AddWeaponControl extends React.Component {
         if (this.state.weaponTemplateChoices && this.state.weaponChoices) {
             choices = this.state.weaponTemplateChoices.concat(this.state.weaponChoices);
         }
-        return <Col>
+        return <div>
             <Row>
-                <Col>
+                <Col sm={2}>
                     <label>Weapon</label>
                 </Col>
-                <Col><Combobox data={choices}
-                              textField='name'
-                              filter="contains"
-                              value={this.state.selectedWeapon}
-                              groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
-                              onChange={(value) => this.handleWeaponChange(value) }
+                <Col sm={4}><Combobox data={choices}
+                                      textField='name'
+                                      filter="contains"
+                                      value={this.state.selectedWeapon}
+                                      groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
+                                      onChange={(value) => this.handleWeaponChange(value)}
                 />
                 </Col>
             </Row>
             <Row>
-                <Col>
+                <Col sm={2}>
                     <label>Quality</label>
                 </Col>
-                <Col>
+                <Col sm={4}>
                     {quality}
                 </Col>
             </Row>
             <Row>
-            <Button size="sm" disabled={!this.fieldsValid()}
-                    ref={(c) => this._addButton = c}
-                    onClick={() => this.handleAdd()}>
-                Add Weapon</Button>
-                <div><a style={{marginRight: "1em"}} href="/sheets/add_weapon/">Create a new weapon</a>
-                    <a style={{marginRight: "1em"}} href="/sheets/add_weapon_template/">Create a new weapon template</a>
-                    <a style={{marginRight: "1em"}} href="/sheets/add_weapon_quality/">Create new quality</a>
-                    <a style={{marginRight: "1em"}} href="/sheets/add_weapon_special_quality/">Create new special quality</a>
-                </div>
+                <Col>
+                    <Button size="sm" disabled={!this.fieldsValid()}
+                            ref={(c) => this._addButton = c}
+                            onClick={() => this.handleAdd()}>
+                        Add Weapon</Button>
+                </Col>
             </Row>
-        </Col>
+            <Row>
+                <Col><a style={{marginRight: "1em"}}
+                        href="/sheets/add_weapon/">Create a new weapon</a>
+                    <a style={{marginRight: "1em"}}
+                       href="/sheets/add_weapon_template/">Create a new weapon
+                        template</a>
+                    <a style={{marginRight: "1em"}}
+                       href="/sheets/add_weapon_quality/">Create new
+                        quality</a>
+                    <a style={{marginRight: "1em"}}
+                       href="/sheets/add_weapon_special_quality/">Create new
+                        special quality</a>
+
+                </Col>
+            </Row>
+        </div>
     }
 }
 

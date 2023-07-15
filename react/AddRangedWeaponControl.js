@@ -116,36 +116,43 @@ class AddRangedWeaponControl extends React.Component {
         }
         return <div>
             <Row>
-            <table>
-                <tbody>
-                <tr>
-                    <td><label>Weapon</label></td>
-                    <td><Combobox data={choices}
-                                  textField='name'
-                                  busy={this.state.isBusy}
-                                  filter="contains"
-                                  value={this.state.selectedWeapon}
-                                  groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
-                                  onChange={(value) => this.handleWeaponChange(value) }
-                /></td>
-                </tr>
-                <tr>
-                    <td><label>Quality</label></td>
-                    <td>
-                        {quality}
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <Button size="sm" disabled={!this.fieldsValid()}
-                    ref={(c) => this._addButton = c}
-                    onClick={() => this.handleAdd()}>
-                Add Weapon</Button>
-                <div><a href="/sheets/add_ranged_weapon/">Create a new weapon</a>
-                    <a href="/sheets/add_ranged_weapon_template/">Create a new weapontemplate</a>
-                    <a href="/sheets/add_weapon_quality/">Create new quality</a>
-                    <a href="/sheets/add_weapon_special_quality/">Create new special quality</a>
-                </div>
+                <Col sm={2}><label>Weapon</label></Col>
+                <Col sm={4}><Combobox data={choices}
+                                      textField='name'
+                                      busy={this.state.isBusy}
+                                      filter="contains"
+                                      value={this.state.selectedWeapon}
+                                      groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
+                                      onChange={(value) => this.handleWeaponChange(value)}
+                />
+                </Col>
+            </Row>
+            <Row>
+                <Col sm={2}><label>Quality</label></Col>
+                <Col sm={4}>
+                    {quality}
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Button size="sm" disabled={!this.fieldsValid()}
+                            ref={(c) => this._addButton = c}
+                            onClick={() => this.handleAdd()}>
+                        Add Weapon</Button>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <div><a href="/sheets/add_ranged_weapon/">Create a new
+                        weapon</a>
+                        <a href="/sheets/add_ranged_weapon_template/">Create a
+                            new weapontemplate</a>
+                        <a href="/sheets/add_weapon_quality/">Create new
+                            quality</a>
+                        <a href="/sheets/add_weapon_special_quality/">Create
+                            new special quality</a>
+                    </div>
+                </Col>
             </Row>
         </div>
     }
