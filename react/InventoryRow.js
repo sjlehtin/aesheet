@@ -133,20 +133,6 @@ class InventoryRow extends React.Component {
         }
     }
 
-  escFunction (event) {
-    if (event.key === "Escape") {
-        this.cancelEdit()
-    }
-  }
-
-  componentDidMount(){
-    document.addEventListener("keydown", (e) => this.escFunction(e), false);
-  }
-
-  componentWillUnmount(){
-    document.removeEventListener("keydown", this.escFunction, false);
-  }
-
     handleRemove(event) {
         event.stopPropagation();
         if (typeof(this.props.onDelete) !== "undefined") {
@@ -255,7 +241,7 @@ class InventoryRow extends React.Component {
                 onClick={(e) => this.startEdit("unitWeight")}>
                 {unitWeight}</td>
 
-            <td className="weight">{ (parseFloat(this.state.unitWeight) * parseInt(this.state.quantity)).toFixed(2) }</td>
+            <td className="weight" aria-label={"Weight"}>{ (parseFloat(this.state.unitWeight) * parseInt(this.state.quantity)).toFixed(2) }</td>
         </tr>);
     }
 }

@@ -1,311 +1,251 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 
-const inventoryEntryFactory = require('./factories').inventoryEntryFactory;
-
-jest.mock('sheet-rest');
-var rest = require('sheet-rest');
+import { screen, render, fireEvent, waitFor } from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
 
 import Inventory from 'Inventory';
 
+const factories = require('./factories');
+
+const server = setupServer(
+    rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+        return res(ctx.json([]))
+    })
+)
+
 describe('Inventory', function() {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    var promises = [];
+    const renderInventory = (givenProps) => {
+        const props = Object.assign({url: "/rest/sheets/1/inventory/"},
+            givenProps)
+        return render(<Inventory {...props}/>)
+    }
 
-    var jsonResponse = function (json) {
-        var promise = Promise.resolve(json);
-        promises.push(promise);
-        return promise;
-    };
-
-    beforeEach(function () {
-        promises = [];
+    it('renders also as empty', async () => {
+        const inventory = renderInventory()
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
     });
 
-    var getInventory = function (givenProps) {
-        var props = {url: "/rest/sheets/1/inventory/"};
-        if (typeof(givenProps) !== "undefined") {
-            props = Object.assign(props, givenProps);
-        }
-        var inventory = <Inventory {...props} />;
-        var node = TestUtils.renderIntoDocument(inventory);
-        return TestUtils.findRenderedComponentWithType(node, Inventory);
-    };
+    it('loads inventory with a REST API', async ()=> {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        description: "Collectable comic",
+                        unit_weight: 5.50,
+                        quantity: 1
+                    }),
+                    factories.inventoryEntryFactory({
+                        description: "Potion of flying",
+                        unit_weight: 0.50,
+                        quantity: 1
+                    })
 
-    it('renders also as empty', function () {
-        rest.getData.mockReturnValue(jsonResponse([]));
-        var inventory = getInventory();
-        var table = TestUtils.findRenderedDOMComponentWithTag(inventory,
-            "tbody");
-    });
-
-    it('loads inventory with a REST API', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([]));
-        var inventory = getInventory();
-        expect(rest.getData.mock.calls[0][0]).toEqual('/rest/sheets/1/inventory/');
-        Promise.all(promises).then(() => {
-            done();
-        });
-    });
-
-    it('renders inventory', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([
-            inventoryEntryFactory({description: 'potion of flying', id: 1}),
-            inventoryEntryFactory({
-                description: 'podkin point arrows',
-                unit_weight: "0.1",
-                quantity: 20,
-                id: 2
+                ]))
             })
-        ]));
-        var inventory = getInventory();
-        expect(rest.getData.mock.calls[0][0]).toEqual('/rest/sheets/1/inventory/');
-        Promise.all(promises).then(() => {
-            Promise.all(promises).then(() => {
-                var table = TestUtils.findRenderedDOMComponentWithTag(inventory,
-                    "table");
-                expect(inventory.state.inventory.length).toEqual(2);
-                /* InventoryRow */
-                var nodeList = table.querySelectorAll('.weight');
-                expect(nodeList.length).toEqual(2);
-                done();
-            });
-        });
-    });
-
-    it('allows items to be added', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
-        var inventory = getInventory();
-
-        Promise.all(promises).then((data) => {
-
-            TestUtils.Simulate.click(inventory._addButton);
-
-            var newElem = inventoryEntryFactory();
-            rest.post.mockReturnValue(jsonResponse(Object.assign(newElem,
-                {id: '42'})));
-
-            inventory.handleNew(newElem);
-
-            Promise.all(promises).then((data) => {
-                expect(rest.post.mock.calls.length).toEqual(1);
-                expect(rest.post.mock.calls[0][0]).toEqual(
-                    '/rest/sheets/1/inventory/');
-                expect(rest.post.mock.calls[0][1]).toEqual(
-                    newElem);
-                expect(inventory.state.inventory.length).toEqual(2);
-                done();
-            }).catch((err) => {
-                fail(err)
-            });
-        }).catch((err) => fail(err));
-    });
-
-    it('allows addition to be canceled', function () {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
-        const inventory = getInventory();
-
-        return Promise.all(promises).then((data) => {
-
-            TestUtils.Simulate.click(inventory._addButton);
-            expect(inventory._addButton.disabled).toBe(true);
-            let cancelButton = ReactDOM.findDOMNode(inventory)
-                .querySelector('#cancelButton');
-            expect(cancelButton).not.toBe(null);
-            expect(inventory._addButton.disabled).toBe(true);
-
-            // Enter a valid description.
-            let node = ReactDOM.findDOMNode(inventory._inputRow)
-                .querySelector('td input');
-            TestUtils.Simulate.change(node, {target: {value: "foo"}});
-            expect(inventory._inputRow.isValid()).toBe(true);
-
-            TestUtils.Simulate.click(cancelButton);
-
-            // Add button should be active again.
-            expect(inventory._addButton.disabled).toBe(false);
-        }).catch((err) => fail(err));
-    });
-
-    it('allows addition to be canceled without data entry', function () {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
-        const inventory = getInventory();
-
-        return Promise.all(promises).then((data) => {
-
-            TestUtils.Simulate.click(inventory._addButton);
-            expect(inventory._addButton.disabled).toBe(true);
-            let cancelButton = ReactDOM.findDOMNode(inventory)
-                .querySelector('#cancelButton');
-            expect(cancelButton).not.toBe(null);
-
-            TestUtils.Simulate.click(cancelButton);
-
-            // Add button should be active again.
-            expect(inventory._addButton.disabled).toBe(false);
-
-            cancelButton = ReactDOM.findDOMNode(inventory)
-                .querySelector('#cancelButton');
-            expect(cancelButton).toBe(null);
-        }).catch((err) => fail(err));
-    });
-
-    it('allows items to be added with button click', function (done) {
-        rest.getData.mockReturnValue(jsonResponse([inventoryEntryFactory({id: 1})]));
-        var inventory = getInventory();
-
-        Promise.all(promises).then((data) => {
-            TestUtils.Simulate.click(inventory._addButton);
-
-            var node = ReactDOM.findDOMNode(inventory._inputRow)
-                .querySelector('td input');
-            expect(ReactDOM.findDOMNode(inventory._addButton)
-                .hasAttribute("disabled")).toEqual(true);
-
-            expect(inventory._inputRow.isValid()).toEqual(false);
-            node.value = "Foofaafom";
-            TestUtils.Simulate.change(node);
-            expect(inventory._inputRow.isValid()).toEqual(true);
-
-            expect(ReactDOM.findDOMNode(inventory._addButton)
-                .hasAttribute("disabled")).toEqual(false);
-            spyOn(inventory, 'handleNew');
-
-            TestUtils.Simulate.click(
-                ReactDOM.findDOMNode(inventory._addButton));
-
-            expect(inventory.handleNew).toHaveBeenCalled();
-            done();
-        }).catch((err) => fail(err));
-    });
-
-    it('allows items to be removed', function (done) {
-        var initialElem = inventoryEntryFactory({id: 1});
-        rest.getData.mockReturnValue(jsonResponse([initialElem]));
-        var inventory = getInventory();
-
-        Promise.all(promises).then((data) => {
-
-            expect(inventory.state.inventory.length).toEqual(1);
-            expect(inventory.state.inventory[0].id).toEqual(1);
-
-            //TestUtils.Simulate.click(inventory._addButton);
-            //
-            rest.del.mockReturnValue(jsonResponse());
-
-            inventory.handleRemove(0);
-
-            Promise.all(promises).then((data) => {
-                expect(rest.del.mock.calls.length).toEqual(1);
-                expect(rest.del.mock.calls[0][0]).toEqual(
-                    '/rest/sheets/1/inventory/1/');
-                expect(rest.del.mock.calls[0][1]).toEqual(
-                    initialElem);
-                expect(inventory.state.inventory.length).toEqual(0);
-                done();
-            }).catch((err) => {
-                fail(err)
-            });
-        }).catch((err) => fail(err));
-    });
-
-    it('allows items to be edited', function (done) {
-        var initialElem = inventoryEntryFactory({id: 1});
-        rest.getData.mockReturnValue(jsonResponse([initialElem]));
-        var inventory = getInventory();
-
-        Promise.all(promises).then((data) => {
-
-            expect(inventory.state.inventory.length).toEqual(1);
-            expect(inventory.state.inventory[0].id).toEqual(1);
-
-            var newElem = Object.assign({}, initialElem,
-                {description: "New description"});
-
-            //TestUtils.Simulate.click(inventory._addButton);
-            //
-            rest.put.mockReturnValue(jsonResponse(newElem));
-
-            inventory.handleEdit(0, newElem);
-
-            Promise.all(promises).then((data) => {
-                expect(rest.put.mock.calls.length).toEqual(1);
-                expect(rest.put.mock.calls[0][0]).toEqual(
-                    '/rest/sheets/1/inventory/1/');
-                expect(rest.put.mock.calls[0][1]).toEqual(
-                    newElem);
-                expect(inventory.state.inventory.length).toEqual(1);
-                expect(inventory.state.inventory[0]).not.toEqual(initialElem);
-                expect(inventory.state.inventory[0]).toEqual(newElem);
-                done();
-            }).catch((err) => {
-                fail(err)
-            });
-        }).catch((err) => fail(err));
-    });
-
-    it('reports total weight', function (done) {
-        var callback = jasmine.createSpy("callback");
-
-        rest.getData.mockReturnValue(jsonResponse([
-            inventoryEntryFactory({id: 2, quantity: 5, unit_weight: 2.3}),
-            inventoryEntryFactory({id: 3, quantity: 1, unit_weight: 2.7})
-        ]));
-
-        var inventory = getInventory({onWeightChange: callback});
-
-        Promise.all(promises).then((data) => {
-            expect(callback).toHaveBeenCalledWith(5 * 2.3 + 2.7);
-            done();
-        }).catch((err) => fail(err));
-    });
-
-    it('reports total weight after removal', function (done) {
-        var callback = jasmine.createSpy("callback");
-
-        rest.getData.mockReturnValue(jsonResponse([
-            inventoryEntryFactory({id: 2, quantity: 5, unit_weight: 2.3}),
-            inventoryEntryFactory({id: 3, quantity: 1, unit_weight: 2.7})
-        ]));
-
-        var inventory = getInventory({onWeightChange: callback});
-
-        Promise.all(promises).then((data) => {
-            rest.del.mockReturnValue(jsonResponse());
-
-            inventory.handleRemove(0);
-
-            Promise.all(promises).then((data) => {
-                expect(callback).toHaveBeenCalledWith(2.7);
-                done();
-            }).catch((err) => fail(err));
-
-        }).catch((err) => fail(err));
+        )
+        const inventory = renderInventory()
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+        expect(screen.getByText("Collectable comic")).toBeInTheDocument()
+        const weights = inventory.getAllByLabelText("Weight")
+        expect(weights[0].textContent).toEqual("5.50")
+        expect(weights[1].textContent).toEqual("0.50")
     });
 
 
-    it('reports total weight after edit', function (done) {
-        var callback = jasmine.createSpy("callback");
+    it('allows addition to be canceled', async () => {
+        const user = userEvent.setup()
 
-        var initialElem = {id: 1, quantity: 1, unit_weight: 2.7};
-        rest.getData.mockReturnValue(jsonResponse([
-            inventoryEntryFactory(initialElem)]));
-        var inventory = getInventory({onWeightChange: callback});
+        const inventory = renderInventory()
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
 
-        Promise.all(promises).then((data) => {
+        expect(screen.queryByRole("button", {name: "Cancel"})).not.toBeInTheDocument()
 
-            var newElem = Object.assign({}, initialElem);
-            newElem.quantity = 5;
-            rest.put.mockReturnValue(jsonResponse(newElem));
+        await user.click(inventory.getByRole("button", {name: "Add entry"}))
 
-            inventory.handleEdit(0, newElem);
+        expect(inventory.getByRole("button", {name: "Add entry"})).toBeDisabled()
 
-            Promise.all(promises).then((data) => {
-                expect(callback).toHaveBeenCalledWith(5 * 2.7);
-                done();
-            }).catch((err) => fail(err));
-        }).catch((err) => fail(err));
+        fireEvent.change(inventory.getByRole("textbox", {name: "description"}), {target: {value: "Foofaa"}})
+
+        expect(inventory.getByRole("button", {name: "Add entry"})).not.toBeDisabled()
+
+        expect(screen.getByDisplayValue("Foofaa")).toBeInTheDocument()
+
+        expect(screen.queryByRole("button", {name: "Cancel"})).toBeInTheDocument()
+
+        await user.click(screen.getByRole("button", {name: "Cancel"}))
+
+        expect(screen.queryByDisplayValue("Foofaa")).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", {name: "Cancel"})).not.toBeInTheDocument()
+        expect(inventory.getByRole("button", {name: "Add entry"})).not.toBeDisabled()
+    });
+
+    it('allows addition to be canceled without data entry', async () => {
+        const user = userEvent.setup()
+
+        const inventory = renderInventory()
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        expect(screen.queryByRole("button", {name: "Cancel"})).not.toBeInTheDocument()
+
+        await user.click(inventory.getByRole("button", {name: "Add entry"}))
+
+        expect(inventory.getByRole("button", {name: "Add entry"})).toBeDisabled()
+
+        expect(screen.queryByRole("button", {name: "Cancel"})).toBeInTheDocument()
+
+        await user.click(screen.getByRole("button", {name: "Cancel"}))
+
+        expect(screen.queryByRole("button", {name: "Cancel"})).not.toBeInTheDocument()
+        expect(inventory.getByRole("button", {name: "Add entry"})).not.toBeDisabled()
+    });
+
+    it('allows addition to be canceled with Escape key', async () => {
+        const user = userEvent.setup()
+
+        const inventory = renderInventory()
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        expect(screen.queryByRole("button", {name: "Cancel"})).not.toBeInTheDocument()
+
+        await user.click(inventory.getByRole("button", {name: "Add entry"}))
+
+        expect(inventory.getByRole("button", {name: "Add entry"})).toBeDisabled()
+
+        expect(screen.queryByRole("button", {name: "Cancel"})).toBeInTheDocument()
+
+        inventory.getByRole("textbox", {name: "description"}).focus()
+
+        await user.keyboard("[Escape]")
+
+        expect(inventory.getByRole("button", {name: "Add entry"})).not.toBeDisabled()
+        expect(screen.queryByRole("button", {name: "Cancel"})).not.toBeInTheDocument()
+    });
+
+    it('allows items to be edited and submitted with Enter', async () => {
+        const user = userEvent.setup()
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        id: 97,
+                        description: "Collectable comic",
+                        unit_weight: 5.50,
+                        quantity: 1
+                    })
+                    ],
+                ))
+            }),
+            rest.put('http://localhost/rest/sheets/1/inventory/97', async (req, res, ctx) => {
+                return res(ctx.json(await req.json()))
+            }),
+        )
+        const spy = jest.fn().mockResolvedValue()
+        const inventory = renderInventory({onWeightChange: spy})
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        await user.click(inventory.getByText("Collectable comic"))
+
+        fireEvent.change(inventory.getByRole("textbox", {name: "description"}), {target: {value: "Foofaa"}})
+        fireEvent.change(inventory.getByRole("textbox", {name: "weight"}), {target: {value: 0.5}})
+
+        await inventory.getByRole("textbox", {name: "weight"}).focus()
+        await user.keyboard("[Enter]")
+
+        expect(spy).toHaveBeenCalledWith(0.5)
+
+        expect(screen.queryByText("Foofaa")).toBeInTheDocument()
+    });
+
+    it('reports total weight', async ()=> {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        description: "Collectable comic",
+                        unit_weight: 5.50,
+                        quantity: 1
+                    }),
+                    factories.inventoryEntryFactory({
+                        description: "Potion of flying",
+                        unit_weight: 0.50,
+                        quantity: 1
+                    })
+                ]))
+            })
+        )
+
+        const spy = jest.fn().mockResolvedValue()
+        const inventory = renderInventory({onWeightChange: spy})
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        expect(spy).toHaveBeenCalledWith(6)
+    });
+
+    it('reports total weight after removal', async ()=> {
+        const user = userEvent.setup()
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        description: "Collectable comic",
+                        unit_weight: 5.50,
+                        quantity: 1
+                    }),
+                    factories.inventoryEntryFactory({
+                        id: 97,
+                        description: "Potion of flying",
+                        unit_weight: 0.50,
+                        quantity: 1
+                    })
+                ]))
+            }),
+            rest.delete('http://localhost/rest/sheets/1/inventory/97/', (req, res, ctx) => {
+                return res(ctx.json({}))
+            })
+        )
+
+        const spy = jest.fn().mockResolvedValue()
+        const inventory = renderInventory({onWeightChange: spy})
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        await user.click(inventory.getAllByRole("button", {"name": "Remove"})[1])
+        expect(spy).toHaveBeenCalledWith(5.50)
+    });
+
+    it('reports total weight after edit and submit with repeated Add entry', async ()=> {
+        const user = userEvent.setup()
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        description: "Collectable comic",
+                        unit_weight: 5.50,
+                        quantity: 1
+                    })
+                    ],
+                ))
+            }),
+            rest.post('http://localhost/rest/sheets/1/inventory/', async (req, res, ctx) => {
+                return res(ctx.json(Object.assign(await req.json(), {id: 99})))
+            })
+        )
+        const spy = jest.fn().mockResolvedValue()
+        const inventory = renderInventory({onWeightChange: spy})
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        await user.click(inventory.getByRole("button", {name: "Add entry"}))
+
+        fireEvent.change(inventory.getByRole("textbox", {name: "description"}), {target: {value: "Foofaa"}})
+        fireEvent.change(inventory.getByRole("textbox", {name: "weight"}), {target: {value: 0.5}})
+
+        await user.click(inventory.getByRole("button", {name: "Add entry"}))
+
+        expect(spy).toHaveBeenCalledWith(6)
     });
 });

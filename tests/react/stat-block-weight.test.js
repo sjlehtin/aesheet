@@ -1,163 +1,245 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
-jest.mock('sheet-rest');
-var rest = require('sheet-rest');
+import StatBlock from 'StatBlock'
 
-var factories = require('./factories');
+import { screen, render, waitForElementToBeRemoved, within, fireEvent, prettyDOM, waitFor } from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
 
-const Inventory = require('Inventory').default;
+const factories = require('./factories');
+
+const server = setupServer(
+  rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
+    return res(ctx.json(factories.sheetFactory()))
+  }),
+  rest.get('http://localhost/rest/sheets/1/*/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+  rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+  rest.get('http://localhost/rest/characters/2/', (req, res, ctx) => {
+    return res(ctx.json(factories.characterFactory()))
+  }),
+  rest.get('http://localhost/rest/characters/2/*/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+  rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  })
+)
 
 describe('stat block weight handling', function() {
-    it("can calculate weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-            expect(block.getCarriedWeight()).toEqual(0);
+    it("can calculate weight", async () => {
 
-            block.inventoryWeightChanged(5.5);
-
-            expect(block.getCarriedWeight()).toEqual(5.5);
-
-            expect(block.getSkillHandler().getEffStats().ref).toBeLessThan(
-                block.getSkillHandler().getBaseStats().ref);
-            done();
-        });
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        unit_weight: 5.50,
+                        quantity: 1
+                    })
+                ]))
+            }),
+        )
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("5.50 kg")
     });
 
-    it("integrates with Inventory", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
+    it("integrates with Inventory", async () => {
+        server.use(
+            rest.post('http://localhost/rest/sheets/1/inventory/', async (req, res, ctx) => {
+                return res(ctx.json(Object.assign({}, await req.json(), {id: 42})))
+            }),
+        )
 
-            expect(block.getCarriedWeight()).toEqual(0);
+        const user = userEvent.setup()
 
-            var inventoryControl = TestUtils.findRenderedComponentWithType(
-                block, Inventory);
+        render(<StatBlock url="/rest/sheets/1/" />)
 
-            inventoryControl.updateInventory([
-                factories.inventoryEntryFactory({unit_weight: "5.5",
-                quantity: 1})]);
-            expect(block.getCarriedWeight()).toEqual(5.5);
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
 
-            done();
-        });
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("0.00 kg")
+
+        await user.click(screen.getByRole("button", {name: "Add entry"}))
+
+        fireEvent.change(screen.getByRole("textbox", {name: "description"}), {target: {value: "Foofaa"}})
+        fireEvent.change(screen.getByRole("textbox", {name: "weight"}), {target: {value: 0.5}})
+
+        await user.click(screen.getByRole("button", {name: "Add entry"}))
+
+        await waitFor(() => expect(screen.getByLabelText("Weight carried").textContent).toEqual("0.50 kg"))
     });
 
-    it("adds armor weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            var armor = factories.armorFactory({base: {weight: 8}});
-            var promise = Promise.resolve(
-            Object.assign({}, armor, {id: 1, name: "foo armor"}));
-            rest.post.mockReturnValue(promise);
+    it("adds armor weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetarmor/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [
+                        factories.armorFactory({base: {weight: 8}})
+                    ]
+                ))
+            }),
+        )
 
-            block.handleArmorChanged(armor);
-            promise.then(() => {
-                expect(block.getCarriedWeight()).toEqual(8);
-                done();
-            });
-        });
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("8.00 kg")
     });
 
-    it("accounts for armor quality", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            var armor = factories.armorFactory({
-                base: {weight: 8},
-                quality: {mod_weight_multiplier: 0.8}});
-            var promise = Promise.resolve(
-            Object.assign({}, armor, {id: 1, name: "foo armor"}));
-            rest.post.mockReturnValue(promise);
+    it("accounts for armor quality", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetarmor/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [
+                        factories.armorFactory({
+                            base: {weight: 8},
+                            quality: {mod_weight_multiplier: 0.8}
+                        })
+                    ]
+                ))
+            }),
+        )
 
-            block.handleArmorChanged(armor);
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
 
-            promise.then(() => {
-                expect(block.getCarriedWeight()).toEqual(6.4);
-                done();
-            });
-        });
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("6.40 kg")
     });
 
-    it("adds helm weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            expect(block.getCarriedWeight()).toEqual(0);
-            var armor = factories.armorFactory({
-                base: {is_helm:true, weight: 8},
-                quality: {mod_weight_multiplier: 0.8}});
-            var promise = Promise.resolve(
-            Object.assign({}, armor, {id: 1, name: "foo armor"}));
-            rest.post.mockReturnValue(promise);
+    it("adds helm weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheethelm/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [
+                        factories.armorFactory({
+                            base: {is_helm: true, weight: 8},
+                            quality: {mod_weight_multiplier: 0.8}
+                        })
+                    ]
+                ))
+            }),
+        )
 
-            block.handleHelmChanged(armor);
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
 
-            promise.then(() => {
-                expect(block.getCarriedWeight()).toEqual(6.4);
-                done();
-            });
-        });
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("6.40 kg")
     });
 
-    it("adds close combat weapons weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            block.handleWeaponsLoaded([factories.weaponFactory({
+    it("adds close combat weapons weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetweapons/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.weaponFactory({
                 base: {weight: 6},
-                quality: {weight_multiplier: 0.5}})]);
-            expect(block.getCarriedWeight()).toEqual(3.0);
-            done();
-        });
+                quality: {weight_multiplier: 0.5}})]
+                ))
+            }),
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("3.00 kg")
     });
 
-    it("adds ranged weapons weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            block.handleRangedWeaponsLoaded([factories.rangedWeaponFactory({
+    it("adds ranged weapons weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetrangedweapons/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.weaponFactory({
                 base: {weight: 6},
-                quality: {weight_multiplier: 0.5}})]);
-            expect(block.getCarriedWeight()).toEqual(3.0);
-            done();
-        });
+                quality: {weight_multiplier: 0.5}})]
+                ))
+            }),
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        expect(screen.queryByText("Sheet data")).not.toBeInTheDocument()
+
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("3.00 kg")
     });
 
-    it("adds firearms weight", function () {
-        const block = factories.statBlockFactory();
-        return block.loaded.then(function () {
-            block.handleFirearmsLoaded([factories.firearmFactory({
+    it("adds firearms weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetfirearms/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.firearmFactory({
+                        base: {weight: 5},
+                        scope: null
+                    })]
+                ))
+            }),
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        expect(screen.queryByText("Sheet data")).not.toBeInTheDocument()
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("5.00 kg")
+    });
+
+    it("adds scope weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetfirearms/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.firearmFactory({
+                        base: {weight: 5},
+                        scope: {weight: 0.5}
+                    })]
+                ))
+            }),
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        screen.getByText("Sheet data")
+        await waitForElementToBeRemoved(() => screen.queryByText("Sheet data"))
+
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("5.50 kg")
+    });
+
+    it("adds miscellaneous items weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetmiscellaneousitems/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.sheetMiscellaneousItemFactory({
+                        item: {weight: 2}
+                    })]
+                ))
+            }),
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+
+        await waitForElementToBeRemoved(() => sheet.getByText("Sheet data"))
+
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("2.00 kg")
+    });
+
+    it("handles lists of weapons", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetweapons/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.weaponFactory({
                 base: {weight: 6},
-                scope: null})]);
-            expect(block.getCarriedWeight()).toEqual(6.0);
-        });
-    });
+                quality: {weight_multiplier: 0.5}}),
+                    factories.weaponFactory({
+                base: {weight: 4}})]
+                ))
+            }),
+        )
 
-    it("adds scope weight", function () {
-        const block = factories.statBlockFactory();
-        return block.loaded.then(function () {
-            block.handleFirearmsLoaded([factories.firearmFactory({
-                base: {weight: 1},
-                scope: {weight: 0.5}})]);
-            expect(block.getCarriedWeight()).toEqual(1.5);
-        });
-    });
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
 
-    it("adds miscellaneous items weight", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            block.handleMiscellaneousItemsLoaded([factories.sheetMiscellaneousItemFactory({
-                item: {weight: 2}})]);
-            expect(block.getCarriedWeight()).toEqual(2);
-            done();
-        });
-    });
-
-    it("handles lists of weapons", function (done) {
-        var block = factories.statBlockFactory();
-        block.afterLoad(function () {
-            block.handleWeaponsLoaded([factories.weaponFactory({
-                base: {weight: 3}}),
-            factories.weaponFactory({base: {weight: 4}})]);
-            expect(block.getCarriedWeight()).toEqual(7.0);
-            done();
-        });
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("7.00 kg")
     });
 });

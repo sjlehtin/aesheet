@@ -7,7 +7,8 @@ import {Table, Button, Input} from 'react-bootstrap';
 const util = require('./sheet-util');
 const rest = require('./sheet-rest');
 
-import InventoryRow from './InventoryRow';
+import Loading from 'Loading'
+import InventoryRow from 'InventoryRow';
 
 /*
  * Inventory component holds the inventory items by itself.  As the items
@@ -21,29 +22,41 @@ class Inventory extends React.Component {
         super(props);
 
         this.state = {inventory: [], addEnabled: false,
-        addButtonEnabled: true};
+        addButtonEnabled: true,
+        loading: true};
     }
 
-    componentDidMount() {
-        rest.getData(this.props.url).then((json) => {
-            this.updateInventory(json);
-        });
-    }
-
-    notifyWeightChange() {
-        if (typeof(this.props.onWeightChange) !== "undefined") {
-            this.props.onWeightChange(this.totalWeight());
+    escFunction(event) {
+        if (event.key === "Escape") {
+            this.setState({addEnabled: false, addButtonEnabled: true})
         }
     }
 
-    updateInventory(newInventory) {
-        this.setState({inventory: newInventory});
-        this.notifyWeightChange();
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.escFunction, false);
     }
 
-    totalWeight() {
+    async componentDidMount() {
+        const json = await rest.getData(this.props.url)
+        await this.updateInventory(json)
+        await this.setState({loading: false})
+        document.addEventListener("keydown", (e) => this.escFunction(e), false);
+    }
+
+    async notifyWeightChange(newInventory) {
+        if (typeof(this.props.onWeightChange) !== "undefined") {
+            await this.props.onWeightChange(this.totalWeight(newInventory));
+        }
+    }
+
+    async updateInventory(newInventory) {
+        await this.setState({inventory: newInventory});
+        await this.notifyWeightChange(newInventory);
+    }
+
+    totalWeight(inventory) {
         var total = 0;
-        this.state.inventory.forEach((elem, ii) => {
+        inventory.forEach((elem, ii) => {
             total += parseFloat(elem.unit_weight)
                 * parseInt(elem.quantity);
         });
@@ -63,8 +76,10 @@ class Inventory extends React.Component {
 
                 newInventory.push(data);
 
-                this.setState({addEnabled: false});
-                this.setState({addButtonEnabled: true});
+                this.setState({
+                    addEnabled: false,
+                    addButtonEnabled: true
+                });
                 this.updateInventory(newInventory);
             })
             .catch((err) => {console.log("Failed to update: ", err); });
@@ -109,8 +124,14 @@ class Inventory extends React.Component {
     }
 
     render() {
+        let loading = ""
+        if (this.state.loading) {
+            loading = <Loading>Inventory</Loading>
+        }
+
         let total = 0;
         const weightStyle = {textAlign: "left", paddingLeft: 20};
+
         const rows = this.state.inventory.map((elem, ii) => {
             total += parseFloat(elem.unit_weight)
                 * parseInt(elem.quantity);
@@ -133,7 +154,7 @@ class Inventory extends React.Component {
         }
         return <Table striped condensed={"true"} style={{fontSize: "80%"}}>
             <thead>
-            <tr><th>Item</th><th>Location</th><th>Qty</th><th>Wt.</th><th style={weightStyle}>Total Wt.</th></tr>
+            <tr><th>{loading}Item</th><th>Location</th><th>Qty</th><th>Wt.</th><th style={weightStyle}>Total Wt.</th></tr>
             </thead>
             <tbody>
             {rows}
