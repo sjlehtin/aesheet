@@ -806,7 +806,7 @@ class FirearmControl extends RangedWeaponRow {
                         {this.renderSweepTable()}
                         </Col>
                     </Row>
-                    <MagazineControl magazineSize={this.props.weapon.base.magazine_size} magazines={this.props.weapon.magazines}
+                    <MagazineControl firearm={this.props.weapon}
                                         onRemove={async (mag) => {
                                             await this.props.onMagazineRemove(mag)
                                         }}

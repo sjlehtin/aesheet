@@ -48,7 +48,7 @@ describe('stat block weight handling', function() {
             }),
         )
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("5.50 kg")
     });
 
@@ -187,6 +187,25 @@ describe('stat block weight handling', function() {
         expect(screen.getByLabelText("Weight carried").textContent).toEqual("5.00 kg")
     });
 
+    it("adds firearm magazine weight", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetfirearms/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.firearmFactory({
+                        base: {weight: 5, magazine_weight: 0.75},
+                        scope: null,
+                        ammo: {weight: 12},
+                        magazines: [{current: 30, capacity: 40}, {current: 30, capacity: 40}, {current: 40, capacity: 40}]
+                    })]
+                ))
+            }),
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("10.25 kg")
+    });
+
     it("adds scope weight", async () => {
         server.use(
             rest.get('http://localhost/rest/sheets/1/sheetfirearms/', async (req, res, ctx) => {
@@ -200,8 +219,7 @@ describe('stat block weight handling', function() {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        screen.getByText("Sheet data")
-        await waitForElementToBeRemoved(() => screen.queryByText("Sheet data"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
 
         expect(screen.getByLabelText("Weight carried").textContent).toEqual("5.50 kg")
     });

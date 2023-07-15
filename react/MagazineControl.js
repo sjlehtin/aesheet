@@ -11,7 +11,7 @@ class MagazineControl extends React.Component {
 
         this.state = {
             busy: false,
-            value: this.props.magazineSize
+            value: props.firearm.base.magazine_size
         };
     }
 
@@ -26,16 +26,17 @@ class MagazineControl extends React.Component {
     async handleClick (e) {
         this.setState({busy: true})
         await this.props.onAdd({capacity: parseInt(this.state.value, 10)})
-        this.setState({busy: false, value: this.props.magazineSize})
+        this.setState({busy: false})
     }
 
     render () {
 
         let magazines = []
-        if (this.props.magazines?.length) {
-            for (const [ind, mag] of this.props.magazines.entries()) {
+        if (this.props.firearm.magazines?.length) {
+            for (const [ind, mag] of this.props.firearm.magazines.entries()) {
                 magazines.push(<MagazineRow key={ind} capacity={mag.capacity}
                                             current={mag.current}
+                                            currentMagazineWeight={util.magazineWeight(this.props.firearm, mag)}
                                             onChange={async (change) => {
                                                 await this.props.onChange(Object.assign({}, mag, change))}}
                                             onRemove={async () => await this.props.onRemove(mag)}
@@ -62,8 +63,7 @@ class MagazineControl extends React.Component {
 }
 
 MagazineControl.props = {
-    magazineSize: PropTypes.number.isRequired,
-    magazines: PropTypes.arrayOf(Object).isRequired,
+    firearm: PropTypes.object.isRequired,
     onChange: PropTypes.func,
     onRemove: PropTypes.func,
     onAdd: PropTypes.func

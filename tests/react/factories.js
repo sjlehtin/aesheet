@@ -257,7 +257,8 @@ const baseFirearmFactory = (props) => {
             "base_skill": "Handguns",
             "skill": null,
             "skill2": null,
-            "magazine_size": 8
+            "magazine_size": 8,
+            "magazine_weight": 0.350
     };
     return Object.assign(_base, props);
 };

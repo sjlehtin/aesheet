@@ -13,8 +13,19 @@ var exports = function () {
             return false;
         };
 
+    const magazineWeight = (wpn, mag) => {
+        let magWeight = 0
+        magWeight += parseFloat(wpn.base.magazine_weight)
+        // Ammo has weight in grams. Estimate cartridge weighs 1.5 as
+        // much as the bullet, based on 7.62x51 Nato caliber.
+        magWeight += (parseFloat(wpn.ammo.weight) * 0.001 * 2.5) * parseInt(mag.current)
+        return magWeight;
+    }
+
     return {
         isInt: isInt,
+
+        magazineWeight: magazineWeight,
 
         isFloat: function (value) {
             if (typeof(value) === "number") {

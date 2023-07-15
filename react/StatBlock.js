@@ -30,7 +30,15 @@ import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
 import RangeControl from './RangeControl';
 
-import {Container, Row, Col, Table, Image, Card, Badge} from 'react-bootstrap';
+import {
+    Badge,
+    Card,
+    Col,
+    Container,
+    Image,
+    Row,
+    Table
+} from 'react-bootstrap';
 
 const rest = require('./sheet-rest');
 const util = require('./sheet-util');
@@ -1011,6 +1019,9 @@ class StatBlock extends React.Component {
             weight += parseFloat(wpn.base.weight);
             if (wpn.scope) {
                 weight += parseFloat(wpn.scope.weight)
+            }
+            for (const mag of wpn.magazines) {
+                weight += util.magazineWeight(wpn, mag)
             }
         }
 

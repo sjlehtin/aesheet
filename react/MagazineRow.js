@@ -32,13 +32,14 @@ class MagazineRow extends React.Component {
             display.push(<span style={spentAmmoStyle} key={`spent-${ind}`}>•</span>)
         }
 
-        display.push(<span style={{marginLeft: "2em"}}>{this.props.current}/{this.props.capacity}</span>)
+        display.push(<span key={"numbers"} style={{marginLeft: "2em"}}>{this.props.current}/{this.props.capacity}</span>)
         return <Row aria-label={`Magazine of size ${this.props.capacity} with ${this.props.current} bullets remaining`}>
-            <Col md={4}>
+            <Col md={6}>
                 {display}
             </Col>
-            <Col md={3}><Button aria-label={"Shoot"} size={"sm"} onClick={async () => this.handleShoot() }>Shoot!</Button></Col>
-            <Col md={3}><Button aria-label={"Remove magazine"} size={"sm"} onClick={async () => {await this.props.onRemove()}}>Remove</Button></Col>
+            <Col md={2}><Button aria-label={"Shoot"} size={"sm"} onClick={async () => this.handleShoot() }>Shoot!</Button></Col>
+            <Col md={2}><Button aria-label={"Remove magazine"} size={"sm"} onClick={async () => {await this.props.onRemove()}}>Remove</Button></Col>
+            <Col md={2}><span aria-label={"Weight"}>{this.props.currentMagazineWeight.toFixed(2)} kg</span></Col>
         </Row>
     }
 }
@@ -46,6 +47,7 @@ class MagazineRow extends React.Component {
 MagazineRow.props = {
     size: PropTypes.number.isRequired,
     current: PropTypes.number.isRequired,
+    currentMagazineWeight: PropTypes.number,
     onChange: PropTypes.func,
     onRemove: PropTypes.func
 };

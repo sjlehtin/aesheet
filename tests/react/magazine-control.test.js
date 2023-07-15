@@ -9,9 +9,18 @@ const factories = require('./factories');
 describe('MagazineControl', () => {
 
     const renderMagazineControl = (givenProps) => {
-        const props = Object.assign({magazineSize: 10, magazines: []}, givenProps)
-        return render(
-            <MagazineControl {...props} />)
+
+        const firearmProps= factories.firearmFactory(
+            Object.assign({
+                base: {magazine_weight: 0.35, magazine_size: 10},
+                magazines: []
+            }, givenProps?.firearm))
+
+
+        const props = Object.assign({}, givenProps, {
+                firearm: firearmProps
+            })
+        return render(<MagazineControl {...props} />)
     }
 
     it ("validates input", async () => {
@@ -20,7 +29,7 @@ describe('MagazineControl', () => {
         const spy = jest.fn().mockResolvedValue()
 
         const control = renderMagazineControl({
-            magazineSize: 11,
+            firearm: {base: {magazine_size: 11}},
             onAdd: spy})
         const input = control.getByRole("textbox", {name: "Magazine size"})
 
@@ -42,8 +51,8 @@ describe('MagazineControl', () => {
 
         expect(spy).toHaveBeenCalledWith({capacity: 10})
 
-        // Value should return to gun default after add.
-        expect(input.value).toEqual("11")
+        // Value should stay at what the user set.
+        expect(input.value).toEqual("10")
 
         expect(control.getByRole("button", {
             name: "Add magazine"
@@ -57,17 +66,24 @@ describe('MagazineControl', () => {
 
     it ("renders magazines", async () => {
         const control = renderMagazineControl({
-            magazineSize: 11,
-            magazines: [
-                factories.magazineFactory({capacity: 15, current: 3}),
-                factories.magazineFactory({capacity: 15, current: 15})
-            ]
+            firearm: factories.firearmFactory({
+                base: {magazine_weight: 0.75},
+                ammo: {weight: 12},
+                magazines: [
+                    {capacity: 15, current: 3},
+                    {capacity: 15, current: 15}
+                ]
+            })
         })
-        expect(control.queryByText("No magazines")).toBeNull()
-        const mag1 = control.getByLabelText("Magazine of size 15 with 3 bullets remaining")
-        const mag2 = control.getByLabelText("Magazine of size 15 with 15 bullets remaining")
+        expect(screen.queryByText("No magazines")).toBeNull()
+        const mag1 = screen.getByLabelText("Magazine of size 15 with 3 bullets remaining")
+        const mag2 = screen.getByLabelText("Magazine of size 15 with 15 bullets remaining")
         within(mag2).getByRole("button", {name: "Remove magazine"})
-        expect(control.getAllByRole("button", {name: "Remove magazine"}).length).toEqual(2)
+        expect(screen.getAllByRole("button", {name: "Remove magazine"}).length).toEqual(2)
+
+        const mags = screen.getAllByLabelText("Weight")
+        expect(mags.length).toEqual(2)
+        expect(mags.map((el) => el.textContent)).toEqual(["0.84 kg", "1.20 kg"])
     })
 
     it ("can remove magazines", async () => {
@@ -79,13 +95,14 @@ describe('MagazineControl', () => {
             id: 2, capacity: 15, current: 3
         });
         const control = renderMagazineControl({
-            magazineSize: 11,
-            magazines: [
-                mag,
-            ],
+            firearm: {
+                magazines: [
+                    mag,
+                ],
+            },
             onRemove: spy
         })
-        const button = control.getByRole("button", {name: "Remove magazine"})
+        const button = screen.getByRole("button", {name: "Remove magazine"})
         await user.click(button)
         expect(spy).toHaveBeenCalledWith(mag)
     })
