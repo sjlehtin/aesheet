@@ -43,23 +43,15 @@ export function patch(url, data, method) {
     });
 }
 
-export function getData(url) {
-    return new Promise(function (resolved, rejected) {
-        fetch(url, {
+export async function getData(url) {
+    const res = await fetch(url, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
             credentials: 'same-origin'
-        }).then((response) => {
-            response.json().then((json) => {
-                resolved(json);
-            }).catch((e) => rejected(e));
-        }).catch((e) => {
-            rejected(e)
-        });
-
-    })
+        })
+    return await res.json()
 }
 
 export function post(url, data) {
