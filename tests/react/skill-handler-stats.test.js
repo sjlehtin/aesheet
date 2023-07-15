@@ -312,7 +312,7 @@ describe('SkillHandler stats', function() {
             ]
         });
         expect(handler.getBaseStats().baseBody).toEqual(16);
-        expect(handler.getBaseStats().body).toEqual(18);
+        expect(handler.getBaseStats().body).toEqual(20);
     });
 
     it('calculates initiative', function () {

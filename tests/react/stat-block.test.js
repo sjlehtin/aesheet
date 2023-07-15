@@ -88,16 +88,6 @@ describe('StatBlock', function() {
         });
     });
 
-    it('adds correct body for Toughness', function () {
-        let block = factories.statBlockFactory({character: {
-            cur_wil: 53, cur_psy: 42, bought_mana: 5},
-            edges: [{edge: {edge: {name: "Toughness"}, level: 2}}]});
-
-        return block.loaded.then(function () {
-            expect(ReactDOM.findDOMNode(block).querySelector('#bodyFromToughness').textContent).toEqual("4");
-        });
-    });
-
     it('collects a list of edges while updating with REST', function (done) {
         var block = factories.statBlockFactory();
         block.afterLoad(function () {

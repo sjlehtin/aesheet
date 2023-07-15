@@ -551,7 +551,7 @@ class SkillHandler {
 
             this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
             this._baseStats.body =
-                this._baseStats.baseBody + this.edgeLevel("Toughness");
+                this._baseStats.baseBody + 2 * this.edgeLevel("Toughness");
         }
 
         return this._baseStats;

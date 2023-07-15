@@ -43,6 +43,7 @@ class StatBlock extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            loading: true,
             sheet: undefined,
             char: undefined,
             edgeList: [],
@@ -253,91 +254,88 @@ class StatBlock extends React.Component {
         }).catch((err) => console.log("Failed to remove edge:", err));
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         /* TODO: Failures to load objects from the server should be indicated
            visually to the users, as well as failures to save etc.  Use an
            error-handling control for this purpose. */
+        let promises = []
 
-        rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
-            this.handleFirearmsLoaded(json);
-        }).catch((err) => {console.log("Failed to load firearms:", err)});
+        const firearms = await rest.getData(this.props.url + 'sheetfirearms/')
+        this.handleFirearmsLoaded(firearms)
 
-        rest.getData(this.props.url + 'sheetweapons/').then((json) => {
+        // promises.push(rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
+        //     this.handleFirearmsLoaded(json);
+        // }).catch((err) => {console.log("Failed to load firearms:", err)}))
+
+        promises.push(rest.getData(this.props.url + 'sheetweapons/').then((json) => {
             this.handleWeaponsLoaded(json);
-        }).catch((err) => {console.log("Failed to load weapons:", err)});
+        }).catch((err) => {console.log("Failed to load weapons:", err)}))
 
-        rest.getData(this.props.url + 'sheetrangedweapons/').then((json) => {
+        promises.push(rest.getData(this.props.url + 'sheetrangedweapons/').then((json) => {
             this.handleRangedWeaponsLoaded(json);
         }).catch((err) => {console.log("Failed to load ranged weapons:",
-            err)});
+            err)}))
 
-        rest.getData(this.props.url + 'sheettransienteffects/').then((json) => {
+        promises.push(rest.getData(this.props.url + 'sheettransienteffects/').then((json) => {
             this.handleTransientEffectsLoaded(json);
         }).catch((err) => {console.log("Failed to load transient effects:",
-            err)});
+            err)}))
 
-        rest.getData(this.props.url + 'sheetmiscellaneousitems/').then((json) => {
+        promises.push(rest.getData(this.props.url + 'sheetmiscellaneousitems/').then((json) => {
             this.handleMiscellaneousItemsLoaded(json);
         }).catch((err) => {console.log("Failed to load miscellaneous items:",
-            err)});
+            err)}))
 
-        rest.getData(this.props.url + 'sheetarmor/').then((json) => {
+        promises.push(rest.getData(this.props.url + 'sheetarmor/').then((json) => {
             let obj = {};
             if (json.length > 0) {
                 obj = json[0];
             }
             this.handleArmorLoaded(obj);
         }).catch((err) => {console.log("Failed to load armor:",
-            err)});
+            err)}))
 
-        rest.getData(this.props.url + 'sheethelm/').then((json) => {
+        promises.push(rest.getData(this.props.url + 'sheethelm/').then((json) => {
             let obj = {};
             if (json.length > 0) {
                 obj = json[0];
             }
             this.handleHelmLoaded(obj);
         }).catch((err) => {console.log("Failed to load helm:",
-            err)});
+            err)}))
 
-        rest.getData(this.props.url).then((sheet) => {
+        const sheet = await rest.getData(this.props.url)
 
-            const characterUrl = `/rest/characters/${sheet.character}/`;
+        const characterUrl = `/rest/characters/${sheet.character}/`;
 
-            this.setState({
-                sheet: sheet,
-                // Updates occur towards the character.
-                url: characterUrl
-            });
-
-            rest.getData(characterUrl + 'characteredges/').then(
-                (characterEdges) => {
-                    this.handleEdgesLoaded(characterEdges);
-                }).catch(function (err) {
-                    console.log("Failed to load edges", err)});
-
-            rest.getData(characterUrl + 'wounds/').then(
-                (wounds) => {
-                    this.handleWoundsLoaded(wounds);
-                }).catch(function (err) {
-                    console.log("Failed to load wounds", err)});
-
-            rest.getData(characterUrl)
-                .then((character) => {
-                    rest.getData(characterUrl + 'characterskills/').then(
-                        (characterSkills) => {
-                            rest.getData(
-                                `/rest/skills/campaign/${character.campaign}/`)
-                                .then((allSkills) => {
-                                    this.handleSkillsLoaded(characterSkills,
-                                    allSkills);
-                                }).catch((err) => {
-                                console.log("Failed load: ", err)});
-                        }).catch(function (err) {
-                            console.log("Failed CS load", err)});
-                    this.setState({char: character});
-                });
-
+        this.setState({
+            sheet: sheet,
+            // Updates occur towards the character.
+            url: characterUrl
         });
+
+        promises.push(rest.getData(characterUrl + 'characteredges/').then(
+            (characterEdges) => {
+                this.handleEdgesLoaded(characterEdges);
+            }).catch(function (err) {
+                console.log("Failed to load edges", err)}))
+
+        promises.push(rest.getData(characterUrl + 'wounds/').then(
+            (wounds) => {
+                this.handleWoundsLoaded(wounds);
+            }).catch(function (err) {
+                console.log("Failed to load wounds", err)}))
+
+        const character = await rest.getData(characterUrl)
+        const characterSkills = await rest.getData(characterUrl + 'characterskills/')
+        const allSkills = await rest.getData(
+            `/rest/skills/campaign/${character.campaign}/`)
+
+        this.handleSkillsLoaded(characterSkills, allSkills);
+        this.setState({char: character});
+
+        await Promise.allSettled(promises)
+        this.setState({loading: false})
     }
 
     mana(baseStats) {
@@ -852,7 +850,7 @@ class StatBlock extends React.Component {
 
         expendable = <tbody>
         <tr><td style={statStyle}>B</td>
-            <td style={baseStyle}>{baseStats.baseBody}{toughness}</td>
+            <td style={baseStyle} aria-label={"Body at full health"}>{baseStats.baseBody}{toughness}</td>
             <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
             <td style={baseStyle}>{baseStats.stamina}</td>
@@ -1029,7 +1027,7 @@ class StatBlock extends React.Component {
     }
 
     renderFirearms(skillHandler) {
-        if (!this.state.firearmList || !skillHandler) {
+        if (this.state.loading) {
             return <Loading>Firearms</Loading>;
         }
         var rows = [];
@@ -1335,8 +1333,8 @@ class StatBlock extends React.Component {
     }
 
     renderHeader() {
-        if (!this.state.char || !this.state.sheet) {
-            return <Loading>Header</Loading>;
+        if (this.state.loading) {
+            return <Loading>Sheet data</Loading>;
         }
 
         var privateNotification = '';
@@ -1371,12 +1369,20 @@ class StatBlock extends React.Component {
         return <SenseTable handler={handler}/>;
     }
 
+    renderWeightCarried () {
+        if (this.state.loading) {
+            return <Loading>Inventory</Loading>
+        }
+        return <span>Weight carried: <span aria-label={"Weight carried"}>{this.getCarriedWeight().toFixed(2)} kg</span></span>
+    }
+
     render() {
         var skillHandler = this.getSkillHandler();
         if (skillHandler) {
             var baseStats = skillHandler.getBaseStats();
             var effStats = skillHandler.getEffStats();
         }
+
 
         return (
             <Container fluid={true}>
@@ -1394,7 +1400,7 @@ class StatBlock extends React.Component {
                                 {this.renderSPControl(baseStats)}
                             </Row>
                             <Row>
-                                Weight carried: {this.getCarriedWeight().toFixed(2)} kg
+                                {this.renderWeightCarried()}
                             </Row>
                         </Col>
                         <Col md={6}>
