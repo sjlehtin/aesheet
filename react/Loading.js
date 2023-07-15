@@ -9,7 +9,7 @@ class Loading extends React.Component {
         } else {
             content = 'Loading...';
         }
-        return <div><GoSync id={"loading"} aria-label={"Loading"} style={{
+        return <div><GoSync id={"loading"} aria-label={"Loading"} role={"status"} aria-busy={"true"} style={{
             animation: "spin 1s infinite linear",
             strokeWidth: "2px",
             scale: "150%"
