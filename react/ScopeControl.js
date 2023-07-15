@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import DropdownList from 'react-widgets/DropdownList';
+import DropdownList from 'react-widgets/DropdownList'
 
 const rest = require('./sheet-rest');
 
@@ -13,7 +13,8 @@ class ScopeControl extends React.Component {
             busy: false,
             editing: false,
             scopeChoices: [],
-            selectedScope: undefined
+            selectedScope: undefined,
+            loading: !!props.url
         };
     }
 
@@ -23,9 +24,9 @@ class ScopeControl extends React.Component {
 
     async updateScopeSelection() {
         if (this.props.url) {
-            await this.setState({busy: true})
+            this.setState({busy: true})
             let json = await rest.getData(this.props.url)
-            await this.setState({busy: false, scopeChoices: json})
+            this.setState({busy: false, scopeChoices: json, loading: false})
         }
     }
 
