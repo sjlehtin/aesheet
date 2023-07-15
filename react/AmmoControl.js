@@ -23,9 +23,9 @@ class AmmoControl extends React.Component {
 
     async updateAmmoSelection() {
         if (this.props.url) {
-            await this.setState({busy: true});
+            this.setState({busy: true});
             let json = await rest.getData(this.props.url)
-            await this.setState({busy: false, ammoChoices: json})
+            this.setState({busy: false, ammoChoices: json})
         }
     }
 
