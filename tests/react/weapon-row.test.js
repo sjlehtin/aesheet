@@ -51,7 +51,7 @@ describe('WeaponRow', function() {
 
     it("can calculate effect of missing specialization skill checks",
         function () {
-            var firearm = getWeaponRow({
+            var weapon = getWeaponRow({
                 handlerProps: {
                     skills: [{
                         skill: "Weapon combat",
@@ -67,7 +67,7 @@ describe('WeaponRow', function() {
                     }
                 })
             });
-            expect(firearm.skillCheck()).toEqual(50);
+            expect(weapon.skillCheck()).toEqual(50);
         });
 
     it("notices specializations", function () {
