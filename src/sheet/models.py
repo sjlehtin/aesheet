@@ -971,6 +971,16 @@ class SheetFirearm(models.Model):
     )
     add_ons = models.ManyToManyField(FirearmAddOn, blank=True)
 
+    FULL = "FULL"
+    PRIMARY = "PRI"
+    SECONDARY = "SEC"
+
+    use_type = models.CharField(
+        max_length=10,
+        default=FULL,
+        choices=((FULL, "Full"), (PRIMARY, "Primary"), (SECONDARY, "Secondary")),
+    )
+
     def __str__(self):
         return "{base} w/ {ammo}".format(base=self.base, ammo=self.ammo)
 
@@ -1417,7 +1427,6 @@ class ArmorQuality(ExportedModel):
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
 
-    # TODO: this is from size, which should be handled specially in code.
     mod_weight_multiplier = models.DecimalField(
         max_digits=4, decimal_places=1, default=1.0
     )
@@ -1448,6 +1457,7 @@ class Armor(ExportedModel):
     special_qualities = models.ManyToManyField(
         ArmorSpecialQuality, blank=True
     )
+    # TODO: armor size
 
     @classmethod
     def dont_export(cls):

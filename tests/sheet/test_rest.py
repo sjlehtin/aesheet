@@ -714,6 +714,22 @@ class SheetFirearmTestCase(TestCase):
 
         self.assertIsNone(models.SheetFirearm.objects.get(pk=sheet_firearm.pk).scope)
 
+    def test_changing_use_type(self):
+        firearm = factories.BaseFirearmFactory(name="AK-47")
+        ammo = factories.AmmunitionFactory(calibre__name="7.62x39")
+        scope = factories.ScopeFactory(name="Foo Scope")
+        self.sheet.firearms.add(firearm, through_defaults={"ammo": ammo})
+
+        sheet_firearm = models.SheetFirearm.objects.get(base=firearm.pk)
+        self.assertIsNone(sheet_firearm.scope)
+
+        response = self.client.patch(
+            "{}{}/".format(self.url, sheet_firearm.pk),
+            data={'use_type': "PRI"},
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        assert models.SheetFirearm.objects.get(pk=sheet_firearm.pk).use_type == "PRI"
 
 # TODO: add test for checking private sheets restrict access to
 # sheetfirearms, sheetweapons, and sheetrangedweapons correctly.
