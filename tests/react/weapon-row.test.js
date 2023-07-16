@@ -1,20 +1,12 @@
-jest.dontMock('WeaponRow');
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-
-const WeaponRow = require('WeaponRow').default;
-
-var factories = require('./factories');
+import WeaponRow from 'WeaponRow'
+import { screen, render } from '@testing-library/react'
+const factories = require('./factories');
 
 describe('WeaponRow', function() {
-    "use strict";
 
-    var getWeaponRow = function (givenProps) {
-        var handlerProps = {
+    const renderWeaponRow = (givenProps) => {
+        let handlerProps = {
             characterSkills: [],
             edges: [],
             character: {cur_fit: 45, cur_ref: 45}
@@ -25,7 +17,7 @@ describe('WeaponRow', function() {
             delete givenProps.handlerProps;
         }
 
-        var allSkills = [];
+        let allSkills = [];
         for (let skill of handlerProps.skills) {
             allSkills.push({
                 name: skill.skill,
@@ -33,7 +25,7 @@ describe('WeaponRow', function() {
         }
         handlerProps.allSkills = allSkills;
 
-        var props = {
+        let props = {
             weapon: factories.weaponFactory(
                 {base: {base_skill: "Weapon combat"}}),
             skillHandler: factories.skillHandlerFactory(handlerProps)
@@ -41,17 +33,13 @@ describe('WeaponRow', function() {
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
-        var table = TestUtils.renderIntoDocument(
-            <WeaponRow {...props}/>
-        );
 
-        return TestUtils.findRenderedComponentWithType(table,
-            WeaponRow);
+        return render(<WeaponRow {...props}/>)
     };
 
     it("can calculate effect of missing specialization skill checks",
-        function () {
-            var weapon = getWeaponRow({
+        () => {
+            renderWeaponRow({
                 handlerProps: {
                     skills: [{
                         skill: "Weapon combat",
@@ -67,11 +55,11 @@ describe('WeaponRow', function() {
                     }
                 })
             });
-            expect(weapon.skillCheck()).toEqual(50);
+            expect(screen.getByLabelText("Base check").textContent).toEqual("50")
         });
 
     it("notices specializations", function () {
-        var weapon = getWeaponRow({
+        renderWeaponRow({
             handlerProps: {
                 skills: [{
                         skill: "Greatsword",
@@ -91,11 +79,11 @@ describe('WeaponRow', function() {
                 }
             })
         });
-        expect(weapon.skillCheck()).toEqual(65);
+        expect(screen.getByLabelText("Base check").textContent).toEqual("65")
     });
 
     it("calculates correct ROA for full", function () {
-        var weapon = getWeaponRow({
+         renderWeaponRow({
             handlerProps: {
                 skills: [{
                     skill: "Weapon combat",
@@ -105,17 +93,17 @@ describe('WeaponRow', function() {
             weapon: factories.weaponFactory({
                 base: {base_skill: "Weapon combat", roa: "1.5"}})
         });
-        expect(weapon.roa()).toBeCloseTo(1.95, 2);
+        expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("1.95")
     });
 
-    var getWeapon = function (givenProps) {
-        var props = {roa: "1.5", size: 1, ccv: 10, skillLevel: 0, fit: 45,
+    const renderWeapon = function (givenProps) {
+        let props = {roa: "1.5", size: 1, ccv: 10, skillLevel: 0, fit: 45,
             int: 45, extraSkills: [], edges: [], quality: {}, base: {}};
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
 
-        var skills = [{
+        let skills = [{
             skill: "Weapon combat",
             level: props.skillLevel
         }];
@@ -124,13 +112,13 @@ describe('WeaponRow', function() {
             skills.push(skill);
         }
 
-        var base = Object.assign({
+        const base = Object.assign({
             base_skill: "Weapon combat", roa: props.roa,
             ccv: props.ccv, num_dice: 2, dice: 6, extra_damage: 2,
             leth: 5, plus_leth: 1, defense_leth: 6, durability: 7,
-            draw_initiative: -3, dp: 7}, props.base);
+            draw_initiative: -3, dp: 7, weight: 3.6}, props.base);
 
-        return getWeaponRow({
+        return renderWeaponRow({
             handlerProps: {
                 skills: skills,
                 edges: props.edges,
@@ -144,223 +132,239 @@ describe('WeaponRow', function() {
     };
 
     it("calculates correct ROA for a large weapon", function () {
-        var weapon = getWeapon({size: 2});
-        expect(weapon.roa()).toBeCloseTo(1.35, 2);
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("1.35")
     });
 
     it("calculates correct ROA for FULL use", function () {
-        var weapon = getWeapon();
-        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(1.5, 2);
+        renderWeapon();
+        expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("1.50")
     });
 
     it("calculates correct ROA for PRI use", function () {
-        var weapon = getWeapon();
-        expect(weapon.roa(WeaponRow.PRI)).toBeCloseTo(1.25, 2);
+        renderWeapon();
+        expect(screen.getByLabelText("ROA for PRI").textContent).toEqual("1.25")
     });
 
     it("calculates correct ROA for SEC use", function () {
-        var weapon = getWeapon();
-        expect(weapon.roa(WeaponRow.SEC)).toBeCloseTo(1.0, 2);
+        renderWeapon();
+        expect(screen.getByLabelText("ROA for SEC").textContent).toEqual("1.00")
     });
 
     it("calculates very high two-weapon style effect correctly", function () {
         // Even 6th level TWS should only counter the PRI penalty,
         // not give an actual bonus.
-        var weapon = getWeapon({
+        renderWeapon({
             extraSkills: [{skill: "Two-weapon style", level: 6}]
         });
-        expect(weapon.roa(WeaponRow.PRI)).toBeCloseTo(1.5, 2);
-        expect(weapon.roa(WeaponRow.SEC)).toBeCloseTo(1.3, 2);
+        expect(screen.getByLabelText("ROA for PRI").textContent).toEqual("1.50")
+        expect(screen.getByLabelText("ROA for SEC").textContent).toEqual("1.30")
     });
 
     it("caps roa", function () {
-        var weapon = getWeapon({skillLevel: 5, roa: 2.0});
-        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(2.5, 2);
+        renderWeapon({skillLevel: 5, roa: 2.0});
+        expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("2.50")
     });
 
     it("takes Single-weapon style into account", function () {
-        var weapon = getWeapon({
+        renderWeapon({
             extraSkills: [{skill: "Single-weapon style", level: 3}]
         });
-        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(1.65, 2);
+        expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("1.65")
     });
 
     it("stacks SWS and WC", function () {
-        var weapon = getWeapon({
+        renderWeapon({
             skillLevel: 5,
             extraSkills: [{skill: "Single-weapon style", level: 3}]
         });
-        expect(weapon.roa(WeaponRow.FULL)).toBeCloseTo(2.47, 2);
+        expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("2.47")
     });
 
+    function getChecks(name) {
+        let values = []
+        screen.getAllByRole("cell", {name: name}).forEach((el) => values.push(el.textContent))
+        return values
+    }
+
     it("calculates skill checks for full use", function () {
-        var weapon = getWeapon();
-        expect(weapon.skillChecks([0.5, 1, 2, 3])).toEqual([60, 55, 38, 25]);
+        renderWeapon();
+        expect(getChecks("Attack for FULL")).toEqual(["60", "55", "55", "38", "32", "25", "", "", ""])
     });
 
     it("calculates skill checks for primary use", function () {
-        var weapon = getWeapon();
-        expect(weapon.skillChecks([0.5, 1, 2, 3],
-            {useType: WeaponRow.PRI})).toEqual([60, 55, 33, null]);
+        renderWeapon();
+        expect(getChecks("Attack for PRI")).toEqual(["60", "55", "41", "33", "25", "", "", "", ""])
     });
 
     it("calculates skill checks for secondary use", function () {
-        var weapon = getWeapon();
-        expect(weapon.skillChecks([0.5, 1, 2, 3],
-            {useType: WeaponRow.SEC})).toEqual([35, 30, 0, null]);
+        renderWeapon();
+        expect(getChecks("Attack for SEC")).toEqual(["35", "30", "10", "0", "", "", "", "", ""])
     });
 
     it("takes Ambidexterity into account in secondary skill checks", function () {
-        var weapon = getWeapon({edges: [{edge: {name: "Ambidexterity"}, level: 3}]});
-        expect(weapon.skillChecks([0.5, 1, 2, 3],
-            {useType: WeaponRow.SEC})).toEqual([50, 45, 15, null]);
+        renderWeapon({edges: [{edge: {name: "Ambidexterity"}, level: 3}]});
+        expect(getChecks("Attack for SEC")).toEqual(["50", "45", "25", "15", "", "", "", "", ""])
     });
 
     it("counters penalty for high INT", function () {
-        var weapon = getWeapon({int: 66});
-        expect(weapon.skillChecks([0.5, 1, 2, 3])).toEqual([60, 55, 45, 32]);
+        renderWeapon({int: 66});
+        expect(getChecks("Attack for FULL")).toEqual(["60", "55", "55", "45", "39", "32", "", "", ""])
     });
 
     it("calculates initiatives for full use", function () {
-        var weapon = getWeapon();
-        expect(weapon.initiatives([0.5, 1, 2, 3],
-            {useType: WeaponRow.FULL})).toEqual([6, 6, -4, -14]);
+        renderWeapon();
+        expect(getChecks("Attack initiative for FULL")).toEqual(["+6", "-4", "-14", ""])
     });
 
     it("calculates initiatives for primary use", function () {
-        var weapon = getWeapon();
-        expect(weapon.initiatives([0.5, 1, 2, 3],
-            {useType: WeaponRow.PRI})).toEqual([6, 5, -7, null]);
+        renderWeapon();
+        expect(getChecks("Attack initiative for PRI")).toEqual(["+5", "-7", "", ""])
     });
 
     it("calculates initiatives for secondary use", function () {
-        var weapon = getWeapon();
-        expect(weapon.initiatives([0.33, 1, 2, 3],
-            {useType: WeaponRow.SEC})).toEqual([6, 4, -11, null]);
+        renderWeapon();
+        expect(getChecks("Attack initiative for SEC")).toEqual(["+4", "-11", "", ""])
     });
 
     it("calculates defense initiatives for full use", function () {
-        var weapon = getWeapon();
-        expect(weapon.defenseInitiatives([1, 2, 3],
-            {useType: WeaponRow.FULL})).toEqual([9, -1, -11]);
+        renderWeapon();
+        expect(getChecks("Defense initiative for FULL")).toEqual(["+9", "-1", "-11"])
     });
 
     it("calculates defense initiatives for primary use", function () {
-        var weapon = getWeapon();
-        expect(weapon.defenseInitiatives([1, 2, 3],
-            {useType: WeaponRow.PRI})).toEqual([9, -3, -15]);
+        renderWeapon();
+        expect(getChecks("Defense initiative for PRI")).toEqual(["+9", "-3", "-15"])
     });
 
     it("calculates defense initiatives for secondary use", function () {
-        var weapon = getWeapon();
-        expect(weapon.defenseInitiatives([1, 2, 3],
-            {useType: WeaponRow.SEC})).toEqual([9, -6, -21]);
+        renderWeapon();
+        expect(getChecks("Defense initiative for SEC")).toEqual(["+9", "-6", "-21"])
     });
 
     it("calculates damage", function () {
-        var weapon = getWeapon();
-        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+2/5+1");
+        renderWeapon();
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("2d6+2/5+1")
     });
 
     it("calculates damage with odd number fit", function () {
-        var weapon = getWeapon({fit: 58});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+3/5+1");
+        renderWeapon({fit: 58});
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("2d6+3/5+1")
     });
 
     it("calculates damage with quality", function () {
-        var weapon = getWeapon({quality: {damage: 3, leth: 1,
-            plus_leth: 1}});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("2d6+5/6+2");
+        renderWeapon({
+            quality: {
+                damage: 3, leth: 1,
+                plus_leth: 1
+            }
+        });
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("2d6+5/6+2")
     });
 
     it("calculates defense damage", function () {
-        var weapon = getWeapon();
-        expect(weapon.renderDamage({useType: WeaponRow.FULL,
-            defense: true})).toEqual("2d6+2/6");
+        renderWeapon();
+        expect(screen.getByLabelText("Defense damage for FULL").textContent).toEqual("2d6+2/6")
     });
 
     it("calculates defense damage with quality", function () {
-        var weapon = getWeapon({quality: {damage: 3, leth: 1,
+        renderWeapon({quality: {damage: 3, leth: 1,
             plus_leth: 1, defense_leth: 1}});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL, defense: true}))
-            .toEqual("2d6+5/7");
+        expect(screen.getByLabelText("Defense damage for FULL").textContent).toEqual("2d6+5/7")
     });
 
     // Damage capping
     // Lethality capping
+    it("caps damage and lethality, base case", function () {
+        renderWeapon({quality: {damage: 1}, base: {num_dice: 1}});
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("1d6+3/5+1")
+    })
+
     it("caps damage and lethality", function () {
-        var weapon = getWeapon({quality: {damage: 1}, base: {num_dice: 1}});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("1d6+3/5+1");
-        weapon = getWeapon({quality: {damage: 1}, base: {num_dice: 1},
+        renderWeapon({quality: {damage: 1}, base: {num_dice: 1},
             fit: 180});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL}))
-            .toEqual("1d6+12/8+1");
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("1d6+12/8+1")
     });
 
     it("takes martial arts expertise into account", function () {
-        var weapon = getWeapon({quality: {damage: 1}, base: {num_dice: 1},
+        renderWeapon({quality: {damage: 1}, base: {num_dice: 1},
         extraSkills: [{skill: "Martial arts expertise", level: 6}]});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL}))
-            .toEqual("1d6+7/6+1");
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("1d6+7/6+1")
     });
 
     // Size
 
     it("takes size into account with damage", function () {
-        var weapon = getWeapon({size: 2, quality: {damage: 1}});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL})).toEqual("4d6+5/6+1");
+        renderWeapon({size: 2, quality: {damage: 1}});
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("4d6+5/6+1")
     });
 
     it("takes size into account with defense damage", function () {
-        var weapon = getWeapon({size: 2, base: {defense_leth: 6},
+        renderWeapon({size: 2, base: {defense_leth: 6},
             quality: {damage: 1}});
-        expect(weapon.renderDamage({useType: WeaponRow.FULL,
-            defense: true})).toEqual("4d6+5/7");
+        expect(screen.getByLabelText("Defense damage for FULL").textContent).toEqual("4d6+5/7")
     });
 
-    it("takes size into account with durability", function () {
-        var weapon = getWeapon({size: 2});
-        expect(weapon.durability()).toEqual(9);
+    it("takes size into account with durabibility", function () {
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("Durability").textContent).toEqual("9")
     });
 
-    it("takes size into account with damage points", function () {
-        var weapon = getWeapon({size: 2});
-        expect(weapon.dp()).toEqual(14);
-        weapon = getWeapon({size: 3});
-        expect(weapon.dp()).toEqual(28);
+    it("takes large size into account with damagae points", function () {
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("Damage points").textContent).toEqual("14")
     });
 
-    it("takes size into account with draw initiative", function () {
-        var weapon = getWeapon({size: 2});
-        expect(weapon.drawInitiative()).toEqual(-5);
+    it("takes huge size into account with damagae points", function () {
+        renderWeapon({size: 3});
+        expect(screen.getByLabelText("Damage points").textContent).toEqual("28")
     });
 
-    it("takes size into account with ccv", function () {
-        var weapon = getWeapon({size: 2});
-        expect(weapon.ccv()).toEqual(15);
-        weapon = getWeapon({size: 3});
-        expect(weapon.ccv()).toEqual(20);
+    it("takes large size into account with draw initiative", function () {
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("Draw initiative").textContent).toEqual("-5")
     });
 
-    it("takes size into account with bypass", function () {
-        var weapon = getWeapon({size: 2});
-        expect(weapon.bypass()).toEqual(-2);
+    it("takes large size into account with CCV", function () {
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("Close combat value").textContent).toEqual("15")
     });
 
-    // Weapons requiring one-handed use cannot be used PRI or SEC
-    // without the skill.
+    it("takes huge size into account with CCV", function () {
+        renderWeapon({size: 3});
+        expect(screen.getByLabelText("Close combat value").textContent).toEqual("20")
+    });
+
+    it("takes large size into account with bypass", function () {
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("Bypass").textContent).toEqual("-2")
+    });
+
+    it("shows weight", function () {
+        renderWeapon({size: 1});
+        expect(screen.getByLabelText("Weight").textContent).toEqual("3.60 kg")
+    });
+
+    it("takes large size into account with weight", function () {
+        renderWeapon({size: 2});
+        expect(screen.getByLabelText("Weight").textContent).toEqual("10.80 kg")
+    });
+
+    it("takes huge size into account with weight", function () {
+        renderWeapon({size: 3});
+        expect(screen.getByLabelText("Weight").textContent).toEqual("32.40 kg")
+    });
+
     it("observes weapon One-handed use requirement", function () {
-        var weapon = getWeapon({size: 2, base: {skill2: "One-handed use"}});
+        renderWeapon({size: 2, base: {skill2: "One-handed use"}});
 
-        var rows = ReactDOM.findDOMNode(weapon).querySelectorAll('tbody tr');
-        expect(rows[1].textContent).not.toContain("Unskilled");
-        expect(rows[2].textContent).toContain("Unskilled");
-        expect(rows[3].textContent).toContain("Unskilled");
+        expect(screen.getByRole("row", {name: "Action row for FULL"}).textContent).not.toMatch(/Unskilled/)
+        expect(screen.getByRole("row", {name: "Action row for PRI"}).textContent).toMatch(/Unskilled/)
+        expect(screen.getByRole("row", {name: "Action row for SEC"}).textContent).toMatch(/Unskilled/)
     });
+
 
     // Special damage
 
     // TODO: Lance damage on charge.
-
-
 });

@@ -997,22 +997,18 @@ class StatBlock extends React.Component {
     getCarriedWeight() {
         var weight = 0;
         if (this.state.armor && this.state.armor.base) {
-            weight += parseFloat(this.state.armor.base.weight) *
-            parseFloat(this.state.armor.quality.mod_weight_multiplier);
+            weight += util.itemWeight(this.state.armor)
         }
         if (this.state.helm && this.state.helm.base) {
-            weight += parseFloat(this.state.helm.base.weight) *
-            parseFloat(this.state.helm.quality.mod_weight_multiplier);
+            weight += util.itemWeight(this.state.helm)
         }
 
         for (let wpn of this.state.weaponList) {
-            weight += parseFloat(wpn.base.weight) *
-                parseFloat(wpn.quality.weight_multiplier);
+            weight += util.itemWeight(wpn)
         }
 
         for (let wpn of this.state.rangedWeaponList) {
-            weight += parseFloat(wpn.base.weight) *
-                parseFloat(wpn.quality.weight_multiplier);
+            weight += util.itemWeight(wpn)
         }
 
         for (let wpn of this.state.firearmList) {
@@ -1020,6 +1016,7 @@ class StatBlock extends React.Component {
             if (wpn.scope) {
                 weight += parseFloat(wpn.scope.weight)
             }
+            // TODO: addons
             for (const mag of wpn.magazines) {
                 weight += util.magazineWeight(wpn, mag)
             }

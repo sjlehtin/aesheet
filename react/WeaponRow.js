@@ -109,18 +109,6 @@ class WeaponRow extends React.Component {
             2 * (this.props.weapon.size - 1);
     }
 
-    skillCheck() {
-        let check = this.props.skillHandler.skillCheck(
-            this.props.weapon.base.base_skill);
-
-        check += this.ccv();
-
-        if (!this.isSkilled()) {
-            check += this.props.weapon.base.ccv_unskilled_modifier;
-        }
-        return check;
-    }
-
     skillCheckV2() {
         const gottenCheck = this.props.skillHandler.skillCheckV2(
             this.props.weapon.base.base_skill);
@@ -183,44 +171,6 @@ class WeaponRow extends React.Component {
 
     getStat(stat) {
         return this.props.skillHandler.getStat(stat);
-    }
-
-    skillChecks(actions, givenProps) {
-        let props = {useType: WeaponRow.FULL, counterPenalty: true};
-        if (givenProps) {
-            props = Object.assign(props, givenProps);
-        }
-
-        const roa = this.roa(props.useType);
-        let baseCheck = this.skillCheck();
-        if (baseCheck === null) {
-            // Actions not available.
-            return null; //actions.map((e) => {return null;});
-        }
-        const checks = [];
-
-        if (props.useType === WeaponRow.SEC) {
-            if (!this.props.weapon.base.is_shield) {
-                baseCheck += Math.min(-25 + this.props.skillHandler
-                        .edgeLevel("Ambidexterity") * 5, 0);
-            }
-        }
-        for (let act of actions) {
-            if (act > 2 * roa) {
-                checks.push(null);
-            } else {
-                let mod = Math.round(WeaponRow.checkMod(roa, act,
-                    this.baseCheckBonusForSlowActions,
-                    this.extraActionModifier));
-
-                if (props.counterPenalty) {
-                    mod = WeaponRow.counterPenalty(mod,
-                        this.getStat(this.penaltyCounterStat));
-                }
-                checks.push(mod + baseCheck);
-            }
-        }
-        return checks;
     }
 
     skillChecksV2(actions, givenProps) {
@@ -458,7 +408,7 @@ class WeaponRow extends React.Component {
     renderUseType(useType) {
         if (useType === WeaponRow.PRI || useType === WeaponRow.SEC) {
             if (!this.oneHandedUseAvailable()) {
-                return <tr>
+                return <tr aria-label={`Action row for ${useType}`}>
                     <td colSpan={19} style={{color: "red", textAlign: "left"}}
                     >Unskilled for one-handed use</td></tr>
             }
@@ -485,28 +435,28 @@ class WeaponRow extends React.Component {
                 } else {
                     cellContent = ""
                 }
-                return <td key={`chk-${ii}`} style={cellStyle}>{cellContent}</td>;
+                return <td key={`chk-${ii}`} style={cellStyle} aria-label={`Attack for ${useType}`}>{cellContent}</td>;
             });
         }
         const attackInitiatives = this.initiatives([1, 2, 3, 4],
             {useType: useType});
         const attackInitiativeCells = attackInitiatives.map((el, ii) => {
-            return <td key={`ai-${ii}`} style={initStyle}
+            return <td key={`ai-${ii}`} style={initStyle} aria-label={`Attack initiative for ${useType}`}
             >{this.renderInt(el)}</td>;});
 
         const defenseInitiatives = this.defenseInitiatives([1, 2, 3],
             {useType: useType});
         const defenseInitiativeCells = defenseInitiatives.map((el, ii) => {
-            return <td key={`di-${ii}`} style={defenseInitStyle}
+            return <td key={`di-${ii}`} style={defenseInitStyle} aria-label={`Defense initiative for ${useType}`}
             >{this.renderInt(el)}</td>;});
 
-        return <tr><td style={cellStyle}>{this.roa(useType).toFixed(2)}</td>
+        return <tr aria-label={`Action row for ${useType}`}><td style={cellStyle} aria-label={`ROA for ${useType}`}>{this.roa(useType).value.toFixed(2)}</td>
             {checkCells}
             {attackInitiativeCells}
-            <td style={attackDamageStyle}>{
+            <td style={attackDamageStyle} aria-label={`Attack damage for ${useType}`}>{
                 this.renderDamage({useType: useType})}</td>
             {defenseInitiativeCells}
-            <td style={defenseDamageStyle}>{
+            <td style={defenseDamageStyle}  aria-label={`Defense damage for ${useType}`}>{
                 this.renderDamage({useType: useType,
                                    defense: true})}</td>
         </tr>;
@@ -525,6 +475,19 @@ class WeaponRow extends React.Component {
             return <th style={headerStyle} key={`act-${ii}`}>{el.toFixed(1)}</th>;
         });
 
+        const baseCheck = this.skillCheckV2();
+
+        // TODO: extract?
+        let baseCheckContainer;
+        if (baseCheck) {
+            const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
+            baseCheckContainer = <div><label id={"base-check"} style={baseCheckStyle}>Base check</label><span
+                aria-labelledby={"base-check"}><StatBreakdown
+                value={baseCheck.value}
+                breakdown={baseCheck.breakdown}
+                style={baseCheckStyle}/></span></div>
+        }
+
         return <div style={this.props.style}>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
@@ -539,7 +502,8 @@ class WeaponRow extends React.Component {
                 </thead>
                 <tbody>
                 <tr>
-                    <td style={cellStyle} rowSpan={4}>{this.weaponName()}</td>
+                    <td style={cellStyle} rowSpan={4}>{this.weaponName()}
+                        {baseCheckContainer}</td>
                     <td style={cellStyle} rowSpan={4}>{this.skillLevel()}</td>
                 </tr>
                 {this.renderUseType(WeaponRow.FULL)}
@@ -548,12 +512,14 @@ class WeaponRow extends React.Component {
       </tbody>
 </table>
             <div>
-            <span style={infoStyle}><label>Draw-I:</label> {this.drawInitiative()}</span>
+            <span style={infoStyle}><label>CCV</label> <span aria-label={"Close combat value"}>{this.ccv()}</span></span>
+            <span style={infoStyle}><label>Draw-I:</label> <span aria-label={"Draw initiative"}>{this.drawInitiative()}</span></span>
             <span style={infoStyle} className="durability">
-                <label>Durability:</label>{this.durability()}</span>
+                <label>Durability:</label><span aria-label={"Durability"}>{this.durability()}</span></span>
             <span style={infoStyle}><label>Size:</label> {this.props.weapon.size}</span>
-            <span style={infoStyle}><label>DP:</label> {this.dp()}</span>
-            <span style={infoStyle}><label>Bypass:</label> {this.bypass()}</span>
+            <span style={infoStyle}><label>DP:</label><span aria-label={"Damage points"}>{this.dp()}</span></span>
+            <span style={infoStyle}><label>Bypass:</label> <span aria-label={"Bypass"}>{this.bypass()}</span></span>
+            <span style={infoStyle}><label>Weight:</label> <span aria-label={"Weight"}>{util.itemWeight(this.props.weapon).toFixed(2)} kg</span></span>
                     <Button onClick={(e) => this.handleRemove()}
                             ref={(c) => this._removeButton = c}
                             size="sm"

@@ -1,3 +1,4 @@
+const React = require("react");
 
 var exports = function () {
     "use strict";
@@ -22,10 +23,18 @@ var exports = function () {
         return magWeight;
     }
 
+    const itemWeight = (item) => {
+        const size = item.size ?? 1
+        return parseFloat(item.base.weight) *
+                parseFloat(item.quality.weight_multiplier ?? item.quality.mod_weight_multiplier ?? 1) *
+            Math.pow(3, (size - 1))
+    }
+
     return {
         isInt: isInt,
 
         magazineWeight: magazineWeight,
+        itemWeight: itemWeight,
 
         isFloat: function (value) {
             if (typeof(value) === "number") {

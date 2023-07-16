@@ -151,6 +151,25 @@ describe('stat block weight handling', function() {
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("3.00 kg")
     });
 
+    it("adds weight of large weapons", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetweapons/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.weaponFactory({
+                base: {weight: 6},
+                quality: {weight_multiplier: 0.5},
+                    size: 2}
+                    )]
+                ))
+            }),
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("9.00 kg")
+    });
+
     it("adds ranged weapons weight", async () => {
         server.use(
             rest.get('http://localhost/rest/sheets/1/sheetrangedweapons/', async (req, res, ctx) => {
