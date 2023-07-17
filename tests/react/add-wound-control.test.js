@@ -1,209 +1,159 @@
-jest.dontMock('AddWoundControl');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 
-const TableWrapper = require('./testutils').TableWrapper;
+import { render, screen, within, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+
+
 const AddWoundControl = require('AddWoundControl').default;
 
 var factories = require('./factories');
 
 describe('AddWoundControl', function() {
-    "use strict";
 
-    var getAddWoundControlTree = function (givenProps) {
-        var props = givenProps;
-        if (!props) {
-            props = {};
-        }
-        return TestUtils.renderIntoDocument(
-            <TableWrapper>
-                <AddWoundControl {...props} />
-            </TableWrapper>
-        );
-    };
+    it("allows wounds to be added", async () => {
+        const spy = jest.fn().mockResolvedValue({})
+        const user = userEvent.setup()
 
-    it("allows wounds to be added", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getAddWoundControlTree({
-            onAdd: callback
-            });
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+        render(<AddWoundControl onAdd={spy}/>)
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        expect(within(screen.getByLabelText("Location")).getByText("Torso (5-7)")).toBeInTheDocument()
 
-        addControl.handleLocationChange("H");
-        addControl.handleTypeChange("R");
-        addControl.handleEffectChange("Fuzznozzle");
+        await user.click(screen.getByRole("combobox", {name: "Location"}))
+        await user.click(screen.getByText("Head (8)"))
 
-        TestUtils.Simulate.click(addControl._addButton);
+        await user.click(screen.getByRole("combobox", {name: "Type"}))
+        await user.click(screen.getByText("Burn"))
 
-        expect(callback).toHaveBeenCalledWith({location: "H", damage_type: "R", damage: 5, effect: 'Fuzznozzle'});
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
+
+        await user.click(screen.getByLabelText("Effect"))
+
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        await user.clear(effectInput)
+        await user.type(effectInput, "Fuzznozzle")
+
+        await user.click(screen.getByRole("button", {name: "Add wound"}))
+
+        expect(spy).toHaveBeenCalledWith({location: "H", damage_type: "R", damage: "5", effect: 'Fuzznozzle'});
+
+        spy.mockClear()
+
+        // Verify it has changed the fields to default values after add.
+        await user.click(screen.getByRole("button", {name: "Add wound"}))
+
+        expect(spy).toHaveBeenCalledWith({location: "T", damage_type: "S", damage: 0, effect: 'Scratched'});
     });
 
-    it("clears fields after add", function (done) {
-        var promise = Promise.resolve({});
-        var callback = jasmine.createSpy("callback").and.returnValue(promise);
-        var tree = getAddWoundControlTree({
-            onAdd: callback
-            });
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("validates damage", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        render(<AddWoundControl />)
 
-        addControl.handleLocationChange("H");
-        addControl.handleTypeChange("R");
-        addControl.handleEffectChange("Fuzznozzle");
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5a")
 
-        TestUtils.Simulate.click(addControl._addButton);
+        expect(screen.getByRole("textbox", {name: "Damage"})).not.toHaveClass("is-valid")
+        expect(screen.getByRole("button", {name: "Add wound"})).toBeDisabled()
 
-        promise.then(() => {
-            expect(addControl.state.damage).toEqual(0);
-            expect(addControl.state.effect).toEqual("");
-            expect(addControl.state.selectedType).toEqual("S");
-            expect(addControl.state.selectedLocation).toEqual("T");
-            done();
-        }).catch((err) => {console.log(err)});
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "[Backspace]")
+        expect(screen.getByRole("textbox", {name: "Damage"})).toHaveClass("is-valid")
+        expect(screen.getByRole("button", {name: "Add wound"})).not.toBeDisabled()
     });
 
-    it("validates location", function () {
-        var tree = getAddWoundControlTree({
-            });
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("fills in effect for head wounds", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        render(<AddWoundControl />)
 
-        // Cannot easily trigger change with the Combobox.
-        addControl.handleLocationChange("Foo");
+        await user.click(screen.getByRole("combobox", {name: "Location"}))
+        await user.click(screen.getByText("Head (8)"))
 
-        expect(addControl.isValid()).toEqual(false);
+        await user.click(screen.getByRole("combobox", {name: "Type"}))
+        await user.click(screen.getByText("Burn"))
 
-        addControl.handleLocationChange("H");
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
 
-        expect(addControl.isValid()).toEqual(true);
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Skin burned bad [IMM -30]")
     });
 
-    it("validates damage", function () {
-        var tree = getAddWoundControlTree({});
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("takes effect from last in case of massive damage", async () => {
+        const user = userEvent.setup()
 
-        // Allows zero wounds.  The effect should be fillable afterwards.
-        expect(addControl.isValid()).toEqual(true);
+        render(<AddWoundControl />)
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: "5a"}});
+        await user.click(screen.getByRole("combobox", {name: "Location"}))
+        await user.click(screen.getByText("Head (8)"))
 
-        expect(addControl.isValid()).toEqual(false);
+        await user.click(screen.getByRole("combobox", {name: "Type"}))
+        await user.click(screen.getByText("Pierce"))
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "20")
 
-        expect(addControl.isValid()).toEqual(true);
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Head blown off [DEATH]")
     });
 
-    it("fills in effect for head wounds", function () {
-        var tree = getAddWoundControlTree();
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("fills in effect for arm wounds", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        render(<AddWoundControl />)
 
-        addControl.handleLocationChange("H");
-        addControl.handleTypeChange("R");
+        await user.click(screen.getByRole("combobox", {name: "Location"}))
+        await user.click(screen.getByText("Left arm (2)"))
 
-        expect(addControl.state.effect).toContain("Skin burned bad");
-        expect(addControl.state.effect).toContain("IMM -30");
+        await user.click(screen.getByRole("combobox", {name: "Type"}))
+        await user.click(screen.getByText("Bludgeon"))
+
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
+
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Shoulder broken")
     });
 
-    it("takes effect from last in case of massive damage", function () {
-        var tree = getAddWoundControlTree();
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("fills in effect for leg wounds", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 20}});
+        render(<AddWoundControl />)
 
-        addControl.handleLocationChange("H");
-        addControl.handleTypeChange("P");
+        await user.click(screen.getByRole("combobox", {name: "Location"}))
+        await user.click(screen.getByText("Left leg (1)"))
 
-        expect(addControl.state.effect).toContain("Head blown off");
+        await user.click(screen.getByRole("combobox", {name: "Type"}))
+        await user.click(screen.getByText("Pierce"))
+
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
+
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Major vein cut [major ext]")
     });
 
-    it("fills in effect for arm wounds", function () {
-        var tree = getAddWoundControlTree();
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("fills in effect for torso wounds", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        render(<AddWoundControl />)
 
-        addControl.handleLocationChange("LA");
-        addControl.handleTypeChange("B");
-        expect(addControl.state.effect).toContain("Shoulder broken");
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
+
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Gut pierced [minor int]")
     });
 
-    it("fills in effect for leg wounds", function () {
-        var tree = getAddWoundControlTree();
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("takes toughness into account in the effect", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
+        render(<AddWoundControl toughness={3} />)
 
-        addControl.handleLocationChange("LL");
-        addControl.handleTypeChange("P");
-        expect(addControl.state.effect).toContain("Major vein cut");
-    });
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "8")
 
-    it("fills in effect for torso wounds", function () {
-        var tree = getAddWoundControlTree();
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
-
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
-
-        addControl.handleLocationChange("T");
-        addControl.handleTypeChange("S");
-        expect(addControl.state.effect).toContain("Gut pierced");
-    });
-
-    it("updates effect on damage change", function () {
-        var tree = getAddWoundControlTree();
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
-
-        addControl.handleLocationChange("T");
-        addControl.handleTypeChange("S");
-
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 5}});
-
-        expect(addControl.state.effect).toContain("Gut pierced");
-    });
-
-    it("takes toughness into account in the effect", function () {
-        var tree = getAddWoundControlTree({toughness: 3});
-        var addControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
-
-        addControl.handleLocationChange("T");
-        addControl.handleTypeChange("S");
-
-        TestUtils.Simulate.change(addControl._damageInputField,
-            {target: {value: 8}});
-
-        expect(addControl.state.effect).toContain("Gut pierced");
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Gut pierced [minor int]")
     });
 });

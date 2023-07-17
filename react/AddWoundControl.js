@@ -16,7 +16,9 @@ class AddWoundControl extends React.Component {
             selectedLocation: "T",
             selectedType: "S",
             damage: 0,
-            effect: undefined
+            effect: this.findEffect({type: "S",
+                            location: "T",
+                            damage: 0})
         };
     }
 
@@ -68,12 +70,17 @@ class AddWoundControl extends React.Component {
         });
     }
 
-    isValid() {
+    isDamageValid() {
         if (!util.isInt(this.state.damage) || this.state.damage < 0) {
             return false;
         }
+        return true
+    }
 
-        return AddWoundControl.isLocationValid(this.state.selectedLocation) &&
+    isValid() {
+
+        return this.isDamageValid() &&
+            AddWoundControl.isLocationValid(this.state.selectedLocation) &&
             AddWoundControl.isDamageTypeValid(this.state.selectedType);
     }
 
@@ -96,7 +103,10 @@ class AddWoundControl extends React.Component {
                 this.setState({
                     selectedLocation: "T",
                     selectedType: "S",
-                    damage: 0, effect: ""});
+                    damage: 0,
+                    effect: this.findEffect({type: "S",
+                            location: "T",
+                            damage: 0})});
             });
         }
     }
@@ -117,12 +127,13 @@ class AddWoundControl extends React.Component {
         return <div>
         <Row>
             <Col>
-                <Form.Label>Location</Form.Label>
+                <Form.Label id={"location-label"}>Location</Form.Label>
             <DropdownList style={{minWidth: "10em"}} data={AddWoundControl.locations}
                           textField='description'
                           dataKey='location'
                           value={this.state.selectedLocation}
                           filter="contains"
+                          aria-label={"Location"}
                           onChange={(value) => this.handleLocationChange(value)} />
             </Col>
             <Col>
@@ -132,17 +143,21 @@ class AddWoundControl extends React.Component {
                           dataKey='type'
                           value={this.state.selectedType}
                           filter="contains"
+                          aria-label={"Type"}
                           onChange={(value) => this.handleTypeChange(value)} />
             </Col>
             <Col>
                 <Form.Label>Damage</Form.Label>
-                <FormControl style={{minWidth: "3em"}} type="text" value={this.state.damage} onChange={
+                <FormControl style={{minWidth: "3em"}} type="text" aria-label={"Damage"}
+                             isValid={this.isDamageValid()}
+                             value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
                 ref={(c) => { if (c) { this._damageInputField = ReactDOM.findDOMNode(c)}}} />
             </Col>
                 <Col>
                 <Form.Label>Effect</Form.Label>
                 <Combobox style={{minWidth: "10em"}} data={woundChoices}
+                          aria-label={"Effect"}
                           value={this.state.effect}
                           filter="contains"
                           onChange={(value) => this.handleEffectChange(value)} />
@@ -231,11 +246,11 @@ AddWoundControl.woundEffects = {
 "Hair burned [IMM]",
 "Eyes burned* [IMM -10]",
 "Extremity charred* [IMM -20]",
-"Skin burned bad	 [IMM -30]",
-"Charred	[IMM -40]",
-"Charred	[IMM -50]",
-"Fatally charred	[IMM -60]",
-"Fatally charred	[IMM -70]",
+"Skin burned bad [IMM -30]",
+"Charred [IMM -40]",
+"Charred [IMM -50]",
+"Fatally charred [IMM -60]",
+"Fatally charred [IMM -70]",
 "Head burned through [IMM -80]",
 "Head burned through [IMM -90]",
 "Head destroyed [DEATH]"]
