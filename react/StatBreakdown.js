@@ -12,9 +12,16 @@ class StatBreakdown extends React.Component {
     render() {
         let rows = []
 
+        let toFixed = 2
+        let coerceMainValue = false
+        if (this.props.toFixed !== undefined) {
+            coerceMainValue = true
+            toFixed = this.props.toFixed
+        }
+
         function renderValue(value) {
-            if (!Number.isInteger(value)) {
-                value = value.toFixed(2)
+            if (coerceMainValue || !Number.isInteger(value)) {
+                value = value.toFixed(toFixed)
             }
             return value;
         }
@@ -59,7 +66,7 @@ class StatBreakdown extends React.Component {
                         </div>
                     </Tooltip>
                 }>
-                <div ref={targetRef}>{renderValue(this.props.value)}</div>
+                <div ref={targetRef}>{renderValue(this.props.value)}{this.props.units}</div>
             </OverlayTrigger>
         </div>
     }
@@ -70,7 +77,9 @@ StatBreakdown.propTypes = {
     value: PropTypes.number.isRequired,
     breakdown: PropTypes.arrayOf(Object).isRequired,
     style: PropTypes.object,
-    label: PropTypes.string
+    label: PropTypes.string,
+    toFixed: PropTypes.number,
+    units: PropTypes.string,
 }
 
 export default StatBreakdown

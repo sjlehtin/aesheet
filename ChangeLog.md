@@ -1,4 +1,10 @@
-## Version 0.14.0 -- 2023-07-15
+## Version 0.15.0 -- TBR
+
+### Added
+
+* Added breakdown for encumbrance of carried equipment.
+
+## Version 0.14.0 -- 2023-07-16
 
 ### Added
 

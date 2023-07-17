@@ -950,7 +950,7 @@ class StatBlock extends React.Component {
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
             effects: this.getAllEffects(),
-            weightCarried: this.getCarriedWeight(),
+            weightCarried: this.getCarriedWeight().value,
             wounds: this.state.woundList,
             armor: this.state.armor,
             helm: this.state.helm
@@ -994,38 +994,117 @@ class StatBlock extends React.Component {
     }
 
     getCarriedWeight() {
-        var weight = 0;
+        let breakdown = []
+        let weight = 0
         if (this.state.armor && this.state.armor.base) {
-            weight += util.itemWeight(this.state.armor)
+            const itemWeight = util.itemWeight(this.state.armor)
+            weight += itemWeight
+            breakdown.push(
+                {
+                    reason: "armor",
+                    value: itemWeight
+                }
+            )
         }
         if (this.state.helm && this.state.helm.base) {
-            weight += util.itemWeight(this.state.helm)
+            const itemWeight =  util.itemWeight(this.state.helm)
+            weight += itemWeight
+            breakdown.push(
+                {
+                    reason: "helm",
+                    value: itemWeight
+                }
+            )
         }
 
+        let weaponWeight = 0
         for (let wpn of this.state.weaponList) {
-            weight += util.itemWeight(wpn)
+            weaponWeight += util.itemWeight(wpn)
+        }
+        weight += weaponWeight
+        if (weaponWeight) {
+            breakdown.push(
+                {
+                    reason: "CC weapons",
+                    value: weaponWeight
+                }
+            )
         }
 
+        let rangedWeaponWeight = 0
         for (let wpn of this.state.rangedWeaponList) {
-            weight += util.itemWeight(wpn)
+            rangedWeaponWeight += util.itemWeight(wpn)
+        }
+        weight += rangedWeaponWeight
+        if (weaponWeight) {
+            breakdown.push(
+                {
+                    reason: "ranged weapons",
+                    value: rangedWeaponWeight
+                }
+            )
         }
 
+        let firearmWeight = 0
+        let ammoWeight = 0
         for (let wpn of this.state.firearmList) {
-            weight += parseFloat(wpn.base.weight);
+            firearmWeight += parseFloat(wpn.base.weight);
             if (wpn.scope) {
-                weight += parseFloat(wpn.scope.weight)
+                firearmWeight += parseFloat(wpn.scope.weight)
             }
             // TODO: addons
             for (const mag of wpn.magazines) {
-                weight += util.magazineWeight(wpn, mag)
+                ammoWeight += util.magazineWeight(wpn, mag)
             }
         }
-
-        for (let item of this.state.miscellaneousItemList) {
-            weight += parseFloat(item.item.weight);
+        weight += firearmWeight
+        if (weaponWeight) {
+            breakdown.push(
+                {
+                    reason: "firearms",
+                    value: firearmWeight
+                }
+            )
         }
 
-        return weight + this.state.carriedInventoryWeight;
+        weight += ammoWeight
+        if (ammoWeight) {
+            breakdown.push(
+                {
+                    reason: "ammunition",
+                    value: ammoWeight
+                }
+            )
+        }
+
+        let miscellaneousItemWeight = 0
+        for (let item of this.state.miscellaneousItemList) {
+            miscellaneousItemWeight += parseFloat(item.item.weight);
+        }
+        weight += miscellaneousItemWeight
+        if (miscellaneousItemWeight) {
+            breakdown.push(
+                {
+                    reason: "miscellaneous items",
+                    value: miscellaneousItemWeight
+                }
+            )
+        }
+
+        weight += this.state.carriedInventoryWeight
+        if (this.state.carriedInventoryWeight) {
+            breakdown.push(
+                {
+                    reason: "inventory",
+                    value: this.state.carriedInventoryWeight
+                }
+            )
+        }
+
+        return {
+            value: weight,
+            breakdown: breakdown
+        }
     }
 
     rangeChanged(newRange) {
@@ -1382,7 +1461,9 @@ class StatBlock extends React.Component {
         if (this.state.loading) {
             return <Loading>Inventory</Loading>
         }
-        return <span>Weight carried: <span aria-label={"Weight carried"}>{this.getCarriedWeight().toFixed(2)} kg</span></span>
+        const weight = this.getCarriedWeight()
+        return <span>Weight carried: <span aria-label={"Weight carried"}>
+            <StatBreakdown style={{display: "inline-block"}} label={"Encumbrance"} toFixed={2} units={" kg"} value={Number.parseFloat(weight.value)} breakdown={weight.breakdown} /></span></span>
     }
 
     render() {
@@ -1409,7 +1490,7 @@ class StatBlock extends React.Component {
                                 {this.renderSPControl(baseStats)}
                             </Row>
                             <Row>
-                                {this.renderWeightCarried()}
+                                <Col md={6}>{this.renderWeightCarried()}</Col>
                             </Row>
                         </Col>
                         <Col md={6}>

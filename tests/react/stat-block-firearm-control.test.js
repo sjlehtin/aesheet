@@ -87,7 +87,7 @@ describe('StatBlock -- FirearmControl', () => {
 
         await user.click(screen.getByText(/FooAmmo/))
 
-        await waitFor(() => expect(screen.queryByLabelText("Damage")?.textContent).toEqual("3d4+3/4 (+2)"))
+        await waitFor(async () => expect((within(await screen.findByLabelText(/Firearm/)).queryByLabelText("Damage"))?.textContent).toEqual("3d4+3/4 (+2)"))
 
         const scopeInput = await screen.findByRole("combobox", {name: "Scope selection"})
         await user.click(scopeInput)
