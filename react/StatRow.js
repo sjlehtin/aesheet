@@ -129,7 +129,7 @@ class StatRow extends React.Component {
                 <td style={statStyle}>{this.props.stat.toUpperCase()}</td>
                 <td style={baseStyle}>{this.props.baseStats[this.props.stat]}</td>
                 <td style={effStyle}>
-                    <StatBreakdown value={this.props.effStats[this.props.stat]} breakdown={this.props.effStats.breakdown[this.props.stat]} />
+                    <StatBreakdown label={"Stat"} value={this.props.effStats[this.props.stat]} breakdown={this.props.effStats.breakdown[this.props.stat]} />
                 </td>
                 <td style={changeStyle}>
                     ({change >= 0 ? "+" : ""}{change})

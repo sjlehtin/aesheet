@@ -11,20 +11,31 @@ class StatBreakdown extends React.Component {
 
     render() {
         let rows = []
+
+        function renderValue(value) {
+            if (!Number.isInteger(value)) {
+                value = value.toFixed(2)
+            }
+            return value;
+        }
+
         this.props.breakdown.forEach((row, index) => {
+            let value = row.value
+            value = renderValue(value);
             rows.push(<tr key={index}>
                 <td>{row.reason}</td>
-                <td>{row.value}</td>
+                <td>{value}</td>
             </tr>)
         })
         const containerRef = React.createRef()
         const targetRef = React.createRef()
+        const label = this.props.label ?? "Skill check"
         return <div ref={containerRef}
                     onClick={() => {
                         this.setState({show: !this.state.show})
                     }}
                     style={this.props.style}
-                    aria-label={"Skill check"}>
+                    aria-label={label}>
             <OverlayTrigger
                 show={this.state.show}
                 onToggle={(shouldShow) => this.setState({show: shouldShow})}
@@ -35,10 +46,10 @@ class StatBreakdown extends React.Component {
                 overlay={(props) =>
                     <Tooltip {...props}>
                         <div>
-                            <table aria-label={"Stat breakdown"}>
+                            <table aria-label={`${label} breakdown`}>
                                 <thead>
                                 <tr>
-                                    <th colSpan={2}>Stat breakdown</th>
+                                    <th colSpan={2}>{`${label} breakdown`}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -48,7 +59,7 @@ class StatBreakdown extends React.Component {
                         </div>
                     </Tooltip>
                 }>
-                <div ref={targetRef}>{this.props.value}</div>
+                <div ref={targetRef}>{renderValue(this.props.value)}</div>
             </OverlayTrigger>
         </div>
     }
@@ -58,7 +69,8 @@ class StatBreakdown extends React.Component {
 StatBreakdown.propTypes = {
     value: PropTypes.number.isRequired,
     breakdown: PropTypes.arrayOf(Object).isRequired,
-    style: PropTypes.object
+    style: PropTypes.object,
+    label: PropTypes.string
 }
 
 export default StatBreakdown
