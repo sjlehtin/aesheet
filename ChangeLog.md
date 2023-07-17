@@ -1,3 +1,14 @@
+## Version 0.14.0 -- 2023-07-15
+
+### Added
+
+* Added magazine management for firearms and added encumbrance from carried ordnance.
+* Added use type for firearms. You can now add two pistols for your characters for an authentic John Woo -style pistols akimbo experience.
+
+### Fixed
+
+* CC Weapon size now factored in to the weight of the weapon.
+
 ## Version 0.13.0 -- 2023-07-11
 
 ### Added
