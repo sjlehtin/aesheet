@@ -40,9 +40,9 @@ Full list of all todo items in the TODO.
 ```bash
 tox
 npm test
-npm run build
+npm run build -- --mode=production
 python setup.py bdist_wheel
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput --clear
 gtar zcvf aesheet-0.11-full.tar.xz static/ dist/aesheet-0.11-py3-none-any.whl
 ```
 
@@ -68,58 +68,6 @@ django-admin migrate
 
 ```shell
 sudo systemctl restart aesheet.<env>
-```
-
-#### nginx configuration
-
-Using the supervisor.conf.tmpl in the package, generate a
-`/etc/nginx/sites-available/${program}` config by running
-
-```
- % cat nginx.conf.template | \
-    SERVERNAME=devsheet.liskot.org TAG=dev PROJECTDIR=$PWD \
-    envsubst '${PROJECTDIR},${TAG},${SERVERNAME}' \
-    > /etc/nginx/sites-available/devsheet
-```
-
-#### Using with supervisor
-
-Using the supervisor.conf.tmpl in the package, generate a
-`/etc/supervisor/conf.d/${program}` config by running
-
-```
- % cat supervisor.conf.template | PROGRAM=sheet WORKDIR=$PWD envsubst \
-    > /etc/supervisor/conf.d/sheet
-```
-
-## Administering
-
-### On update
-
-After updating sources, run
-
-```
- % npm install
- % . .venv/bin/activate
- % pipenv install
- % npx webpack --mode production
- % python manage.py migrate
- % python manage.py collectstatic -l -i node_modules
- % sudo supervisorctl reload sheet
-```
-
-If nginx configuration needed to be updated, you also need to reload nginx configuration.
-
-
-```
- % sudo systemctl reload nginx
-```
-
-After updating sources, run
-
-```
- % ./update.sh
- % supervisorctl reload (sheet|devsheet)
 ```
 
 ## Using the Docker images
