@@ -1,10 +1,17 @@
 import React from 'react';
-import {render, within} from '@testing-library/react'
+import {
+    render,
+    screen,
+    within,
+    waitFor,
+    waitForElementToBeRemoved
+} from '@testing-library/react'
 import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
 import FirearmControl from 'FirearmControl'
+import WeaponRow from 'WeaponRow'
 
 const factories = require('./factories');
 
@@ -56,7 +63,10 @@ describe('FirearmControl', () => {
             }
             props = Object.assign(props, givenProps);
         }
-        return render(<FirearmControl {...factories.firearmControlPropsFactory(props)} />)
+        const firearm = render(<FirearmControl {...factories.firearmControlPropsFactory(props)} />)
+        waitFor(() => expect(screen.queryByRole("combobox", {busy: true})).not.toBeInTheDocument())
+
+        return firearm
     }
 
     function getActionChecks(firearm) {
@@ -616,7 +626,7 @@ describe('FirearmControl', () => {
                         skill: "Autofire",
                         level: 0});
         }
-        return render(<FirearmControl {...factories.firearmControlPropsFactory({
+        const firearm = render(<FirearmControl {...factories.firearmControlPropsFactory({
             handlerProps: {
                 skills: skills,
                 character: {cur_ref: 45, cur_int: 45, cur_psy: 45,
@@ -631,6 +641,8 @@ describe('FirearmControl', () => {
                 base_skill: "Long guns"
             }
         })})}/>);
+        waitFor(() => expect(screen.queryByRole("combobox", {busy: false})).toBeInTheDocument())
+        return firearm
     };
 
     async function getBurstChecks(firearm, burst) {
@@ -719,4 +731,58 @@ describe('FirearmControl', () => {
         await user.click(firearm.getByRole("button", {name: "Remove firearm"}))
         expect(spy).toHaveBeenCalledWith({id: 5})
     });
+
+    it ("can change use type", async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderFirearm({
+            weapon: factories.firearmFactory({id: 5, use_type: WeaponRow.PRI}),
+            onChange: spy
+        });
+
+        expect(screen.getByLabelText("Use type").textContent).toEqual("PRI")
+
+        const useTypeSelection = screen.getByRole("combobox", {name: "Use type selection"});
+        await user.click(useTypeSelection)
+        await user.click(await screen.findByText(/Secondary/))
+
+        expect(spy).toHaveBeenCalledWith({id: 5, use_type: "SEC"})
+    });
+
+    it ("calculates correct ROF and checks for primary use type", () => {
+        const firearm = renderFirearm({
+            handlerProps: {
+                skills: [{
+                    skill: "Pistol",
+                    level: 0
+                }]},
+            weapon: factories.firearmFactory({
+                base: {base_skill: "Pistol"},
+                use_type: "PRI"
+            })
+        })
+
+        expect(firearm.getByLabelText("Rate of fire").textContent).toEqual("2.61")
+        const values = getActionChecks(firearm);
+        expect(values).toEqual(["60", "53", "50", "42", "34", "27", "", "",  "", ""])
+    });
+
+    it ("calculates correct ROF and checks for secondary use type", () => {
+        const firearm = renderFirearm({
+            handlerProps: {
+                skills: [{
+                    skill: "Pistol",
+                    level: 0
+                }]},
+            weapon: factories.firearmFactory({
+                base: {base_skill: "Pistol"},
+                use_type: "SEC"
+            })
+        })
+
+        expect(firearm.getByLabelText("Rate of fire").textContent).toEqual("2.36")
+        const values = getActionChecks(firearm);
+        expect(values).toEqual(["35", "27", "25", "15", "6", "", "", "",  "", ""])
+    });
+
 });

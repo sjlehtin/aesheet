@@ -29,26 +29,25 @@ class AmmoControl extends React.Component {
         }
     }
 
-    handleChange(value) {
+    async handleChange(value) {
 
         this.setState({busy: true});
-        this.props.onChange(value).then(() => this.setState({busy: false}))
-            .catch((err) => { console.log("Failed change");
-                              this.setState({busy: false}) });
+        await this.props.onChange(value)
+        this.setState({busy: false})
     }
 
     render() {
         return <DropdownList
             aria-label={"Select ammunition"}
             value={this.props.ammo}
-                           busy={this.state.busy}
-                           textField={(obj) => {
-                               return AddFirearmControl.formatAmmo(obj);
-                           }}
-                           onChange={(value) => this.handleChange(value)}
-                           filter="contains"
-                           data={this.state.ammoChoices}
-            />;
+            busy={this.state.busy}
+            textField={(obj) => {
+                return AddFirearmControl.formatAmmo(obj);
+            }}
+            onChange={async (value) => await this.handleChange(value)}
+            filter="contains"
+            data={this.state.ammoChoices}
+        />;
     }
 }
 

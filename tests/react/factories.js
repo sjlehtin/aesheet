@@ -353,7 +353,8 @@ const firearmFactory = function (overrideFields) {
             base: baseFirearmFactory(overrideFields.base),
             ammo: ammunitionFactory(overrideFields.ammo),
             scope: overrideFields.scope === null ? null : scopeFactory(overrideFields.scope),
-            magazines: magazines
+            magazines: magazines,
+            use_type: overrideFields.use_type ?? "FULL"
     };
 };
 

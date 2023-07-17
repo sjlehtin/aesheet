@@ -84,7 +84,7 @@ class WeaponRow extends React.Component {
             roa += Math.min(mod, 0);
         }
         roa *= this.skillROAMultiplier();
-        return Math.min(roa, 2.5);
+        return {value: Math.min(roa, 2.5), breakdown: []};
     }
 
     ccv() {
@@ -179,7 +179,7 @@ class WeaponRow extends React.Component {
             props = Object.assign(props, givenProps);
         }
 
-        const roa = this.roa(props.useType);
+        const roa = this.roa(props.useType).value;
         const baseCheck = this.skillCheckV2();
         if (!baseCheck) {
             // Actions not available.
@@ -245,7 +245,7 @@ class WeaponRow extends React.Component {
                         actionCheck += counter
                         actionBreakdown.push({
                             value: counter,
-                            reason: `modifier from ${this.penaltyCounterStat}`
+                            reason: `Modifier from ${this.penaltyCounterStat}`
                         })
                     }
                 }
@@ -287,7 +287,7 @@ class WeaponRow extends React.Component {
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
-        const rof = this.roa(props.useType);
+        const rof = this.roa(props.useType).value;
         const baseI = -5 / rof;
         const readiedBaseI = this.readiedBaseI;
         let targetI = this.targetInitiative();

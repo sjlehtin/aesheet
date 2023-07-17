@@ -30,21 +30,20 @@ class ScopeControl extends React.Component {
         }
     }
 
-    handleChange(value) {
-
-        this.setState({busy: true});
-        this.props.onChange(value).then(() => this.setState({busy: false}))
-            .catch((err) => { console.log("Failed change");
-                              this.setState({busy: false}) });
+    async handleChange(value) {
+        this.setState({busy: true})
+        await this.props.onChange(value)
+        this.setState({busy: false})
     }
 
     render() {
         return <DropdownList value={this.props.scope}
                              busy={this.state.busy}
+                             aria-busy={true || this.state.busy}
                              textField={(obj) => {
                                  return obj ? obj.name : "";
                              }}
-                             onChange={(value) => this.handleChange(value)}
+                             onChange={async (value) => await this.handleChange(value)}
                              filter="contains"
                              placeholder={"Add a scope"}
                              aria-label={"Scope selection"}

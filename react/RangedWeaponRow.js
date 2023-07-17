@@ -56,7 +56,7 @@ class RangedWeaponRow extends WeaponRow {
         };
     }
 
-    roa() {
+    roa(useType) {
         var roa = this.baseROA();
         roa *= this.skillROAMultiplier();
 
@@ -66,11 +66,14 @@ class RangedWeaponRow extends WeaponRow {
                 roa += level * 0.05;
             }
         }
-        return Math.min(roa, 5.0);
+        return {
+            value: Math.min(roa, 5.0),
+            breakdown: []
+        };
     }
 
-    rof() {
-        return this.roa();
+    rof(useType) {
+        return this.roa(useType);
     }
 
     fitDamageBonus(useType) {
@@ -146,7 +149,7 @@ class RangedWeaponRow extends WeaponRow {
                     <td style={cellStyle} rowSpan={2}>{
                         this.weaponName()}</td>
                     <td style={cellStyle}>{this.skillLevel()}</td>
-                    <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().toFixed(2)}</td>
+                    <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().value.toFixed(2)}</td>
                     {checkCells}
                     <td style={cellStyle}>{this.targetInitiative()}</td>
                     <td style={cellStyle}>{this.drawInitiative()}</td>

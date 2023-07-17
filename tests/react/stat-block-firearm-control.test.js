@@ -2,7 +2,15 @@ import React from 'react';
 
 import StatBlock from 'StatBlock'
 
-import { render, waitForElementToBeRemoved, within, fireEvent, prettyDOM, waitFor } from '@testing-library/react'
+import {
+    render,
+    waitForElementToBeRemoved,
+    within,
+    fireEvent,
+    prettyDOM,
+    waitFor,
+    screen
+} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
@@ -22,9 +30,23 @@ const server = setupServer(
   rest.get('http://localhost/rest/characters/2/*/', (req, res, ctx) => {
     return res(ctx.json([]))
   }),
-  rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
-    return res(ctx.json([]))
-  })
+    rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
+        return res(ctx.json([]))
+    }),
+    rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
+        return res(ctx.json([
+            factories.ammunitionFactory({id: 97, calibre: {name: "12FR"}}),
+            factories.ammunitionFactory({
+                id: 42,
+                calibre: {name: "FooAmmo"},
+                num_dice: 3,
+                dice: 4,
+                extra_damage: 3,
+                leth: 4,
+                plus_leth: 2
+            }),
+        ]))
+    }),
 )
 
 describe('StatBlock -- FirearmControl', () => {
@@ -42,12 +64,6 @@ describe('StatBlock -- FirearmControl', () => {
                     firearm
                 ]))
             }),
-            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
-                return res(ctx.json([
-                    factories.ammunitionFactory({id: 97, calibre: {name: "12FR"}}),
-                    factories.ammunitionFactory({id: 42, calibre: {name: "FooAmmo"}, num_dice: 3, dice: 4, extra_damage: 3, leth: 4, plus_leth: 2}),
-                ]))
-            }),
             rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/", (req, res, ctx) => {
                 return res(ctx.json(
                     Object.assign({}, firearm, req)
@@ -61,24 +77,24 @@ describe('StatBlock -- FirearmControl', () => {
             }),
         )
 
-        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
 
-        await sheet.findByText("The Cannon")
+        expect(await screen.findByText("The Cannon")).toBeInTheDocument()
 
-        const input = await sheet.findByRole("combobox", {name: "Select ammunition"})
+        const input = await screen.findByRole("combobox", {name: "Select ammunition"})
         await user.click(input)
 
-        await user.click(await within(input).findByText(/FooAmmo/))
+        await user.click(screen.getByText(/FooAmmo/))
 
-        await within(await sheet.findByLabelText(/Firearm/)).findByText("3d4+3/4 (+2)")
+        await waitFor(() => expect(screen.queryByLabelText("Damage")?.textContent).toEqual("3d4+3/4 (+2)"))
 
-        const scopeInput = await sheet.findByRole("combobox", {name: "Scope selection"})
+        const scopeInput = await screen.findByRole("combobox", {name: "Scope selection"})
         await user.click(scopeInput)
 
-        await user.click(await within(scopeInput).findByText(/Baff baff/))
+        await user.click(await screen.findByText(/Baff baff/))
 
-        await within(await sheet.findByLabelText(/Firearm/)).findByText("Awesome scope")
+        await within(await screen.findByLabelText(/Firearm/)).findByText("Awesome scope")
     });
 
     it('allows changing range to shoot to', async () => {
@@ -121,12 +137,6 @@ describe('StatBlock -- FirearmControl', () => {
             rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
                 return res(ctx.json([
                     firearm
-                ]))
-            }),
-            rest.get("http://localhost/rest/ammunition/firearm/The%20Cannon/", (req, res, ctx) => {
-                return res(ctx.json([
-                    factories.ammunitionFactory({id: 97, calibre: {name: "12FR"}}),
-                    factories.ammunitionFactory({id: 42, calibre: {name: "FooAmmo"}, num_dice: 3, dice: 4, extra_damage: 3, leth: 4, plus_leth: 2}),
                 ]))
             }),
             rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/", (req, res, ctx) => {
@@ -203,6 +213,35 @@ describe('StatBlock -- FirearmControl', () => {
 
     });
 
+    it('allows changing firearm use type', async () => {
+        const user = userEvent.setup()
+        const firearm = factories.firearmFactory({
+            id: 1, base: {name: "The Cannon"},
+        });
+
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/", async (req, res, ctx) => {
+                return res(ctx.json(Object.assign({}, firearm, await req.json())))
+            }),
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+
+        const useTypeInput = screen.getByRole("combobox", {name: "Use type selection"})
+        await user.click(useTypeInput)
+        await user.click(await screen.findByText(/Primary/))
+
+        await waitFor( () => {
+            expect(screen.getByLabelText("Use type").textContent).toEqual("PRI")
+        })
+    });
+
     it('allows adding a clip to a firearm', async () => {
         const user = userEvent.setup()
         const firearm = factories.firearmFactory({
@@ -234,7 +273,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
 
         const input = sheet.getByRole("textbox", {name: "Magazine size"})
         fireEvent.change(input, {target: {value: "21"}})

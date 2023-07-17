@@ -1,5 +1,5 @@
 import FirearmControl from 'FirearmControl'
-import {render} from "@testing-library/react";
+import {render, screen, waitFor} from "@testing-library/react";
 import React from "react";
 
 import {rest} from 'msw'
@@ -26,15 +26,19 @@ describe('FirearmControl -- ScopeControl', () => {
         return render(<FirearmControl {...factories.firearmControlPropsFactory(givenProps)} />)
     }
 
-    it('renders ScopeControl', () => {
+    it('renders ScopeControl', async () => {
         const control = renderFirearm({weapon:
             {scope: {name: "Test Scope"}}});
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
         control.getByText("Test Scope")
     });
 
-    it('does not barf without a scope', () => {
+    it('does not barf without a scope', async () => {
         const control = renderFirearm({weapon:
             {scope: null}});
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
         control.getByRole("button", {name: "Remove scope"})
         control.getByText("Add a scope")
     });
@@ -58,7 +62,7 @@ describe('FirearmControl -- ScopeControl', () => {
             })
         )
         const spy = jest.fn().mockResolvedValue({})
-        const control = renderFirearm({
+        renderFirearm({
             weapon:
                 {
                     id: 19,
@@ -67,9 +71,11 @@ describe('FirearmControl -- ScopeControl', () => {
             onChange: spy,
             campaign: 4
         });
-        await user.click(control.getByRole("combobox", {name: "Scope selection"}))
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
 
-        await user.click(await control.findByText(/Fantabulous/))
+        await user.click(screen.getByRole("combobox", {name: "Scope selection"}))
+
+        await user.click(await screen.findByText(/Fantabulous/))
 
         expect(spy).toHaveBeenCalledWith({id: 19, scope: newScope})
     });

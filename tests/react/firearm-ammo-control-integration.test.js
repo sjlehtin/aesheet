@@ -1,6 +1,6 @@
 import React from "react";
 
-import { render } from '@testing-library/react'
+import {render, screen, waitFor, within} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
@@ -46,13 +46,13 @@ describe('FirearmControl -- AmmoControl', () => {
             {base: {name: "Nabu tussari"},
              ammo: {calibre: {name: "Test Ammo"}}}});
 
-        const control = render(<FirearmControl {...props}/>)
+        render(<FirearmControl {...props}/>)
 
-        const elem_arr = await control.findAllByRole('combobox', {busy: false})
-        await user.click(elem_arr[0].querySelector('.rw-picker-caret'));
+        await waitFor(() => expect(screen.queryByRole("combobox", {name: "Select ammunition", busy: false})).toBeInTheDocument())
+        await user.click(screen.getByRole("combobox", {name: "Select ammunition", busy: false}))
 
-        await control.findByText(/Roblox/)
-        await control.findByText(/FMJ-CHROME/)
+        await screen.findByText(/Roblox/)
+        await screen.findByText(/FMJ-CHROME/)
     });
 
     it('integrates AmmoControl for changing ammmo', async () => {
@@ -80,18 +80,16 @@ describe('FirearmControl -- AmmoControl', () => {
             onChange: spy
         });
 
-        const control = render(<FirearmControl {...props}/>)
+        render(<FirearmControl {...props}/>)
 
         expect(spy).not.toHaveBeenCalled()
 
-        const elem_arr = await control.findAllByRole('combobox', {busy: false})
-        await user.click(elem_arr[0].querySelector('.rw-picker-caret'));
+        await waitFor(() => expect(screen.queryByRole("combobox", {name: "Select ammunition", busy: false})).toBeInTheDocument())
 
-        let options = await control.findAllByRole('option', {});
+        const ammoDropdown = screen.getByRole("combobox", {name: "Select ammunition", busy: false});
+        await user.click(ammoDropdown)
 
-        expect(options.length).toEqual(2)
-
-        await user.click(options[1])
+        await user.click(screen.getByText(/Skudaa/))
 
         // Check that the control passes the correct value up.
         expect(spy).toHaveBeenCalledWith({id: 52, ammo: newAmmo})

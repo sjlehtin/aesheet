@@ -271,10 +271,6 @@ class StatBlock extends React.Component {
         const firearms = await rest.getData(this.props.url + 'sheetfirearms/')
         this.handleFirearmsLoaded(firearms)
 
-        // promises.push(rest.getData(this.props.url + 'sheetfirearms/').then((json) => {
-        //     this.handleFirearmsLoaded(json);
-        // }).catch((err) => {console.log("Failed to load firearms:", err)}))
-
         promises.push(rest.getData(this.props.url + 'sheetweapons/').then((json) => {
             this.handleWeaponsLoaded(json);
         }).catch((err) => {console.log("Failed to load weapons:", err)}))
@@ -551,7 +547,7 @@ class StatBlock extends React.Component {
             }).catch((err) => {console.log("Error in deletion: ", err)});
     }
 
-    handleFirearmChanged(data) {
+    async handleFirearmChanged(data) {
         let patchData = {id: data.id};
         if (data.ammo) {
             patchData.ammo = data.ammo.id;
@@ -562,15 +558,18 @@ class StatBlock extends React.Component {
         } else if (data.scope === null) {
             patchData.scope = null;
         }
+        patchData.use_type = data.use_type
 
-        return rest.patch(this.getFirearmURL(data), patchData).then(() => {
-            const index = StatBlock.findItemIndex(
-                this.state.firearmList, data);
-            let updatedFireArm = Object.assign({}, this.state.firearmList[index],
-                data);
-            this.state.firearmList.splice(index, 1, updatedFireArm);
-            this.setState({firearmList: this.state.firearmList});
-        }).catch(err => {console.log("Error updating firearm: ", err)});
+        // Consider fetching full details from backend
+        const json = await rest.patch(this.getFirearmURL(data), patchData)
+
+        const index = StatBlock.findItemIndex(
+            this.state.firearmList, data);
+        let updatedFireArm = Object.assign({}, this.state.firearmList[index],
+            data);
+        updatedFireArm.use_type = json.use_type
+        this.state.firearmList.splice(index, 1, updatedFireArm);
+        this.setState({firearmList: this.state.firearmList});
     }
 
     async handleMagazineRemoved(firearm, magazine) {
@@ -588,7 +587,7 @@ class StatBlock extends React.Component {
         const faIndex = StatBlock.findItemIndex(
             newList, firearm);
         newList[faIndex].magazines.push(json);
-        await this.setState({firearmList: newList});
+        this.setState({firearmList: newList});
     }
 
     async handleMagazineChanged(firearm, magazine) {
@@ -828,17 +827,17 @@ class StatBlock extends React.Component {
             <tr>
                 <td style={statStyle}>MOV</td>
                 <td style={baseStyle}>{baseStats.mov}</td>
-                <td style={effStyle}><StatBreakdown value={effStats.mov} breakdown={effStats.breakdown.mov} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.mov} breakdown={effStats.breakdown.mov} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>DEX</td>
                 <td style={baseStyle}>{baseStats.dex}</td>
-                <td style={effStyle}><StatBreakdown value={effStats.dex} breakdown={effStats.breakdown.dex} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.dex} breakdown={effStats.breakdown.dex} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>IMM</td>
                 <td style={baseStyle}>{baseStats.imm}</td>
-                <td style={effStyle}><StatBreakdown value={effStats.imm} breakdown={effStats.breakdown.imm} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.imm} breakdown={effStats.breakdown.imm} /></td>
             </tr>
         </tbody>;
 
@@ -1041,22 +1040,24 @@ class StatBlock extends React.Component {
         var rows = [];
 
         var idx = 0;
+        const baseStyle = {fontSize: "80%"}
         for (let fa of this.state.firearmList) {
+            let bgColor
             if (idx % 2 === 0) {
-                var bgColor = "transparent";
+                bgColor = "transparent"
             } else {
-                bgColor = "rgb(245, 245, 255)";
+                bgColor = "rgb(245, 245, 255, 0.4)"
             }
             rows.push(<FirearmControl
                 key={idx++} weapon={fa}
                 skillHandler={skillHandler}
                 onRemove={(fa) => this.handleFirearmRemoved(fa) }
-                onChange={(data) => this.handleFirearmChanged(data)}
+                onChange={async (data) => await this.handleFirearmChanged(data)}
                 onMagazineRemove={async (mag) => await this.handleMagazineRemoved(fa, mag)}
                 onMagazineAdd={async (mag) => await this.handleMagazineAdded(fa, mag)}
                 onMagazineChange={async (mag) => await this.handleMagazineChanged(fa, mag)}
                 campaign={this.state.char.campaign}
-                style={{fontSize: "80%", backgroundColor: bgColor}}
+                style={Object.assign({}, baseStyle, {backgroundColor: bgColor})}
                 toRange={this.state.firearmRange}
                 darknessDetectionLevel={this.state.firearmDarknessDetectionLevel}
             />);

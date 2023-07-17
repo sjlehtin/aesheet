@@ -2,10 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import RangedWeaponRow from 'RangedWeaponRow';
+import WeaponRow from 'WeaponRow';
 import AmmoControl from 'AmmoControl';
 import ScopeControl from 'ScopeControl';
 import StatBreakdown from "StatBreakdown";
 import MagazineControl from 'MagazineControl';
+import UseTypeControl from 'UseTypeControl';
 
 const util = require('./sheet-util');
 import {Col, Row, Button, Table} from 'react-bootstrap';
@@ -26,12 +28,6 @@ class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
 
-        // // TODO: if need to load edgelevels etc, only set after that.
-        // let range = this.shortRange();
-
-        // TODO: get range from props, it allows rendering all weapons
-        // at the same time.
-
         // XXX move to class statics
         this.readiedBaseI = -1;
         this.baseCheckBonusForSlowActions = 10;
@@ -39,7 +35,7 @@ class FirearmControl extends RangedWeaponRow {
         this.penaltyCounterStat = "FIT";
     }
 
-    roa() {
+    roa(useType) {
         const base = this.props.weapon.base;
         const impulse = (parseFloat(this.props.weapon.ammo.weight) *
             parseFloat(this.props.weapon.ammo.velocity))/1000;
@@ -48,14 +44,36 @@ class FirearmControl extends RangedWeaponRow {
             parseFloat(base.stock) *
             (parseFloat(base.weight) + 6));
 
-        const skillLevel = this.skillLevel();
-
         let rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
+        let breakdown = [{
+                value: rof,
+                reason: "firearm"
+            }]
 
-        if (skillLevel > 0) {
-            rof *= 1 + 0.1 * skillLevel;
+        let mod = 0;
+        if (useType === WeaponRow.PRI) {
+            mod = -0.25;
+        } else if (useType === WeaponRow.SEC) {
+            mod = -0.5;
         }
-        return rof;
+
+        rof += mod
+        if (mod) {
+            breakdown.push({
+                value: mod,
+                reason: `${useType} use type`
+            })
+        }
+        const skillRof = rof * this.skillROAMultiplier()
+        breakdown.push({
+            value: skillRof - rof,
+            reason: "skill"
+        })
+        return {
+            value: skillRof,
+            breakdown: breakdown
+        }
+
     }
 
     // Return range effect to the given range. If unable to act to the range,
@@ -325,7 +343,7 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         const checks = this.skillChecksV2(this.mapBurstActions(actions),
-            {counterPenalty: false});
+            {useType: this.props.weapon.use_type, counterPenalty: false});
         if (checks === null) {
             // no actions available.
             return actions.map((el) => {return [];});
@@ -365,12 +383,11 @@ class FirearmControl extends RangedWeaponRow {
             ammo.leth + rangeEffect.leth}{plusLeth}</span>;
     }
 
-    handleAmmoChanged(value) {
+    async handleAmmoChanged(value) {
         if (this.props.onChange) {
-            return this.props.onChange({id: this.props.weapon.id,
+            await this.props.onChange({id: this.props.weapon.id,
                 ammo: value});
         }
-        return Promise.resolve({});
     }
 
     renderBurstTable() {
@@ -441,6 +458,7 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     sweepChecks(sweepType) {
+        // TODO: Sweep fire with non-full?
         const sweeps = {
             5: [0, 2, 5, 10],
             10: [0, 1, 2, 2, 5, 5, 10, 10],
@@ -565,16 +583,22 @@ class FirearmControl extends RangedWeaponRow {
         </div>;
     }
 
-    handleScopeRemove() {
-        return this.handleScopeChanged(null);
+    async handleScopeRemove() {
+        await this.handleScopeChanged(null);
     }
 
-    handleScopeChanged(value) {
+    async handleScopeChanged(value) {
         if (this.props.onChange) {
-            return this.props.onChange({id: this.props.weapon.id,
+            await this.props.onChange({id: this.props.weapon.id,
                 scope: value});
         }
-        return Promise.resolve({});
+    }
+
+    async handleUseTypeChange(useType) {
+        if (this.props.onChange) {
+            await this.props.onChange({id: this.props.weapon.id,
+                use_type: useType});
+        }
     }
 
     targetInitiative() {
@@ -612,7 +636,8 @@ class FirearmControl extends RangedWeaponRow {
         const actionCells = actions.map((act, ii) =>
         {return <th key={`act-${ii}`} style={headerStyle}>{act}</th>});
 
-        const cellStyle = {padding: 2, minWidth: "2em", textAlign: "center"};
+        const cellStyle = {padding: 2, minWidth: "2em", textAlign: "center", backgroundColor: "rgba(255, 255, 255, 0.5)"};
+        const firstCellStyle = Object.assign({}, cellStyle, {minWidth: "8em"})
         const helpStyle = Object.assign({color: "hotpink"}, cellStyle);
         const initStyle = Object.assign({color: "red"}, cellStyle);
 
@@ -623,6 +648,7 @@ class FirearmControl extends RangedWeaponRow {
 
         const baseCheck = super.skillCheckV2();
 
+        // TODO: extract?
         let baseCheckContainer;
         if (baseCheck) {
             const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
@@ -633,7 +659,7 @@ class FirearmControl extends RangedWeaponRow {
                 style={baseCheckStyle}/></span></div>
         }
 
-        let skillChecks = this.skillChecksV2(actions);
+        let skillChecks = this.skillChecksV2(actions, {useType: this.props.weapon.use_type});
         if (skillChecks == null) {
             skillChecks = <td colSpan={9}><strong>Range too long!</strong></td>;
         } else {
@@ -702,94 +728,178 @@ class FirearmControl extends RangedWeaponRow {
         } else {
             rangeInfo = <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
         }
-        return <div  aria-label={`Firearm ${this.props.weapon.base.name}`} style={this.props.style}>
+
+        const rof = this.rof(this.props.weapon.use_type)
+
+        const backgroundStyle = {
+            scale: "800%",
+            position: "absolute",
+            fontWeight: "bold",
+            transform: "rotate(-15deg)",
+            color: "rgba(234,16,223,0.68)",
+            top: "80px",
+            left: "400px",
+            zIndex: 0 };
+
+        const rootStyle = Object.assign({}, this.props.style, {position: "relative"});
+        const backgroundText = this.props.weapon.use_type !== WeaponRow.FULL ?
+            <div style={backgroundStyle}>{this.props.weapon.use_type}</div> : "";
+
+        return <div
+            aria-label={`Firearm ${this.props.weapon.base.name}`}
+            style={rootStyle}>
             <Row>
                 <Col xs={"auto"}>
                     <Row>
                         <Col>
-                        <table style={{fontSize: 'inherit'}}>
-                            <thead>
-                            <tr>
-                                <th style={headerStyle}>Weapon</th>
-                                <th style={headerStyle}>Lvl</th>
-                                <th style={headerStyle}>ROF</th>
-                                  {actionCells}
-                                <th style={headerStyle}>TI</th>
-                                <th style={headerStyle}>DI</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                            <tr aria-label={"Actions"}>
-                                <td rowSpan="2" style={cellStyle}>
-                                    <div>
-                                        {weapon.name}
 
-                                        {unskilled}
-                                        {baseCheckContainer}
-                                    </div>
-                                </td>
-                                <td style={cellStyle}>{this.skillLevel()}</td>
-                                <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().toFixed(2)}</td>
-                                {skillChecks}
-                                <td style={cellStyle} aria-label={"Target initiative"}>{`${util.renderInt(this.targetInitiative())}`}</td>
-                                <td style={cellStyle}>{weapon.draw_initiative}</td>
-                            </tr>
-                            <tr aria-label={"Initiatives"}>
-                                <td style={helpStyle} colSpan={2}>
-                                    I vs. 1 target
-                                </td>
-                                {initiatives}
-                            </tr>
-                            <tr><td style={cellStyle} rowSpan={2}>
-                                <AmmoControl
-                                    ammo={this.props.weapon.ammo}
-                                    url={`/rest/ammunition/firearm/${encodeURIComponent(this.props.weapon.base.name)}/`}
-                                    onChange={this.handleAmmoChanged.bind(this)}
-                                />
-                            </td>
-                                <th style={inlineHeaderStyle} colSpan={3}>Damage</th>
-                                <th style={inlineHeaderStyle} colSpan={2}>Dtype</th>
-                                <th style={inlineHeaderStyle} colSpan={2}>S</th>
-                                <th style={inlineHeaderStyle} colSpan={2}>M</th>
-                                <th style={inlineHeaderStyle} colSpan={2}>L</th>
-                            </tr>
-                            <tr>
-                                <td style={cellStyle} colSpan={3} aria-label={"Damage"}>{this.renderDamage()}</td>
-                                <td style={cellStyle} colSpan={2}>{this.props.weapon.ammo.type}</td>
-                                <td style={cellStyle} colSpan={2} aria-label={"Short range"}>{this.shortRange()}</td>
-                                <td style={cellStyle} colSpan={2} aria-label={"Medium range"}>{this.mediumRange()}</td>
-                                <td style={cellStyle} colSpan={2} aria-label={"Long range"}>{this.longRange()}</td>
-                            </tr>
-                            <tr>
-                                <td style={cellStyle} rowSpan={2}>
-                                <ScopeControl
-                                    scope={this.props.weapon.scope}
-                                    url={`/rest/scopes/campaign/${this.props.campaign}/`}
-                                    onChange={this.handleScopeChanged.bind(this)}
-                                />
-                                </td>
-                                <th style={inlineHeaderStyle} colSpan={2}>Weigth</th>
-                                <th style={inlineHeaderStyle} colSpan={2}>Sight</th>
-                                <th style={inlineHeaderStyle} colSpan={2}><span style={{whiteSpace: "nowrap"}}>Target-I</span></th>
-                                <th style={inlineHeaderStyle} colSpan={6}>Notes</th>
-                                <td style={cellStyle} rowSpan={2} colSpan={3}>
-                                    <Button onClick={(e) => this.handleScopeRemove()}
-                                        ref={(c) => this._scopeRemoveButton = c}
-                                        disabled={this.props.weapon.scope === null}
-                                        size="sm">Remove scope</Button>
-                                </td>
-                            </tr>
-                            <tr title={"Modifiers counted into checks already"}>
-                                <td style={cellStyle} colSpan={2}>{scope.weight}</td>
-                                <td style={cellStyle} colSpan={2}>{scope.sight}</td>
-                                <td style={cellStyle} colSpan={2}>{scope.target_i_mod}</td>
-                                <td style={cellStyle} colSpan={6}>{scope.notes}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <div><span style={marginRightStyle}><label style={labelStyle}>Durability:</label>{weapon.durability}</span>
-                            <span style={marginRightStyle}><label style={labelStyle}>Weight:</label>{weapon.weight}</span>
-                        </div>
+                            <div style={{
+                                fontSize: 'inherit',
+                                position: "relative",
+                                zIndex: 1,
+                                backgroundColor: "rgba(255, 255, 255, 0.0)"
+                            }}>
+                                <table style={{
+                                    fontSize: 'inherit',
+                                    backgroundColor: "rgba(255, 255, 255, 0.5)"
+                                }}>
+                                    <thead>
+                                    <tr>
+                                        <th style={headerStyle}>Weapon</th>
+                                        <th style={headerStyle}>Lvl</th>
+                                        <th style={headerStyle}>ROF</th>
+                                        {actionCells}
+                                        <th style={headerStyle}>TI</th>
+                                        <th style={headerStyle}>DI</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr aria-label={"Actions"}>
+                                        <td rowSpan="2" style={cellStyle}>
+                                            <div>
+                                                {weapon.name}
+
+                                                {unskilled}
+                                                {baseCheckContainer}
+                                            </div>
+                                        </td>
+                                        <td style={cellStyle}>{this.skillLevel()}</td>
+                                        <td style={cellStyle}
+                                            aria-label={"Rate of fire"}>
+                                            <StatBreakdown label={"ROF"}
+                                                           value={rof.value}
+                                                           breakdown={rof.breakdown}/>
+                                        </td>
+                                        {skillChecks}
+                                        <td style={cellStyle}
+                                            aria-label={"Target initiative"}>{`${util.renderInt(this.targetInitiative())}`}</td>
+                                        <td style={cellStyle}>{weapon.draw_initiative}</td>
+                                    </tr>
+                                    <tr aria-label={"Initiatives"}>
+                                        <td style={helpStyle} colSpan={2}>
+                                            I vs. 1 target
+                                        </td>
+                                        {initiatives}
+                                    </tr>
+                                    <tr>
+                                        <td style={firstCellStyle}
+                                            rowSpan={2}>
+                                            <AmmoControl
+                                                ammo={this.props.weapon.ammo}
+                                                url={`/rest/ammunition/firearm/${encodeURIComponent(this.props.weapon.base.name)}/`}
+                                                onChange={async (value) => await this.handleAmmoChanged(value)}
+                                            />
+                                        </td>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={3}>Damage
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}>Dtype
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}>S
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}>M
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}>L
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td style={cellStyle} colSpan={3}
+                                            aria-label={"Damage"}>{this.renderDamage()}</td>
+                                        <td style={cellStyle}
+                                            colSpan={2}>{this.props.weapon.ammo.type}</td>
+                                        <td style={cellStyle} colSpan={2}
+                                            aria-label={"Short range"}>{this.shortRange()}</td>
+                                        <td style={cellStyle} colSpan={2}
+                                            aria-label={"Medium range"}>{this.mediumRange()}</td>
+                                        <td style={cellStyle} colSpan={2}
+                                            aria-label={"Long range"}>{this.longRange()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style={firstCellStyle}
+                                            rowSpan={2}>
+                                            <ScopeControl
+                                                scope={this.props.weapon.scope}
+                                                url={`/rest/scopes/campaign/${this.props.campaign}/`}
+                                                onChange={async (value) => await this.handleScopeChanged(value)}
+                                            />
+                                            <UseTypeControl
+                                                useType={this.props.weapon.use_type}
+                                                onChange={async (value) => await this.handleUseTypeChange(value)}
+                                            />
+                                        </td>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}>Weigth
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}>Sight
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={2}><span
+                                            style={{whiteSpace: "nowrap"}}>Target-I</span>
+                                        </th>
+                                        <th style={inlineHeaderStyle}
+                                            colSpan={6}>Notes
+                                        </th>
+                                        <td style={cellStyle} rowSpan={2}
+                                            colSpan={3}>
+                                            <Button
+                                                onClick={(e) => this.handleScopeRemove()}
+                                                ref={(c) => this._scopeRemoveButton = c}
+                                                disabled={this.props.weapon.scope === null}
+                                                size="sm">Remove
+                                                scope</Button>
+                                        </td>
+                                    </tr>
+                                    <tr title={"Modifiers counted into checks already"}>
+                                        <td style={cellStyle}
+                                            colSpan={2}>{scope.weight}</td>
+                                        <td style={cellStyle}
+                                            colSpan={2}>{scope.sight}</td>
+                                        <td style={cellStyle}
+                                            colSpan={2}>{scope.target_i_mod}</td>
+                                        <td style={cellStyle}
+                                            colSpan={6}>{scope.notes}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {backgroundText}
+
+                            <div><span style={marginRightStyle}><label
+                                style={labelStyle}>Durability:</label>{weapon.durability}</span>
+                                <span style={marginRightStyle}><label
+                                    style={labelStyle}>Weight:</label>{parseFloat(weapon.weight).toFixed(2)} kg</span>
+                                <span style={marginRightStyle}><label
+                                    style={labelStyle}>Use type:</label><span
+                                    aria-label={"Use type"}>{this.props.weapon.use_type}</span></span>
+                            </div>
+
+
                         </Col>
                         <Col md={3}>
                             {this.renderBurstTable()}
@@ -803,19 +913,19 @@ class FirearmControl extends RangedWeaponRow {
                     </Row>
                     <Row>
                         <Col>
-                        {this.renderSweepTable()}
+                            {this.renderSweepTable()}
                         </Col>
                     </Row>
                     <MagazineControl firearm={this.props.weapon}
-                                        onRemove={async (mag) => {
-                                            await this.props.onMagazineRemove(mag)
-                                        }}
+                                     onRemove={async (mag) => {
+                                         await this.props.onMagazineRemove(mag)
+                                     }}
                                      onAdd={async (mag) => {
-                                            await this.props.onMagazineAdd(mag)
-                                        }}
+                                         await this.props.onMagazineAdd(mag)
+                                     }}
                                      onChange={async (mag) => {
-                                            await this.props.onMagazineChange(mag)
-                                        }}
+                                         await this.props.onMagazineChange(mag)
+                                     }}
                     />
                 </Col>
             </Row>
@@ -823,6 +933,7 @@ class FirearmControl extends RangedWeaponRow {
             <Button onClick={(e) => this.handleRemove()}
                     ref={(c) => this._removeButton = c}
                     size="sm">Remove firearm</Button>
+
         </div>;
     }
 }
