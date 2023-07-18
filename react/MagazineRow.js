@@ -36,16 +36,18 @@ class MagazineRow extends React.Component {
             display.push(<span style={spentAmmoStyle} key={`spent-${ind}`}>•</span>)
         }
 
-        display.push(<span key={"numbers"} style={{marginLeft: "2em"}}>{this.props.current}/{this.props.capacity}</span>)
+        display.push(<span key={"numbers"} style={{marginLeft: "2em", textAlign: "right"}}>{this.props.current}/{this.props.capacity}</span>)
         const cellStyle = {padding: "2px"}
         return <Row aria-label={`Magazine of size ${this.props.capacity} with ${this.props.current} bullets remaining`}>
             <Col md={5} style={cellStyle}>
+                <div style={{marginLeft: "2em"}}>
                 {display}
+                </div>
             </Col>
-            <Col md={1} style={cellStyle}><Button aria-label={"Shoot"} size={"sm"} onClick={async () => this.handleShoot() }>Shoot!</Button></Col>
-            <Col md={1} style={cellStyle}><Button aria-label={"Load"} size={"sm"} onClick={async () => this.handleLoad() }>Load</Button></Col>
+            <Col md={2} style={cellStyle}><Button aria-label={"Shoot"} size={"sm"} onClick={async () => this.handleShoot() }>Shoot!</Button></Col>
+            <Col md={2} style={cellStyle}><Button aria-label={"Load"} size={"sm"} onClick={async () => this.handleLoad() }>Load</Button></Col>
             <Col md={2} style={cellStyle}><Button aria-label={"Remove magazine"} size={"sm"} onClick={async () => {await this.props.onRemove()}}>Remove</Button></Col>
-            <Col md={2} style={cellStyle}><span aria-label={"Weight"}>{this.props.currentMagazineWeight.toFixed(2)} kg</span></Col>
+            <Col md={1} style={cellStyle}><span aria-label={"Weight"}>{this.props.currentMagazineWeight.toFixed(2)} kg</span></Col>
         </Row>
     }
 }

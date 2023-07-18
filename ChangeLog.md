@@ -1,3 +1,9 @@
+## Version 0.15.1 -- 2023-07-18
+
+### Fixed
+
+* Tweaked magazine display.
+
 ## Version 0.15.0 -- 2023-07-18
 
 ### Added
