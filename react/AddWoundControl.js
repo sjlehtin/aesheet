@@ -23,10 +23,30 @@ class AddWoundControl extends React.Component {
     }
 
     findEffect(wound) {
+        const threshold = this.props.handler.getDamageThreshold(wound.location)
+
+            // Toughness already factored in to the threshold.
+        if (wound.damage > threshold) {
+            if (wound.damage > 2*threshold) {
+                const effectMap = {P: "blown to smithereens", "S": "sliced clean off", B: "obliterated", R: "burned to a crisp"}
+                const locMap = {H: "Head", T: "Torso",
+                                     RA: "Arm", LA: "Arm", RL: "Leg", LL: "Leg"}
+
+                return `${locMap[wound.location]} ${effectMap[wound.type]}`
+            } else {
+                const effectMap = {P: "blown off", "S": "severed", B: "crushed", R: "burned through"}
+                const locMap = {
+                    H: "Head", T: "Torso",
+                    RA: "Hand", LA: "Hand", RL: "Foot", LL: "Foot"
+                }
+                return `${locMap[wound.location]} ${effectMap[wound.type]}`
+            }
+        }
+
         const choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
 
-
-        const effDamage = wound.damage - this.props.toughness;
+        const toughness = this.props.handler?.edgeLevel("Toughness") ?? 0;
+        const effDamage = wound.damage - toughness;
         if (effDamage < 0) {
             return choices[0];
         }
@@ -175,6 +195,7 @@ class AddWoundControl extends React.Component {
 
 AddWoundControl.propTypes = {
     onAdd: PropTypes.func,
+    handler: PropTypes.object,
     toughness: PropTypes.number
 };
 

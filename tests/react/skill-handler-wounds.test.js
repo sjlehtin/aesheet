@@ -69,6 +69,7 @@ describe('SkillHandler wounds', function() {
 
     it('should recognize major limb wound', function () {
         var handler = factories.skillHandlerFactory({
+            character: { cur_fit: 81},
             wounds: [{damage: 7, location: "LA"}]
         });
 
@@ -85,6 +86,7 @@ describe('SkillHandler wounds', function() {
 
     it('calculates penalties from multiple wounds in a location', function () {
         var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 81},
             wounds: [{damage: 2, location: "RA"}, {damage: 2, location: "RA"},
                 {damage: 1, location: "RA"}, {damage: 1, location: "RA"}]
         });
@@ -166,6 +168,7 @@ describe('SkillHandler wounds', function() {
 
     it('calculates penalties to wounds to left arm', function () {
         var handler = factories.skillHandlerFactory({
+            character: {cur_fit: 81},
             wounds: [{damage: 5, location: "LA"}]
         });
 
@@ -179,6 +182,85 @@ describe('SkillHandler wounds', function() {
         });
 
         expect(handler.getWoundPenalties().ra_fit_ref).toEqual(-20);
+    });
+
+    it('recognizes maximum penalties to arm', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 81},
+            wounds: [{damage: 20, location: "RA"}]
+        });
+
+        expect(handler.getWoundPenalties().aa).toEqual(-10);
+        //expect(handler.getWoundPenalties().ra_fit_ref).toEqual(-Infinity);
+    });
+
+    it('recognizes maximum penalties to leg', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 81},
+            wounds: [{damage: 20, location: "LL"}]
+        });
+
+        expect(handler.getWoundPenalties().mov).toEqual(-75);
+        expect(handler.getWoundPenalties().aa).toEqual(-10);
+    });
+
+    it('recognizes maximum penalties to torso', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 105},
+            wounds: [{damage: 25, location: "T"}]
+        });
+
+        expect(handler.getWoundPenalties().mov).toEqual(-0);
+        expect(handler.getWoundPenalties().aa).toEqual(-100);
+    });
+
+    it('recognizes maximum penalties to torso', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 130},
+            wounds: [{damage: 25, location: "H"}]
+        });
+
+        expect(handler.getWoundPenalties().mov).toEqual(-0);
+        expect(handler.getWoundPenalties().aa).toEqual(-120);
+    });
+
+    it('calculates stamina damage', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 50, stamina_damage: 5},
+        });
+
+        expect(handler.getStaminaDamage()).toEqual(5)
+    });
+
+    it('calculates stamina damage', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 51, stamina_damage: 5},
+        });
+
+        expect(handler.getStaminaDamage()).toEqual(5)
+    });
+
+    it('calculates damage including from massive wounds', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 51, stamina_damage: 5},
+            wounds: [{damage: 10, location: "RA"}]
+        });
+
+        expect(handler.getCurrentBody()).toEqual(9)
+        // Damage is capped at 4 pts due to 4 pt threshold in arm.
+        expect(handler.getStaminaDamage()).toEqual(9)
+    });
+
+    it('calculates damage including from multiple massive wounds', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 80, stamina_damage: 5},
+
+            wounds: [{damage: 11, location: "RA"},
+                {damage: 11, location: "LA"}]
+        });
+
+        expect(handler.getStaminaDamage()).toEqual(15)
+        expect(handler.getCurrentBody()).toEqual(8)
     });
 
 });

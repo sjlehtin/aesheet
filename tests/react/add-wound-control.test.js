@@ -3,11 +3,9 @@ import React from 'react';
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
+import AddWoundControl from 'AddWoundControl';
 
-
-const AddWoundControl = require('AddWoundControl').default;
-
-var factories = require('./factories');
+const factories = require('./factories');
 
 describe('AddWoundControl', function() {
 
@@ -15,7 +13,7 @@ describe('AddWoundControl', function() {
         const spy = jest.fn().mockResolvedValue({})
         const user = userEvent.setup()
 
-        render(<AddWoundControl onAdd={spy}/>)
+        render(<AddWoundControl handler={factories.skillHandlerFactory()} onAdd={spy}/>)
 
         expect(within(screen.getByLabelText("Location")).getByText("Torso (5-7)")).toBeInTheDocument()
 
@@ -49,7 +47,7 @@ describe('AddWoundControl', function() {
     it("validates damage", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory()} />)
 
         await user.type(screen.getByRole("textbox", {name: "Damage"}), "5a")
 
@@ -64,7 +62,7 @@ describe('AddWoundControl', function() {
     it("fills in effect for head wounds", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory()} />)
 
         await user.click(screen.getByRole("combobox", {name: "Location"}))
         await user.click(screen.getByText("Head (8)"))
@@ -82,7 +80,7 @@ describe('AddWoundControl', function() {
     it("takes effect from last in case of massive damage", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory({character: {cur_fit: 200}})} />)
 
         await user.click(screen.getByRole("combobox", {name: "Location"}))
         await user.click(screen.getByText("Head (8)"))
@@ -100,7 +98,7 @@ describe('AddWoundControl', function() {
     it("fills in effect for arm wounds", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory()} />)
 
         await user.click(screen.getByRole("combobox", {name: "Location"}))
         await user.click(screen.getByText("Left arm (2)"))
@@ -109,16 +107,16 @@ describe('AddWoundControl', function() {
         await user.click(screen.getByText("Bludgeon"))
 
         await user.clear(screen.getByRole("textbox", {name: "Damage"}))
-        await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "3")
 
         const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
-        expect(effectInput).toHaveValue("Shoulder broken")
+        expect(effectInput).toHaveValue("Joint dislocated")
     });
 
     it("fills in effect for leg wounds", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory()} />)
 
         await user.click(screen.getByRole("combobox", {name: "Location"}))
         await user.click(screen.getByText("Left leg (1)"))
@@ -136,7 +134,7 @@ describe('AddWoundControl', function() {
     it("fills in effect for torso wounds", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory()} />)
 
         await user.clear(screen.getByRole("textbox", {name: "Damage"}))
         await user.type(screen.getByRole("textbox", {name: "Damage"}), "5")
@@ -148,7 +146,7 @@ describe('AddWoundControl', function() {
     it("takes toughness into account in the effect", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl toughness={3} />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory({edges: [{edge: "Toughness", level: 3}]})} />)
 
         await user.clear(screen.getByRole("textbox", {name: "Damage"}))
         await user.type(screen.getByRole("textbox", {name: "Damage"}), "8")
@@ -156,4 +154,25 @@ describe('AddWoundControl', function() {
         const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
         expect(effectInput).toHaveValue("Gut pierced [minor int]")
     });
+
+    it("takes damage threshold into account", async () => {
+        const user = userEvent.setup()
+
+        render(<AddWoundControl handler={factories.skillHandlerFactory({edges: [{edge: "Toughness", level: 3}]})} />)
+
+        await user.click(screen.getByRole("combobox", {name: "Location"}))
+        await user.click(screen.getByText("Left leg (1)"))
+
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "9")
+
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
+        expect(effectInput).toHaveValue("Foot severed")
+
+        await user.clear(screen.getByRole("textbox", {name: "Damage"}))
+        await user.type(screen.getByRole("textbox", {name: "Damage"}), "17")
+
+        expect(effectInput).toHaveValue("Leg sliced clean off")
+    });
+
 });

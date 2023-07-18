@@ -41,7 +41,7 @@ describe('WoundPenaltyBox', function() {
             character: {cur_fit: 30, cur_ref: 50, cur_lrn: 50, cur_int: 50,
                 cur_psy: 50, cur_wil: 50, cur_cha: 50, cur_pos: 50
             },
-            wounds: [{damage: 4, location: "H"}]})).toContain(
+            wounds: [{damage: 3, location: "H"}, {damage: 2, location: "T"}]})).toContain(
                 "Heart stopped");
     });
 

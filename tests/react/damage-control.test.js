@@ -1,23 +1,23 @@
-jest.dontMock('DamageControl');
-jest.dontMock('WoundRow');
-jest.dontMock('AddWoundControl');
-jest.dontMock('WoundPenaltyBox');
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
 import TestUtils from 'react-dom/test-utils';
 
 import DamageControl from 'DamageControl';
 const WoundRow = require('WoundRow').default;
 import AddWoundControl from 'AddWoundControl';
 
-var factories = require('./factories');
+const factories = require('./factories');
+
+import {fireEvent, render, screen} from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
+
+import {defer} from './testutils'
+
+const server = setupServer(
+)
 
 describe('DamageControl', function() {
-    "use strict";
 
     var getDamageControlTree = function (givenProps) {
         var props = givenProps;
@@ -41,33 +41,72 @@ describe('DamageControl', function() {
             DamageControl);
     };
 
-    it("can validate the input field", function () {
-        var control = getDamageControl();
-        var node = ReactDOM.findDOMNode(control._inputField);
+    const renderDamageControl = (givenProps) => {
+        var props = givenProps
+        if (!props) {
+            props = {}
+        }
+        props.handler = factories.skillHandlerFactory({character: props.character})
+        props.character = props.handler.props.character
+        if (props.wounds) {
+            props.wounds = props.wounds.map(
+                (props) => { return factories.woundFactory(props); })
+        }
+        return render(<DamageControl {...props} />)
+    }
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: "a2b"}});
-        expect(control.isValid()).toEqual(false);
-        expect(control.validationState()).toEqual("error");
 
+    it("can validate the input field", async () => {
+        renderDamageControl()
+
+        const el = await screen.findByLabelText("Stamina damage")
+
+        fireEvent.change(el, {target: {value: "a2"}})
+
+        expect(el).not.toHaveClass("is-valid")
+
+        fireEvent.change(el, {target: {value: "2"}})
+
+        expect(el).toHaveClass("is-valid")
     });
 
-    it('validates input and accepts valid', function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(
-            Promise.resolve({}));
-        var control = getDamageControl({onMod: callback, character:
-        {cur_ref:40, cur_wil: 40}});
+    it('validates input and accepts valid', async ()=> {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue()
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: 8}});
-        expect(control.isValid()).toEqual(true);
-        expect(control.validationState()).toEqual("success");
+        renderDamageControl({
+            onMod: spy,
+            character: {cur_ref: 40, cur_wil: 40}
+        })
 
-        TestUtils.Simulate.click(control._changeButton);
+        const el = await screen.findByRole("textbox", {name: "Stamina damage"})
 
-        // 20 - 8 = 12
-        expect(callback).toHaveBeenCalledWith('stamina_damage', 0, 12);
+        await user.clear(el)
+        await user.type(el, "8")
+
+        expect(el).toHaveClass("is-valid")
+
+        await user.click(screen.getByRole("button", {name: "Change"}))
+
+        expect(spy).toHaveBeenCalledWith('stamina_damage', 0, 8);
     });
+
+    it('validates can be submitted with Enter', async ()=> {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue()
+
+        renderDamageControl({
+            onMod: spy,
+            character: {cur_ref: 40, cur_wil: 40}
+        })
+
+        const el = await screen.findByRole("textbox", {name: "Stamina damage"})
+
+        await user.clear(el)
+        await user.type(el, "8[Enter]")
+
+        expect(spy).toHaveBeenCalledWith('stamina_damage', 0, 8);
+    })
 
     it('can be busy during REST update', function (done) {
         var promise = Promise.resolve({});
@@ -78,7 +117,6 @@ describe('DamageControl', function() {
         TestUtils.Simulate.change(
             control._inputField, {target: {value: 8}});
         expect(control.isValid()).toEqual(true);
-        expect(control.validationState()).toEqual("success");
 
         TestUtils.Simulate.click(control._changeButton);
 
@@ -101,28 +139,25 @@ describe('DamageControl', function() {
         expect(callback).toHaveBeenCalledWith('stamina_damage', 12, 0);
     });
 
-    // TODO: test for componentWillReceiveProps
-
-    it("allows wounds to be passed", function () {
-        var tree = getDamageControlTree({
+    it("allows wounds to be passed", async () => {
+        renderDamageControl({
             wounds: [{damage: 5, location: "H",
                       id: 2, effect: "Throat punctured."}]
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
+            })
+
+        await screen.findByText("Throat punctured.")
     });
 
-    it("renders multiple wounds", function () {
-        var tree = getDamageControlTree({
+    it("renders multiple wounds", async () => {
+        renderDamageControl({
             wounds: [{damage: 5, location: "H",
                       id: 2, effect: "Throat punctured."},
-            {damage: 3, location: "T",
+                        {damage: 3, location: "T",
                       id: 2, effect: "Heart racing."}]
-            });
-        var woundRows = TestUtils.scryRenderedComponentsWithType(tree,
-            WoundRow);
-        expect(ReactDOM.findDOMNode(woundRows[0]).textContent).toContain("Throat punctured");
-        expect(ReactDOM.findDOMNode(woundRows[1]).textContent).toContain("Heart racing");
+            })
+
+        await screen.findByText("Throat punctured.")
+        await screen.findByText("Heart racing.")
     });
 
     it("allows wounds to be added", function () {

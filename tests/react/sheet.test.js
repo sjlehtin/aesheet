@@ -501,25 +501,27 @@ describe('StatBlock', function() {
 //         });
 //     });
 //
-//     it("handles stamina changes", function (done) {
-//         var block = factories.statBlockFactory({
-//             character: factories.characterFactory({cur_wil: 40, cur_ref: 40})
-//         });
-//
-//         block.afterLoad(function () {
-//
-//             rest.patch.mockClear();
-//
-//             var control = TestUtils.findRenderedComponentWithType(
-//                 block, DamageControl);
-//
-//             TestUtils.Simulate.change(control._inputField,
-//                 {target: {value: 8}});
-//             TestUtils.Simulate.click(control._changeButton);
-//
-//             expect(rest.patch.mock.calls[0][1]).toEqual({stamina_damage: 12});
-//
-//             done();
-//         });
-//     });
+    it("handles stamina changes", async () => {
+        const user = userEvent.setup()
+
+        const character = factories.characterFactory()
+        server.use(
+            rest.get('http://localhost/rest/characters/2/', (req, res, ctx) => {
+                return res(ctx.json(character))
+            }),
+            rest.patch('http://localhost/rest/characters/2/', async (req, res, ctx) => {
+                return res(ctx.json(Object.assign({}, character, await req.json())))
+            })
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+
+        const damageInput = screen.getByRole("textbox", {name: "Stamina damage"});
+        await user.clear(damageInput)
+        await user.type(damageInput, "8[Enter]")
+
+        await waitFor(() => expect(screen.getByLabelText("Current stamina").textContent.trim()).toEqual("14 / 22"))
+    });
 });

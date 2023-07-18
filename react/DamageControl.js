@@ -18,6 +18,19 @@
  */
 
 /*
+ * Damage threshold
+ *
+ * Calculate effect as indicated in the rules and treat damage in excess of
+ * threshold as penalty on the stamina. This allows to naturally heal
+ * the wounds which will then restore the stamina to normal as the excess
+ * damage is healed.
+ *
+ * The effect of the wound should factor in previous damage to the
+ * hit-location per the example in the rules "5.3.3 Limb damage threshold".
+ *
+ */
+
+/*
  * Further improvements:
  *
  * - separate wounds per hit location
@@ -31,58 +44,51 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-import { Button, Table, Card } from 'react-bootstrap';
-import {GoSync} from 'react-icons/go'
+import { Button, Table, Card, Form, Col, Row } from 'react-bootstrap';
 
 import SkillHandler from './SkillHandler';
 import WoundRow from './WoundRow';
 import WoundPenaltyBox from './WoundPenaltyBox';
 import AddWoundControl from './AddWoundControl';
+import Loading from 'Loading'
 
 const util = require('./sheet-util');
-const rest = require('./sheet-rest');
 
 class DamageControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentStamina: this.props.handler.getBaseStats().stamina -
-                this.props.character.stamina_damage,
+            currentStaminaDamage: this.props.character.stamina_damage,
             isBusy: false
         };
     }
 
     handleSubmit(event) {
-        var newValue = this.props.handler.getBaseStats().stamina -
-            this.state.currentStamina;
         this.setState({isBusy: true});
         this.props.onMod('stamina_damage', this.props.character.stamina_damage,
-            newValue).then(() => this.setState({isBusy: false}));
+            parseInt(this.state.currentStaminaDamage)).then(() => this.setState({isBusy: false}));
     }
 
     handleChange(event) {
-        this.setState({currentStamina: event.target.value});
+        this.setState({currentStaminaDamage: event.target.value});
     }
 
     handleClear(event) {
-        this.setState({currentStamina: this.props.handler.getBaseStats().stamina,
+        this.setState({currentStaminaDamage: 0,
             isBusy: true});
         this.props.onMod('stamina_damage', this.props.character.stamina_damage,
             0).then(() => this.setState({isBusy: false}));
     }
 
-    validationState() {
-        return util.isInt(this.state.currentStamina) ? "success" : "error";
-    }
-
     isValid() {
-        return this.validationState() === "success";
+        return  util.isInt(this.state.currentStaminaDamage);
     }
 
     handleKeyDown(e) {
-        if (e.keyCode === 13) {
+        if (e.code === "Enter") {
             /* Enter. */
             this.handleSubmit();
+            e.stopPropagation()
         }
     }
 
@@ -106,14 +112,14 @@ class DamageControl extends React.Component {
     }
 
     render() {
-        var inputStyle = {width: "3em", marginLeft: "1em"};
+        const inputStyle = {width: "6em", textAlign: "right", marginLeft: "1em"};
 
         var loading = '';
         if (this.state.isBusy) {
-            loading = <GoSync />;
+            loading = <Loading />;
         }
         var damage = '';
-        if (this.props.character.stamina_damage) {
+        if (this.props.handler.getStaminaDamage()) {
             var renderedAcPenalty, renderedInitPenalty;
             var acPenalty = this.props.handler.getACPenalty();
             var descrStyle = {marginLeft: "1em"};
@@ -125,14 +131,13 @@ class DamageControl extends React.Component {
                     <span style={descrStyle}>{initPenalty} I</span>;
             }
             damage = <div style={{color: 'red'}}>
-                -{this.props.character.stamina_damage} STA
+                -{this.props.handler.getStaminaDamage()} STA
                 => {renderedAcPenalty}
                 {renderedInitPenalty}
             </div>;
         }
-        var bodyDamage = 0;
+
         var rows = this.props.wounds.map((wound, idx) => {
-            bodyDamage += wound.damage - wound.healed;
             return <WoundRow key={"wound-" + idx} wound={wound}
                              onMod={(data) => this.handleWoundMod(data)}
                              onRemove={(data) => this.handleWoundRemove(data)}
@@ -149,7 +154,7 @@ class DamageControl extends React.Component {
         var stats = this.props.handler.getBaseStats();
 
         var deathSymbol = '';
-        if (bodyDamage >= stats.body) {
+        if (this.props.handler.getCurrentBody() <= 0) {
             deathSymbol = <span style={{fontSize: "200%"}}
                                 title="The character is dead due to massive damage">✟</span>;
         }
@@ -159,21 +164,42 @@ class DamageControl extends React.Component {
                 <h4>Stamina damage and wounds</h4>
             </Card.Header>
             <Card.Body className={"table-responsive"}>
+            <div>
+                <Row>
+                    <Col md={"1"}>
+                <label>Body</label>
+                        </Col>
+                    <Col md={"auto"}>
                 <div style={this.props.style}>
-            <div><label>Body: </label><span style={{marginLeft: "1em"}}>{stats.body - bodyDamage} / {stats.body} {deathSymbol}</span></div>
+                        <span style={{marginLeft: "1em"}} aria-label={"Current body"}>{this.props.handler.getCurrentBody()} / {stats.body} {deathSymbol}</span></div>
+                    </Col>
+                    </Row>
+                <Row>
+                    <Col md={"1"}>
+                <label>Stamina</label>
+                        </Col>
+                    <Col md={"auto"}>
+                <div style={this.props.style}>
+                        <span style={{marginLeft: "1em"}} aria-label={"Current stamina"}>{this.props.handler.getCurrentStamina()} / {stats.stamina} </span></div>
+                    </Col>
+                    </Row>
             {damage}
-            <label>Stamina: </label>
-            <input ref={(c) =>
+                        <Row>
+<Col md={"1"}>
+    <Form.Label htmlFor={"stamina-damage"}>Stamina damage</Form.Label>
+</Col>
+<Col md={"auto"}>
+            <Form.Control ref={(c) =>
                      c ? this._inputField = ReactDOM.findDOMNode(c) : null}
                    type="text"
                    onChange={(e) => this.handleChange(e)}
-                   //bsStyle={this.validationState()}
-                   //hasFeedback
-                   value={this.state.currentStamina}
+                   id={"stamina-damage"} isValid={this.isValid()}
+                   value={this.state.currentStaminaDamage}
                    onKeyDown={(e) => this.handleKeyDown(e)}
                    style={inputStyle}
             />
-            <span> / {stats.stamina}</span>
+    </Col>
+                        <Col md={"auto"}>
             <Button
                 style={{marginLeft: "1em"}}
                 size="sm"
@@ -181,20 +207,24 @@ class DamageControl extends React.Component {
                       c ? this._changeButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
-
+                        </Col>
+                        <Col md={"auto"}>
             <Button style={{marginLeft: ".5em"}}
                     size="sm"
                     ref={(c) =>
                       c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
+                    id={"clear-stamina-damage"}
                     onClick={(e) => this.handleClear()}>Clear{loading}</Button>
+                        </Col>
+                            </Row>
             <WoundPenaltyBox handler={this.props.handler}/>
             {wounds}
         </div>
                 </Card.Body>
             <Card.Footer>
                 <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)}
-                                 toughness={this.props.handler.edgeLevel("Toughness")}/>
+                                 handler={this.props.handler}/>
             </Card.Footer>
         </Card>);
     }

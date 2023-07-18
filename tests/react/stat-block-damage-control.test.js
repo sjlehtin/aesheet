@@ -109,13 +109,4 @@ describe('stat block wounds handling', function() {
             });
         });
     });
-
-    it("integrates toughness into AddWoundControl", function (done) {
-        var tree = factories.statBlockTreeFactory({edges: [{edge: {edge: "Toughness", level: 3}}]});
-        tree.afterLoad(function () {
-            var addControl = TestUtils.findRenderedComponentWithType(tree, AddWoundControl);
-            expect(addControl.props.toughness).toEqual(3);
-            done();
-        });
-    });
 });

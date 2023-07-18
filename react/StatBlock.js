@@ -1376,8 +1376,8 @@ class StatBlock extends React.Component {
         return <CharacterNotes url={`/rest/characters/${this.state.char.id}/`}/>;
     }
 
-    renderArmor() {
-        if (!this.state.char || !this.state.armor || !this.state.helm) {
+    renderArmor(skillHandler) {
+        if (this.state.loading) {
             return <Loading>Armor</Loading>;
         }
         return <Card className={"m-1"}>
@@ -1389,6 +1389,7 @@ class StatBlock extends React.Component {
                 campaign={this.state.char.campaign}
                 armor={this.state.armor}
                 helm={this.state.helm}
+                handler={skillHandler}
                 miscellaneousItems={this.state.miscellaneousItemList}
                 onHelmChange={(value) => this.handleHelmChanged(value)}
                 onArmorChange={(value) => this.handleArmorChanged(value)}
@@ -1519,7 +1520,7 @@ class StatBlock extends React.Component {
                     </Row>
                     <Row>
                         <Col>
-                            {this.renderArmor()}
+                            {this.renderArmor(skillHandler)}
                         </Col>
                         <Col style={{fontSize: "60%"}}>
                             {this.renderMovementRates(skillHandler)}

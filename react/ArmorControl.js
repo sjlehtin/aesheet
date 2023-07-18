@@ -88,7 +88,7 @@ class ArmorControl extends React.Component {
         var descStyle = Object.assign({fontWeight: "bold"}, cellStyle);
 
         var headerCells = ["d8", "Loc", "P", "S", "B", "R", "DR", "DP",
-            "PL"].map((el, ii) => {
+            "PL", "Threshold"].map((el, ii) => {
             return <th style={headerStyle} key={ii}>{el}</th>;});
 
         armorStats.push(<thead style={headerStyle} key={"thead"}>
@@ -104,6 +104,7 @@ class ArmorControl extends React.Component {
                     { util.rounddown(this.getArmorStat(loc, col)) }
                 </td>);
             }
+            row.push(<td style={{fontWeight: "bold", textAlign: "center"}} key={loc + "Threshold"}>{this.props.handler?.getDamageThreshold(loc)}</td>)
             locations.push(<tr key={loc}>{row}</tr>);
         }
         armorStats.push(<tbody key={0}>{locations}</tbody>);
@@ -124,6 +125,7 @@ ArmorControl.propTypes = {
     tag: PropTypes.string,
     armor: PropTypes.object,
     helm: PropTypes.object,
+    handler: PropTypes.object,
     miscellaneousItems: PropTypes.arrayOf(PropTypes.object),
     effects: PropTypes.arrayOf(PropTypes.object),
     campaign: PropTypes.number.isRequired,

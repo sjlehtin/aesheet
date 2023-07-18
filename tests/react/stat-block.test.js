@@ -468,25 +468,25 @@ describe('StatBlock', function() {
         });
     });
 
-    it("handles stamina changes", function (done) {
-        var block = factories.statBlockFactory({
-            character: factories.characterFactory({cur_wil: 40, cur_ref: 40})
-        });
-
-        block.afterLoad(function () {
-
-            rest.patch.mockClear();
-
-            var control = TestUtils.findRenderedComponentWithType(
-                block, DamageControl);
-
-            TestUtils.Simulate.change(control._inputField,
-                {target: {value: 8}});
-            TestUtils.Simulate.click(control._changeButton);
-
-            expect(rest.patch.mock.calls[0][1]).toEqual({stamina_damage: 12});
-
-            done();
-        });
-    });
+    // it("handles stamina changes", function (done) {
+    //     var block = factories.statBlockFactory({
+    //         character: factories.characterFactory({cur_wil: 40, cur_ref: 40})
+    //     });
+    //
+    //     block.afterLoad(function () {
+    //
+    //         rest.patch.mockClear();
+    //
+    //         var control = TestUtils.findRenderedComponentWithType(
+    //             block, DamageControl);
+    //
+    //         TestUtils.Simulate.change(control._inputField,
+    //             {target: {value: 8}});
+    //         TestUtils.Simulate.click(control._changeButton);
+    //
+    //         expect(rest.patch.mock.calls[0][1]).toEqual({stamina_damage: 12});
+    //
+    //         done();
+    //     });
+    // });
 });

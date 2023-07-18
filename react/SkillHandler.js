@@ -119,7 +119,8 @@ class SkillHandler {
 
     getACPenalty() {
         /* TODO: Fix issue with extra stamina, should not give AC bonus. */
-        return util.rounddown(this.props.character.stamina_damage/
+
+        return util.rounddown(this.props.character.stamina_damage /
             this.getBaseStats().stamina * (-20));
     }
 
@@ -557,35 +558,78 @@ class SkillHandler {
         return this._baseStats;
     }
 
+    getDamageThreshold(givenLoc) {
+        if (!this._thresholds) {
+            const divider = {H: 10, T: 5, RA: 15, RL: 10, LA: 15, LL: 10}
+            this._thresholds = {}
+            for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+                this._thresholds[loc] = util.roundup(this.getBaseStats().fit / divider[loc]) + this.edgeLevel("Toughness")
+            }
+        }
+        return this._thresholds[givenLoc]
+    }
+
     getWoundPenalties() {
         if (!this._woundPenalties) {
-            var locationDamages = {H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0};
-            for (let ww of this.props.wounds) {
-                locationDamages[ww.location] += ww.damage - ww.healed;
+            this._woundPenalties = {};
+
+            this._woundPenalties.bodyDamage = 0
+            this._woundPenalties.staminaDamage = 0
+
+            let locationDamages = {H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0};
+            for (const ww of this.props.wounds) {
+                const damage = ww.damage - ww.healed;
+                locationDamages[ww.location] += damage;
             }
 
-            var toughness = this.edgeLevel("Toughness");
+            // Cap body damage at threshold, rest is stamina damage.
+            for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+                const threshold = this.getDamageThreshold(loc)
+                if (locationDamages[loc] > threshold) {
+                    // Damage exceeding twice the threshold is ignored.
+                    const damage = Math.min(threshold,
+                        locationDamages[loc] - threshold);
+
+                    this._woundPenalties.staminaDamage += damage
+                    locationDamages[loc] = threshold
+                }
+                this._woundPenalties.bodyDamage += locationDamages[loc]
+            }
+
+            const toughness = this.edgeLevel("Toughness");
 
             for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
                 locationDamages[loc] = Math.max(0, locationDamages[loc] - toughness);
             }
 
-            this._woundPenalties = {};
-
-            this._woundPenalties.aa = -10 * locationDamages.H;
-            this._woundPenalties.aa += -5 * locationDamages.T;
+            const maxAAPenaltyPerLoc = {H: -120, T: -100, RA: -10, LA: -10, RL: -10, LL: -10}
+            this._woundPenalties.aa = Math.max(-10 * locationDamages.H, maxAAPenaltyPerLoc.H);
+            this._woundPenalties.aa += Math.max(-5 * locationDamages.T, maxAAPenaltyPerLoc.T);
             for (let loc of ["RA", "LA", "RL", "LL"]) {
                 this._woundPenalties.aa +=
-                    util.rounddown(locationDamages[loc] / 3) * -5;
+                    Math.max(util.rounddown(locationDamages[loc] / 3) * -5, maxAAPenaltyPerLoc[loc]);
             }
 
-            this._woundPenalties.mov = -10 * locationDamages.RL;
-            this._woundPenalties.mov += -10 * locationDamages.LL;
+            this._woundPenalties.mov = Math.max(-10 * locationDamages.RL, -75);
+            this._woundPenalties.mov += Math.max(-10 * locationDamages.LL, -75);
 
             this._woundPenalties.la_fit_ref = -10 * locationDamages.LA;
             this._woundPenalties.ra_fit_ref = -10 * locationDamages.RA;
+
         }
         return this._woundPenalties;
+    }
+
+    getCurrentBody() {
+        return this.getBaseStats().body - this.getWoundPenalties().bodyDamage
+    }
+
+    getStaminaDamage() {
+        return this.props.character.stamina_damage + this.getWoundPenalties().staminaDamage
+    }
+
+    getCurrentStamina() {
+        return this.getBaseStats().stamina - this.getStaminaDamage()
     }
 
     getEffStats() {

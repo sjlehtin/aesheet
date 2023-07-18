@@ -80,7 +80,7 @@ describe('SkillHandler stats', function() {
         var handler = factories.skillHandlerFactory({
             character: {cur_fit: 50},
             weightCarried: 26,
-            wounds: [{location: "H", damage: 6}]
+            wounds: [{location: "H", damage: 5}, {location: "T", damage: 2}]
         });
         expect(handler.getWoundPenalties().aa).toEqual(-60);
         expect(handler.getEffStats().fit).toEqual(-100);
