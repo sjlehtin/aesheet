@@ -16,9 +16,14 @@ sheet/tests/log.html
 sheet/tests/output.xml
 sheet/tests/report.html
 sheet/tests/selenium-screenshot-*.png
+src/aesheet.egg-info/
 npm-debug.log
 /upload
-
+build/
+dist/
+npmbuild/
+.env.*
+.python-version
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
