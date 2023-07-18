@@ -106,4 +106,47 @@ describe('MagazineControl', () => {
         await user.click(button)
         expect(spy).toHaveBeenCalledWith(mag)
     })
+
+    it ("can spend bullets", async () => {
+        const user = userEvent.setup()
+
+        const spy = jest.fn().mockResolvedValue()
+
+        const mag = factories.magazineFactory({
+            id: 2, capacity: 15, current: 3
+        });
+        const control = renderMagazineControl({
+            firearm: {
+                magazines: [
+                    mag,
+                ],
+            },
+            onChange: spy
+        })
+        const button = screen.getByRole("button", {name: "Shoot"})
+        await user.click(button)
+        expect(spy).toHaveBeenCalledWith({id: 2, capacity: 15, current: 2})
+    })
+
+    it ("can load magazines", async () => {
+        const user = userEvent.setup()
+
+        const spy = jest.fn().mockResolvedValue()
+
+        const mag = factories.magazineFactory({
+            id: 2, capacity: 15, current: 3
+        });
+        const control = renderMagazineControl({
+            firearm: {
+                magazines: [
+                    mag,
+                ],
+            },
+            onChange: spy
+        })
+        const button = screen.getByRole("button", {name: "Load"})
+        await user.click(button)
+        expect(spy).toHaveBeenCalledWith({id: 2, capacity: 15, current: 15})
+    })
+
 })

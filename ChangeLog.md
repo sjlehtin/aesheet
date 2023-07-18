@@ -1,8 +1,14 @@
-## Version 0.15.0 -- TBR
+## Version 0.15.0 -- 2023-07-18
 
 ### Added
 
 * Added breakdown for encumbrance of carried equipment.
+* Added damage thresholds to hit locations. Massive wounds exceeding threshold cause stamina damage.
+* Allow loading magazines.
+
+### Fixed
+
+* Penalties for wounds in a hit location are capped according to the rules.
 
 ## Version 0.14.0 -- 2023-07-16
 
