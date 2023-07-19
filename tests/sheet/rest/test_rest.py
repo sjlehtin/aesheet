@@ -1719,7 +1719,7 @@ class CharacterEdgeTestCase(TestCase):
         self.assertIsInstance(response.data[0]["edge"], dict)
 
     def test_adding_items(self):
-        edge = factories.EdgeLevelFactory(edge__name="Natural climber")
+        edge = factories.EdgeLevelFactory(edge__name="Natural climber", level=1)
 
         response = self.client.post(
                 self.url,
