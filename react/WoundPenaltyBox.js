@@ -25,7 +25,6 @@ class WoundPenaltyBox extends React.Component {
             excessPenalties[stat] = stats[stat] < -penalties.aa;
         }
 
-        console.log(excessPenalties)
         if (excessPenalties.fit) {
             penaltyCells.push(<span>Heart stopped (FIT below zero)<span style={noteStyle}>Body must be healed sufficiently to counter the penalty. Chance of severe permanent brain damage is 2% per minute.</span></span>);
         }
@@ -48,7 +47,7 @@ class WoundPenaltyBox extends React.Component {
         }
 
         if (penalties.aa !== 0) {
-            penaltyCells.push(<span>{penalties.aa} AA</span>);
+            penaltyCells.push(<span aria-label={"AA penalty"}>{penalties.aa} AA</span>);
         }
         if (penalties.mov !== 0) {
             penaltyCells.push(<span>{penalties.mov} MOV</span>);
@@ -73,7 +72,7 @@ class WoundPenaltyBox extends React.Component {
         if (penaltyCells.length > 0) {
             content = <div>
                 <div style={{fontWeight: "bold"}}>From wounds</div>
-                <div style={{color: "red"}}>
+                <div style={{color: "red"}} aria-label={"AA penalty effects"}>
                     {penaltyCells.map((el, idx) => {
                         return <div key={"pen-" + idx}>{el}</div>
                     })}
