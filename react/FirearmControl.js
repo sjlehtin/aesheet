@@ -28,6 +28,7 @@ class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
 
+        this.state = {useType: this.props.weapon.use_type }
         // XXX move to class statics
         this.readiedBaseI = -1;
         this.baseCheckBonusForSlowActions = 10;
@@ -343,7 +344,7 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         const checks = this.skillChecksV2(this.mapBurstActions(actions),
-            {useType: this.props.weapon.use_type, counterPenalty: false});
+            {useType: this.state.useType, counterPenalty: false});
         if (checks === null) {
             // no actions available.
             return actions.map((el) => {return [];});
@@ -595,6 +596,7 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     async handleUseTypeChange(useType) {
+        this.setState({useType: useType})
         if (this.props.onChange) {
             await this.props.onChange({id: this.props.weapon.id,
                 use_type: useType});
@@ -659,7 +661,7 @@ class FirearmControl extends RangedWeaponRow {
                 style={baseCheckStyle}/></span></div>
         }
 
-        let skillChecks = this.skillChecksV2(actions, {useType: this.props.weapon.use_type});
+        let skillChecks = this.skillChecksV2(actions, {useType: this.state.useType});
         if (skillChecks == null) {
             skillChecks = <td colSpan={9}><strong>Range too long!</strong></td>;
         } else {
@@ -729,7 +731,7 @@ class FirearmControl extends RangedWeaponRow {
             rangeInfo = <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
         }
 
-        const rof = this.rof(this.props.weapon.use_type)
+        const rof = this.rof(this.state.useType)
 
         const backgroundStyle = {
             scale: "800%",
@@ -742,8 +744,8 @@ class FirearmControl extends RangedWeaponRow {
             zIndex: 0 };
 
         const rootStyle = Object.assign({}, this.props.style, {position: "relative"});
-        const backgroundText = this.props.weapon.use_type !== WeaponRow.FULL ?
-            <div style={backgroundStyle}>{this.props.weapon.use_type}</div> : "";
+        const backgroundText = this.state.useType !== WeaponRow.FULL ?
+            <div style={backgroundStyle}>{this.state.useType}</div> : "";
 
         return <div
             aria-label={`Firearm ${this.props.weapon.base.name}`}
@@ -847,7 +849,7 @@ class FirearmControl extends RangedWeaponRow {
                                                 onChange={async (value) => await this.handleScopeChanged(value)}
                                             />
                                             <UseTypeControl
-                                                useType={this.props.weapon.use_type}
+                                                useType={this.state.useType}
                                                 onChange={async (value) => await this.handleUseTypeChange(value)}
                                             />
                                         </td>
@@ -896,7 +898,7 @@ class FirearmControl extends RangedWeaponRow {
                                     style={labelStyle}>Weight:</label>{parseFloat(weapon.weight).toFixed(2)} kg</span>
                                 <span style={marginRightStyle}><label
                                     style={labelStyle}>Use type:</label><span
-                                    aria-label={"Use type"}>{this.props.weapon.use_type}</span></span>
+                                    aria-label={"Use type"}>{this.state.useType}</span></span>
                             </div>
 
 

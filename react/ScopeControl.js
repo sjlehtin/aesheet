@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import DropdownList from 'react-widgets/DropdownList'
+import Loading from 'Loading'
 
 const rest = require('./sheet-rest');
 
@@ -37,9 +38,14 @@ class ScopeControl extends React.Component {
     }
 
     render() {
-        return <DropdownList value={this.props.scope}
+        let loading = ""
+        if (this.state.loading) {
+            loading = <Loading>Scope selection</Loading>
+        }
+        return <div>
+            {loading}
+        <DropdownList value={this.props.scope}
                              busy={this.state.busy}
-                             aria-busy={true || this.state.busy}
                              textField={(obj) => {
                                  return obj ? obj.name : "";
                              }}
@@ -48,8 +54,8 @@ class ScopeControl extends React.Component {
                              placeholder={"Add a scope"}
                              aria-label={"Scope selection"}
                              data={this.state.scopeChoices}
-
         />
+        </div>
     }
 }
 

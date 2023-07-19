@@ -11,14 +11,14 @@ class UseTypeControl extends React.Component {
 
         this.state = {
             busy: false,
+            useType: this.props.useType ?? WeaponRow.FULL
         };
     }
 
     async handleChange(useType) {
-
-        this.setState({busy: true});
+        this.setState({useType: useType, busy: true})
         await this.props.onChange(useType)
-        this.setState({busy: false});
+        this.setState({busy: false})
     }
 
     render () {
@@ -27,7 +27,7 @@ class UseTypeControl extends React.Component {
             {value: WeaponRow.SEC, name: "Secondary"}
         ];
         return <DropdownList busy={this.state.busy}
-                             defaultValue={this.props.useType ?? WeaponRow.FULL}
+                             value={this.state.useType}
                              textField={"name"}
                              dataKey={"value"}
                             onChange={async (obj) => await this.handleChange(obj.value)}
