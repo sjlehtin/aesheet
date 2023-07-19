@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import SkillHandler from "SkillHandler";
 
 class WoundPenaltyBox extends React.Component {
     constructor(props) {
@@ -19,26 +20,41 @@ class WoundPenaltyBox extends React.Component {
             color: "gray"
         };
 
-        if (-penalties.aa > stats.fit) {
-            penaltyCells.push(<span>Heart stopped <span style={noteStyle}>Body must be healed sufficiently to counter the penalty. Chance of severe permanent brain damage is 2% per minute.</span></span>);
+        const excessPenalties = {}
+        for (const stat of SkillHandler.baseStatNames) {
+            excessPenalties[stat] = stats[stat] < -penalties.aa;
         }
 
-        if (-penalties.aa > stats.ref || -penalties.aa > stats.wil) {
-            penaltyCells.push(<span>Paralyzed/Unconscious</span>);
+        console.log(excessPenalties)
+        if (excessPenalties.fit) {
+            penaltyCells.push(<span>Heart stopped (FIT below zero)<span style={noteStyle}>Body must be healed sufficiently to counter the penalty. Chance of severe permanent brain damage is 2% per minute.</span></span>);
         }
 
-        if (-penalties.aa > stats.int || -penalties.aa > stats.lrn || -penalties.aa > stats.psy) {
-            penaltyCells.push(<span>Shocked <span style={noteStyle}>Shocked PCs may continue combat, if they succeed in their WIL check (due to lethal wound) not counting shock modifiers.</span></span>);
+        if (excessPenalties.ref) {
+            penaltyCells.push(<span>Paralyzed (REF below zero)</span>);
+        }
+        if (excessPenalties.wil) {
+            penaltyCells.push(<span>Unconscious (WIL below zero)</span>);
         }
 
-        if (penalties.aa != 0) {
+        let shockedExceeds = []
+        for (const stat of ["int", "lrn", "psy"]) {
+            if (excessPenalties[stat]) {
+                shockedExceeds.push(stat.toUpperCase())
+            }
+        }
+        if (shockedExceeds.length > 0) {
+            penaltyCells.push(<span>Shocked ({`${shockedExceeds.join(',')}`} below zero)<span style={noteStyle}>Shocked PCs may continue combat, if they succeed in their WIL check (due to lethal wound) not counting shock modifiers.</span></span>);
+        }
+
+        if (penalties.aa !== 0) {
             penaltyCells.push(<span>{penalties.aa} AA</span>);
         }
-        if (penalties.mov != 0) {
+        if (penalties.mov !== 0) {
             penaltyCells.push(<span>{penalties.mov} MOV</span>);
         }
 
-        if (penalties.ra_fit_ref != 0) {
+        if (penalties.ra_fit_ref !== 0) {
             var newVar = {fontSize: "small", marginLeft: "1em"};
             penaltyCells.push(<span>RA {penalties.ra_fit_ref} FIT/REF<span
                 style={noteStyle}>
@@ -46,7 +62,7 @@ class WoundPenaltyBox extends React.Component {
             </span></span>);
         }
 
-        if (penalties.la_fit_ref != 0) {
+        if (penalties.la_fit_ref !== 0) {
             penaltyCells.push(<span>LA {penalties.la_fit_ref} FIT/REF<span
                 style={noteStyle}>
                 (effect not applied to checks)

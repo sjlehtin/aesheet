@@ -11,7 +11,6 @@ const WoundPenaltyBox = require('WoundPenaltyBox').default;
 var factories = require('./factories');
 
 describe('WoundPenaltyBox', function() {
-    "use strict";
 
     var getWoundPenaltyBoxTree = function (givenProps) {
         var props = {handler: factories.skillHandlerFactory(givenProps)};
@@ -42,7 +41,7 @@ describe('WoundPenaltyBox', function() {
                 cur_psy: 50, cur_wil: 50, cur_cha: 50, cur_pos: 50
             },
             wounds: [{damage: 3, location: "H"}, {damage: 2, location: "T"}]})).toContain(
-                "Heart stopped");
+                "Heart stopped (FIT below zero)");
     });
 
     it("indicates a paralyzed effect due to ref", function () {
@@ -51,16 +50,16 @@ describe('WoundPenaltyBox', function() {
                 cur_psy: 50, cur_wil: 50, cur_cha: 50, cur_pos: 50
             },
             wounds: [{damage: 4, location: "H"}]})).toContain(
-                "Paralyzed");
+                "Paralyzed (REF below zero)");
     });
 
-    it("indicates a paralyzed effect due to wil", function () {
+    it("indicates an unconscious effect due to wil", function () {
         expect(getTextContent({
             character: {cur_fit: 50, cur_ref: 50, cur_lrn: 50, cur_int: 50,
                 cur_psy: 50, cur_wil: 30, cur_cha: 50, cur_pos: 50
             },
             wounds: [{damage: 4, location: "H"}]})).toContain(
-                "Paralyzed");
+                "Unconscious (WIL below zero)");
     });
 
     it("indicates a shocked effect due to int", function () {
@@ -69,7 +68,7 @@ describe('WoundPenaltyBox', function() {
                 cur_psy: 50, cur_wil: 50, cur_cha: 50, cur_pos: 50
             },
             wounds: [{damage: 4, location: "H"}]})).toContain(
-                "Shocked");
+                "Shocked (INT below zero)");
     });
 
     it("indicates a shocked effect due to lrn", function () {
@@ -78,7 +77,7 @@ describe('WoundPenaltyBox', function() {
                 cur_psy: 50, cur_wil: 50, cur_cha: 50, cur_pos: 50
             },
             wounds: [{damage: 4, location: "H"}]})).toContain(
-                "Shocked");
+                "Shocked (LRN below zero)");
     });
 
     it("indicates a shocked effect due to psy", function () {
@@ -87,7 +86,7 @@ describe('WoundPenaltyBox', function() {
                 cur_psy: 30, cur_wil: 50, cur_cha: 50, cur_pos: 50
             },
             wounds: [{damage: 4, location: "H"}]})).toContain(
-                "Shocked");
+                "Shocked (PSY below zero)");
     });
 
 });

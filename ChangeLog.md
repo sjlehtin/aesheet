@@ -1,3 +1,9 @@
+## Version 0.16.0 -- TBR
+
+### Changed
+
+* Tweaked wound penalty indications to show explicitly the stats that are negative due to excess AA penalties.
+
 ## Version 0.15.1 -- 2023-07-18
 
 ### Fixed
