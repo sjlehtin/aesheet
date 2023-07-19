@@ -40,10 +40,15 @@ class CharacterEdgeTestCase(TestCase):
             id=self.sheet.character.id).edges.all()[0].edge.name,
                          "Natural climber")
 
+        entries = models.CharacterLogEntry.objects.all()
+        assert len(entries) == 1
+        assert "Added edge Natural climber 1" in str(entries[0])
+
     def test_patch(self):
         character_edge = factories.CharacterEdgeFactory(
             character=self.sheet.character,
-            edge__edge__name="Short winded")
+            edge__edge__name="Short winded",
+            edge__level=1)
         item_id = character_edge.id
         assert not character_edge.ignore_cost
 
@@ -75,12 +80,19 @@ class CharacterEdgeTestCase(TestCase):
             id=ce_id)
         assert character_edge.edge.id == edge_id
 
+
     def test_deleting_items(self):
         char_edge = factories.CharacterEdgeFactory(
-            character=self.sheet.character)
+            character=self.sheet.character,
+            edge__edge__name="Natural climber",
+            edge__level=1)
 
         response = self.client.delete(
                 "{}{}/".format(self.url, char_edge.pk), format='json')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(models.CharacterEdge.objects.count(), 0,
                          "The row should get deleted")
+
+        entries = models.CharacterLogEntry.objects.all()
+        assert len(entries) == 1
+        assert "Removed edge Natural climber 1" in str(entries[0])

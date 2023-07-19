@@ -276,6 +276,18 @@ class Character(PrivateMixin, models.Model):
         entry.removed = removed
         entry.save()
 
+    def add_edge_log_entry(
+        self, edge, request=None, amount=0, removed=False
+    ):
+        entry = CharacterLogEntry()
+        entry.character = self
+        entry.user = request.user if request else None
+        entry.entry_type = entry.EDGE
+        entry.edge = edge
+        entry.amount = amount
+        entry.removed = removed
+        entry.save()
+
     def add_log_entry(self, entry_text, request=None):
         entry = CharacterLogEntry()
         entry.character = self
@@ -1641,6 +1653,7 @@ class CharacterLogEntry(models.Model):
     edge = models.ForeignKey(
         EdgeLevel, blank=True, null=True, on_delete=models.SET_NULL
     )
+    # TODO: level is included in the EdgeLevel model
     edge_level = models.IntegerField(default=0)
 
     removed = models.BooleanField(
@@ -1675,12 +1688,13 @@ class CharacterLogEntry(models.Model):
                 )
             else:
                 return "Added skill %s %d." % (self.skill, self.skill_level)
+        elif self.entry_type == self.EDGE:
+            if self.removed:
+                return f"Removed edge {self.edge}"
+            else:
+                return f"Added edge {self.edge}"
         elif self.entry_type == self.NON_FIELD:
             return self.entry
-
-    # TODO: Remove after python 2.7 support no longer needed.
-    def __unicode__(self):
-        return self.__str__()
 
     def access_allowed(self, user):
         return self.character.access_allowed(user)

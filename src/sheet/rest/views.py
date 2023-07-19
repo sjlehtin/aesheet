@@ -644,9 +644,21 @@ class CharacterEdgeViewSet(ListPermissionMixin, viewsets.ModelViewSet):
         return serializer
 
     def perform_create(self, serializer):
-        serializer.validated_data['character'] = self.character
-        super(CharacterEdgeViewSet, self).perform_create(
-            serializer)
+        with transaction.atomic():
+            self.character.add_edge_log_entry(
+                serializer.validated_data["edge"],
+                request=self.request,
+            )
+
+            serializer.validated_data["character"] = self.character
+            super(CharacterEdgeViewSet, self).perform_create(serializer)
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            self.character.add_edge_log_entry(
+                instance.edge, request=self.request, removed=True
+            )
+            super(CharacterEdgeViewSet, self).perform_destroy(instance)
 
 
 class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
@@ -716,6 +728,7 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                                            'location']),
                          serializer.validated_data['damage']),
                 request=self.request)
+
             serializer.validated_data['character'] = self.character
             super(WoundViewSet, self).perform_create(serializer)
 

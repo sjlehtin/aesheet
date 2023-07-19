@@ -1,5 +1,9 @@
 ## Version 0.16.0 -- TBR
 
+### Added
+
+* Adding and removing edges will generate character log entries.
+
 ### Changed
 
 * Tweaked wound penalty indications to show explicitly the stats that are negative due to excess AA penalties.
