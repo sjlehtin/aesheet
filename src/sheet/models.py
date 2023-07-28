@@ -277,14 +277,13 @@ class Character(PrivateMixin, models.Model):
         entry.save()
 
     def add_edge_log_entry(
-        self, edge, request=None, amount=0, removed=False
+        self, edge, request=None, removed=False
     ):
         entry = CharacterLogEntry()
         entry.character = self
         entry.user = request.user if request else None
         entry.entry_type = entry.EDGE
         entry.edge = edge
-        entry.amount = amount
         entry.removed = removed
         entry.save()
 
@@ -1563,8 +1562,6 @@ class Sheet(PrivateMixin, models.Model):
 
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
-    (SPECIAL, FULL, PRI, SEC) = (0, 1, 2, 3)
-
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
@@ -1579,10 +1576,6 @@ class Sheet(PrivateMixin, models.Model):
             name=self.character.name,
             descr=(": %s" % self.description) if self.description else "",
         )
-
-    # TODO: Remove after python 2.7 support no longer needed.
-    def __unicode__(self):
-        return self.__str__()
 
     class Meta:
         ordering = ("character__name",)
