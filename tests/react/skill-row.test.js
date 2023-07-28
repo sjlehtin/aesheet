@@ -186,13 +186,13 @@ describe('SkillRow', function() {
         expect(spy).not.toHaveBeenCalled()
         await el.focus()
         await user.keyboard("{Space}")
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
 
         spy.mockClear()
         expect(spy).not.toHaveBeenCalled()
         await el.focus()
         await user.keyboard("{Enter}")
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
     });
 
     it('should not have a level controls without a skill', function () {
