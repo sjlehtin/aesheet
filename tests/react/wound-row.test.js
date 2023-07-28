@@ -1,140 +1,129 @@
-jest.dontMock('WoundRow');
-jest.dontMock('sheet-util');
-jest.dontMock('./testutils');
-jest.dontMock('./factories');
-
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
-const TableWrapper = require('./testutils').TableWrapper;
-const WoundRow = require('WoundRow').default;
+import { render, screen, within, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
-var factories = require('./factories');
+import WoundRow from 'WoundRow'
+
+const factories = require('./factories');
 
 describe('WoundRow', function() {
-    "use strict";
 
-    var getWoundRowTree = function (givenProps) {
-        var props = givenProps;
-        if (!props) {
-            props = {};
-        }
-        props.wound = factories.woundFactory(props.wound);
-        return TestUtils.renderIntoDocument(
-            <TableWrapper>
-                <WoundRow {...props} />
-            </TableWrapper>
-        );
-    };
+    it("allows wounds to be removed", async () => {
+        const user = userEvent.setup()
 
-    it("allows wounds to be removed", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getWoundRowTree({
-            wound: {id: 2},
-            onRemove: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
+        const spy = jest.fn().mockResolvedValue({})
+        render(<table><tbody><WoundRow wound={factories.woundFactory({id: 2})} onRemove={spy} /></tbody></table>)
 
-        TestUtils.Simulate.click(woundRow._removeButton);
+        await user.click(screen.getByRole("button", {name: "Heal"}))
 
-        expect(callback).toHaveBeenCalledWith({id:2});
+        expect(spy).toHaveBeenCalledWith({id: 2})
     });
 
-    it("allows wounds to be healed", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getWoundRowTree({
-            wound: {damage: 5, location: "H", healed: 0,
-                    id: 2, effect: "Throat punctured."},
-            onMod: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
+    it("allows wounds to be healed", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(woundRow._healButton);
+        const spy = jest.fn().mockResolvedValue({})
+        render(<table>
+            <tbody><WoundRow wound={factories.woundFactory(
+                {
+                    damage: 5,
+                    location: "H",
+                    healed: 0,
+                    id: 2,
+                    effect: "Throat punctured."
+                })} onMod={spy}/></tbody>
+        </table>)
 
-        expect(callback).toHaveBeenCalledWith({id:2, healed: 1});
+        await user.click(screen.getByRole("button", {name: "Decrease damage"}))
+
+        expect(spy).toHaveBeenCalledWith({id: 2, healed: 1})
     });
 
-    it("allows wounds to be worsened", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getWoundRowTree({
-            wound: {damage: 5, location: "H", healed: 0,
-                    id: 2, effect: "Throat punctured."},
-            onMod: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
+    it("allows wounds to be worsened", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(woundRow._worsenButton);
+        const spy = jest.fn().mockResolvedValue({})
+        render(<table>
+            <tbody><WoundRow wound={factories.woundFactory(
+                {
+                    damage: 5,
+                    location: "H",
+                    healed: 0,
+                    id: 2,
+                    effect: "Throat punctured."
+                })} onMod={spy}/></tbody>
+        </table>)
 
-        expect(callback).toHaveBeenCalledWith({id:2, damage: 6});
+        await user.click(screen.getByRole("button", {name: "Increase damage"}))
+
+        expect(spy).toHaveBeenCalledWith({id: 2, damage: 6})
     });
 
     it("does not show heal button if fully healed", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getWoundRowTree({
-            wound: {damage: 5, location: "H", healed: 5,
-                    id: 2, effect: "Throat punctured."},
-            onMod: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
-
-        expect(woundRow._healButton).not.toBeDefined();
+        render(<table>
+            <tbody><WoundRow wound={factories.woundFactory(
+                {
+                    damage: 5,
+                    location: "H",
+                    healed: 5,
+                    id: 2,
+                    effect: "Throat punctured."
+                })} /></tbody>
+        </table>)
+        expect(screen.queryByRole("button", {name: "Decrease damage"})).not.toBeInTheDocument()
     });
 
-    it("allows wound effects to be changed", function (done) {
-        var resolve = Promise.resolve({});
-        var callback = jasmine.createSpy("callback").and.returnValue(resolve);
-        var tree = getWoundRowTree({
-            wound: {damage: 5, location: "H", healed: 0,
-                    id: 2, effect: "Throat punctured."},
-            onMod: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
+    it("allows wound effects to be changed", async () => {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(woundRow._effectField);
+        const spy = jest.fn().mockResolvedValue({})
+        render(<table>
+            <tbody><WoundRow wound={factories.woundFactory(
+                {
+                    damage: 5,
+                    location: "H",
+                    healed: 0,
+                    id: 2,
+                    effect: "Throat punctured."
+                })} onMod={spy}/></tbody>
+        </table>)
 
-        TestUtils.Simulate.change(woundRow._effectInputField,
-            {target: {value: "Fuzzbazz"}});
+        await user.click(screen.getByLabelText("Wound effect"))
 
-        TestUtils.Simulate.keyDown(woundRow._effectInputField,
-                {key: "Enter", keyCode: 13, which: 13});
+        const input = screen.getByRole("textbox", {name: "Wound effect"});
+        await user.click(input)
+        await user.clear(input)
+        await user.type(input,"FuzzBazz[Enter]")
 
-        expect(callback).toHaveBeenCalledWith({
-            id: 2,
-            effect: "Fuzzbazz"
-        });
-        resolve.then(function () {
-            expect(woundRow.state.editingEffect).toEqual(false);
-            done();
-        }).catch((err) => {console.log(err)});
+        expect(spy).toHaveBeenCalledWith({id: 2, effect: "FuzzBazz"})
     });
 
-    it("allows wound effect changing to be canceled", function () {
-        var resolve = Promise.resolve({});
-        var callback = jasmine.createSpy("callback").and.returnValue(resolve);
-        var tree = getWoundRowTree({
-            wound: {
-                damage: 5, location: "H", healed: 0,
-                id: 2, effect: "Throat punctured."
-            },
-            onMod: callback
-        });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
+    it("allows wound effect changing to be canceled", async ()=> {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.click(woundRow._effectField);
+        const spy = jest.fn().mockResolvedValue({})
+        render(<table>
+            <tbody><WoundRow wound={factories.woundFactory(
+                {
+                    damage: 5,
+                    location: "H",
+                    healed: 0,
+                    id: 2,
+                    effect: "Throat punctured."
+                })} onMod={spy}/></tbody>
+        </table>)
 
-        TestUtils.Simulate.change(woundRow._effectInputField,
-            {target: {value: "Fuzzbazz"}});
+        await user.click(screen.getByLabelText("Wound effect"))
 
-        TestUtils.Simulate.keyDown(woundRow._effectInputField,
-            {key: "Esc", keyCode: 27, which: 27});
+        const input = screen.getByRole("textbox", {name: "Wound effect"});
+        await user.click(input)
+        await user.clear(input)
+        await user.type(input,"FuzzBazz[Escape]")
 
-        expect(woundRow.state.editingEffect).toEqual(false);
-        expect(woundRow.state.effect).toEqual("Throat punctured.");
+        expect(spy).not.toHaveBeenCalled()
+        expect(screen.queryByRole("textbox", {name: "Wound effect"})).not.toBeInTheDocument()
+        expect(screen.queryByDisplayValue("FuzzBazz")).not.toBeInTheDocument()
+        expect(screen.getByText(/Throat punctured/)).toBeInTheDocument()
     });
 });

@@ -3,11 +3,10 @@ import TestUtils from 'react-dom/test-utils';
 
 import DamageControl from 'DamageControl';
 const WoundRow = require('WoundRow').default;
-import AddWoundControl from 'AddWoundControl';
 
 const factories = require('./factories');
 
-import {fireEvent, render, screen} from '@testing-library/react'
+import {fireEvent, render, screen, waitFor, within} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
@@ -160,20 +159,23 @@ describe('DamageControl', function() {
         await screen.findByText("Heart racing.")
     });
 
-    it("allows wounds to be added", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getDamageControlTree({onWoundAdd: callback});
-        var addWoundControl = TestUtils.findRenderedComponentWithType(tree,
-            AddWoundControl);
+    it("allows wounds to be added", async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderDamageControl({
+            onWoundAdd: spy
+            })
 
-        TestUtils.Simulate.change(addWoundControl._damageInputField,
-            {target: {value: 5}});
-        addWoundControl.handleEffectChange("Fuzznozzle");
+        const damageInput = screen.getByRole("textbox", {name: "Damage"})
+        await user.clear(damageInput)
+        await user.type(damageInput, "5")
+        const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox")
+        await user.clear(effectInput)
+        await user.type(effectInput, "Fuzznozzle")
 
-        TestUtils.Simulate.click(addWoundControl._addButton);
+        await user.click(screen.getByRole("button", {name: "Add wound"}))
 
-        expect(callback).toHaveBeenCalledWith({location: "T",
-            damage_type: "S", damage: 5, effect: 'Fuzznozzle'});
+        expect(spy).toHaveBeenCalledWith({location: "T", damage_type: "S", damage: "5", effect: "Fuzznozzle"});
     });
 
     it("allows wounds to be removed", function () {
@@ -191,18 +193,15 @@ describe('DamageControl', function() {
 
     });
 
-    it("allows wounds to be modified", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getDamageControlTree({
+    it("allows wounds to be modified", async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderDamageControl({
             wounds: [{damage: 5, location: "H", healed: 0,
                       id: 2, effect: "Throat punctured."}],
-            onWoundMod: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
-
-        TestUtils.Simulate.click(woundRow._healButton);
-
-        expect(callback).toHaveBeenCalledWith({id:2, healed: 1});
+            onWoundMod: spy
+            })
+        await user.click(screen.getByRole("button", {name: "Decrease damage"}))
+        expect(spy).toHaveBeenCalledWith({id:2, healed: 1});
     });
 });

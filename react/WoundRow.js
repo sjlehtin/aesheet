@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import {GoArrowUp, GoArrowDown} from 'react-icons/go'
 import {Button, FormControl} from 'react-bootstrap';
+import {IncreaseButton, DecreaseButton} from "ModificationButton";
 
 const util = require('./sheet-util');
 const rest = require('./sheet-rest');
@@ -50,11 +51,11 @@ class WoundRow extends React.Component {
     }
 
     handleKeyDown(e) {
-        if (e.keyCode === 13) {
+        if (e.code === "Enter") {
             /* Enter. */
             this.props.onMod({id: this.props.wound.id, effect: this.state.effect})
                 .then(() => this.setState({editingEffect: false}));
-        } else if (e.keyCode === 27) {
+        } else if (e.code === "Escape") {
             /* Escape. */
             this.cancelEdit();
         }
@@ -62,30 +63,18 @@ class WoundRow extends React.Component {
 
     render() {
 
-        var worsenButton, decreaseButton = '';
-
-        worsenButton = <span style={{color: "red", position: "absolute", left: 10, bottom: 1, cursor: "pointer"}}
-                               ref={(c) => this._worsenButton = c}
-                               onClick={() => this.handleWorsen()}>
-            <GoArrowUp /></span>;
+        const worsenButton = <IncreaseButton style={{color: "red"}} onClick={() => this.handleWorsen()} name={"Increase damage"} />
+        let decreaseButton = '';
 
         if (this.props.wound.healed < this.props.wound.damage) {
-            decreaseButton = <span style={{
-                color: "green",
-                position: "absolute",
-                left: 22,
-                bottom: -3,
-                cursor: "pointer"
-            }}
-                                   ref={(c) => this._healButton = c}
-                                   onClick={() => this.handleHeal()}>
-            <GoArrowDown /></span>;
+            decreaseButton = <DecreaseButton style={{color: "green"}} onClick={() => this.handleHeal()} name={"Decrease damage"} />;
         }
 
         var effectField = this.props.wound.effect;
         if (this.state.editingEffect) {
             effectField = <FormControl ref={(c) => {if (c) {this._effectInputField = ReactDOM.findDOMNode(c); this._effectInputField.focus(); }}}
                                  type="text"
+                                       aria-label={"Wound effect"}
                                  onChange={(value) => this.handleEffectChanged(value)}
                                  onKeyDown={(e) => this.handleKeyDown(e)}
                                  onClick={(c) => c.stopPropagation()}
@@ -94,11 +83,11 @@ class WoundRow extends React.Component {
         return <tr style={this.props.style}>
             <td>{this.props.wound.location}</td>
             <td>{this.props.wound.damage_type}</td>
-            <td>{this.props.wound.damage - this.props.wound.healed}
+            <td aria-label={"Current wound damage"}>{this.props.wound.damage - this.props.wound.healed}
             <span style={{position: "relative"}}>{worsenButton}{decreaseButton}</span></td>
-            <td onClick={() => this.handleEffectFieldClicked()} ref={(c) => this._effectField = c}>
+            <td aria-label={"Wound effect"} onClick={() => this.handleEffectFieldClicked()} ref={(c) => this._effectField = c}>
                 {effectField}</td>
-            <td style={{widht: "3em"}}>
+            <td style={{width: "3em"}}>
                 <Button size="sm"
                         ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleRemove()}>Heal</Button>
