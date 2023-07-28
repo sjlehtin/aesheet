@@ -2,7 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import SkillCheck from 'SkillCheck'
-import {GoArrowUp, GoArrowDown, GoX} from 'react-icons/go'
+import {GoX} from 'react-icons/go'
+import {IncreaseButton, DecreaseButton} from 'ModificationButton'
 
 /*
  * This component handles display of a skill, level, checks.  If the
@@ -117,38 +118,14 @@ class SkillRow extends React.Component {
 
         var increaseButton, decreaseButton;
         if (this.canIncrease()) {
-            increaseButton = <span style={{color: "green", position: "absolute", left: 10, bottom: 1, cursor: "pointer"}} ref={(c) => this._increaseButton = c}
-                                   role={"button"}
-                                   aria-label={"Increase skill level"}
-                                   tabIndex={0}
-                                  onKeyDown={(e) => {
-                                      if (e.key === "Space") {
-                                        this.handleIncrease()
-                                      } else if (e.key === "Enter") {
-                                        this.handleIncrease()
-                                      }
-                                  }}
-
-                                         onClick={() => this.handleIncrease()}
-
-            ><GoArrowUp /></span>;
+            increaseButton = <IncreaseButton name={"Increase skill level"}
+                                             onClick={() => this.handleIncrease()}/>;
         } else {
             increaseButton = '';
         }
         if (this.canDecrease()) {
-            decreaseButton = <span style={{color: "red", position: "absolute", left: 22, bottom: -3, cursor: "pointer"}} ref={(c) => this._decreaseButton = c}
-                                   role={"button"}
-                                   aria-label={"Decrease skill level"}
-                                   tabIndex={0}
-                                  onKeyDown={(e) => {
-                                      if (e.key === "Space") {
-                                        this.handleIncrease()
-                                      } else if (e.key === "Enter") {
-                                        this.handleIncrease()
-                                      }
-                                  }}
-                                         onClick={() => this.handleDecrease()}
-            ><GoArrowDown /></span>;
+            decreaseButton = <DecreaseButton name={"Decrease skill level"}
+                                             onClick={() => this.handleDecrease()}/>;
         } else {
             decreaseButton = '';
         }
