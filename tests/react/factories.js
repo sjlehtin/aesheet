@@ -951,7 +951,6 @@ var statBlockTreeFactory = function (overrides) {
 };
 
 var statBlockFactory = function (overrides) {
-    "use strict";
     var table = statBlockTreeFactory(overrides);
     var statBlock = TestUtils.findRenderedComponentWithType(table,
         StatBlock);
