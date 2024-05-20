@@ -12,6 +12,8 @@ describe('SkillTable', function() {
             stat: "WIL", skill_cost_0: 0}),
         factories.skillFactory({name: "Balance",
             stat: "MOV", skill_cost_0: 0}),
+        factories.skillFactory({name: "Find information",
+            stat: "LRN", skill_cost_0: 0}),
         factories.skillFactory({name: "Stealth"}),
         factories.skillFactory({name: "Concealment"}),
         factories.skillFactory({name: "Search",
@@ -48,11 +50,15 @@ describe('SkillTable', function() {
 
     it("starts with a good set of physical skills", function () {
         const table = render(getSkillTable({
-            character: {cur_int: 50}
+            character: {cur_int: 50, cur_lrn: 50}
         }));
         const searchRow = within(screen.getByText(/Search/).closest('tr'));
         expect(searchRow.getByLabelText("Skill check").textContent).toEqual("50")
         expect(searchRow.getByLabelText("Skill level").textContent).toEqual("0")
+
+        const infoRow = within(screen.getByText(/Find information/).closest('tr'));
+        expect(infoRow.getByLabelText("Skill check").textContent).toEqual("50")
+        expect(infoRow.getByLabelText("Skill level").textContent).toEqual("0")
     });
 
     it("does render all skills", function () {

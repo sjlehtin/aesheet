@@ -255,16 +255,51 @@ SkillTable.propTypes = {
     onCharacterSkillModify: PropTypes.func,
 };
 
-SkillTable.prefilledPhysicalSkills = ["Endurance / run",
+/*
+ * 2024 Update:
+ *
+ * SAVES / ALL (<AB>)
+ *
+ * Acquire asset (POS)                                             0/2/2/3
+ * Balance (MOV)                                                   0/2/2/3
+ * Dodge (REF)                                                     0/2/2/3
+ * Endurance / Run (FIT)                                           0/2/2/3
+ * Find information (LRN)                                          0/2/2/3
+ * Mental fortitude (WIL)                                          0/2/2/3
+ * Negotiate / Persuade (CHA)                                      0/2/2/3
+ * Physical fortitude (IMM)                                        0/2/2/3
+ * Search / Observe (INT)                                          0/2/2/3
+ * Sneak / Stealth (DEX)                                           0/2/2/3
+ * Surprise / Tail / Shadow (PSY)                                  0/2/2/3
+ *
+ * PHYSICAL (½ <AB>)
+ * Basic movement modes  (½ <AB>)
+ * Climb (MOV)                                                     1/1/2/3
+ * Hide / Conceal (INT)                                            1/1/2/3
+ * Jump (FIT)                                                      1/1/2/3
+ * Swim (FIT)                                                      1/1/2/3
+ */
+
+SkillTable.prefilledPhysicalSkills =
+    [
+    "Acquire asset",
     "Balance",
-    "Stealth",
-    "Concealment",
+    "Dodge",
+    "Endurance / run",
+    "Find information",
+    "Mental fortitude",
+    "Persuasion",
+    "Physical fortitude",
     "Search",
+    "Stealth",
+    "Tailing / Shadowing",
     "Climbing",
-    "Swimming",
+    "Concealment",
     "Jump",
+    "Swimming",
     "Sleight of hand"
 ];
+
 SkillTable.prefilledPhysicalSkillsMap = util.toObject(
     SkillTable.prefilledPhysicalSkills);
 
