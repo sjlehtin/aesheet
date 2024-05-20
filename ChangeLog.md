@@ -1,4 +1,4 @@
-## Version 0.16.0 -- TBR
+## Version 0.16.0 -- 2024-05-21
 
 ### Added
 
@@ -7,6 +7,7 @@
 ### Changed
 
 * Tweaked wound penalty indications to show explicitly the stats that are negative due to excess AA penalties.
+* Changed default skill layout according to JW's 2024 update.
 
 ## Version 0.15.1 -- 2023-07-18
 
