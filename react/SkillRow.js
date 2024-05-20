@@ -108,7 +108,7 @@ class SkillRow extends React.Component {
         var remove;
         if (this.props.skillHandler.hasSkill(this.props.skillName) &&
             this.props.onCharacterSkillRemove) {
-            remove = <span style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
+            remove = <span aria-label={"Remove skill"} style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
                     onClick={(e) => {this.props.onCharacterSkillRemove(
                       this.props.characterSkill)}}
                     ><GoX /></span>;
@@ -139,10 +139,10 @@ class SkillRow extends React.Component {
                 cs._missingRequired.join(", ")}`;
             skillStyle.color = 'red';
         }
-        return <tr style={skillStyle} title={missing}>
+        return <tr style={skillStyle} title={missing} aria-label={"Skill"}>
             <td><span style={Object.assign(skillStyle, {paddingLeft: indent})}>{
               this.props.skillName}</span><span style={{position: "relative"}}>{remove}</span></td>
-            <td><span>{this.skillLevel()}</span><span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
+            <td><span aria-label={"Skill level"}>{this.skillLevel()}</span><span style={{position: "relative"}}>{increaseButton}{decreaseButton}</span></td>
             <td>{this.props.skillPoints ? this.props.skillPoints : ""}</td>
             <td className="skill-check">{checks}</td></tr>;
     }

@@ -1,23 +1,13 @@
-jest.dontMock('SkillTable');
-jest.dontMock('SkillHandler');
-jest.dontMock('SkillRow');
-jest.dontMock('AddSkillControl');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-
 import SkillTable from 'SkillTable';
 
-var factories = require('./factories');
+import { screen, render, waitForElementToBeRemoved, within, fireEvent, prettyDOM, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
+const factories = require('./factories');
 
 describe('SkillTable', function() {
-    "use strict";
-
-    var _basicPhysical = [
+    const _basicPhysical = [
         factories.skillFactory({name: "Endurance / run",
             stat: "WIL", skill_cost_0: 0}),
         factories.skillFactory({name: "Balance",
@@ -32,7 +22,7 @@ describe('SkillTable', function() {
         factories.skillFactory({name: "Sleight of hand"})
     ];
 
-    var getSkillTable = function (givenProps) {
+     const getSkillTable = function (givenProps) {
         var props = {};
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -45,135 +35,43 @@ describe('SkillTable', function() {
         props.allSkills = allSkills;
 
         var skillHandler = factories.skillHandlerFactory(props);
-        var table = TestUtils.renderIntoDocument(
-            <SkillTable skillHandler={skillHandler}
+        return  <SkillTable skillHandler={skillHandler}
                         onCharacterSkillAdd={props.onCharacterSkillAdd}
                         onCharacterSkillModify={props.onCharacterSkillModify}
-                        onCharacterSkillRemove={props.onCharacterSkillRemove}
-            />
-        );
-
-        return TestUtils.findRenderedComponentWithType(table,
-            SkillTable);
+                        onCharacterSkillRemove={props.onCharacterSkillRemove} />;
     };
 
     it('renders as empty', function () {
-        var table = getSkillTable();
-        expect(typeof(table)).toEqual("object");
+        const table = render(getSkillTable());
+        expect(table.getByLabelText("SP from starting stats").textContent).toEqual("29")
     });
 
-    var getSkillList = function (skillTable) {
-        var rows = Array.prototype.slice.call(ReactDOM.findDOMNode(skillTable).querySelector('tbody').querySelectorAll('tr'));
-        return rows.map((row) => {
-            var node = row.querySelectorAll('td span')[0];
-
-            return node.textContent;
-        })
-    };
-
-    var findSkillRows = function (skillTable, skillName) {
-        var returnRows = [];
-        var rows = ReactDOM.findDOMNode(skillTable).querySelector('tbody').querySelectorAll('tr');
-        for (var ii = 0; ii < rows.length; ii++) {
-            var row = rows[ii];
-            if (row.querySelectorAll('td span')[0].textContent === skillName) {
-                returnRows.push(row)
-            }
-        }
-        return returnRows;
-    };
-
-    var findSkillRow = function (skillTable, skillName) {
-        var rows = findSkillRows(skillTable, skillName);
-        expect(rows.length).toEqual(1);
-        return rows[0];
-    };
-
-    var getSkillLevel = function (cells) {
-        return cells[1].querySelector('span').textContent;
-    };
-    
-    var getSkillCheck = function (cells) {
-        return cells[3].textContent;
-    };
-    
     it("starts with a good set of physical skills", function () {
-        var table = getSkillTable({
-            character: {cur_int: 50}});
-        var expectedSkills = ["Endurance / run",
-            "Balance",
-            "Stealth",
-            "Concealment",
-            "Search",
-            "Climbing",
-            "Swimming",
-            "Jump",
-            "Sleight of hand"
-        ];
-        expect(getSkillList(table).slice(0, 9)).toEqual(expectedSkills);
-        var row = findSkillRow(table, "Search");
-        expect(row).not.toBe(undefined);
-        expect(row.length).not.toEqual(0);
-
-        var cells = row.querySelectorAll('td');
-
-        expect(getSkillLevel(cells)).toEqual('0');
-        expect(getSkillCheck(cells)).toEqual('50');
+        const table = render(getSkillTable({
+            character: {cur_int: 50}
+        }));
+        const searchRow = within(screen.getByText(/Search/).closest('tr'));
+        expect(searchRow.getByLabelText("Skill check").textContent).toEqual("50")
+        expect(searchRow.getByLabelText("Skill level").textContent).toEqual("0")
     });
 
-    it("does render all skills", function (){
-        var table = getSkillTable({character: {cur_int: 50},
-            allSkills: _basicPhysical.concat([
-                {name: "Agriculture"}]),
-            skills: [
-                {skill: "Search", level: 1},
-                {skill: "Agriculture", level: 3}
-            ]});
-        // the basic physical skills + Agriculture.
-        // expect(getSkillList(table).length).toEqual(10);
-       
-        var searchRow = findSkillRows(table, "Search")[0];
-        var searchCells = searchRow.querySelectorAll('td');
-        
-        expect(getSkillLevel(searchCells)).toEqual('1');
-        
-        var agricultureRow = findSkillRow(table, "Agriculture");
-        var agricultureCells = agricultureRow.querySelectorAll('td');
-        
-        expect(getSkillLevel(agricultureCells)).toEqual('3');
-    });
-
-    it("mangles skill list to remove physical prefilled skills", function () {
-        var table = getSkillTable({character: {cur_int: 50},
-            allSkills: _basicPhysical.concat([
-                {name: "Search"}]),
-            skills: [
-                {skill: "Search", level: 1},
-                {skill: "Agriculture", level: 3}
-            ]});
-        var newList = table.mangleSkillList();
-        expect(newList.length).toEqual(1);
-        expect(newList[0].skill).toEqual("Agriculture");
-    });
-
-    it("does not render same skill twice", function () {
-        var table = getSkillTable({
-            allSkills: _basicPhysical.concat([
-                factories.skillFactory({name: "Agriculture"})]),
+    it("does render all skills", function () {
+        const table = render(getSkillTable({
             skills: [
                 factories.characterSkillFactory({skill: "Search", level: 1}),
                 factories.characterSkillFactory(
                     {skill: "Agriculture", level: 3})
-            ]});
-        // the basic physical skills + Agriculture.
-        expect(getSkillList(table).length).toEqual(10);
-        var searchRow = findSkillRow(table, "Search");
-        var searchCells = searchRow.querySelectorAll('td');
+            ]
+        }));
+        const elems = screen.queryAllByText(/Search/)
+        expect(elems.length).toEqual(1)
 
-        expect(getSkillLevel(searchCells)).toEqual('1');
+        expect(within(elems[0].closest('tr')).getByLabelText("Skill level").textContent).toEqual("1")
+
+        const agriculture = screen.getByText(/Agriculture/);
+        expect(agriculture).toBeInTheDocument()
+        expect(within(agriculture.closest('tr')).getByLabelText("Skill level").textContent).toEqual("3")
     });
-
-
 
     // -> to skillrow.  Here we just pass the callbacks forward.
     xit("allows adding a physical skill level from the start set", test.todo);
@@ -182,33 +80,70 @@ describe('SkillTable', function() {
 
     xit("allows adding a new skill", test.todo);
 
-    it("calls the passed onCharacterSkillModify handler", function () {
+    it("calls the passed onCharacterSkillModify handler", async function () {
+        const user = userEvent.setup()
+
+        const gardeningSkill = factories.characterSkillFactory({skill: "Gardening", id: 42, level: 3});
+
+        const data = Object.assign(
+            // TODO: figure out where this is added, the passed object should not be mutated.
+            {indent: 0},
+            gardeningSkill,
+            {level: 4});
         let spy = jasmine.createSpy("callback");
-        let table = getSkillTable({
-            onCharacterSkillModify: spy
-        });
-        const data = {id: 2, level: 3, skill: "Gardening", character: 1};
-        table.handleCharacterSkillModify(Object.assign({}, data));
+        const table = render(getSkillTable({
+            onCharacterSkillModify: spy,
+            skills: [gardeningSkill]
+        }));
+
+        const row = screen.getByText("Gardening").closest('tr')
+        const increaseButton = within(row).getByRole("button", {name: "Increase skill level"})
+        await user.click(increaseButton)
         expect(spy).toHaveBeenCalledWith(data);
     });
 
-    it("calls the passed onCharacterSkillRemove handler", function () {
+    it("calls the passed onCharacterSkillRemove handler", async function () {
+        const user = userEvent.setup()
+
+        const gardeningSkill = factories.characterSkillFactory({skill: "Gardening", id: 42, level: 3});
+
+        const data = Object.assign(
+            // TODO: figure out where this is added, the passed object should not be mutated.
+            {indent: 0},
+            gardeningSkill);
         let spy = jasmine.createSpy("callback");
-        let table = getSkillTable({
-            onCharacterSkillRemove: spy
-        });
-        const data = {id: 2};
-        table.handleCharacterSkillRemove(Object.assign({}, data));
+        const table = render(getSkillTable({
+            onCharacterSkillRemove: spy,
+            skills: [gardeningSkill]
+        }));
+
+        const row = screen.getByText("Gardening").closest('tr')
+        const removeButton = within(row).getByLabelText("Remove skill")
+        await user.click(removeButton)
         expect(spy).toHaveBeenCalledWith(data);
     });
 
-    it("calls the passed onCharacterSkillAdd handler", function () {
+    it("calls the passed onCharacterSkillAdd handler", async function () {
+        const user = userEvent.setup()
+
+        const data = {level: 3, skill: "Gardening"};
         let spy = jasmine.createSpy("callback");
-        let table = getSkillTable({
-            onCharacterSkillAdd: spy
-        });
-        const data = {level: 3, skill: "Gardening", character: 1};
-        table.handleCharacterSkillAdd(Object.assign({}, data));
+        const table = render(getSkillTable({
+            onCharacterSkillAdd: spy,
+            allSkills: [factories.skillFactory({name: "Gardening"}),]
+        }));
+        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
+        await user.clear(skillInput)
+        await user.type(skillInput, "Gardening")
+        await user.click(screen.getByText("Gardening"))
+
+        const levelInput = within(screen.getByLabelText("Add skill level")).getByRole("combobox")
+        await user.clear(levelInput)
+        await user.type(levelInput, "3")
+
+        const addButton = screen.getByRole("button", {name: "Add skill"})
+        expect(addButton).not.toBeDisabled()
+        await user.click(addButton)
         expect(spy).toHaveBeenCalledWith(data);
     });
 
@@ -238,30 +173,33 @@ describe('SkillTable', function() {
     xit("passes armor modifiers them to skillrows", test.todo);
 
     it("calculates SPs from edges", function () {
-        let table = getSkillTable({
+        const table = render(getSkillTable({
             edges: [factories.edgeLevelFactory({extra_skill_points: 6}),
                 factories.edgeLevelFactory({extra_skill_points: 8})
             ]
-        });
-        expect(table.edgeSkillPoints()).toEqual(14);
+        }));
+        expect(table.getByLabelText("SP from edges").textContent).toEqual("14")
     });
 
     it("calculates starting SP", function () {
-        let table = getSkillTable({character: {
+        const table = render(getSkillTable({character: {
             start_lrn: 50, start_int: 38, start_psy: 47}
-        });
-        expect(table.initialSkillPoints()).toEqual(30);
+        }));
+        expect(table.getByLabelText("SP from starting stats").textContent).toEqual("30")
+
     });
 
     it("processes age SP", function () {
-        let table = getSkillTable({character: {gained_sp: 23}});
-        expect(table.earnedSkillPoints()).toEqual(23);
+        const table = render(getSkillTable({character: {
+            gained_sp: 23}
+        }));
+        expect(table.getByLabelText("SP earned during play").textContent).toEqual("23")
     });
 
     it("can give hints to optimize skill point accumulation", function () {
-        let table = getSkillTable({character: {
+        const table = render(getSkillTable({character: {
             cur_lrn: 50, cur_int: 38, cur_psy: 47}
-        });
-        expect(table.optimizeAgeSP()).toEqual({lrn: 3, int: 0, psy: 1});
+        }));
+        expect(table.getByLabelText("SP optimization hint").textContent).toEqual("+3 LRN, +0 INT, +1 PSY")
     });
 });

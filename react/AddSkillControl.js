@@ -61,7 +61,7 @@ class AddSkillControl extends React.Component {
         if (typeof(skill) === "undefined") {
             return false;
         }
-        var level = this.state.selectedLevel;
+        var level = parseInt(this.state.selectedLevel);
         if (level <= skill.max_level && level >= skill.min_level) {
             return true;
         }
@@ -72,7 +72,7 @@ class AddSkillControl extends React.Component {
         if (typeof(this.props.onCharacterSkillAdd) !== "undefined") {
             this.props.onCharacterSkillAdd(
                 {skill: this.state.selectedSkill.name,
-                 level: this.state.selectedLevel});
+                 level: parseInt(this.state.selectedLevel)});
             this.setState({skillValue: '',
                 selectedSkill: undefined,
                 selectedLevel: ''})
@@ -90,7 +90,7 @@ class AddSkillControl extends React.Component {
         return <div>
             <table>
                 <tbody>
-                <tr>
+                <tr aria-label={"Add skill name"}>
                     <td><label>Skill</label></td>
                     <td><Combobox data={this.getSkillChoices()}
                                   textField='name'
@@ -99,7 +99,7 @@ class AddSkillControl extends React.Component {
                                   onChange={(value) =>
                                     this.handleSkillChange(value) }/></td>
                 </tr>
-                <tr>
+                <tr aria-label={"Add skill level"}>
                     <td><label>Level</label></td>
                     <td>
                         <Combobox data={levelChoices}
@@ -110,7 +110,7 @@ class AddSkillControl extends React.Component {
                 </tr>
                 </tbody>
             </table>
-            <Button size="sm" disabled={!this.skillValid()}
+            <Button aria-label={"Add skill"} size="sm" disabled={!this.skillValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Skill</Button>

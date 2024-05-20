@@ -221,18 +221,19 @@ class SkillTable extends React.Component {
                 <td colSpan={2} style={totalStyle} title={totalTitle}>{totalSP}</td></tr>
             <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Gained SP</td>
                 <td colSpan={2}>
-                <span title="From starting stats">{initialSP}</span>
+                <span title="From starting stats" aria-label={"SP from starting stats"}>{initialSP}</span>
                 <span> + </span>
-                <span title="From edges">{edgeSP}</span>
+                <span title="From edges" aria-label={"SP from edges"}>{edgeSP}</span>
                 <span> + </span>
-                <span title="Earned during play">{ageSP}</span>
+                <span title="Earned during play" aria-label={"SP earned during play"}>{ageSP}</span>
                 <span> = </span>
                 <span title="Total gained">{gainedSP}</span></td></tr>
             <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Next age SP increase</td>
-                <td colSpan={2}>{util.renderInt(opt.lrn)
-                } LRN, {util.renderInt(opt.int)} INT,  {
+                <td colSpan={2}>
+                    <span aria-label={"SP optimization hint"}>{util.renderInt(opt.lrn)
+                } LRN, {util.renderInt(opt.int)} INT, {
                     util.renderInt(opt.psy)} PSY
-                </td>
+                </span></td>
             </tr>
             </tfoot>
         </Table>
