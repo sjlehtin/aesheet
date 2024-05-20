@@ -104,13 +104,37 @@ class EffectAdmin(ItemAdmin):
     pass
 
 
+class CharacterSkillAdmin(admin.ModelAdmin):
+    list_select_related = True
+    list_per_page = 50
+
+    list_display = ('character', 'skill', 'level')
+    list_filter = ('character__name', 'skill__name')
+    search_fields = ('character__name', 'skill__name')
+    save_as = True
+
+    ordering = ('character__name', )
+
+
+class CharacterEdgeAdmin(admin.ModelAdmin):
+    list_select_related = True
+    list_per_page = 50
+
+    list_display = ('character', 'edge',  'ignore_cost')
+    list_filter = ('character__name', 'edge__edge__name')
+    search_fields = ('character__name', 'edge__edge__name')
+    save_as = True
+
+    ordering = ('character__name', )
+
+
 admin.site.register(sm.Armor, ArmorAdmin)
 admin.site.register(sm.ArmorQuality, QualityAdmin)
 admin.site.register(sm.ArmorTemplate, ItemAdmin)
 admin.site.register(sm.ArmorSpecialQuality, EffectAdmin)
 admin.site.register(sm.Character)
-admin.site.register(sm.CharacterEdge)
-admin.site.register(sm.CharacterSkill)
+admin.site.register(sm.CharacterEdge, CharacterEdgeAdmin)
+admin.site.register(sm.CharacterSkill, CharacterSkillAdmin)
 admin.site.register(sm.Edge)
 admin.site.register(sm.EdgeLevel)
 admin.site.register(sm.EdgeSkillBonus, EdgeSkillBonusAdmin)

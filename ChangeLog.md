@@ -3,6 +3,7 @@
 ### Added
 
 * Adding and removing edges will generate character log entries.
+* Added easier admin interface for character skills and edges.
 
 ### Changed
 
