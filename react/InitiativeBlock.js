@@ -26,7 +26,7 @@ class InitiativeBlock extends React.Component {
         var melee = this.initiatives(30, distances);
         var ranged = this.initiatives(60, distances);
         var getItems = function (initiatives) {
-            return initiatives.map((init, ii) => { return <td key={ii}>{init}</td>; });
+            return initiatives.map((init, ii) => { return <td aria-label={"check"} key={ii}>{init}</td>; });
         }
         return <Card className={"m-1"} style={this.props.style}>
             <Card.Header>
@@ -36,21 +36,21 @@ class InitiativeBlock extends React.Component {
             <Table style={{fontSize: "inherit"}} size={"sm"}>
                 <thead>
                     <tr>
-                        <th>Distance</th>
+                        <th><label id={"distanceLabel"}>Distance</label></th>
                         <th>
-                            <input type="text" style={{width: "3em"}}
+                            <input aria-labelledby="distanceLabel" type="text" style={{width: "3em"}}
                                    value={this.state.distance}
-                                   ref={(c) => { this._inputNode = c }}
                                    onChange={(e) => {this.setState({distance: e.target.value})}}
                             />
                         </th>
                         {distances.slice(1).map((elem, ii) => {
-                            return <th key={ii}>{elem} m</th>})}</tr>
+                            return <th key={ii}>{elem} m</th>})}
+                    </tr>
                 </thead>
                 <tbody>
-                <tr><td>Charge</td>{getItems(charging)}</tr>
-                <tr><td>Melee</td>{getItems(melee)}</tr>
-                <tr><td>Ranged / casting</td>{getItems(ranged)}</tr>
+                <tr aria-label={"Charge initiatives"}><td>Charge</td>{getItems(charging)}</tr>
+                <tr aria-label={"Melee initiatives"}><td>Melee</td>{getItems(melee)}</tr>
+                <tr aria-label={"Ranged initiatives"}><td>Ranged / casting</td>{getItems(ranged)}</tr>
                 </tbody>
             </Table>
             </Card.Body>

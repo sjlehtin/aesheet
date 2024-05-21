@@ -1,19 +1,13 @@
-jest.dontMock('InitiativeBlock');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
+
+import {render, screen, within} from '@testing-library/react'
+import InitiativeBlock from "InitiativeBlock";
+import userEvent from "@testing-library/user-event";
 
 var factories = require('./factories');
 
-const InitiativeBlock = require('InitiativeBlock').default;
-
 describe('InitiativeBlock', function() {
-    "use strict";
-
-    var getInitiativeBlock = function (props) {
+    const renderInitiativeBlock = function (props) {
         if (!props) {
             props = {};
         }
@@ -24,37 +18,47 @@ describe('InitiativeBlock', function() {
         }
         props.stats  = factories.skillHandlerFactory(
             skillHandlerProps);
-        var node = TestUtils.renderIntoDocument(
+        return render(
             <InitiativeBlock {...props} />);
-
-        return TestUtils.findRenderedComponentWithType(node,
-            InitiativeBlock);
     };
 
+    function getInitiatives(initLabel) {
+        let values = []
+        within(screen.getByLabelText(initLabel)).getAllByRole("cell", {name: "check"}).forEach((el) => {
+            values.push(parseInt(el.textContent))
+        })
+        return values;
+    }
+
     it('allows calculating initiatives for arbitrary values', function () {
-        var block = getInitiativeBlock({stats: {
+        renderInitiativeBlock({stats: {
             character: {
                 cur_fit: 52,
                 cur_ref: 52
             }}});
-        var calculated  = block.initiatives(20, [30, 20, 10, 5, 2]);
-        expect(calculated).toEqual([-12,-8,-4,-2,-1]);
+
+        let values = getInitiatives("Charge initiatives");
+
+        expect(values).toEqual([-12,-8,-4,-2,-1]);
     });
 
-    it('allows free-form input', function () {
-        var block = getInitiativeBlock({stats: {
+    it('allows free-form input', async function () {
+        const user = userEvent.setup()
+
+        renderInitiativeBlock({stats: {
             character: {
                 cur_fit: 52,
                 cur_ref: 52
-            }}});
-        TestUtils.Simulate.change(ReactDOM.findDOMNode(block._inputNode),
-            {target: {value: "25"}})
-        var rows = ReactDOM.findDOMNode(block).querySelectorAll('tbody tr');
-        var calculated = [];
-        for (var row of rows) {
-            calculated.push(parseInt(
-                row.querySelectorAll('td')[1].textContent));
-        }
-        expect(calculated).toEqual([-10, -15, -29]);
+            }
+        }});
+
+        const input = screen.getByRole("textbox", {name: "Distance"})
+
+        await user.clear(input)
+        await user.type(input, "25")
+
+        expect(getInitiatives("Charge initiatives")).toEqual([-10,-8,-4,-2,-1])
+        expect(getInitiatives("Melee initiatives")).toEqual([-15,-12,-6,-3,-2])
+        expect(getInitiatives("Ranged initiatives")).toEqual([-29,-24,-12,-6,-3])
     });
 });
