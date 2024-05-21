@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import {Button, FormControl, FormGroup} from 'react-bootstrap';
@@ -161,8 +160,6 @@ class InventoryRow extends React.Component {
 
         if (this.state.editing) {
             quantity = <FormControl type="text"
-                           ref={(c) => { this._quantityInputField = c ?
-                           ReactDOM.findDOMNode(c) : undefined}}
                            isValid={this.quantityValidationState()}
                            onChange={(e) => this.handleQuantityChange(e)}
                            onKeyDown={(e) =>
@@ -176,8 +173,6 @@ class InventoryRow extends React.Component {
 
         if (this.state.editing) {
             location = <FormControl type="text"
-                           ref={(c) => { this._locationInputField = c ?
-                           ReactDOM.findDOMNode(c) : undefined}}
                            onChange={(e) => this.handleLocationChange(e)}
                                     isValid={true}
                            onKeyDown={(e) =>
