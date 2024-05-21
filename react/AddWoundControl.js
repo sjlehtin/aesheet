@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { Button, FormControl, Form, Row, Col } from 'react-bootstrap';
@@ -7,7 +6,6 @@ import { Button, FormControl, Form, Row, Col } from 'react-bootstrap';
 import {DropdownList, Combobox} from 'react-widgets';
 
 const util = require('./sheet-util');
-const rest = require('./sheet-rest');
 
 class AddWoundControl extends React.Component {
     constructor(props) {
@@ -172,7 +170,7 @@ class AddWoundControl extends React.Component {
                              isValid={this.isDamageValid()}
                              value={this.state.damage} onChange={
                 (e) => this.handleDamageChange(e)}
-                ref={(c) => { if (c) { this._damageInputField = ReactDOM.findDOMNode(c)}}} />
+                />
             </Col>
                 <Col>
                 <Form.Label>Effect</Form.Label>
@@ -185,7 +183,6 @@ class AddWoundControl extends React.Component {
                 <Col className={"d-flex align-items-center"}>
                     <Button className={"my-1"} style={{verticalAlign: "middle"}} size="sm"
                         disabled={!this.isValid()}
-                        ref={(c) => { if (c) { this._addButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleSubmit()}>Add wound</Button>
                 </Col>
             </Row>

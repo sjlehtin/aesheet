@@ -72,7 +72,7 @@ class WoundRow extends React.Component {
 
         var effectField = this.props.wound.effect;
         if (this.state.editingEffect) {
-            effectField = <FormControl ref={(c) => {if (c) {this._effectInputField = ReactDOM.findDOMNode(c); this._effectInputField.focus(); }}}
+            effectField = <FormControl
                                  type="text"
                                        aria-label={"Wound effect"}
                                  onChange={(value) => this.handleEffectChanged(value)}
@@ -89,7 +89,6 @@ class WoundRow extends React.Component {
                 {effectField}</td>
             <td style={{width: "3em"}}>
                 <Button size="sm"
-                        ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
                         onClick={() => this.handleRemove()}>Heal</Button>
             </td>
         </tr>;
