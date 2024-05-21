@@ -1,157 +1,103 @@
-jest.dontMock('CharacterNotes');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-
-var rest = require('sheet-rest');
-
 import CharacterNotes from 'CharacterNotes';
 
+import {
+    render,
+    screen,
+    waitFor,
+    waitForElementToBeRemoved
+} from '@testing-library/react'
+import {rest} from 'msw'
+import {setupServer} from 'msw/node'
+import userEvent from '@testing-library/user-event'
+
+// var rest = require('sheet-rest');
+const factories = require('./factories');
+
+const server = setupServer(
+  rest.get('http://localhost/rest/characters/42', (req, res, ctx) => {
+    return res(ctx.json(factories.characterFactory({notes: "this is char pk 42 notes"})))
+  }),
+)
+
+
 describe('character note tests', function (){
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    var promises;
+    it('can change to editing mode by clicking the text area', async function () {
+        const user = userEvent.setup()
 
-    var patchOk = function () {
-        var response = Promise.resolve({});
-        rest.patch.mockReturnValue(response);
-        promises.push(response);
-    };
+        render(<CharacterNotes url="/rest/characters/42" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-    beforeEach(function () {
-        var mockPromise = Promise.resolve({"notes": "this is char pk 42 notes"});
-        rest.getData = jest.fn();
-        rest.patch = jest.fn();
-        rest.getData.mockReturnValue(mockPromise);
-        promises = [];
-        promises.push(mockPromise);
+        expect(screen.getByRole("textbox")).toHaveAttribute('readonly')
+
+        await user.click(screen.getByRole("textbox"))
+
+        expect(screen.getByRole("textbox")).not.toHaveAttribute('readonly')
+
     });
 
-    it('starts in non-editing mode', function () {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes />
-        );
-        var characterNode = ReactDOM.findDOMNode(character);
+    it('reverts value on cancel', async function () {
+        const user = userEvent.setup()
 
-        expect(characterNode.textContent).toContain('Edit');
-    });
+        render(<CharacterNotes url="/rest/characters/42" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-    it('can change to editing mode by clicking the edit link', function () {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes />
-        );
-        var characterNode = ReactDOM.findDOMNode(character);
+        await user.click(screen.getByRole("button", {name: "Edit"}))
 
-        TestUtils.Simulate.click(characterNode.querySelectorAll(
-            'a.edit-control')[0]);
+        expect(screen.getByRole("textbox")).not.toHaveAttribute('readonly')
 
-        expect(characterNode.textContent).not.toContain('Edit');
-    });
+        await user.clear(screen.getByRole("textbox"))
+        await user.type(screen.getByRole("textbox"), "This is the new note")
 
-    it('can change to editing mode by clicking the text area', function () {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes />
-        );
-        expect(character.state.editing).not.toEqual(true);
+        await user.click(screen.getByRole("button", {name: "Cancel"}))
 
-        var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
-            "textarea");
-        TestUtils.Simulate.click(areaNode);
+        expect(screen.queryByRole("button", {name: "Update"})).toBe(null)
 
-        expect(character.state.editing).toEqual(true);
-    });
+        expect(screen.queryByText("This is the new note")).toBe(null)
 
-    it('can start in editing mode', function () {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes initialEditing={true} />
-        );
-        var characterNode = ReactDOM.findDOMNode(character);
-        expect(characterNode.textContent).not.toContain('Edit');
-    });
-
-    it('updates state on textarea edit', function () {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes initialEditing={true} />
-        );
-        var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
-            "textarea");
-        areaNode.value = "new note";
-        TestUtils.Simulate.change(areaNode);
-
-        expect(character.state.notes).toEqual("new note");
-    });
-
-    it('reverts value on cancel', function () {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes initialEditing={true} />
-        );
-        var characterNode = ReactDOM.findDOMNode(character);
-        var areaNode = TestUtils.findRenderedDOMComponentWithTag(character,
-            "textarea");
-        var originalValue = areaNode.value;
-        expect(originalValue).not.toEqual("new note");
-
-        areaNode.value = "new note";
-        TestUtils.Simulate.change(areaNode);
-
-        var cancelNode = TestUtils.findRenderedDOMComponentWithTag(character,
-            "a");
-
-        TestUtils.Simulate.click(cancelNode);
-
-        expect(character.state.editing).toEqual(false);
-
-        expect(character.state.notes).toEqual(originalValue);
+        expect(screen.queryByText("this is char pk 42 notes")).toBeInTheDocument()
     });
 
 
-    it('obtains initial data with fetch', function (done) {
-        var character = TestUtils.renderIntoDocument(
-            <CharacterNotes url="/rest/characters/42" />
-        );
+    it('obtains initial data with fetch',  async function () {
+        const notes = render(<CharacterNotes url="/rest/characters/42" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-        Promise.all(promises).then(function () {
-            expect(rest.getData.mock.calls[0][0]).toEqual("/rest/characters/42");
-            expect(character.state.notes).toContain('this is char pk 42 notes');
-            done();
-        });
+        expect(screen.queryByText("this is char pk 42 notes")).toBeInTheDocument()
     });
 
-    it('updates state to the server', function (done) {
-        var character;
+    it('updates state to the server', async function () {
+        const user = userEvent.setup()
 
-        character = TestUtils.renderIntoDocument(
-            <CharacterNotes url="/rest/characters/42" initialEditing={true} />
-        );
+        render(<CharacterNotes url="/rest/characters/42" />)
+        await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-        // TODO: seems to work without this, probably because no asserts
-        // require that the promise would be delivered successfully.
-        patchOk();
+        expect(screen.queryByText("this is char pk 42 notes")).toBeInTheDocument()
 
-        Promise.all(promises).then(function () {
-            expect(rest.getData.mock.calls[0][0]).toEqual("/rest/characters/42");
+        expect(screen.getByRole("textbox")).toHaveAttribute('readonly')
 
-            var areaNode = TestUtils.findRenderedDOMComponentWithTag(
-                character, "textarea");
+        await user.click(screen.getByRole("button", {name: "Edit"}))
 
-            TestUtils.Simulate.change(areaNode,
-                {target: {value: "new note"}});
+        expect(screen.getByRole("textbox")).not.toHaveAttribute('readonly')
 
-            expect(character.state.notes).toEqual("new note");
+        await user.clear(screen.getByRole("textbox"))
+        await user.type(screen.getByRole("textbox"), "This is the new note")
 
-            var submitButton= TestUtils.findRenderedDOMComponentWithTag(
-                character, "input");
+        server.use(
+            rest.patch("http://localhost/rest/characters/42", async (req, res, ctx) => {
+                return res(ctx.json(
+                    await req.json()
+                ))
+            }),
+        )
 
-            TestUtils.Simulate.click(submitButton);
+        await user.click(screen.getByRole("button", {name: "Update"}))
 
-            expect(rest.patch.mock.calls[0][0]).toEqual("/rest/characters/42");
-            expect(rest.patch.mock.calls[0][1]).toEqual({notes: "new note"});
-
-        }).then(function () {
-            expect(character.state.editing).toEqual(false);
-            done();
-        });
+        await waitFor(() => expect(screen.queryByRole("button", {name: "Update"})).toBe(null))
     });
 });
 

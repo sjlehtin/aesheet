@@ -1,47 +1,50 @@
 import React from 'react';
 
+import { Button, Form } from 'react-bootstrap';
+
+import Loading from 'Loading'
+
 const rest = require('./sheet-rest');
 
 class CharacterNotes extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            editing: props.initialEditing,
-            // TODO: Should be filled in componentDidMount if left undefined.
-            notes: undefined,
+            editing: false,
+            notes: "",
+            isBusy: true,
             old_value: ""
         };
     }
 
-    componentDidMount() {
-        rest.getData(this.props.url).then((json) => {
-            this.setState({notes: json.notes});
-        });
+    async componentDidMount() {
+        const json = await rest.getData(this.props.url)
+        this.setState({notes: json.notes, isBusy: false});
     }
 
-    handleSubmit(event) {
+    async handleSubmit() {
         /* PATCH the backend character with updated values. */
-        event.preventDefault();
-        rest.patch(this.props.url, {
-            "notes": this.state.notes
-        }).then(function () {
-            this.setState({
-                editing: false
+        this.setState({isBusy: true})
+        try {
+            await rest.patch(this.props.url, {
+                notes: this.state.notes,
             })
-        }.bind(this)).catch(function (reason) {
+            this.setState({
+                editing: false,
+                isBusy: false
+            })
+        } catch (reason) {
             console.log("Failed to update char:", reason)
-        });
+        }
     }
 
-    handleEdit(event) {
-        event.preventDefault();
+    handleEdit() {
         this.setState({
             editing: true,
             old_value: this.state.notes });
     }
 
-    handleCancel(event) {
-        event.preventDefault();
+    handleCancel() {
         this.setState({
             editing: false,
             notes: this.state.old_value
@@ -53,42 +56,50 @@ class CharacterNotes extends React.Component {
     }
 
     render() {
-        var fieldStyle = {
+        const fieldStyle = {
             width: "100%",
             height: "20em",
             scrollY: "auto"
         };
-        var notesField;
+        let notesField;
         if (!this.state.editing) {
-            notesField = (<form onClick={(e) => this.handleEdit(e)}>
-                <textarea style={fieldStyle}
-                          disabled value={this.state.notes} />
-                <a href="#"
-                   className="edit-control">Edit</a>
-            </form>);
+            notesField = <Form>
+                <Form.Control as={"textarea"}
+                              // style={Object.assign({color: '#555'}, fieldStyle)}
+                            readOnly value={this.state.notes}
+                               rows={20}
+                            onClick={() => this.handleEdit() } />
+                    <Button onClick={() => this.handleEdit()}>Edit</Button>
+                </Form>
         } else {
             notesField = (
-                <form><textarea
-                    style={fieldStyle}
+                <Form><Form.Control
+                     as={"textarea"}
+                    // style={fieldStyle}
                     value={this.state.notes}
-                    onChange={this.handleChange.bind(this)}/>
-                    <a href="#" onClick={this.handleCancel.bind(this)}
-                       className="edit-control">Cancel</a>
-                    <input type="submit" value="Update" name="character-note"
-                           className="edit-control"
-                           onClick={this.handleSubmit.bind(this)}/>
-                </form>);
+                     rows={20}
+                    onChange={(e) => this.handleChange(e) }/>
+                    <Button onClick={() => {return this.handleCancel()}}>Cancel</Button>{' '}
+                    <Button onClick={() => {return this.handleSubmit()}}>Update</Button>
+                </Form>);
         }
-        return (<div className="character-note">
+
+        let loading;
+
+        if (this.state.isBusy) {
+            loading = <Loading />
+        } else {
+            loading = ""
+        }
+
+        return <div>
             <h3>
                 Character notes
+                {loading}
             </h3>
             {notesField}
-
-        </div>)
+        </div>
     }
 }
-
-CharacterNotes.defaultProps = { initialEditing: false };
 
 export default CharacterNotes;

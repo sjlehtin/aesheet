@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+* Change character notes to use bootstrap buttons and allow activating edit by clicking on the textarea.
+
 ## [0.16.0] - 2024-05-21
 
 ### Added
