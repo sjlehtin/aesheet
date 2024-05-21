@@ -146,8 +146,6 @@ class InventoryRow extends React.Component {
         if (this.state.editing) {
             description = <FormGroup>
                 <FormControl type="text"
-                           ref={(c) => { this._descriptionInputField = c ?
-                           ReactDOM.findDOMNode(c) : undefined}}
                            isValid={this.descriptionValidationState()}
                            onChange={(e) => this.handleDescriptionChange(e)}
                            onKeyDown={(e) =>
@@ -192,8 +190,6 @@ class InventoryRow extends React.Component {
         
         if (this.state.editing) {
             unitWeight = <FormControl type="text"
-                           ref={(c) => { this._unitWeightInputField = c ?
-                           ReactDOM.findDOMNode(c) : undefined}}
                            isValid={this.unitWeightValidationState()}
                            onChange={(e) => this.handleUnitWeightChange(e)}
                            onKeyDown={(e) =>
@@ -208,7 +204,6 @@ class InventoryRow extends React.Component {
         if (!this.props.createNew) {
             removeButton =
                 <Button
-                    ref={(c) => {if (c) {this._removeButton = ReactDOM.findDOMNode(c)}}}
                     size="sm"
                     onClick={(e) => {this.handleRemove(e); }}>
                     Remove</Button>;
@@ -218,7 +213,7 @@ class InventoryRow extends React.Component {
 
         return (<tr onKeyDown={(e) =>
                              this.handleKeyDown(e, "foo")}>
-            <td style={{position: "relative"}} ref={(c) => this._descriptionField = c}
+            <td style={{position: "relative"}}
                 onClick={(e) => this.startEdit("description")}>
                 <span>
                 {description}
@@ -229,16 +224,13 @@ class InventoryRow extends React.Component {
                 </span>
             </td>
 
-            <td ref={(c) => this._locationField = c}
-                onClick={(e) => this.startEdit("location")}>
+            <td onClick={(e) => this.startEdit("location")}>
                 {location}</td>
 
-            <td ref={(c) => this._quantityField = c}
-                onClick={(e) => this.startEdit("quantity")}>
+            <td onClick={(e) => this.startEdit("quantity")}>
                 {quantity}</td>
 
-            <td ref={(c) => this._unitWeightField = c}
-                onClick={(e) => this.startEdit("unitWeight")}>
+            <td onClick={(e) => this.startEdit("unitWeight")}>
                 {unitWeight}</td>
 
             <td className="weight" aria-label={"Weight"}>{ (parseFloat(this.state.unitWeight) * parseInt(this.state.quantity)).toFixed(2) }</td>

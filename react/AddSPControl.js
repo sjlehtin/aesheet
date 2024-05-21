@@ -46,17 +46,13 @@ class AddSPControl extends React.Component {
         }
         return <div title="Age SP is added every five adventures">
             <label>Age SP:</label>
-            <input ref={(c) =>
-                     c ? this._inputField = ReactDOM.findDOMNode(c) : null}
-                   type="text"
+            <input type="text"
                    onChange={(e) => this.handleChange(e)}
                    value={this.state.ageSP}
                    onKeyDown={(e) => this.handleKeyDown(e)}
                    style={inputStyle}
             />
             <Button size="sm"
-                    ref={(c) =>
-                      c ? this._addButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid()}
                     onClick={(e) => this.handleSubmit()}
             >Add SP</Button>

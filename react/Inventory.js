@@ -162,8 +162,6 @@ class Inventory extends React.Component {
             <tfoot>
             <tr>
                 <td><Button
-                    ref={(c) => {this._addButton =
-                    c ? ReactDOM.findDOMNode(c) : undefined}}
                     style={{}}
                     disabled={!this.state.addButtonEnabled}
                     onClick={(e) => this.handleAddButtonClick(e)}>
