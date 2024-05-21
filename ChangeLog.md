@@ -1,4 +1,6 @@
-## Version 0.16.0 -- 2024-05-21
+## [Unreleased]
+
+## [0.16.0] - 2024-05-21
 
 ### Added
 
@@ -10,13 +12,13 @@
 * Tweaked wound penalty indications to show explicitly the stats that are negative due to excess AA penalties.
 * Changed default skill layout according to JW's 2024 update.
 
-## Version 0.15.1 -- 2023-07-18
+## [0.15.1] - 2023-07-18
 
 ### Fixed
 
 * Tweaked magazine display.
 
-## Version 0.15.0 -- 2023-07-18
+## [0.15.0] - 2023-07-18
 
 ### Added
 
@@ -28,7 +30,7 @@
 
 * Penalties for wounds in a hit location are capped according to the rules.
 
-## Version 0.14.0 -- 2023-07-16
+## [0.14.0] - 2023-07-16
 
 ### Added
 
@@ -39,7 +41,7 @@
 
 * CC Weapon size now factored in to the weight of the weapon.
 
-## Version 0.13.0 -- 2023-07-11
+## [0.13.0] - 2023-07-11
 
 ### Added
 
@@ -61,7 +63,7 @@
 
 * Removed CharacterLogEntry edit from the admin. Never used and only clutters the list of models.
 
-## Version 0.12.0 -- 2023-07-06
+## [0.12.0] - 2023-07-06
 
 ### Added
 
@@ -73,7 +75,7 @@
 
 * Due to new additions, support in Django 2.2 no longer passes tests and is removed.
 
-## Version 0.11.0 -- 2023-07-06
+## [0.11.0] - 2023-07-06
 
 ### Added
 
@@ -88,7 +90,7 @@
 * `react-icons/go` (Github Octicons) used instead of obsoleted `react-octicon`
 * Updated rest of the `npm` packages. There should be no more outdated dependencies.
 
-## Version 0.10.0 -- 2023-06-21
+## [0.10.0] - 2023-06-21
 
 ### Added
 
@@ -104,7 +106,7 @@
 
 * `git log` is not used as the dynamic ChangeLog anymore; it is not available when installing from packages.
 
-## Version 0.9.1 -- 2019-08-09
+## [0.9.1] - 2019-08-09
 
 Scope weights are calculated to total weight.
 
@@ -112,7 +114,7 @@ Severed link between FirearmAddOns and Scopes; the link was originally
 accidental due to the use of direct concrete inheritance between the
 classes.
 
-## Version 0.9 -- 2019-08-05
+## [0.9.0] - 2019-08-05
 
 Added scopes, with possibility of assigning "perks", or edge levels, to
 the scopes. As a classic example, this allows creating of night vision
