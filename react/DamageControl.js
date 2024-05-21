@@ -41,7 +41,6 @@
  *
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { Button, Table, Card, Form, Col, Row } from 'react-bootstrap';
@@ -189,30 +188,25 @@ class DamageControl extends React.Component {
     <Form.Label htmlFor={"stamina-damage"}>Stamina damage</Form.Label>
 </Col>
 <Col md={"auto"}>
-            <Form.Control ref={(c) =>
-                     c ? this._inputField = ReactDOM.findDOMNode(c) : null}
-                   type="text"
-                   onChange={(e) => this.handleChange(e)}
-                   id={"stamina-damage"} isValid={this.isValid()}
-                   value={this.state.currentStaminaDamage}
-                   onKeyDown={(e) => this.handleKeyDown(e)}
-                   style={inputStyle}
+            <Form.Control
+                    type="text"
+                    onChange={(e) => this.handleChange(e)}
+                    id={"stamina-damage"} isValid={this.isValid()}
+                    value={this.state.currentStaminaDamage}
+                    onKeyDown={(e) => this.handleKeyDown(e)}
+                    style={inputStyle}
             />
     </Col>
                         <Col md={"auto"}>
             <Button
                 style={{marginLeft: "1em"}}
                 size="sm"
-                    ref={(c) =>
-                      c ? this._changeButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
                         </Col>
                         <Col md={"auto"}>
             <Button style={{marginLeft: ".5em"}}
                     size="sm"
-                    ref={(c) =>
-                      c ? this._clearButton = ReactDOM.findDOMNode(c) : null}
                     disabled={!this.isValid() || this.state.isBusy}
                     id={"clear-stamina-damage"}
                     onClick={(e) => this.handleClear()}>Clear{loading}</Button>

@@ -1,13 +1,10 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
 import DamageControl from 'DamageControl';
-const WoundRow = require('WoundRow').default;
 
 const factories = require('./factories');
 
 import {fireEvent, render, screen, waitFor, within} from '@testing-library/react'
-import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
@@ -17,28 +14,6 @@ const server = setupServer(
 )
 
 describe('DamageControl', function() {
-
-    var getDamageControlTree = function (givenProps) {
-        var props = givenProps;
-        if (!props) {
-            props = {};
-        }
-        props.handler = factories.skillHandlerFactory({character: props.character});
-        props.character = props.handler.props.character;
-        if (props.wounds) {
-            props.wounds = props.wounds.map(
-                (props) => { return factories.woundFactory(props); });
-        }
-        return TestUtils.renderIntoDocument(
-            <DamageControl {...props} />
-        );
-    };
-
-    var getDamageControl = function(givenProps) {
-        var control = getDamageControlTree(givenProps);
-        return TestUtils.findRenderedComponentWithType(control,
-            DamageControl);
-    };
 
     const renderDamageControl = (givenProps) => {
         var props = givenProps
@@ -107,35 +82,38 @@ describe('DamageControl', function() {
         expect(spy).toHaveBeenCalledWith('stamina_damage', 0, 8);
     })
 
-    it('can be busy during REST update', function (done) {
-        var promise = Promise.resolve({});
-        var callback = jasmine.createSpy("callback").and.returnValue(promise);
-        var control = getDamageControl({onMod: callback, character:
-        {cur_ref:40, cur_wil: 40}});
+    it('can be busy during REST update', async function () {
+        const user = userEvent.setup()
 
-        TestUtils.Simulate.change(
-            control._inputField, {target: {value: 8}});
-        expect(control.isValid()).toEqual(true);
+        let deferred = defer();
 
-        TestUtils.Simulate.click(control._changeButton);
+        const spy = jest.fn().mockImplementation(async (res, req) => {
+            console.log("Waiting to complete")
+            await deferred
+            console.log(res)
+        })
+        renderDamageControl({onMod: spy, character:
+            {cur_ref:40, cur_wil: 40, stamina_damage: 12}})
 
-        expect(control.state.isBusy).toEqual(true);
-        promise.then(() => {
-            expect(control.state.isBusy).toEqual(false);
-            done();
-        });
+        await user.click(screen.getByRole("button", {name: "Clear"}))
+        expect(screen.queryAllByLabelText('Loading')).not.toBeNull()
+
+        deferred.resolve()
+
+        await waitFor(() => {expect(screen.queryByLabelText('Loading')).toBeNull()})
+
+        expect(spy).toHaveBeenCalledWith('stamina_damage', 12, 0);
+
     });
 
-    it("allows clearing stamina damage", function () {
-        var promise = Promise.resolve({});
-        var callback = jasmine.createSpy("callback").and.returnValue(promise);
+    it("allows clearing stamina damage", async function () {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderDamageControl({onMod: spy, character:
+            {cur_ref:40, cur_wil: 40, stamina_damage: 12}})
 
-        var control = getDamageControl({onMod: callback, character:
-        {cur_ref:40, cur_wil: 40, stamina_damage: 12}});
-
-        TestUtils.Simulate.click(control._clearButton);
-
-        expect(callback).toHaveBeenCalledWith('stamina_damage', 12, 0);
+        await user.click(screen.getByRole("button", {name: "Clear"}))
+        expect(spy).toHaveBeenCalledWith('stamina_damage', 12, 0);
     });
 
     it("allows wounds to be passed", async () => {
@@ -178,19 +156,16 @@ describe('DamageControl', function() {
         expect(spy).toHaveBeenCalledWith({location: "T", damage_type: "S", damage: "5", effect: "Fuzznozzle"});
     });
 
-    it("allows wounds to be removed", function () {
-        var callback = jasmine.createSpy("callback").and.returnValue(Promise.resolve({}));
-        var tree = getDamageControlTree({
-            wounds: [{id: 2}],
-            onWoundRemove: callback
-            });
-        var woundRow = TestUtils.findRenderedComponentWithType(tree,
-            WoundRow);
-
-        TestUtils.Simulate.click(woundRow._removeButton);
-
-        expect(callback).toHaveBeenCalledWith({id:2});
-
+    it("allows wounds to be removed", async function () {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderDamageControl({
+            wounds: [{damage: 5, location: "H", healed: 0,
+                      id: 2, effect: "Throat punctured."}],
+            onWoundRemove: spy
+            })
+        await user.click(screen.getByRole("button", {name: "Heal"}))
+        expect(spy).toHaveBeenCalledWith({id:2});
     });
 
     it("allows wounds to be modified", async () => {
