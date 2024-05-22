@@ -24,6 +24,50 @@ import {Col, Row, Button, Table} from 'react-bootstrap';
  * The add-ons may affect the user's senses when using the firearm, notably
  * sight, which is used to calculate the range penalties for the weapon.
  */
+
+/*
+ * Firearms in Close Combat (AE HR 22, ref 2024-05-22)
+ * A PC who finds herself in close combat with a firearm has two options.
+ *
+ * Ranged-Fire Actions
+ *
+ * ** This is handled in current sheet by using 0 (point blank) as range **
+ * ** TODO: Maybe add a comment about Ranged-Fire only working if initiative
+ *     won, as indicated below? **
+ *
+ * The PC may select to take ranged-fire actions (at +60 to hit, +2 D/L), but
+ * in order to do so she must win the initiative. If she loses the initiative,
+ * she loses the actions for that turn. In case the PC takes several firing
+ * actions, she is allowed to complete the actions up till the first
+ * close-combat action made by an enemy (irrespective of the success of the
+ * close-combat action). In any case, the PC is not allowed any close-combat
+ * defenses.
+ * If this action is chosen, it makes sense to combine it with Instinctive
+ * fire.
+ *
+ * Close-Combat Actions
+ *
+ * TODO: The firearms in CC is currently missing completely
+ *
+ * The PC may also select to take close-combat actions. In this case, the
+ * ROA of the firearm is one half of the ROF. The ROA and the to-hit roll are
+ * modified by the Instinctive fire skill. As in all close combat, 2,5 is the
+ * maximum ROA. Successful attacks are at +2 lethality.
+ * If the firearm uses burst fire, each burst takes two actions (#1, #3, #5),
+ * all rounds hit, and normal lethality modifiers apply, so that the rounds
+ * of a three-round burst are at +2, 0, and +4 lethality.
+ * To defend, the PC must use another skill (Unarmed combat with a pistol,
+ * Staff with a longarm). When used together with firing attacks, the
+ * defenses are counted as one action each (and normal attacks are not
+ * allowed). Note that this is a special case of close combat as the
+ * attacks and defenses are made with different skills and their rates are
+ *  calculated separately.
+ * Firearm attacks may be defended normally. If the defense results to
+ * reduced damage, the rolled damage is reduced from each round separately
+ * (the defender manages to turn the gun down to ground and is hit only by
+ * ricochet).
+ */
+
 class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
