@@ -65,6 +65,12 @@ describe('AddSkillControl', function() {
         await user.click(screen.getByText("Two-weapon Style"))
 
         await user.click(within(screen.getByLabelText("Add skill level")).getByRole("button"))
+
+        const levelInput = within(screen.getByLabelText("Add skill level")).getByRole("combobox")
+
+        // The default level should be the lowest possible to select
+        expect(levelInput.value).toEqual("1")
+
         let values = []
         within(screen.getByLabelText("Add skill level")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
 
@@ -81,14 +87,10 @@ describe('AddSkillControl', function() {
         await user.type(skillInput, "foo")
 
         await user.click(within(screen.getByLabelText("Add skill level")).getByRole("button"))
+
         let values = []
         within(screen.getByLabelText("Add skill level")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
-
         expect(values.length).toEqual(0)
-    });
-
-    xit("defaults to lowest skill level based on selected skill", function () {
-        // TODO
     });
 
     it("enables the addition button with valid input", async function () {
