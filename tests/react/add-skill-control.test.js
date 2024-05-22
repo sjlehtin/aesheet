@@ -1,26 +1,22 @@
-jest.dontMock('AddSkillControl');
-jest.dontMock('SkillRow');
-jest.dontMock('SkillTable');
-jest.dontMock('./factories');
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 
-const SkillTable = require('SkillTable').default;
-const AddSkillControl = require('AddSkillControl').default;
+import { screen, render, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
-var rest = require('sheet-rest');
+import AddSkillControl from 'AddSkillControl';
+import SkillTable from 'SkillTable';
+const factories = require('./factories');
 
-var factories = require('./factories');
 
 describe('AddSkillControl', function() {
-    "use strict";
 
     var _basicSkills = [
         factories.skillFactory({name: "Endurance / run",
             stat: "WIL", skill_cost_0: 0, type: "Physical"}),
         factories.skillFactory({name: "Persuasion", type: "Social"}),
-        factories.skillFactory({name: "Mental Fortitude", type: "Mystical"})
+        factories.skillFactory({name: "Mental Fortitude", type: "Mystical"}),
+        factories.skillFactory({name: "Two-weapon Style", type: "Physical",
+            min_level: 1, max_level: 4 })
     ];
 
     var findSkill = function(skills, skillName) {
@@ -32,76 +28,114 @@ describe('AddSkillControl', function() {
         throw Error("skill " + skillName + " not found");
     };
 
-    var getAddSkillControl = function (givenProps) {
+    const renderAddSkillControl = function (givenProps) {
         var props = {allSkills: _basicSkills,
             characterSkillMap: {}
         };
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);
         }
-        var table = TestUtils.renderIntoDocument(
-            <AddSkillControl {...props}/>
-        );
 
-        return TestUtils.findRenderedComponentWithType(table,
-            AddSkillControl);
+        return render(<AddSkillControl {...props}/>)
     };
 
-    it("can filter skills the user already has", function () {
-        var control = getAddSkillControl({characterSkillMap:
+    it("can filter skills the user already has", async function () {
+        const user = userEvent.setup()
+
+        renderAddSkillControl({characterSkillMap:
             SkillTable.getCharacterSkillMap([
                 factories.characterSkillFactory({skill: "Persuasion"})])});
 
-        var filteredList = control.getSkillChoices();
-        var names = filteredList.map((elem) => { return elem.name} );
-        expect(names).toEqual(["Endurance / run", "Mental Fortitude"]);
+        await user.click(within(screen.getByLabelText("Add skill name")).getByRole("button"))
+        let values = []
+        within(screen.getByLabelText("Add skill name")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
+
+        expect(values).toEqual(["Endurance / run", "Two-weapon Style", "Mental Fortitude"]);
+
     });
 
-    it("can render correct values for skill level based on selected skill", function () {
-        var skillList = [].concat([factories.skillFactory({
-            name: "Two-weapon Style", type: "Physical",
-            min_level: 1, max_level: 4 })],
-            _basicSkills);
+    it("can render correct values for skill level based on selected skill", async function () {
+        const user = userEvent.setup()
 
-        var control = getAddSkillControl({allSkills: skillList});
-        expect(control.getLevelChoices()).toEqual([]);
+        renderAddSkillControl();
 
-        control.handleSkillChange(findSkill(skillList,
-            "Two-weapon Style"));
-        expect(control.getLevelChoices()).toEqual([1, 2, 3, 4]);
+        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
+        await user.clear(skillInput)
+        await user.type(skillInput, "Two-wea")
+        await user.click(screen.getByText("Two-weapon Style"))
+
+        await user.click(within(screen.getByLabelText("Add skill level")).getByRole("button"))
+        let values = []
+        within(screen.getByLabelText("Add skill level")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
+
+        expect(values).toEqual(["1", "2", "3", "4"])
     });
 
-    it("will not barf if skill value is not found", function () {
-        var control = getAddSkillControl();
-        expect(control.getLevelChoices()).toEqual([]);
-        control.handleSkillChange("foobar");
-        expect(control.getLevelChoices()).toEqual([]);
+    it("will not barf if skill value is not found", async function () {
+        const user = userEvent.setup()
+
+        renderAddSkillControl();
+
+        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
+        await user.clear(skillInput)
+        await user.type(skillInput, "foo")
+
+        await user.click(within(screen.getByLabelText("Add skill level")).getByRole("button"))
+        let values = []
+        within(screen.getByLabelText("Add skill level")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
+
+        expect(values.length).toEqual(0)
     });
 
-    it("defaults to lowest skill level based on selected skill", function () {
-        // TODO
+    // it("defaults to lowest skill level based on selected skill", function () {
+    //     // TODO
+    // });
+
+    it("enables the addition button with valid input", async function () {
+        const user = userEvent.setup()
+
+        renderAddSkillControl();
+
+        const addButton = screen.getByRole("button", {name: "Add skill"})
+
+        // Expect the button to start disabled.
+        expect(addButton).toBeDisabled()
+
+        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
+        await user.clear(skillInput)
+        await user.type(skillInput, "Pers")
+        await user.click(screen.getByText("Persuasion"))
+
+        const levelInput = within(screen.getByLabelText("Add skill level")).getByRole("combobox")
+        await user.clear(levelInput)
+        await user.type(levelInput, "foo")
+
+        expect(addButton).toBeDisabled()
+
+        await user.clear(levelInput)
+        await user.type(levelInput, "2")
+
+        expect(addButton).not.toBeDisabled()
     });
 
-    it("starts with the add button disabled", function () {
-        var control = getAddSkillControl();
-        expect(control.skillValid()).toEqual(false);
-    });
+    it("calls the skill addition callback on skill add", async function () {
+        const user = userEvent.setup()
+        const spy = jasmine.createSpy("callback");
 
-    it("enables the addition button with valid input", function () {
-        var control = getAddSkillControl();
-        control.handleSkillChange(findSkill(_basicSkills, "Persuasion"));
-        control.handleLevelChange("foo");
-        expect(control.skillValid()).toEqual(false);
-        control.handleLevelChange(2);
-        expect(control.skillValid()).toEqual(true);
-    });
+        renderAddSkillControl({onCharacterSkillAdd: spy});
 
-    it("calls the skill addition callback on skill add", function () {
-        var spy = jasmine.createSpy("callback");
-        var control = getAddSkillControl({onCharacterSkillAdd: spy});
-        control.handleSkillChange(findSkill(_basicSkills, "Persuasion"));
-        control.handleLevelChange(2);
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._addButton));
+        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
+        await user.clear(skillInput)
+        await user.type(skillInput, "Pers")
+        await user.click(screen.getByText("Persuasion"))
+
+        const levelInput = within(screen.getByLabelText("Add skill level")).getByRole("combobox")
+        await user.clear(levelInput)
+        await user.type(levelInput, "2")
+
+        const addButton = screen.getByRole("button", {name: "Add skill"})
+        expect(addButton).not.toBeDisabled()
+        await user.click(addButton)
         expect(spy).toHaveBeenCalledWith({skill: "Persuasion", level: 2});
     });
 
