@@ -56,6 +56,10 @@ First tests done with `add-weapon-control-tests.js` and `stat-block-character-ed
 
 Having tests on top of MSW and StatBlock seems to be almost like a system-level integration test. Very nice!
 
+### React-widgets
+
+This library seems to be mostly stale. It is causing warnings due to use of `findDOMNode` from inside the library. I use the widgets mostly because of the `Combobox`, but similar are available in other packages, and even writing one based on Bootstrap should not be very hard.
+
 ## Class components to React Hooks?
 
 https://react.dev/reference/react/Component#alternatives
@@ -64,4 +68,9 @@ Class components are `legacy` and I expect support for them will disappear.
 
 At least `useEffect()` hook was not very easy to use with the class components.
 
+First stab at this is in the `ModificationButton.js`. New components should use function based style and be implemented with TypeScript as applicable.
+
 ## TODO: JavaScript to TypeScript or whatever is the latest rage
+
+https://webpack.js.org/guides/typescript/
+
