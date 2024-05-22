@@ -87,9 +87,9 @@ describe('AddSkillControl', function() {
         expect(values.length).toEqual(0)
     });
 
-    // it("defaults to lowest skill level based on selected skill", function () {
-    //     // TODO
-    // });
+    xit("defaults to lowest skill level based on selected skill", function () {
+        // TODO
+    });
 
     it("enables the addition button with valid input", async function () {
         const user = userEvent.setup()

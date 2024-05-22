@@ -1,18 +1,21 @@
-jest.dontMock('XPControl');
-jest.dontMock('sheet-util');
-
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
 
-const rest = require('sheet-rest');
+import { screen, render, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
-const XPControl = require('XPControl').default;
+import XPControl from 'XPControl';
 import factories from './factories';
 
-describe('XPControl', function() {
-    "use strict";
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
 
-    var promises;
+const server = setupServer(
+)
+
+describe('XPControl', function() {
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
     var charDataFactory = function (statOverrides) {
         let overrides = {
@@ -30,8 +33,8 @@ describe('XPControl', function() {
     };
 
 
-    var xpControlFactory = function(givenProps) {
-        var props = {
+    const renderXPControl = function(givenProps) {
+        let props = {
             url: "/rest/characters/1/",
             initialChar: charDataFactory(),
             edgesBought: 0
@@ -40,18 +43,9 @@ describe('XPControl', function() {
         if (typeof(givenProps) !== "undefined") {
             props = Object.assign(props, givenProps);
         }
-        var control = React.createElement(XPControl, props);
 
-        var node = TestUtils.renderIntoDocument(control);
-        return TestUtils.findRenderedComponentWithType(node,
-            XPControl);
+        return render(<XPControl {...props} />)
     };
-
-    beforeEach(function () {
-        rest.getData = jest.fn();
-        rest.patch = jest.fn();
-        promises = [];
-    });
 
     it('can calculate used xp', function (){
         expect(XPControl.calculateStatRaises(charDataFactory())).toEqual(76);
@@ -60,130 +54,85 @@ describe('XPControl', function() {
     });
 
     it('can calculate used xp from edges', function () {
-        var control = xpControlFactory();
-        expect(control.xpEdgesBought()).toEqual(0);
+        renderXPControl();
+        expect(screen.getByLabelText("XP used for edges").textContent).toEqual("0")
     });
 
     it('can take free edges into account', function () {
-        var control = xpControlFactory({
+        renderXPControl({
             edgesBought: 3, initialChar:
             charDataFactory({free_edges: 2})});
-        expect(control.xpEdgesBought()).toEqual(25);
+        expect(screen.getByLabelText("XP used for edges").textContent).toEqual("25")
     });
 
     it('will not allow negative cost from free edges', function () {
-        var control = xpControlFactory({
+        renderXPControl({
             edgesBought: 3, initialChar:
             charDataFactory({free_edges: 4})});
-        expect(control.xpEdgesBought()).toEqual(0);
+        expect(screen.getByLabelText("XP used for edges").textContent).toEqual("0")
     });
 
-    var jsonResponse = function (json) {
-        var promise = Promise.resolve(json);
-        promises.push(promise);
-        return promise;
-    };
+    it('reacts to input', async function () {
+        const user = userEvent.setup()
 
-    it('calls parent component set change callback', function (done) {
-        rest.patch.mockReturnValue(jsonResponse({}));
+        const callback = jest.fn().mockResolvedValue({})
 
-        var callback = jasmine.createSpy("callback");
-        var control = xpControlFactory({onMod: callback,
-            initialChar: charDataFactory({total_xp: 60})});
+        renderXPControl({
+            initialChar: charDataFactory({total_xp: 60}),
+            onMod: callback
+        });
 
-        TestUtils.Simulate.click(control.getAddDOMNode());
+        await user.click(screen.getByRole("button", {name: "Add XP"}))
 
-        var input = control.getInputDOMNode();
-        /* Required with Bootstrap. */
-        input.value = 200;
-        TestUtils.Simulate.change(input, {target: {value: 200}});
+        const textInput = screen.getByRole("textbox");
 
-        control.handleSubmit(new Event("submit", {}));
+        expect(textInput.value).toEqual("0")
+        expect(textInput).toHaveFocus()
 
-        Promise.all(promises).then(function () {
-            expect(rest.patch.mock.calls[0][0]).toEqual('/rest/characters/1/');
-            expect(rest.patch.mock.calls[0][1]).toEqual({total_xp: 260});
+        const addButton = screen.getByRole("button", {name: "Add"})
 
-            Promise.all(promises).then(function () {
-                expect(callback).toHaveBeenCalledWith("total_xp", 60, 260);
-                done();
-            }).catch(function (err) { fail(err);});;
-        }).catch(function (err) { fail(err);});
+        await user.clear(textInput)
+        await user.type(textInput, "foo")
+        expect(addButton).toBeDisabled()
+
+        await user.clear(textInput)
+        await user.type(textInput, "200")
+
+        expect(addButton).not.toBeDisabled()
+
+        let values = []
+        server.use(
+            rest.patch("http://localhost/rest/characters/1/", async (req, res, ctx) => {
+                const payload = await req.json();
+                values.push(payload)
+                return res(ctx.json(payload))
+            }),
+        )
+        await user.click(addButton)
+
+        expect(values[0]).toEqual({total_xp: 260})
+        expect(callback).toHaveBeenCalledWith("total_xp", 60 ,260)
     });
 
-    it('reacts to input', function () {
-        var control = xpControlFactory({
+    it('allows adding to be canceled', async function () {
+        const user = userEvent.setup()
+
+        renderXPControl({
             initialChar: charDataFactory({total_xp: 60})
         });
 
-        expect(control.state.addXP).toEqual(0);
+        await user.click(screen.getByRole("button", {name: "Add XP"}))
 
-        TestUtils.Simulate.click(control.getAddDOMNode());
+        const textInput = screen.getByRole("textbox")
 
-        var input = control.getInputDOMNode();
-        input.value = 200;
-        TestUtils.Simulate.change(
-            control.getInputDOMNode(), {target: {value: 200}});
-        expect(control.state.addXP).toEqual(200);
+        expect(textInput.value).toEqual("0")
+        expect(textInput).toHaveFocus()
+
+        expect(screen.queryByRole("textbox")).not.toBe(null)
+
+        await user.click(screen.getByRole("button", {name: "Close"}))
+
+        expect(screen.queryByRole("textbox")).toBe(null)
     });
 
-    it('allows dialog to be shown', function () {
-        var control = xpControlFactory();
-        expect(control.state.showDialog).toBe(false);
-        TestUtils.Simulate.click(control.getAddDOMNode(), {});
-        expect(control.state.showDialog).toBe(true);
-    });
-
-    it('validates integer values', function () {
-        var control = xpControlFactory();
-        TestUtils.Simulate.click(control.getAddDOMNode());
-        var input = control.getInputDOMNode();
-        TestUtils.Simulate.change(input, {target: {value: "20a"}});
-
-        expect(control.isValid()).toBe(false);
-
-        TestUtils.Simulate.change(input, {target: {value: "tsap"}});
-
-        expect(control.isValid()).toBe(false);
-
-        TestUtils.Simulate.change(input, {target: {value: 10}});
-
-        expect(control.isValid()).toBe(true);
-
-        TestUtils.Simulate.change(input, {target: {value: "10"}});
-
-        expect(control.isValid()).toBe(true);
-    });
-
-    it('allows adding to be canceled', function () {
-        var control = xpControlFactory();
-        TestUtils.Simulate.click(control.getAddDOMNode());
-        var input = control.getInputDOMNode();
-        input.value = 200;
-        TestUtils.Simulate.change(input, {target: {value: 200}});
-
-        expect(control.state.addXP).toEqual(200);
-
-        /* TODO: it would be nice to trigger the cancel by triggering the
-         dialog, but the DOM manipulation seems to be a bit tricky.  For
-          later... */
-        control.handleCancel();
-        expect(control.state.addXP).toEqual(0);
-        expect(control.state.showDialog).toBe(false);
-    });
-
-    it('reacts to submit button', function (done) {
-        var control = xpControlFactory();
-        var response = jsonResponse({});
-        rest.patch.mockReturnValue(response);
-
-        var spy = spyOn(control, 'handleSubmit');
-
-        TestUtils.Simulate.click(control.getAddDOMNode());
-        TestUtils.Simulate.click(control.getSubmitDOMNode());
-        response.then(function () {
-            expect(spy).toHaveBeenCalled();
-            done();
-        });
-    });
 });

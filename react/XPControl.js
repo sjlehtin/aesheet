@@ -1,11 +1,10 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import { Button, Modal, FormControl } from 'react-bootstrap';
 
-var util = require('./sheet-util');
-var rest = require('./sheet-rest');
+const util = require('./sheet-util');
+const rest = require('./sheet-rest');
 
 class XPControl extends React.Component {
     constructor(props) {
@@ -62,22 +61,6 @@ class XPControl extends React.Component {
         this.setState({addXP: event.target.value});
     }
 
-    getInputDOMNode() {
-        return ReactDOM.findDOMNode(this._inputField);
-    }
-
-    getAddDOMNode() {
-        return ReactDOM.findDOMNode(this._addButton);
-    }
-
-    getCancelDOMNode() {
-        return ReactDOM.findDOMNode(this._cancelButton);
-    }
-
-    getSubmitDOMNode() {
-        return ReactDOM.findDOMNode(this._submitButton);
-    }
-
     handleCancel() {
         this.setState({addXP: 0, showDialog: false});
     }
@@ -97,7 +80,7 @@ class XPControl extends React.Component {
         var hero;
 
         if (this.props.initialChar.hero) {
-            hero = <span title="Hero">100 + </span>;
+            hero = <span><span title="Hero">100</span><span> + </span></span>;
             totalXP += 100;
         }
         var stat = {fontWeight: "bold", paddingRight: 5};
@@ -106,12 +89,13 @@ class XPControl extends React.Component {
             xpWarning = <div style={{color: "red"}}>Too much XP used!</div>;
         }
         return (<div><span style={stat}>XP:</span>
-            <span title="Stats, stamina and mana bought">{xpStatsBought} + </span>
+            <span title="Stats, stamina and mana bought">{xpStatsBought}</span><span> + </span>
             {hero}
-            <span title={`${this.props.edgesBought} edges bought, ${this
-            .props.initialChar.free_edges} free edges`}>
-                {xpEdgesBought} + </span>
-            <span title="XP used ingame">{this.props.initialChar.xp_used_ingame}</span>
+            <span aria-label={"XP used for edges"}
+                  title={`${this.props.edgesBought} edges bought, ${this
+                      .props.initialChar.free_edges} free edges`}>{xpEdgesBought}</span><span> + </span>
+            <span
+                title="XP used ingame">{this.props.initialChar.xp_used_ingame}</span>
             <span> = <span title="Used XP">{totalXP}
             </span> / <span title="Total XP">{this.props.initialChar.total_xp}
             </span>
@@ -123,25 +107,23 @@ class XPControl extends React.Component {
                     Add XP</Button></span>
             <Modal show={this.state.showDialog} keyboard
                    onHide={this.handleCancel.bind(this)}>
-                <Modal.Header closeButton={true}><Modal.Title>Add XP</Modal.Title></Modal.Header>
+                <Modal.Header closeButton={true}><Modal.Title>Add
+                    XP</Modal.Title></Modal.Header>
                 <Modal.Body>
-                     {/*TODO: fix hasFeedback*/}
-                    <FormControl type="text" ref={(c) => { this._inputField = c;
-                    /* Set focus initially here. */
-                    if (c) {
-                    ReactDOM.findDOMNode(c).focus();
-                    }
-                    }}
-                           label="Add XP"
-                           onChange={this.handleChange.bind(this)}
-                           isValid={this.isValid()}
-                           className="col-xs-2"
-                           value={this.state.addXP} />
+                    <FormControl type="text"
+                                 label="Add XP"
+                                 autoFocus
+                                 onChange={this.handleChange.bind(this)}
+                                 isValid={this.isValid()}
+                                 className="col-xs-2"
+                                 value={this.state.addXP}/>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button ref={(c) => this._submitButton = c}
-                                 onClick={(e) => { this.handleSubmit(e);}}
-                                 variant="primary">Add</Button>
+                    <Button onClick={(e) => {
+                                this.handleSubmit(e);
+                            }}
+                            disabled={!this.isValid()}
+                            variant="primary">Add</Button>
                 </Modal.Footer>
             </Modal>
             {xpWarning}
