@@ -1263,7 +1263,7 @@ class StatBlock extends React.Component {
             <Card.Body className={"table-responsive p-0"}>
             <Table striped>
                 <thead>
-                <tr><th>Effect</th></tr>
+                <tr><th>Name</th><th>Effect</th><th></th></tr>
                 </thead>
                 <tbody>
                 {rows}
@@ -1326,7 +1326,12 @@ class StatBlock extends React.Component {
 
         let idx = 0;
 
+        let costIgnored = false
+
         for (let item of this.state.characterEdges) {
+            if (item.ignore_cost) {
+                costIgnored = true;
+            }
             rows.push(<EdgeRow
                 key={idx++}
                 edge={item}
@@ -1335,6 +1340,10 @@ class StatBlock extends React.Component {
             />);
         }
 
+        let costIgnoredElem = <span />;
+        if (costIgnored) {
+            costIgnoredElem = <span style={{fontSize: "small"}}>* Cost ignored</span>
+        }
         return <Card id="edges" className={"m-1"}>
             <Card.Body>
                 <h4>Edges</h4>
@@ -1342,12 +1351,13 @@ class StatBlock extends React.Component {
             <Card.Body className={"table-responsive p-0 m-1"}>
             <Table striped >
                 <thead>
-                <tr><th>Edge</th></tr>
+                <tr><th>Edge</th><th>Cost</th><th>Ignore cost?</th></tr>
                 </thead>
                 <tbody>
                 {rows}
                 </tbody>
             </Table>
+                {costIgnoredElem}
             </Card.Body>
             <Card.Footer>
                 <AddCharacterEdgeControl
