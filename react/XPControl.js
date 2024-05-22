@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Button, Modal, FormControl } from 'react-bootstrap';
+import { Button, Modal, FormControl, Form } from 'react-bootstrap';
 
 const util = require('./sheet-util');
 const rest = require('./sheet-rest');
@@ -110,8 +110,11 @@ class XPControl extends React.Component {
                 <Modal.Header closeButton={true}><Modal.Title>Add
                     XP</Modal.Title></Modal.Header>
                 <Modal.Body>
+                    <Form.Label id={"add-xp-input"}>Add XP</Form.Label>
                     <FormControl type="text"
                                  label="Add XP"
+                                 name={"add-xp-input"}
+                                 aria-labelledby={"add-xp-input"}
                                  autoFocus
                                  onChange={this.handleChange.bind(this)}
                                  isValid={this.isValid()}

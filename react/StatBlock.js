@@ -371,7 +371,7 @@ class StatBlock extends React.Component {
 
         var rates = [];
 
-        if (highStat != 0) {
+        if (highStat !== 0) {
             rates.push(highStat);
         }
         if (level > 0) {
@@ -846,6 +846,7 @@ class StatBlock extends React.Component {
         if (bodyFromToughness) {
             toughness = <span>+<span style={{ fontWeight: "bold"}}
                                      id={"bodyFromToughness"}
+                                     aria-label={"Body from Toughness"}
             >{bodyFromToughness}</span></span>;
         } else {
             toughness = "";
@@ -858,14 +859,14 @@ class StatBlock extends React.Component {
         expendable = <tbody>
         <tr><td style={statStyle}>B</td>
             <td style={baseStyle} aria-label={"Body at full health"}>{baseStats.baseBody}{toughness}</td>
-            <td style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
+            <td aria-label={"Body healing"} style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
             <td style={baseStyle}>{baseStats.stamina}</td>
-            <td style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
+            <td aria-label={"Stamina recovery"} style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
             }</td></tr>
         <tr><td style={statStyle}>M</td>
-            <td style={baseStyle}>{this.mana(baseStats)}</td>
-            <td style={recoveryStyle}>{this.manaRecovery(effStats, skillHandler)
+            <td style={baseStyle} aria-label={"Maximum mana"}>{this.mana(baseStats)}</td>
+            <td aria-label={"Mana recovery"} style={recoveryStyle}>{this.manaRecovery(effStats, skillHandler)
             }</td></tr>
         </tbody>;
 

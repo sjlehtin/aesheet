@@ -210,7 +210,7 @@ class SkillTable extends React.Component {
                 <h4>Skills</h4>
             </Card.Header>
             <Card.Body className={"table-responsive p-0"}>
-            <Table style={{fontSize: "inherit"}} striped>
+            <Table aria-label={"Skills"} style={{fontSize: "inherit"}} striped>
             <thead>
             <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
             </thead>

@@ -108,7 +108,7 @@ class SkillRow extends React.Component {
         var remove;
         if (this.props.skillHandler.hasSkill(this.props.skillName) &&
             this.props.onCharacterSkillRemove) {
-            remove = <span aria-label={"Remove skill"} style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
+            remove = <span aria-label={"Remove skill"} name={"Remove skill"} role={"button"} style={{color: "red", cursor: "pointer", float: "right", paddingRight: 5}}
                     onClick={(e) => {this.props.onCharacterSkillRemove(
                       this.props.characterSkill)}}
                     ><GoX /></span>;

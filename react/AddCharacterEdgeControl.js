@@ -69,23 +69,24 @@ class AddEdgeLevelControl extends React.Component {
     render () {
         return <table>
             <tbody>
-                <tr>
-                    <td><label>EdgeLevel</label><Combobox data={this.state.edgeLevelChoices}
+                <tr aria-label={"Add edge level"}>
+                    <td><label id={"edgelevel"}>EdgeLevel</label>
+                        <Combobox data={this.state.edgeLevelChoices}
                                   textField={(obj) => {
                                       return this.formatEdge(obj);
                                   }}
+                                  aria-labelledby={"edgelevel"}
                                   open={this.state.isOpen}
                                   busy={this.state.isBusy}
                                   filter="contains"
                                   value={this.state.selectedEdgeLevel}
-                                  onChange={(value) => this.handleEdgeLevelChange(value) }
-                />
+                                  onChange={(value) => this.handleEdgeLevelChange(value) } />
             <Button size="sm" disabled={!this.fieldsValid()}
                     ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add EdgeLevel</Button>
-                <div><a href="/sheets/add_edge/">Create a new edge</a>
-                    <a href="/sheets/add_edge_level/">Create a new edge level</a>
+                <div><a href="/sheets/add_edge/">Create a new edge</a>{' '}
+                    <a href="/sheets/add_edge_level/">Create a new edge level</a>{' '}
                     <a href="/sheets/add_edge_skill_bonus/">Create a new skillbonus for edge level</a>
                 </div>
                         </td>
