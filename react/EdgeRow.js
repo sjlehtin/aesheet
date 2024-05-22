@@ -24,7 +24,7 @@ class EdgeRow extends React.Component {
                 <span><FormCheck
                     aria-label={"Ignore cost"}
                            tabIndex={0}
-                           onChange={(e) => {this.props.onChange(Object.assign(restPayload, {ignore_cost: !restPayload.ignore_cost}))}}
+                           onChange={(e) => {this.props.onChange(Object.assign(restPayload, {ignore_cost: !this.props.edge.ignore_cost}))}}
                            checked={this.props.edge.ignore_cost}
                            type={"checkbox"} value={this.props.edge.ignore_cost}/></span>
             </td>
