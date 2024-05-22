@@ -75,7 +75,7 @@ class SenseTable extends React.Component {
                 }
             }
             let style = Object.assign({}, baseStyle, extras);
-            return <td className="check" key={"chk-" + ii} style={style} {...props}>{chk}</td>;
+            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}>{chk}</td>;
         });
 
         const numPad = 12 - checks.length;
@@ -133,7 +133,7 @@ class SenseTable extends React.Component {
     renderSurpriseChecks() {
         let baseCheck = this.props.handler.surpriseCheck();
         return [<td key="empty"/>,
-            <td className="check" key="check">{baseCheck}</td>]
+            <td className="check" aria-label={"check"} key="check">{baseCheck}</td>]
             .concat(SenseTable.getPadCells(11));
     }
 
@@ -157,25 +157,25 @@ class SenseTable extends React.Component {
             </tr>
         </thead>
         <tbody>
-        <tr ref={(c) => this._visionCheckRow = c}><th>Day</th>
+        <tr aria-label={"Day vision"}><th>Day</th>
             {this.renderVisionChecks()}<td/></tr>
         <tr style={{}}><th>Night 1</th>
             {this.renderNightVisionChecks(-1)}<td style={noteStyle}>-1, Dusk</td></tr>
-        <tr ref={(c) => this._nightVision2CheckRow = c} style={{}}><th>Night 2</th>
+        <tr aria-label={"Night Vision DL -2"}><th>Night 2</th>
             {this.renderNightVisionChecks(-2)}<td style={noteStyle}>-2, Artificial light</td></tr>
-        <tr ref={(c) => this._nightVision3CheckRow = c} style={{}}><th>Night 3</th>
+        <tr aria-label={"Night Vision DL -3"}><th>Night 3</th>
             {this.renderNightVisionChecks(-3)}<td style={noteStyle}>-3, Moonlight</td></tr>
-        <tr ref={(c) => this._nightVision4CheckRow = c} style={{}}><th>Night 4</th>
+        <tr aria-label={"Night Vision DL -4"}><th>Night 4</th>
             {this.renderNightVisionChecks(-4)}<td style={noteStyle}>-4, Darkness</td></tr>
-        <tr ref={(c) => this._nightVision7CheckRow = c} style={{}}><th>Night 7</th>
+        <tr aria-label={"Night Vision DL -7"}><th>Night 7</th>
             {this.renderNightVisionChecks(-7)}<td style={noteStyle}>-7, Pitch black</td></tr>
-        <tr ref={(c) => this._hearingCheckRow = c}><th>Hearing</th>
+        <tr aria-label={"Hearing"}><th>Hearing</th>
             {this.renderHearingChecks()}<td/></tr>
-        <tr ref={(c) => this._smellCheckRow = c}><th>Smell</th>
+        <tr aria-label={"Smell"}><th>Smell</th>
             {this.renderSmellChecks()}<td/></tr>
-        <tr ref={(c) => this._touchCheckRow = c}><th>Touch</th>
+        <tr aria-label={"Touch"}><th>Touch</th>
             {this.renderTouchChecks()}<td/></tr>
-        <tr ref={(c) => this._surpriseCheckRow = c}><th>Surprise</th>
+        <tr aria-label={"Surprise"}><th>Surprise</th>
             {this.renderSurpriseChecks()}<td/></tr>
         </tbody>
         </Table>

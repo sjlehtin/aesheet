@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {GoX} from 'react-icons/go';
+
+import {Button} from 'react-bootstrap';
 
 const util = require('./sheet-util');
 
@@ -23,7 +24,7 @@ class TransientEffectRow extends React.Component {
             if (util.isInt(value)) {
                 rendered = util.renderInt(value);
             } else if (util.isFloat(value)) {
-                if (parseFloat(value) == 0.0) {
+                if (parseFloat(value) === 0.0) {
                     continue;
                 }
                 rendered = value;
@@ -42,20 +43,13 @@ class TransientEffectRow extends React.Component {
             }
         }
 
-        return <tr style={this.props.style}
-                   title={this.props.effect.effect.description}>
-            <td>
-            {this.props.effect.effect.name}
-                <span style={{marginLeft: 10}}>
-                {effects}
-                </span>
-            <span style={{color: "red", cursor: "pointer", float: "right",
-            paddingRight: 5}}
-                  ref={(c) => this._removeButton = c }
-                  onClick={(e) => {this.props.onRemove(this.props.effect)}}
-            ><GoX /></span>
-                </td>
-        </tr>;
+        return <tr title={this.props.effect.effect.description}>
+            <td aria-label={"Name"}>{this.props.effect.effect.name}</td>
+            <td aria-label={"Effect"}>{effects}</td>
+            <td><Button
+                onClick={(e) =>
+                {this.props.onRemove({id: this.props.effect.id})}}>Remove</Button></td>
+        </tr>
     }
 }
 
