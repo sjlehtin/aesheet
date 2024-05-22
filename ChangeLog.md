@@ -1,3 +1,10 @@
+## [Unreleased]
+
+### Changed
+
+* `Tailing / Shadowing` (to be renamed) affects surprise check and `Search` (to be renamed) affects other sense checks.
+* AC penalty also affects sense and surprise checks.
+
 ## [0.16.1] - 2024-05-21
 
 ### Changed

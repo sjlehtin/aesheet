@@ -1,14 +1,6 @@
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
-import React from 'react';
-
-const factories = require('./factories');
+import factories from './factories';
 
 describe('SkillHandler edge skill bonuses', function() {
-    "use strict";
-
     it('handles plain surprise check', function () {
         const handler = factories.skillHandlerFactory({character: {cur_psy: 50}});
 
@@ -29,6 +21,14 @@ describe('SkillHandler edge skill bonuses', function() {
 
         expect(handler.nightVisionBaseCheck()).toEqual({check: 50,
             darknessDetectionLevel: -1, detectionLevel: 0});
+    });
+
+    it('handles skill night vision modifiers', function () {
+        const handler = factories.skillHandlerFactory({
+                            character: {cur_int: 50},
+                            skills: [{skill: "Search", level: 1}]});
+        expect(handler.nightVisionBaseCheck()).toEqual({check: 55,
+            darknessDetectionLevel: 0, detectionLevel: 0});
     });
 
     it('recognizes Acute Vision for detection level', function () {
@@ -98,6 +98,13 @@ describe('SkillHandler edge skill bonuses', function() {
         expect(handler.dayVisionBaseCheck()).toEqual({check: 45, detectionLevel: 0});
     });
 
+    it('handles skill day vision modifiers', function () {
+        const handler = factories.skillHandlerFactory({
+                            character: {cur_int: 50},
+                            skills: [{skill: "Search", level: 1}]});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 55, detectionLevel: 0});
+    });
+
     it('handles edge surprise modifiers', function () {
         const handler = factories.skillHandlerFactory({character: {cur_psy: 50},
         edges: [{edge: "Peripheral Vision", level: 1, surprise: 5}]});
@@ -112,6 +119,13 @@ describe('SkillHandler edge skill bonuses', function() {
         expect(handler.surpriseCheck()).toEqual(45);
     });
 
+    it('handles skill surprise modifiers', function () {
+        const handler = factories.skillHandlerFactory({
+                            character: {cur_psy: 50},
+                            skills: [{skill: "Tailing / Shadowing", level: 1}]});
+        expect(handler.surpriseCheck()).toEqual(55);
+    });
+
     it('handles edge smell modifiers', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Excellent Cook", level: 1, smell: 5}]});
@@ -124,6 +138,13 @@ describe('SkillHandler edge skill bonuses', function() {
                             character: {cur_int: 50},
                             armor: {base: {mod_smell: -5}}});
         expect(handler.smellCheck()).toEqual({check: 45, detectionLevel: 0});
+    });
+
+    it('handles skill smell modifiers', function () {
+        const handler = factories.skillHandlerFactory({character: {cur_int: 50},
+        skills: [{skill: "Search", level: 1}]});
+
+        expect(handler.smellCheck()).toEqual({check: 55, detectionLevel: 0});
     });
 
     it('recognizes Acute Smell and Taste for detection level', function () {
@@ -154,6 +175,13 @@ describe('SkillHandler edge skill bonuses', function() {
         expect(handler.hearingCheck()).toEqual({check: 45, detectionLevel: 0});
     });
 
+    it('handles skill hearing modifiers', function () {
+        const handler = factories.skillHandlerFactory({character: {cur_int: 50},
+        skills: [{skill: "Search", level: 1}]});
+
+        expect(handler.hearingCheck()).toEqual({check: 55, detectionLevel: 0});
+    });
+
     it('recognizes Acute Hearing for detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Acute Hearing", level: 1}]});
@@ -173,6 +201,13 @@ describe('SkillHandler edge skill bonuses', function() {
         edges: [{edge: "Acute Touch", level: 1}]});
 
         expect(handler.touchCheck()).toEqual({check: 50, detectionLevel: 1});
+    });
+
+    it('handles skill touch modifiers', function () {
+        const handler = factories.skillHandlerFactory({character: {cur_int: 50},
+        skills: [{skill: "Search", level: 1}]});
+
+        expect(handler.touchCheck()).toEqual({check: 55, detectionLevel: 0});
     });
 
     it('handles armor touch modifiers', function () {

@@ -142,43 +142,21 @@ class SkillHandler {
      * If character doesn't have the skill, and the skill level 0 has
      * a non-zero cost, calculate check defaulted to half-ability.
      */
-    skillCheck(skillName, stat) {
-        var skill = this.state.skillMap[skillName];
-        if (!skill || this.isBaseSkill(skillName)) {
-            return null;
-        }
 
-        if (!stat) {
-            stat = skill.stat;
-        }
-        var ability = this.getStat(stat);
-        var level = this.skillLevel(skillName);
-
-        var check = 0;
-        if (level === "U") {
-            check = Math.round(ability / 4)
-        } else if (level === "B") {
-            check = Math.round(ability / 2)
-        } else {
-            check = ability + level * 5;
-        }
-        if (skillName in this.state.skillBonusMap) {
-            check += this.state.skillBonusMap[skillName].bonus;
-        }
-
-        check += this.getSkillMod(skillName);
-        check += this.getACPenalty();
-        return check;
-    }
-
-    skillCheckV2(skillName, stat) {
+    skillCheckV2(skillName, stat, ignoreMissingSkill) {
         const skill = this.state.skillMap[skillName];
-        if (!skill || this.isBaseSkill(skillName)) {
-            return null;
-        }
 
-        if (!stat) {
-            stat = skill.stat;
+        if (!ignoreMissingSkill) {
+            if (!skill || this.isBaseSkill(skillName)) {
+                return null;
+            }
+            if (!stat) {
+                stat = skill.stat;
+            }
+        } else {
+            if (!stat) {
+                throw "When ignoring missing skill, stat is required"
+            }
         }
         const effStats = this.getEffStats();
         const ability = effStats[stat.toLowerCase()];
@@ -187,12 +165,12 @@ class SkillHandler {
 
         let check = 0;
         let breakdown = []
-        if (level === "U") {
+        if (level === "U" && !ignoreMissingSkill) {
             check = Math.round(ability / 4)
             breakdown.push({value: check,
                 reason: `1/4*${stat} (U)`
             })
-        } else if (level === "B") {
+        } else if (level === "B" && !ignoreMissingSkill) {
             check = Math.round(ability / 2)
             breakdown.push({value: check,
                 reason: `1/2*${stat} (B)`
@@ -237,6 +215,10 @@ class SkillHandler {
             value: check,
             breakdown: breakdown
         }
+    }
+
+    skillCheck(skillName, stat) {
+        return this.skillCheckV2(skillName, stat)?.value
     }
 
     /* U is quarter-skill, i.e., using a pistol even without Basic
@@ -804,7 +786,7 @@ class SkillHandler {
     }
 
     dayVisionBaseCheck() {
-        let check = this.getEffStats().int;
+        let check = this.skillCheckV2("Search", "INT", true)?.value;
         check += this.getTotalModifier("vision");
         check -= 5 * this.edgeLevel("Color Blind");
         return {check: check,
@@ -812,6 +794,7 @@ class SkillHandler {
     }
 
     nightVisionBaseCheck(givenPerks) {
+        const check = this.skillCheckV2("Search", "INT", true)?.value;
         let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
         let nightVision = this.detectionLevel("Night Vision",
             "Night Blindness");
@@ -819,28 +802,32 @@ class SkillHandler {
             acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", givenPerks);
             nightVision += this.detectionLevel("Night Vision", "Night Blindness", givenPerks);
         }
-        return {check: this.getEffStats().int + this.getTotalModifier("vision"),
+        return {check: check + this.getTotalModifier("vision"),
             detectionLevel: util.rounddown(acuteVision / 2),
             darknessDetectionLevel: nightVision};
     }
 
     surpriseCheck() {
-        return this.getEffStats().psy + this.getTotalModifier("surprise");
+        const surpriseSkillCheck = this.skillCheckV2("Tailing / Shadowing", "PSY", true)?.value;
+        return surpriseSkillCheck + this.getTotalModifier("surprise");
     }
 
     smellCheck() {
-        return {check: this.getEffStats().int + this.getTotalModifier("smell"),
+        const smellCheck = this.skillCheckV2("Search", "INT", true)?.value;
+        return {check: smellCheck + this.getTotalModifier("smell"),
             detectionLevel: this.detectionLevel("Acute Smell and Taste",
                             "Poor Smell and Taste")};
     }
 
     hearingCheck() {
-        return {check: this.getEffStats().int + this.getTotalModifier("hear"),
+        const hearingCheck = this.skillCheckV2("Search", "INT", true)?.value;
+        return {check: hearingCheck + this.getTotalModifier("hear"),
             detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
     }
 
     touchCheck() {
-        return {check: this.getEffStats().int +
+        const touchCheck = this.skillCheckV2("Search", "INT", true)?.value;
+        return {check: touchCheck +
                         util.roundup(this.getSkillMod("climb") / 2),
                 detectionLevel: this.edgeLevel("Acute Touch")};
     }

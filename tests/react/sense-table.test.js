@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { screen, render, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 
 import SenseTable from 'SenseTable';
 import factories from './factories';
@@ -77,6 +76,16 @@ describe('SenseTable', function() {
 
         const checks = getChecks("Surprise")
         expect(checks[checks.length - 1]).toEqual(50);
+        // Just one check (close).
+        expect(checks.length).toEqual(1);
+    });
+
+    it('add surprise skill to surprise check', function () {
+        getSenseTable({character: {cur_psy: 50},
+            skills: [factories.characterSkillFactory({skill: "Tailing / Shadowing", level: 1})]});
+
+        const checks = getChecks("Surprise")
+        expect(checks[checks.length - 1]).toEqual(55);
         // Just one check (close).
         expect(checks.length).toEqual(1);
     });
