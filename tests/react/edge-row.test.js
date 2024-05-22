@@ -1,81 +1,55 @@
-import createReactClass from "create-react-class";
-
-jest.dontMock('EdgeRow');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
-/*
-Coverage before adding test file
-File                             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
-  EdgeRow.js                     |   77.77 |       50 |      75 |   77.77 | 15,31
- */
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-const characterEdgeFactory = require('./factories').characterEdgeFactory;
+import { screen, render, waitFor } from '@testing-library/react'
+const factories = require('./factories');
 
-const EdgeRow = require('EdgeRow').default;
+import EdgeRow from "EdgeRow"
+import userEvent from "@testing-library/user-event";
 
-jest.mock('sheet-rest');
-var rest = require('sheet-rest');
-
-var edgeRowFactory = function(givenProps) {
-    const Wrapper = createReactClass({
-        render: function () {
-            return <table>
-                <tbody>{this.props.children}</tbody>
-            </table>;
-        }
-    });
-
-    let props = Object.assign(givenProps, {edge:  characterEdgeFactory(givenProps.edge)})
-    let rowElement = React.createElement(EdgeRow, props);
-    let table = TestUtils.renderIntoDocument(
-        <Wrapper>
-            {rowElement}
-        </Wrapper>
-    );
-
-    return TestUtils.findRenderedComponentWithType(table,
-        EdgeRow);
+const edgeRowFactory = function(givenProps) {
+    let props = Object.assign(givenProps, {edge:  factories.characterEdgeFactory(givenProps.edge)})
+    return render(<table><tbody><EdgeRow {...props} /></tbody></table>)
 };
 
 describe('EdgeRow', function() {
 
-    it("can toggle the ignore_cost field", function () {
-        const spy = jasmine.createSpy();
+    it("can toggle the ignore_cost field", async function () {
+        const user = userEvent.setup()
 
-        const edge = characterEdgeFactory({edge: {edge: {name: "Foo edge"}}, level: 2, ignore_cost: true});
+        const spy = jest.fn();
 
-        let expected = Object.assign({}, edge);
-        delete expected.edge;
-        expected.ignore_cost = false;
+        const edge = factories.characterEdgeFactory({edge: {edge: {name: "Foo edge"}}, level: 2, id: 42});
 
-        const control = edgeRowFactory({
+        edgeRowFactory({
             edge: edge,
             onChange: spy
         });
 
-        TestUtils.Simulate.change(ReactDOM.findDOMNode(control._toggleIgnoreCost));
+        const checkbox = screen.getByRole("checkbox", {name: "Ignore cost"})
+        expect(checkbox).not.toBeChecked()
 
-        expect(spy).toHaveBeenCalledWith(expected);
+        await user.click(checkbox)
+
+        expect(spy.mock.lastCall[0].ignore_cost).toBe(true)
+
+        waitFor(() => {
+            expect(screen.getByRole("checkbox", {name: "Ignore cost"})).toBeChecked()
+        })
     });
 
-    it("can remove the edge", function () {
-        const spy = jasmine.createSpy();
+    it("can remove the edge", async function () {
+        const user = userEvent.setup()
 
-        const edge = characterEdgeFactory({edge: {edge: {name: "Foo edge"}}, level: 2});
+        const spy = jest.fn();
 
-        let expected = Object.assign({}, edge);
-        delete expected.edge;
+        const edge = factories.characterEdgeFactory({edge: {edge: {name: "Foo edge"}}, level: 2, id: 42});
 
-        const control = edgeRowFactory({
+        edgeRowFactory({
             edge: edge,
             onRemove: spy
         });
 
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._removeButton));
+        await user.click(screen.getByRole("button", {name: "Remove"}))
 
-        expect(spy).toHaveBeenCalledWith(expected);
+        expect(spy.mock.lastCall[0].id).toBe(42)
     });
 });
