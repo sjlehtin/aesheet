@@ -123,8 +123,8 @@ describe('stat block edge handling', function() {
                 return res(ctx.status(204))
             })
         )
-        let promise = waitForElementToBeRemoved(() => screen.queryByText(/Acute Vision 1/i))
         await user.click(await within(document.getElementById("edges")).findByRole("button", {name: /Remove/i}))
-        return promise
+
+        await waitFor(() => expect(screen.queryByText(/Acute Vision 1/i)).toBe(null))
     });
 });
