@@ -28,14 +28,22 @@
     ++ bleeding damage, retain original wound, but incurs AA etc penalties
        as per bleeding.
 
+    - mana usage controls
+
     - fit/ref penalties from arm damage
     - add a generic skill check element to allow unskilled checks
     + add a log entry for added edges
-    - add indication of last SP addition
-    - add indication of last XP addition
+    + add indication of last SP addition
+    + add indication of last XP addition
+    - make SP addition a modal dialog to reduce possibility of human error
     - "add xp used ingame" with a possibility to enter description (to log)
     - calculate shock check and add "times wounded" to sheet
-    - character log to the side after skill panel
+    - character log to the side after skill panel. Should update dynamically,
+        use websockets for this
+
+    - weapons, ammo, armor, skills, should all be possible to update in the
+        backend, without need to reload the sheet. Websocket notification on
+        changes in the backend, so client JS knows to discard loaded lists?
 
     - "goon sheet" sheet set for (mostly) GM managed groups of NPCs
         - Add and remove, sync from main sheet
@@ -58,7 +66,7 @@
     - telescopic sight x16 xxxxl extreme range options
     - language skills to a separate section in the skills
     - make "standard skills" stand out a bit in the selection
-    -- allow "upgrading skill" (which will add the corresponding skill
+    -- allow "upgrading skill" (which will add the corresponding skill)
     + apply instinctive fire on low ranges
     - double range penalties for sweep fire missing in range view
     - UI: touch devices "missing skills" not showing up, can't see the reason for the missing skill indicator
