@@ -4,11 +4,7 @@ import RangeControl from 'RangeControl';
 
 const factories = require('./factories');
 
-jest.mock('sheet-rest');
-const rest = require('sheet-rest');
-
 describe('RangeControl', () => {
-    "use strict";
 
     const getRangeControl = (props) => {
         if (!props) {

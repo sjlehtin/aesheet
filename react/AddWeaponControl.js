@@ -96,7 +96,7 @@ class AddWeaponControl extends React.Component {
                 value={this.state.selectedQuality}
                 textField='name'
                 filter="contains"
-                onChange={(value) => this.handleQualityChange(value)}/>;
+                onChange={(value) => this.handleQualityChange(value)} />;
         }
 
         let choices = [];
@@ -108,13 +108,13 @@ class AddWeaponControl extends React.Component {
                 <Col sm={2}>
                     <label>Weapon</label>
                 </Col>
-                <Col sm={4}><Combobox data={choices}
-                                      textField='name'
-                                      filter="contains"
-                                      value={this.state.selectedWeapon}
-                                      groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
-                                      onChange={(value) => this.handleWeaponChange(value)}
-                />
+                <Col sm={4}>
+                    <Combobox data={choices}
+                              textField='name'
+                              filter="contains"
+                              value={this.state.selectedWeapon}
+                              groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
+                              onChange={(value) => this.handleWeaponChange(value)} />
                 </Col>
             </Row>
             <Row>

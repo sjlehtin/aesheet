@@ -54,8 +54,8 @@ class AddSPControl extends React.Component {
             />
             <Button size="sm"
                     disabled={!this.isValid()}
-                    onClick={(e) => this.handleSubmit()}
-            >Add SP</Button>
+                    onClick={(e) =>
+                        this.handleSubmit()}>Add SP</Button>
         </div>
     };
 }

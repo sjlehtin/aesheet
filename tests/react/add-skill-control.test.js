@@ -19,15 +19,6 @@ describe('AddSkillControl', function() {
             min_level: 1, max_level: 4 })
     ];
 
-    var findSkill = function(skills, skillName) {
-        for (var skill of skills) {
-            if (skill.name === skillName) {
-                return skill;
-            }
-        }
-        throw Error("skill " + skillName + " not found");
-    };
-
     const renderAddSkillControl = function (givenProps) {
         var props = {allSkills: _basicSkills,
             characterSkillMap: {}

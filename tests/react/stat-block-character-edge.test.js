@@ -24,7 +24,7 @@ const server = setupServer(
   }),
   rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
     return res(ctx.json([]))
-  })
+  }),
 )
 
 describe('stat block edge handling', function() {

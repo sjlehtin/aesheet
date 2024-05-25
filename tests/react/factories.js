@@ -191,7 +191,7 @@ const characterEdgeFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
     }
-    var edge = edgeLevelFactory(overrideFields.edge);
+    let edge= edgeLevelFactory(overrideFields.edge);
 
     if ('edge' in overrideFields) {
         delete overrideFields.edge;
@@ -789,19 +789,17 @@ var transientEffectFactory = function (overrideFields) {
 };
 
 var sheetTransientEffectFactory = function (overrideFields) {
-    "use strict";
-
     if (!overrideFields) {
         overrideFields = {};
     }
 
-    var effect = {
+    let effect = {
         "id": 1,
         "effect": transientEffectFactory(overrideFields.effect),
         "sheet": 1
     };
 
-    var overrides = Object.assign({}, overrideFields);
+    let overrides = Object.assign({}, overrideFields);
     if ('effect' in overrides) {
         delete overrides.effect;
     }
