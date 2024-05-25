@@ -11,37 +11,37 @@ class AddFirearmControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isBusy: false,
-            isOpen: false
+            isBusy: true,
         }
     }
 
-    loadFirearms() {
-        this.setState({isBusy: true});
-        rest.getData(`/rest/firearms/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    firearmChoices: json,
-                    isBusy: false})
-            }
-        ).catch((err) => console.log(err));
+    async componentDidMount() {
+        await this.loadFirearms()
     }
 
-    handleFirearmChange(value) {
+    async loadFirearms() {
+        this.setState({isBusy: true});
+        const json = await rest.getData(`/rest/firearms/campaign/${this.props.campaign}/`)
+        this.setState(
+            {
+                    firearmChoices: json,
+                    isBusy: false
+            }
+        )
+    }
+
+    async handleFirearmChange(value) {
         this.setState({selectedFirearm: value});
         if (!this.state.firearmChoices) {
-            this.loadFirearms();
+            await this.loadFirearms();
         }
 
-        this.setState({selectedAmmo: null});
+        this.setState({selectedAmmo: null, isBusy: true});
 
         if (typeof(value) === "object") {
 
-            rest.getData(`/rest/ammunition/firearm/${encodeURIComponent(value.name)}/`).then(
-                (json) => {
-                    this.setState({ammoChoices: json})
-                }
-            ).catch((err) => console.log(err));
+            const json = await rest.getData(`/rest/ammunition/firearm/${encodeURIComponent(value.name)}/`)
+            this.setState({ammoChoices: json, isBusy: false})
         }
     }
 
@@ -49,13 +49,7 @@ class AddFirearmControl extends React.Component {
         this.setState({selectedAmmo: value})
     }
 
-    handleOpen() {
-        this.loadFirearms();
-    }
-
     handleAdd() {
-        console.log("adding:",
-            this.state.selectedFirearm, this.state.selectedAmmo);
         if (this.props.onFirearmAdd) {
             this.props.onFirearmAdd({
                 base: this.state.selectedFirearm,
@@ -91,32 +85,28 @@ class AddFirearmControl extends React.Component {
         return <div>
             <Row>
                 <Col sm={2}>
-                    <label>Firearm</label>
+                    <label id={"firearm-label"}>Firearm</label>
                 </Col>
                 <Col sm={4}>
                     <DropdownList data={this.state.firearmChoices}
                                   textField='name'
-                                  open={this.state.isOpen}
+                                  aria-labelledby={"firearm-label"}
                                   busy={this.state.isBusy}
-                                  onToggle={(isOpen) => {
-                                      this.setState({isOpen: isOpen});
-                                      if (isOpen) {
-                                          this.handleOpen();
-                                      }
-                                  }}
                                   filter="contains"
                                   value={this.state.selectedFirearm}
-                                  onChange={(value) => this.handleFirearmChange(value)}
+                                  onChange={async (value) => await this.handleFirearmChange(value)}
                     />
                 </Col>
             </Row>
             <Row>
                 <Col sm={2}>
-                    <label>Ammo</label>
+                    <label id={"ammunition-label"}>Ammo</label>
                 </Col>
                 <Col sm={4}>
                     <DropdownList data={this.state.ammoChoices}
                                   value={this.state.selectedAmmo}
+                                  busy={this.state.isBusy}
+                                  aria-labelledby={"ammunition-label"}
                                   textField={(obj) => {
                                       return AddFirearmControl.formatAmmo(obj);
                                   }}
@@ -127,7 +117,6 @@ class AddFirearmControl extends React.Component {
             <Row>
                 <Col>
                     <Button size="sm" disabled={!this.fieldsValid()}
-                            ref={(c) => this._addButton = c}
                             onClick={() => this.handleAdd()}>
                         Add Firearm</Button>
                 </Col>

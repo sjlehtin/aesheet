@@ -87,14 +87,14 @@ describe('StatBlock -- FirearmControl', () => {
 
         await user.click(screen.getByText(/FooAmmo/))
 
-        await waitFor(async () => expect((within(await screen.findByLabelText(/Firearm/)).queryByLabelText("Damage"))?.textContent).toEqual("3d4+3/4 (+2)"))
+        await waitFor(async () => expect((within(await screen.findByLabelText(/Firearm The Cannon/)).queryByLabelText("Damage"))?.textContent).toEqual("3d4+3/4 (+2)"))
 
         const scopeInput = await screen.findByRole("combobox", {name: "Scope selection"})
         await user.click(scopeInput)
 
         await user.click(await screen.findByText(/Baff baff/))
 
-        await within(await screen.findByLabelText(/Firearm/)).findByText("Awesome scope")
+        await within(await screen.findByLabelText(/Firearm The Cannon/)).findByText("Awesome scope")
     });
 
     it('allows changing range to shoot to', async () => {
@@ -155,11 +155,10 @@ describe('StatBlock -- FirearmControl', () => {
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
         await waitForElementToBeRemoved(document.querySelector("#loading"))
 
-
-        const firearmBlock = await sheet.findByLabelText(/Firearm/);
+        const firearmBlock = await sheet.findByLabelText(/Firearm The Cannon/);
         await within(firearmBlock).findByText("Awesome scope")
         await user.click(await within(firearmBlock).findByRole("button", {name: "Remove scope"}))
-        expect(await within(await sheet.findByLabelText(/Firearm/)).queryByText("Awesome scope")).toBeNull()
+        await waitFor(() => expect(within(firearmBlock).queryByText("Awesome scope")).toBeNull())
     });
 
     it('allows removing a clip from a firearm', async () => {
@@ -201,7 +200,7 @@ describe('StatBlock -- FirearmControl', () => {
         const mag = await sheet.queryByLabelText("Magazine of size 20 with 19 bullets remaining")
         expect(mag).not.toBeNull()
 
-        const firearmBlock = await sheet.findByLabelText(/Firearm/);
+        const firearmBlock = await sheet.findByLabelText(/Firearm The Cannon/);
         const removeButtons = await within(firearmBlock).findAllByRole("button", {name: "Remove magazine"})
         expect(removeButtons.length).toEqual(3)
 

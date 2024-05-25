@@ -227,7 +227,7 @@ class SkillTable extends React.Component {
                 <span> + </span>
                 <span title="Earned during play" aria-label={"SP earned during play"}>{ageSP}</span>
                 <span> = </span>
-                <span title="Total gained">{gainedSP}</span></td></tr>
+                <span title="Total gained" aria-label={"Total gained SP"}>{gainedSP}</span></td></tr>
             <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Next age SP increase</td>
                 <td colSpan={2}>
                     <span aria-label={"SP optimization hint"}>{util.renderInt(opt.lrn)
