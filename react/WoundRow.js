@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 import {GoArrowUp, GoArrowDown} from 'react-icons/go'
@@ -85,7 +84,7 @@ class WoundRow extends React.Component {
             <td>{this.props.wound.damage_type}</td>
             <td aria-label={"Current wound damage"}>{this.props.wound.damage - this.props.wound.healed}
             <span style={{position: "relative"}}>{worsenButton}{decreaseButton}</span></td>
-            <td aria-label={"Wound effect"} onClick={() => this.handleEffectFieldClicked()} ref={(c) => this._effectField = c}>
+            <td aria-label={"Wound effect"} onClick={() => this.handleEffectFieldClicked()}>
                 {effectField}</td>
             <td style={{width: "3em"}}>
                 <Button size="sm"

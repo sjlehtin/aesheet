@@ -2,7 +2,7 @@ import React from 'react';
 
 import StatBlock from 'StatBlock'
 
-const factories = require('./factories');
+import factories from './factories'
 
 import {render, waitFor, waitForElementToBeRemoved, screen, within} from '@testing-library/react'
 import { rest } from 'msw'

@@ -1,7 +1,7 @@
 import React from 'react';
 import WeaponRow from 'WeaponRow'
 import { screen, render } from '@testing-library/react'
-const factories = require('./factories');
+import factories from './factories';
 
 describe('WeaponRow', function() {
 
