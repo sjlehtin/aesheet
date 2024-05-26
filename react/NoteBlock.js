@@ -33,7 +33,7 @@ class NoteBlock extends React.Component {
 
             var color = colorMap[noteType];
 
-            return <ul style={{fontSize: "80%", color: color}}>
+            return <ul style={{fontSize: "80%", color: color}} aria-label={`${noteType} notes`}>
                 {edgeList.map((elem, ii) => {
                     let title = <strong>{formatItem(elem)}:</strong>;
                     return <li key={ii}>
