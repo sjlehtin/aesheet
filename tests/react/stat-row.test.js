@@ -1,23 +1,18 @@
-jest.dontMock('StatRow');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
-jest.mock('sheet-rest');
-var rest = require('sheet-rest');
-var factories = require('./factories');
+import StatRow from 'StatRow'
 
-const StatRow = require('StatRow').default;
+import factories from './factories'
 
-var statRowFactory = function(givenProps) {
-    var Wrapper = createReactClass({
-        render: function() {
-            return <table><tbody>{this.props.children}</tbody></table>;
-        }
-    });
+import {render, screen} from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
+
+const server = setupServer(
+)
+
+const renderStatRow = function(givenProps) {
     var props = {
         stat: "fit",
         url: "/rest/characters/1/",
@@ -35,90 +30,50 @@ var statRowFactory = function(givenProps) {
         effects: [{fit: 20}]});
     props.effStats = handler.getEffStats();
     props.baseStats = handler.getBaseStats();
-    var rowElement = React.createElement(StatRow, props);
-    var table = TestUtils.renderIntoDocument(
-        <Wrapper>
-            {rowElement}
-        </Wrapper>
-    );
 
-    return TestUtils.findRenderedComponentWithType(table,
-        StatRow);
+    return render(<table><tbody><StatRow {...props} /></tbody></table>)
 };
 
 describe('stat row', function() {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    var promises;
-    var row;
+    it('calls parent component set change callback', async function () {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
 
-    var patchOk = function () {
-        var response = Promise.resolve({});
-        rest.patch.mockReturnValue(response);
-        promises.push(response);
-    };
+        renderStatRow({onMod: spy});
 
-    beforeEach(function () {
-        rest.getData = jest.fn();
-        rest.patch = jest.fn();
-        promises = [];
+        const statElem = screen.getByLabelText("Current FIT")
+        expect(statElem.textContent).toEqual("73")
 
-        row = statRowFactory();
-    });
+        // Touching the row should cause the edit buttons to be visible.
+        await user.pointer([
+          // touch the screen at element1
+          {keys: '[TouchA>]', target: statElem},
+          // release the touch pointer at the last position (element2)
+          {keys: '[/TouchA]'},
+        ])
 
-    it('renders to a row', function () {
-        var rowContents = TestUtils.scryRenderedDOMComponentsWithTag(row, "td").map(
-            (node) => { return node.textContent } );
-        expect(rowContents.join('')).not.toContain("NaN");
-        var intValues = rowContents.map((value) => { return parseInt(value) });
-        expect(intValues).toContain(53);
-        expect(intValues).toContain(73);
-    });
+        let values = []
 
-    it ('updates increases to the server', function (done) {
-        patchOk({});
-        TestUtils.Simulate.click(row._increaseButton);
-        Promise.all(promises).then(function () {
-            expect(rest.patch.mock.calls[0][0]).toEqual('/rest/characters/1/');
-            expect(rest.patch.mock.calls[0][1]).toEqual({cur_fit: 56});
+        server.use(
+            rest.patch('http://localhost/rest/characters/1/', async (req, res, ctx) => {
+                const json = await req.json();
+                values.push(json)
+                return res(ctx.json(json))
+            }),
+        )
 
-            expect(row.state.cur).toEqual(56);
+        await user.click(screen.getByRole("button", {name: "Decrease FIT"}))
 
-            done();
-        });
-    });
+        expect(spy).toHaveBeenCalledWith("fit", 55, 54)
+        expect(values[0].cur_fit).toEqual(54)
 
-    it ('updates decreases to the server', function (done) {
-        patchOk({});
-        TestUtils.Simulate.click(row._decreaseButton);
-        Promise.all(promises).then(function () {
-            expect(rest.patch.mock.calls[0][0]).toEqual('/rest/characters/1/');
-            expect(rest.patch.mock.calls[0][1]).toEqual({cur_fit: 54});
+        await user.click(screen.getByRole("button", {name: "Increase FIT"}))
 
-            expect(row.state.cur).toEqual(54);
-
-            done();
-        });
-    });
-
-});
-
-describe('StatRow updates', function (){
-    "use strict";
-
-    it('calls parent component set change callback', function () {
-        rest.patch.mockClear();
-        let response = Promise.resolve({"mockedPatch": 1});
-        rest.patch.mockReturnValue(response);
-
-        let callback = jest.fn();
-        let row = statRowFactory({onMod: callback});
-        TestUtils.Simulate.click(row._decreaseButton);
-
-        expect(rest.patch).toBeCalledWith('/rest/characters/1/', {cur_fit: 54});
-
-        return response.then(() => {
-                expect(callback).toHaveBeenCalledWith("fit", 55, 54);
-        });
+        expect(spy).toHaveBeenCalledWith("fit", 54, 55)
+        expect(values[1].cur_fit).toEqual(55)
     });
 });

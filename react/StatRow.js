@@ -7,11 +7,6 @@ const rest = require('./sheet-rest');
 class StatRow extends React.Component {
     constructor(props) {
         super(props);
-        /* TODO: next phase, expose the stat calculation to
-           the JavaScript completely.  Calculate weights in JS, pass spell
-           effects, item effects, etc. to JS.  This allows creating a UI where
-           hovering over the stat allows to show a breakdown where the stat
-           bonuses and penalties are coming from, in real time. */
         /* TODO: Move stat update towards backend to StatBlock. */
         var stat = this.props.stat.toLowerCase();
         this.state = {
@@ -122,13 +117,14 @@ class StatRow extends React.Component {
         var change = this.state.cur
             - this.props.initialChar["start_" + this.state.stat];
 
+        const stat = this.props.stat.toUpperCase();
         return (
             <tr onMouseEnter={this.handleMouseEnter.bind(this)}
                 onMouseLeave={this.handleMouseOut.bind(this)}
                 onTouchEnd={this.handleTouchEnd.bind(this)}>
-                <td style={statStyle}>{this.props.stat.toUpperCase()}</td>
+                <td style={statStyle}>{stat}</td>
                 <td style={baseStyle}>{this.props.baseStats[this.props.stat]}</td>
-                <td style={effStyle}>
+                <td style={effStyle} aria-label={`Current ${stat}`}>
                     <StatBreakdown label={"Stat"} value={this.props.effStats[this.props.stat]} breakdown={this.props.effStats.breakdown[this.props.stat]} />
                 </td>
                 <td style={changeStyle}>
@@ -138,11 +134,13 @@ class StatRow extends React.Component {
                 <td onTouchEnd={(e) => e.stopPropagation()}>
                     <div style={controlStyle}>
                         <span style={incStyle}
-                              ref={(c) => this._increaseButton = c}
+                              role={"button"}
+                              aria-label={`Increase ${stat}`}
                               onClick={(e) => {return this.handleIncrease(e)}}
                         ><GoArrowUp /></span>
                         <span style={decStyle}
-                              ref={(c) => this._decreaseButton = c}
+                              role={"button"}
+                              aria-label={`Decrease ${stat}`}
                               onClick={(e) => {return this.handleDecrease(e)}}
                         ><GoArrowDown /></span>
                     </div>
