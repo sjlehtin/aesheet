@@ -1,82 +1,54 @@
-jest.dontMock('AddArmorControl');
-jest.dontMock('ArmorControl');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
 
-const ArmorControl = require('ArmorControl').default;
-const AddArmorControl = require('AddArmorControl').default;
+import ArmorControl from 'ArmorControl'
 
-jest.mock('sheet-rest');
-var rest = require('sheet-rest');
+import factories from './factories'
 
-var factories = require('./factories');
+import {render, waitFor, waitForElementToBeRemoved, screen, within} from '@testing-library/react'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import userEvent from '@testing-library/user-event'
+
+const server = setupServer(
+  rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
+    return res(ctx.json([]))
+  }),
+)
 
 describe('ArmorControl', function() {
-    "use strict";
+    beforeAll(() => server.listen({onUnhandledRequest: 'error'}))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    var getArmorControl = function (givenProps) {
-        rest.getData.mockReturnValue(Promise.resolve([]));
+    it("can remove the helmet", async function () {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({});
 
-        var props = {campaign: 1};
-        if (givenProps) {
-            props = Object.assign(props, givenProps);
-        }
-        var table = TestUtils.renderIntoDocument(
-            <ArmorControl {...props}/>
-        );
+        render(<ArmorControl campaign={2} armor={factories.armorFactory()}
+                helm={factories.armorFactory(
+                    {name: "Ze Helmet", is_helm: true})}
+                onHelmChange={spy} />)
 
-        return TestUtils.findRenderedComponentWithType(table,
-            ArmorControl);
-    };
+        expect(screen.getByText(/Ze Helmet/)).toBeInTheDocument()
 
-    it("can render the add controls", function () {
-        var control = getArmorControl({armor: {}, helm: {}});
-
-        var addControls = TestUtils.scryRenderedComponentsWithType(control,
-            AddArmorControl);
-        expect(addControls.length).toEqual(0);
-
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._editButton));
-
-        addControls = TestUtils.scryRenderedComponentsWithType(control,
-            AddArmorControl);
-        expect(addControls.length).toEqual(2);
-    });
-
-    it("can remove the helmet", function () {
-        var spy = jasmine.createSpy();
-
-        var control = getArmorControl({
-            armor: factories.armorFactory(),
-            helm: factories.armorFactory({is_helm: true}),
-            onHelmChange: spy
-        });
-
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._editButton));
-
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._removeHelmetButton));
+        await user.click(screen.getByRole("button", {name: "Edit Armor"}))
+        await user.click(screen.getByRole("button", {name: "Remove helmet"}))
 
         expect(spy).toHaveBeenCalledWith(null);
     });
 
-    it("can remove the helmet", function () {
-        var spy = jasmine.createSpy();
+    it("can remove the armor", async function () {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({});
 
-        var control = getArmorControl({
-            armor: factories.armorFactory(),
-            helm: factories.armorFactory({is_helm: true}),
-            onArmorChange: spy
-        });
+        render(<ArmorControl campaign={2} armor={factories.armorFactory()}
+                helm={factories.armorFactory(
+                    {name: "Ze Helmet", is_helm: true})}
+                onArmorChange={spy} />)
 
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._editButton));
-
-        TestUtils.Simulate.click(ReactDOM.findDOMNode(control._removeArmorButton));
+        await user.click(screen.getByRole("button", {name: "Edit Armor"}))
+        await user.click(screen.getByRole("button", {name: "Remove armor"}))
 
         expect(spy).toHaveBeenCalledWith(null);
     });
-
 });

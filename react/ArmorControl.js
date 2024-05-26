@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Input } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 
 import AddArmorControl from './AddArmorControl';
 const util = require('./sheet-util');
@@ -45,16 +45,13 @@ class ArmorControl extends React.Component {
 
     render() {
         var addControls = '';
-        var buttonText = 'Edit';
         if (this.state.editing) {
             addControls = <div>
-                <Button ref={(c) => this._removeHelmetButton = c}
-                    onClick={() => {this.props.onHelmChange(null)}}
+                <Button onClick={() => {this.props.onHelmChange(null)}}
                     disabled={
                             !(this.props.helm ? this.props.helm.id : 0)}>
                     Remove helmet</Button>
-                <Button ref={(c) => this._removeArmorButton = c}
-                        onClick={() => this.props.onArmorChange(null)}
+                <Button onClick={() => this.props.onArmorChange(null)}
                         disabled={
                             !(this.props.armor ? this.props.armor.id : 0)}>
                     Remove armor</Button>
@@ -65,13 +62,12 @@ class ArmorControl extends React.Component {
                     campaign={this.props.campaign} />
                 <AddArmorControl onChange={(value) => this.props.onArmorChange(value) }
                                  campaign={this.props.campaign} />
-                <div><a href="/sheets/add_armor/">Create a new armor</a>
-                    <a href="/sheets/add_armor_template/">Create a new armortemplate</a>
-                    <a href="/sheets/add_armor_quality/">Create new quality</a>
+                <div><a href="/sheets/add_armor/">Create a new armor</a>{' '}
+                    <a href="/sheets/add_armor_template/">Create a new armortemplate</a>{' '}
+                    <a href="/sheets/add_armor_quality/">Create new quality</a>{' '}
                     <a href="/sheets/add_armor_special_quality/">Create new special quality</a>
                 </div>
             </div>;
-            buttonText = 'Close';
         }
         var armors = [];
         if (this.props.helm && this.props.helm.name) {
@@ -109,13 +105,30 @@ class ArmorControl extends React.Component {
         }
         armorStats.push(<tbody key={0}>{locations}</tbody>);
 
-        return <div style={this.props.style}><div>{armors.join(', ')}
-            <Button ref={(c) => this._editButton = c} onClick={
-                () => this.setState({editing: !this.state.editing})}>Edit</Button>
-        </div>
-            <div>
-            {addControls}
-            </div>
+        let editButtonName = "Edit Armor"
+        if (this.state.editing) {
+            editButtonName = "Close edit"
+        }
+
+        return <div style={this.props.style}>
+            <Row>
+                <Col>
+                    <Row>
+                        <Col>Helmet</Col><Col><span aria-label={"Current helmet"}>{this.props.helm?.name}</span></Col>
+                    </Row>
+                    <Row>
+                        <Col>Armor</Col><Col
+                        aria-label={"Current armor"}>{this.props.armor?.name}</Col>
+                    </Row>
+                </Col>
+                <Col>
+                    <Button onClick={
+                        () => this.setState({editing: !this.state.editing})}>{editButtonName}</Button>
+                </Col>
+            </Row>
+            <Row>
+                {addControls}
+            </Row>
             <table>{armorStats}</table>
         </div>;
     }

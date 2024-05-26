@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Button, Input, Row } from 'react-bootstrap';
+import { Button, Row, Form } from 'react-bootstrap';
 import Combobox from 'react-widgets/Combobox';
 
 const rest = require('./sheet-rest');
@@ -10,34 +10,35 @@ class AddArmorControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            normalQuality: null,
             selectedQuality: null,
             selectedArmor: null,
             qualityChoices: [],
+            isBusy: true,
             armorChoices: [],
             armorTemplateChoices: []
         }
     }
 
-    componentDidMount() {
-        rest.getData(`/rest/armorqualities/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    qualityChoices: json})
-            }
-        ).catch((err) => console.log(err));
-        rest.getData(`/rest/armors/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    armorChoices: json})
-            }
-        ).catch((err) => console.log(err));
-        rest.getData(`/rest/armortemplates/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    armorTemplateChoices: json})
-            }
-        ).catch((err) => console.log(err));
+    async componentDidMount() {
+        let promises = [];
+        promises.push(rest.getData(`/rest/armorqualities/campaign/${this.props.campaign}/`))
+        promises.push(rest.getData(`/rest/armors/campaign/${this.props.campaign}/`))
+        promises.push(rest.getData(`/rest/armortemplates/campaign/${this.props.campaign}/`))
+        let [qualities, armors, templates] = await Promise.all(promises);
+
+        const normalQuality = qualities.find((q) => {return /normal/i.exec(q.name);});
+
+        this.setState({
+            normalQuality: normalQuality,
+            selectedQuality: normalQuality,
+            qualityChoices: qualities,
+            armorChoices: armors,
+            armorTemplateChoices: templates,
+            isBusy: false
+        })
     }
+
 
     fieldsValid() {
         if (!this.state.selectedArmor) {
@@ -78,14 +79,12 @@ class AddArmorControl extends React.Component {
             }
             this.props.onChange(armor);
 
-            this.setState({selectedQuality: null, selectedArmor: null});
+            this.setState({selectedQuality: this.state.normalQuality, selectedArmor: null});
         }
     }
 
     render() {
         var quality;
-        var busy = (!this.state.armorChoices || !this.state.armorTemplateChoices ||
-            !this.state.qualityChoices);
         if (this.state.selectedArmor && this.state.selectedArmor.quality) {
             quality = <span>{this.state.selectedArmor.quality.name}</span>;
         } else {
@@ -94,7 +93,8 @@ class AddArmorControl extends React.Component {
                 value={this.state.selectedQuality}
                 textField='name'
                 filter="contains"
-                busy={busy}
+                busy={this.state.isBusy}
+                aria-label={"Select quality"}
                 onChange={(value) => this.handleQualityChange(value)}/>;
         }
 
@@ -114,11 +114,12 @@ class AddArmorControl extends React.Component {
             <table>
                 <tbody>
                 <tr>
-                    <td><label>{this.props.tag}</label></td>
+                    <td><Form.Label>{this.props.tag}</Form.Label></td>
                     <td><Combobox data={choices}
                                   textField='name'
-                                  busy={busy}
+                                  busy={this.state.isBusy}
                                   filter="contains"
+                                  aria-label={`Select ${this.props.tag.toLowerCase()}`}
                                   value={this.state.selectedArmor}
                                   groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
                                   onChange={(value) => this.handleArmorChange(value) }
@@ -133,9 +134,8 @@ class AddArmorControl extends React.Component {
                 </tbody>
             </table>
             <Button size="sm" disabled={!this.fieldsValid()}
-                    ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
-                Set</Button>
+                Set {`${this.props.tag}`}</Button>
 
             </Row>
         </div>
@@ -148,6 +148,5 @@ AddArmorControl.propTypes = {
 };
 
 AddArmorControl.defaultProps = {tag: "Armor"}
-
 
 export default AddArmorControl;

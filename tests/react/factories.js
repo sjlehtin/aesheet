@@ -448,7 +448,7 @@ var armorTemplateFactory = function (overrideFields) {
     var template = {
         "name": "Cloth hood",
         "description": "",
-        "is_helm": true,
+        "is_helm": false,
         "armor_h_p": "0.0",
         "armor_h_s": "0.0",
         "armor_h_b": "0.0",

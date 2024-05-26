@@ -7,6 +7,8 @@ import Combobox from 'react-widgets/Combobox';
 
 const rest = require('./sheet-rest');
 
+// TODO: Add tests
+
 class AddRangedWeaponControl extends React.Component {
     constructor(props) {
         super(props);
@@ -19,46 +21,24 @@ class AddRangedWeaponControl extends React.Component {
         }
     }
 
-    componentDidMount() {
-        this.loadWeapons();
-        rest.getData(`/rest/weaponqualities/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    qualityChoices: json});
+    async componentDidMount() {
+        let promises = [];
+        // TODO: should use some kind of dependency injection to not load the same data multiple times.
+        promises.push(rest.getData(`/rest/weaponqualities/campaign/${this.props.campaign}/`))
+        promises.push(rest.getData(`/rest/rangedweapons/campaign/${this.props.campaign}/`))
+        promises.push(rest.getData(`/rest/rangedweapontemplates/campaign/${this.props.campaign}/`))
+        let [qualities, weapons, templates] = await Promise.all(promises);
 
-            }
-        ).catch((err) => console.log(err));
-        rest.getData(`/rest/rangedweapons/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    weaponChoices: json})
-            }
-        ).catch((err) => console.log(err));
-    }
-
-    componentDidUpdate() {
-        if (this.state.weaponChoices && this.state.weaponTemplateChoices &&
-            this.state.weaponQualityChoices) {
-            this.setState({isBusy: false})
-        }
-    }
-
-    loadWeapons() {
-        this.setState({isBusy: true});
-        rest.getData(`/rest/rangedweapontemplates/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    weaponTemplateChoices: json,
-                    isBusy: false})
-            }
-        ).catch((err) => console.log(err));
+        this.setState({
+            qualityChoices: qualities,
+            weaponTemplateChoices: templates,
+            weaponChoices: weapons,
+            isBusy: false
+        })
     }
 
     handleWeaponChange(value) {
         this.setState({selectedWeapon: value});
-        if (!this.state.weaponChoices) {
-            this.loadWeapons();
-        }
     }
 
     handleQualityChange(value) {

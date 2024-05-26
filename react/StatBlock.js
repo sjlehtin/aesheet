@@ -116,7 +116,7 @@ class StatBlock extends React.Component {
         this.setState({armor: armor})
     }
 
-    changeArmor(armor, url, finalizer) {
+    async changeArmor(armor, url, finalizer) {
         let data;
         if ('id' in armor) {
             data = {item: armor.id};
@@ -126,25 +126,21 @@ class StatBlock extends React.Component {
                 quality: armor.quality.name
             };
         }
-        rest.post(url, data).then((json) => {
-            armor.id = json.id;
-            armor.name = json.name;
-            finalizer(armor);
-        }).catch((err) => {
-            console.log("error", err)
-        });
+        const json = await rest.post(url, data)
+        armor.id = json.id;
+        armor.name = json.name;
+        finalizer(armor);
     }
 
-    handleArmorChanged(armor) {
-        var finalizer = (item) => { this.setState({armor: item}); };
+    async handleArmorChanged(armor) {
+        const finalizer = (item) => { this.setState({armor: item}); };
 
         if (armor === null) {
-            rest.del(this.getArmorURL(this.state.armor)).then(function (json) {
-                finalizer({});
-            }).catch((err) => {console.log("error", err)});
+            await rest.del(this.getArmorURL(this.state.armor));
+            finalizer({})
             return;
         }
-        this.changeArmor(armor, this.getArmorURL(), finalizer);
+        await this.changeArmor(armor, this.getArmorURL(), finalizer);
     }
 
     getHelmURL(item) {
