@@ -1,53 +1,63 @@
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
+
+import { screen, render, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
 import RangeControl from 'RangeControl';
 
-const factories = require('./factories');
+import factories from './factories';
 
 describe('RangeControl', () => {
 
-    const getRangeControl = (props) => {
+    const renderRangeControl = (props) => {
         if (!props) {
             props = {};
         }
         if (!props.skillHandler) {
             props.skillHandler = factories.skillHandlerFactory();
         }
-        return TestUtils.renderIntoDocument(<RangeControl {...props}/>);
+        return render(<RangeControl {...props}/>);
     };
 
-    it('calls the onChange when input is changed with valid value', () => {
+    it('calls the onChange when input is changed with valid value', async () => {
+        const user = userEvent.setup()
         let spy = jest.fn();
-        const control = getRangeControl({onChange: spy});
-        TestUtils.Simulate.change(control._inputField, {target: {value: 19}});
+        renderRangeControl({onChange: spy});
+
+        await user.type(screen.getByRole("textbox", {name: "Range"}), "19")
         expect(spy).toHaveBeenCalledWith({range: 19,
             darknessDetectionLevel: 0});
     });
 
-    it('calls the onChange when input is changed with valid float value', () => {
+    it('calls the onChange when input is changed with valid float value', async () => {
+        const user = userEvent.setup()
         let spy = jest.fn();
-        const control = getRangeControl({onChange: spy});
-        TestUtils.Simulate.change(control._inputField, {target: {value: "0.4"}});
+        renderRangeControl({onChange: spy});
+
+        await user.type(screen.getByRole("textbox", {name: "Range"}), "0.4")
         expect(spy).toHaveBeenCalledWith({range: 0.4,
             darknessDetectionLevel: 0});
     });
 
-    it('calls the onChange when input is cleared', () => {
+    it('calls the onChange when input is cleared', async () => {
+        const user = userEvent.setup()
         let spy = jest.fn();
-        const control = getRangeControl({onChange: spy});
-        TestUtils.Simulate.change(control._inputField, {target: {value: "0.4"}});
-        jest.clearAllMocks();
-        TestUtils.Simulate.change(control._inputField, {target: {value: ""}});
-        expect(spy).toHaveBeenCalledWith({range: "",
-            darknessDetectionLevel: 0});
+        renderRangeControl({onChange: spy});
+
+        await user.type(screen.getByRole("textbox", {name: "Range"}), "0.4")
+        expect(spy).toHaveBeenCalledWith({range: 0.4, darknessDetectionLevel: 0});
+        await user.clear(screen.getByRole("textbox", {name: "Range"}))
+        expect(spy).toHaveBeenCalledWith({range: "", darknessDetectionLevel: 0});
     });
 
-    it('does not call the onChange when input is invalid', () => {
+    it('does not call the onChange when input is invalid', async () => {
+        const user = userEvent.setup()
         let spy = jest.fn();
-        const control = getRangeControl({onChange: spy});
-        TestUtils.Simulate.change(control._inputField, {target: {value: "foo19"}});
+        renderRangeControl({onChange: spy});
+
+        await user.type(screen.getByRole("textbox", {name: "Range"}), "foo19")
         expect(spy).not.toHaveBeenCalled();
     });
 
-    // TODO: detection level tests.
+    // TODO: detection level tests with scopes and weapon mods.
 });

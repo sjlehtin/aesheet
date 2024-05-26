@@ -67,11 +67,12 @@ class RangeControl extends React.Component {
         }
         return <div>
             <Form.Group aas={Row}>
-            <Form.Label column sm={"2"}>Range</Form.Label>
+            <Form.Label id={"range-control-label"} column sm={"2"}>Range</Form.Label>
                 <Col>
                 <Form.Control ref={(c) => this._inputField = c}
                           size="sm" type="text"
                           sm={"2"}
+                              aria-labelledby={"range-control-label"}
                           aria-label="Target at range"
                           placeholder={"Leave empty to shoot to short range"}
                           onChange={(e) => this.handleChange(e)}
