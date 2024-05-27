@@ -14,13 +14,9 @@ class AddTransientEffectRow extends React.Component {
             isBusy: true};
     }
 
-    componentDidMount() {
-        rest.getData(`/rest/transienteffects/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    choices: json, isBusy: false})
-            }
-        ).catch((err) => console.log(err));
+    async componentDidMount() {
+        const json = await rest.getData(`/rest/transienteffects/campaign/${this.props.campaign}/`)
+        this.setState({ choices: json, isBusy: false} )
     }
 
     isValid() {
@@ -45,12 +41,12 @@ class AddTransientEffectRow extends React.Component {
                       value={this.state.selectedEffect}
                       busy={this.state.isBusy}
                       textField="name"
+                      aria-label={"Add transient effect"}
                       filter="contains"
                       onChange={(value) => this.handleChange(value)} />
             </Col>
             <Col>
             <Button size="sm" disabled={!this.isValid()}
-                    ref={(c) => this._addButton = c}
                     onClick={() => this.handleAdd()}>
                 Add Effect</Button>
                 <a href="/sheets/add_transient_effect/">Create a new effect</a>

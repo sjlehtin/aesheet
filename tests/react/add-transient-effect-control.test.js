@@ -1,76 +1,45 @@
-jest.dontMock('AddTransientEffectControl');
-jest.dontMock('./factories');
 import React from 'react';
-import ReactDOM from 'react-dom';
-import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
-const AddTransientEffectControl = require('AddTransientEffectControl').default;
+import {screen, render, within} from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
-jest.mock('sheet-rest');
-var rest = require('sheet-rest');
+import AddTransientEffectControl from 'AddTransientEffectControl';
+import * as factories from './factories'
+import {setupServer} from "msw/node";
+import {rest} from "msw";
 
-var factories = require('./factories');
+const server = setupServer(
+  rest.get('http://localhost/rest/transienteffects/campaign/2/', (req, res, ctx) => {
+    return res(ctx.json([factories.transientEffectFactory({name: "Amazing Effect", id: 444})]))
+  }),
+)
 
 describe('AddTransientEffectControl', function() {
-    "use strict";
+    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    afterEach(() => server.resetHandlers())
+    afterAll(() => server.close())
 
-    var promises = [];
+    it("validates input and allows existing effects to be added", async function () {
+        // var control = getAddTransientEffectControl();
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
 
-    beforeEach(function () {
-        promises = [];
-    });
+        render(<AddTransientEffectControl campaign={2} onAdd={spy} />)
 
-    var getAddTransientEffectControl = function (givenProps) {
-        var Wrapper = createReactClass({
-            render: function () {
-                return <table>
-                    {this.props.children}
-                </table>;
-            }
-        });
+        expect(screen.getByRole("button", {name: "Add Effect"})).toBeDisabled()
 
-        var props = {
-            allEffects: [factories.transientEffectFactory()]
-        };
-        if (typeof(givenProps) !== "undefined") {
-            props = Object.assign(props, givenProps);
-        }
-        var table = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <AddTransientEffectControl {...props}/>
-            </Wrapper>
-        );
+        const levelInput = within(screen.getByLabelText("Add transient effect")).getByRole("combobox")
 
-        return TestUtils.findRenderedComponentWithType(table,
-            AddTransientEffectControl);
-    };
+        await user.type(levelInput, "foo")
+        expect(screen.getByRole("button", {name: "Add Effect"})).toBeDisabled()
 
-    it("calls parent add", function (done) {
-        var callback = jasmine.createSpy("callback");
-        var effect = factories.transientEffectFactory({name: "Tsup"});
-        rest.getData.mockReturnValue(Promise.resolve([effect]));
-        var control = getAddTransientEffectControl({
-            campaign: 2,
-            onAdd: callback
-        });
+        await user.clear(levelInput)
+        await user.type(levelInput, "mazin")
 
-        Promise.all(promises).then(function () {
-            var node = ReactDOM.findDOMNode(control._addButton);
-            expect(node.hasAttribute('disabled')).toEqual(true);
-            control.handleChange(effect);
-            expect(node.hasAttribute('disabled')).toEqual(false);
-            TestUtils.Simulate.click(node);
-            expect(callback).toHaveBeenCalled();
-            done();
-        }).catch((err) => done.fail(err));
-    });
+        await user.click(screen.getByText(/Amazing/))
+        await user.click(screen.getByRole("button", {name: "Add Effect"}))
 
-    it("does not allow invalid values to be added", function () {
-        var control = getAddTransientEffectControl();
-        var node = ReactDOM.findDOMNode(control._addButton);
-        expect(node.hasAttribute('disabled')).toEqual(true);
-        control.handleChange("foo");
-        expect(control.isValid()).toBe(false);
+        expect(spy).toHaveBeenCalled()
+        expect(spy.mock.lastCall[0].id).toEqual(444)
     });
 });
