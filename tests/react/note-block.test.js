@@ -2,7 +2,7 @@ import React from 'react';
 
 import NoteBlock from 'NoteBlock'
 
-import factories from './factories'
+import * as factories from './factories'
 
 import {render, waitFor, waitForElementToBeRemoved, screen, within} from '@testing-library/react'
 

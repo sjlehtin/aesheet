@@ -2,7 +2,7 @@ import React from 'react';
 
 import StatRow from 'StatRow'
 
-import factories from './factories'
+import * as factories from './factories'
 
 import {render, screen} from '@testing-library/react'
 import { rest } from 'msw'

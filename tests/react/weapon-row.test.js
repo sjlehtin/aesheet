@@ -1,7 +1,7 @@
 import React from 'react';
 import WeaponRow from 'WeaponRow'
 import { screen, render } from '@testing-library/react'
-import factories from './factories';
+import * as factories from './factories'
 
 describe('WeaponRow', function() {
 

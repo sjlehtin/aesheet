@@ -13,8 +13,7 @@ import userEvent from '@testing-library/user-event'
 import FirearmControl from 'FirearmControl'
 import WeaponRow from 'WeaponRow'
 
-const factories = require('./factories');
-
+import * as factories from './factories'
 
 const server = setupServer(
   rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {
@@ -31,7 +30,6 @@ describe('FirearmControl', () => {
     afterAll(() => server.close());
 
     const renderFirearm = async (givenProps) => {
-
         let props = {
             base: {base_skill: "Handguns", skill: "Pistol"},
             handlerProps: {
@@ -364,8 +362,12 @@ describe('FirearmControl', () => {
     //     // there should be only one call to the skillHandler.visionCheck TODO: TBC
     // });
 
-    xit('accounts for the Color blind flaw correctly in daylight', test.todo)
-    xit('ignores for the Color blind flaw correctly in night time', test.todo)
+    test.todo("takes character's Acute/Poor Vision correctly into account")
+    test.todo("takes scope's Acute Vision correctly into account")
+    test.todo("stacks scope's and characters Acute/Poor Vision correctly")
+    test.todo("allow specifying maximum range for scope/addon")
+    test.todo('accounts for the Color blind flaw correctly in daylight')
+    test.todo('ignores for the Color blind flaw correctly in night time')
 
     it ("can calculate a row of checks to implicit short range", async () => {
         await renderFirearm({

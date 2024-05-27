@@ -1,15 +1,9 @@
-import React from 'react';
-import TestUtils from 'react-dom/test-utils';
-
-const rest = require('sheet-rest');
-
-const StatBlock = require('StatBlock').default;
-const SkillHandler = require('SkillHandler').default;
+import SkillHandler from 'SkillHandler'
 
 let objectId = 1;
 
 const characterFactory = function (statOverrides) {
-    var _charData = {
+    let _charData = {
         id: 2,
 
         "start_fit": 43,
@@ -57,8 +51,8 @@ const characterFactory = function (statOverrides) {
     return Object.assign(_charData, statOverrides);
 };
 
-var skillFactory = function (overrideFields) {
-    var props = {};
+const skillFactory = function (overrideFields) {
+    let props = {};
     // Simplify generating skills to allow using only the name.  Slight
     // allowance for older code.
     if (typeof(overrideFields) === "object") {
@@ -66,7 +60,7 @@ var skillFactory = function (overrideFields) {
     } else if (overrideFields){
         props.name = overrideFields;
     }
-    var _baseSkill = {
+    let _baseSkill = {
         "name": "Acting / Bluff",
         "description": "",
         "notes": "",
@@ -87,13 +81,8 @@ var skillFactory = function (overrideFields) {
     return Object.assign(_baseSkill, props);
 };
 
-
-var nextEdgeID = 0;
-
-var edgeFactory = function (overrideFields) {
-    "use strict";
-
-    var props = {};
+const edgeFactory = function (overrideFields) {
+    let props = {};
 
     // Treat an existing non-object as name.
     if (typeof(overrideFields) !== "object" && overrideFields) {
@@ -102,7 +91,7 @@ var edgeFactory = function (overrideFields) {
         props = overrideFields;
     }
 
-    var edge = {
+    let edge = {
         "name": "Acute Hearing",
         "description": "Can hear very well",
         "notes": "No notes to talk about"
@@ -110,34 +99,34 @@ var edgeFactory = function (overrideFields) {
     return Object.assign(edge, props);
 };
 
-var edgeSkillBonusFactory = function (overrideFields) {
+const edgeSkillBonusFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
     }
 
-    var _baseBonus = {
+    let _baseBonus = {
         "id": objectId,
         "skill": "Surgery",
         "bonus": 15
     };
 
-    var newBonus = Object.assign(_baseBonus, overrideFields);
+    const newBonus = Object.assign(_baseBonus, overrideFields);
     /* Overriding ID is possible. */
     objectId = newBonus.id + 1;
     return newBonus;
 };
 
-var edgeLevelFactory = function (overrideFields) {
+const edgeLevelFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
     }
-    var edge = edgeFactory(overrideFields.edge);
+    const edge = edgeFactory(overrideFields.edge);
 
     if ('edge' in overrideFields) {
         delete overrideFields.edge;
     }
 
-    var edgeSkillBonuses = [];
+    let edgeSkillBonuses = [];
     if (overrideFields.edge_skill_bonuses) {
         for (let bonus of overrideFields.edge_skill_bonuses) {
             edgeSkillBonuses.push(edgeSkillBonusFactory(bonus));
@@ -145,7 +134,7 @@ var edgeLevelFactory = function (overrideFields) {
         delete overrideFields.edge_skill_bonuses;
     }
 
-    var _baseEdge = {
+    let _baseEdge = {
         "id": objectId,
     "notes": "",
     "cc_skill_levels": 0,
@@ -181,7 +170,7 @@ var edgeLevelFactory = function (overrideFields) {
     "extra_skill_points": 0
     };
 
-    var newEdge = Object.assign(_baseEdge, overrideFields);
+    const newEdge = Object.assign(_baseEdge, overrideFields);
     /* Overriding ID is possible. */
     objectId = newEdge.id + 1;
     return newEdge;
@@ -197,29 +186,29 @@ const characterEdgeFactory = function (overrideFields) {
         delete overrideFields.edge;
     }
 
-    var _baseCharacterEdge = {
+    let _baseCharacterEdge = {
         "id": objectId,
         "edge": edge,
         "character": 1,
         "ignore_cost": false
     };
-    var newEdge = Object.assign(_baseCharacterEdge, overrideFields);
+    const newEdge = Object.assign(_baseCharacterEdge, overrideFields);
     /* Overriding ID is possible. */
     objectId = newEdge.id + 1;
     return newEdge;
 };
 
 // Tests pollute each other, needs some reset functionality.
-var nextSkillID = 0;
+let nextSkillID = 0;
 
-var characterSkillFactory = function (overrideFields) {
-    var _baseCS = {
+const characterSkillFactory = function (overrideFields) {
+    let _baseCS = {
         "id": nextSkillID,
         "level": 1,
         "character": 1,
         "skill": "Acting / Bluff"
     };
-    var newSkill = Object.assign(_baseCS, overrideFields);
+    const newSkill = Object.assign(_baseCS, overrideFields);
     /* Overriding ID is possible. */
     nextSkillID = newSkill.id + 1;
     return newSkill
@@ -407,9 +396,8 @@ function firearmControlPropsFactory(givenProps) {
     return Object.assign(givenProps, props);
 }
 
-var miscellaneousItemFactory = function (overrideFields) {
-    "use strict";
-    var item = {
+const miscellaneousItemFactory = function (overrideFields) {
+    let item = {
         "id": objectId++,
         "name": "Bullet proof cloak",
         "description": "",
@@ -426,26 +414,24 @@ var miscellaneousItemFactory = function (overrideFields) {
     return Object.assign(item, overrideFields);
 };
 
-var sheetMiscellaneousItemFactory = function (overrideFields) {
-    "use strict";
+const sheetMiscellaneousItemFactory = function (overrideFields) {
 
     if (!overrideFields) {
         overrideFields = {};
     }
 
-    var item = {};
+    let item = {};
     if (overrideFields.item) {
         item = overrideFields.item;
         delete overrideFields.item;
     }
-    var sheetItem = Object.assign({id: objectId++}, overrideFields);
+    let sheetItem = Object.assign({id: objectId++}, overrideFields);
     sheetItem.item = miscellaneousItemFactory(item);
     return sheetItem;
 };
 
-var armorTemplateFactory = function (overrideFields) {
-    "use strict";
-    var template = {
+const armorTemplateFactory = function (overrideFields) {
+    let template = {
         "name": "Cloth hood",
         "description": "",
         "is_helm": false,
@@ -512,9 +498,8 @@ var armorTemplateFactory = function (overrideFields) {
     return Object.assign(template, overrideFields);
 };
 
-var armorQualityFactory = function (overrideFields) {
-    "use strict";
-    var quality = {
+const armorQualityFactory = function (overrideFields) {
+    let quality = {
         "name": "normal",
         "short_name": "",
         "dp_multiplier": "1.0",
@@ -542,25 +527,24 @@ var armorQualityFactory = function (overrideFields) {
     return Object.assign(quality, overrideFields);
 };
 
-var armorFactory = function(overrideFields) {
-    "use strict";
+const armorFactory = function(overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
 
-    var base = {};
+    let base = {};
     if (overrideFields.base) {
         base = overrideFields.base;
         delete overrideFields.base;
     }
 
-    var quality = {};
+    let quality = {};
     if (overrideFields.quality) {
         quality = overrideFields.quality;
         delete overrideFields.quality;
     }
 
-    var armor = {
+    let armor = {
         "id": 1,
         "name": "Leather armor",
         "description": "",
@@ -572,8 +556,8 @@ var armorFactory = function(overrideFields) {
     return Object.assign(armor, overrideFields);
 };
 
-var weaponTemplateFactory = function (overrideFields) {
-    var template = {
+const weaponTemplateFactory = function (overrideFields) {
+    let template = {
             "name": "Broadsword",
             "short_name": "Spatha",
             "description": "",
@@ -606,9 +590,8 @@ var weaponTemplateFactory = function (overrideFields) {
     return Object.assign(template, overrideFields);
 };
 
-var weaponQualityFactory = function (overrideFields) {
-    "use strict";
-    var quality = {
+const weaponQualityFactory = function (overrideFields) {
+    let quality = {
             "name": "normal",
             "short_name": "",
             "roa": "0.0000",
@@ -633,13 +616,11 @@ var weaponQualityFactory = function (overrideFields) {
     return Object.assign(quality, overrideFields);
 };
 
-var weaponFactory = function (overrideFields) {
-    "use strict";
-
+const weaponFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
-    var weapon = {
+    let weapon = {
         "id": 3,
         "name": "Broadsword",
         "description": "",
@@ -675,7 +656,7 @@ var weaponFactory = function (overrideFields) {
         "special_qualities": []
     };
     
-    var overrides = Object.assign({}, overrideFields);
+    let overrides = Object.assign({}, overrideFields);
     if ('base' in overrides) {
         weapon.base = Object.assign(weapon.base, overrideFields.base);
         delete overrides.base;
@@ -687,14 +668,12 @@ var weaponFactory = function (overrideFields) {
     return Object.assign(weapon, overrides);
 };
 
-var rangedWeaponFactory = function (overrideFields) {
-    "use strict";
-
+const rangedWeaponFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
 
-    var weapon = {
+    let weapon = {
         "id": 1,
         "name": "Short bow, 2h w/ Broadhead arrow Exceptional",
         "description": "",
@@ -737,7 +716,7 @@ var rangedWeaponFactory = function (overrideFields) {
         "special_qualities": []
     };
 
-    var overrides = Object.assign({}, overrideFields);
+    let overrides = Object.assign({}, overrideFields);
     if ('base' in overrides) {
         weapon.base = Object.assign(weapon.base, overrideFields.base);
         delete overrides.base;
@@ -749,14 +728,12 @@ var rangedWeaponFactory = function (overrideFields) {
     return Object.assign(weapon, overrides);
 };
 
-var transientEffectFactory = function (overrideFields) {
-    "use strict";
-
+const transientEffectFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
 
-    var effect = {
+    let effect = {
         "name": "No effect",
         "notes": "",
         "cc_skill_levels": 0,
@@ -788,7 +765,7 @@ var transientEffectFactory = function (overrideFields) {
     return Object.assign(effect, overrideFields);
 };
 
-var sheetTransientEffectFactory = function (overrideFields) {
+const sheetTransientEffectFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
@@ -806,8 +783,8 @@ var sheetTransientEffectFactory = function (overrideFields) {
     return Object.assign(effect, overrides);
 };
 
-var inventoryEntryFactory = function (overrides) {
-    var _entryData = {
+const inventoryEntryFactory = function (overrides) {
+    let _entryData = {
         quantity: 1,
         unit_weight: "0.5",
         description: "Item",
@@ -819,8 +796,8 @@ var inventoryEntryFactory = function (overrides) {
     return Object.assign(_entryData, overrides);
 };
 
-var woundFactory = function (overrides) {
-    var _entryData = {
+const woundFactory = function (overrides) {
+    let _entryData = {
         "id": objectId++,
         "location": "T",
         "damage": 1,
@@ -833,8 +810,8 @@ var woundFactory = function (overrides) {
     return Object.assign(_entryData, overrides);
 };
 
-var sheetFactory = function (statOverrides) {
-    var _sheetData = {
+const sheetFactory = function (statOverrides) {
+    let _sheetData = {
         id: 1,
         character: 2,
     };
@@ -842,130 +819,13 @@ var sheetFactory = function (statOverrides) {
     return Object.assign(_sheetData, statOverrides);
 };
 
-var statBlockTreeFactory = function (overrides) {
-    var characterOverrides = undefined;
-    var sheetOverrides = undefined;
-    let wounds = [], edges = [], firearms = [];
-    if (overrides) {
-        characterOverrides = overrides.character;
-        sheetOverrides = overrides.sheet;
-        if (overrides.wounds) {
-            wounds = overrides.wounds.map(
-                (props) => { return woundFactory(props); });
-        }
-        if (overrides.edges) {
-            edges = overrides.edges.map(
-                (props) => {return characterEdgeFactory(props)});
-        }
-        if (overrides.firearms) {
-            firearms = overrides.firearms.map(
-                (props) => {return firearmFactory(props)});
-        }
-    }
-
-    var charData = characterFactory(characterOverrides);
-    var sheetData = sheetFactory(sheetOverrides);
-
-
-    var promises = [];
-
-    var jsonResponse = function (json) {
-        var promise = Promise.resolve(json);
-        promises.push(promise);
-        return promise;
-    };
-
-    var afterLoad = function (callback) {
-        Promise.all(promises).then(function () {
-            Promise.all(promises).then(function () {
-                Promise.all(promises).then(function () {
-                    callback()
-                }).catch(function (err) { fail("failed with " + err)});
-            }).catch(function (err) { fail("failed with " + err)});
-        }).catch(function (err) { fail("failed with " + err)});
-    };
-
-    rest.getData.mockImplementation(function (url) {
-        if (url === "/rest/sheets/1/") {
-            return jsonResponse(sheetData);
-        } else if (url === "/rest/characters/2/") {
-            return jsonResponse(charData);
-        } else if (url === "/rest/characters/2/characterskills/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/characters/2/characteredges/") {
-            return jsonResponse(edges);
-        } else if (url === "/rest/characters/2/wounds/") {
-            return jsonResponse(wounds);
-        } else if (url === "/rest/skills/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/weapontemplates/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/weaponqualities/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/weapons/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/sheetfirearms/") {
-            return jsonResponse(firearms);
-        } else if (url === "/rest/sheets/1/sheetweapons/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/sheetrangedweapons/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/rangedweapontemplates/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/rangedweapons/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/sheettransienteffects/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/transienteffects/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/inventory/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/sheetarmor/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/sheethelm/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/sheets/1/sheetmiscellaneousitems/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/miscellaneousitems/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url === "/rest/edgelevels/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url.match(new RegExp('/rest/ammunition/firearm/.*/'))) {
-            return jsonResponse([]);
-        } else if (url ===  "/rest/scopes/campaign/2/") {
-            return jsonResponse([]);
-        } else if (url ===  "/rest/firearms/campaign/2/") {
-            return jsonResponse([]);
-        } else {
-            /* Throwing errors here do not cancel the test. */
-            fail("this is an unsupported url:" + url);
-        }
-    });
-    var table = TestUtils.renderIntoDocument(
-        <StatBlock url="/rest/sheets/1/"/>
-    );
-
-    table.afterLoad = afterLoad;
-    table.loaded = Promise.all(promises);
-    return table;
-};
-
-var statBlockFactory = function (overrides) {
-    var table = statBlockTreeFactory(overrides);
-    var statBlock = TestUtils.findRenderedComponentWithType(table,
-        StatBlock);
-    statBlock.afterLoad = table.afterLoad;
-    statBlock.loaded = table.loaded;
-    return statBlock;
-};
-
-var skillHandlerFactory = function (givenProps) {
+const skillHandlerFactory = function (givenProps) {
     if (!givenProps) {
         givenProps = {};
     }
-    var edgeList = [], skills = [], allSkills = [], effects = [], wounds = [];
+    let edgeList = [], skills = [], allSkills = [], effects = [], wounds = [];
 
-    var skillMap = {};
+    let skillMap = {};
     if (givenProps.allSkills) {
         for (let sk of givenProps.allSkills) {
             var newSkill = skillFactory(sk);
@@ -1029,34 +889,14 @@ var skillHandlerFactory = function (givenProps) {
     return new SkillHandler(handlerProps);
 };
 
-module.exports = {
-    characterFactory: characterFactory,
-    sheetFactory: sheetFactory,
-    statBlockFactory: statBlockFactory,
-    statBlockTreeFactory: statBlockTreeFactory,
-    characterSkillFactory: characterSkillFactory,
-    skillFactory: skillFactory,
-    edgeLevelFactory: edgeLevelFactory,
-    edgeFactory: edgeFactory,
-    characterEdgeFactory: characterEdgeFactory,
-    ammunitionFactory: ammunitionFactory,
-    scopeFactory: scopeFactory,
-    baseFirearmFactory: baseFirearmFactory,
-    firearmControlPropsFactory: firearmControlPropsFactory,
-    magazineFactory: magazineFactory,
-    firearmFactory: firearmFactory,
-    weaponTemplateFactory: weaponTemplateFactory,
-    weaponQualityFactory: weaponQualityFactory,
-    weaponFactory: weaponFactory,
-    rangedWeaponFactory: rangedWeaponFactory,
-    transientEffectFactory: transientEffectFactory,
-    sheetTransientEffectFactory: sheetTransientEffectFactory,
-    inventoryEntryFactory: inventoryEntryFactory,
-    armorTemplateFactory: armorTemplateFactory,
-    armorQualityFactory: armorQualityFactory,
-    armorFactory: armorFactory,
-    miscellaneousItemFactory: miscellaneousItemFactory,
-    sheetMiscellaneousItemFactory: sheetMiscellaneousItemFactory,
-    skillHandlerFactory: skillHandlerFactory,
-    woundFactory: woundFactory
-};
+export {
+    characterFactory, sheetFactory, characterSkillFactory, skillFactory,
+    edgeLevelFactory, edgeFactory, characterEdgeFactory, ammunitionFactory,
+    scopeFactory, baseFirearmFactory, firearmControlPropsFactory,
+    magazineFactory, firearmFactory, weaponTemplateFactory,
+    weaponQualityFactory, weaponFactory, rangedWeaponFactory,
+    transientEffectFactory, sheetTransientEffectFactory,
+    inventoryEntryFactory, armorTemplateFactory, armorQualityFactory,
+    armorFactory, miscellaneousItemFactory, sheetMiscellaneousItemFactory,
+    skillHandlerFactory, woundFactory
+}

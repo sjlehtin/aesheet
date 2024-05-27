@@ -1,4 +1,4 @@
-import factories from './factories';
+import * as factories from './factories'
 
 describe('SkillHandler edge skill bonuses', function() {
     it('handles plain surprise check', function () {

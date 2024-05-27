@@ -4,8 +4,7 @@ import { screen, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import TransientEffectRow from 'TransientEffectRow';
-import factories from './factories';
-
+import * as factories from './factories'
 
 describe('TransientEffectRow', function() {
     const getTransientEffectRow = function (givenProps) {

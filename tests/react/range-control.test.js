@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 
 import RangeControl from 'RangeControl';
 
-import factories from './factories';
+import * as factories from './factories'
 
 describe('RangeControl', () => {
 

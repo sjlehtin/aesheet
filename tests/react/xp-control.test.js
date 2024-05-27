@@ -4,7 +4,7 @@ import { screen, render, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import XPControl from 'XPControl';
-import factories from './factories';
+import * as factories from './factories'
 
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
