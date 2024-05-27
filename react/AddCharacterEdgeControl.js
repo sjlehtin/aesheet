@@ -7,6 +7,8 @@ import Combobox from 'react-widgets/Combobox';
 
 const rest = require('./sheet-rest');
 
+// TODO: add tests
+
 class AddEdgeLevelControl extends React.Component {
     constructor(props) {
         super(props);
@@ -17,19 +19,17 @@ class AddEdgeLevelControl extends React.Component {
         }
     }
 
-    loadEdgeLevels() {
+    async loadEdgeLevels() {
         this.setState({isBusy: true});
-        rest.getData(`/rest/edgelevels/campaign/${this.props.campaign}/`).then(
-            (json) => {
-                this.setState({
-                    edgeLevelChoices: json,
-                    isBusy: false})
-            }
-        ).catch((err) => console.log(err));
+        const json = await rest.getData(`/rest/edgelevels/campaign/${this.props.campaign}/`)
+        this.setState({
+            edgeLevelChoices: json,
+            isBusy: false
+        })
     }
 
-    componentDidMount() {
-        this.loadEdgeLevels();
+    async componentDidMount() {
+        await this.loadEdgeLevels();
     }
 
     handleEdgeLevelChange(value) {
