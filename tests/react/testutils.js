@@ -1,7 +1,9 @@
-function defer() {
-    var res, rej;
+import {screen, within} from "@testing-library/react";
 
-    var promise = new Promise((resolve, reject) => {
+function defer() {
+    let res, rej;
+
+    let promise = new Promise((resolve, reject) => {
         res = resolve;
         rej = reject;
     });
@@ -12,4 +14,13 @@ function defer() {
     return promise;
 }
 
-export {defer};
+function getSenseChecks(checkLabel) {
+    let values = []
+    within(screen.getByLabelText(checkLabel)).queryAllByRole("cell", {name: "check"}).forEach((el) => {
+        values.push(parseInt(el.textContent))
+    })
+    return values;
+}
+
+
+export {defer, getSenseChecks};
