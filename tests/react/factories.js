@@ -44,6 +44,7 @@ const characterFactory = function (statOverrides) {
         free_edges: 0,
         xp_used_ingame: 0,
 
+        weigth: "75.0",
         edges: [],
         "campaign": 2
     };

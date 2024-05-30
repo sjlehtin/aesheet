@@ -29,6 +29,8 @@ import MovementRates from './MovementRates';
 import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
 import RangeControl from './RangeControl';
+import SideDrawer from "./SideDrawer";
+import GravityControl from "./GravityControl";
 
 import {
     Badge,
@@ -65,6 +67,8 @@ class StatBlock extends React.Component {
             rangedWeaponList: [],
             transientEffectList: [],
             miscellaneousItemList: [],
+
+            gravity: 1.0,
 
             carriedInventoryWeight: 0,
 
@@ -1098,6 +1102,33 @@ class StatBlock extends React.Component {
             )
         }
 
+
+        if (this.state.gravity !== 1.0) {
+            const adjustedWeight = weight * this.state.gravity
+            const extraWeight = adjustedWeight - weight
+
+            weight += extraWeight
+            breakdown.push(
+                {
+                    reason: "extra weight from gravity",
+                    value: extraWeight
+                }
+            )
+
+            // TODO: fix typo
+            const characterWeight = parseFloat(this.state.char.weigth)
+            const adjustedCharacterWeight = characterWeight * this.state.gravity
+            const extraCharWeight = adjustedCharacterWeight - characterWeight
+
+            weight += extraCharWeight
+            breakdown.push(
+                {
+                    reason: "extra character weight from gravity",
+                    value: extraCharWeight
+                }
+            )
+        }
+
         return {
             value: weight,
             breakdown: breakdown
@@ -1107,6 +1138,10 @@ class StatBlock extends React.Component {
     rangeChanged(newRange) {
         this.setState({firearmRange: newRange.range,
                        firearmDarknessDetectionLevel: newRange.darknessDetectionLevel});
+    }
+
+    gravityChanged(newGravity) {
+        this.setState({gravity: newGravity})
     }
 
     renderFirearms(skillHandler) {
@@ -1143,10 +1178,6 @@ class StatBlock extends React.Component {
             <Card.Header>
                 <h4>Firearms</h4>
             </Card.Header>
-            <Card.Body>
-                <RangeControl onChange={(e) => this.rangeChanged(e)}
-                              skillHandler={skillHandler}/>
-            </Card.Body>
             <Card.Body className={"table-responsive p-0 m-1"}>
             {rows}
             </Card.Body>
@@ -1481,12 +1512,23 @@ class StatBlock extends React.Component {
             var effStats = skillHandler.getEffStats();
         }
 
-
         return (
+            <>
+            <SideDrawer >
+                <>
+                <Row>
+                    <RangeControl onChange={(e) => this.rangeChanged(e)}
+                                  skillHandler={skillHandler}/>
+                </Row>
+                <Row>
+                    <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
+                </Row>
+                </>
+            </SideDrawer>
             <Container fluid={true}>
                 {this.renderHeader()}
                 <Row>
-                <Col md={8}>
+                <Col md={8} >
                     <Row>
                         <Col md={6}>
                             <Row>
@@ -1583,7 +1625,7 @@ class StatBlock extends React.Component {
                     {this.renderSkills(skillHandler)}
                 </Col>
                 </Row>
-            </Container>
+            </Container></>
         )
     }
 }

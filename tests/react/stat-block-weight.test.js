@@ -8,6 +8,7 @@ import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
 const factories = require('./factories');
+import {testSetup} from './testutils'
 
 const server = setupServer(
   rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
@@ -31,7 +32,10 @@ const server = setupServer(
 )
 
 describe('stat block weight handling', function() {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    beforeAll(() => {
+        testSetup()
+        server.listen({ onUnhandledRequest: 'error' })
+    })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 
@@ -279,4 +283,33 @@ describe('stat block weight handling', function() {
 
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("7.00 kg")
     });
+
+    it("accounts for changes in gravitation", async () => {
+        const user = userEvent.setup()
+
+        server.use(
+          rest.get('http://localhost/rest/characters/2/', (req, res, ctx) => {
+            return res(ctx.json(factories.characterFactory({weigth: "80.0"})))
+          }),
+            rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {
+                return res(ctx.json([
+                    factories.inventoryEntryFactory({
+                        unit_weight: 5.50,
+                        quantity: 1
+                    })
+                ]))
+            }),
+        )
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+
+        await user.click(screen.getByRole("button", {name: "Combat transients"}))
+
+        const input = screen.getByRole("textbox", {name: "Gravity"})
+        await user.clear(input)
+        await user.type(input, "2.0")
+        expect(input).toHaveClass("is-valid")
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("91.00 kg")
+    });
+
 });

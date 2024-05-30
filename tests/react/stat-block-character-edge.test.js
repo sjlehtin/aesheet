@@ -8,6 +8,7 @@ import {render, waitFor, waitForElementToBeRemoved, screen, within} from '@testi
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
+import {testSetup} from "./testutils";
 
 const server = setupServer(
   rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
@@ -28,7 +29,10 @@ const server = setupServer(
 )
 
 describe('stat block edge handling', function() {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    beforeAll(() => {
+        testSetup()
+        server.listen({ onUnhandledRequest: 'error' })
+    })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 

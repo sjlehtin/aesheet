@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event'
 const factories = require('./factories');
 
 import StatBlock from 'StatBlock'
+import {testSetup} from "./testutils";
 
 
 const server = setupServer(
@@ -35,7 +36,10 @@ const server = setupServer(
 
 
 describe('stat block wounds handling', function() {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    beforeAll(() => {
+        testSetup()
+        server.listen({ onUnhandledRequest: 'error' })
+    })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 

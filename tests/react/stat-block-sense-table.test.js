@@ -7,7 +7,7 @@ import * as factories from './factories'
 import {render, waitForElementToBeRemoved, screen} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import {getSenseChecks} from "./testutils";
+import {getSenseChecks, testSetup} from "./testutils";
 
 const server = setupServer(
   rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
@@ -28,7 +28,10 @@ const server = setupServer(
 )
 
 describe('stat block -- sense table', function() {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    beforeAll(() => {
+        testSetup()
+        server.listen({ onUnhandledRequest: 'error' })
+    })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 

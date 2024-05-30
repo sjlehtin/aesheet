@@ -11,6 +11,7 @@ import {
 import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import userEvent from '@testing-library/user-event'
+import {testSetup} from "./testutils";
 
 const factories = require('./factories');
 
@@ -56,7 +57,10 @@ const server = setupServer(
 )
 
 describe('StatBlock', function() {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    beforeAll(() => {
+        testSetup()
+        server.listen({ onUnhandledRequest: 'error' })
+    })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 

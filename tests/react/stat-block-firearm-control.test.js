@@ -16,6 +16,7 @@ import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
 import * as factories from './factories'
+import {testSetup} from "./testutils";
 
 const server = setupServer(
   rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
@@ -50,7 +51,10 @@ const server = setupServer(
 )
 
 describe('StatBlock -- FirearmControl', () => {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+    beforeAll(() => {
+        testSetup()
+        server.listen({ onUnhandledRequest: 'error' })
+    })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 
@@ -110,6 +114,8 @@ describe('StatBlock -- FirearmControl', () => {
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
 
         await waitForElementToBeRemoved(document.querySelector("#loading"))
+
+        await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
         const input = await sheet.findByLabelText("Target at range")
 

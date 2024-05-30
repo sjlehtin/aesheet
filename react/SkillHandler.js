@@ -652,7 +652,7 @@ class SkillHandler {
                 var encumbrancePenalty = util.roundup(
                     (-10 * this.props.weightCarried) / this._effStats.fit);
 
-                if (encumbrancePenalty) {
+                if (encumbrancePenalty < 0) {
                     this._effStats.fit += encumbrancePenalty;
                     this._effStats.breakdown.fit.push({
                         reason: "encumbrance",
