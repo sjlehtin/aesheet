@@ -952,6 +952,7 @@ class StatBlock extends React.Component {
             edges: this.state.edgeList,
             effects: this.getAllEffects(),
             weightCarried: this.getCarriedWeight().value,
+            gravity: this.state.gravity,
             wounds: this.state.woundList,
             armor: this.state.armor,
             helm: this.state.helm
@@ -1098,33 +1099,6 @@ class StatBlock extends React.Component {
                 {
                     reason: "inventory",
                     value: this.state.carriedInventoryWeight
-                }
-            )
-        }
-
-
-        if (this.state.gravity !== 1.0) {
-            const adjustedWeight = weight * this.state.gravity
-            const extraWeight = adjustedWeight - weight
-
-            weight += extraWeight
-            breakdown.push(
-                {
-                    reason: "extra weight from gravity",
-                    value: extraWeight
-                }
-            )
-
-            // TODO: fix typo
-            const characterWeight = parseFloat(this.state.char.weigth)
-            const adjustedCharacterWeight = characterWeight * this.state.gravity
-            const extraCharWeight = adjustedCharacterWeight - characterWeight
-
-            weight += extraCharWeight
-            breakdown.push(
-                {
-                    reason: "extra character weight from gravity",
-                    value: extraCharWeight
                 }
             )
         }

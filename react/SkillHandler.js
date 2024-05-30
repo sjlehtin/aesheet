@@ -615,6 +615,12 @@ class SkillHandler {
     }
 
     getEffStats() {
+        function calculateEncumbrancePenalty(weightCarried, fit) {
+            let encumbrancePenalty = util.roundup(
+                (-10 * weightCarried) / fit);
+            return encumbrancePenalty;
+        }
+
         if (!this._effStats) {
             this._effStats = {};
             this._effStats.breakdown = {}
@@ -649,21 +655,63 @@ class SkillHandler {
             // (transient effects, such as spells) and hard mods (edges)
             // in the Excel combat sheet.
             if (this._effStats.fit > 0) {
-                var encumbrancePenalty = util.roundup(
-                    (-10 * this.props.weightCarried) / this._effStats.fit);
+                let encumbrancePenalty = calculateEncumbrancePenalty(this.props.weightCarried, this._effStats.fit);
+
+                if (this.props.gravity !== 1.0) {
+                    const adjustedWeight = this.props.weightCarried * this.props.gravity
+                    const extraWeight = adjustedWeight - this.props.weightCarried
+
+                    // TODO: fix typo
+                    const characterWeight = parseFloat(this.props.character.weigth)
+                    const adjustedCharacterWeight = characterWeight * this.props.gravity
+                    const extraCharWeight = adjustedCharacterWeight - characterWeight
+
+                    const extraFromGravity = extraWeight + extraCharWeight
+
+                    if (this.props.gravity > 1) {
+
+                        const encumbrancePenaltyFromGravity = calculateEncumbrancePenalty(extraFromGravity, this._effStats.fit);
+                        this.addEncumbrancePenalty(encumbrancePenaltyFromGravity, "gravity");
+
+                        // High-G maneuver
+                        const level = this.skillLevel("High-G maneuver");
+                        const skillOffset = Math.min(level * 5, -encumbrancePenaltyFromGravity)
+
+                        this._effStats.ref += skillOffset
+                        if (skillOffset > 0) {
+                            this._effStats.breakdown.ref.push({
+                                reason: "high-g skill",
+                                value: skillOffset
+                            })
+                        }
+                    } else {
+                        const encumbrancePenaltyFromGravity = calculateEncumbrancePenalty(extraFromGravity, this._effStats.fit);
+                        const penaltyOffset = Math.max(encumbrancePenaltyFromGravity, encumbrancePenalty)
+                        encumbrancePenalty += penaltyOffset
+
+                        const gravityPenalty = util.roundup(-25 * (1.0 - this.props.gravity))
+                        this._effStats.ref += gravityPenalty
+                        this._effStats.breakdown.ref.push({
+                            reason: "gravity",
+                            value: gravityPenalty
+                        })
+
+                        // Low-G maneuver
+                        const level = this.skillLevel("Low-G maneuver");
+                        const skillOffset = Math.min(level * 5, -gravityPenalty)
+
+                        this._effStats.ref += skillOffset
+                        if (skillOffset > 0) {
+                            this._effStats.breakdown.ref.push({
+                                reason: "low-g skill",
+                                value: skillOffset
+                            })
+                        }
+                    }
+                }
 
                 if (encumbrancePenalty < 0) {
-                    this._effStats.fit += encumbrancePenalty;
-                    this._effStats.breakdown.fit.push({
-                        reason: "encumbrance",
-                        value: encumbrancePenalty
-                    })
-
-                    this._effStats.ref += encumbrancePenalty;
-                    this._effStats.breakdown.ref.push({
-                        reason: "encumbrance",
-                        value: encumbrancePenalty
-                    })
+                    this.addEncumbrancePenalty(encumbrancePenalty);
                 }
             } else {
                 // Effective FIT zero or negative, the character cannot move.
@@ -735,6 +783,20 @@ class SkillHandler {
             addStatMods('imm')
         }
         return this._effStats;
+    }
+
+    addEncumbrancePenalty(encumbrancePenalty, tag = "encumbrance") {
+        this._effStats.fit += encumbrancePenalty;
+        this._effStats.breakdown.fit.push({
+            reason: tag,
+            value: encumbrancePenalty
+        })
+
+        this._effStats.ref += encumbrancePenalty;
+        this._effStats.breakdown.ref.push({
+            reason: tag,
+            value: encumbrancePenalty
+        })
     }
 
     detectionLevel(goodEdge, badEdge, givenMap) {
@@ -851,7 +913,8 @@ SkillHandler.defaultProps = {
     helm: {},
     effects: [],
     edges: [],
-    wounds: []
+    wounds: [],
+    gravity: 1.0
 };
 
 SkillHandler.BASE_VISION_RANGE = 9;

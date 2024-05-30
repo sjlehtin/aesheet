@@ -66,6 +66,66 @@ describe('SkillHandler stats', function() {
         expect(handler.getEffStats().mov).toEqual(44);
     });
 
+    it('takes low-G into account ', function () {
+        const handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({
+                cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
+            }),
+            weightCarried: 26,
+            gravity: 0.5
+        });
+
+        expect(handler.getBaseStats().fit).toEqual(50);
+        expect(handler.getEffStats().fit).toEqual(50);
+        expect(handler.getEffStats().ref).toEqual(37);
+    })
+
+    it('takes low-G maneuver into account ', function () {
+        const handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({
+                cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
+            }),
+            skills: [{skill: "Low-G maneuver", level: 2}],
+            weightCarried: 26,
+            gravity: 0.5
+        });
+
+        expect(handler.getBaseStats().fit).toEqual(50);
+        expect(handler.getEffStats().fit).toEqual(50);
+        expect(handler.getEffStats().ref).toEqual(47);
+    })
+
+    it('takes high-G into account ', function () {
+        const handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({
+                cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
+            }),
+            weightCarried: 26,
+            gravity: 1.5
+        });
+
+        expect(handler.getBaseStats().fit).toEqual(50);
+        // There are two roundups when calculating the total penalty. It is
+        // possible to get rid of one of them, but not trivial and it requires
+        // a bit of doing
+        expect(handler.getEffStats().fit).toEqual(33);
+        expect(handler.getEffStats().ref).toEqual(33);
+    })
+
+    it('takes high-G maneuver into account ', function () {
+        const handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({
+                cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
+            }),
+            skills: [{skill: "High-G maneuver", level: 2}],
+            weightCarried: 26,
+            gravity: 1.5
+        });
+
+        expect(handler.getEffStats().fit).toEqual(33);
+        expect(handler.getEffStats().ref).toEqual(43);
+    })
+
     it('handles zero eff fit on weight penalty calculation', function () {
         var handler = factories.skillHandlerFactory({
             character: {cur_fit: 50},

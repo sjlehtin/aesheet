@@ -884,10 +884,7 @@ const skillHandlerFactory = function (givenProps) {
         wounds: wounds,
         armor: armor, helm: helm
     };
-    if (givenProps.weightCarried) {
-        handlerProps.weightCarried = givenProps.weightCarried;
-    }
-    return new SkillHandler(handlerProps);
+    return new SkillHandler(Object.assign({}, givenProps, handlerProps));
 };
 
 export {
