@@ -1110,8 +1110,10 @@ class StatBlock extends React.Component {
     }
 
     rangeChanged(newRange) {
-        this.setState({firearmRange: newRange.range,
-                       firearmDarknessDetectionLevel: newRange.darknessDetectionLevel});
+        this.setState({
+            firearmRange: newRange.range,
+            firearmDarknessDetectionLevel: newRange.darknessDetectionLevel
+        });
     }
 
     gravityChanged(newGravity) {
@@ -1492,7 +1494,10 @@ class StatBlock extends React.Component {
                 <>
                 <Row>
                     <RangeControl onChange={(e) => this.rangeChanged(e)}
-                                  skillHandler={skillHandler}/>
+                                  skillHandler={skillHandler}
+                                  initialRange={this.state.firearmRange}
+                                  initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
+                    />
                 </Row>
                 <Row>
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />

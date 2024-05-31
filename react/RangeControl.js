@@ -9,9 +9,9 @@ class RangeControl extends React.Component {
         super(props);
 
         this.state = {
-            currentValue: "",
-            currentRange: null,
-            currentDetectionLevel: 0
+            currentValue: props.initialRange ?? "",
+            currentRange: props.initialRange ?? null,
+            currentDetectionLevel: props.initialDetectionLevel ?? 0
         };
     }
 
@@ -67,12 +67,12 @@ class RangeControl extends React.Component {
         }
         return <div>
             <Form.Group aas={Row}>
-            <Form.Label id={"range-control-label"} column sm={"2"}>Range</Form.Label>
                 <Col>
-                <Form.Control ref={(c) => this._inputField = c}
+            <Form.Label id={"range-control-label"} column sm={"2"}>Range</Form.Label>
+                <Form.Control
                           size="sm" type="text"
                           sm={"2"}
-                              aria-labelledby={"range-control-label"}
+                          aria-labelledby={"range-control-label"}
                           aria-label="Target at range"
                           placeholder={"Leave empty to shoot to short range"}
                           onChange={(e) => this.handleChange(e)}
@@ -80,14 +80,14 @@ class RangeControl extends React.Component {
                           value={this.state.currentValue}
             />
                 </Col>
-            <Form.Label column sm={"2"}>Darkness DL</Form.Label>
                 <Col>
+            <Form.Label column sm={"2"}>Darkness DL</Form.Label>
                 <DropdownList data={RangeControl.detectionLevels}
                               aria-label={"Darkness DL"}
                           textField={item => `${item.description} (${item.detectionLevel})`}
                           dataKey='detectionLevel'
                           value={this.state.currentDetectionLevel}
-                              defaultValue={RangeControl.detectionLevels[0]}
+                          defaultValue={RangeControl.detectionLevels[0]}
                           onChange={(value) => this.handleDetectionLevelChange(value)} />
                 </Col>
             </Form.Group>
@@ -102,7 +102,9 @@ class RangeControl extends React.Component {
 
 RangeControl.propTypes = {
     onChange: PropTypes.func,
-    skillHandler: PropTypes.object.isRequired
+    skillHandler: PropTypes.object.isRequired,
+    initialRange: PropTypes.number,
+    initialDetectionLevel: PropTypes.number
 };
 
 RangeControl.detectionLevels = [
