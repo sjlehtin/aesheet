@@ -1224,6 +1224,7 @@ class StatBlock extends React.Component {
                 skillHandler={skillHandler}
                 onRemove={(wpn) => this.handleRangedWeaponRemoved(wpn) }
                 style={{fontSize: "80%", backgroundColor: bgColor}}
+                gravity={this.state.gravity}
             />);
         }
 

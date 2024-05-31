@@ -2,7 +2,8 @@ import React from 'react';
 
 import RangedWeaponRow from "RangedWeaponRow";
 
-import { render } from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
+
 const factories = require('./factories');
 
 describe('RangedWeaponRow', function() {
@@ -143,6 +144,50 @@ describe('RangedWeaponRow', function() {
                 quality: {max_fit: 100}}
         });
         expect(weapon.getByLabelText("Damage").textContent).toEqual("1d6+7/6+1")
+    });
+
+    it("renders range without passed gravity prop", function () {
+
+        const props = {
+            handlerProps: {
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
+            },
+            weaponProps: {
+                base: {
+                    roa: "1.5",
+                    base_skill: "Bow",
+                    range_s: 5,
+                    range_m: 20,
+                    range_l: 30
+                }
+            },
+        };
+        renderWeaponRow(props)
+
+        expect(screen.getByLabelText("Short range").textContent).toEqual("5");
+    })
+
+    it("halves range in high gravity", function () {
+
+        const props = {
+            handlerProps: {
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
+            },
+            weaponProps: {
+                base: {
+                    roa: "1.5",
+                    base_skill: "Bow",
+                    range_s: 5,
+                    range_m: 20,
+                    range_l: 30 }
+            },
+        };
+        renderWeaponRow(Object.assign({gravity: 2.0}, props));
+        expect(screen.getByLabelText("Short range").textContent).toEqual("2")
+        expect(screen.getByLabelText("Medium range").textContent).toEqual("10")
+        expect(screen.getByLabelText("Long range").textContent).toEqual("15")
     });
 
 });

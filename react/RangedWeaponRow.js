@@ -128,21 +128,26 @@ class RangedWeaponRow extends WeaponRow {
         { return <td style={initStyle} key={`init-${ii}`}>{util.renderInt(el)}</td>; });
 
         const base = this.props.weapon.base;
-        const ranges = <span>{base.range_s} / {base.range_m} / {base.range_l}</span>;
+
+        function calculateRange(r, g) {
+            return util.rounddown(r / (g ?? 1.0))
+        }
 
         return <div style={this.props.style}>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
-                  <tr>
+                <tr>
                     <th style={headerStyle}>Weapon</th>
                     <th style={headerStyle}>Lvl</th>
                     <th style={headerStyle}>ROF</th>
-                      {actionCells}
+                    {actionCells}
                     <th style={headerStyle}>TI</th>
                     <th style={headerStyle}>DI</th>
                     <th style={headerStyle}>Damage</th>
-                    <th style={headerStyle}>S / M / L</th>
-                  </tr>
+                    <th style={headerStyle}>S</th>
+                    <th style={headerStyle}>M</th>
+                    <th style={headerStyle}>L</th>
+                </tr>
                 </thead>
                 <tbody>
                 <tr aria-label={"Actions"}>
@@ -154,7 +159,9 @@ class RangedWeaponRow extends WeaponRow {
                     <td style={cellStyle}>{this.targetInitiative()}</td>
                     <td style={cellStyle}>{this.drawInitiative()}</td>
                     <td style={cellStyle} aria-label={"Damage"}>{this.renderDamage()}</td>
-                    <td style={cellStyle}>{ranges}</td>
+                    <td style={cellStyle} aria-label={"Short range"}>{calculateRange(base.range_s, this.props.gravity)}</td>
+                    <td style={cellStyle} aria-label={"Medium range"}>{calculateRange(base.range_m, this.props.gravity)}</td>
+                    <td style={cellStyle} aria-label={"Long range"}>{calculateRange(base.range_l, this.props.gravity)}</td>
                 </tr>
                 <tr>
                     <td colSpan={2}><span style={helpStyle}>I vs. 1 target</span></td>
@@ -170,7 +177,6 @@ class RangedWeaponRow extends WeaponRow {
             <span style={infoStyle}><label>DP:</label> {this.dp()}</span>
             <span style={infoStyle}><label>Size:</label> {this.props.weapon.size}</span>
                     <Button onClick={(e) => this.handleRemove()}
-                            ref={(c) => this._removeButton = c}
                             size="sm"
                     >Remove</Button>
             </div>
@@ -182,7 +188,12 @@ class RangedWeaponRow extends WeaponRow {
 RangedWeaponRow.props = {
     skillHandler: PropTypes.object.isRequired,
     weapon: PropTypes.object.isRequired,
-    onRemove: PropTypes.func
+    onRemove: PropTypes.func,
+    gravity: PropTypes.number
+};
+
+RangedWeaponRow.defaultProps = {
+    gravity: 1.0
 };
 
 export default RangedWeaponRow;
