@@ -674,14 +674,17 @@ class SkillHandler {
 
                         // High-G maneuver
                         const level = this.skillLevel("High-G maneuver");
-                        const skillOffset = Math.min(level * 5, -encumbrancePenaltyFromGravity)
 
-                        this._effStats.ref += skillOffset
-                        if (skillOffset > 0) {
-                            this._effStats.breakdown.ref.push({
-                                reason: "high-g skill",
-                                value: skillOffset
-                            })
+                        if (typeof(level) === "number") {
+                            const skillOffset = Math.min(level * 5, -encumbrancePenaltyFromGravity)
+
+                            this._effStats.ref += skillOffset
+                            if (skillOffset > 0) {
+                                this._effStats.breakdown.ref.push({
+                                    reason: "high-g skill",
+                                    value: skillOffset
+                                })
+                            }
                         }
                     } else {
                         const encumbrancePenaltyFromGravity = calculateEncumbrancePenalty(extraFromGravity, this._effStats.fit);
@@ -697,14 +700,16 @@ class SkillHandler {
 
                         // Low-G maneuver
                         const level = this.skillLevel("Low-G maneuver");
-                        const skillOffset = Math.min(level * 5, -gravityPenalty)
+                        if (typeof(level) === "number") {
+                            const skillOffset = Math.min(level * 5, -gravityPenalty)
 
-                        this._effStats.ref += skillOffset
-                        if (skillOffset > 0) {
-                            this._effStats.breakdown.ref.push({
-                                reason: "low-g skill",
-                                value: skillOffset
-                            })
+                            this._effStats.ref += skillOffset
+                            if (skillOffset > 0) {
+                                this._effStats.breakdown.ref.push({
+                                    reason: "low-g skill",
+                                    value: skillOffset
+                                })
+                            }
                         }
                     }
                 }

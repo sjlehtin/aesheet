@@ -24,11 +24,14 @@ const server = setupServer(
     return res(ctx.json([]))
   }),
   rest.get('http://localhost/rest/characters/2/', (req, res, ctx) => {
-    return res(ctx.json(factories.characterFactory()))
+    return res(ctx.json(factories.characterFactory({cur_fit: 50, cur_ref: 50})))
   }),
   rest.get('http://localhost/rest/characters/2/*/', (req, res, ctx) => {
     return res(ctx.json([]))
   }),
+    rest.get('http://localhost/rest/skills/campaign/2/', (req, res, ctx) => {
+      return res(ctx.json([factories.skillFactory({name: "Low-G maneuver"}), factories.skillFactory({name: "High-G maneuver"}),]))
+    }),
     rest.get('http://localhost/rest/*/campaign/2/', (req, res, ctx) => {
         return res(ctx.json([]))
     }),
@@ -57,6 +60,9 @@ describe('StatBlock -- gravity', () => {
 
         expect(screen.getByLabelText("Short range").textContent).toEqual("30")
 
+        expect(screen.getByLabelText("Current REF").textContent).toEqual("49")
+        expect(screen.getByLabelText("Current FIT").textContent).toEqual("49")
+
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
         const input = await screen.findByLabelText("Gravity")
@@ -65,5 +71,8 @@ describe('StatBlock -- gravity', () => {
         await user.type(input, "2")
 
         expect(screen.getByLabelText("Short range").textContent).toEqual("15")
+
+        expect(screen.getByLabelText("Current REF").textContent).toEqual("33")
+        expect(screen.getByLabelText("Current FIT").textContent).toEqual("33")
     });
 })
