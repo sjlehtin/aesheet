@@ -1,7 +1,7 @@
 import React from 'react';
 import AmmoControl from 'AmmoControl';
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 import { render, screen } from '@testing-library/react'
 import { rest } from 'msw'

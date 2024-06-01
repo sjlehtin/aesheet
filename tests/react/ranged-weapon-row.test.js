@@ -4,7 +4,7 @@ import RangedWeaponRow from "RangedWeaponRow";
 
 import {render, screen} from '@testing-library/react'
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 describe('RangedWeaponRow', function() {
 

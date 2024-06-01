@@ -1,6 +1,6 @@
 import React from 'react';
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 const characterSkillFactory = factories.characterSkillFactory;
 const skillFactory = factories.skillFactory;

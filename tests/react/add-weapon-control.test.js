@@ -2,7 +2,7 @@ import React from 'react';
 
 import AddWeaponControl from "AddWeaponControl";
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 import {render, fireEvent, waitFor, waitForElementToBeRemoved, screen, within} from '@testing-library/react'
 import { rest } from 'msw'

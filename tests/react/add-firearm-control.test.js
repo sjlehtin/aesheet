@@ -7,7 +7,7 @@ import AddFirearmControl from 'AddFirearmControl';
 import {rest} from "msw";
 import {setupServer} from 'msw/node'
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 const server = setupServer(
     rest.get('http://localhost/rest/firearms/campaign/2/', (req, res, ctx) => {

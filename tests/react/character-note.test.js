@@ -11,8 +11,7 @@ import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
-// var rest = require('sheet-rest');
-const factories = require('./factories');
+import * as factories from './factories'
 
 const server = setupServer(
   rest.get('http://localhost/rest/characters/42', (req, res, ctx) => {

@@ -4,7 +4,7 @@ import SkillTable from 'SkillTable';
 import { screen, render, waitForElementToBeRemoved, within, fireEvent, prettyDOM, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 describe('SkillTable', function() {
     const _basicPhysical = [

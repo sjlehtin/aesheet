@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 
 import AddSkillControl from 'AddSkillControl';
 import SkillTable from 'SkillTable';
-const factories = require('./factories');
+import * as factories from './factories';
 
 
 describe('AddSkillControl', function() {

@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 
 import WoundRow from 'WoundRow'
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 describe('WoundRow', function() {
 

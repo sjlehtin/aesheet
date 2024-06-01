@@ -1,4 +1,4 @@
-const factories = require('./factories');
+import * as factories from './factories'
 
 describe('SkillHandler', function() {
 

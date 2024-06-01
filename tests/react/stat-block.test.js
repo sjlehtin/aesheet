@@ -13,7 +13,7 @@ import {setupServer} from 'msw/node'
 import userEvent from '@testing-library/user-event'
 import {testSetup} from "./testutils";
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 let objectId = 900
 

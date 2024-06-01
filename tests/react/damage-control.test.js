@@ -2,16 +2,13 @@ import React from 'react';
 
 import DamageControl from 'DamageControl';
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 import {fireEvent, render, screen, waitFor, within} from '@testing-library/react'
-import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
 
 import {defer} from './testutils'
 
-const server = setupServer(
-)
 
 describe('DamageControl', function() {
 

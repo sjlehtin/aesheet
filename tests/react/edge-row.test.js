@@ -1,6 +1,6 @@
 import React from 'react';
 import { screen, render, waitFor } from '@testing-library/react'
-const factories = require('./factories');
+import * as factories from './factories'
 
 import EdgeRow from "EdgeRow"
 import userEvent from "@testing-library/user-event";

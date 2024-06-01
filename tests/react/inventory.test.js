@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event'
 
 import Inventory from 'Inventory';
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 const server = setupServer(
     rest.get('http://localhost/rest/sheets/1/inventory/', (req, res, ctx) => {

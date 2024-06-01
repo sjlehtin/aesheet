@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event'
 
 import FirearmControl from "FirearmControl";
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 const server = setupServer(
     rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {

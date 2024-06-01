@@ -1,6 +1,6 @@
 import React from 'react';
 import { screen, render } from '@testing-library/react'
-const factories = require('./factories');
+import * as factories from './factories'
 
 import WoundPenaltyBox from "WoundPenaltyBox"
 

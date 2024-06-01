@@ -4,7 +4,7 @@ import MagazineControl from 'MagazineControl'
 import {fireEvent, render, within, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 describe('MagazineControl', () => {
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ScopeControl from 'ScopeControl';
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 import { render, screen } from '@testing-library/react'
 import { rest } from 'msw'

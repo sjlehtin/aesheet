@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 
 import AddWoundControl from 'AddWoundControl';
 
-const factories = require('./factories');
+import * as factories from './factories'
 
 describe('AddWoundControl', function() {
 
