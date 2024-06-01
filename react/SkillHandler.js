@@ -419,8 +419,7 @@ class SkillHandler {
         if (effRate) {
             rate *= effRate;
         }
-        return rate;
-
+        return rate / this.props.gravity;
     }
 
     jumpingHeight() {

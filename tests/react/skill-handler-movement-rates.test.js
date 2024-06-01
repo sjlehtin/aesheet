@@ -1,14 +1,7 @@
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
-import React from 'react';
-
-var factories = require('./factories');
+import * as factories from './factories';
 
 
 describe('SkillHandler movement rates', function() {
-    "use strict";
 
     it('calculates unskilled climbing speed', function () {
         var handler = factories.skillHandlerFactory();
@@ -104,6 +97,17 @@ describe('SkillHandler movement rates', function() {
         var handler = factories.skillHandlerFactory();
 
         expect(handler.jumpingDistance()).toBeCloseTo(43/24);
+    });
+
+    it('takes gravity into account in jumping', function () {
+        var handler = factories.skillHandlerFactory({gravity: 2,
+            character: {cur_fit: 60, cur_ref: 60}, skills: [
+            {skill: "Jumping", level: 4}]});
+
+        // This should be close to 4, but because encumbrance penalties due
+        // to gravity kick in, the character is essentially double penalized
+        // for the gravity. Is it a problem? Confirm with JW.
+        expect(handler.jumpingDistance()).toBeCloseTo(3.458);
     });
 
     it('calculates level 0 jumping distance', function () {
