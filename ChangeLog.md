@@ -1,9 +1,21 @@
 ## [Unreleased]
 
+### Added
+
+* Added a "Combat transients" side drawer to contain ephemeral combat stats that are often changed during combat. It allows those stats to stay stationary while perusing the rest of the sheet. It can be dismissed if not needed.
+* Added a control to change the gravity. It currently affects encumbrance on high gravity and adds a REF-penalty on low gravity. REF-penalties due to gravity can be offset by having the relevant skill (High/Low-G maneuver).
+* Gravity affects also ranged weapons range and jumping distances. For jumping, high gravity has a large effect, due to increased encumbrance causing FIT/REF penalty, and the gravity directly reducing the distances. 
+
 ### Changed
 
 * `Tailing / Shadowing` (to be renamed) affects surprise check and `Search` (to be renamed) affects other sense checks.
 * AC penalty also affects sense and surprise checks.
+* Moved range controls to the combat transients sidebar.
+
+### Fixed
+
+* Default to normal quality when adding armor and helmets.
+* Sheet no longer uses old ReactDOM TestUtils in the tests, it is now using mostly Testing Library and Mock Service Worker for testing the sheet functionality.
 
 ## [0.16.1] - 2024-05-21
 

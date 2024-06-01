@@ -3,7 +3,7 @@
 I'm writing down what I updated when I started to work on this project again
 just before my X-mas holidays before our Sunday AEMR game on 2021-12-19.
 
-Update: still going in 2023 :)
+Update: still going in ~~2023~~ 2024 :)
 
 ## Update to current python: DONE
 
@@ -46,7 +46,7 @@ Django has moved settings.py etc. to one level above the base directory. That ch
 I'm left with a bunch of warnings about anti-patterns in React usage, those 
 need to be sorted also.
 
-### React 18
+### React 18: DONE
 
 `react-dom/test-utils` starts to generate warnings. It is being retired in favor of [Testing Library](https://testing-library.com/docs/react-testing-library/).
 
@@ -64,7 +64,7 @@ This library seems to be mostly stale. It is causing warnings due to use of `fin
 
 https://react.dev/reference/react/Component#alternatives
 
-Class components are `legacy` and I expect support for them will disappear.
+Class components are `legacy` and I expect support for them to eventually disappear.
 
 At least `useEffect()` hook was not very easy to use with the class components.
 

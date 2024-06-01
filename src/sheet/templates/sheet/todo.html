@@ -17,7 +17,32 @@
     + 3) berettas akimbo
     + 4) overland
     - 5) spell skill cheks
-    - 6) default to normal quality for armor, weapons
+    + 6) default to normal quality for armor, weapons
+
+    - gravity effects, encumbrance effects from high gravity
+        + encumbrance increased from high gravity
+        + REF penalty for low gravity
+        + REF penalties countered by low/high G-maneuvers skill
+        + effect of gravity applies to ranged weapons...
+        + ... and jumping (linearly, smaller gravity increases distances, higher gravity decreases them)
+        - gravity causes maybe now double penalty for jumping,
+          because the encumbrance penalty is on top and then
+          the gravity affects the distances linearly.
+    - make the range control affect the advancing initiatives
+        - sense table could highlight
+    - range control for ranged weapons
+    - firearms in CC. (from firearms section)
+    - check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
+        - at least in normal daylight, acute vision does not work (probably because night vision check always used)
+        - Render perks in the details, as an overlay for example
+    - character log to the side after skill panel. Should update dynamically,
+        use websockets for this
+
+    - range, light level, conditions, turns of combat to specific combat overlay to access it quickly while perusing the rest of the sheet.
+        + gravity control
+        + remember set range and detection level on reopen
+        - setting range once will affect firearms and ranged weapons
+        - highlights the correct column in senses
 
     + inventory
     + damage taken
@@ -38,12 +63,14 @@
     - make SP addition a modal dialog to reduce possibility of human error
     - "add xp used ingame" with a possibility to enter description (to log)
     - calculate shock check and add "times wounded" to sheet
-    - character log to the side after skill panel. Should update dynamically,
-        use websockets for this
 
     - weapons, ammo, armor, skills, should all be possible to update in the
         backend, without need to reload the sheet. Websocket notification on
         changes in the backend, so client JS knows to discard loaded lists?
+
+    - use a common data store component for loading data that can then cache and invalidate loaded data centrally. This will avoid loading, e.g., skills and edges from multiple locations in the sheet.
+        - how to handle data updates? Currently no updates to those lists done by sheet (skills, edges)
+        - redux?
 
     - "goon sheet" sheet set for (mostly) GM managed groups of NPCs
         - Add and remove, sync from main sheet
