@@ -63,6 +63,8 @@ describe('StatBlock -- gravity', () => {
         expect(screen.getByLabelText("Current REF").textContent).toEqual("49")
         expect(screen.getByLabelText("Current FIT").textContent).toEqual("49")
 
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("1.00 kg")
+
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
         const input = await screen.findByLabelText("Gravity")
@@ -70,9 +72,18 @@ describe('StatBlock -- gravity', () => {
         await user.clear(input)
         await user.type(input, "2")
 
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("2.00 kg")
+
         expect(screen.getByLabelText("Short range").textContent).toEqual("15")
 
-        expect(screen.getByLabelText("Current REF").textContent).toEqual("33")
-        expect(screen.getByLabelText("Current FIT").textContent).toEqual("33")
+        expect(screen.getByLabelText("Current REF").textContent).toEqual("49")
+        expect(screen.getByLabelText("Current FIT").textContent).toEqual("49")
+
+        // Low gravity only increases extreme range, max 4x
+
+        await user.clear(input)
+        await user.type(input, "0.1")
+
+        expect(screen.getByLabelText("Short range").textContent).toEqual("30")
     });
 })

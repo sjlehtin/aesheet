@@ -100,17 +100,23 @@ describe('SkillHandler movement rates', function() {
     });
 
     it('takes gravity into account', function () {
-        const handler = factories.skillHandlerFactory({gravity: 2,
+        const handler = factories.skillHandlerFactory({
+            gravity: 2,
             character: {cur_fit: 60, cur_ref: 60}, skills: [
             {skill: "Jumping", level: 4}],
-            allSkills: [factories.skillFactory({name: "Low-G maneuver"}), factories.skillFactory({name: "High-G maneuver"}),]});
+            allSkills: [
+                factories.skillFactory({name: "Low-G maneuver"}),
+                factories.skillFactory({name: "High-G maneuver"}),
+            ]});
 
-        expect(handler.getEffStats().ref).toEqual(47)
+        expect(handler.getEffStats().ref).toEqual(60)
 
         // This should be close to 4, but because encumbrance penalties due
         // to gravity kick in, the character is essentially double penalized
         // for the gravity. Is it a problem? Confirm with JW.
-        expect(handler.jumpingDistance()).toBeCloseTo(3.458);
+        expect(handler.jumpingDistance()).toBeCloseTo(4);
+
+        expect(handler.getACPenalty().value).toEqual(-5)
     });
 
     it('calculates level 0 jumping distance', function () {

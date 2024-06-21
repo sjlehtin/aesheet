@@ -309,7 +309,7 @@ describe('stat block weight handling', function() {
         await user.clear(input)
         await user.type(input, "2.0")
         expect(input).toHaveClass("is-valid")
-        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("5.50 kg")
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("11.00 kg")
     });
 
 });

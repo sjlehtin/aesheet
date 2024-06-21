@@ -71,13 +71,13 @@ describe('SkillHandler stats', function() {
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
-            weightCarried: 26,
+            weightCarried: 26, // Gravity already accounted for
             gravity: 0.5
         });
 
         expect(handler.getBaseStats().fit).toEqual(50);
-        expect(handler.getEffStats().fit).toEqual(50);
-        expect(handler.getEffStats().ref).toEqual(37);
+        expect(handler.getEffStats().fit).toEqual(44);
+        expect(handler.getEffStats().ref).toEqual(31);
     })
 
     it('takes low-G maneuver into account ', function () {
@@ -86,30 +86,45 @@ describe('SkillHandler stats', function() {
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
             skills: [{skill: "Low-G maneuver", level: 2}],
-            weightCarried: 26,
+            weightCarried: 26, // Gravity already accounted for
             gravity: 0.5
         });
 
         expect(handler.getBaseStats().fit).toEqual(50);
-        expect(handler.getEffStats().fit).toEqual(50);
-        expect(handler.getEffStats().ref).toEqual(47);
+        expect(handler.getEffStats().fit).toEqual(44);
+        expect(handler.getEffStats().ref).toEqual(41);
     })
 
-    it('takes high-G into account ', function () {
+    it('takes high-G into account without carried gear', function () {
         const handler = factories.skillHandlerFactory({
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
-            weightCarried: 26,
-            gravity: 1.5
+            weightCarried: 0,
+            gravity: 2.2
         });
 
         expect(handler.getBaseStats().fit).toEqual(50);
-        // There are two roundups when calculating the total penalty. It is
-        // possible to get rid of one of them, but not trivial and it requires
-        // a bit of doing
-        expect(handler.getEffStats().fit).toEqual(33);
-        expect(handler.getEffStats().ref).toEqual(33);
+        expect(handler.getEffStats().fit).toEqual(50);
+        expect(handler.getEffStats().ref).toEqual(50);
+
+        expect(handler.getACPenalty().value).toEqual(-7)
+    })
+
+    it('takes high-G into account', function () {
+        const handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({
+                cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
+            }),
+            weightCarried: 26, // Gravity already accounted for
+            gravity: 2.2
+        });
+
+        expect(handler.getBaseStats().fit).toEqual(50);
+        expect(handler.getEffStats().fit).toEqual(44);
+        expect(handler.getEffStats().ref).toEqual(44);
+
+        expect(handler.getACPenalty().value).toEqual(-7)
     })
 
     it('takes high-G maneuver into account ', function () {
@@ -117,13 +132,15 @@ describe('SkillHandler stats', function() {
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
-            skills: [{skill: "High-G maneuver", level: 2}],
-            weightCarried: 26,
-            gravity: 1.5
+            skills: [{skill: "High-G maneuver", level: 1}],
+            weightCarried: 26, // Gravity already accounted for
+            gravity: 2.2
         });
 
-        expect(handler.getEffStats().fit).toEqual(33);
-        expect(handler.getEffStats().ref).toEqual(43);
+        expect(handler.getEffStats().fit).toEqual(44);
+        expect(handler.getEffStats().ref).toEqual(44);
+
+        expect(handler.getACPenalty().value).toEqual(-2)
     })
 
     it('handles zero eff fit on weight penalty calculation', function () {
@@ -390,7 +407,7 @@ describe('SkillHandler stats', function() {
                 cur_ref: 45, cur_wil: 45, bought_stamina: 5
             }
         });
-        expect(handler.getACPenalty()).toEqual(-0);
+        expect(handler.getACPenalty().value).toEqual(0);
     });
 
     it('calculates AC penalty when damaged', function () {
@@ -400,7 +417,7 @@ describe('SkillHandler stats', function() {
                 bought_stamina: 5, stamina_damage: 15
             }
         });
-        expect(handler.getACPenalty()).toEqual(-10);
+        expect(handler.getACPenalty().value).toEqual(-10);
     });
 
     it('calculates initiative penalty when damaged a lot', function () {

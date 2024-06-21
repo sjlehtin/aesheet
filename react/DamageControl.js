@@ -119,12 +119,12 @@ class DamageControl extends React.Component {
         }
         var damage = '';
         if (this.props.handler.getStaminaDamage()) {
-            var renderedAcPenalty, renderedInitPenalty;
-            var acPenalty = this.props.handler.getACPenalty();
-            var descrStyle = {marginLeft: "1em"};
+            let renderedAcPenalty, renderedInitPenalty;
+            const acPenalty = this.props.handler.getACPenalty().value;
+            const descrStyle = {marginLeft: "1em"};
             renderedAcPenalty =
                 <span style={descrStyle}>{acPenalty} AC</span>;
-            var initPenalty = SkillHandler.getInitPenaltyFromACPenalty(acPenalty);
+            const initPenalty = SkillHandler.getInitPenaltyFromACPenalty(acPenalty);
             if (initPenalty) {
                 renderedInitPenalty =
                     <span style={descrStyle}>{initPenalty} I</span>;

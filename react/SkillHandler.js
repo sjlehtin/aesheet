@@ -16,6 +16,32 @@
  * TODO: study Redux for handling state in a cleaner fashion.
  */
 
+/** Rules update 2024-06-05 by JW
+ *
+ * 1.1.1       Balance, Low-G, and High-G maneuver
+ * The Balance (MOV) skill is used in a multitude of close-combat situations.
+ * With the Balance skill level one or more, you can also walk on a precarious surface. A successful skill check lets you move at MOV/6 along the surface for 1 turn.
+ * Characters with a Tumbling skill level of 3 or higher get a +10 bonus to Balance skill checks.
+ * 1.1.1.1        High-G maneuver
+ * Higher than Earth gravity will have the following effects:
+ * ·       AC penalty of -5*(effG-1). Note that this will most often apply in situations of temporary high-G acceleration. DONE
+ * ·       Movement rates in all movement modes are reduced proportionally to the gravity. For example, movement of 30 m becomes 15 m in 2G. NOT DONE
+ * ·       Carried weight is multiplied with the effective gravity. For example, carried weight of 50 kg becomes 100 kg in 2G. DONE
+ * ·       Ranges of missile weapons are reduced proportionally to the gravity. For example, a range of 100 m becomes 50 m in 2G. DONE
+ * ·       Falling damage is increased proportional to the gravity.
+ * ·       Ranges of conventional firearms are reduced. Use GM judgment. Ranges of firearms with v0 greater than 10 km/s can be considered unaffected.
+ * Mastering the High-G maneuver skill allows the PC to negate +5L of the AC penalty. DONE A successful skill check allows the PC to negate +10L of the AC penalty for L turns.
+ * 1.1.1.2        Low-G maneuver
+ * Lower than Earth gravity will have the following effects:
+ * ·       REF penalty of -25*(1-effG). DONE
+ * ·       Movement rates in all movement modes are increased proportionally to the gravity, up to maximum of quintupling. For example, movement of 30 m becomes 60 m in 0.5G. However, note the REF penalty that is calculated to MOV. Note also that attempting to move at increased speed requires a Low-G maneuverskill check. If the check fails, the PC falls, or moves uncontrollably at 0G. NOT DONE
+ * ·       Carried weight is multiplied with the effective gravity. For example, carried weight of 50 kg becomes 25 kg in 0.5G. DONE
+ * ·       Extreme range of missile weapons is increased proportionally to the gravity, up to maximum of quintupling. For example, an Extreme range of 100 m becomes 200 m in 0.5G. Note that throwing to Extreme range suffers a minimum penalty of -60 to hit, -2 TI, -2L/-2D, no FIT bonuses to damage. NOT DONE
+ * ·       Falling damage is reduced proportional to the gravity.
+ * ·       Felt recoil of conventional firearms is increased in low-G. If effect, there is a -25*(1-effG) to-hit penalty. Firearms with I of 1.0 or less can be considered unaffected. NOT DONE
+ * Mastering the Low-G maneuver skill allows the PC to negate +5L of the REF penalty and +5L of the to-hit penalty with firearms. DONE
+ */
+
 const util = require('./sheet-util');
 
 class SkillHandler {
@@ -97,13 +123,9 @@ class SkillHandler {
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
     isBaseSkill(skillName) {
-        var skill = this.state.skillMap[skillName];
+        const skill = this.state.skillMap[skillName];
 
-        if (skill.skill_cost_1 === null) {
-            return true;
-        } else {
-            return false;
-        }
+        return skill.skill_cost_1 === null;
     }
 
     getStat(stat) {
@@ -114,14 +136,49 @@ class SkillHandler {
         return this.getStat('ref') / 10 +
             this.getStat('int') / 20 +
             this.getStat('psy') / 20 +
-            SkillHandler.getInitPenaltyFromACPenalty(this.getACPenalty());
+            SkillHandler.getInitPenaltyFromACPenalty(this.getACPenalty().value);
     }
 
     getACPenalty() {
-        /* TODO: Fix issue with extra stamina, should not give AC bonus. */
+        let breakdown = []
+        let penalty = 0
 
-        return util.rounddown(this.props.character.stamina_damage /
-            this.getBaseStats().stamina * (-20));
+        /* Extra stamina should not give AC bonus. */
+        if (this.props.character.stamina_damage > 0) {
+            penalty = util.rounddown(this.props.character.stamina_damage /
+                this.getBaseStats().stamina * (-20))
+            if (penalty > 0) {
+                breakdown.push({
+                    value: penalty,
+                    reason: "Stamina damage"
+                })
+            }
+        }
+
+        if (this.props.gravity > 1) {
+            const gravityPenalty = util.roundup(-5 * (this.props.gravity - 1.0))
+            penalty += gravityPenalty
+            breakdown.push({
+                reason: "gravity",
+                value: gravityPenalty
+            })
+
+            // Low-G maneuver
+            const level = this.skillLevel("High-G maneuver");
+            if (typeof(level) === "number") {
+                const skillOffset = Math.min(level * 5, -gravityPenalty)
+
+                penalty += skillOffset
+                if (skillOffset > 0) {
+                    breakdown.push({
+                        reason: "high-g skill",
+                        value: skillOffset
+                    })
+                }
+            }
+
+        }
+        return {'value': penalty, breakdown: breakdown}
     }
 
     static getInitPenaltyFromACPenalty(acPenalty) {
@@ -203,10 +260,11 @@ class SkillHandler {
                 reason: `skill mods`
             })
         }
-        const acPenalty = this.getACPenalty();
+        const acPenalty = this.getACPenalty().value;
         if (acPenalty) {
             check += acPenalty;
-            breakdown.push({value: acPenalty,
+            breakdown.push({
+                value: acPenalty,
                 reason: `AC penalty`
             })
         }
@@ -654,68 +712,32 @@ class SkillHandler {
             // (transient effects, such as spells) and hard mods (edges)
             // in the Excel combat sheet.
             if (this._effStats.fit > 0) {
-                let encumbrancePenalty = calculateEncumbrancePenalty(this.props.weightCarried, this._effStats.fit);
-
-                if (this.props.gravity !== 1.0) {
-                    const adjustedWeight = this.props.weightCarried * this.props.gravity
-                    const extraWeight = adjustedWeight - this.props.weightCarried
-
-                    // TODO: fix typo
-                    const characterWeight = parseFloat(this.props.character.weigth)
-                    const adjustedCharacterWeight = characterWeight * this.props.gravity
-                    const extraCharWeight = adjustedCharacterWeight - characterWeight
-
-                    const extraFromGravity = extraWeight + extraCharWeight
-
-                    if (this.props.gravity > 1) {
-
-                        const encumbrancePenaltyFromGravity = calculateEncumbrancePenalty(extraFromGravity, this._effStats.fit);
-                        this.addEncumbrancePenalty(encumbrancePenaltyFromGravity, "gravity");
-
-                        // High-G maneuver
-                        const level = this.skillLevel("High-G maneuver");
-
-                        if (typeof(level) === "number") {
-                            const skillOffset = Math.min(level * 5, -encumbrancePenaltyFromGravity)
-
-                            this._effStats.ref += skillOffset
-                            if (skillOffset > 0) {
-                                this._effStats.breakdown.ref.push({
-                                    reason: "high-g skill",
-                                    value: skillOffset
-                                })
-                            }
-                        }
-                    } else {
-                        const encumbrancePenaltyFromGravity = calculateEncumbrancePenalty(extraFromGravity, this._effStats.fit);
-                        const penaltyOffset = Math.max(encumbrancePenaltyFromGravity, encumbrancePenalty)
-                        encumbrancePenalty += penaltyOffset
-
-                        const gravityPenalty = util.roundup(-25 * (1.0 - this.props.gravity))
-                        this._effStats.ref += gravityPenalty
-                        this._effStats.breakdown.ref.push({
-                            reason: "gravity",
-                            value: gravityPenalty
-                        })
-
-                        // Low-G maneuver
-                        const level = this.skillLevel("Low-G maneuver");
-                        if (typeof(level) === "number") {
-                            const skillOffset = Math.min(level * 5, -gravityPenalty)
-
-                            this._effStats.ref += skillOffset
-                            if (skillOffset > 0) {
-                                this._effStats.breakdown.ref.push({
-                                    reason: "low-g skill",
-                                    value: skillOffset
-                                })
-                            }
-                        }
-                    }
-                }
-
+                const encumbrancePenalty = calculateEncumbrancePenalty(this.props.weightCarried, this._effStats.fit);
                 if (encumbrancePenalty < 0) {
                     this.addEncumbrancePenalty(encumbrancePenalty);
+                }
+
+                if (this.props.gravity < 1.0) {
+                    const gravityPenalty = util.roundup(-25 * (1.0 - this.props.gravity))
+                    this._effStats.ref += gravityPenalty
+                    this._effStats.breakdown.ref.push({
+                        reason: "gravity",
+                        value: gravityPenalty
+                    })
+
+                    // Low-G maneuver
+                    const level = this.skillLevel("Low-G maneuver");
+                    if (typeof(level) === "number") {
+                        const skillOffset = Math.min(level * 5, -gravityPenalty)
+
+                        this._effStats.ref += skillOffset
+                        if (skillOffset > 0) {
+                            this._effStats.breakdown.ref.push({
+                                reason: "low-g skill",
+                                value: skillOffset
+                            })
+                        }
+                    }
                 }
             } else {
                 // Effective FIT zero or negative, the character cannot move.

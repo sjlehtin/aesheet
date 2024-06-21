@@ -130,6 +130,10 @@ class RangedWeaponRow extends WeaponRow {
         const base = this.props.weapon.base;
 
         function calculateRange(r, g) {
+            // Low-G does not improve range in other than extreme range.
+            if (g < 1) {
+                g = 1.0
+            }
             return util.rounddown(r / (g ?? 1.0))
         }
 

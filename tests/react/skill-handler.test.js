@@ -122,4 +122,33 @@ describe('SkillHandler', function() {
         expect(newList[2].indent).toEqual(2);
     });
 
+    it('takes high g in to account', function () {
+        const handler = factories.skillHandlerFactory({
+            gravity: 2,
+        });
+
+        expect(handler.getACPenalty().value).toEqual(-5)
+    });
+
+    it('takes high g maneuver skill in to account', function () {
+        const handler = factories.skillHandlerFactory({
+            gravity: 2.2,
+            skills: [
+                {skill: "High-G maneuver", level: 1}, ],
+            allSkills: [
+                {name: "High-G maneuver"},
+            ]
+        });
+
+        expect(handler.getACPenalty().value).toEqual(-2)
+    });
+
+    it('does not give an AC bonus for bonus stamina', function () {
+        const handler = factories.skillHandlerFactory({
+            character: factories.characterFactory({stamina_damage: "-10"}),
+        });
+
+        expect(handler.getACPenalty().value).toEqual(0)
+    });
+
 });

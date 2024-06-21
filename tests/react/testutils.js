@@ -14,7 +14,15 @@ function testSetup() {
             removeEventListener: jest.fn(),
             dispatchEvent: jest.fn(),
         })),
-    });
+    })
+
+    // @headlessui/react
+    Object.defineProperty(window, 'ResizeObserver', {
+        value: jest.fn().mockImplementation(query => ({
+            observe: jest.fn(),
+            disconnect: jest.fn()
+        }))
+    })
 }
 
 function defer() {

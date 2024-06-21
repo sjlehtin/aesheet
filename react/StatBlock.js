@@ -1103,6 +1103,17 @@ class StatBlock extends React.Component {
             )
         }
 
+        const extraFromGravity = weight * (this.state.gravity - 1.0)
+        if (extraFromGravity) {
+            weight += extraFromGravity
+            breakdown.push(
+                {
+                    reason: "gravity",
+                    value: extraFromGravity
+                }
+            )
+        }
+
         return {
             value: weight,
             breakdown: breakdown
