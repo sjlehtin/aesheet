@@ -3,48 +3,92 @@ import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
 import AddArmorControl from './AddArmorControl';
+import StatBreakdown from "./StatBreakdown";
 const util = require('./sheet-util');
+
+function getArmorStat(location, type, piece) {
+    const accessor = `armor_${location.toLowerCase()}_${type.toLowerCase()}`;
+    const qualityAccessor = `armor_${type.toLowerCase()}`;
+
+    const getFieldValue = function(field) {
+        if (field) {
+            return parseFloat(field);
+        }
+        return 0;
+    };
+
+    const base = piece?.base ?? {}
+    const quality = piece?.quality ?? {}
+
+    const fromBase = getFieldValue(base[accessor]);
+    const fromQuality = getFieldValue(quality[qualityAccessor]);
+
+    return fromBase + fromQuality
+}
+
+class ValueBreakdown {
+    #value = 0
+    #breakdown = []
+
+    constructor() {
+
+    }
+
+    add(newValue, description) {
+        this.#value += newValue
+        this.#breakdown.push({value: newValue, reason: description})
+    }
+
+    addBreakdown(breakdown) {
+        this.#value += breakdown.value()
+        this.#breakdown = Array.concat(this.#breakdown, breakdown.breakdown())
+    }
+
+    value() {
+        return this.#value
+    }
+
+    breakdown() {
+        return this.#breakdown
+    }
+}
+
+function calculateArmorStats(armor, helm, miscItems) {
+    let stats = {};
+
+    let armorPieces = [armor, helm]
+
+    for (let item of miscItems) {
+        for (let ql of item.item.armor_qualities) {
+            armorPieces.append({name: item.item.name, base: ql})
+        }
+    }
+    for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+        stats[loc] = {}
+        for (let col of ["P", "S", "B", "R", "DR", "DP", "PL"]) {
+            const bd = new ValueBreakdown()
+            for (const piece of armorPieces) {
+                const eff = getArmorStat(loc, col, piece)
+                if (eff) {
+                    bd.add(eff, piece.name ?? piece.base.name)
+                }
+            }
+            stats[loc][col] = bd
+        }
+    }
+
+    return stats
+}
 
 class ArmorControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {editing: false};
-    }
 
-    getArmorStat(location, type) {
-        var stat = 0;
-        var accessor = `armor_${location.toLowerCase()}_${type.toLowerCase()}`;
-        var quality = `armor_${type.toLowerCase()}`;
-
-        var getFieldValue = function(field) {
-            if (field) {
-                return parseFloat(field);
-            }
-            return 0;
-        };
-        if (this.props.armor && this.props.armor.base) {
-            stat += getFieldValue(this.props.armor.base[accessor]);
-            if (location !== "H") {
-                stat += getFieldValue(this.props.armor.quality[quality]);
-            }
-        }
-        if (this.props.helm && this.props.helm.base) {
-            stat += getFieldValue(this.props.helm.base[accessor]);
-            if (location === "H") {
-                stat += getFieldValue(this.props.helm.quality[quality]);
-            }
-        }
-
-        for (let item of this.props.miscellaneousItems) {
-            for (let ql of item.item.armor_qualities) {
-                    stat += getFieldValue(ql[accessor]);
-            }
-        }
-        return stat;
     }
 
     render() {
-        var addControls = '';
+        let addControls = '';
         if (this.state.editing) {
             addControls = <div>
                 <Button onClick={() => {this.props.onHelmChange(null)}}
@@ -69,41 +113,30 @@ class ArmorControl extends React.Component {
                 </div>
             </div>;
         }
-        var armors = [];
-        if (this.props.helm && this.props.helm.name) {
-            armors.push(this.props.helm.name);
-        }
-        if (this.props.armor && this.props.armor.name) {
-            armors.push(this.props.armor.name)
-        }
+        const armorStats = calculateArmorStats(this.props.armor, this.props.helm, this.props.miscellaneousItems)
 
-        var armorStats = [];
+        const headerStyle = {textAlign: "center", minWidth: "2.5em"};
+        const cellStyle = { minWidth: "2.5em", textAlign: "center", border: "1px dotted black" };
+        const descStyle = Object.assign({fontWeight: "bold"}, cellStyle);
 
-        var headerStyle = {textAlign: "center", minWidth: "2.5em"};
-        var cellStyle = { minWidth: "2.5em", textAlign: "center", border: "1px dotted black" };
-        var descStyle = Object.assign({fontWeight: "bold"}, cellStyle);
-
-        var headerCells = ["d8", "Loc", "P", "S", "B", "R", "DR", "DP",
+        const headerCells = ["d8", "Loc", "P", "S", "B", "R", "DR", "DP",
             "PL", "Threshold"].map((el, ii) => {
             return <th style={headerStyle} key={ii}>{el}</th>;});
 
-        armorStats.push(<thead style={headerStyle} key={"thead"}>
-            <tr>{headerCells}</tr></thead>);
-        var locations = [];
-        var dice = { H: "8", T: "5-7", RA: "4", RL: "3", LA: "2", LL: "1"};
+        let locations = [];
+        const dice = { H: "8", T: "5-7", RA: "4", RL: "3", LA: "2", LL: "1"};
         for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
-            var row = [];
+            let row = [];
             row.push(<td style={descStyle} key={loc + "-1"}>{dice[loc]}</td>);
             row.push(<td style={descStyle} key={loc + "-2"}>{loc}</td>);
             for (let col of ["P", "S", "B", "R", "DR", "DP", "PL"]) {
                 row.push(<td style={cellStyle} key={loc + '-' + col}>
-                    { util.rounddown(this.getArmorStat(loc, col)) }
+                    <StatBreakdown label={`Armor ${loc} ${col}`} value={util.rounddown(armorStats[loc][col].value())} breakdown={armorStats[loc][col].breakdown()} />
                 </td>);
             }
             row.push(<td style={{fontWeight: "bold", textAlign: "center"}} key={loc + "Threshold"}>{this.props.handler?.getDamageThreshold(loc)}</td>)
             locations.push(<tr key={loc}>{row}</tr>);
         }
-        armorStats.push(<tbody key={0}>{locations}</tbody>);
 
         let editButtonName = "Edit Armor"
         if (this.state.editing) {
@@ -117,8 +150,8 @@ class ArmorControl extends React.Component {
                         <Col>Helmet</Col><Col><span aria-label={"Current helmet"}>{this.props.helm?.name}</span></Col>
                     </Row>
                     <Row>
-                        <Col>Armor</Col><Col
-                        aria-label={"Current armor"}>{this.props.armor?.name}</Col>
+                        <Col>Armor</Col>
+                        <Col aria-label={"Current armor"}>{this.props.armor?.name}</Col>
                     </Row>
                 </Col>
                 <Col>
@@ -129,7 +162,12 @@ class ArmorControl extends React.Component {
             <Row>
                 {addControls}
             </Row>
-            <table>{armorStats}</table>
+            <table>
+                <thead style={headerStyle} key={"thead"}>
+                <tr>{headerCells}</tr>
+                </thead>
+                <tbody key={0}>{locations}</tbody>
+            </table>
         </div>;
     }
 }
