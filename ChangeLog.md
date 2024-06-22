@@ -1,3 +1,10 @@
+## [Unreleased] - TBD
+
+### Changed
+
+* Gravity rules updated according to rules change on 2024-06-05. Movement rates and recoil are not yet implemented. See SkillHandler.js for full status of implementation.
+* If ArmorQuality has DR set to zero, total armor DR will be calculated by a formula from the lethality reductions in the armor at that location, if any.
+
 ## [0.17.0] - 2024-06-01
 
 ### Added

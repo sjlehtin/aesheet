@@ -1,29 +1,71 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Col, Row } from 'react-bootstrap';
+import {Button, Col, Row} from 'react-bootstrap';
 
 import AddArmorControl from './AddArmorControl';
 import StatBreakdown from "./StatBreakdown";
+
 const util = require('./sheet-util');
 
 function getArmorStat(location, type, piece) {
-    const accessor = `armor_${location.toLowerCase()}_${type.toLowerCase()}`;
-    const qualityAccessor = `armor_${type.toLowerCase()}`;
-
-    const getFieldValue = function(field) {
-        if (field) {
-            return parseFloat(field);
+    const getBaseValue = function(a, loc, typ) {
+        const val = a[`armor_${loc.toLowerCase()}_${typ.toLowerCase()}`]
+        if (val) {
+            return parseFloat(val);
         }
         return 0;
-    };
+    }
+
+    const getQualityValue = function(a, typ) {
+        const val = a[`armor_${typ.toLowerCase()}`]
+        if (val) {
+            return parseFloat(val);
+        }
+        return 0;
+    }
 
     const base = piece?.base ?? {}
     const quality = piece?.quality ?? {}
 
-    const fromBase = getFieldValue(base[accessor]);
-    const fromQuality = getFieldValue(quality[qualityAccessor]);
+    const fromBase = getBaseValue(base, location, type);
+    const fromQuality = getQualityValue(quality, type);
 
-    return fromBase + fromQuality
+    /* Damage reduction is handled specially.
+     *
+     * If DR for quality is zero and the base armor affects location, DR
+     * is calculated from the lethality reductions of the base with the
+     * quality effect baked in.
+     *
+     * Excel formula:
+     * =-ROUNDUP(POWER(2/3*AVERAGE(<over leth reduction types>);2);0)
+     * => -9 overall leth reduction results in 36 DR
+     */
+    let lethRed = 0
+    for  (let col of ["P", "S", "B", "R"]) {
+        lethRed += getBaseValue(base, location, col)
+    }
+
+    // If there are no lethality reductions from base, the armor does not
+    // affect this location, and we do not add the quality values to the
+    // location.
+    if (lethRed === 0) {
+        return fromBase
+    }
+
+    let stat = fromBase + fromQuality
+    if (type === "DR" && piece?.quality && fromQuality === 0) {
+        let fromQuality = 0
+        for (let col of ["P", "S", "B", "R"]) {
+            fromQuality += getQualityValue(quality, col)
+        }
+
+        // Armor is calculated from the lethalities if quality has an effect.
+        if (fromQuality !== 0) {
+            lethRed += fromQuality
+            stat = -Math.pow((lethRed / 4) * (2 / 3), 2)
+        }
+    }
+    return stat
 }
 
 class ValueBreakdown {
