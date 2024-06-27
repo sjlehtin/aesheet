@@ -103,7 +103,8 @@ class RangeControl extends React.Component {
 RangeControl.propTypes = {
     onChange: PropTypes.func,
     skillHandler: PropTypes.object.isRequired,
-    initialRange: PropTypes.number,
+    initialRange: PropTypes.oneOfType([
+        PropTypes.string,  PropTypes.number ]),
     initialDetectionLevel: PropTypes.number
 };
 
