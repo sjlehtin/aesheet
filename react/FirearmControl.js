@@ -11,6 +11,7 @@ import UseTypeControl from 'UseTypeControl';
 
 const util = require('./sheet-util');
 import {Col, Row, Button, Table} from 'react-bootstrap';
+import {isFloat} from "./sheet-util";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -161,7 +162,7 @@ class FirearmControl extends RangedWeaponRow {
             name: "Short"
         };
 
-        if (toRange === "" || typeof(toRange) === "undefined" || isNaN(toRange)) {
+        if (!toRange && !isFloat(toRange)) {
             return shortRangeEffect;
         }
         const shortRange = this.shortRange();
