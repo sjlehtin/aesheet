@@ -1,4 +1,4 @@
-## [Unreleased] - TBD
+## [0.18.0] - 2024-06-27
 
 ### Changed
 
