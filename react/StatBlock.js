@@ -1494,27 +1494,30 @@ class StatBlock extends React.Component {
     }
 
     render() {
-        var skillHandler = this.getSkillHandler();
+        const skillHandler = this.getSkillHandler();
+        let baseStats;
+        let rangeControl;
+
         if (skillHandler) {
-            var baseStats = skillHandler.getBaseStats();
-            var effStats = skillHandler.getEffStats();
+            baseStats = skillHandler.getBaseStats();
+            rangeControl = <RangeControl onChange={(e) => this.rangeChanged(e)}
+                                  skillHandler={skillHandler}
+                                  initialRange={this.state.firearmRange}
+                                  initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
+                    />
+        } else {
+            rangeControl = <Loading>Range control</Loading>
         }
 
         return (
             <>
             <SideDrawer >
-                <>
                 <Row>
-                    <RangeControl onChange={(e) => this.rangeChanged(e)}
-                                  skillHandler={skillHandler}
-                                  initialRange={this.state.firearmRange}
-                                  initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
-                    />
+                    {rangeControl}
                 </Row>
                 <Row>
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
                 </Row>
-                </>
             </SideDrawer>
             <Container fluid={true}>
                 {this.renderHeader()}
