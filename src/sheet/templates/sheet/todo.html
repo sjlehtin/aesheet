@@ -24,10 +24,8 @@
         + REF penalty for low gravity
         + REF penalties countered by low/high G-maneuvers skill
         + effect of gravity applies to ranged weapons...
-        + ... and jumping (linearly, smaller gravity increases distances, higher gravity decreases them)
-        - gravity causes maybe now double penalty for jumping,
-          because the encumbrance penalty is on top and then
-          the gravity affects the distances linearly.
+        - movement rates
+        - allow changing gravity with 0.1 increments with cursor keys
     - make the range control affect the advancing initiatives
         - sense table could highlight
     - range control for ranged weapons
@@ -67,6 +65,8 @@
     - weapons, ammo, armor, skills, should all be possible to update in the
         backend, without need to reload the sheet. Websocket notification on
         changes in the backend, so client JS knows to discard loaded lists?
+
+    - editing armor should prefill currently used armor, if it from a template, to allow quickly changing the armor or quality
 
     - use a common data store component for loading data that can then cache and invalidate loaded data centrally. This will avoid loading, e.g., skills and edges from multiple locations in the sheet.
         - how to handle data updates? Currently no updates to those lists done by sheet (skills, edges)
