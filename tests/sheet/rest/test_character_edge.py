@@ -21,13 +21,20 @@ class CharacterEdgeTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_items(self):
-        factories.CharacterEdgeFactory(character=self.sheet.character)
+        factories.CharacterEdgeFactory(character=self.sheet.character,
+                                       edge__edge__name="Hardened Skin",
+                                       edge__armor_l=-1.0,
+                                       edge__armor_dr=-2.0)
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
-        self.assertIsInstance(response.data[0]["edge"], dict)
+        edge_level = response.data[0]["edge"]
+        self.assertIsInstance(edge_level, dict)
+        assert edge_level["edge"]["name"] == "Hardened Skin"
+        assert edge_level["armor_l"] == "-1.0"
+        assert edge_level["armor_dr"] == "-2.0"
 
     def test_adding_items(self):
         edge = factories.EdgeLevelFactory(edge__name="Natural climber", level=1)

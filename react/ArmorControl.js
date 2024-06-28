@@ -30,7 +30,7 @@ function getArmorStat(location, type, piece) {
     const fromBase = getBaseValue(base, location, type);
     const fromQuality = getQualityValue(quality, type);
 
-    /* Damage reduction is handled specially.
+    /* Armor damage reduction is handled specially.
      *
      * If DR for quality is zero and the base armor affects location, DR
      * is calculated from the lethality reductions of the base with the
@@ -41,18 +41,20 @@ function getArmorStat(location, type, piece) {
      * => -9 overall leth reduction results in 36 DR
      */
     let lethRed = 0
+    let fromArmor = 0
     for  (let col of ["P", "S", "B", "R"]) {
-        lethRed += getBaseValue(base, location, col)
+        fromArmor += getBaseValue(base, location, col)
     }
 
     // If there are no lethality reductions from base, the armor does not
     // affect this location, and we do not add the quality values to the
     // location.
-    if (lethRed === 0) {
+    if (fromArmor === 0) {
         return fromBase
     }
 
     let stat = fromBase + fromQuality
+
     if (type === "DR" && piece?.quality && fromQuality === 0) {
         let fromQuality = 0
         for (let col of ["P", "S", "B", "R"]) {
@@ -95,7 +97,7 @@ class ValueBreakdown {
     }
 }
 
-function calculateArmorStats(armor, helm, miscItems) {
+function calculateArmorStats(armor, helm, miscItems, handler) {
     let stats = {};
 
     let armorPieces = [armor, helm]
@@ -105,10 +107,25 @@ function calculateArmorStats(armor, helm, miscItems) {
             armorPieces.append({name: item.item.name, base: ql})
         }
     }
+
+    const fromEdgeLethalityReduction = handler?.getEdgeModifier("armor_l")
+    const fromEdgeDamageReduction = handler?.getEdgeModifier("armor_dr")
+
     for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
         stats[loc] = {}
         for (let col of ["P", "S", "B", "R", "DR", "DP", "PL"]) {
             const bd = new ValueBreakdown()
+
+            if (col === "DR") {
+                if (fromEdgeDamageReduction !== 0) {
+                    bd.add(fromEdgeDamageReduction, "from edges")
+                }
+            } else if( ["P", "S", "B", "R"].includes(col)) {
+                if (fromEdgeLethalityReduction !== 0) {
+                    bd.add(fromEdgeLethalityReduction, "from edges")
+                }
+            }
+
             for (const piece of armorPieces) {
                 const eff = getArmorStat(loc, col, piece)
                 if (eff) {
@@ -155,7 +172,7 @@ class ArmorControl extends React.Component {
                 </div>
             </div>;
         }
-        const armorStats = calculateArmorStats(this.props.armor, this.props.helm, this.props.miscellaneousItems)
+        const armorStats = calculateArmorStats(this.props.armor, this.props.helm, this.props.miscellaneousItems, this.props.handler)
 
         const headerStyle = {textAlign: "center", minWidth: "2.5em"};
         const cellStyle = { minWidth: "2.5em", textAlign: "center", border: "1px dotted black" };

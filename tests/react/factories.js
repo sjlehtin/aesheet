@@ -159,6 +159,8 @@ const edgeLevelFactory = function (overrideFields) {
     "swim_multiplier": "0.00",
     "climb_multiplier": "0.00",
     "fly_multiplier": "0.00",
+    "armor_l": "0.00",
+    "armor_dr": "0.00",
     "vision": 0,
     "hear": 0,
     "smell": 0,

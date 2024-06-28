@@ -553,6 +553,16 @@ class EdgeLevel(ExportedModel, StatModifier):
     requires_hero = models.BooleanField(default=False)
     extra_skill_points = models.IntegerField(default=0)
 
+    # Deliberately not taking in ArmorSpecialQuality, as the prime use case
+    # is Hardened Skin, which applies equally to each hit location.
+    # If later extension is needed, a specific armor value in a hit location
+    # should override this overall reduction... or add on top of it,
+    # whichever approach is chosen then.
+    armor_l = models.DecimalField(max_digits=4, decimal_places=1, default=0,
+                                  help_text="Overall lethality reduction")
+    armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0,
+                                   help_text="Overall damage reduction")
+
     @classmethod
     def dont_export(cls):
         return [

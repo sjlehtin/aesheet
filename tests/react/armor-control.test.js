@@ -103,4 +103,17 @@ describe('ArmorControl', function() {
         // Find the breakdown row for the armor and check that it has the correct value.
         expect(within(within(breakdown).getByText("FooArmor").closest("tr")).getAllByRole("cell")[1].textContent).toEqual("-36")
     });
+
+    it("takes Hardened Skin edge into account", async function () {
+        render(<ArmorControl campaign={2} armor={factories.armorFactory({
+            base: factories.armorTemplateFactory({'armor_h_r': 0, 'armor_h_dr': 0, 'armor_t_p': -9.5, 'armor_t_dr': -14}),
+            quality: factories.armorQualityFactory({'armor_dr': -3})
+        })} handler={factories.skillHandlerFactory({edges: [{edge: "Hardened Skin", level: 1, armor_l:-0.5, armor_dr:-2.0}]})} />)
+
+        expect(screen.getByLabelText("Armor T DR").textContent).toEqual("-19")
+        expect(screen.getByLabelText("Armor T P").textContent).toEqual("-10")
+        expect(screen.getByLabelText("Armor T R").textContent).toEqual("0")
+        expect(screen.getByLabelText("Armor H P").textContent).toEqual("0")
+        expect(screen.getByLabelText("Armor H DR").textContent).toEqual("-2")
+    })
 });
