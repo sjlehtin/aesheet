@@ -27,7 +27,20 @@ describe('SenseTable', function() {
         expect(checks.length).toEqual(10);
     });
 
-    it('displays hearing checks', function () {
+    it('displays hearing checks with Poor Hearing', function () {
+        getSenseTable({character: {cur_int: 50}});
+
+        const checks = getSenseChecks("Hearing")
+        expect(checks[checks.length - 1]).toEqual(50);
+        // Distance of 100m by default.
+        expect(checks.length).toEqual(6);
+
+        const smellChecks = getSenseChecks("Smell")
+        // Distance of 10m by default.
+        expect(smellChecks.length).toEqual(3);
+    });
+
+    it('displays hearing checks with Poor Hearing', function () {
         getSenseTable({character: {cur_int: 50},
             edges: [{edge: "Poor Hearing", level: 1}]});
 
@@ -37,6 +50,20 @@ describe('SenseTable', function() {
         expect(checks.length).toEqual(5);
     });
 
+    it('displays hearing checks with Acute Hearing', function () {
+        getSenseTable({character: {cur_int: 50},
+            edges: [{edge: "Acute Hearing", level: 1}]});
+
+        const checks = getSenseChecks("Hearing")
+        expect(checks[checks.length - 1]).toEqual(50);
+        // Distance of 200m with Poor Hearing.
+        expect(checks.length).toEqual(7);
+
+        const smellChecks = getSenseChecks("Smell")
+        // Distance of 10m by default.
+        expect(smellChecks.length).toEqual(3);
+    });
+
     it('displays smell checks', function () {
         getSenseTable({character: {cur_int: 50}});
 
@@ -44,6 +71,16 @@ describe('SenseTable', function() {
         expect(checks[checks.length - 1]).toEqual(50);
         // Distance of 10m by default.
         expect(checks.length).toEqual(3);
+    });
+
+    it('displays smell checks with Acute Smell and Taste', function () {
+        getSenseTable({character: {cur_int: 50},
+                edges: [{edge: "Acute Smell and Taste", level: 1}]});
+
+        const checks = getSenseChecks("Smell")
+        expect(checks[checks.length - 1]).toEqual(50);
+        // Distance of 20m with edge.
+        expect(checks.length).toEqual(4);
     });
 
     it('displays touch check', function () {

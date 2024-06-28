@@ -120,7 +120,7 @@ class SenseTable extends React.Component {
     }
 
     renderSmellChecks() {
-        return SenseTable.getCheckCells(this.props.handler.hearingCheck(),
+        return SenseTable.getCheckCells(this.props.handler.smellCheck(),
             SenseTable.BASE_SMELL_RANGE);
     }
 

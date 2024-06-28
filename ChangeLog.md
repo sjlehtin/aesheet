@@ -1,3 +1,9 @@
+## [Unreleased] - 2024-06-28
+
+### Fixed
+
+* {Acute,Poor} Hearing was mistakenly used in place of {Acute,Poor} Smell and Taste.
+
 ## [0.18.0] - 2024-06-27
 
 ### Changed
