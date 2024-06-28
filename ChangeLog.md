@@ -1,4 +1,8 @@
-## [Unreleased] - 2024-06-28
+## [0.19.0] - 2024-06-28
+
+### Added
+
+* Added possibility to specify lethality and damage reduction to edge levels. This allows implementing Hardened Skin edge.
 
 ### Fixed
 
