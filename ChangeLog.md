@@ -1,3 +1,9 @@
+## [0.20.0] - 2024-06-28
+
+### Added
+
+* Better admin controls for ArmorTemplates, ArmorQualities, and EdgeLevels.
+
 ## [0.19.0] - 2024-06-28
 
 ### Added
