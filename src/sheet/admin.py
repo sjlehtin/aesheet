@@ -75,6 +75,47 @@ class ArmorAdmin(admin.ModelAdmin):
     list_filter = ('base__tech_level',)
 
 
+class ArmorQualityAdmin(admin.ModelAdmin):
+    list_per_page = 50
+
+    list_display = ('name', 'short_name', 'tech_level', 'dp_multiplier',
+                    'armor_p', 'armor_s', 'armor_b', 'armor_r', 'armor_dr',
+
+                    'mod_fit', 'mod_ref', 'mod_psy',
+
+                    'mod_sensory', 'mod_stealth', 'mod_conceal', 'mod_climb',
+
+                    'mod_weight_multiplier', 'mod_encumbrance_class'
+                    )
+    list_editable = list_display[1:]
+    list_filter = ('tech_level',)
+    search_fields = ('name', )
+    save_as = True
+
+
+class ArmorTemplateAdmin(admin.ModelAdmin):
+    list_per_page = 50
+
+    list_display = ('name', 'tech_level', 'is_helm', 
+                    'armor_h_p', 'armor_h_s', 'armor_h_b', 'armor_h_r', 'armor_h_dr', 'armor_h_dp', 'armor_h_pl',
+                    'armor_t_p', 'armor_t_s', 'armor_t_b', 'armor_t_r', 'armor_t_dr', 'armor_t_dp', 'armor_t_pl',
+                    'armor_ll_p', 'armor_ll_s', 'armor_ll_b', 'armor_ll_r', 'armor_ll_dr', 'armor_ll_dp', 'armor_ll_pl',
+                    'armor_la_p', 'armor_la_s', 'armor_la_b', 'armor_la_r', 'armor_la_dr', 'armor_la_dp', 'armor_la_pl',
+                    'armor_rl_p', 'armor_rl_s', 'armor_rl_b', 'armor_rl_r', 'armor_rl_dr', 'armor_rl_dp', 'armor_rl_pl',
+                    'armor_ra_p', 'armor_ra_s', 'armor_ra_b', 'armor_ra_r', 'armor_ra_dr', 'armor_ra_dp', 'armor_ra_pl',
+
+                    'mod_fit', 'mod_ref', 'mod_psy',
+
+                    'mod_vision', 'mod_hear', 'mod_smell', 'mod_surprise',
+
+                    'mod_stealth', 'mod_conceal', 'mod_climb', 'mod_tumble',
+
+                    'weight', 'encumbrance_class'
+                    )
+    list_editable = list_display[2:]
+    list_filter = ('tech_level',)
+
+
 class AmmunitionAdmin(admin.ModelAdmin):
     list_select_related = True
     list_per_page = 50
@@ -128,15 +169,34 @@ class CharacterEdgeAdmin(admin.ModelAdmin):
     ordering = ('character__name', )
 
 
+class EdgeLevelAdmin(admin.ModelAdmin):
+    list_select_related = True
+    list_per_page = 50
+
+    list_display = ('edge', 'level',  'cost',
+                    'extra_skill_points', 'armor_l', 'armor_dr',
+                    'cc_skill_levels', 'fit', 'ref', 'lrn', 'int',
+                    'psy', 'wil', 'cha', 'pos', 'mov', 'dex', 'imm',
+                    'run_multiplier', 'swim_multiplier', 'climb_multiplier',
+                    'fly_multiplier', 'vision', 'hear', 'smell', 'surprise',
+                    'requires_hero')
+    list_editable = list_display[2:]
+    list_filter = ('edge__name', )
+    search_fields = ('edge__name', )
+    save_as = True
+
+    ordering = ('edge__name', 'level', 'cost')
+
+
 admin.site.register(sm.Armor, ArmorAdmin)
-admin.site.register(sm.ArmorQuality, QualityAdmin)
-admin.site.register(sm.ArmorTemplate, ItemAdmin)
+admin.site.register(sm.ArmorQuality, ArmorQualityAdmin)
+admin.site.register(sm.ArmorTemplate, ArmorTemplateAdmin)
 admin.site.register(sm.ArmorSpecialQuality, EffectAdmin)
 admin.site.register(sm.Character)
 admin.site.register(sm.CharacterEdge, CharacterEdgeAdmin)
 admin.site.register(sm.CharacterSkill, CharacterSkillAdmin)
 admin.site.register(sm.Edge)
-admin.site.register(sm.EdgeLevel)
+admin.site.register(sm.EdgeLevel, EdgeLevelAdmin)
 admin.site.register(sm.EdgeSkillBonus, EdgeSkillBonusAdmin)
 admin.site.register(sm.Sheet)
 admin.site.register(sm.TechLevel)
