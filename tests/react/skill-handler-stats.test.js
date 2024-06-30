@@ -445,7 +445,7 @@ describe('SkillHandler stats', function() {
                 bought_stamina: 5, stamina_damage: 15
             },
             skills: [{skill: {name: "Pistol", stat: 'DEX'}, level: 1, }]});
-        expect(handler.skillCheck("Pistol")).toEqual(40);
+        expect(handler.skillCheckV2("Pistol").value).toEqual(40);
     });
 
 });

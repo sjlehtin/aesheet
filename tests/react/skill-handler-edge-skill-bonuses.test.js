@@ -1,21 +1,12 @@
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
-import React from 'react';
-
-var factories = require('./factories');
-
-const SkillHandler = require('SkillHandler').default;
+import * as factories from './factories'
 
 describe('SkillHandler edge skill bonuses', function() {
-    "use strict";
 
     it('handles a skill check without edges', function () {
         var handler = factories.skillHandlerFactory({skills: [
             {skill: "Surgery", level: 1}]});
 
-        expect(handler.skillCheck("Surgery")).toEqual((43 + 5));
+        expect(handler.skillCheckV2("Surgery").value).toEqual((43 + 5));
     });
 
     it('accounts for Acute Touch', function () {
@@ -38,7 +29,7 @@ describe('SkillHandler edge skill bonuses', function() {
                 }]
         });
 
-        expect(handler.skillCheck("Surgery")).toEqual(43 + 5 + 13);
+        expect(handler.skillCheckV2("Surgery").value).toEqual(43 + 5 + 13);
     });
 
 });

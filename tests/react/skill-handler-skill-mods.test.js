@@ -53,7 +53,7 @@ describe('SkillHandler stats', function() {
                 }
             })
         });
-        expect(handler.skillCheck("Climbing", "mov")).toEqual(45);
+        expect(handler.skillCheckV2("Climbing", "mov").value).toEqual(45);
     });
 
     it('counts armor penalties in to the stealth skill check', function () {
@@ -69,7 +69,7 @@ describe('SkillHandler stats', function() {
                 }
             })
         });
-        expect(handler.skillCheck("Stealth", "mov")).toEqual(47);
+        expect(handler.skillCheckV2("Stealth", "mov").value).toEqual(47);
     });
 
     it('counts armor penalties in to the concealment skill check', function () {
@@ -85,7 +85,7 @@ describe('SkillHandler stats', function() {
                 }
             })
         });
-        expect(handler.skillCheck("Concealment", "mov")).toEqual(51);
+        expect(handler.skillCheckV2("Concealment", "mov").value).toEqual(51);
     });
 
     it('counts armor penalties in to the tumbling skill check', function () {
@@ -98,7 +98,7 @@ describe('SkillHandler stats', function() {
                 },
             })
         });
-        expect(handler.skillCheck("Tumbling", "ref")).toEqual(50);
+        expect(handler.skillCheckV2("Tumbling", "ref").value).toEqual(50);
     });
 
 });

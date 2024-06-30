@@ -275,10 +275,6 @@ class SkillHandler {
         }
     }
 
-    skillCheck(skillName, stat) {
-        return this.skillCheckV2(skillName, stat)?.value
-    }
-
     /* U is quarter-skill, i.e., using a pistol even without Basic
        Firearms.  B is half-skill, i.e., the character has top-level skill,
        but not the skill required.  Otherwise, if the character has the

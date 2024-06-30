@@ -7,7 +7,7 @@ describe('SkillHandler', function() {
             {skill: "Pistol", level: 1}]});
 
         expect(handler.skillLevel("Pistol")).toEqual(1);
-        expect(handler.skillCheck("Pistol")).toEqual(48);
+        expect(handler.skillCheckV2("Pistol").value).toEqual(48);
     });
 
     it('calculates skill check for zero cost skill', function () {
@@ -15,7 +15,7 @@ describe('SkillHandler', function() {
             character: {cur_fit: 48},
             allSkills: [
             {name: "Endurance/run", level: 0, skill_cost_0: 0, stat: "FIT"}]});
-        expect(handler.skillCheck("Endurance/run")).toEqual(48);
+        expect(handler.skillCheckV2("Endurance/run").value).toEqual(48);
     });
 
     it('calculates unskilled check', function () {
@@ -24,7 +24,7 @@ describe('SkillHandler', function() {
             allSkills: [{
                 name: "Pistol", required_skills: ["Basic Firearms"]}]
         });
-        expect(handler.skillCheck("Pistol")).toEqual(22)
+        expect(handler.skillCheckV2("Pistol").value).toEqual(22)
     });
 
     it('calculates extremely unskilled check', function () {
@@ -34,7 +34,7 @@ describe('SkillHandler', function() {
                 required_skills: ["Basic Firearms"]}
                 ]
         });
-        expect(handler.skillCheck("Pistol")).toEqual(11)
+        expect(handler.skillCheckV2("Pistol").value).toEqual(11)
     });
     
     it("mangles skill list to respect requirements order", function () {
