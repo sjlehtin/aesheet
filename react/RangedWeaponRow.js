@@ -16,8 +16,8 @@ class RangedWeaponRow extends WeaponRow {
         this.penaltyCounterStat = "FIT";
     }
 
-    skillCheckV2() {
-        const gottenCheck = this.props.skillHandler.skillCheckV2(
+    skillCheck() {
+        const gottenCheck = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
 
         if (!gottenCheck) {

@@ -109,8 +109,8 @@ class WeaponRow extends React.Component {
             2 * (this.props.weapon.size - 1);
     }
 
-    skillCheckV2() {
-        const gottenCheck = this.props.skillHandler.skillCheckV2(
+    skillCheck() {
+        const gottenCheck = this.props.skillHandler.skillCheck(
             this.props.weapon.base.base_skill);
 
         if (!gottenCheck) {
@@ -180,7 +180,7 @@ class WeaponRow extends React.Component {
         }
 
         const roa = this.roa(props.useType).value;
-        const baseCheck = this.skillCheckV2();
+        const baseCheck = this.skillCheck();
         if (!baseCheck) {
             // Actions not available.
             return null; //actions.map((e) => {return null;});
@@ -475,7 +475,7 @@ class WeaponRow extends React.Component {
             return <th style={headerStyle} key={`act-${ii}`}>{el.toFixed(1)}</th>;
         });
 
-        const baseCheck = this.skillCheckV2();
+        const baseCheck = this.skillCheck();
 
         // TODO: extract?
         let baseCheckContainer;

@@ -302,12 +302,12 @@ class FirearmControl extends RangedWeaponRow {
         return effect;
     }
 
-    skillCheckV2() {
+    skillCheck() {
         let effect = this.rangeEffect(this.props.toRange)
         if (!effect) {
             return null
         }
-        const baseCheck = super.skillCheckV2()
+        const baseCheck = super.skillCheck()
         if (!baseCheck) {
             return null
         }
@@ -337,7 +337,7 @@ class FirearmControl extends RangedWeaponRow {
         if (base.restricted_burst_rounds > 0) {
             maxHits = Math.min(maxHits, base.restricted_burst_rounds);
         }
-        const baseSkillCheck = this.skillCheckV2();
+        const baseSkillCheck = this.skillCheck();
         const burstMultipliers = [0, 1, 3, 6, 10];
         const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
@@ -523,7 +523,7 @@ class FirearmControl extends RangedWeaponRow {
             autofirePenalty = -20;
         }
 
-        const baseSkillCheck = this.skillCheckV2();
+        const baseSkillCheck = this.skillCheck();
         let checks = [];
         let penaltyMultiplier = 0;
         for (let multiplier of sweeps[sweepType]) {
@@ -693,7 +693,7 @@ class FirearmControl extends RangedWeaponRow {
                 util.renderInt(init)}</td>
         });
 
-        const baseCheck = super.skillCheckV2();
+        const baseCheck = super.skillCheck();
 
         // TODO: extract?
         let baseCheckContainer;

@@ -200,7 +200,7 @@ class SkillHandler {
      * a non-zero cost, calculate check defaulted to half-ability.
      */
 
-    skillCheckV2(skillName, stat, ignoreMissingSkill) {
+    skillCheck(skillName, stat, ignoreMissingSkill) {
         const skill = this.state.skillMap[skillName];
 
         if (!ignoreMissingSkill) {
@@ -870,7 +870,7 @@ class SkillHandler {
     }
 
     dayVisionBaseCheck() {
-        let check = this.skillCheckV2("Search", "INT", true)?.value;
+        let check = this.skillCheck("Search", "INT", true)?.value;
         check += this.getTotalModifier("vision");
         check -= 5 * this.edgeLevel("Color Blind");
         return {check: check,
@@ -878,7 +878,7 @@ class SkillHandler {
     }
 
     nightVisionBaseCheck(givenPerks) {
-        const check = this.skillCheckV2("Search", "INT", true)?.value;
+        const check = this.skillCheck("Search", "INT", true)?.value;
         let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
         let nightVision = this.detectionLevel("Night Vision",
             "Night Blindness");
@@ -892,25 +892,25 @@ class SkillHandler {
     }
 
     surpriseCheck() {
-        const surpriseSkillCheck = this.skillCheckV2("Tailing / Shadowing", "PSY", true)?.value;
+        const surpriseSkillCheck = this.skillCheck("Tailing / Shadowing", "PSY", true)?.value;
         return surpriseSkillCheck + this.getTotalModifier("surprise");
     }
 
     smellCheck() {
-        const smellCheck = this.skillCheckV2("Search", "INT", true)?.value;
+        const smellCheck = this.skillCheck("Search", "INT", true)?.value;
         return {check: smellCheck + this.getTotalModifier("smell"),
             detectionLevel: this.detectionLevel("Acute Smell and Taste",
                             "Poor Smell and Taste")};
     }
 
     hearingCheck() {
-        const hearingCheck = this.skillCheckV2("Search", "INT", true)?.value;
+        const hearingCheck = this.skillCheck("Search", "INT", true)?.value;
         return {check: hearingCheck + this.getTotalModifier("hear"),
             detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
     }
 
     touchCheck() {
-        const touchCheck = this.skillCheckV2("Search", "INT", true)?.value;
+        const touchCheck = this.skillCheck("Search", "INT", true)?.value;
         return {check: touchCheck +
                         util.roundup(this.getSkillMod("climb") / 2),
                 detectionLevel: this.edgeLevel("Acute Touch")};

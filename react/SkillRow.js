@@ -26,17 +26,8 @@ class SkillRow extends React.Component {
         this.state = {  };
     }
 
-    /* A base-level skill, i.e., Basic Artillery and the like. */
-    isBaseSkill() {
-        return this.props.skillHandler.isBaseSkill(this.props.skillName);
-    }
-
     skillCheck(stat) {
         return this.props.skillHandler.skillCheck(this.props.skillName, stat);
-    }
-
-    skillCheckV2(stat) {
-        return this.props.skillHandler.skillCheckV2(this.props.skillName, stat);
     }
 
     skillLevel() {
@@ -79,7 +70,7 @@ class SkillRow extends React.Component {
             var checkList = [];
             for (var ii = 0; ii < this.props.renderForStats.length; ii++) {
                 var stat = this.props.renderForStats[ii];
-                var check = this.skillCheckV2(stat);
+                var check = this.skillCheck(stat);
                 checkList.push(
                     <tr key={ii}>
                         <td>{stat.toUpperCase()}</td>
@@ -93,7 +84,7 @@ class SkillRow extends React.Component {
             }
             checks = <table aria-label={"Skill checks for explicitly given stats"}><tbody>{checkList}</tbody></table>;
         } else {
-            const check = this.skillCheckV2()
+            const check = this.skillCheck()
             if (check) {
                 checks = <SkillCheck skillName={this.props.skillName}
                                      skillCheck={check.value}
