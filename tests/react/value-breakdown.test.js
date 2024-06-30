@@ -22,4 +22,20 @@ describe("ValueBreakdown", function () {
         expect(bd.breakdown().length).toEqual(3)
         expect(bd.breakdown()[2]).toEqual({value: 0, reason: "no reason"})
     })
+
+    it("can take in an existing breakdown", function () {
+        const bd = new ValueBreakdown()
+        bd.add(4, "because")
+        bd.add(-2.5, "penalty")
+
+        expect(bd.value()).toEqual(1.5)
+
+        const bd2 = new ValueBreakdown()
+        bd2.add(3, "initial")
+
+        expect(bd2.value()).toEqual(3)
+        bd2.addBreakdown(bd)
+        expect(bd2.value()).toEqual(4.5)
+        expect(bd2.breakdown().length).toEqual(3)
+    })
 })

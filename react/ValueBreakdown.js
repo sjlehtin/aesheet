@@ -15,7 +15,7 @@ export default class ValueBreakdown {
 
     addBreakdown(breakdown) {
         this.#value += breakdown.value()
-        this.#breakdown = Array.concat(this.#breakdown, breakdown.breakdown())
+        this.#breakdown = [...this.#breakdown, ...breakdown.breakdown()]
     }
 
     value() {
