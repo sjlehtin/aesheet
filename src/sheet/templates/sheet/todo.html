@@ -26,22 +26,32 @@
         + effect of gravity applies to ranged weapons...
         - movement rates
         - allow changing gravity with 0.1 increments with cursor keys
+    - firearms in CC. (from firearms section)
+    - add a generic skill check element to allow unskilled checks
+        - at least render base skill checks
+    - fix issue in skill list rendering with skills that are specializations
+        of "standard" skills
     - make the range control affect the advancing initiatives
         - sense table could highlight
+    - check breakdown for sweep fire
     - range control for ranged weapons
-    - firearms in CC. (from firearms section)
     - check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
         - at least in normal daylight, acute vision does not work (probably because night vision check always used)
         - Render perks in the details, as an overlay for example
     - character log to the side after skill panel. Should update dynamically,
         use websockets for this
 
+    - "add xp used ingame" with a possibility to enter description (to log)
+    -- if a log entry is added, entry should not be coalesced.
+    - "add xp" with an optional log entry, allowing for in-game notes.
+
     - range, light level, conditions, turns of combat to specific combat overlay to access it quickly while perusing the rest of the sheet.
         + gravity control
         + remember set range and detection level on reopen
         - setting range once will affect firearms and ranged weapons
         - highlights the correct column in senses
-
+        - make the drawer handle wider, the scrollbar is layered on top of the handle, making hard to toggle the overlay
+        - visible indication when non-standard selections, i.e., combat in progress
     + inventory
     + damage taken
     ++ stamina
@@ -54,7 +64,6 @@
     - mana usage controls
 
     - fit/ref penalties from arm damage
-    - add a generic skill check element to allow unskilled checks
     + add a log entry for added edges
     + add indication of last SP addition
     + add indication of last XP addition
@@ -89,6 +98,11 @@
           adversaries on a laptop screen
         - currently used weapon selected from main sheet choices
             - only currently selected weapon checks rendered
+        - MVP: just combine multiple sheets to same view with selected weapon
+            - allow showing movement and selecting between weapons (firearm,
+              ranged, cc) to render the weapon
+            - reorganize sheets to allow changing visualization of combat
+              formation
 
     - telescopic sight x16 xxxxl extreme range options
     - language skills to a separate section in the skills
@@ -102,13 +116,13 @@
 
     + notes changes should perhaps not be logged.
 
-    - suspended weight
-    - check that power armor fit bonus works.
+    - power armors
+        - skill reduces ref penalty
+        - suspended weight
+        + check that power armor fit bonus works.
 
     - acute vision counters penalty in ranged combat (-10 -> -5 etc)
     - acute vision edge to main sheet
-
-    - range UI for ranged weapons (bows etc)
 
     + skill modifiers from armor
 
@@ -150,9 +164,6 @@
     - overland movement double time
 
     - show character height, weight in sheet.
-    - "add xp used ingame" with a possibility to enter description (to log)
-    -- if a log entry is added, entry should not be coalesced.
-    - "add xp" with an optional log entry, allowing for in-game notes.
     - shield damage points
     - damage points for armor, weapons
     - tiring
@@ -182,7 +193,6 @@
     ++ edges
 
     + encumbrance breakdown (M)
-    + sheet styling
 
     - short description of spell effect (+50 FIT etc)
     - stats, armors etc if the character is larger sized.
@@ -193,9 +203,6 @@
 
     - Inserting None as skill cost to the sheet should work to allow resetting
       skill costs from CSV import.
-
-    - creating new objects should be ajaxiced and redirects should occur in a
-      sensible manner.
 
     - hardened skin + toughness -> natural weapons durability.
     -- NaturalWeaponDura=Aleth+HdSkin+ROUNDDOWN(Toughness/2)+SizeModifier
