@@ -23,8 +23,8 @@ class RangedWeaponRow extends WeaponRow {
         if (!gottenCheck) {
             return null;
         }
-        let check = gottenCheck.value
-        let breakdown = gottenCheck.breakdown.slice()
+        let check = gottenCheck.value()
+        let breakdown = gottenCheck.breakdown().slice()
 
         const unskilledPenalty = -10;
 

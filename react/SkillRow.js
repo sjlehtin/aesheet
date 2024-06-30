@@ -67,17 +67,17 @@ class SkillRow extends React.Component {
     render () {
         let checks;
         if (this.props.renderForStats) {
-            var checkList = [];
-            for (var ii = 0; ii < this.props.renderForStats.length; ii++) {
-                var stat = this.props.renderForStats[ii];
-                var check = this.skillCheck(stat);
+            let checkList = [];
+            for (let ii = 0; ii < this.props.renderForStats.length; ii++) {
+                const stat = this.props.renderForStats[ii];
+                const check = this.skillCheck(stat);
                 checkList.push(
                     <tr key={ii}>
                         <td>{stat.toUpperCase()}</td>
                         <td>
                             <SkillCheck skillName={this.props.skillName}
-                                        skillCheck={check.value}
-                                        checkBreakdown={check.breakdown}/>
+                                        skillCheck={check.value()}
+                                        checkBreakdown={check.breakdown()}/>
                         </td>
                     </tr>
                 );
@@ -87,11 +87,11 @@ class SkillRow extends React.Component {
             const check = this.skillCheck()
             if (check) {
                 checks = <SkillCheck skillName={this.props.skillName}
-                                     skillCheck={check.value}
-                                     checkBreakdown={check.breakdown}/>
+                                     skillCheck={check.value()}
+                                     checkBreakdown={check.breakdown()}/>
             }
         }
-        var indent = 0;
+        let indent = 0;
         if (this.props.indent > 0) {
             indent = `${this.props.indent}em`;
         }

@@ -6,7 +6,7 @@ describe('SkillHandler edge skill bonuses', function() {
         var handler = factories.skillHandlerFactory({skills: [
             {skill: "Surgery", level: 1}]});
 
-        expect(handler.skillCheck("Surgery").value).toEqual((43 + 5));
+        expect(handler.skillCheck("Surgery").value()).toEqual((43 + 5));
     });
 
     it('accounts for Acute Touch', function () {
@@ -29,7 +29,7 @@ describe('SkillHandler edge skill bonuses', function() {
                 }]
         });
 
-        expect(handler.skillCheck("Surgery").value).toEqual(43 + 5 + 13);
+        expect(handler.skillCheck("Surgery").value()).toEqual(43 + 5 + 13);
     });
 
 });

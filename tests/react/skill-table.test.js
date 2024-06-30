@@ -36,11 +36,12 @@ describe('SkillTable', function() {
         }
         props.allSkills = allSkills;
 
-        var skillHandler = factories.skillHandlerFactory(props);
-        return  <SkillTable skillHandler={skillHandler}
-                        onCharacterSkillAdd={props.onCharacterSkillAdd}
-                        onCharacterSkillModify={props.onCharacterSkillModify}
-                        onCharacterSkillRemove={props.onCharacterSkillRemove} />;
+        const skillHandler = factories.skillHandlerFactory(props);
+        return <SkillTable
+                    skillHandler={skillHandler}
+                    onCharacterSkillAdd={props.onCharacterSkillAdd}
+                    onCharacterSkillModify={props.onCharacterSkillModify}
+                    onCharacterSkillRemove={props.onCharacterSkillRemove} />;
     };
 
     it('renders as empty', function () {

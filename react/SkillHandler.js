@@ -42,7 +42,8 @@
  * Mastering the Low-G maneuver skill allows the PC to negate +5L of the REF penalty and +5L of the to-hit penalty with firearms. DONE
  */
 
-const util = require('./sheet-util');
+import * as util from './sheet-util'
+import ValueBreakdown from "./ValueBreakdown";
 
 class SkillHandler {
     constructor(props) {
@@ -215,64 +216,33 @@ class SkillHandler {
                 throw "When ignoring missing skill, stat is required"
             }
         }
+
+        const bd = new ValueBreakdown()
+
         const effStats = this.getEffStats();
         const ability = effStats[stat.toLowerCase()];
 
-        const level = this.skillLevel(skillName);
+        const level= this.skillLevel(skillName);
 
-        let check = 0;
-        let breakdown = []
         if (level === "U" && !ignoreMissingSkill) {
-            check = Math.round(ability / 4)
-            breakdown.push({value: check,
-                reason: `1/4*${stat} (U)`
-            })
+            bd.add(Math.round(ability / 4), `1/4*${stat} (U)`)
         } else if (level === "B" && !ignoreMissingSkill) {
-            check = Math.round(ability / 2)
-            breakdown.push({value: check,
-                reason: `1/2*${stat} (B)`
-            })
+            bd.add(Math.round(ability / 2), `1/2*${stat} (B)`)
         } else {
-            let levelBonus = level * 5;
-            check = ability + levelBonus;
-            breakdown.push({
-                value: ability,
-                reason: stat
-            })
-            if (levelBonus) {
-                breakdown.push({
-                    value: levelBonus,
-                    reason: `skill level`
-                })
-            }
+            bd.add(ability, stat)
+
+            const levelBonus = level * 5;
+            bd.add(levelBonus, "skill level")
         }
+
         if (skillName in this.state.skillBonusMap) {
-            check += this.state.skillBonusMap[skillName].bonus;
-            breakdown.push({value: this.state.skillBonusMap[skillName].bonus,
-                reason: `skill bonuses`
-            })
+            bd.add(this.state.skillBonusMap[skillName].bonus, "skill bonuses")
         }
 
-        const skillMod = this.getSkillMod(skillName);
-        if (skillMod) {
-            check += skillMod;
-            breakdown.push({value: skillMod,
-                reason: `skill mods`
-            })
-        }
-        const acPenalty = this.getACPenalty().value;
-        if (acPenalty) {
-            check += acPenalty;
-            breakdown.push({
-                value: acPenalty,
-                reason: `AC penalty`
-            })
-        }
+        bd.add(this.getSkillMod(skillName), "skill mods")
+        bd.add(this.getACPenalty().value, "AC penalty")
 
-        return {
-            value: check,
-            breakdown: breakdown
-        }
+        return bd
     }
 
     /* U is quarter-skill, i.e., using a pistol even without Basic
@@ -280,11 +250,13 @@ class SkillHandler {
        but not the skill required.  Otherwise, if the character has the
         skill, return the level of the skill. */
     skillLevel(skillName) {
-        var cs = this.state.characterSkillMap[skillName];
-        var skill = this.state.skillMap[skillName];
+        const cs = this.state.characterSkillMap[skillName];
+        const skill = this.state.skillMap[skillName];
+
         if (!skill) {
             return null;
         }
+
         if (!cs) {
             if (skill.required_skills.length > 0) {
                 for (let reqd of skill.required_skills) {
@@ -522,7 +494,7 @@ class SkillHandler {
     }
 
     getSkillMod(skill) {
-        var normalized = skill.toLowerCase();
+        let normalized = skill.toLowerCase();
         if (normalized === "climbing") {
             normalized = "climb";
         } else if (normalized === "concealment") {
@@ -870,7 +842,7 @@ class SkillHandler {
     }
 
     dayVisionBaseCheck() {
-        let check = this.skillCheck("Search", "INT", true)?.value;
+        let check = this.skillCheck("Search", "INT", true)?.value();
         check += this.getTotalModifier("vision");
         check -= 5 * this.edgeLevel("Color Blind");
         return {check: check,
@@ -878,7 +850,7 @@ class SkillHandler {
     }
 
     nightVisionBaseCheck(givenPerks) {
-        const check = this.skillCheck("Search", "INT", true)?.value;
+        const check = this.skillCheck("Search", "INT", true)?.value();
         let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
         let nightVision = this.detectionLevel("Night Vision",
             "Night Blindness");
@@ -892,25 +864,25 @@ class SkillHandler {
     }
 
     surpriseCheck() {
-        const surpriseSkillCheck = this.skillCheck("Tailing / Shadowing", "PSY", true)?.value;
+        const surpriseSkillCheck = this.skillCheck("Tailing / Shadowing", "PSY", true)?.value();
         return surpriseSkillCheck + this.getTotalModifier("surprise");
     }
 
     smellCheck() {
-        const smellCheck = this.skillCheck("Search", "INT", true)?.value;
+        const smellCheck = this.skillCheck("Search", "INT", true)?.value();
         return {check: smellCheck + this.getTotalModifier("smell"),
             detectionLevel: this.detectionLevel("Acute Smell and Taste",
                             "Poor Smell and Taste")};
     }
 
     hearingCheck() {
-        const hearingCheck = this.skillCheck("Search", "INT", true)?.value;
+        const hearingCheck = this.skillCheck("Search", "INT", true)?.value();
         return {check: hearingCheck + this.getTotalModifier("hear"),
             detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
     }
 
     touchCheck() {
-        const touchCheck = this.skillCheck("Search", "INT", true)?.value;
+        const touchCheck = this.skillCheck("Search", "INT", true)?.value();
         return {check: touchCheck +
                         util.roundup(this.getSkillMod("climb") / 2),
                 detectionLevel: this.edgeLevel("Acute Touch")};
@@ -921,13 +893,6 @@ SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
 SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
     ["mov", "dex", "imm", "vision", "hear", "smell", "surprise"]);
-
-// SkillHandler.props = {
-//     character: React.PropTypes.object.isRequired,
-//     edges: React.PropTypes.array,
-//     effects: React.PropTypes.array,
-//     weightCarried: React.PropTypes.number.isRequired
-//};
 
 SkillHandler.defaultProps = {
     weightCarried: 0,

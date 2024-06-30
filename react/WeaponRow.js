@@ -116,8 +116,8 @@ class WeaponRow extends React.Component {
         if (!gottenCheck) {
             return null;
         }
-        let check = gottenCheck.value
-        let breakdown = gottenCheck.breakdown.slice()
+        let check = gottenCheck.value()
+        let breakdown = gottenCheck.breakdown().slice()
         const ccv = this.ccv();
         check += ccv;
         if (ccv) {
