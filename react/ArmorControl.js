@@ -4,6 +4,7 @@ import {Button, Col, Row} from 'react-bootstrap';
 
 import AddArmorControl from './AddArmorControl';
 import StatBreakdown from "./StatBreakdown";
+import ValueBreakdown from "./ValueBreakdown";
 
 const util = require('./sheet-util');
 
@@ -67,33 +68,6 @@ function getArmorStat(location, type, piece) {
         }
     }
     return stat
-}
-
-class ValueBreakdown {
-    #value = 0
-    #breakdown = []
-
-    constructor() {
-
-    }
-
-    add(newValue, description) {
-        this.#value += newValue
-        this.#breakdown.push({value: newValue, reason: description})
-    }
-
-    addBreakdown(breakdown) {
-        this.#value += breakdown.value()
-        this.#breakdown = Array.concat(this.#breakdown, breakdown.breakdown())
-    }
-
-    value() {
-        return this.#value
-    }
-
-    breakdown() {
-        return this.#breakdown
-    }
 }
 
 function calculateArmorStats(armor, helm, miscItems, handler) {
