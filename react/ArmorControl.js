@@ -40,7 +40,6 @@ function getArmorStat(location, type, piece) {
      * =-ROUNDUP(POWER(2/3*AVERAGE(<over leth reduction types>);2);0)
      * => -9 overall leth reduction results in 36 DR
      */
-    let lethRed = 0
     let fromArmor = 0
     for  (let col of ["P", "S", "B", "R"]) {
         fromArmor += getBaseValue(base, location, col)
@@ -63,7 +62,7 @@ function getArmorStat(location, type, piece) {
 
         // Armor is calculated from the lethalities if quality has an effect.
         if (fromQuality !== 0) {
-            lethRed += fromQuality
+            const lethRed = fromArmor + fromQuality
             stat = -Math.pow((lethRed / 4) * (2 / 3), 2)
         }
     }
@@ -108,8 +107,8 @@ function calculateArmorStats(armor, helm, miscItems, handler) {
         }
     }
 
-    const fromEdgeLethalityReduction = handler?.getEdgeModifier("armor_l")
-    const fromEdgeDamageReduction = handler?.getEdgeModifier("armor_dr")
+    const fromEdgeLethalityReduction = handler?.getEdgeModifier("armor_l") ?? 0
+    const fromEdgeDamageReduction = handler?.getEdgeModifier("armor_dr") ?? 0
 
     for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
         stats[loc] = {}

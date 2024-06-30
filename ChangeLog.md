@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Fixed
+
+* Fixed an obvious bug in armor dr calculation when calculating with qualities.
+
 ## [0.20.0] - 2024-06-28
 
 ### Added

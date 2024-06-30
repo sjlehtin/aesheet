@@ -68,12 +68,12 @@ describe('ArmorControl', function() {
         // =-ROUNDUP(POWER(2/3*AVERAGE(AY36:BB36);2);0)
         // => -9 overall leth reduction results in 36 DR
         render(<ArmorControl campaign={2}
-                             armor={factories.armorFactory({
+                             armor={factories.armorFactory({ name: 'Power armor',
             base: factories.armorTemplateFactory({'armor_t_p': -9, 'armor_t_s': -9, 'armor_t_b': -9, 'armor_t_r': -9, 'armor_t_dr': -36}),
             quality: factories.armorQualityFactory({'armor_p': -0.5, 'armor_s': -0.5, 'armor_b': -0.5, 'armor_r': -0.5, 'armor_dr': 0})
         })}
-                             helm={factories.armorFactory({
-                base: factories.armorTemplateFactory({'armor_h_p': -9, 'armor_h_s': -9, 'armor_h_b': -9, 'armor_h_r': -9, 'armor_h_dr': -36}),
+                             helm={factories.armorFactory({ name: 'Power helmet',
+                base: factories.armorTemplateFactory({ 'armor_h_p': -9, 'armor_h_s': -9, 'armor_h_b': -9, 'armor_h_r': -9, 'armor_h_dr': -36}),
             quality: factories.armorQualityFactory({'armor_p': -0.5, 'armor_s': -0.5, 'armor_b': -0.5, 'armor_r': -0.5, 'armor_dr': 0})
         })}
         />)
