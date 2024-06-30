@@ -9,9 +9,10 @@ import StatBreakdown from "StatBreakdown";
 import MagazineControl from 'MagazineControl';
 import UseTypeControl from 'UseTypeControl';
 
-const util = require('./sheet-util');
+import * as util from './sheet-util'
 import {Col, Row, Button, Table} from 'react-bootstrap';
 import {isFloat} from "./sheet-util";
+import ValueBreakdown from "./ValueBreakdown";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -311,21 +312,10 @@ class FirearmControl extends RangedWeaponRow {
         if (!baseCheck) {
             return null
         }
-        let check = baseCheck.value
-        let breakdown = baseCheck.breakdown.slice()
 
-        check += effect.check
-        if (effect.check) {
-            breakdown.push({
-                value: effect.check,
-                reason: "range"
-            })
-        }
+        baseCheck.add(effect.check, "range")
 
-        return {
-            value: check,
-            breakdown: breakdown
-        }
+        return baseCheck
     }
 
     singleBurstChecks(check) {
@@ -341,17 +331,22 @@ class FirearmControl extends RangedWeaponRow {
         const burstMultipliers = [0, 1, 3, 6, 10];
         const autofireClasses = {"A": -1, "B": -2, "C": -3, "D": -4, "E": -5};
 
-        let autofirePenalty = 0;
+        const autofirePenalty = new ValueBreakdown()
         if (!this.props.skillHandler.hasSkill("Autofire")) {
-            autofirePenalty = -10;
+            autofirePenalty.add(-10, "Unskilled @Autofire")
         }
+
         for (let ii = 0; ii < 5; ii++) {
             if (ii >= maxHits || check === null || baseSkillCheck === null) {
                 checks.push(null);
             } else {
                 // The modifier might be positive at this point, and penalty
                 // countering could leave the overall mod as positive.
-                let mod = check - baseSkillCheck.value;
+                let mod = check.value() - baseSkillCheck.value();
+
+                const bd = new ValueBreakdown()
+
+                bd.addBreakdown(baseSkillCheck)
 
                 let bonus = 0;
                 if (mod > 0) {
@@ -359,13 +354,21 @@ class FirearmControl extends RangedWeaponRow {
                     mod = 0;
                 }
 
+                bd.add(bonus, "bonus from ROA")
+                //bd.add(mod, "penalty #act")
+                // bd.add(burstMultipliers[ii] *
+                //     autofireClasses[base.autofire_class],
+                //     "autofire class")
+
                 mod += burstMultipliers[ii] *
                     autofireClasses[base.autofire_class];
 
                 mod = FirearmControl.counterPenalty(mod,
                         this.getStat("FIT"));
+                bd.add(mod, "burst penalty")
+                bd.addBreakdown(autofirePenalty)
 
-                checks.push(baseSkillCheck.value + bonus + mod + autofirePenalty);
+                checks.push(bd)
             }
         }
         return checks;
@@ -392,14 +395,10 @@ class FirearmControl extends RangedWeaponRow {
             {useType: this.state.useType, counterPenalty: false});
         if (checks === null) {
             // no actions available.
-            return actions.map((el) => {return [];});
+            return actions.map(() => {return []});
         }
         return checks.map((chk) => {
-            let base = null
-            if (chk !== null) {
-                base = chk.value
-            };
-            return this.singleBurstChecks(base)
+            return this.singleBurstChecks(chk)
         });
     }
 
@@ -456,8 +455,14 @@ class FirearmControl extends RangedWeaponRow {
         for (let ii = 0; ii < 5; ii++) {
             const checkCells = [];
             for (let jj = 0; jj < burstChecks.length; jj++) {
+                let cell;
+                if (burstChecks[jj][ii]) {
+                    cell = <StatBreakdown value={burstChecks[jj][ii].value()} breakdown={burstChecks[jj][ii].breakdown()} />
+                } else {
+                    cell = ""
+                }
                 checkCells.push(<td key={jj} style={cellStyle} aria-label={`Burst ${jj + 1} To-Hit`}>
-                    {burstChecks[jj][ii]}</td>);
+                    {cell}</td>);
             }
             burstRows.push(<tr key={`chk-${ii}`}>
                 <td style={cellStyle}>{lethalities[ii]}</td>
@@ -518,9 +523,10 @@ class FirearmControl extends RangedWeaponRow {
 
         const afClass = autofireClasses[this.props.weapon.base.autofire_class];
 
-        let autofirePenalty = -10;
+        const autofirePenalty = new ValueBreakdown()
+        autofirePenalty.add(-10, "Autofire")
         if (!this.props.skillHandler.hasSkill("Autofire")) {
-            autofirePenalty = -20;
+            autofirePenalty.add(-10, "Unskilled @Autofire")
         }
 
         const baseSkillCheck = this.skillCheck();
@@ -531,13 +537,16 @@ class FirearmControl extends RangedWeaponRow {
             if (baseSkillCheck === null) {
                 checks.push(null)
             }  else {
-                checks.push(
-                    baseSkillCheck.value +
-                    sweepType +
-                    FirearmControl.counterPenalty(
-                        penaltyMultiplier * afClass, this.getStat("fit")) +
-                    autofirePenalty
-                );
+                const bd = new ValueBreakdown()
+
+                bd.addBreakdown(baseSkillCheck)
+                bd.add(sweepType, "Sweep bonus")
+                const penalty = penaltyMultiplier * afClass
+                // TODO, use counterPenaltyV2
+                bd.add(FirearmControl.counterPenalty(
+                        penalty, this.getStat("fit")), "sweep penalty")
+                bd.addBreakdown(autofirePenalty)
+                checks.push(bd)
             }
         }
         return checks;
@@ -583,14 +592,20 @@ class FirearmControl extends RangedWeaponRow {
         var cellStyle = Object.assign({borderStyle: "dotted"}, baseStyle);
 
         for (let sweep of [5, 10, 15, 20]) {
-            var checks = this.sweepChecks(sweep);
-            for (var ii = checks.length; ii < 16; ii++) {
+            let checks = this.sweepChecks(sweep);
+            for (let ii = checks.length; ii < 16; ii++) {
                 checks[ii] = null;
             }
             checks.reverse();
-            ii = 0;
-            var checkCells = checks.map((chk) => {
-                return <td style={cellStyle} key={ii++} aria-label={`Sweep ${sweep} to-hit`}>{chk}</td>;
+            const checkCells = checks.map((chk, index) => {
+                let cell;
+                if (chk) {
+                    cell = <StatBreakdown value={chk.value()}
+                                          breakdown={chk.breakdown()}/>;
+                } else {
+                    cell = ""
+                }
+                return <td style={cellStyle} key={index} aria-label={`Sweep ${sweep} to-hit`}>{cell}</td>;
             });
             sweepRows.push(<tr key={sweep}><td>{sweep}</td><td>{util.roundup(this.props.weapon.base.autofire_rpm/(6*sweep))}</td>{checkCells}</tr>);
         }
@@ -701,8 +716,8 @@ class FirearmControl extends RangedWeaponRow {
             const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
             baseCheckContainer = <div><label id={"base-check"} style={baseCheckStyle}>Base check</label><span
                 aria-labelledby={"base-check"}><StatBreakdown
-                value={baseCheck.value}
-                breakdown={baseCheck.breakdown}
+                value={baseCheck.value()}
+                breakdown={baseCheck.breakdown()}
                 style={baseCheckStyle}/></span></div>
         }
 
@@ -713,8 +728,8 @@ class FirearmControl extends RangedWeaponRow {
             skillChecks = skillChecks.map((chk, ii) => {
                 let cellContent;
                 if (chk) {
-                    cellContent = <StatBreakdown value={chk.value}
-                                                 breakdown={chk.breakdown}/>
+                    cellContent = <StatBreakdown value={chk.value()}
+                                                 breakdown={chk.breakdown()}/>
                 } else {
                     cellContent = ""
                 }

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import WeaponRow from 'WeaponRow';
+import ValueBreakdown from "./ValueBreakdown";
 import StatBreakdown from "StatBreakdown";
 const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
@@ -23,37 +24,28 @@ class RangedWeaponRow extends WeaponRow {
         if (!gottenCheck) {
             return null;
         }
-        let check = gottenCheck.value()
-        let breakdown = gottenCheck.breakdown().slice()
+
+        const bd = new ValueBreakdown()
+
+        bd.addBreakdown(gottenCheck)
 
         const unskilledPenalty = -10;
 
         if (this.props.weapon.base.skill) {
             if (!this.props.skillHandler.hasSkill(
                     this.props.weapon.base.skill)) {
-                check += unskilledPenalty;
-                breakdown.push({
-                    value: unskilledPenalty,
-                    reason: `unskilled (${this.props.weapon.base.skill})`
-                })
+                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill})`)
             }
         }
 
         if (this.props.weapon.base.skill2) {
             if (!this.props.skillHandler.hasSkill(
                     this.props.weapon.base.skill2)) {
-                check += unskilledPenalty;
-                breakdown.push({
-                    value: unskilledPenalty,
-                    reason: `unskilled (${this.props.weapon.base.skill2})`
-                })
+                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill2})`)
             }
         }
 
-        return {
-            value: check,
-            breakdown: breakdown
-        };
+        return bd
     }
 
     roa(useType) {
@@ -116,8 +108,8 @@ class RangedWeaponRow extends WeaponRow {
             checkCells = checkCells.map((el, ii) => {
                 let cellContent;
                 if (el) {
-                    cellContent = <StatBreakdown value={el.value}
-                                                 breakdown={el.breakdown}/>
+                    cellContent = <StatBreakdown value={el.value()}
+                                                 breakdown={el.breakdown()}/>
                 } else {
                     cellContent = ""
                 }

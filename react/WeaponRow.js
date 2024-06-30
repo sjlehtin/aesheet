@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
 import StatBreakdown from "./StatBreakdown";
+import ValueBreakdown from "./ValueBreakdown";
 
 class WeaponRow extends React.Component {
     constructor(props) {
@@ -116,29 +117,19 @@ class WeaponRow extends React.Component {
         if (!gottenCheck) {
             return null;
         }
-        let check = gottenCheck.value()
-        let breakdown = gottenCheck.breakdown().slice()
+
+        const bd = new ValueBreakdown()
+
+        bd.addBreakdown(gottenCheck)
+
         const ccv = this.ccv();
-        check += ccv;
-        if (ccv) {
-            breakdown.push({
-                value: ccv,
-                reason: "CCV"
-            })
-        }
+        bd.add(ccv, "CCV")
+
         if (!this.isSkilled()) {
-            check += this.props.weapon.base.ccv_unskilled_modifier;
-            if (this.props.weapon.base.ccv_unskilled_modifier) {
-                breakdown.push({
-                    value: this.props.weapon.base.ccv_unskilled_modifier,
-                    reason: "unskilled"
-                })
-            }
+            bd.add(this.props.weapon.base.ccv_unskilled_modifier,
+                "unskilled")
         }
-        return {
-            value: check,
-            breakdown: breakdown
-        };
+        return bd
     }
 
     static checkMod(roa, act, baseBonus, extraActionModifier) {
@@ -187,27 +178,17 @@ class WeaponRow extends React.Component {
         }
         const checks = [];
 
-        let check = baseCheck.value
-        let breakdown = baseCheck.breakdown.slice();
-
         if (props.useType === WeaponRow.SEC) {
             if (!this.props.weapon.base.is_shield) {
                 const wrongHandPenalty = -25;
-                check += wrongHandPenalty
-                breakdown.push({
-                    value: wrongHandPenalty,
-                    reason: "Wrong hand penalty"
-                })
 
-                const counter = Math.min(this.props.skillHandler
-                    .edgeLevel("Ambidexterity") * 5, -wrongHandPenalty);
-                check += counter;
-                if (counter) {
-                    breakdown.push({
-                        value: counter,
-                        reason: "Counter from Ambidexterity"
-                    })
-                }
+                baseCheck.add(wrongHandPenalty, "Wrong hand penalty")
+
+                const counter = Math.min(
+                    this.props.skillHandler.edgeLevel("Ambidexterity") * 5,
+                    -wrongHandPenalty);
+
+                baseCheck.add(counter, "Counter from Ambidexterity")
             }
         }
 
@@ -215,20 +196,15 @@ class WeaponRow extends React.Component {
             if (act > 2 * roa) {
                 checks.push(null);
             } else {
-                let actionBreakdown = breakdown.slice()
-                let actionCheck = check;
+                const bd = new ValueBreakdown()
 
-                let mod = Math.round(WeaponRow.checkMod(roa, act,
+                bd.addBreakdown(baseCheck)
+
+                const mod = Math.round(WeaponRow.checkMod(roa, act,
                     this.baseCheckBonusForSlowActions,
                     this.extraActionModifier));
 
-                actionCheck += mod
-                if (mod) {
-                    actionBreakdown.push({
-                        value: mod,
-                        reason: "ROA"
-                    })
-                }
+                bd.add(mod, "ROA")
 
                 // TODO: counterPenalty is a bad name, as a bad stat will give actual penalty for actions with these, see AE2K_Weapons_17.xls
                 if (props.counterPenalty) {
@@ -241,16 +217,10 @@ class WeaponRow extends React.Component {
                             counter = Math.min(counter, -mod)
                         }
                     }
-                    if (counter) {
-                        actionCheck += counter
-                        actionBreakdown.push({
-                            value: counter,
-                            reason: `Modifier from ${this.penaltyCounterStat}`
-                        })
-                    }
+
+                    bd.add(counter, `Modifier from ${this.penaltyCounterStat}`)
                 }
-                checks.push({value: actionCheck,
-                             breakdown: actionBreakdown});
+                checks.push(bd)
             }
         }
         return checks;
@@ -430,8 +400,8 @@ class WeaponRow extends React.Component {
             checkCells = checks.map((el, ii) => {
                 let cellContent;
                 if (el) {
-                    cellContent = <StatBreakdown value={el.value}
-                                                 breakdown={el.breakdown}/>
+                    cellContent = <StatBreakdown value={el.value()}
+                                                 breakdown={el.breakdown()}/>
                 } else {
                     cellContent = ""
                 }
@@ -483,8 +453,8 @@ class WeaponRow extends React.Component {
             const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
             baseCheckContainer = <div><label id={"base-check"} style={baseCheckStyle}>Base check</label><span
                 aria-labelledby={"base-check"}><StatBreakdown
-                value={baseCheck.value}
-                breakdown={baseCheck.breakdown}
+                value={baseCheck.value()}
+                breakdown={baseCheck.breakdown()}
                 style={baseCheckStyle}/></span></div>
         }
 
