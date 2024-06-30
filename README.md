@@ -59,11 +59,9 @@ Check `settings.py` for need of changes due to upgrades or configuration changes
 Update outdated python packages `pip list --outdated` 
 
 ```sh
-sudo cp -a ~/aesheet-0.12.0/static .
-sudo ve/bin/pip install -U ~sjl/aesheet-0.11/dist/aesheet-0.11-py3-none-any.whl
-sudo -u www-data bash
-. ./env
-django-admin migrate
+sudo cp -a ~/aesheet-0.11.0/static .
+sudo ve/bin/pip install -U ~sjl/aesheet-0.11.0/aesheet-0.11.0-py3-none-any.whl
+sudo -u www-data bash -c "source ./env && django-admin migrate"
 ```
 
 ```shell
