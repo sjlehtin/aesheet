@@ -179,7 +179,7 @@ class SkillHandler {
             }
 
         }
-        return {'value': penalty, breakdown: breakdown}
+        return {value: penalty, breakdown: breakdown}
     }
 
     static getInitPenaltyFromACPenalty(acPenalty) {
@@ -560,6 +560,10 @@ class SkillHandler {
             this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
             this._baseStats.body =
                 this._baseStats.baseBody + 2 * this.edgeLevel("Toughness");
+
+            this._baseStats.mana = util.roundup(
+                (this._baseStats.psy + this._baseStats.wil)/ 4)
+                + this.props.character.bought_mana;
         }
 
         return this._baseStats;
@@ -637,6 +641,10 @@ class SkillHandler {
 
     getCurrentStamina() {
         return this.getBaseStats().stamina - this.getStaminaDamage()
+    }
+
+    getCurrentMana() {
+        return this.getBaseStats().mana
     }
 
     getEffStats() {
