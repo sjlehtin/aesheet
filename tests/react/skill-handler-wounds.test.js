@@ -7,7 +7,14 @@ var factories = require('./factories');
 const SkillHandler = require('SkillHandler').default;
 
 describe('SkillHandler wounds', function() {
-    "use strict";
+
+    it('returns healthy status without damage', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_ref: 50, cur_int: 50}
+        });
+
+        expect(handler.getStatus()).toEqual(SkillHandler.STATUS_OK);
+    });
 
     it('integrates eff stats with wound AA penalties', function () {
         var handler = factories.skillHandlerFactory({
@@ -25,6 +32,7 @@ describe('SkillHandler wounds', function() {
         });
 
         expect(handler.getWoundPenalties().aa).toEqual(-25);
+        expect(handler.getStatus()).toEqual(SkillHandler.STATUS_CRITICAL)
     });
 
     it('calculates penalties with partially healed torso wounds', function () {
@@ -33,6 +41,7 @@ describe('SkillHandler wounds', function() {
         });
 
         expect(handler.getWoundPenalties().aa).toEqual(-15);
+        expect(handler.getStatus()).toEqual(SkillHandler.STATUS_WOUNDED)
     });
 
     it('calculates penalties with head wound', function () {

@@ -372,6 +372,9 @@ class SkillHandler {
     runningSpeed() {
         var rate = this.getEffStats().mov;
 
+        if (rate <= 0) {
+            return 0;
+        }
         var edgeRate = this.getEdgeModifier('run_multiplier');
         var effRate = this.getEffectModifier('run_multiplier');
         if (edgeRate) {
@@ -580,6 +583,28 @@ class SkillHandler {
         return this._thresholds[givenLoc]
     }
 
+    getStatus() {
+        const woundPenalties = this.getWoundPenalties()
+        const acPenalty = this.getACPenalty().value
+        if (woundPenalties.aa > -10 && acPenalty > -10) {
+            return SkillHandler.STATUS_OK
+        } else if (woundPenalties.aa < -20 || acPenalty < -20) {
+            /*
+             * Pain resistance
+             *
+             * TODO: -20 AC not enough for CRITICAL with this edge
+             * TODO: also the AA calculation should take the edge into account
+             *
+             * Never shocked due to wounding. Not subject to AA penalties
+             * from leg and arm wounds. Automatically continue combat at
+             * zero Stamina (at -20 AC, -2 I).
+             *
+             */
+            return SkillHandler.STATUS_CRITICAL
+        } else {
+            return SkillHandler.STATUS_WOUNDED
+        }
+    }
     getWoundPenalties() {
         if (!this._woundPenalties) {
             this._woundPenalties = {};
@@ -915,5 +940,9 @@ SkillHandler.defaultProps = {
 SkillHandler.BASE_VISION_RANGE = 9;
 SkillHandler.BASE_HEARING_RANGE = 6;
 SkillHandler.BASE_SMELL_RANGE  = 3;
+
+SkillHandler.STATUS_OK = 1
+SkillHandler.STATUS_WOUNDED = 5
+SkillHandler.STATUS_CRITICAL = 9
 
 export default SkillHandler;
