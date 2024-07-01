@@ -139,7 +139,7 @@ describe('StatBlock', function() {
               }),
             rest.get("http://localhost/rest/characters/2/characteredges/", (req, res, ctx) => {
                 return res(ctx.json([factories.characterEdgeFactory(
-                    {edge: {edge: "Fast Healing", level: 3,  notes: "Heal very very fast"}})]))
+                    {edge: {edge: "Fast Healing", level: 3, cost: 5, notes: "Heal very very fast"}})]))
             }),
         )
 
@@ -150,7 +150,7 @@ describe('StatBlock', function() {
 
         expect(screen.queryByLabelText("Body healing").textContent).toEqual("3/2d")
 
-        expect(screen.getByText("Heal very very fast")).toBeInTheDocument()
+        expect(screen.getByText(/Heal very very fast/)).toBeInTheDocument()
     });
 
     it('can indicate mana recovery with high stat and edge', async function () {
