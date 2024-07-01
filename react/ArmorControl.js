@@ -122,7 +122,7 @@ class ArmorControl extends React.Component {
     render() {
         let addControls = '';
         if (this.state.editing) {
-            addControls = <div>
+            addControls = <Row>
                 <Button onClick={() => {this.props.onHelmChange(null)}}
                     disabled={
                             !(this.props.helm ? this.props.helm.id : 0)}>
@@ -143,7 +143,7 @@ class ArmorControl extends React.Component {
                     <a href="/sheets/add_armor_quality/">Create new quality</a>{' '}
                     <a href="/sheets/add_armor_special_quality/">Create new special quality</a>
                 </div>
-            </div>;
+            </Row>;
         }
         const armorStats = calculateArmorStats(this.props.armor, this.props.helm, this.props.miscellaneousItems, this.props.handler)
 
@@ -175,6 +175,8 @@ class ArmorControl extends React.Component {
             editButtonName = "Close edit"
         }
 
+        const editAvailable = !!this.props.onArmorChange
+
         return <div style={this.props.style}>
             <Row>
                 <Col>
@@ -186,14 +188,15 @@ class ArmorControl extends React.Component {
                         <Col aria-label={"Current armor"}>{this.props.armor?.name}</Col>
                     </Row>
                 </Col>
+                { editAvailable ?
                 <Col>
                     <Button onClick={
                         () => this.setState({editing: !this.state.editing})}>{editButtonName}</Button>
                 </Col>
+                    : ""
+                }
             </Row>
-            <Row>
-                {addControls}
-            </Row>
+            {addControls}
             <table>
                 <thead style={headerStyle} key={"thead"}>
                 <tr>{headerCells}</tr>

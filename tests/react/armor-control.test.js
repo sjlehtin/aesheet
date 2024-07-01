@@ -27,7 +27,9 @@ describe('ArmorControl', function() {
         render(<ArmorControl campaign={2} armor={factories.armorFactory()}
                 helm={factories.armorFactory(
                     {name: "Ze Helmet", is_helm: true})}
-                onHelmChange={spy} />)
+                onHelmChange={spy}
+                             onArmorChange={jest.fn().mockResolvedValue({})}
+        />)
 
         expect(screen.getByText(/Ze Helmet/)).toBeInTheDocument()
 
