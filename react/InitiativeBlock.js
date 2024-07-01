@@ -14,9 +14,14 @@ class InitiativeBlock extends React.Component {
 
     initiatives(constant, distances) {
         return distances.map((distance) => {
-            return util.roundup(
-                (-constant * distance) /
-                (this.props.stats.runningSpeed()));
+            const speed = this.props.stats.runningSpeed();
+            if (speed > 0) {
+                return util.roundup(
+                    (-constant * distance) /
+                    speed);
+            } else {
+                return "-";
+            }
         });
     }
 
