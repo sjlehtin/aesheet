@@ -287,12 +287,13 @@ class Character(PrivateMixin, models.Model):
         entry.removed = removed
         entry.save()
 
-    def add_log_entry(self, entry_text, request=None):
+    def add_log_entry(self, entry_text, request=None, sheet=None):
         entry = CharacterLogEntry()
         entry.character = self
         entry.user = request.user if request else None
         entry.entry_type = entry.NON_FIELD
         entry.entry = entry_text
+        entry.sheet = sheet
         entry.save()
 
 
@@ -508,6 +509,13 @@ class Wound(models.Model):
         Character, related_name="wounds", on_delete=models.CASCADE
     )
 
+    # # On initial migration, assign to first sheet of the character.
+    # # If no sheets, create a new sheet for the character.
+    sheet = models.ForeignKey(
+        "Sheet", related_name="wounds", on_delete=models.CASCADE,
+        null=True
+    )
+
     LOCATION_CHOICES = [
         ("H", "Head"),
         ("T", "Torso"),
@@ -586,7 +594,7 @@ class EdgeLevel(ExportedModel, StatModifier):
 class EdgeSkillBonus(ExportedModel):
     """
     Skill bonuses from edges, e.g., +15 to Surgery from Acute Touch, is
-    achieved with adding these.  Get the `id' (an integer value) of an
+    achieved with adding these.  Get the `id` (an integer value) of an
     existing EdgeLevel (like Acute Touch 1) and the skill and assign a
     bonus (or penalty, if negative).
     """
@@ -1572,6 +1580,8 @@ class Sheet(PrivateMixin, models.Model):
 
     last_update_at = models.DateTimeField(auto_now=True, blank=True)
 
+    stamina_damage = models.IntegerField(default=0)
+
     def access_allowed(self, user):
         return self.character.access_allowed(user)
 
@@ -1625,6 +1635,9 @@ class CharacterLogEntry(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, blank=True)
     user = models.ForeignKey(auth.models.User, on_delete=models.CASCADE)
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
+
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE,
+                              blank=True, null=True)
 
     STAT, SKILL, EDGE, NON_FIELD = range(0, 4)
     entry_type = models.PositiveIntegerField(

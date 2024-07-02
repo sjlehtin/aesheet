@@ -1734,15 +1734,20 @@ class EdgeLevelTestCase(TestCase):
         self.assertIn("Night vision", names)
 
 
+# TODO: add test case for logging stamina damage
+# TODO: add sheet log which combines log events from character and filters
+#       based on current sheet
+
 class WoundTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.request_factory = APIRequestFactory()
         self.owner = factories.UserFactory(username="luke")
         self.character = factories.CharacterFactory(owner=self.owner)
+        self.sheet = factories.SheetFactory(owner=self.owner, character=self.character)
         self.assertTrue(
             self.client.login(username="luke", password="foobar"))
-        self.url = '/rest/characters/{}/wounds/'.format(
+        self.url = '/rest/sheets/{}/wounds/'.format(
             self.character.pk)
 
     def test_url(self):
@@ -1752,6 +1757,7 @@ class WoundTestCase(TestCase):
 
     def test_shows_wounds(self):
         factories.WoundFactory(character=self.character,
+                               sheet=self.sheet,
                                effect="Throat slashed")
 
         response = self.client.get(self.url, format='json')
@@ -1767,15 +1773,17 @@ class WoundTestCase(TestCase):
                       'location': "H"},
             format='json')
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(models.Character.objects.get(id=self.character.id)
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id)
                          .wounds.all()[0].damage, 5)
 
         entries = models.CharacterLogEntry.objects.all()
         self.assertEqual(len(entries), 1)
         self.assertIn("was wounded", entries[0].entry)
+        assert entries[0].sheet_id == self.sheet.id
 
     def test_healing_wounds(self):
         wound = factories.WoundFactory(character=self.character,
+                                       sheet=self.sheet,
                                effect="Throat slashed", damage=5)
         response = self.client.patch(
                 "{}{}/".format(self.url, wound.pk),
@@ -1790,6 +1798,7 @@ class WoundTestCase(TestCase):
 
     def test_worsening_wounds(self):
         wound = factories.WoundFactory(character=self.character,
+                                       sheet=self.sheet,
                                effect="Throat slashed", damage=5)
         response = self.client.patch(
                 "{}{}/".format(self.url, wound.pk),
@@ -1804,6 +1813,7 @@ class WoundTestCase(TestCase):
 
     def test_modifying_wounds(self):
         wound = factories.WoundFactory(character=self.character,
+                                       sheet=self.sheet,
                                effect="Throat slashed", damage=5)
         response = self.client.patch(
                 "{}{}/".format(self.url, wound.pk),
@@ -1818,6 +1828,7 @@ class WoundTestCase(TestCase):
 
     def test_deleting_wounds(self):
         wound = factories.WoundFactory(character=self.character,
+                                       sheet=self.sheet,
                                effect="Throat slashed")
         factories.WoundFactory(character=self.character,
                                effect="Throat punctured")

@@ -739,3 +739,90 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                     self.map_location(instance.location)),
                 request=self.request)
             super(WoundViewSet, self).perform_destroy(instance)
+
+class SheetWoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
+    serializer_class = serializers.WoundSerializer
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet = models.Sheet.objects.get(
+                pk=self.kwargs['sheet_pk'])
+        self.containing_object = self.sheet
+        return super(SheetWoundViewSet, self).initialize_request(
+                request, *args, **kwargs)
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(SheetWoundViewSet, self).get_serializer(
+                *args, **kwargs)
+        if isinstance(serializer, serializers.WoundSerializer):
+            serializer.fields['sheet'].default = self.sheet
+            serializer.fields['sheet'].read_only = True
+            serializer.fields['character'].default = self.sheet.character
+            serializer.fields['character'].read_only = True
+
+        return serializer
+
+    def get_queryset(self):
+        return self.sheet.wounds.all()
+
+    def map_location(self, location):
+        map = dict(models.Wound.LOCATION_CHOICES)
+        loc = map.get(location, None)
+        if loc is None:
+            return location
+        return loc
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        with transaction.atomic():
+            old_damage = instance.damage - instance.healed
+
+            new_damage = (
+                serializer.validated_data.get('damage', instance.damage) -
+                serializer.validated_data.get('healed', instance.healed))
+
+            if old_damage > new_damage:
+                self.sheet.character.add_log_entry(
+                    u"{} wound partially healed for {} points.".format(
+                        self.map_location(instance.location),
+                        old_damage - new_damage),
+                    sheet=self.sheet,
+                    request=self.request)
+            elif new_damage > old_damage:
+                self.sheet.character.add_log_entry(
+                    u"{} wound worsened for {} points.".format(
+                        self.map_location(instance.location),
+                        new_damage - old_damage),
+                    sheet=self.sheet,
+                    request=self.request)
+            else:
+                self.sheet.character.add_log_entry(
+                    u"{} wound changed.".format(
+                        self.map_location(instance.location)),
+                    sheet=self.sheet,
+                    request=self.request)
+
+            super(SheetWoundViewSet, self).perform_update(serializer)
+
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            self.sheet.character.add_log_entry(
+                u"{} was wounded to {} for {} points.".format(
+                         self.sheet.character.name,
+                         self.map_location(serializer.validated_data[
+                                           'location']),
+                         serializer.validated_data['damage']),
+                sheet=self.sheet,
+                request=self.request)
+
+            serializer.validated_data['character'] = self.sheet.character
+            serializer.validated_data['sheet'] = self.sheet
+            super(SheetWoundViewSet, self).perform_create(serializer)
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            self.sheet.character.add_log_entry(
+                u"{} wound was healed.".format(
+                    self.map_location(instance.location)),
+                sheet=self.sheet,
+                request=self.request)
+            super(SheetWoundViewSet, self).perform_destroy(instance)

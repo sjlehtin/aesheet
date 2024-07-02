@@ -145,8 +145,8 @@ class SkillHandler {
         let penalty = 0
 
         /* Extra stamina should not give AC bonus. */
-        if (this.props.character.stamina_damage > 0) {
-            penalty = util.rounddown(this.props.character.stamina_damage /
+        if (this.props.staminaDamage > 0) {
+            penalty = util.rounddown(this.props.staminaDamage /
                 this.getBaseStats().stamina * (-20))
             if (penalty > 0) {
                 breakdown.push({
@@ -661,7 +661,7 @@ class SkillHandler {
     }
 
     getStaminaDamage() {
-        return this.props.character.stamina_damage + this.getWoundPenalties().staminaDamage
+        return this.props.staminaDamage + this.getWoundPenalties().staminaDamage
     }
 
     getCurrentStamina() {
@@ -929,6 +929,7 @@ SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
 
 SkillHandler.defaultProps = {
     weightCarried: 0,
+    staminaDamage: 0,
     armor: {},
     helm: {},
     effects: [],

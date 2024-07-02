@@ -39,7 +39,6 @@ const characterFactory = function (statOverrides) {
         "base_mod_imm": 0,
         bought_mana: 0,
         bought_stamina: 0,
-        stamina_damage: 0,
         total_xp: 0,
         free_edges: 0,
         xp_used_ingame: 0,
@@ -807,7 +806,8 @@ const woundFactory = function (overrides) {
         "healed": 0,
         "damage_type": "S",
         "effect": "Grazed.",
-        "character": 2
+        "character": 2,
+        "sheet": 1
     };
 
     return Object.assign(_entryData, overrides);
@@ -817,6 +817,7 @@ const sheetFactory = function (statOverrides) {
     let _sheetData = {
         id: 1,
         character: 2,
+        stamina_damage: 0,
     };
 
     return Object.assign(_sheetData, statOverrides);
@@ -877,14 +878,16 @@ const skillHandlerFactory = function (givenProps) {
     if (givenProps.helm) {
         helm = armorFactory(givenProps.helm);
     }
-    var handlerProps = {
+    const handlerProps = {
         character: characterFactory(
             Object.assign({}, givenProps.character)),
         edges: edgeList,
         effects: effects,
-        characterSkills: skills, allSkills: allSkills,
+        characterSkills: skills,
+        allSkills: allSkills,
         wounds: wounds,
-        armor: armor, helm: helm
+        armor: armor,
+        helm: helm,
     };
     return new SkillHandler(Object.assign({}, givenProps, handlerProps));
 };

@@ -235,15 +235,8 @@ describe('SkillHandler wounds', function() {
 
     it('calculates stamina damage', function () {
         const handler = factories.skillHandlerFactory({
-            character: {cur_fit: 50, stamina_damage: 5},
-        });
-
-        expect(handler.getStaminaDamage()).toEqual(5)
-    });
-
-    it('calculates stamina damage', function () {
-        const handler = factories.skillHandlerFactory({
-            character: {cur_fit: 51, stamina_damage: 5},
+            character: {cur_fit: 51},
+            staminaDamage: 5
         });
 
         expect(handler.getStaminaDamage()).toEqual(5)
@@ -251,7 +244,8 @@ describe('SkillHandler wounds', function() {
 
     it('calculates damage including from massive wounds', function () {
         const handler = factories.skillHandlerFactory({
-            character: {cur_fit: 51, stamina_damage: 5},
+            character: {cur_fit: 51},
+            staminaDamage: 5,
             wounds: [{damage: 10, location: "RA"}]
         });
 
@@ -262,10 +256,11 @@ describe('SkillHandler wounds', function() {
 
     it('calculates damage including from multiple massive wounds', function () {
         const handler = factories.skillHandlerFactory({
-            character: {cur_fit: 80, stamina_damage: 5},
+            character: {cur_fit: 80},
 
             wounds: [{damage: 11, location: "RA"},
-                {damage: 11, location: "LA"}]
+                {damage: 11, location: "LA"}],
+            staminaDamage: 5
         });
 
         expect(handler.getStaminaDamage()).toEqual(15)

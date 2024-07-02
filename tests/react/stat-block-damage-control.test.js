@@ -45,7 +45,7 @@ describe('stat block wounds handling', function() {
 
     it("can load wounds", async () => {
         server.use(
-            rest.get("http://localhost/rest/characters/2/wounds/", (req, res, ctx) => {
+            rest.get("http://localhost/rest/sheets/1/wounds/", (req, res, ctx) => {
                 return res(ctx.json([factories.woundFactory({
                     damage: 2,
                     effect: "Throat punctured"
@@ -68,10 +68,10 @@ describe('stat block wounds handling', function() {
             healed: 0
         });
         server.use(
-            rest.get("http://localhost/rest/characters/2/wounds/", (req, res, ctx) => {
+            rest.get("http://localhost/rest/sheets/1/wounds/", (req, res, ctx) => {
                 return res(ctx.json([wound]))
             }),
-            rest.patch("http://localhost/rest/characters/2/wounds/2/", async (req, res, ctx) => {
+            rest.patch("http://localhost/rest/sheets/1/wounds/2/", async (req, res, ctx) => {
                 return res(ctx.json(Object.assign({}, wound, await req.json())))
             })
 
@@ -92,10 +92,10 @@ describe('stat block wounds handling', function() {
             healed: 0
         });
         server.use(
-            rest.get("http://localhost/rest/characters/2/wounds/", (req, res, ctx) => {
+            rest.get("http://localhost/rest/sheets/1/wounds/", (req, res, ctx) => {
                 return res(ctx.json([wound]))
             }),
-            rest.delete("http://localhost/rest/characters/2/wounds/2/", (req, res, ctx) => {
+            rest.delete("http://localhost/rest/sheets/1/wounds/2/", (req, res, ctx) => {
                 return res(ctx.status(204))
             })
 
@@ -121,7 +121,7 @@ describe('stat block wounds handling', function() {
         }
 
         server.use(
-            rest.post("http://localhost/rest/characters/2/wounds/", async (req, res, ctx) => {
+            rest.post("http://localhost/rest/sheets/1/wounds/", async (req, res, ctx) => {
                 return res(ctx.json(await normalizeWound(req)))
             })
 
@@ -141,4 +141,29 @@ describe('stat block wounds handling', function() {
         await waitFor(() => expect(screen.getByLabelText("Current wound damage").textContent).toEqual("5"))
         expect(screen.getByText("Fuzznozzle")).toBeInTheDocument()
     });
+
+    // TODO: move this an sheet.test.js stamina damage test to same place
+    it("can handle stamina damage", async () => {
+        const user = userEvent.setup()
+
+        server.use(
+            rest.patch("http://localhost/rest/sheets/1/", async (req, res, ctx) => {
+                const json = await req.json();
+                console.log("got json", json)
+                return res(ctx.json(Object.assign({}, json)))
+            })
+
+        )
+
+        render(<StatBlock url="/rest/sheets/1/"/>)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+
+        const damageInput = screen.getByRole("textbox", {name: "Stamina damage"})
+        await user.clear(damageInput)
+        await user.type(damageInput, "20")
+
+        await user.click(screen.getByRole("button", {name: "Change"}))
+
+        await waitFor(() => expect(screen.getByText(/-20 STA/)).toBeInTheDocument())
+    })
 });

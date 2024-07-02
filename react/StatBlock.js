@@ -185,7 +185,7 @@ class StatBlock extends React.Component {
 
     handleWoundChanged(data) {
         let woundId = data.id;
-        return rest.patch(this.state.url + `wounds/${woundId}/`,
+        return rest.patch(this.props.url + `wounds/${woundId}/`,
             data).then((json) => {
             let index = StatBlock.findItemIndex(
                 this.state.woundList, data);
@@ -197,7 +197,7 @@ class StatBlock extends React.Component {
 
     handleWoundRemoved(data) {
         let woundId = data.id;
-        return rest.del(this.state.url + `wounds/${woundId}/`).then(
+        return rest.del(this.props.url + `wounds/${woundId}/`).then(
             (json) => {
             let index = StatBlock.findItemIndex(
                 this.state.woundList, data);
@@ -208,7 +208,7 @@ class StatBlock extends React.Component {
     }
 
     handleWoundAdded(data) {
-        return rest.post(this.state.url + `wounds/`, data).then((json) => {
+        return rest.post(this.props.url + `wounds/`, data).then((json) => {
             this.state.woundList.push(json);
             this.setState({woundList: this.state.woundList});
         }).then((err) => console.log(err));
@@ -310,6 +310,12 @@ class StatBlock extends React.Component {
 
         const sheet = await rest.getData(this.props.url)
 
+        promises.push(rest.getData(this.props.url + 'wounds/').then(
+            (wounds) => {
+                this.handleWoundsLoaded(wounds);
+            }).catch(function (err) {
+                console.log("Failed to load wounds", err)}))
+
         const characterUrl = `/rest/characters/${sheet.character}/`;
 
         this.setState({
@@ -323,12 +329,6 @@ class StatBlock extends React.Component {
                 this.handleEdgesLoaded(characterEdges);
             }).catch(function (err) {
                 console.log("Failed to load edges", err)}))
-
-        promises.push(rest.getData(characterUrl + 'wounds/').then(
-            (wounds) => {
-                this.handleWoundsLoaded(wounds);
-            }).catch(function (err) {
-                console.log("Failed to load wounds", err)}))
 
         const character = await rest.getData(characterUrl)
         const characterSkills = await rest.getData(characterUrl + 'characterskills/')
@@ -469,6 +469,15 @@ class StatBlock extends React.Component {
         }).catch((err) => console.log(err));
     }
 
+    async handleSheetUpdate(field, oldValue, newValue) {
+        let data = this.state.sheet;
+
+        const update = {}
+        update[field] = newValue;
+        const json = await rest.patch(this.props.url, update)
+        data[field] = newValue;
+        this.setState({sheet: data});
+    }
 
     static findItemIndex(itemList, givenItem) {
         for (var ii = 0; ii < itemList.length; ii++) {
@@ -942,7 +951,7 @@ class StatBlock extends React.Component {
 
     getSkillHandler() {
         if (!this.state.char|| !this.state.edgeList || !this.state.armor ||
-            !this.state.helm) {
+            !this.state.helm || !this.state.sheet) {
             return null;
         }
         return new SkillHandler({
@@ -953,6 +962,7 @@ class StatBlock extends React.Component {
             effects: this.getAllEffects(),
             weightCarried: this.getCarriedWeight().value,
             gravity: this.state.gravity,
+            staminaDamage: this.state.sheet.stamina_damage,
             wounds: this.state.woundList,
             armor: this.state.armor,
             helm: this.state.helm
@@ -1433,17 +1443,18 @@ class StatBlock extends React.Component {
     }
 
     renderDamages(skillHandler) {
-        if (!skillHandler) {
+        if (!skillHandler || !this.state.sheet) {
             return <Loading>Damage controls</Loading>;
         }
         return <DamageControl
                 character={skillHandler.props.character}
+                sheet={this.state.sheet}
                 handler={skillHandler}
                 wounds={this.state.woundList}
                 onWoundMod={this.handleWoundChanged.bind(this)}
                 onWoundRemove={this.handleWoundRemoved.bind(this)}
                 onWoundAdd={this.handleWoundAdded.bind(this)}
-                onMod={this.handleCharacterUpdate.bind(this)}
+                onMod={this.handleSheetUpdate.bind(this)}
             />;
     }
 

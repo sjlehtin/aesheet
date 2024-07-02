@@ -414,8 +414,9 @@ describe('SkillHandler stats', function() {
         var handler = factories.skillHandlerFactory({
             character: {
                 cur_ref: 45, cur_wil: 45,
-                bought_stamina: 5, stamina_damage: 15
-            }
+                bought_stamina: 5,
+            },
+            staminaDamage: 15
         });
         expect(handler.getACPenalty().value).toEqual(-10);
     });
@@ -424,8 +425,9 @@ describe('SkillHandler stats', function() {
         var handler = factories.skillHandlerFactory({
             character: {
                 cur_ref: 45, cur_int: 45, cur_psy: 46, cur_wil: 45,
-                bought_stamina: 5, stamina_damage: 15
-            }
+                bought_stamina: 5,
+            },
+            staminaDamage: 15
         });
         expect(Math.round(handler.getInitiative())).toEqual(8);
     });
@@ -442,8 +444,9 @@ describe('SkillHandler stats', function() {
             character: {
                 cur_ref: 45, cur_int: 45,
                 cur_psy: 46, cur_wil: 45,
-                bought_stamina: 5, stamina_damage: 15
+                bought_stamina: 5,
             },
+            staminaDamage: 15,
             skills: [{skill: {name: "Pistol", stat: 'DEX'}, level: 1, }]});
         expect(handler.skillCheck("Pistol").value()).toEqual(40);
     });

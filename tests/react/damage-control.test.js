@@ -19,6 +19,7 @@ describe('DamageControl', function() {
         }
         props.handler = factories.skillHandlerFactory({character: props.character})
         props.character = props.handler.props.character
+        props.sheet = factories.sheetFactory(props.sheet)
         if (props.wounds) {
             props.wounds = props.wounds.map(
                 (props) => { return factories.woundFactory(props); })
@@ -89,8 +90,11 @@ describe('DamageControl', function() {
             await deferred
             console.log(res)
         })
-        renderDamageControl({onMod: spy, character:
-            {cur_ref:40, cur_wil: 40, stamina_damage: 12}})
+        renderDamageControl({
+            onMod: spy,
+            character: {cur_ref:40, cur_wil: 40},
+            sheet: factories.sheetFactory({stamina_damage: 12})
+        })
 
         await user.click(screen.getByRole("button", {name: "Clear"}))
         expect(screen.queryAllByLabelText('Loading')).not.toBeNull()
@@ -106,8 +110,11 @@ describe('DamageControl', function() {
     it("allows clearing stamina damage", async function () {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        renderDamageControl({onMod: spy, character:
-            {cur_ref:40, cur_wil: 40, stamina_damage: 12}})
+        renderDamageControl({
+            onMod: spy,
+            character: {cur_ref:40, cur_wil: 40},
+            sheet: factories.sheetFactory({stamina_damage: 12})
+        })
 
         await user.click(screen.getByRole("button", {name: "Clear"}))
         expect(spy).toHaveBeenCalledWith('stamina_damage', 12, 0);

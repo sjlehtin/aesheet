@@ -1,9 +1,9 @@
 /*
- * Stamina damage is a scalar on the Character, with similar controls
+ * Stamina damage is a scalar on the Sheet, with similar controls
  * as stats.
  *
  * Lethal wounds are separate from each other, so they need to be
- * in many-to-one rel to Character.  A wound's fatality may decrease as it is
+ * in many-to-one rel to Sheet.  A wound's fatality may decrease as it is
  * healed, or increase due to bleeding.  In any case, the original wound
  * does not change due to either.  The current damage or the healed amount
  * changes, but the effect stays the same.
@@ -33,13 +33,14 @@
 /*
  * Further improvements:
  *
- * - separate wounds per hit location
+ * + separate wounds per hit location
  * - show the damages in a "straw man" view
- * - show effects, AA, FIT/REF, MOV penalties
- *
- * FIT/REF damage to RA could affect FULL and PRI, to LA could affect SEC.
+ * + show effects, AA, FIT/REF, MOV penalties
+ * - FIT/REF damage to RA could affect FULL and PRI,
+ *   to LA could affect SEC and FULL.
  *
  */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -57,36 +58,39 @@ class DamageControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentStaminaDamage: this.props.character.stamina_damage,
+            currentStaminaDamage: this.props.sheet.stamina_damage,
             isBusy: false
         };
     }
 
-    handleSubmit(event) {
+    async handleSubmit(event) {
         this.setState({isBusy: true});
-        this.props.onMod('stamina_damage', this.props.character.stamina_damage,
-            parseInt(this.state.currentStaminaDamage)).then(() => this.setState({isBusy: false}));
+        await this.props.onMod('stamina_damage', this.props.sheet.stamina_damage,
+            parseInt(this.state.currentStaminaDamage))
+        this.setState({isBusy: false})
     }
 
     handleChange(event) {
         this.setState({currentStaminaDamage: event.target.value});
     }
 
-    handleClear(event) {
+    async handleClear(event) {
         this.setState({currentStaminaDamage: 0,
             isBusy: true});
-        this.props.onMod('stamina_damage', this.props.character.stamina_damage,
-            0).then(() => this.setState({isBusy: false}));
+        await this.props.onMod('stamina_damage',
+            this.props.sheet.stamina_damage,
+            0)
+        this.setState({isBusy: false});
     }
 
     isValid() {
         return  util.isInt(this.state.currentStaminaDamage);
     }
 
-    handleKeyDown(e) {
+    async handleKeyDown(e) {
         if (e.code === "Enter") {
             /* Enter. */
-            this.handleSubmit();
+            await this.handleSubmit();
             e.stopPropagation()
         }
     }
@@ -193,7 +197,7 @@ class DamageControl extends React.Component {
                     onChange={(e) => this.handleChange(e)}
                     id={"stamina-damage"} isValid={this.isValid()}
                     value={this.state.currentStaminaDamage}
-                    onKeyDown={(e) => this.handleKeyDown(e)}
+                    onKeyDown={async (e) => await this.handleKeyDown(e)}
                     style={inputStyle}
             />
     </Col>
@@ -202,14 +206,14 @@ class DamageControl extends React.Component {
                 style={{marginLeft: "1em"}}
                 size="sm"
                     disabled={!this.isValid() || this.state.isBusy}
-                    onClick={(e) => this.handleSubmit()}>Change{loading}</Button>
+                    onClick={async (e) => await this.handleSubmit()}>Change{loading}</Button>
                         </Col>
                         <Col md={"auto"}>
             <Button style={{marginLeft: ".5em"}}
                     size="sm"
                     disabled={!this.isValid() || this.state.isBusy}
                     id={"clear-stamina-damage"}
-                    onClick={(e) => this.handleClear()}>Clear{loading}</Button>
+                    onClick={async (e) => await this.handleClear()}>Clear{loading}</Button>
                         </Col>
                             </Row>
             <WoundPenaltyBox handler={this.props.handler}/>
