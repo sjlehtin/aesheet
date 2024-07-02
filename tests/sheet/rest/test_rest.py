@@ -1850,3 +1850,45 @@ class WoundTestCase(TestCase):
 
     # TODO: healing and worsening log entries should be coalesced.
     # TODO: type of received damage should be stored.
+
+class StaminaDamageTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory(owner=self.owner)
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheets/{}/'.format(
+            self.sheet.pk)
+
+    def test_add_stamina_damage(self):
+        response = self.client.patch(
+                self.url,
+                data={'stamina_damage': 5},
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).stamina_damage, 5)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("received 5 points of stamina damage", entries[0].entry)
+        assert entries[0].sheet_id == self.sheet.id
+
+    def test_heal_stamina_damage(self):
+        self.sheet.stamina_damage = 10
+        self.sheet.save()
+
+        response = self.client.patch(
+                self.url,
+                data={'stamina_damage': 5},
+            format='json')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(models.Sheet.objects.get(id=self.sheet.id).stamina_damage, 5)
+
+        entries = models.CharacterLogEntry.objects.all()
+        self.assertEqual(len(entries), 1)
+        self.assertIn("healed 5 points of stamina damage", entries[0].entry)
+        assert entries[0].sheet_id == self.sheet.id

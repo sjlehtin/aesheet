@@ -56,6 +56,27 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                                                      'character__campaign',
                                                      ).all()
 
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        with transaction.atomic():
+            if "stamina_damage" in serializer.validated_data:
+                new_value = serializer.validated_data["stamina_damage"]
+                old_value = instance.stamina_damage
+                change = new_value - old_value
+                if change > 0:
+                    instance.character.add_log_entry(
+                        f"{instance.character.name} received {change} "
+                        "points of stamina damage.",
+                        sheet=instance, request=self.request)
+                elif change < 0:
+                    instance.character.add_log_entry(
+                        f"{instance.character.name} was healed {-change} "
+                        "points of stamina damage.",
+                        sheet=instance, request=self.request)
+
+            super(SheetViewSet, self).perform_update(serializer)
+
+
 
 class CharacterViewSet(mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
@@ -739,6 +760,7 @@ class WoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                     self.map_location(instance.location)),
                 request=self.request)
             super(WoundViewSet, self).perform_destroy(instance)
+
 
 class SheetWoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
     serializer_class = serializers.WoundSerializer
