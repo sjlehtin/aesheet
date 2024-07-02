@@ -1,6 +1,7 @@
 import sheet.models
 from sheet.rest import serializers
-from rest_framework import generics, viewsets, mixins, permissions, status
+from rest_framework import generics, viewsets, mixins, permissions
+from rest_framework.decorators import action
 from django.http import Http404
 import sheet.models as models
 from rest_framework.response import Response
@@ -40,6 +41,7 @@ class WeaponAmmunitionList(generics.ListAPIView):
 class SheetViewSet(mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
+                   mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
     queryset = sheet.models.Sheet.objects.all()
     serializer_class = serializers.SheetSerializer
@@ -76,6 +78,13 @@ class SheetViewSet(mixins.RetrieveModelMixin,
 
             super(SheetViewSet, self).perform_update(serializer)
 
+    @action(detail=True, methods=['post'])
+    def clone(self, request, pk=None):
+        # TODO: owner vs user wrt private
+        original = self.get_object()
+        new = original.clone(request=request)
+
+        return Response(self.get_serializer(new).data)
 
 
 class CharacterViewSet(mixins.RetrieveModelMixin,

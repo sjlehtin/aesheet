@@ -614,7 +614,7 @@ class CharacterEdge(PrivateMixin, models.Model):
     edge = models.ForeignKey(EdgeLevel, on_delete=models.CASCADE)
 
     ignore_cost = models.BooleanField(
-        default=False, help_text="Whether edge cost counts " "as used XP"
+        default=False, help_text="Whether edge cost counts as used XP"
     )
 
     def access_allowed(self, user):
@@ -1596,6 +1596,41 @@ class Sheet(PrivateMixin, models.Model):
             name=self.character.name,
             descr=(": %s" % self.description) if self.description else "",
         )
+
+    def clone(self, request=None):
+        original_sheet = self
+        weapons = original_sheet.weapons.all()
+        ranged_weapons = original_sheet.ranged_weapons.all()
+        firearms = SheetFirearm.objects.filter(sheet=original_sheet)
+        miscellaneous_items = original_sheet.miscellaneous_items.all()
+        transient_effects = original_sheet.transient_effects.all()
+
+        new_sheet = original_sheet
+        new_sheet.owner = request.user if request else original_sheet.owner
+        new_sheet.pk = None
+        new_sheet.save()
+
+        for weapon in weapons:
+            new_sheet.weapons.add(weapon)
+
+        for weapon in ranged_weapons:
+            new_sheet.ranged_weapons.add(weapon)
+
+        for firearm in firearms:
+            firearm.pk = None
+            firearm.sheet = new_sheet
+            firearm.save()
+
+        for item in miscellaneous_items:
+            SheetMiscellaneousItem.objects.create(
+                sheet=new_sheet, item=item)
+
+        for effect in transient_effects:
+            SheetTransientEffect.objects.create(
+                sheet=new_sheet,
+                effect=effect)
+
+        return new_sheet
 
     class Meta:
         ordering = ("character__name",)

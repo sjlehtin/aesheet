@@ -45,6 +45,38 @@ class SheetTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+class SheetCloneTestCase(TestCase):
+    def setUp(self):
+        self.request_factory = APIRequestFactory()
+        self.user = factories.UserFactory(username="leia")
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet = factories.SheetFactory(character__owner=self.owner)
+        self.clone_view = views.SheetViewSet.as_view({'post': 'clone'})
+        self.delete_view = views.SheetViewSet.as_view({'delete': 'destroy'})
+
+    def test_clone_sheet(self):
+        req = self.request_factory.post(
+            reverse('sheet-clone',
+                    kwargs={'pk': self.sheet.pk}
+                    ))
+        force_authenticate(req, user=self.user)
+        response = self.clone_view(req,
+                                   pk=self.sheet.id
+                                   )
+        self.assertEqual(response.status_code, 200)
+
+        assert response.data['id'] != self.sheet.id
+        assert response.data['id'] > 1
+        assert response.data['character'] == self.sheet.character.id
+
+    def test_delete_sheet(self):
+        req = self.request_factory.delete(reverse('sheet-detail', kwargs={'pk': self.sheet.pk}))
+        force_authenticate(req, user=self.user)
+        response = self.delete_view(req, pk=self.sheet.id)
+        self.assertEqual(response.status_code, 204)
+        assert not models.Sheet.objects.filter(id=self.sheet.id).exists()
+
+
 class CharacterTestCase(TestCase):
     def setUp(self):
         self.request_factory = APIRequestFactory()
