@@ -33,7 +33,7 @@ export function AddSheetControl({campaign, addSheet}) {
     }
     </Form.Select>
     return <Container>
-        <Col xs={3} className={"m-1"}>
+        <Col>
         <div><a href={"/sheets/add_sheet/"}>Create new sheet</a> <em>(Takes you out of this page)</em></div>
         {rows}
             <Button disabled={!selected} onClick={async () => { if (!!selected) await addSheet(selected)}}>Add</Button>

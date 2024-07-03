@@ -5,7 +5,9 @@ import {AddSheetControl} from "./AddSheetControl";
 import useSwr from 'swr'
 import Loading from "./Loading";
 import * as rest from './sheet-rest'
-
+import RangeControl from "./RangeControl";
+import GravityControl from "./GravityControl";
+import {useState} from 'react';
 
 
 async function handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate){
@@ -46,6 +48,10 @@ async function handleClone(sheetSetId, sheetSetSheet,  sheetSetSheets, sheetsMut
 export function SheetSet({sheetSetId}) {
     let rows = []
 
+    const [range, setRange] = useState('')
+    const [detectionLevel, setDetectionLevel] = useState(0)
+    const [gravity, setGravity] = useState(1.0)
+
     const { data: sheetSet, error: errorSheetSet, isLoading: sheetSetLoading } =
         useSwr(`/rest/sheetsets/${sheetSetId}/`, rest.getData)
 
@@ -67,7 +73,7 @@ export function SheetSet({sheetSetId}) {
                     const url = `/rest/sheets/${sheetSetSheet.sheet.id}/`;
                     console.log("Rendering sheet", sheetSetSheet, url)
                     return <Col key={index}>
-                        <CompactSheet key={index} url={url}>
+                        <CompactSheet key={index} url={url} toRange={range} darknessDetectionLevel={detectionLevel} gravity={gravity}>
                             <div>
                             <Button size="sm" onClick={async () => {
                                 console.log("clone pressed")
@@ -98,12 +104,25 @@ export function SheetSet({sheetSetId}) {
         }</Row>)
     }
     return <Container fluid>
-        <Row>
+        <Row className={"m-1"}>
+            <Col fluid={"true"} xs={3}>
             Add sheets
             <AddSheetControl campaign={sheetSet.campaign} addSheet={async (sheetId) => {
                 console.log("Add called", sheetId)
                 await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
             }}/>
+            </Col>
+            <Col><RangeControl onChange={(newRange) => {
+                    setRange(newRange.range),
+                    setDetectionLevel(newRange.darknessDetectionLevel)
+        }}
+                                  initialRange={range}
+                                  initialDetectionLevel={detectionLevel}
+                    />
+            </Col>
+            <Col>
+                <GravityControl initialValue={gravity} onChange={setGravity} />
+            </Col>
         </Row>
             {rows}
     </Container>

@@ -18,7 +18,7 @@ export function renderSheet(sheetId, target) {
 
 export function renderCompactSheet(sheetId, target) {
     const root = createRoot(target)
-    root.render(<CompactSheet url={`/rest/sheets/${sheetId}/`}/>);
+    root.render(<CompactSheet gravity={1.0} toRange={''} url={`/rest/sheets/${sheetId}/`}/>);
 }
 
 export function renderSheetSet(sheetSetId, target) {

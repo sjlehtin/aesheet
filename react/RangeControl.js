@@ -49,21 +49,27 @@ class RangeControl extends React.Component {
 
     render() {
         let visionCheck = '';
-        if (util.isFloat(this.state.currentRange)) {
-            const check = this.props.skillHandler.nightVisionCheck(this.state.currentRange,
-                this.state.currentDetectionLevel);
+        if (this.props.skillHandler) {
+            if (util.isFloat(this.state.currentRange)) {
+                const check = this.props.skillHandler.nightVisionCheck(this.state.currentRange,
+                    this.state.currentDetectionLevel);
 
-            let style = {};
-            let verbose = '';
-            if (check < 75) {
-                style.color = 'hotpink';
-                verbose = `Ranged penalty: ${75 - check}`;
-            } else if (check >= 100) {
-                style.fontWeight = 'bold';
-                verbose = "Bumping enabled";
+                let style = {};
+                let verbose = '';
+                if (check < 75) {
+                    style.color = 'hotpink';
+                    verbose = `Ranged penalty: ${75 - check}`;
+                } else if (check >= 100) {
+                    style.fontWeight = 'bold';
+                    verbose = "Bumping enabled";
+                }
+                visionCheck =
+                    <div><span>Vision check:</span><span style={style}
+                                                         aria-label={"Vision check"}>{check}</span>
+                        <span className={"ml-2"} style={{fontStyle: "italic"}}
+                              aria-label={"Vision check detail"}>{verbose}</span>
+                    </div>;
             }
-            visionCheck = <div><span>Vision check:</span><span style={style} aria-label={"Vision check"}>{check}</span>
-                <span className={"ml-2"} style={{fontStyle: "italic"}} aria-label={"Vision check detail"}>{verbose}</span></div>;
         }
         return <div>
             <Form.Group aas={Row}>
@@ -81,7 +87,7 @@ class RangeControl extends React.Component {
             />
                 </Col>
                 <Col>
-            <Form.Label column sm={"2"}>Darkness DL</Form.Label>
+            <Form.Label column sm={"3"}>Darkness DL</Form.Label>
                 <DropdownList data={RangeControl.detectionLevels}
                               aria-label={"Darkness DL"}
                           textField={item => `${item.description} (${item.detectionLevel})`}
@@ -102,7 +108,7 @@ class RangeControl extends React.Component {
 
 RangeControl.propTypes = {
     onChange: PropTypes.func,
-    skillHandler: PropTypes.object.isRequired,
+    skillHandler: PropTypes.object,
     initialRange: PropTypes.oneOfType([
         PropTypes.string,  PropTypes.number ]),
     initialDetectionLevel: PropTypes.number

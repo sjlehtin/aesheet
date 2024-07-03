@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import {Button, Modal} from 'react-bootstrap';
 import StatRow from './StatRow';
 import StatBreakdown from "./StatBreakdown";
 import NoteBlock from './NoteBlock';
@@ -48,6 +49,8 @@ class CompactSheet extends React.Component {
 
             armor: undefined,
             helm: undefined,
+
+            showDamages: false,
 
             woundList: [],
 
@@ -159,7 +162,7 @@ class CompactSheet extends React.Component {
 
     handleWoundChanged(data) {
         let woundId = data.id;
-        return rest.patch(this.state.url + `wounds/${woundId}/`,
+        return rest.patch(this.props.url + `wounds/${woundId}/`,
             data).then((json) => {
             let index = CompactSheet.findItemIndex(
                 this.state.woundList, data);
@@ -171,7 +174,7 @@ class CompactSheet extends React.Component {
 
     handleWoundRemoved(data) {
         let woundId = data.id;
-        return rest.del(this.state.url + `wounds/${woundId}/`).then(
+        return rest.del(this.props.url + `wounds/${woundId}/`).then(
             (json) => {
             let index = CompactSheet.findItemIndex(
                 this.state.woundList, data);
@@ -182,7 +185,7 @@ class CompactSheet extends React.Component {
     }
 
     handleWoundAdded(data) {
-        return rest.post(this.state.url + `wounds/`, data).then((json) => {
+        return rest.post(this.props.url + `wounds/`, data).then((json) => {
             this.state.woundList.push(json);
             this.setState({woundList: this.state.woundList});
         }).then((err) => console.log(err));
@@ -375,6 +378,16 @@ class CompactSheet extends React.Component {
             data[field] = newValue;
             this.setState({char: data});
         }).catch((err) => console.log(err));
+    }
+
+    async handleSheetUpdate(field, oldValue, newValue) {
+        let data = this.state.sheet;
+
+        const update = {}
+        update[field] = newValue;
+        const json = await rest.patch(this.props.url, update)
+        data[field] = newValue;
+        this.setState({sheet: data});
     }
 
 
@@ -668,7 +681,9 @@ class CompactSheet extends React.Component {
         if (!skillHandler) {
             return <Loading>Advancing initiatives</Loading>;
         }
-        return <InitiativeBlock className="m-1" style={{fontSize: "80%"}}
+        return <InitiativeBlock className="m-1"
+                                style={{fontSize: "80%"}}
+                                distance={this.props.toRange}
                                 stats={skillHandler} />;
     }
 
@@ -684,7 +699,8 @@ class CompactSheet extends React.Component {
             edges: this.state.edgeList,
             effects: this.getAllEffects(),
             weightCarried: this.getCarriedWeight().value,
-            gravity: this.state.gravity,
+            staminaDamage: this.state.sheet.stamina_damage,
+            gravity: this.props.gravity,
             wounds: this.state.woundList,
             armor: this.state.armor,
             helm: this.state.helm
@@ -831,7 +847,7 @@ class CompactSheet extends React.Component {
             )
         }
 
-        const extraFromGravity = weight * (this.state.gravity - 1.0)
+        const extraFromGravity = weight * (this.props.gravity - 1.0)
         if (extraFromGravity) {
             weight += extraFromGravity
             breakdown.push(
@@ -873,8 +889,8 @@ class CompactSheet extends React.Component {
                 onMagazineChange={async (mag) => await this.handleMagazineChanged(fa, mag)}
                 campaign={this.state.char.campaign}
                 style={Object.assign({}, baseStyle, {backgroundColor: bgColor})}
-                toRange={this.state.firearmRange}
-                darknessDetectionLevel={this.state.firearmDarknessDetectionLevel}
+                toRange={this.props.toRange}
+                darknessDetectionLevel={this.props.darknessDetectionLevel}
             />);
         }
 
@@ -933,7 +949,7 @@ class CompactSheet extends React.Component {
                 skillHandler={skillHandler}
                 onRemove={(wpn) => this.handleRangedWeaponRemoved(wpn) }
                 style={{fontSize: "80%", backgroundColor: bgColor}}
-                gravity={this.state.gravity}
+                gravity={this.props.gravity}
             />);
         }
 
@@ -963,12 +979,13 @@ class CompactSheet extends React.Component {
         }
         return <DamageControl
                 character={skillHandler.props.character}
+                sheet={this.state.sheet}
                 handler={skillHandler}
                 wounds={this.state.woundList}
                 onWoundMod={this.handleWoundChanged.bind(this)}
                 onWoundRemove={this.handleWoundRemoved.bind(this)}
                 onWoundAdd={this.handleWoundAdded.bind(this)}
-                onMod={this.handleCharacterUpdate.bind(this)}
+                onMod={this.handleSheetUpdate.bind(this)}
             />;
     }
 
@@ -1000,14 +1017,34 @@ class CompactSheet extends React.Component {
 
         const statusClass = skillHandler ? `${statusMap.get(skillHandler.getStatus())}` : "";
 
+        const title = this.state.char ? `${this.state.char.name} ${this.state.char.total_xp} XP` : ''
+
         return (
             <>
+                      <Modal size="lg" show={this.state.showDamages} onHide={() => {this.setState(
+                          {showDamages: false}
+                      )}}>
+        <Modal.Header closeButton>
+          <Modal.Title>{title} damages</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{this.renderDamages(skillHandler)}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {this.setState(
+                          {showDamages: false}
+                      )}}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
             <Card className={`m-0 ${statusClass}`}>
                 <Card.Header>
                     <Row fluid={"true"}>
                         <Col xs={5}>
-                    <h4>{this.state.char ? `${this.state.char.name} ${this.state.char.total_xp} XP` : <Loading>Character</Loading>}{' '}{this.state.sheet?.description} {`(id: ${this.state.sheet?.id})`}</h4>
+                    <h4>{title ? title : <Loading>Character</Loading>}{' '}{this.state.sheet?.description} {`(id: ${this.state.sheet?.id})`}</h4>
                         </Col>
+                        <Col xs={2}><Button size={"sm"} onClick={() => {this.setState(
+                          {showDamages: true}
+                      )}}>Damage</Button></Col>
                         <Col fluid={"true"} className="d-flex justify-content-end">
                             {this.props.children}
                         </Col>
@@ -1035,7 +1072,7 @@ class CompactSheet extends React.Component {
                         <Col>
                             <Row>
                                 <Col>
-                            {this.renderArmor(skillHandler)}
+                                 {this.renderArmor(skillHandler)}
                                     </Col>
                                 </Row>
                             <Row>
@@ -1071,6 +1108,9 @@ class CompactSheet extends React.Component {
 
 CompactSheet.propTypes = {
     url: PropTypes.string.isRequired,
+    toRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    darknessDetectionLevel: PropTypes.number.isRequired,
+    gravity: PropTypes.number.isRequired,
     onCharacterSkillAdd: PropTypes.func,
     onCharacterSkillRemove: PropTypes.func,
     onCharacterSkillModify: PropTypes.func
