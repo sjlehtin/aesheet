@@ -1040,7 +1040,7 @@ class CompactSheet extends React.Component {
                 <Card.Header>
                     <Row fluid={"true"}>
                         <Col xs={5}>
-                    <h4>{title ? title : <Loading>Character</Loading>}{' '}{this.state.sheet?.description} {`(id: ${this.state.sheet?.id})`}</h4>
+                    <h4>{title ? <a href={`/sheets/${this.state.sheet.id}/`}>{title}</a> : <Loading>Character</Loading>}{' '}{this.state.sheet?.description} {`(id: ${this.state.sheet?.id})`}</h4>
                         </Col>
                         <Col xs={2}><Button size={"sm"} onClick={() => {this.setState(
                           {showDamages: true}

@@ -1520,6 +1520,14 @@ class StatBlock extends React.Component {
             rangeControl = <Loading>Range control</Loading>
         }
 
+        const statusMap = new Map([
+            [SkillHandler.STATUS_OK, "bg-success-subtle"],
+            [SkillHandler.STATUS_WOUNDED, "bg-warning-subtle"],
+            [SkillHandler.STATUS_CRITICAL, "bg-danger-subtle"]
+        ])
+
+        const statusClass = skillHandler ? `${statusMap.get(skillHandler.getStatus())}` : "";
+
         return (
             <>
             <SideDrawer >
@@ -1530,7 +1538,7 @@ class StatBlock extends React.Component {
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
                 </Row>
             </SideDrawer>
-            <Container fluid={true}>
+            <Container fluid={true} className={`m-0 ${statusClass}`}>
                 {this.renderHeader()}
                 <Row>
                 <Col md={8} >
