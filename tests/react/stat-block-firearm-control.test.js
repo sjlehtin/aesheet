@@ -293,11 +293,11 @@ describe('StatBlock -- FirearmControl', () => {
 
     it('allows changing a clip in a firearm', async () => {
         const user = userEvent.setup()
-        let mag =                 factories.magazineFactory({
-                    id: 42,
-                    capacity: 20,
-                    current: 15
-                })
+        let mag = factories.magazineFactory({
+            id: 42,
+            capacity: 20,
+            current: 15
+        })
 
         const firearm = factories.firearmFactory({
             id: 1,

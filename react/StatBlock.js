@@ -480,8 +480,8 @@ class StatBlock extends React.Component {
     }
 
     static findItemIndex(itemList, givenItem) {
-        for (var ii = 0; ii < itemList.length; ii++) {
-            var item = itemList[ii];
+        for (let ii = 0; ii < itemList.length; ii++) {
+            const item = itemList[ii];
             if (item.id === givenItem.id) {
                 return ii;
             }
