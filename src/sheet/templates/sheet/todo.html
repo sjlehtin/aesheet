@@ -31,9 +31,12 @@
         - at least render base skill checks
     - fix issue in skill list rendering with skills that are specializations
         of "standard" skills
-    - make the range control affect the advancing initiatives
-        - sense table could highlight
     - check breakdown for sweep fire
+    - double range penalties for sweep fire missing in range view
+    - allow adding number of targets in combat transients, to calculate penalties accurately
+        - 5 per additional target in same arc, -10 per additional in different arc
+        - -10 per additional opponent in close combat
+    - pass combat transients down, to allow adding things like num opponents easily
     - range control for ranged weapons
     - check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
         - at least in normal daylight, acute vision does not work (probably because night vision check always used)
@@ -44,6 +47,9 @@
     - "add xp used ingame" with a possibility to enter description (to log)
     -- if a log entry is added, entry should not be coalesced.
     - "add xp" with an optional log entry, allowing for in-game notes.
+
+    - make the range control affect the advancing initiatives
+        - sense table could highlight
 
     - range, light level, conditions, turns of combat to specific combat overlay to access it quickly while perusing the rest of the sheet.
         + gravity control
@@ -101,15 +107,19 @@
         - MVP: just combine multiple sheets to same view with selected weapon
             - allow showing movement and selecting between weapons (firearm,
               ranged, cc) to render the weapon
-            - reorganize sheets to allow changing visualization of combat
-              formation
-
+        - allow very easy duplication, maintain some reference on how many
+          sheets there are for the character, warn if removing last sheet
+        - reorganize sheets to allow changing visualization of combat
+          formation
+        - SheetSet - multiple sheets with order and grid position
+          - tied to user accounts and private by default
+          - add, create, destroy from the view
+          - sheet operations as normal
     - telescopic sight x16 xxxxl extreme range options
     - language skills to a separate section in the skills
     - make "standard skills" stand out a bit in the selection
     -- allow "upgrading skill" (which will add the corresponding skill)
     + apply instinctive fire on low ranges
-    - double range penalties for sweep fire missing in range view
     - UI: touch devices "missing skills" not showing up, can't see the reason for the missing skill indicator
 
     + fix toughness (now 1 pt per level, should be 2)
