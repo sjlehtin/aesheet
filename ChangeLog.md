@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+### Changed
+
+* Moved wounds and stamina damage to Sheet. This allows Sheet to be used as part of a set of sheets without adding another indirection.
+
+### Added
+
+* Added check breakdowns for the skill checks in burst and sweep fire for firearms.
+* Fixed erroneous positive advancing initiatives in case character MOV dropped to zero or below.
+* Added sheet sets for managing multiple sheets (characters) in a single page.
+
 ### Fixed
 
 * Fixed an obvious bug in armor dr calculation when calculating with qualities.
