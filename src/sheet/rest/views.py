@@ -43,7 +43,7 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
                    mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
-    queryset = sheet.models.Sheet.objects.all()
+    queryset = sheet.models.Sheet.objects.select_related('character__campaign_id').all()
     serializer_class = serializers.SheetSerializer
     permission_classes = [permissions.IsAuthenticated, IsAccessible]
 
@@ -85,6 +85,17 @@ class SheetViewSet(mixins.RetrieveModelMixin,
         new = original.clone(request=request)
 
         return Response(self.get_serializer(new).data)
+
+
+class SheetSetViewSet(mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.ListModelMixin,
+                   mixins.DestroyModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = sheet.models.SheetSet.objects.all()
+    serializer_class = serializers.SheetSetSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAccessible]
+
 
 
 class CharacterViewSet(mixins.RetrieveModelMixin,
@@ -857,3 +868,47 @@ class SheetWoundViewSet(ListPermissionMixin, viewsets.ModelViewSet):
                 sheet=self.sheet,
                 request=self.request)
             super(SheetWoundViewSet, self).perform_destroy(instance)
+
+
+class SheetSetSheetViewSetMixin(ListPermissionMixin):
+    # TODO: until all sheet* objects are handled through intermediate
+    # objects, we can't use IsAccessible here.  The implicit tables do not
+    # allow for object permissions.
+    permission_classes = [permissions.IsAuthenticated]
+
+    def initialize_request(self, request, *args, **kwargs):
+        self.sheet_set = models.SheetSet.objects.get(
+                pk=self.kwargs['sheet_set_pk'])
+        self.containing_object = self.sheet_set
+        return super(SheetSetSheetViewSetMixin, self).initialize_request(
+                request, *args, **kwargs)
+
+
+class SheetSetSheetViewSet(SheetSetSheetViewSetMixin, viewsets.ModelViewSet):
+    # TODO: an individual sheet should be in the sheet set only once.
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == "partial_update":
+            # When creating new, we do not want the full nested
+            # representation, just id's.
+            return serializers.SheetSetSheetCreateSerializer
+        else:
+            return serializers.SheetSetSheetListSerializer
+
+    def get_queryset(self):
+        return models.SheetSetSheet.objects.filter(sheet_set=self.sheet_set)
+        # self.sheet.firearms.all()
+
+    def get_serializer(self, *args, **kwargs):
+        serializer = super(SheetSetSheetViewSet, self).get_serializer(
+                *args, **kwargs)
+        if self.action == 'create' or self.action == "partial_update":
+            # ListSerializer does not have the fields.
+            serializer.fields['sheet_set'].default = self.sheet_set
+            serializer.fields['sheet_set'].read_only = True
+
+        return serializer
+
+    def perform_create(self, serializer):
+        serializer.validated_data['sheet_set'] = self.sheet_set
+        super(SheetSetSheetViewSet, self).perform_create(
+            serializer)

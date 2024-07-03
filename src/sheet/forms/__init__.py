@@ -62,6 +62,12 @@ class AddSheetForm(SetOwnerMixin, EditSheetForm):
     pass
 
 
+class AddSheetSetForm(SetOwnerMixin, RequestForm):
+    class Meta:
+        model = sheet.models.SheetSet
+        exclude = ('owner', 'sheets')
+
+
 class AddArmorForm(RequestForm):
     item_class = sheet.models.Armor
     item_queryset = sheet.models.Armor.objects.filter(base__is_helm=False)

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %} Sheet set {{ sheetset.name }} {% endblock %}
+
+{% block content %}
+
+    <div id="stat-block-container">Loading...</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static "react/bundle.js" %}">
+</script>
+<script type="application/javascript">
+    var sheetSetId = {{ sheet_set.pk }};
+    SheetApp.renderSheetSet(sheetSetId, document.getElementById('stat-block-container'));
+</script>
+
+{% endblock %}

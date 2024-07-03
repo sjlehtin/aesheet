@@ -141,6 +141,11 @@ router.register(r'sheets/(?P<sheet_pk>[0-9]+)/inventory',
                 views.InventoryEntryViewSet,
                 basename='sheet-inventory-item')
 
+router.register(r'sheetsets', views.SheetSetViewSet)
+router.register(r'sheetsets/(?P<sheet_set_pk>[0-9]+)/sheetsetsheets',
+                views.SheetSetSheetViewSet,
+                basename='sheetset-sheet')
+
 urlpatterns = router.urls + [
     re_path(r'^ammunition/firearm/(?P<firearm>.+)/$',
             views.WeaponAmmunitionList.as_view()),

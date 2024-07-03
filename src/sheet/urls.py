@@ -33,9 +33,16 @@ urlpatterns = [
          sheet.views.EditSheetView.as_view(),
          name='edit_sheet'),
 
+    path('sheetsets/add_sheetset/', sheet.views.AddSheetSetView.as_view(),
+         name="add_sheet_set"),
+    path('sheetsets/<int:sheet_set_id>/', sheet.views.sheet_set_detail,
+         name='sheet_set_detail', kwargs={'template_name': 'sheet/sheet_set_detail.html'}),
+
     # Specific sheets for the characters.
     path('sheets/', sheet.views.sheets_index, name='sheets_index'),
     path('sheets/<int:sheet_id>/', sheet.views.sheet_detail, name='sheet_detail'),
+    path('sheets/<int:sheet_id>/compact/', sheet.views.sheet_detail,
+         name='sheet_compact', kwargs={'template_name': 'sheet/sheet_compact.html'}),
 
     path('sheets/copy/<int:sheet_id>',
          sheet.views.CopySheetView.as_view(), name='copy_sheet'),

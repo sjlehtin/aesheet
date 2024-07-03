@@ -36,4 +36,28 @@
     <p>No sheets.</p>
 {% endif %}
 
+<h2>Sheet sets</h2>
+
+    <p>Sheet sets combine multiple sheets into a single view, allowing
+    quick visibility into the combat actions available as well as damage of
+    the combatants.
+    </p>
+    <p>
+    Mostly useful for GM work, but helps also players managing multiple NPCs.
+    Sheet sets are user specific.
+    </p>
+
+    <p>
+        <a href="{% url "add_sheet_set" %}">Add a new sheet set</a>
+    </p>
+    {% if sheet_sets %}
+        <ul>
+{% for sheet_set in sheet_sets %}
+                <li><a href="{% url "sheet_set_detail" sheet_set.id %}">{{ sheet_set }}</a>
+                </li>
+    {% endfor %}
+        </ul>
+{% else %}
+    <p>You do not currently have sheet sets.</p>
+{% endif %}
 {% endblock %}

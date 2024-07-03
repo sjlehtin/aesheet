@@ -1,6 +1,6 @@
 {
   "name": "aesheet",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Client-side presentation and manipulation of the server-side sheet data.",
   "main": "react/main.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "react-widgets": "^5.8.4",
     "sass": "^1.57.1",
     "sass-loader": "^13.2.0",
+    "swr": "^2.2.5",
     "universal-cookie": "^4.0.2",
     "whatwg-fetch": "^3.0.0"
   },

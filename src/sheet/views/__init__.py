@@ -22,10 +22,12 @@ def characters_index(request):
 
 def sheets_index(request):
     return render(request, 'sheet/sheets_index.html',
-                  {'campaigns': Sheet.get_by_campaign(request.user)})
+                  {'campaigns': Sheet.get_by_campaign(request.user),
+                   'sheet_sets': SheetSet.objects.filter(owner=request.user)
+                   })
 
 
-def sheet_detail(request, sheet_id=None):
+def sheet_detail(request, sheet_id=None, template_name='sheet/sheet_detail.html'):
     sheet = get_object_or_404(Sheet.objects.prefetch_related(
         'character__characterlogentry_set__skill',
     ),
@@ -33,8 +35,16 @@ def sheet_detail(request, sheet_id=None):
     if not sheet.character.access_allowed(request.user):
         raise PermissionDenied
 
-    c = {'sheet': sheet }
-    return render(request, 'sheet/sheet_detail.html', c)
+    c = {'sheet': sheet
+         }
+    return render(request, template_name, c)
+
+
+def sheet_set_detail(request, sheet_set_id=None, template_name='sheet/sheet_set_detail.html'):
+    sheet_set = get_object_or_404(SheetSet.objects.all(), pk=sheet_set_id)
+    c = {'sheet_set': sheet_set,
+         }
+    return render(request, template_name, c)
 
 
 class FormSaveMixin(object):
@@ -176,6 +186,16 @@ class AddSheetView(BaseCreateView):
 
     def get_success_url(self):
         return reverse('sheet_detail', args=(self.object.pk, ))
+
+
+class AddSheetSetView(BaseCreateView):
+    model = Sheet
+    form_class = AddSheetSetForm
+    template_name = 'sheet/gen_edit.html'
+    success_message = "SheetSet added successfully."
+
+    def get_success_url(self):
+        return reverse('sheet_set_detail', args=(self.object.pk, ))
 
 
 class AddEdgeLevelView(AddTransientEffectView):

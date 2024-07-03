@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %} Compact {{ sheet.character.name }}'s sheet {% endblock %}
+
+{% block content %}
+
+    <div id="stat-block-container">Loading...</div>
+
+{% endblock %}
+
+{# TODO: https://webpack.js.org/concepts/entry-points/ multiple entry points #}
+{% block script %}
+<script src="{% static "react/bundle.js" %}">
+</script>
+<script type="application/javascript">
+    const sheetId = {{ sheet.pk }};
+    const sheets = [{{ sheet_ids|escapeseq|join:", " }}];
+    if (sheets.length > 0) {
+        SheetApp.renderSheetSet(sheets, document.getElementById('stat-block-container'))
+    } else {
+        SheetApp.renderCompactSheet(sheetId, document.getElementById('stat-block-container'));
+    }
+</script>
+
+{% endblock %}

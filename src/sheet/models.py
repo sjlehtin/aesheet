@@ -1751,6 +1751,36 @@ class CharacterLogEntry(models.Model):
         return self.character.access_allowed(user)
 
 
+class SheetSet(PrivateMixin, models.Model):
+    owner = models.ForeignKey(
+        auth.models.User, related_name="sheetsets", on_delete=models.CASCADE
+    )
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+
+    sheets = models.ManyToManyField(
+        Sheet, through="SheetSetSheet", blank=True
+    )
+
+    # gravity = models.DecimalField(default=1.0)
+    # turns played
+    def access_allowed(self, user):
+        return True
+
+    def __str__(self):
+        return f"{self.name} ({self.campaign})"
+
+class SheetSetSheet(PrivateMixin, models.Model):
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
+    sheet_set = models.ForeignKey(SheetSet, on_delete=models.CASCADE)
+
+    order = models.PositiveIntegerField(default=0)
+    # order / grid location
+    # folded
+
+
 def _collect_exportable_classes(start_model):
     """
     Collect all models inheriting from, e.g., ExportedModel, which have not

@@ -18,10 +18,36 @@ class AmmunitionSerializer(serializers.ModelSerializer):
 
 class SheetSerializer(serializers.ModelSerializer):
     owner = serializers.CharField(source='owner.username', read_only=True)
+    campaign = serializers.IntegerField(source='character.campaign_id', read_only=True)
+    character_name = serializers.CharField(source='character.name', read_only=True)
+    character_total_xp = serializers.CharField(source='character.total_xp', read_only=True)
 
     class Meta:
         model = sheet.models.Sheet
         fields = "__all__"
+
+
+class SheetSetSerializer(serializers.ModelSerializer):
+    owner = serializers.CharField(source='owner.username', read_only=True)
+
+    class Meta:
+        model = sheet.models.SheetSet
+        fields = "__all__"
+
+
+class SheetSetSheetCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.SheetSetSheet
+        fields = "__all__"
+
+
+class SheetSetSheetListSerializer(serializers.ModelSerializer):
+    sheet_id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = sheet.models.SheetSetSheet
+        exclude = ('sheet_set', )
+        depth = 1
 
 
 class EdgeSerializer(serializers.ModelSerializer):
