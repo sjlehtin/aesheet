@@ -511,11 +511,7 @@ class SkillHandler {
 
     getEdgeModifier(mod) {
         // Return the sum of modifiers from edges for modifier `mod`.
-        var edges = [];
-        if (this.props.edges) {
-            edges = this.props.edges;
-        }
-        return this.getEffectModifier(mod, edges);
+        return this.getEffectModifier(mod, this.props.edges ?? []);
     }
 
     getEffectModifier(mod, effects) {
@@ -526,7 +522,7 @@ class SkillHandler {
                 effects = [];
             }
         }
-        var sum = 0;
+        let sum = 0;
         for (let eff of effects) {
             sum += parseFloat(eff[mod]);
         }
@@ -586,9 +582,10 @@ class SkillHandler {
     getStatus() {
         const woundPenalties = this.getWoundPenalties()
         const acPenalty = this.getACPenalty().value
+        const painResistance = this.getEdgeModifier("pain_resistance") > 0
         if (woundPenalties.aa > -10 && acPenalty > -10) {
             return SkillHandler.STATUS_OK
-        } else if (woundPenalties.aa < -20 || acPenalty < -20) {
+        } else if (woundPenalties.aa < -20 || (!painResistance && acPenalty <= -20)) {
             /*
              * Pain resistance
              *
@@ -607,6 +604,7 @@ class SkillHandler {
     }
     getWoundPenalties() {
         if (!this._woundPenalties) {
+            // TODO: Use ValueBreakdown
             this._woundPenalties = {};
 
             this._woundPenalties.bodyDamage = 0
@@ -641,11 +639,12 @@ class SkillHandler {
             const maxAAPenaltyPerLoc = {H: -120, T: -100, RA: -10, LA: -10, RL: -10, LL: -10}
             this._woundPenalties.aa = Math.max(-10 * locationDamages.H, maxAAPenaltyPerLoc.H);
             this._woundPenalties.aa += Math.max(-5 * locationDamages.T, maxAAPenaltyPerLoc.T);
-            for (let loc of ["RA", "LA", "RL", "LL"]) {
-                this._woundPenalties.aa +=
-                    Math.max(util.rounddown(locationDamages[loc] / 3) * -5, maxAAPenaltyPerLoc[loc]);
+            if (this.getEdgeModifier('pain_resistance') <= 0) {
+                for (let loc of ["RA", "LA", "RL", "LL"]) {
+                    this._woundPenalties.aa +=
+                        Math.max(util.rounddown(locationDamages[loc] / 3) * -5, maxAAPenaltyPerLoc[loc]);
+                }
             }
-
             this._woundPenalties.mov = Math.max(-10 * locationDamages.RL, -75);
             this._woundPenalties.mov += Math.max(-10 * locationDamages.LL, -75);
 

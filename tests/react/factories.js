@@ -160,6 +160,7 @@ const edgeLevelFactory = function (overrideFields) {
     "fly_multiplier": "0.00",
     "armor_l": "0.00",
     "armor_dr": "0.00",
+    "pain_resistance": 0,
     "vision": 0,
     "hear": 0,
     "smell": 0,

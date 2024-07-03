@@ -210,6 +210,11 @@ describe('SkillHandler stats', function() {
         expect(handler.getEdgeModifier('swim_multiplier')).toEqual(0);
     });
 
+    it('is defensive about server data for edge modifiers', function () {
+        const handler = factories.skillHandlerFactory();
+        expect(handler.getEdgeModifier('foo_multiplier') <= 0).toEqual(true);
+    });
+
     it('can calculate modifiers from effects', function (){
         var handler = factories.skillHandlerFactory({character: {
             cur_fit: 40, cur_int: 50, cur_ref: 50, cur_wil: 50},

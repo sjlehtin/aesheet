@@ -16,6 +16,15 @@ describe('SkillHandler wounds', function() {
         expect(handler.getStatus()).toEqual(SkillHandler.STATUS_OK);
     });
 
+    it('returns disabled status when stamina is negative', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_ref: 50, cur_wil: 50},
+            staminaDamage: 25
+        });
+        expect(handler.getACPenalty().value).toBeLessThanOrEqual(-20)
+        expect(handler.getStatus()).toEqual(SkillHandler.STATUS_CRITICAL);
+    });
+
     it('integrates eff stats with wound AA penalties', function () {
         var handler = factories.skillHandlerFactory({
             character: {cur_ref: 50, cur_int: 50},
@@ -112,7 +121,7 @@ describe('SkillHandler wounds', function() {
         expect(handler.getWoundPenalties().aa).toEqual(-10);
     });
 
-    it('calculates MOV penalties from multiple wounds taking toughness into' +
+    it('calculates AA penalty from multiple wounds taking toughness into' +
         ' account', function () {
         // The Atlas example of the rules.
         var handler = factories.skillHandlerFactory({
@@ -265,6 +274,23 @@ describe('SkillHandler wounds', function() {
 
         expect(handler.getStaminaDamage()).toEqual(15)
         expect(handler.getCurrentBody()).toEqual(8)
+        expect(handler.getWoundPenalties().aa).toEqual(-20)
+    });
+
+    it('takes pain resistance edge in account', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {cur_fit: 80},
+            edges: [{edge: "Pain Resistance", level: 1, pain_resistance: 1}],
+
+            wounds: [{damage: 11, location: "RA"},
+                {damage: 11, location: "LA"}],
+            staminaDamage: 30
+        });
+
+        expect(handler.getStaminaDamage()).toEqual(40)
+        expect(handler.getCurrentBody()).toEqual(8)
+        expect(handler.getWoundPenalties().aa).toEqual(-0)
+        expect(handler.getStatus()).toEqual(SkillHandler.STATUS_WOUNDED)
     });
 
 });

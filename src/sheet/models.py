@@ -571,6 +571,8 @@ class EdgeLevel(ExportedModel, StatModifier):
     armor_dr = models.DecimalField(max_digits=4, decimal_places=1, default=0,
                                    help_text="Overall damage reduction")
 
+    pain_resistance = models.IntegerField(default=0)
+
     @classmethod
     def dont_export(cls):
         return [
