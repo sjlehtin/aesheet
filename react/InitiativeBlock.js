@@ -26,7 +26,22 @@ class InitiativeBlock extends React.Component {
     }
 
     render() {
-        var distances = [this.state.distance, 20, 10, 5, 2];
+        let distance = this.props.distance;
+        let distanceControl
+        if (typeof(distance) !== "number") {
+            distance = this.state.distance
+            distanceControl =
+                <input aria-labelledby="distanceLabel" type="text"
+                       style={{width: "3em"}}
+                       value={this.state.distance}
+                       onChange={(e) => {
+                           this.setState({distance: e.target.value})
+                       }}
+                />
+        } else {
+            distanceControl = <span>{distance} m</span>
+        }
+        var distances = [distance, 20, 10, 5, 2];
         var charging = this.initiatives(20, distances);
         var melee = this.initiatives(30, distances);
         var ranged = this.initiatives(60, distances);
@@ -43,10 +58,7 @@ class InitiativeBlock extends React.Component {
                     <tr>
                         <th><label id={"distanceLabel"}>Distance</label></th>
                         <th>
-                            <input aria-labelledby="distanceLabel" type="text" style={{width: "3em"}}
-                                   value={this.state.distance}
-                                   onChange={(e) => {this.setState({distance: e.target.value})}}
-                            />
+                            {distanceControl}
                         </th>
                         {distances.slice(1).map((elem, ii) => {
                             return <th key={ii}>{elem} m</th>})}
@@ -65,6 +77,7 @@ class InitiativeBlock extends React.Component {
 
 InitiativeBlock.propTypes = {
     stats: PropTypes.object.isRequired,
+    distance: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
 };
 
 export default InitiativeBlock;
