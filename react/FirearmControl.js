@@ -540,7 +540,7 @@ class FirearmControl extends RangedWeaponRow {
                 const bd = new ValueBreakdown()
 
                 bd.addBreakdown(baseSkillCheck)
-                bd.add(sweepType, "Sweep bonus")
+                bd.add(sweepType, "sweep bonus")
                 const penalty = penaltyMultiplier * afClass
                 // TODO, use counterPenaltyV2
                 bd.add(FirearmControl.counterPenalty(
