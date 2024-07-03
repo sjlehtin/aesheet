@@ -24,10 +24,7 @@
 </script>
 <script type="application/javascript">
     var sheetId = {{ sheet.pk }};
-    SheetApp.render(sheetId, document.getElementById('stat-block-container'));
-    {#var statBlock = SheetApp.React.createElement(SheetApp.StatBlock,#}
-    {#        {url: '/rest/sheets/{{ sheet.pk }}/'});#}
-    {#SheetApp.ReactDOM.render(statBlock, document.getElementById('stat-block-container'));#}
+    SheetApp.renderSheet(sheetId, document.getElementById('stat-block-container'));
 </script>
 
 {% endblock %}

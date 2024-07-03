@@ -28,7 +28,6 @@
         {% url "sheets_index" as sheets_url %}
             {% url "characters_index" as chars_url%}
             {% url "import" as import_url %}
-            {% url "version_history" as history_url %}
             {% url "todo" as todo_url %}
             <li class="nav-item {% active request sheets_url %}">
                 <a class="nav-link" href="{{ sheets_url }}">Sheets</a>
