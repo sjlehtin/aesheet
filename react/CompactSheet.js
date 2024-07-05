@@ -1021,25 +1021,29 @@ class CompactSheet extends React.Component {
 
         return (
             <>
-                      <Modal size="lg" show={this.state.showDamages} onHide={() => {this.setState(
-                          {showDamages: false}
-                      )}}>
-        <Modal.Header closeButton>
-          <Modal.Title>{title} damages</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{this.renderDamages(skillHandler)}</Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => {this.setState(
-                          {showDamages: false}
-                      )}}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                <Modal size="lg" show={this.state.showDamages} onHide={() => {
+                    this.setState(
+                        {showDamages: false}
+                    )
+                }}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{title} damages</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>{this.renderDamages(skillHandler)}</Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={() => {
+                            this.setState(
+                                {showDamages: false}
+                            )
+                        }}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             <Card className={`m-0 ${statusClass}`}>
                 <Card.Header>
                     <Row fluid={"true"}>
-                        <Col xs={5}>
+                        <Col xs={4}>
                     <h4>{title ? <a href={`/sheets/${this.state.sheet.id}/`}>{title}</a> : <Loading>Character</Loading>}{' '}{this.state.sheet?.description} {`(id: ${this.state.sheet?.id})`}</h4>
                         </Col>
                         <Col xs={2}><Button size={"sm"} onClick={() => {this.setState(

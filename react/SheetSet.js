@@ -46,8 +46,6 @@ async function handleClone(sheetSetId, sheetSetSheet,  sheetSetSheets, sheetsMut
 
 
 export function SheetSet({sheetSetId}) {
-    let rows = []
-
     const [range, setRange] = useState('')
     const [detectionLevel, setDetectionLevel] = useState(0)
     const [gravity, setGravity] = useState(1.0)
@@ -61,49 +59,41 @@ export function SheetSet({sheetSetId}) {
     if (errorSheetSet || errorSheets) return <div>Error loading sheetset.</div>
     if (sheetSetLoading || sheetsLoading) return <Loading>SheetSet</Loading>
 
-    console.log("got sheetset", sheetSet)
-    console.log("got sheets for sheetsets", sheetSetSheets)
+    const rows = sheetSetSheets.map(
+        (sheetSetSheet, index) => {
+            const url = `/rest/sheets/${sheetSetSheet.sheet.id}/`;
+            return <Col className="col-4 mb-3" key={index}>
+                <CompactSheet key={index} url={url} toRange={range}
+                              darknessDetectionLevel={detectionLevel}
+                              gravity={gravity}>
+                    <div>
+                        <Button size="sm" onClick={async () => {
+                            const clone = await handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
+                        }}>Clone</Button>{' '}
+                        <Button size="sm" onClick={async () => {
+                            await rest.del(`/rest/sheetsets/${sheetSetId}/sheetsetsheets/${sheetSetSheet.id}/`)
+                            let newList = sheetSetSheets.slice()
+                            newList.splice(index, 1)
+                            await sheetsMutate(newList)
+                        }
+                        }>Remove from set</Button>
+                        {' '}
+                        <div className="vr"/>
+                        {' '}
+                        <Button size="sm" variant="danger"
+                                onClick={async () => {
+                                    await rest.del(`/rest/sheets/${sheetSetSheet.sheet.id}`)
+                                    let newList = sheetSetSheets.slice()
+                                    newList.splice(index, 1)
+                                    await sheetsMutate(newList)
+                                }
+                                }>Delete sheet</Button>
+                    </div>
+                </CompactSheet>
+            </Col>
+        })
 
-    const size = 3
-    for (let ii = 0; ii < sheetSetSheets.length; ii += size) {
-        rows.push(<Row key={ii}>{
-            sheetSetSheets.slice(ii, ii + size).map(
-                (sheetSetSheet, index) => {
-
-                    const url = `/rest/sheets/${sheetSetSheet.sheet.id}/`;
-                    console.log("Rendering sheet", sheetSetSheet, url)
-                    return <Col key={index}>
-                        <CompactSheet key={index} url={url} toRange={range} darknessDetectionLevel={detectionLevel} gravity={gravity}>
-                            <div>
-                            <Button size="sm" onClick={async () => {
-                                console.log("clone pressed")
-                                const clone = await handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
-                            }}>Clone</Button>{' '}
-                            <Button size="sm" onClick={async () => {
-                                console.log("Remove pressed")
-                                await rest.del(`/rest/sheetsets/${sheetSetId}/sheetsetsheets/${sheetSetSheet.id}/`)
-                                console.log("sheetsetsheet deleted")
-                                let newList = sheetSetSheets.slice()
-                                newList.splice(index, 1)
-                                await sheetsMutate(newList)
-                            }
-                            }>Remove from set</Button>
-                            <Button size="sm" variant="danger" onClick={async () => {
-                                console.log("Delete pressed")
-                                await rest.del(`/rest/sheets/${sheetSetSheet.sheet.id}`)
-                                console.log("sheet deleted")
-                                let newList = sheetSetSheets.slice()
-                                newList.splice(index, 1)
-                                await sheetsMutate(newList)
-                            }
-                            }>Delete sheet</Button>
-                        </div>
-                        </CompactSheet>
-                    </Col>
-                })
-        }</Row>)
-    }
-    return <Container fluid>
+    return <Container className={"m-1"} fluid={"true"}>
         <Row className={"m-1"}>
             <Col fluid={"true"} xs={3}>
             Add sheets
@@ -124,6 +114,8 @@ export function SheetSet({sheetSetId}) {
                 <GravityControl initialValue={gravity} onChange={setGravity} />
             </Col>
         </Row>
+        <Row fluid={"true"}>
             {rows}
+        </Row>
     </Container>
 }
