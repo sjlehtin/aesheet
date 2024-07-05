@@ -1,5 +1,6 @@
 import React from "react";
 import {Col,Row, Container, Button} from 'react-bootstrap'
+import {GoChevronLeft, GoChevronRight} from 'react-icons/go'
 import CompactSheet from "./CompactSheet";
 import {AddSheetControl} from "./AddSheetControl";
 import useSwr from 'swr'
@@ -45,6 +46,21 @@ async function handleClone(sheetSetId, sheetSetSheet,  sheetSetSheets, sheetsMut
 }
 
 
+async function updateOrdering(sheetSetId, sheetSetSheets) {
+    for (let index = 0; index < sheetSetSheets.length; index++) {
+        const sheetSetSheet = sheetSetSheets[index]
+
+        if (sheetSetSheet.order !== index) {
+            console.log("updating", sheetSetSheet, "new index", index)
+            const resp = await rest.patch(`/rest/sheetsets/${sheetSetId}/sheetsetsheets/${sheetSetSheet.id}/`,
+                {order: index}
+            )
+            console.log(resp)
+        }
+    }
+}
+
+
 export function SheetSet({sheetSetId}) {
     const [range, setRange] = useState('')
     const [detectionLevel, setDetectionLevel] = useState(0)
@@ -62,14 +78,29 @@ export function SheetSet({sheetSetId}) {
     const rows = sheetSetSheets.map(
         (sheetSetSheet, index) => {
             const url = `/rest/sheets/${sheetSetSheet.sheet.id}/`;
-            return <Col className="col-4 mb-3" key={url}>
+            return <Col className="col-sm-4 mb-3" key={url}>
                 <CompactSheet key={url} url={url} toRange={range}
                               darknessDetectionLevel={detectionLevel}
                               gravity={gravity}>
                     <div>
-                        <Button size="sm" onClick={async () => {
-                            const clone = await handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
-                        }}>Clone</Button>{' '}
+                        <Button aria-label={"Move sheet left"}
+                                disabled={!index} size={"sm"}
+                                onClick={async () => {
+                                    let newList = sheetSetSheets.slice()
+                                    newList.splice(index - 1, 2, newList[index], newList[index - 1])
+                                    await updateOrdering(sheetSetId, newList)
+                                    return sheetsMutate(newList)
+                                }
+                                }><GoChevronLeft/></Button>{' '}
+                        <Button aria-label={"Move sheet right"}
+                                disabled={index === sheetSetSheets.length - 1}
+                                size={"sm"} onClick={async () => {
+                            let newList = sheetSetSheets.slice()
+                            newList.splice(index, 2, newList[index + 1], newList[index])
+                            await updateOrdering(sheetSetId, newList)
+                            return sheetsMutate(newList)
+                        }
+                        }><GoChevronRight/></Button>{' '}
                         <Button size="sm" onClick={async () => {
                             await rest.del(`/rest/sheetsets/${sheetSetId}/sheetsetsheets/${sheetSetSheet.id}/`)
                             let newList = sheetSetSheets.slice()
@@ -79,6 +110,10 @@ export function SheetSet({sheetSetId}) {
                         }>Remove from set</Button>
                         {' '}
                         <div className="vr"/>
+                        {' '}
+                        <Button size="sm" onClick={() => {
+                            return handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
+                        }}>Clone</Button>
                         {' '}
                         <Button size="sm" variant="danger"
                                 onClick={async () => {
@@ -97,10 +132,11 @@ export function SheetSet({sheetSetId}) {
         <Row className={"m-1"}>
             <Col fluid={"true"} xs={3}>
             Add sheets
-            <AddSheetControl campaign={sheetSet.campaign} addSheet={async (sheetId) => {
-                console.log("Add called", sheetId)
-                await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
-            }}/>
+                <AddSheetControl campaign={sheetSet.campaign}
+                                 sheets={sheetSetSheets.map((obj) => obj.sheet.id)}
+                                 addSheet={async (sheetId) => {
+                                     await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
+                                 }}/>
             </Col>
             <Col><RangeControl onChange={(newRange) => {
                     setRange(newRange.range),

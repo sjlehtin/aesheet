@@ -39,11 +39,13 @@ class SheetSetSheetCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         sheet = attrs.get('sheet')
         sheet_set = self.context['view'].containing_object
-        if not sheet:
-            raise serializers.ValidationError("Required fields not passed")
 
-        if sheet_set.sheets.filter(id=sheet.id).exists():
-            raise serializers.ValidationError("Sheet already exists in the set")
+        if not self.instance:
+            if not sheet:
+                raise serializers.ValidationError("Required fields not passed")
+
+            if sheet_set.sheets.filter(id=sheet.id).exists():
+                raise serializers.ValidationError("Sheet already exists in the set")
 
         return attrs
 

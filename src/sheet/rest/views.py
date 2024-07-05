@@ -895,7 +895,7 @@ class SheetSetSheetViewSet(SheetSetSheetViewSetMixin, viewsets.ModelViewSet):
             return serializers.SheetSetSheetListSerializer
 
     def get_queryset(self):
-        return models.SheetSetSheet.objects.filter(sheet_set=self.sheet_set)
+        return models.SheetSetSheet.objects.filter(sheet_set=self.sheet_set).order_by('order', 'id')
         # self.sheet.firearms.all()
 
     def get_serializer(self, *args, **kwargs):
@@ -905,6 +905,9 @@ class SheetSetSheetViewSet(SheetSetSheetViewSetMixin, viewsets.ModelViewSet):
             # ListSerializer does not have the fields.
             serializer.fields['sheet_set'].default = self.sheet_set
             serializer.fields['sheet_set'].read_only = True
+
+            if serializer.instance is not None:
+                serializer.fields['sheet'].read_only = True
 
         return serializer
 

@@ -6,7 +6,7 @@ import {getData} from './sheet-rest'
 import {useState} from 'react'
 
 
-export function AddSheetControl({campaign, addSheet}) {
+export function AddSheetControl({campaign, sheets, addSheet}) {
     const [selected, setSelected] = useState('')
 
     const { data, error, isLoading } =
@@ -15,15 +15,9 @@ export function AddSheetControl({campaign, addSheet}) {
     if (error) return <div>Got error loading sheet list</div>
     if (isLoading) return <Loading>Sheet list</Loading>
 
-
-    console.log("filter for campaign", campaign)
-    console.log("got sheets", data)
-
-    const filtered = data.filter(sheet => sheet.campaign === campaign);
-    console.log("After filter", filtered)
+    const filtered = data.filter(sheet => sheet.campaign === campaign && !sheets.includes(sheet.id));
 
     const rows = <Form.Select value={selected}  onChange={(e) => {
-        console.log("Selected", e.target.value)
         setSelected(e.target.value)
     }}><option value={''}>Select sheet to add</option>
         {
