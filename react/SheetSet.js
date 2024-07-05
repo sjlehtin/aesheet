@@ -62,8 +62,8 @@ export function SheetSet({sheetSetId}) {
     const rows = sheetSetSheets.map(
         (sheetSetSheet, index) => {
             const url = `/rest/sheets/${sheetSetSheet.sheet.id}/`;
-            return <Col className="col-4 mb-3" key={index}>
-                <CompactSheet key={index} url={url} toRange={range}
+            return <Col className="col-4 mb-3" key={url}>
+                <CompactSheet key={url} url={url} toRange={range}
                               darknessDetectionLevel={detectionLevel}
                               gravity={gravity}>
                     <div>
@@ -74,7 +74,7 @@ export function SheetSet({sheetSetId}) {
                             await rest.del(`/rest/sheetsets/${sheetSetId}/sheetsetsheets/${sheetSetSheet.id}/`)
                             let newList = sheetSetSheets.slice()
                             newList.splice(index, 1)
-                            await sheetsMutate(newList)
+                            return sheetsMutate(newList)
                         }
                         }>Remove from set</Button>
                         {' '}
@@ -85,7 +85,7 @@ export function SheetSet({sheetSetId}) {
                                     await rest.del(`/rest/sheets/${sheetSetSheet.sheet.id}`)
                                     let newList = sheetSetSheets.slice()
                                     newList.splice(index, 1)
-                                    await sheetsMutate(newList)
+                                    return sheetsMutate(newList)
                                 }
                                 }>Delete sheet</Button>
                     </div>
