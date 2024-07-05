@@ -226,6 +226,26 @@ class SheetFactory(DjangoModelFactory):
                 SheetTransientEffectFactory(sheet=self, effect=effect)
 
 
+class SheetSetFactory(DjangoModelFactory):
+    campaign = factory.SubFactory(CampaignFactory, tech_levels=("all", ))
+    name = factory.Sequence(lambda n: "sheetset-%03d" % n)
+    owner = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = models.SheetSet
+
+    @factory.post_generation
+    def sheets(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for sheet in extracted:
+                self.sheet_set.add(sheet)
+
+
 class CalibreFactory(DjangoModelFactory):
     class Meta:
         model = models.Calibre

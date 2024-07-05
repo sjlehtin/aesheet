@@ -1600,6 +1600,7 @@ class Sheet(PrivateMixin, models.Model):
         )
 
     def clone(self, request=None):
+        # TODO: copy loadout and clear stamina damage
         original_sheet = self
         weapons = original_sheet.weapons.all()
         ranged_weapons = original_sheet.ranged_weapons.all()
@@ -1769,6 +1770,7 @@ class SheetSet(PrivateMixin, models.Model):
     # gravity = models.DecimalField(default=1.0)
     # turns played
     def access_allowed(self, user):
+        # TODO: hide from other users?
         return True
 
     def __str__(self):

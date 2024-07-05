@@ -1924,3 +1924,39 @@ class StaminaDamageTestCase(TestCase):
         self.assertEqual(len(entries), 1)
         self.assertIn("healed 5 points of stamina damage", entries[0].entry)
         assert entries[0].sheet_id == self.sheet.id
+
+
+class SheetSetSheetTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.request_factory = APIRequestFactory()
+        self.owner = factories.UserFactory(username="luke")
+        self.sheet_set = factories.SheetSetFactory(owner=self.owner)
+        self.sheet = factories.SheetFactory()
+        self.assertTrue(
+            self.client.login(username="luke", password="foobar"))
+        self.url = '/rest/sheetsets/{}/sheetsetsheets/'.format(self.sheet_set.pk)
+
+    def test_adding_items(self):
+        assert not models.SheetSet.objects.get(pk=self.sheet_set.id).sheets.filter(id=self.sheet.id).exists()
+
+        response = self.client.post(
+                self.url,
+                data={'sheet': self.sheet.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        assert models.SheetSet.objects.get(pk=self.sheet_set.id).sheets.filter(id=self.sheet.id).exists()
+
+        # Adding same sheet twice should fail.
+        response = self.client.post(
+                self.url,
+                data={'sheet': self.sheet.pk}, format='json')
+        assert response.status_code == 400
+
+        sheet2 = factories.SheetFactory()
+        response = self.client.post(
+                self.url,
+                data={'sheet': sheet2.pk}, format='json')
+        self.assertEqual(response.status_code, 201)
+
+        assert [self.sheet.id, sheet2.id] == [s['id'] for s in models.SheetSet.objects.get(pk=self.sheet_set.id).sheets.values('id')]
