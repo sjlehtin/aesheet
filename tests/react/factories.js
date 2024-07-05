@@ -435,15 +435,15 @@ const sheetMiscellaneousItemFactory = function (overrideFields) {
 
 const armorTemplateFactory = function (overrideFields) {
     let template = {
-        "name": "Cloth hood",
+        "name": "Cloth cloak",
         "description": "",
         "is_helm": false,
         "armor_h_p": "0.0",
         "armor_h_s": "0.0",
         "armor_h_b": "0.0",
-        "armor_h_r": "-0.5",
-        "armor_h_dr": "-1.0",
-        "armor_h_dp": "1.0",
+        "armor_h_r": "0.0",
+        "armor_h_dr": "0.0",
+        "armor_h_dp": "0.0",
         "armor_t_p": "0.0",
         "armor_t_s": "0.0",
         "armor_t_b": "0.0",

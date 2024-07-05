@@ -70,27 +70,65 @@ describe('ArmorControl', function() {
         // =-ROUNDUP(POWER(2/3*AVERAGE(AY36:BB36);2);0)
         // => -9 overall leth reduction results in 36 DR
         render(<ArmorControl campaign={2}
-                             armor={factories.armorFactory({ name: 'Power armor',
-            base: factories.armorTemplateFactory({'armor_t_p': -9, 'armor_t_s': -9, 'armor_t_b': -9, 'armor_t_r': -9, 'armor_t_dr': -36}),
-            quality: factories.armorQualityFactory({'armor_p': -0.5, 'armor_s': -0.5, 'armor_b': -0.5, 'armor_r': -0.5, 'armor_dr': 0})
-        })}
-                             helm={factories.armorFactory({ name: 'Power helmet',
-                base: factories.armorTemplateFactory({ 'armor_h_p': -9, 'armor_h_s': -9, 'armor_h_b': -9, 'armor_h_r': -9, 'armor_h_dr': -36}),
-            quality: factories.armorQualityFactory({'armor_p': -0.5, 'armor_s': -0.5, 'armor_b': -0.5, 'armor_r': -0.5, 'armor_dr': 0})
-        })}
+                             armor={factories.armorFactory({
+                                 name: 'Power armor',
+                                 base: factories.armorTemplateFactory({
+                                     'armor_t_p': -9,
+                                     'armor_t_s': -9,
+                                     'armor_t_b': -9,
+                                     'armor_t_r': -9,
+                                     'armor_t_dr': -36,
+                                     'armor_ra_p': -1.5,
+                                     'armor_ra_s': -1.0,
+                                     'armor_ra_b': -0.5,
+                                     'armor_ra_r': -0.5,
+                                     'armor_ra_dr': 0,
+                                     'armor_ra_dp': 2,
+
+                                 }),
+                                 quality: factories.armorQualityFactory({
+                                     'armor_p': -0.5,
+                                     'armor_s': -0.5,
+                                     'armor_b': -0.5,
+                                     'armor_r': -0.5,
+                                     'armor_dr': 0,
+                                     'dp_multiplier': 1.5
+                                 })
+                             })}
+                             helm={factories.armorFactory({
+                                 name: 'Power helmet',
+                                 base: factories.armorTemplateFactory({
+                                     'armor_h_p': -9,
+                                     'armor_h_s': -9,
+                                     'armor_h_b': -9,
+                                     'armor_h_r': -9,
+                                     'armor_h_dr': -36,
+                                 }),
+                                 quality: factories.armorQualityFactory({
+                                     'armor_p': -0.5,
+                                     'armor_s': -0.5,
+                                     'armor_b': -0.5,
+                                     'armor_r': -0.5,
+                                     'armor_dr': 0,
+                                     'dp_multiplier': 1.5
+                                 })
+                             })}
         />)
-        expect(screen.getByLabelText("Armor T DR").textContent).toEqual("-40")
-        expect(screen.getByLabelText("Armor H DR").textContent).toEqual("-40")
+        expect(screen.getByLabelText("Armor T DR").textContent).toEqual("-41")
+        expect(screen.getByLabelText("Armor H DR").textContent).toEqual("-41")
 
         expect(screen.getByLabelText("Armor LL DR").textContent).toEqual("0")
         expect(screen.getByLabelText("Armor LL P").textContent).toEqual("0")
+
+        expect(screen.getByLabelText("Armor RA DR").textContent).toEqual("-1")
+        expect(screen.getByLabelText("Armor RA DP").textContent).toEqual("3")
     });
 
     it("skips automatic damage reduction from armor quality when quality does not affect location", async function () {
         const user = userEvent.setup()
 
         render(<ArmorControl campaign={2} armor={factories.armorFactory({ name: "FooArmor",
-            base: factories.armorTemplateFactory({'armor_t_p': -9.2, 'armor_t_s': -9.2, 'armor_t_b': -9.2, 'armor_t_r': -9.2, 'armor_t_dr': -36}),
+            base: factories.armorTemplateFactory({'armor_t_p': -9.2, 'armor_t_s': -9.2, 'armor_t_b': -9.2, 'armor_t_r': -9.2, 'armor_t_dr': -36, 'armor_t_dp': 16,}),
             quality: factories.armorQualityFactory({'armor_p': 0, 'armor_s': 0, 'armor_b': 0, 'armor_r': 0, 'armor_dr': 0})
         })} />)
         const torsoLocation = screen.getByLabelText("Armor T DR");

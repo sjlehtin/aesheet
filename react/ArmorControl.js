@@ -53,7 +53,13 @@ function getArmorStat(location, type, piece) {
         return fromBase
     }
 
-    let stat = fromBase + fromQuality
+    let stat;
+    if (type === "DP") {
+        const dpMultiplier = quality.dp_multiplier ?? 1.0
+        stat = fromBase * (dpMultiplier === 0 ? 1.0 : dpMultiplier)
+    } else {
+        stat = fromBase + fromQuality
+    }
 
     if (type === "DR" && piece?.quality && fromQuality === 0) {
         let fromQuality = 0
@@ -64,7 +70,7 @@ function getArmorStat(location, type, piece) {
         // Armor is calculated from the lethalities if quality has an effect.
         if (fromQuality !== 0) {
             const lethRed = fromArmor + fromQuality
-            stat = -Math.pow((lethRed / 4) * (2 / 3), 2)
+            stat = util.roundup(-Math.pow((lethRed / 4) * (2 / 3), 2))
         }
     }
     return stat

@@ -94,6 +94,8 @@ class ArmorQualityAdmin(admin.ModelAdmin):
 
 
 class ArmorTemplateAdmin(admin.ModelAdmin):
+    search_fields = ('name', )
+
     list_per_page = 50
 
     list_display = ('name', 'tech_level', 'is_helm', 
