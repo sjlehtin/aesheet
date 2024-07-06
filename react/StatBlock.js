@@ -42,8 +42,65 @@ import {
     Table
 } from 'react-bootstrap';
 
-const rest = require('./sheet-rest');
-const util = require('./sheet-util');
+import * as rest from './sheet-rest'
+import * as util from './sheet-util'
+
+export function staminaRecovery(effStats, skillHandler) {
+    /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
+    const highStat = util.rounddown((effStats.imm.value() - 45) / 15);
+    const level = skillHandler.edgeLevel("Fast Healing");
+
+    const rates = [];
+
+    if (highStat !== 0) {
+        rates.push(highStat);
+    }
+    if (level > 0) {
+        const _lookupFastHealing = {
+            1: "1d6",
+            2: "2d6",
+            3: "4d6",
+            4: "8d6",
+            5: "16d6",
+            6: "32d6"
+        };
+        rates.push(_lookupFastHealing[level]);
+    }
+    if (rates.length) {
+        return rates.join('+') + "/8h";
+    } else {
+        return ""
+    }
+}
+
+export function manaRecovery(effStats, skillHandler) {
+    /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
+    const highStat = 2 * util.rounddown((effStats.cha.value() - 45) / 15);
+    const level = skillHandler.edgeLevel("Fast Mana Recovery");
+
+    const rates = [];
+
+    if (highStat != 0) {
+        rates.push(highStat);
+    }
+    if (level > 0) {
+        const _lookupManaRecovery = {
+            1: "2d6",
+            2: "4d6",
+            3: "8d6",
+            4: "16d6",
+            5: "32d6",
+            6: "64d6"
+        };
+        rates.push(_lookupManaRecovery[level]);
+    }
+    if (rates.length) {
+        return rates.join('+') + "/8h";
+    } else {
+        return "";
+    }
+}
+
 
 /**
  * TODO: controls to add bought_mana, bought_stamina, change
@@ -364,62 +421,6 @@ class StatBlock extends React.Component {
         }
     }
 
-    staminaRecovery(effStats, skillHandler) {
-        /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
-        const highStat = util.rounddown((effStats.imm.value() - 45)/15);
-        const level = skillHandler.edgeLevel("Fast Healing");
-
-        const rates = [];
-
-        if (highStat !== 0) {
-            rates.push(highStat);
-        }
-        if (level > 0) {
-            const _lookupFastHealing = {
-                1: "1d6",
-                2: "2d6",
-                3: "4d6",
-                4: "8d6",
-                5: "16d6",
-                6: "32d6"
-            };
-            rates.push(_lookupFastHealing[level]);
-        }
-        if (rates.length) {
-            return rates.join('+') + "/8h";
-        } else {
-            return ""
-        }
-    }
-
-    manaRecovery(effStats, skillHandler) {
-        /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
-        const highStat = 2*util.rounddown((effStats.cha.value() - 45)/15);
-        const level = skillHandler.edgeLevel("Fast Mana Recovery");
-
-        const rates = [];
-
-        if (highStat != 0) {
-            rates.push(highStat);
-        }
-        if (level > 0) {
-            const _lookupManaRecovery = {
-                1: "2d6",
-                2: "4d6",
-                3: "8d6",
-                4: "16d6",
-                5: "32d6",
-                6: "64d6"
-            };
-            rates.push(_lookupManaRecovery[level]);
-        }
-        if (rates.length) {
-            return rates.join('+') + "/8h";
-        } else {
-            return "";
-        }
-    }
-
     handleModification(stat, oldValue, newValue) {
         var data = this.state.char;
         data["cur_" + stat] = newValue;
@@ -458,17 +459,6 @@ class StatBlock extends React.Component {
        actual rest call and propagates the update back downward.  Handling
        API call failures can then be handled by sending messages from
        here in a unified manner. */
-    handleCharacterUpdate(field, oldValue, newValue) {
-        var data = this.state.char;
-
-        var update = {};
-        update[field] = newValue;
-        return rest.patch(this.state.url, update).then((json) => {
-            data[field] = newValue;
-            this.setState({char: data});
-        }).catch((err) => console.log(err));
-    }
-
     async handleSheetUpdate(field, oldValue, newValue) {
         let data = this.state.sheet;
 
@@ -871,11 +861,11 @@ class StatBlock extends React.Component {
             <td aria-label={"Body healing"} style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
         <tr><td style={statStyle}>S</td>
             <td style={baseStyle}>{baseStats.stamina}</td>
-            <td aria-label={"Stamina recovery"} style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
+            <td aria-label={"Stamina recovery"} style={recoveryStyle}>{staminaRecovery(effStats, skillHandler)
             }</td></tr>
         <tr><td style={statStyle}>M</td>
             <td style={baseStyle} aria-label={"Maximum mana"}>{this.mana(baseStats)}</td>
-            <td aria-label={"Mana recovery"} style={recoveryStyle}>{this.manaRecovery(effStats, skillHandler)
+            <td aria-label={"Mana recovery"} style={recoveryStyle}>{manaRecovery(effStats, skillHandler)
             }</td></tr>
         </tbody>;
 

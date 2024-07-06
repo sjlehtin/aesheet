@@ -14,6 +14,7 @@ import SkillHandler from './SkillHandler';
 import ArmorControl from './ArmorControl';
 import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
+import {staminaRecovery, manaRecovery} from "./StatBlock";
 
 import {
     Card,
@@ -302,62 +303,6 @@ class CompactSheet extends React.Component {
         }
     }
 
-    staminaRecovery(effStats, skillHandler) {
-        /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
-        var highStat = util.rounddown((effStats.imm - 45)/15);
-        var level = skillHandler.edgeLevel("Fast Healing");
-
-        var rates = [];
-
-        if (highStat !== 0) {
-            rates.push(highStat);
-        }
-        if (level > 0) {
-            var _lookupFastHealing = {
-                1: "1d6",
-                2: "2d6",
-                3: "4d6",
-                4: "8d6",
-                5: "16d6",
-                6: "32d6"
-            };
-            rates.push(_lookupFastHealing[level]);
-        }
-        if (rates.length) {
-            return rates.join('+') + "/8h";
-        } else {
-            return ""
-        }
-    }
-
-    manaRecovery(effStats, skillHandler) {
-        /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
-        var highStat = 2*util.rounddown((effStats.cha - 45)/15);
-        var level = skillHandler.edgeLevel("Fast Mana Recovery");
-
-        var rates = [];
-
-        if (highStat != 0) {
-            rates.push(highStat);
-        }
-        if (level > 0) {
-            var _lookupManaRecovery = {
-                1: "2d6",
-                2: "4d6",
-                3: "8d6",
-                4: "16d6",
-                5: "32d6",
-                6: "64d6"
-            };
-            rates.push(_lookupManaRecovery[level]);
-        }
-        if (rates.length) {
-            return rates.join('+') + "/8h";
-        } else {
-            return "";
-        }
-    }
-
     handleModification(stat, oldValue, newValue) {
         var data = this.state.char;
         data["cur_" + stat] = newValue;
@@ -610,17 +555,17 @@ class CompactSheet extends React.Component {
             <tr>
                 <td style={statStyle}>MOV</td>
                 <td style={baseStyle}>{baseStats.mov}</td>
-                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.mov} breakdown={effStats.breakdown.mov} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.mov.value()} breakdown={effStats.mov.breakdown()} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>DEX</td>
                 <td style={baseStyle}>{baseStats.dex}</td>
-                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.dex} breakdown={effStats.breakdown.dex} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.dex.value()} breakdown={effStats.dex.breakdown()} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>IMM</td>
                 <td style={baseStyle}>{baseStats.imm}</td>
-                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.imm} breakdown={effStats.breakdown.imm} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.imm.value()} breakdown={effStats.imm.breakdown()} /></td>
             </tr>
         </tbody>;
 
@@ -649,7 +594,7 @@ class CompactSheet extends React.Component {
             <td style={statStyle}>S</td>
             <td style={baseStyle}>{baseStats.stamina}</td>
             <td aria-label={"Stamina recovery"}
-                style={recoveryStyle}>{this.staminaRecovery(effStats, skillHandler)
+                style={recoveryStyle}>{staminaRecovery(effStats, skillHandler)
             }</td>
             <td>{skillHandler.getCurrentStamina()}</td>
         </tr>
@@ -659,7 +604,7 @@ class CompactSheet extends React.Component {
             <td style={baseStyle}
                 aria-label={"Maximum mana"}>{baseStats.mana}</td>
             <td aria-label={"Mana recovery"}
-                style={recoveryStyle}>{this.manaRecovery(effStats, skillHandler)
+                style={recoveryStyle}>{manaRecovery(effStats, skillHandler)
             }</td>
             <td>{skillHandler.getCurrentMana()}</td>
 
