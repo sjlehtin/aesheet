@@ -10,7 +10,7 @@ describe("ValueBreakdown", function () {
         bd.add(-2.5, "penalty")
 
         expect(bd.value()).toEqual(1.5)
-        expect(bd.breakdown()).toEqual([{value: 4, reason: "because"}, {value: -2.5, reason: "penalty"}])
+        expect(bd.breakdown()).toEqual([{value: 4, operation: '+', reason: "because"}, {value: -2.5, operation: '+', reason: "penalty"}])
 
         // If value does not change, reason is ignored by default.
         bd.add(0, "no reason")
@@ -20,7 +20,7 @@ describe("ValueBreakdown", function () {
         bd.add(0, "no reason", true)
         expect(bd.value()).toEqual(1.5)
         expect(bd.breakdown().length).toEqual(3)
-        expect(bd.breakdown()[2]).toEqual({value: 0, reason: "no reason"})
+        expect(bd.breakdown()[2]).toEqual({value: 0, operation: '+', reason: "no reason"})
     })
 
     it("can take in an existing breakdown", function () {
@@ -54,5 +54,29 @@ describe("ValueBreakdown", function () {
 
         bd2.addBreakdown(bd)
         expect(bd2.value()).toEqual(-100)
+    })
+
+    it ("can multiply values", function () {
+        const bd = new ValueBreakdown()
+        bd.add(4, "because")
+        bd.multiply(5, "ace in the sleeve")
+
+        expect(bd.value()).toEqual(20)
+    })
+
+    it ("can multiply values", function () {
+        const bd = new ValueBreakdown()
+        bd.add(4, "because")
+        bd.multiply(5, "ace in the sleeve")
+
+        expect(bd.value()).toEqual(20)
+    })
+
+    it ("can divide values", function () {
+        const bd = new ValueBreakdown()
+        bd.add(4, "because")
+        bd.divide(2, "deuce in the sleeve")
+
+        expect(bd.value()).toEqual(2)
     })
 })

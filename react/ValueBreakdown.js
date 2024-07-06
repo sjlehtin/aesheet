@@ -11,8 +11,27 @@ export default class ValueBreakdown {
     add(newValue, description, forceAdd= false) {
         if (newValue || forceAdd) {
             this.#value += newValue
-            this.#breakdown.push({value: newValue, reason: description})
+            this.#breakdown.push({
+                value: newValue,
+                reason: description,
+                operation: '+'
+            })
         }
+    }
+
+    multiply(newValue, description) {
+        this.#value *= newValue
+        this.#breakdown.push({
+            value: newValue,
+            operation: "*",
+            reason: description
+        })
+    }
+
+    divide(newValue, description) {
+        this.#value /= newValue
+        this.#breakdown.push({value: newValue, operation: "/",
+        reason: description})
     }
 
     set(valueToReturn, description) {
