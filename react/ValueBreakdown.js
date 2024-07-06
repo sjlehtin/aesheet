@@ -2,6 +2,8 @@ export default class ValueBreakdown {
     #value = 0
     #breakdown = []
 
+    #setValue = null
+
     constructor() {
 
     }
@@ -13,12 +15,24 @@ export default class ValueBreakdown {
         }
     }
 
+    set(valueToReturn, description) {
+        this.#setValue = valueToReturn
+        this.#breakdown.push({value: 0, reason: description})
+    }
+
     addBreakdown(breakdown) {
         this.#value += breakdown.value()
         this.#breakdown = [...this.#breakdown, ...breakdown.breakdown()]
+        // Inherit set value from the new bd unless already set here.
+        if (this.#setValue === null) {
+            this.#setValue = breakdown.#setValue
+        }
     }
 
     value() {
+        if (this.#setValue !== null) {
+            return this.#setValue
+        }
         return this.#value
     }
 

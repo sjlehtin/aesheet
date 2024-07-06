@@ -38,4 +38,21 @@ describe("ValueBreakdown", function () {
         expect(bd2.value()).toEqual(4.5)
         expect(bd2.breakdown().length).toEqual(3)
     })
+
+    it ("can set a value to a disabled value", function () {
+        const bd = new ValueBreakdown()
+        bd.add(4, "because")
+        bd.add(-2.5, "penalty")
+
+        bd.set(-100, "Character disabled")
+
+        expect(bd.value()).toEqual(-100)
+
+        const bd2 = new ValueBreakdown()
+        bd2.add(3, "initial")
+        expect(bd2.value()).toEqual(3)
+
+        bd2.addBreakdown(bd)
+        expect(bd2.value()).toEqual(-100)
+    })
 })
