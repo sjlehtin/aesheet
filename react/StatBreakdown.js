@@ -26,12 +26,24 @@ class StatBreakdown extends React.Component {
             return value;
         }
 
-        this.props.breakdown.forEach((row, index) => {
+        let value
+        let breakdown
+
+        if (typeof(this.props.value) === "number") {
+            value = this.props.value
+            breakdown = this.props.breakdown ?? []
+        } else {
+            value = this.props.value.value()
+            breakdown = this.props.value.breakdown()
+        }
+
+        breakdown.forEach((row, index) => {
+            // TODO: logic to ValueBreakdown
             let value = row.value
             value = renderValue(value);
             rows.push(<tr key={index}>
                 <td>{row.reason}</td>
-                <td>{value}</td>
+                <td>{row.operation !== '+' ? row.operation ?? '' : ''}{value}</td>
             </tr>)
         })
         const containerRef = React.createRef()
@@ -66,7 +78,7 @@ class StatBreakdown extends React.Component {
                         </div>
                     </Tooltip>
                 }>
-                <div ref={targetRef}>{renderValue(this.props.value)}{this.props.units}</div>
+                <div ref={targetRef}>{renderValue(value)}{this.props.units}</div>
             </OverlayTrigger>
         </div>
     }
@@ -74,8 +86,8 @@ class StatBreakdown extends React.Component {
 
 
 StatBreakdown.propTypes = {
-    value: PropTypes.number.isRequired,
-    breakdown: PropTypes.arrayOf(Object).isRequired,
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.object]).isRequired,
+    breakdown: PropTypes.arrayOf(Object),
     style: PropTypes.object,
     label: PropTypes.string,
     toFixed: PropTypes.number,
