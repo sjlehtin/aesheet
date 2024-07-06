@@ -19,19 +19,25 @@ export default class ValueBreakdown {
         }
     }
 
-    multiply(newValue, description) {
-        this.#value *= newValue
-        this.#breakdown.push({
-            value: newValue,
-            operation: "*",
-            reason: description
-        })
+    multiply(newValue, description, forceAdd) {
+        if (newValue !== 1.0 || forceAdd) {
+            this.#value *= newValue
+            this.#breakdown.push({
+                value: newValue,
+                operation: "*",
+                reason: description
+            })
+        }
     }
 
-    divide(newValue, description) {
-        this.#value /= newValue
-        this.#breakdown.push({value: newValue, operation: "/",
-        reason: description})
+    divide(newValue, description, forceAdd) {
+        if (newValue !== 1.0 || forceAdd) {
+            this.#value /= newValue
+            this.#breakdown.push({
+                value: newValue, operation: "/",
+                reason: description
+            })
+        }
     }
 
     set(valueToReturn, description) {

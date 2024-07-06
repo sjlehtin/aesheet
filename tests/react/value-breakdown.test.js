@@ -62,14 +62,13 @@ describe("ValueBreakdown", function () {
         bd.multiply(5, "ace in the sleeve")
 
         expect(bd.value()).toEqual(20)
-    })
+        expect(bd.breakdown().length).toEqual(2)
 
-    it ("can multiply values", function () {
-        const bd = new ValueBreakdown()
-        bd.add(4, "because")
-        bd.multiply(5, "ace in the sleeve")
+        bd.multiply(1.0, "nothing much")
+        expect(bd.breakdown().length).toEqual(2)
 
-        expect(bd.value()).toEqual(20)
+        bd.multiply(1.0, "nothing much", true)
+        expect(bd.breakdown().length).toEqual(3)
     })
 
     it ("can divide values", function () {
@@ -78,5 +77,12 @@ describe("ValueBreakdown", function () {
         bd.divide(2, "deuce in the sleeve")
 
         expect(bd.value()).toEqual(2)
+        expect(bd.breakdown().length).toEqual(2)
+
+        bd.divide(1.0, "nothing much")
+        expect(bd.breakdown().length).toEqual(2)
+
+        bd.divide(1.0, "nothing much", true)
+        expect(bd.breakdown().length).toEqual(3)
     })
 })
