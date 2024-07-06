@@ -23,35 +23,40 @@ class AddWoundControl extends React.Component {
     findEffect(wound) {
         const threshold = this.props.handler.getDamageThreshold(wound.location)
 
-            // Toughness already factored in to the threshold.
+        const toughness = this.props.handler?.edgeLevel("Toughness") ?? 0;
+        const effDamage = wound.damage - toughness;
+        const choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
+
+        let choice
+        if (effDamage < 0) {
+            choice = choices[0];
+        } else if (effDamage >= choices.length) {
+            choice = choices[choices.length - 1];
+        } else {
+            choice = choices[effDamage]
+        }
+
+        // Excess damage is non-lethal, but critical effects are still calculated by the full damage (up to the maximum indicated in the table).
+        // Toughness already factored in to the threshold.
         if (wound.damage > threshold) {
+            const extra = choice.extra() ? ` [${choice.extra()}]` : ''
+
             if (wound.damage > 2*threshold) {
                 const effectMap = {P: "blown to smithereens", "S": "sliced clean off", B: "obliterated", R: "burned to a crisp"}
                 const locMap = {H: "Head", T: "Torso",
                                      RA: "Arm", LA: "Arm", RL: "Leg", LL: "Leg"}
-
-                return `${locMap[wound.location]} ${effectMap[wound.type]}`
+                return `${locMap[wound.location]} ${effectMap[wound.type]}${extra}`
             } else {
                 const effectMap = {P: "blown off", "S": "severed", B: "crushed", R: "burned through"}
                 const locMap = {
                     H: "Head", T: "Torso",
                     RA: "Hand", LA: "Hand", RL: "Foot", LL: "Foot"
                 }
-                return `${locMap[wound.location]} ${effectMap[wound.type]}`
+                return `${locMap[wound.location]} ${effectMap[wound.type]}${extra}`
             }
         }
 
-        const choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
-
-        const toughness = this.props.handler?.edgeLevel("Toughness") ?? 0;
-        const effDamage = wound.damage - toughness;
-        if (effDamage < 0) {
-            return choices[0];
-        }
-        if (effDamage >= choices.length) {
-            return choices[choices.length - 1];
-        }
-        return choices[effDamage];
+        return choice?.toString()
     }
 
     handleDamageChange(event) {
@@ -110,22 +115,22 @@ class AddWoundControl extends React.Component {
         return AddWoundControl.locationValues.indexOf(location) >= 0;
     }
 
-    handleSubmit() {
+    async handleSubmit() {
         if (this.isValid() && this.props.onAdd) {
-            this.props.onAdd({
+            await this.props.onAdd({
                 damage: this.state.damage,
                 location: this.state.selectedLocation,
                 damage_type: this.state.selectedType,
                 effect: this.state.effect
-            }).then(() => {
-                this.setState({
+            })
+            this.setState({
                     selectedLocation: "T",
                     selectedType: "S",
                     damage: 0,
-                    effect: this.findEffect({type: "S",
-                            location: "T",
-                            damage: 0})});
-            });
+                    effect: this.findEffect({
+                        type: "S",
+                        location: "T",
+                        damage: 0})});
         }
     }
 
@@ -139,8 +144,8 @@ class AddWoundControl extends React.Component {
 
     render() {
         const woundChoices = AddWoundControl.getWoundChoices(
-            this.state.selectedLocation, this.state.selectedType);
-
+            this.state.selectedLocation,
+            this.state.selectedType).map((w) => w.toString());
 
         return <div>
         <Row>
@@ -218,230 +223,267 @@ AddWoundControl.damageTypes = [
 ];
 AddWoundControl.damageTypeValues = AddWoundControl.damageTypes.map((el) => {return el.type});
 
+class WoundEffect {
+    #effect = ''
+    #extra = []
+
+    constructor(effect, ...extra) {
+        this.#effect = effect
+        this.#extra = extra ?? []
+    }
+
+    toString() {
+        const extra = this.extra().length > 0 ? ` [${this.extra()}]` : ''
+        return `${this.#effect}${extra}`
+    }
+
+    extra() {
+        return this.#extra.length > 0 ? `${this.#extra.join(', ')}` : '';
+    }
+}
+
+const WE = WoundEffect
+
 AddWoundControl.woundEffects = {
     H: {
-        P: ["Scraped",
-"Grazed",
-"Grazed [minor ext]",
-"Extremity crushed [major ext]",
-"Extremity crushed [major ext]",
-"Skull cracked [Slug in, major int]",
-"Throat punctured [severe ext]",
-"Bullet in the head [Slug in, severe int]",
-"Neck slashed half [fatal ext]",
-"Neck slashed half [fatal ext]",
-"Part blown off [fatal int]",
-"Part blown off [fatal int]",
-"Head blown off [DEATH]"],
-        S: ["Scratched",
-"Cut [minor ext]",
-"Cut [minor ext]",
-"Extremity punctured [major ext]",
-"Extremity punctured [major ext]",
-"Skull pierced [major int]",
-"Throat punctured [severe ext]",
-"Hole in skull [severe int]",
-"Neck slashed half [fatal ext]",
-"Neck slashed half [fatal ext]",
-"Brain punctured [fatal int]",
-"Brain punctured [fatal int]",
-"Decapitation [DEATH]"],
-        B: ["Bumped",
-"Concussion",
-"Concussion",
-"Eye crushed*",
-"Nose crushed* [minor ext]",
-"Severe concussion [minor int]",
-"Throat crushed [major int]",
-"Skull cracked [severe int]",
-"Neck crushed [severe int]",
-"Neck crushed [severe int]",
-"Head crushed [fatal int]",
-"Head crushed [fatal int]",
-"Neck broken [DEATH]"],
-        R: ["Blistered",
-"Hair burned",
-"Hair burned [IMM]",
-"Eyes burned* [IMM -10]",
-"Extremity charred* [IMM -20]",
-"Skin burned bad [IMM -30]",
-"Charred [IMM -40]",
-"Charred [IMM -50]",
-"Fatally charred [IMM -60]",
-"Fatally charred [IMM -70]",
-"Head burned through [IMM -80]",
-"Head burned through [IMM -90]",
-"Head destroyed [DEATH]"]
+        P: [new WE("Scraped"),
+            new WE("Grazed"),
+            new WE("Grazed", "minor ext"),
+            new WE("Extremity crushed", "major ext"),
+            new WE("Extremity crushed", "major ext"),
+            new WE("Skull cracked", "Slug in, major int"),
+            new WE("Throat punctured", "severe ext"),
+            new WE("Bullet in the head", "Slug in, severe int"),
+            new WE("Neck slashed half", "fatal ext"),
+            new WE("Neck slashed half", "fatal ext"),
+            new WE("Part blown off", "fatal int"),
+            new WE("Part blown off", "fatal int"),
+            new WE("Head blown off", "DEATH"),
+        ],
+        S: [new WE("Scratched"),
+            new WE("Cut", "minor ext"),
+            new WE("Cut", "minor ext"),
+            new WE("Extremity punctured", "major ext"),
+            new WE("Extremity punctured", "major ext"),
+            new WE("Skull pierced", "major int"),
+            new WE("Throat punctured", "severe ext"),
+            new WE("Hole in skull", "severe int"),
+            new WE("Neck slashed half", "fatal ext"),
+            new WE("Neck slashed half", "fatal ext"),
+            new WE("Brain punctured", "fatal int"),
+            new WE("Brain punctured", "fatal int"),
+            new WE("Decapitation", "DEATH"),
+        ],
+        B: [new WE("Bumped"),
+            new WE("Concussion"),
+            new WE("Concussion"),
+            new WE("Eye crushed*"),
+            new WE("Nose crushed*", "minor ext"),
+            new WE("Severe concussion", "minor int"),
+            new WE("Throat crushed", "major int"),
+            new WE("Skull cracked", "severe int"),
+            new WE("Neck crushed", "severe int"),
+            new WE("Neck crushed", "severe int"),
+            new WE("Head crushed", "fatal int"),
+            new WE("Head crushed", "fatal int"),
+            new WE("Neck broken", "DEATH"),
+        ],
+        R: [new WE("Blistered"),
+            new WE("Hair burned"),
+            new WE("Hair burned", "IMM"),
+            new WE("Eyes burned*", "IMM -10"),
+            new WE("Extremity charred*", "IMM -20"),
+            new WE("Skin burned bad", "IMM -30"),
+            new WE("Charred", "IMM -40"),
+            new WE("Charred", "IMM -50"),
+            new WE("Fatally charred", "IMM -60"),
+            new WE("Fatally charred", "IMM -70"),
+            new WE("Head burned through", "IMM -80"),
+            new WE("Head burned through", "IMM -90"),
+            new WE("Head destroyed", "DEATH"),
+        ]
     },
     T: {
-        P: ["Scraped",
-"Grazed",
-"Grazed",
-"Rib cracked [Slug in, minor ext]",
-"Genitalia pierced [minor ext]",
-"Gut shot [Slug in minor int]",
-"Gut pierced [minor int]",
-"Int. organ hit [Slug in, major int]",
-"Int. organ pierced [major int]",
-"Lung punctured [Slug in, severe int]",
-"Lung punctured [severe int]",
-"Heart muscle hit [Slug in, severe int]",
-"Heart muscle pierced [severe int]",
-"Aorta hit [Slug in, fatal int]",
-"Aorta pierced [fatal int]",
-"Massive tissue damage [fatal int]",
-"Multiple organs destroyed [fatal int]",
-"Heart shot through [fatal int]",
-"Spinal cord severed [fatal int]",
-"Spinal cord severed [fatal int]",
-"Torso destroyed [DEATH]"],
-        S: ["Scratched",
-"Scratched",
-"Cut [minor ext]",
-"Cut [minor ext]",
-"Genitalia cut [minor ext]",
-"Gut pierced [minor int]",
-"Gut pierced [minor int]",
-"Internal organ pierced [major int]",
-"Internal organ pierced [major int]",
-"Lung punctured [severe int]",
-"Lung punctured [severe int]",
-"Heart muscle pierced [severe int]",
-"Heart muscle pierced [severe int]",
-"Aorta cut [fatal int]",
-"Aorta cut [fatal int]",
-"Massive tissue damage [fatal int]",
-"Multiple organs destroyed [fatal int]",
-"Heart pierced [fatal int]",
-"Spinal cord severed [fatal int]",
-"Spinal cord severed [fatal int]",
-"Torso destroyed [DEATH]"],
-        B: ["Bruised",
-"Bruised",
-"Bruised",
-"Bruised",
-"Genitalia hit",
-"Abdomen punched [minor int]",
-"Abdomen punched [minor int]",
-"Internal organ ruptured [major int]",
-"Internal organ ruptured [major int]",
-"Lungs crushed [severe int]",
-"Lungs crushed [severe int]",
-"Internal organs ruptured [severe int]",
-"Internal organs ruptured [severe int]",
-"Massive tissue damage [fatal int]",
-"Massive tissue damage [fatal int]",
-"Massive tissue damage [fatal int]",
-"Multiple organs destroyed [fatal int]",
-"Massive tissue damage [fatal int]",
-"Spinal cord severed [fatal int]",
-"Spinal cord severed [fatal int]",
-"Torso destroyed [DEATH]"],
-        R: ["Blistered",
-"Burned",
-"Burned",
-"Grilled [IMM]",
-"Grilled [IMM -5]",
-"Grilled [IMM -10]",
-"Scorched [IMM -15]",
-"Scorched [IMM -20]",
-"Scorched [IMM -25]",
-"Charred [IMM -30]",
-"Charred [IMM -35]",
-"Charred [IMM -40]",
-"Charred [IMM -45]",
-"Fatally charred [IMM -50]",
-"Fatally charred [IMM -55]",
-"Fatally charred [IMM -60]",
-"Fatally charred [IMM -65]",
-"Fatally charred [IMM -70]",
-"Torso burned through [IMM -75]",
-"Torso burned through [IMM -80]",
-"Torso destroyed [DEATH]"]
+        P: [new WE("Scraped"),
+            new WE("Grazed"),
+            new WE("Grazed"),
+            new WE("Rib cracked", "Slug in", "minor ext"),
+            new WE("Genitalia pierced", "minor ext"),
+            new WE("Gut shot", "Slug in", "minor int"),
+            new WE("Gut pierced", "minor int"),
+            new WE("Int. organ hit", "Slug in", "major int"),
+            new WE("Int. organ pierced", "major int"),
+            new WE("Lung punctured", "Slug in", "severe int"),
+            new WE("Lung punctured", "severe int"),
+            new WE("Heart muscle hit", "Slug in", "severe int"),
+            new WE("Heart muscle pierced", "severe int"),
+            new WE("Aorta hit", "Slug in", "fatal int"),
+            new WE("Aorta pierced", "fatal int"),
+            new WE("Massive tissue damage", "fatal int"),
+            new WE("Multiple organs destroyed", "fatal int"),
+            new WE("Heart shot through", "fatal int"),
+            new WE("Spinal cord severed", "fatal int"),
+            new WE("Spinal cord severed", "fatal int"),
+            new WE("Torso destroyed", "DEATH"),
+        ],
+        S: [new WE("Scratched"),
+            new WE("Scratched"),
+            new WE("Cut", "minor ext"),
+            new WE("Cut", "minor ext"),
+            new WE("Genitalia cut", "minor ext"),
+            new WE("Gut pierced", "minor int"),
+            new WE("Gut pierced", "minor int"),
+            new WE("Internal organ pierced", "major int"),
+            new WE("Internal organ pierced", "major int"),
+            new WE("Lung punctured", "severe int"),
+            new WE("Lung punctured", "severe int"),
+            new WE("Heart muscle pierced", "severe int"),
+            new WE("Heart muscle pierced", "severe int"),
+            new WE("Aorta cut", "fatal int"),
+            new WE("Aorta cut", "fatal int"),
+            new WE("Massive tissue damage", "fatal int"),
+            new WE("Multiple organs destroyed", "fatal int"),
+            new WE("Heart pierced", "fatal int"),
+            new WE("Spinal cord severed", "fatal int"),
+            new WE("Spinal cord severed", "fatal int"),
+            new WE("Torso destroyed", "DEATH"),
+        ],
+        B: [new WE("Bruised"),
+            new WE("Bruised"),
+            new WE("Bruised"),
+            new WE("Bruised"),
+            new WE("Genitalia hit"),
+            new WE("Abdomen punched", "minor int"),
+            new WE("Abdomen punched", "minor int"),
+            new WE("Internal organ ruptured", "major int"),
+            new WE("Internal organ ruptured", "major int"),
+            new WE("Lungs crushed", "severe int"),
+            new WE("Lungs crushed", "severe int"),
+            new WE("Internal organs ruptured", "severe int"),
+            new WE("Internal organs ruptured", "severe int"),
+            new WE("Massive tissue damage", "fatal int"),
+            new WE("Massive tissue damage", "fatal int"),
+            new WE("Massive tissue damage", "fatal int"),
+            new WE("Multiple organs destroyed", "fatal int"),
+            new WE("Massive tissue damage", "fatal int"),
+            new WE("Spinal cord severed", "fatal int"),
+            new WE("Spinal cord severed", "fatal int"),
+            new WE("Torso destroyed", "DEATH"),
+        ],
+        R: [new WE("Blistered"),
+            new WE("Burned"),
+            new WE("Burned"),
+            new WE("Grilled", "IMM"),
+            new WE("Grilled", "IMM -5"),
+            new WE("Grilled", "IMM -10"),
+            new WE("Scorched", "IMM -15"),
+            new WE("Scorched", "IMM -20"),
+            new WE("Scorched", "IMM -25"),
+            new WE("Charred", "IMM -30"),
+            new WE("Charred", "IMM -35"),
+            new WE("Charred", "IMM -40"),
+            new WE("Charred", "IMM -45"),
+            new WE("Fatally charred", "IMM -50"),
+            new WE("Fatally charred", "IMM -55"),
+            new WE("Fatally charred", "IMM -60"),
+            new WE("Fatally charred", "IMM -65"),
+            new WE("Fatally charred", "IMM -70"),
+            new WE("Torso burned through", "IMM -75"),
+            new WE("Torso burned through", "IMM -80"),
+            new WE("Torso destroyed", "DEATH"),
+        ]
     },
     RA: {
-        P: ["Scraped",
-"Muscle hit",
-"Grazed [Slug in]",
-"Bone hit [minor ext]",
-"Artery cut [Slug in, minor ext]",
-"Open fracture [major ext]",
-"Shattered [Slug in, major ext]",
-"Shattered [severe ext]",
-"Shattered [severe ext]"],
-        S: ["Scratched",
-"Muscle cut",
-"Bone cracked [minor ext]",
-"Artery cut [minor ext]",
-"Artery cut [major ext]",
-"Bones slashed [major ext]",
-"Shattered [severe ext]",
-"Shattered [severe ext]",
-"Shattered [severe ext]"],
-        B: ["Bruised",
-"Bruised",
-"Fingers broken",
-"Joint dislocated",
-"Bone cracked",
-"Shoulder broken",
-"Crushed [minor ext]",
-"Crushed [minor ext]",
-"Crushed [major ext]"],
-        R: ["Blistered",
-"Burned",
-"Burned",
-"Grilled [IMM]",
-"Grilled [IMM -5]",
-"Grilled [IMM -10]",
-"Scorched [IMM -15]",
-"Scorched [IMM -20]",
-"Scorched [IMM -25]"]
+        P: [new WE("Scraped"),
+            new WE("Muscle hit"),
+            new WE("Grazed", "Slug in"),
+            new WE("Bone hit", "minor ext"),
+            new WE("Artery cut", "Slug in", "minor ext"),
+            new WE("Open fracture", "major ext"),
+            new WE("Shattered", "Slug in", "major ext"),
+            new WE("Shattered", "severe ext"),
+            new WE("Shattered", "severe ext"),
+        ],
+        S: [new WE("Scratched"),
+            new WE("Muscle cut"),
+            new WE("Bone cracked", "minor ext"),
+            new WE("Artery cut", "minor ext"),
+            new WE("Artery cut", "major ext"),
+            new WE("Bones slashed", "major ext"),
+            new WE("Shattered", "severe ext"),
+            new WE("Shattered", "severe ext"),
+            new WE("Shattered", "severe ext"),
+        ],
+        B: [new WE("Bruised"),
+            new WE("Bruised"),
+            new WE("Fingers broken"),
+            new WE("Joint dislocated"),
+            new WE("Bone cracked"),
+            new WE("Shoulder broken"),
+            new WE("Crushed", "minor ext"),
+            new WE("Crushed", "minor ext"),
+            new WE("Crushed", "major ext"),
+        ],
+        R: [new WE("Blistered"),
+            new WE("Burned"),
+            new WE("Burned"),
+            new WE("Grilled", "IMM"),
+            new WE("Grilled", "IMM -5"),
+            new WE("Grilled", "IMM -10"),
+            new WE("Scorched", "IMM -15"),
+            new WE("Scorched", "IMM -20"),
+            new WE("Scorched", "IMM -25"),
+        ]
     },
     RL: {
-        P: ["Scraped",
-"Scraped",
-"Muscle hit [Slug in]",
-"Muscle pierced [minor ext]",
-"Bone hit [Slug in, minor ext]",
-"Major vein cut [major ext]",
-"Open fracture [Slug in, major ext]",
-"Leg artery cut [severe ext]",
-"Knee shattered [Slug in, severe ext]",
-"Shattered [severe ext]",
-"Shattered [fatal ext]"],
-        S: ["Scratched",
-"Scratched",
-"Muscle cut [minor ext]",
-"Muscle cut [minor ext]",
-"Major vein cut [major ext]",
-"Major vein cut [major ext]",
-"Leg artery cut [severe ext]",
-"Bones slashed [severe ext]",
-"Bones slashed [severe ext]",
-"Shattered [fatal ext]",
-"Shattered [fatal ext]"],
-        B: ["Bruised",
-"Bruised",
-"Numbed ",
-"Numbed ",
-"Joint dislocated",
-"Joint dislocated",
-"Bone cracked [minor ext]",
-"Bone cracked [minor ext]",
-"Hip broken [major ext]",
-"Crushed [major ext]",
-"Crushed [major ext]"],
-        R: ["Blistered",
-"Burned",
-"Burned",
-"Grilled [IMM]",
-"Grilled [IMM -5]",
-"Grilled [IMM -10]",
-"Scorched [IMM -15]",
-"Scorched [IMM -20]",
-"Scorched [IMM -25]",
-"Charred [IMM -30]",
-"Charred [IMM -35]"]
+        P: [new WE("Scraped"),
+            new WE("Scraped"),
+            new WE("Muscle hit", "Slug in"),
+            new WE("Muscle pierced", "minor ext"),
+            new WE("Bone hit", "Slug in", "minor ext"),
+            new WE("Major vein cut", "major ext"),
+            new WE("Open fracture", "Slug in", "major ext"),
+            new WE("Leg artery cut", "severe ext"),
+            new WE("Knee shattered", "Slug in", "severe ext"),
+            new WE("Shattered", "severe ext"),
+            new WE("Shattered", "fatal ext"),
+        ],
+        S: [new WE("Scratched"),
+            new WE("Scratched"),
+            new WE("Muscle cut", "minor ext"),
+            new WE("Muscle cut", "minor ext"),
+            new WE("Major vein cut", "major ext"),
+            new WE("Major vein cut", "major ext"),
+            new WE("Leg artery cut", "severe ext"),
+            new WE("Bones slashed", "severe ext"),
+            new WE("Bones slashed", "severe ext"),
+            new WE("Shattered", "fatal ext"),
+            new WE("Shattered", "fatal ext"),
+        ],
+        B: [new WE("Bruised"),
+            new WE("Bruised"),
+            new WE("Numbed "),
+            new WE("Numbed "),
+            new WE("Joint dislocated"),
+            new WE("Joint dislocated"),
+            new WE("Bone cracked", "minor ext"),
+            new WE("Bone cracked", "minor ext"),
+            new WE("Hip broken", "major ext"),
+            new WE("Crushed", "major ext"),
+            new WE("Crushed", "major ext"),
+        ],
+        R: [new WE("Blistered"),
+            new WE("Burned"),
+            new WE("Burned"),
+            new WE("Grilled", "IMM"),
+            new WE("Grilled", "IMM -5"),
+            new WE("Grilled", "IMM -10"),
+            new WE("Scorched", "IMM -15"),
+            new WE("Scorched", "IMM -20"),
+            new WE("Scorched", "IMM -25"),
+            new WE("Charred", "IMM -30"),
+            new WE("Charred", "IMM -35"),
+        ]
     },
 };
 

@@ -167,12 +167,12 @@ describe('AddWoundControl', function() {
         await user.type(screen.getByRole("textbox", {name: "Damage"}), "9")
 
         const effectInput = within(screen.getByLabelText("Effect")).getByRole("combobox");
-        expect(effectInput).toHaveValue("Foot severed")
+        expect(effectInput).toHaveValue("Foot severed [severe ext]")
 
         await user.clear(screen.getByRole("textbox", {name: "Damage"}))
         await user.type(screen.getByRole("textbox", {name: "Damage"}), "17")
 
-        expect(effectInput).toHaveValue("Leg sliced clean off")
+        expect(effectInput).toHaveValue("Leg sliced clean off [fatal ext]")
     });
 
 });
