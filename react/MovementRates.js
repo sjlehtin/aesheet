@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {Table, Card} from 'react-bootstrap';
+import StatBreakdown from "./StatBreakdown";
 
 const util = require('./sheet-util');
 
@@ -11,15 +12,15 @@ class MovementRates extends React.Component {
     }
 
     render() {
-        var terrains = [{name: 'Road', mult: 1}, {name: 'Clear', mult: 2},
+        const terrains = [{name: 'Road', mult: 1}, {name: 'Clear', mult: 2},
             {name: 'Scrub', mult: 3}, {name: 'Woods', mult: 4},
             {name: 'Sand', mult: 5}, {name: 'Forest', mult: 6},
          {name: 'Mountains', mult: 10}, {name: 'Swamp', mult: 15}];
 
-        var terrainsRow = [];
-        var milesPerDayRow = [];
-        var milesPerHourRow = [];
-        var spd = this.props.skillHandler.runningSpeed();
+        const terrainsRow = [];
+        const milesPerDayRow = [];
+        const milesPerHourRow = [];
+        const spd = this.props.skillHandler.runningSpeed().value();
         for (let terrain of terrains) {
             terrainsRow.push(<th key={"ter-"+terrain.name}>{terrain.name}</th>);
             milesPerDayRow.push(<td key={"mpd-"+terrain.name}>
@@ -27,7 +28,7 @@ class MovementRates extends React.Component {
             milesPerHourRow.push(<td key={"mph-"+terrain.name}>
                 {(spd/(15 * terrain.mult)).toFixed(1)}</td>);
         }
-        var flySpeed = this.props.skillHandler.flyingSpeed();
+        const flySpeed = this.props.skillHandler.flyingSpeed().value();
         terrainsRow.push(<th key="ter-fly">Fly</th>);
         milesPerDayRow.push(<td key="mpd-fly">{util.roundup(flySpeed/2)}</td>);
         milesPerHourRow.push(<td key="mph-fly">{util.roundup(flySpeed/15)}</td>);
@@ -44,13 +45,16 @@ class MovementRates extends React.Component {
                 </tr></thead>
                 <tbody>
                 <tr>
-                    <td><div>H = {this.props.skillHandler.jumpingDistance().toFixed(1)}</div><div>V = {this.props.skillHandler.jumpingHeight().toFixed(1)}</div></td>
-                    <td>{this.props.skillHandler.climbingSpeed().toFixed(1)}</td>
-                    <td>{util.roundup(this.props.skillHandler.swimmingSpeed())}</td>
-                    <td>{util.roundup(this.props.skillHandler.sneakingSpeed().toFixed())}</td>
-                    <td>{util.roundup(this.props.skillHandler.runningSpeed().toFixed())}</td>
-                    <td>{util.roundup(this.props.skillHandler.sprintingSpeed().toFixed())}</td>
-                    <td>{util.roundup(flySpeed.toFixed())}</td>
+                    <td>
+                        <div>H = <StatBreakdown value={this.props.skillHandler.jumpingDistance()} /></div>
+                        <div>V = <StatBreakdown value={this.props.skillHandler.jumpingHeight()} /></div>
+                    </td>
+                    <td><StatBreakdown value={this.props.skillHandler.climbingSpeed()}/></td>
+                    <td><StatBreakdown value={this.props.skillHandler.swimmingSpeed()}/></td>
+                    <td><StatBreakdown value={this.props.skillHandler.sneakingSpeed()}/></td>
+                    <td><StatBreakdown value={this.props.skillHandler.runningSpeed()}/></td>
+                    <td><StatBreakdown value={this.props.skillHandler.sprintingSpeed()}/></td>
+                    <td><StatBreakdown value={flySpeed}/></td>
                 </tr>
                 </tbody>
             </Table>

@@ -85,7 +85,6 @@ class SkillHandler {
 
         this._baseStats = undefined;
         this._effStats = undefined;
-
     }
 
     static getItemMap(list, accessor) {
@@ -366,119 +365,132 @@ class SkillHandler {
     // Movement rates.
 
     sneakingSpeed() {
-        return this.getBaseMovementSpeed() / 5;
+        const bd = this.getBaseMovementSpeed()
+        bd.divide(5, "sneaking")
+        bd.multiply(this.getGravityMovementMultiplier(), "gravity")
+        return bd
     }
 
     getBaseMovementSpeed() {
-        return this.getEffStats().mov.value();
+        const bd = new ValueBreakdown();
+        bd.addBreakdown(this.getEffStats().mov)
+        if (bd.value() <= 0) {
+            bd.set(0, "Base mov <= 0")
+        }
+        return bd;
+    }
+
+    getGravityMovementMultiplier() {
+        return Math.min(4, 1/this.props.gravity)
     }
 
     runningSpeed() {
-        var rate = this.getBaseMovementSpeed();
+        const bd = this.getBaseMovementSpeed();
 
-        if (rate <= 0) {
-            return 0;
-        }
-        var edgeRate = this.getEdgeModifier('run_multiplier');
-        var effRate = this.getEffectModifier('run_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
+        const edgeRate = this.getEdgeModifier('run_multiplier') || 1.0;
+        const effRate = this.getEffectModifier('run_multiplier') || 1.0;
+        bd.multiply(edgeRate, "edges")
+        bd.multiply(effRate, "effects")
 
+        bd.multiply(this.getGravityMovementMultiplier(), "gravity")
+
+        return bd;
     }
 
     sprintingSpeed() {
-        return this.runningSpeed() * 1.5;
+        const bd = this.runningSpeed()
+        bd.multiply(1.5, "sprint")
+        return bd;
     }
 
     climbingSpeed() {
-        var level = this.skillLevel('Climbing');
-        var rate;
+        const level = this.skillLevel('Climbing');
+        const bd = this.getBaseMovementSpeed();
+
+        bd.divide(30, "climbing")
         if (typeof(level) !== 'number') {
-            rate = this.getBaseMovementSpeed() / 60;
+            bd.divide(2, "unskilled")
         } else {
-            rate = this.getBaseMovementSpeed() / 30 + level;
+            bd.add(level, "skill level")
         }
 
-        var edgeRate = this.getEdgeModifier('climb_multiplier');
-        var effRate = this.getEffectModifier('climb_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
+        const edgeRate = this.getEdgeModifier('climb_multiplier') || 1.0;
+        const effRate = this.getEffectModifier('climb_multiplier') || 1.0;
+        bd.multiply(edgeRate, "edges")
+        bd.multiply(effRate, "effects")
+
+        bd.multiply(this.getGravityMovementMultiplier(), "gravity")
+
+        return bd;
     }
     
     swimmingSpeed() {
-        var level = this.skillLevel('Swimming');
-        var rate;
+        const level = this.skillLevel('Swimming');
+        const bd = this.getBaseMovementSpeed();
+        bd.divide(5, "swimming")
+
         if (typeof(level) !== 'number') {
-            rate = this.getBaseMovementSpeed() / 10;
+            bd.divide(2, "unskilled")
         } else {
-            rate = this.getBaseMovementSpeed() / 5 + level * 5;
+            bd.add(level * 5, "skill level")
         }
 
-        var edgeRate = this.getEdgeModifier('swim_multiplier');
-        var effRate = this.getEffectModifier('swim_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate;
+        const edgeRate = this.getEdgeModifier('swim_multiplier') || 1.0;
+        const effRate = this.getEffectModifier('swim_multiplier') || 1.0;
+        bd.multiply(edgeRate, "edges")
+        bd.multiply(effRate, "effects")
+
+        bd.multiply(this.getGravityMovementMultiplier(), "gravity")
+
+        return bd;
     }
 
     jumpingDistance() {
-        var level = this.skillLevel('Jumping');
-        var rate;
+        const level = this.skillLevel('Jumping');
+        const bd = this.getBaseMovementSpeed();
+        bd.divide(12, "jumping")
         if (typeof(level) !== 'number') {
-            rate = this.getBaseMovementSpeed() / 24;
+            bd.divide(2, "unskilled")
         } else {
-            rate = this.getBaseMovementSpeed() / 12 + level*0.75;
+            bd.add(level * 0.75, "skill level")
         }
 
-        var edgeRate = this.getEdgeModifier('run_multiplier');
-        var effRate = this.getEffectModifier('run_multiplier');
-        if (edgeRate) {
-            rate *= edgeRate;
-        }
-        if (effRate) {
-            rate *= effRate;
-        }
-        return rate / this.props.gravity;
+        const edgeRate = this.getEdgeModifier('run_multiplier') || 1.0;
+        const effRate = this.getEffectModifier('run_multiplier') || 1.0;
+        bd.multiply(edgeRate, "edges")
+        bd.multiply(effRate, "effects")
+
+        bd.multiply(this.getGravityMovementMultiplier(), "gravity")
+
+        return bd;
     }
 
     jumpingHeight() {
-        return this.jumpingDistance() / 3;
+        const bd = this.jumpingDistance()
+        bd.divide(3, "jumping up")
+        return bd;
     }
     
     
     flyingSpeed() {
-        var canFly = false;
-        var rate = this.getBaseMovementSpeed();
-        var edgeRate = this.getEdgeModifier('fly_multiplier');
-        var effRate = this.getEffectModifier('fly_multiplier');
+        let canFly = false;
+        const bd = this.getBaseMovementSpeed();
+        const edgeRate = this.getEdgeModifier('fly_multiplier');
+        const effRate = this.getEffectModifier('fly_multiplier');
         if (edgeRate) {
-            rate *= edgeRate;
+            bd.multiply(edgeRate, "edges")
             canFly = true;
         }
         if (effRate) {
-            rate *= effRate;
+            bd.multiply(effRate, "effects")
             canFly = true;
         }
 
-        if (canFly) {
-            return rate;
-        } else {
-            return 0;
-        }
+        bd.multiply(this.getGravityMovementMultiplier(), "gravity")
+
+        if (!canFly) bd.set(0, "cannot fly")
+
+        return bd
     }
 
     // Stats.
@@ -533,14 +545,6 @@ class SkillHandler {
         return sum;
     }
 
-    getHardMods() {
-        return this._hardMods;
-    }
-
-    getSoftMods() {
-        return this._softMods;
-    }
-    
     getBaseStats() {
         if (!this._baseStats) {
             this._baseStats = {};

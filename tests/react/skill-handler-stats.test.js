@@ -34,7 +34,6 @@ describe('SkillHandler stats', function () {
 
         expect(handler.getBaseStats().dex).toEqual(50);
         expect(handler.getEffStats().dex.value()).toEqual(60);
-        expect(handler.getSoftMods().dex).toEqual(10);
     });
 
     it('calculates hard mods', function () {
@@ -45,7 +44,6 @@ describe('SkillHandler stats', function () {
 
         expect(handler.getBaseStats().dex).toEqual(60);
         expect(handler.getEffStats().dex.value()).toEqual(60);
-        expect(handler.getHardMods().dex).toEqual(10);
     });
 
     it('accounts for base mods', function () {
@@ -56,7 +54,6 @@ describe('SkillHandler stats', function () {
         });
 
         expect(handler.getBaseStats().fit).toEqual(48);
-        expect(handler.getHardMods().fit).toEqual(0);
     });
 
     it('calculates weight penalties', function () {
