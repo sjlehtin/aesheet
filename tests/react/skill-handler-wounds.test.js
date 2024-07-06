@@ -31,7 +31,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 2, location: "T"}]
         });
 
-        expect(handler.getEffStats().dex).toEqual(40);
+        expect(handler.getEffStats().dex.value()).toEqual(40);
     });
 
     it('calculates wound penalties with multiple torso wounds', function () {
@@ -172,7 +172,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 2, location: "RL"}]
         });
 
-        expect(handler.getEffStats().mov).toEqual(30);
+        expect(handler.getEffStats().mov.value()).toEqual(30);
     });
 
     it('combines AA and MOV penalties', function () {
@@ -181,7 +181,7 @@ describe('SkillHandler wounds', function() {
             wounds: [{damage: 2, location: "RL"}, {damage: 2, location: "T"}]
         });
 
-        expect(handler.getEffStats().mov).toEqual(20);
+        expect(handler.getEffStats().mov.value()).toEqual(20);
     });
 
     it('calculates penalties to wounds to left arm', function () {

@@ -366,16 +366,16 @@ class StatBlock extends React.Component {
 
     staminaRecovery(effStats, skillHandler) {
         /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
-        var highStat = util.rounddown((effStats.imm - 45)/15);
-        var level = skillHandler.edgeLevel("Fast Healing");
+        const highStat = util.rounddown((effStats.imm.value() - 45)/15);
+        const level = skillHandler.edgeLevel("Fast Healing");
 
-        var rates = [];
+        const rates = [];
 
         if (highStat !== 0) {
             rates.push(highStat);
         }
         if (level > 0) {
-            var _lookupFastHealing = {
+            const _lookupFastHealing = {
                 1: "1d6",
                 2: "2d6",
                 3: "4d6",
@@ -394,16 +394,16 @@ class StatBlock extends React.Component {
 
     manaRecovery(effStats, skillHandler) {
         /* High stat: 2*ROUNDDOWN((CHA-45)/15;0)*/
-        var highStat = 2*util.rounddown((effStats.cha - 45)/15);
-        var level = skillHandler.edgeLevel("Fast Mana Recovery");
+        const highStat = 2*util.rounddown((effStats.cha.value() - 45)/15);
+        const level = skillHandler.edgeLevel("Fast Mana Recovery");
 
-        var rates = [];
+        const rates = [];
 
         if (highStat != 0) {
             rates.push(highStat);
         }
         if (level > 0) {
-            var _lookupManaRecovery = {
+            const _lookupManaRecovery = {
                 1: "2d6",
                 2: "4d6",
                 3: "8d6",
@@ -836,17 +836,17 @@ class StatBlock extends React.Component {
             <tr>
                 <td style={statStyle}>MOV</td>
                 <td style={baseStyle}>{baseStats.mov}</td>
-                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.mov} breakdown={effStats.breakdown.mov} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.mov.value()} breakdown={effStats.mov.breakdown()} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>DEX</td>
                 <td style={baseStyle}>{baseStats.dex}</td>
-                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.dex} breakdown={effStats.breakdown.dex} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.dex.value()} breakdown={effStats.dex.breakdown()} /></td>
             </tr>
             <tr>
                 <td style={statStyle}>IMM</td>
                 <td style={baseStyle}>{baseStats.imm}</td>
-                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.imm} breakdown={effStats.breakdown.imm} /></td>
+                <td style={effStyle}><StatBreakdown label={"Stat"} value={effStats.imm.value()} breakdown={effStats.imm.breakdown()} /></td>
             </tr>
         </tbody>;
 

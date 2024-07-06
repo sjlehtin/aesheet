@@ -130,7 +130,7 @@ class SkillHandler {
     }
 
     getStat(stat) {
-        return this.getEffStats()[stat.toLowerCase()];
+        return this.getEffStats()[stat.toLowerCase()].value();
     }
 
     getInitiative() {
@@ -220,7 +220,7 @@ class SkillHandler {
         const bd = new ValueBreakdown()
 
         const effStats = this.getEffStats();
-        const ability = effStats[stat.toLowerCase()];
+        const ability = effStats[stat.toLowerCase()].value();
 
         const level= this.skillLevel(skillName);
 
@@ -366,11 +366,15 @@ class SkillHandler {
     // Movement rates.
 
     sneakingSpeed() {
-        return this.getEffStats().mov / 5;
+        return this.getBaseMovementSpeed() / 5;
+    }
+
+    getBaseMovementSpeed() {
+        return this.getEffStats().mov.value();
     }
 
     runningSpeed() {
-        var rate = this.getEffStats().mov;
+        var rate = this.getBaseMovementSpeed();
 
         if (rate <= 0) {
             return 0;
@@ -395,9 +399,9 @@ class SkillHandler {
         var level = this.skillLevel('Climbing');
         var rate;
         if (typeof(level) !== 'number') {
-            rate = this.getEffStats().mov / 60;
+            rate = this.getBaseMovementSpeed() / 60;
         } else {
-            rate = this.getEffStats().mov / 30 + level;
+            rate = this.getBaseMovementSpeed() / 30 + level;
         }
 
         var edgeRate = this.getEdgeModifier('climb_multiplier');
@@ -415,9 +419,9 @@ class SkillHandler {
         var level = this.skillLevel('Swimming');
         var rate;
         if (typeof(level) !== 'number') {
-            rate = this.getEffStats().mov / 10;
+            rate = this.getBaseMovementSpeed() / 10;
         } else {
-            rate = this.getEffStats().mov / 5 + level * 5;
+            rate = this.getBaseMovementSpeed() / 5 + level * 5;
         }
 
         var edgeRate = this.getEdgeModifier('swim_multiplier');
@@ -435,9 +439,9 @@ class SkillHandler {
         var level = this.skillLevel('Jumping');
         var rate;
         if (typeof(level) !== 'number') {
-            rate = this.getEffStats().mov / 24;
+            rate = this.getBaseMovementSpeed() / 24;
         } else {
-            rate = this.getEffStats().mov / 12 + level*0.75;
+            rate = this.getBaseMovementSpeed() / 12 + level*0.75;
         }
 
         var edgeRate = this.getEdgeModifier('run_multiplier');
@@ -458,7 +462,7 @@ class SkillHandler {
     
     flyingSpeed() {
         var canFly = false;
-        var rate = this.getEffStats().mov;
+        var rate = this.getBaseMovementSpeed();
         var edgeRate = this.getEdgeModifier('fly_multiplier');
         var effRate = this.getEffectModifier('fly_multiplier');
         if (edgeRate) {
@@ -678,151 +682,105 @@ class SkillHandler {
             return encumbrancePenalty;
         }
 
-        if (!this._effStats) {
+        if (!this._effStatsV2) {
             this._effStats = {};
+            this._effStatsV2 = {};
             this._effStats.breakdown = {}
+            this._effStats.breakdownV2 = {}
+
             const baseStats = this.getBaseStats();
 
             const woundPenalties = this.getWoundPenalties();
 
             for (let st of SkillHandler.baseStatNames) {
-                this._effStats[st] = baseStats[st]
-                this._effStats.breakdown[st] = [
-                    {reason: st.toUpperCase(),
-                     value: baseStats[st]}
-                ]
+                const bd = new ValueBreakdown()
+                this._effStatsV2[st] = bd
+
+                bd.add(baseStats[st], st.toUpperCase())
+
+                // TODO: handle armor mods separately
+                /*
+                 * The Space Suit / Power Armor skill enhancement is required
+                 * to use a power armor effectively. A successful skill
+                 * check (INT) is required to use a previously unfamiliar
+                 * type of suit the first time. When using a power armor,
+                 * exoskeleton, or a powered space suit, each level of
+                 * Power Armor skill increases the FIT bonus by +2 and
+                 * reduces the REF penalty by +3.
+                 */
                 const softMod = this._softMods[st];
-                if (softMod) {
-                    this._effStats[st] += softMod
-                    this._effStats.breakdown[st].push({
-                        reason: "soft mods",
-                        value: softMod
-                    })
-                }
-                this._effStats[st] += woundPenalties.aa;
-                if (woundPenalties.aa) {
-                    this._effStats.breakdown[st].push({
-                        reason: "wound penalties",
-                        value: woundPenalties.aa
-                    })
-                }
+                bd.add(softMod, "soft mods")
+
+                bd.add(woundPenalties.aa, "wound penalties")
             }
 
             // Encumbrance and armor are calculated after soft mods
             // (transient effects, such as spells) and hard mods (edges)
             // in the Excel combat sheet.
-            if (this._effStats.fit > 0) {
-                const encumbrancePenalty = calculateEncumbrancePenalty(this.props.weightCarried, this._effStats.fit);
+            if (this._effStatsV2.fit.value() > 0) {
+                const encumbrancePenalty = calculateEncumbrancePenalty(this.props.weightCarried, this._effStatsV2.fit.value());
                 if (encumbrancePenalty < 0) {
                     this.addEncumbrancePenalty(encumbrancePenalty);
                 }
 
                 if (this.props.gravity < 1.0) {
                     const gravityPenalty = util.roundup(-25 * (1.0 - this.props.gravity))
-                    this._effStats.ref += gravityPenalty
-                    this._effStats.breakdown.ref.push({
-                        reason: "gravity",
-                        value: gravityPenalty
-                    })
+
+                    this._effStatsV2.ref.add(gravityPenalty, "gravity")
 
                     // Low-G maneuver
                     const level = this.skillLevel("Low-G maneuver");
                     if (typeof(level) === "number") {
                         const skillOffset = Math.min(level * 5, -gravityPenalty)
-
-                        this._effStats.ref += skillOffset
-                        if (skillOffset > 0) {
-                            this._effStats.breakdown.ref.push({
-                                reason: "low-g skill",
-                                value: skillOffset
-                            })
-                        }
+                        this._effStatsV2.ref.add(skillOffset, "low-g skill")
                     }
                 }
             } else {
                 // Effective FIT zero or negative, the character cannot move.
                 this._effStats.fit = -100;
                 this._effStats.ref = -100;
+                this._effStatsV2.ref.set(-100, "Eff-FIT negative")
+                this._effStatsV2.fit.set(-100, "Eff-FIT negative")
             }
 
             const addStatMods = (stat) => {
-                this._effStats[stat] += this._hardMods[stat]
-                if (this._hardMods[stat]) {
-                    this._effStats.breakdown[stat].push(
-                        {
-                            reason: "hard mods",
-                            value: this._hardMods[stat]
-                        }
-                    )
-                }
-                this._effStats[stat] += this._softMods[stat]
-                if (this._softMods[stat]) {
-                    this._effStats.breakdown[stat].push(
-                        {
-                            reason: "soft mods",
-                            value: this._softMods[stat]
-                        }
-                    )
-                }
+                this._effStatsV2[stat].add(this._hardMods[stat], "hard mods")
+                this._effStatsV2[stat].add(this._softMods[stat], "soft mods")
             }
 
-            const baseMov = util.roundup((this._effStats.fit +
-                this._effStats.ref) / 2)
-            this._effStats.mov = baseMov
-            this._effStats.breakdown.mov = [
-                {
-                    reason: "(FIT + REF) / 2",
-                    value: baseMov
-                }
-            ]
+            this._effStatsV2.mov = new ValueBreakdown()
+
+            const baseMov = util.roundup((this._effStatsV2.fit.value() +
+                this._effStatsV2.ref.value()) / 2)
+            this._effStatsV2.mov.add(baseMov, "(FIT + REF) / 2")
+
             addStatMods('mov')
-            this._effStats.mov += woundPenalties.mov
-            if (woundPenalties.mov) {
-                this._effStats.breakdown.mov.push(
-                    {
-                        reason: "wound penalties",
-                        value: woundPenalties.mov
-                    }
-                )
-            }
+            this._effStatsV2.mov.add(woundPenalties.mov, "wound penalties")
 
-            const baseDex = util.roundup((this._effStats.int +
-                this._effStats.ref) / 2);
-            this._effStats.dex = baseDex
-            this._effStats.breakdown.dex = [
-                {
-                    reason: "(INT + REF) / 2",
-                    value: baseDex
-                }
-            ]
+            this._effStatsV2.dex = new ValueBreakdown()
+            const baseDex = util.roundup((this._effStatsV2.int.value() +
+                this._effStatsV2.ref.value()) / 2);
+            this._effStatsV2.dex.add(baseDex, "(INT + REF) / 2")
             addStatMods('dex')
+
+            this._effStatsV2.imm = new ValueBreakdown()
 
             const baseImm = util.roundup((this._baseStats.fit +
                 this._baseStats.psy)/2);
-            this._effStats.imm = baseImm
-            this._effStats.breakdown.imm = [
-                {
-                    reason: "(FIT + PSY) / 2",
-                    value: baseImm
-                }
-            ]
+            this._effStatsV2.imm.add(baseImm, "(FIT + PSY) / 2")
             addStatMods('imm')
+
+            for (const st of ["mov", "dex", "imm", ...SkillHandler.baseStatNames]) {
+                this._effStats[st] = this._effStatsV2[st].value()
+                this._effStats.breakdown[st] = this._effStatsV2[st].breakdown()
+            }
         }
-        return this._effStats;
+        return this._effStatsV2;
     }
 
     addEncumbrancePenalty(encumbrancePenalty, tag = "encumbrance") {
-        this._effStats.fit += encumbrancePenalty;
-        this._effStats.breakdown.fit.push({
-            reason: tag,
-            value: encumbrancePenalty
-        })
-
-        this._effStats.ref += encumbrancePenalty;
-        this._effStats.breakdown.ref.push({
-            reason: tag,
-            value: encumbrancePenalty
-        })
+        this._effStatsV2.fit.add(encumbrancePenalty, tag)
+        this._effStatsV2.ref.add(encumbrancePenalty, tag)
     }
 
     detectionLevel(goodEdge, badEdge, givenMap) {

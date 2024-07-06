@@ -109,7 +109,7 @@ describe('SkillHandler movement rates', function() {
                 factories.skillFactory({name: "High-G maneuver"}),
             ]});
 
-        expect(handler.getEffStats().ref).toEqual(60)
+        expect(handler.getEffStats().ref.value()).toEqual(60)
 
         // This should be close to 4, but because encumbrance penalties due
         // to gravity kick in, the character is essentially double penalized
