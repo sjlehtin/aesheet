@@ -1611,6 +1611,7 @@ class Sheet(PrivateMixin, models.Model):
         new_sheet = original_sheet
         new_sheet.owner = request.user if request else original_sheet.owner
         new_sheet.pk = None
+        new_sheet.stamina_damage = 0
         new_sheet.save()
 
         for weapon in weapons:
