@@ -85,4 +85,10 @@ describe("ValueBreakdown", function () {
         bd.divide(1.0, "nothing much", true)
         expect(bd.breakdown().length).toEqual(3)
     })
+
+    it("can take initial values", function () {
+        const bd = new ValueBreakdown(5, "foo")
+        expect(bd.value()).toEqual(5)
+        expect(bd.breakdown()[0].reason).toEqual("foo")
+    })
 })

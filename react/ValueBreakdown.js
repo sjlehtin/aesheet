@@ -4,8 +4,10 @@ export default class ValueBreakdown {
 
     #setValue = null
 
-    constructor() {
-
+    constructor(initialValue, initialDescription) {
+        if (initialValue !== undefined) {
+            this.add(initialValue, initialDescription)
+        }
     }
 
     add(newValue, description, forceAdd= false) {
