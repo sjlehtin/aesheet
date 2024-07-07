@@ -237,6 +237,47 @@ class SkillHandler {
             }
 
         }
+
+        /*
+         * TODO: Tiring
+         *
+         * A character may normally run for FIT minutes, fight for FIT turns,
+         * or sprint for FIT/10 turns, after which time she will suffer a
+         * –10 AC penalty (see Section 5.1). Wearing armor will decrease
+         * these times.
+         * The AC penalty accumulates as shown in the table below. The
+         * formula tells the number of turns after which one point of penalty
+         * is taken. The number in parentheses indicates the time at FIT 45
+         * where the penalty reaches –10 AC. The times are halved in adverse
+         * environment (e.g. very hot or low pressure).
+         *
+         * Duration
+         * Armor  | Running etc.*         | Fighting            | Sprinting
+         * None   | FIT/10 min (45)       | FIT/10 t (45)       | FIT/100 t (5)
+         * Light  | (FIT/10 – 1) min (35) | (FIT/10 – 1) t (35) | (FIT/100 – 0,1) t (4)
+         * Medium | (FIT/10 – 2) min (25) | (FIT/10 – 2) t (25) | (FIT/100 – 0,2) t (3)
+         * Heavy  | (FIT/10 – 3) min (15) | (FIT/10 – 3) t (15) | (FIT/100 – 0,3) t (2)
+         *
+         * *) Includes (non-combat) spell casting, heavy construction work,
+         * and so on.
+         *
+         * After the penalty reaches –10 (and each full 10 points
+         * thereafter), the PC suffers 1d6 non-lethal damage and must make
+         * an endurance WIL check (modified by the Endurance skill). If the
+         * check is successful, the PC can continue the activity. If the
+         * check is failed, the PC must stop running or sprinting. If forced,
+         * she may continue to fight, but may not move more than MOV/5 m per
+         * turn (see below), and will suffer one stamina damage each turn.
+         * The AC penalty due to tiring will return at the rate of 6 points
+         * per hour of rest or 3 points per hour of light activity. Light
+         * activity means that the PC can walk at the exhausted rate
+         * (MOV/5 m per turn) but cannot run, fight, or sprint. If the PC
+         * uses the exhausted rate for continuous overland movement,
+         * AC penalty is not returned.
+         *
+         * The lost stamina (if any) will heal normally, assuming rest and
+         * nourishment. See Section 5.6.1.
+         */
         return {value: penalty, breakdown: breakdown}
     }
 

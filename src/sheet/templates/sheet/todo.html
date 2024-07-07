@@ -19,6 +19,13 @@
     - 5) spell skill cheks
     + 6) default to normal quality for armor, weapons
 
+    - fix issue when adding a private sheet to sheet set
+        - private sheets should be filtered out as choices to the sheet set
+    - fix logout
+
+    - visual indication of damage taken, per hit location
+    - concise view of current penalties, esp. in sheet set
+
     + gravity effects, encumbrance effects from high gravity
         + encumbrance increased from high gravity
         + REF penalty for low gravity
@@ -94,34 +101,35 @@
         - how to handle data updates? Currently no updates to those lists done by sheet (skills, edges)
         - redux?
 
-    - "goon sheet" sheet set for (mostly) GM managed groups of NPCs
-        - Add and remove, sync from main sheet
-        - subsheets linked to the base sheet
-        - Separate wound lists
-          - move wounds to sheet
-        - Separate stamina damage
-          - move stamina damage to sheet
-        - damage control as a modal
-        - Visual condition indicator ((badly) wounded, etc)
-            - AA > -10 green
-            - -20 <= AA <= -10 yellow
-            - AA < -20 red
-        - expendables (like ammo) separated
-        - condensed layout, should be possible to stack couple of dozen of
+    + "goon sheet" sheet set for (mostly) GM managed groups of NPCs
+        + Add and remove, sync from main sheet
+        + subsheets linked to the base sheet
+        + Separate wound lists
+          + move wounds to sheet
+        + Separate stamina damage
+          + move stamina damage to sheet
+        + damage control as a modal
+        + Visual condition indicator ((badly) wounded, etc)
+            + AA > -10 green
+            + -20 <= AA <= -10 yellow
+            + AA < -20 red
+        + expendables (like ammo) separated
+        + condensed layout, should be possible to stack couple of dozen of
           adversaries on a laptop screen
-        - currently used weapon selected from main sheet choices
+        + currently used weapon selected from main sheet choices
             - only currently selected weapon checks rendered
         - MVP: just combine multiple sheets to same view with selected weapon
             - allow showing movement and selecting between weapons (firearm,
               ranged, cc) to render the weapon
-        - allow very easy duplication, maintain some reference on how many
-          sheets there are for the character, warn if removing last sheet
-        - reorganize sheets to allow changing visualization of combat
+        + allow very easy duplication, maintain some reference on how many
+          sheets there are for the character
+        - warn if removing last sheet
+        + reorganize sheets to allow changing visualization of combat
           formation
-        - SheetSet - multiple sheets with order and grid position
-          - tied to user accounts and private by default
-          - add, create, destroy from the view
-          - sheet operations as normal
+        + SheetSet - multiple sheets with order and grid position
+          + tied to user accounts and private by default
+          + add, create, destroy from the view
+          + sheet operations as normal
     - telescopic sight x16 xxxxl extreme range options
     - language skills to a separate section in the skills
     - make "standard skills" stand out a bit in the selection
@@ -133,9 +141,9 @@
 
     + notes changes should perhaps not be logged.
 
-    - power armors
+    + power armors
         + skill reduces ref penalty
-        - suspended weight
+        + suspended weight
         + check that power armor fit bonus works.
 
     - acute vision counters penalty in ranged combat (-10 -> -5 etc)
@@ -186,6 +194,8 @@
     - tiring
     - bootstrap data pop-up links for armor, effects in edit area
     -- show basic info.
+    - show armor leth and damage reductions as a popover when selecting armor
+    - show ammunition basic characteristics when selecting ammunition
     - reordering weapons
 
     - save bonuses (M)
@@ -196,7 +206,6 @@
     +/- adding weapon inplace ("add row" functionality), instead of the large set of
         controls.  Might already be sufficient with the condensed layout, verify with
         JW.
-
 
     - you should be able to leave current stats empty on character creation,
       in which case the stats would be filled in from the initial stats.
