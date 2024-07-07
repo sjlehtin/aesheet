@@ -125,12 +125,13 @@ class StatRow extends React.Component {
                 <td style={statStyle}>{stat}</td>
                 <td style={baseStyle}>{this.props.baseStats[this.props.stat]}</td>
                 <td style={effStyle} aria-label={`Current ${stat}`}>
-                    <StatBreakdown label={"Stat"} value={this.props.effStats[this.props.stat].value()} breakdown={this.props.effStats[this.props.stat].breakdown()} />
+                    <StatBreakdown label={"Stat"} value={this.props.effStats[this.props.stat]} />
                 </td>
                 <td style={changeStyle}>
                     ({change >= 0 ? "+" : ""}{change})
                 </td>
                 {/* Tap here should not make the controls disappear. */}
+                { this.props.onMod ?
                 <td onTouchEnd={(e) => e.stopPropagation()}>
                     <div style={controlStyle}>
                         <span style={incStyle}
@@ -145,6 +146,8 @@ class StatRow extends React.Component {
                         ><GoArrowDown /></span>
                     </div>
                 </td>
+                    : ''
+                }
             </tr>)
     }
 }
