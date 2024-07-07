@@ -79,3 +79,14 @@ export function renderInt (value) {
     }
 }
 
+export function getCounteredPenalty(penalty, counter) {
+    // If the counter is negative, assume it is more penalty.
+    if (counter < 0) {
+        return counter;
+    }
+    // If the penalty is actually bonus, counter doesn't do anything.
+    if (penalty > 0) {
+        return 0
+    }
+    return Math.min(counter, -penalty)
+}
