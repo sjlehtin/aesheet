@@ -1,6 +1,12 @@
 import React from "react";
-import {Col,Row, Container, Button} from 'react-bootstrap'
-import {GoChevronLeft, GoChevronRight} from 'react-icons/go'
+import {Col, Row, Container, Button, Modal} from 'react-bootstrap'
+import {
+    GoChevronLeft,
+    GoChevronRight,
+    GoCopy,
+    GoTrash,
+    GoX
+} from 'react-icons/go'
 import CompactSheet from "./CompactSheet";
 import {AddSheetControl} from "./AddSheetControl";
 import useSwr from 'swr'
@@ -65,6 +71,8 @@ export function SheetSet({sheetSetId}) {
     const [range, setRange] = useState('')
     const [detectionLevel, setDetectionLevel] = useState(0)
     const [gravity, setGravity] = useState(1.0)
+    const [showDeleteSheet, setShowDeleteSheet] = useState(false)
+    const [sheetToDelete, setSheetToDelete] = useState('')
 
     const { data: sheetSet, error: errorSheetSet, isLoading: sheetSetLoading } =
         useSwr(`/rest/sheetsets/${sheetSetId}/`, rest.getData)
@@ -81,8 +89,30 @@ export function SheetSet({sheetSetId}) {
             return <Col className="col-sm-4 mb-3" key={url}>
                 <CompactSheet key={url} url={url} toRange={range}
                               darknessDetectionLevel={detectionLevel}
-                              gravity={gravity}>
+                              gravity={gravity} style={{fontSize: "70%"}}>
                     <div>
+                        <Button size="sm" onClick={() => {
+                            return handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
+                        }} title="Clone sheet, add to sheet set"><GoCopy />Clone</Button>
+                        {' '}
+                        <Button size="sm" variant="danger"
+                                onClick={async () => {
+                                    setShowDeleteSheet(true)
+                                    setSheetToDelete({
+                                        sheetSet: sheetSetSheet,
+                                        hook: async () => {
+                                            await rest.del(`/rest/sheets/${sheetSetSheet.sheet.id}`)
+                                            setShowDeleteSheet(false)
+                                            let newList = sheetSetSheets.slice()
+                                            newList.splice(index, 1)
+                                            return sheetsMutate(newList)
+                                        }
+                                    })
+                                }}
+                                title="Delete sheet permanently!"><GoTrash/>{''}Delete</Button>
+                        {' '}
+                        <div className="vr"/>
+                        {' '}
                         <Button aria-label={"Move sheet left"}
                                 disabled={!index} size={"sm"}
                                 onClick={async () => {
@@ -91,7 +121,7 @@ export function SheetSet({sheetSetId}) {
                                     await updateOrdering(sheetSetId, newList)
                                     return sheetsMutate(newList)
                                 }
-                                }><GoChevronLeft/></Button>{' '}
+                                } title="Move sheet to the left"><GoChevronLeft/></Button>{' '}
                         <Button aria-label={"Move sheet right"}
                                 disabled={index === sheetSetSheets.length - 1}
                                 size={"sm"} onClick={async () => {
@@ -100,35 +130,49 @@ export function SheetSet({sheetSetId}) {
                             await updateOrdering(sheetSetId, newList)
                             return sheetsMutate(newList)
                         }
-                        }><GoChevronRight/></Button>{' '}
+                        } title="Move sheet to the right"><GoChevronRight/></Button>{' '}
+                        {' '}
                         <Button size="sm" onClick={async () => {
                             await rest.del(`/rest/sheetsets/${sheetSetId}/sheetsetsheets/${sheetSetSheet.id}/`)
                             let newList = sheetSetSheets.slice()
                             newList.splice(index, 1)
                             return sheetsMutate(newList)
                         }
-                        }>Remove from set</Button>
-                        {' '}
-                        <div className="vr"/>
-                        {' '}
-                        <Button size="sm" onClick={() => {
-                            return handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
-                        }}>Clone</Button>
-                        {' '}
-                        <Button size="sm" variant="danger"
-                                onClick={async () => {
-                                    await rest.del(`/rest/sheets/${sheetSetSheet.sheet.id}`)
-                                    let newList = sheetSetSheets.slice()
-                                    newList.splice(index, 1)
-                                    return sheetsMutate(newList)
-                                }
-                                }>Delete sheet</Button>
+                        } title="Remove sheet from sheet set"><GoX/></Button>
                     </div>
                 </CompactSheet>
             </Col>
         })
 
     return <Container className={"m-1"} fluid={"true"}>
+                        <Modal size="lg" show={showDeleteSheet} onHide={() => {
+                            setShowDeleteSheet(false)
+                            }}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Delete sheet</Modal.Title>
+                    </Modal.Header>
+                            <Modal.Body><h4>Delete sheet {sheetToDelete?.sheetSet?.sheet.id}?</h4>
+                                <p>
+                                This will permanently delete the sheet (but not the character) from the backend.
+                                </p>
+                                <p>
+                                    Weapons, armor, and damage will be lost.
+                                </p>
+                                <p>You can create a new sheet later on.</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="danger" onClick={() => {
+                            return sheetToDelete.hook()
+                        }}>
+                            Delete
+                        </Button>
+                        <Button variant="secondary" onClick={() => {
+                            setShowDeleteSheet(false)
+                        }}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
         <Row className={"m-1"}>
             <Col fluid={"true"} xs={3}>
             Add sheets
@@ -150,7 +194,7 @@ export function SheetSet({sheetSetId}) {
                 <GravityControl initialValue={gravity} onChange={setGravity} />
             </Col>
         </Row>
-        <Row fluid={"true"}>
+        <Row fluid={"true"} >
             {rows}
         </Row>
     </Container>
