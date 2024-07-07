@@ -48,12 +48,7 @@ class InitiativeBlock extends React.Component {
         var getItems = function (initiatives) {
             return initiatives.map((init, ii) => { return <td aria-label={"check"} key={ii}>{init}</td>; });
         }
-        return <Card className={"m-1"} style={this.props.style}>
-            <Card.Header>
-                <h4>Initiative penalty for advancing in combat</h4>
-            </Card.Header>
-            <Card.Body className={"table-responsive p-0"}>
-            <Table style={{fontSize: "inherit"}} size={"sm"}>
+        return <Table style={{fontSize: "inherit"}} size={"sm"}>
                 <thead>
                     <tr>
                         <th><label id={"distanceLabel"}>Distance</label></th>
@@ -70,8 +65,6 @@ class InitiativeBlock extends React.Component {
                 <tr aria-label={"Ranged initiatives"}><td>Ranged / casting</td>{getItems(ranged)}</tr>
                 </tbody>
             </Table>
-            </Card.Body>
-        </Card>;
     }
 }
 
