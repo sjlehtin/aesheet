@@ -98,7 +98,8 @@ class ArmorTemplateAdmin(admin.ModelAdmin):
 
     list_per_page = 50
 
-    list_display = ('name', 'tech_level', 'is_helm', 
+    list_display = ('name', 'tech_level', 'is_helm',
+                    'is_powered',
                     'armor_h_p', 'armor_h_s', 'armor_h_b', 'armor_h_r', 'armor_h_dr', 'armor_h_dp', 'armor_h_pl',
                     'armor_t_p', 'armor_t_s', 'armor_t_b', 'armor_t_r', 'armor_t_dr', 'armor_t_dp', 'armor_t_pl',
                     'armor_ll_p', 'armor_ll_s', 'armor_ll_b', 'armor_ll_r', 'armor_ll_dr', 'armor_ll_dp', 'armor_ll_pl',
