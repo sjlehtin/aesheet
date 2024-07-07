@@ -76,7 +76,9 @@ const skillFactory = function (overrideFields) {
         "required_skills": [],
         "required_edges": [],
         "min_level": 0,
-        "max_level": 8
+        "max_level": 8,
+        "powered_ref_counter": 0,
+        "powered_fit_mod": 0,
     };
     return Object.assign(_baseSkill, props);
 };
@@ -438,6 +440,7 @@ const armorTemplateFactory = function (overrideFields) {
         "name": "Cloth cloak",
         "description": "",
         "is_helm": false,
+        "is_powered": false,
         "armor_h_p": "0.0",
         "armor_h_s": "0.0",
         "armor_h_b": "0.0",

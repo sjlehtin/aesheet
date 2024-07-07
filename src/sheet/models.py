@@ -371,6 +371,9 @@ class Skill(ExportedModel):
 
     stat = models.CharField(max_length=64, choices=STAT_TYPES)
 
+    powered_ref_counter = models.IntegerField(default=0, help_text="Counters this many points of REF penalty using a powered armor")
+    powered_fit_mod = models.IntegerField(default=0,  help_text="Grant this many points of FIT bonus using a powered armor")
+
     def clean_fields(self, exclude=None):
         self.stat = self.stat.upper()
         super(Skill, self).clean_fields(exclude=exclude)
@@ -1297,6 +1300,8 @@ class ArmorTemplate(ExportedModel):
     tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
     is_helm = models.BooleanField(default=False)
+
+    is_powered = models.BooleanField(default=False, help_text="Powered armor, allowing skill to affect REF and FIT modifiers")
 
     armor_h_p = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     armor_h_s = models.DecimalField(max_digits=4, decimal_places=1, default=0)

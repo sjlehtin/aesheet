@@ -60,10 +60,10 @@ describe('StatBlock -- gravity', () => {
 
         expect(screen.getByLabelText("Short range").textContent).toEqual("30")
 
+        expect(screen.getByLabelText("Weight carried").textContent).toEqual("1.00 kg")
+
         expect(screen.getByLabelText("Current REF").textContent).toEqual("49")
         expect(screen.getByLabelText("Current FIT").textContent).toEqual("49")
-
-        expect(screen.getByLabelText("Weight carried").textContent).toEqual("1.00 kg")
 
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 

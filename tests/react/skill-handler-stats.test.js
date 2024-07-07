@@ -1,14 +1,8 @@
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
-var factories = require('./factories');
-
-const SkillHandler = require('SkillHandler').default;
+import * as factories from './factories'
+import SkillHandler from "../../react/SkillHandler";
+import ValueBreakdown from "../../react/ValueBreakdown";
 
 describe('SkillHandler stats', function () {
-    "use strict";
-
     it('calculates eff stats', function () {
         var handler = factories.skillHandlerFactory({
             character: {cur_ref: 50, cur_int: 50}
@@ -57,11 +51,11 @@ describe('SkillHandler stats', function () {
     });
 
     it('calculates weight penalties', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50
             }),
-            weightCarried: 26
+            weightCarried: new ValueBreakdown(26, "initial")
         });
 
         expect(handler.getBaseStats().fit).toEqual(50);
@@ -77,7 +71,7 @@ describe('SkillHandler stats', function () {
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
-            weightCarried: 26, // Gravity already accounted for
+            weightCarried: new ValueBreakdown(52, "initial"),
             gravity: 0.5
         });
 
@@ -92,7 +86,7 @@ describe('SkillHandler stats', function () {
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
             skills: [{skill: "Low-G maneuver", level: 2}],
-            weightCarried: 26, // Gravity already accounted for
+            weightCarried: new ValueBreakdown(52, "initial"),
             gravity: 0.5
         });
 
@@ -106,7 +100,7 @@ describe('SkillHandler stats', function () {
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
-            weightCarried: 0,
+            weightCarried: new ValueBreakdown(),
             gravity: 2.2
         });
 
@@ -122,7 +116,7 @@ describe('SkillHandler stats', function () {
             character: factories.characterFactory({
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
-            weightCarried: 26, // Gravity already accounted for
+            weightCarried: new ValueBreakdown(12, "initial"),
             gravity: 2.2
         });
 
@@ -139,7 +133,7 @@ describe('SkillHandler stats', function () {
                 cur_fit: 50, cur_int: 50, cur_ref: 50, cur_wil: 50, weigth: 80
             }),
             skills: [{skill: "High-G maneuver", level: 1}],
-            weightCarried: 26, // Gravity already accounted for
+            weightCarried: new ValueBreakdown(12, "initial"),
             gravity: 2.2
         });
 
@@ -150,9 +144,9 @@ describe('SkillHandler stats', function () {
     })
 
     it('handles zero eff fit on weight penalty calculation', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: {cur_fit: 50},
-            weightCarried: 26,
+            weightCarried: new ValueBreakdown(26, "initial"),
             wounds: [{location: "H", damage: 5}]
         });
         expect(handler.getWoundPenalties().aa).toEqual(-50);
@@ -160,9 +154,9 @@ describe('SkillHandler stats', function () {
     });
 
     it('handles negative eff fit on weight penalty calculation', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: {cur_fit: 50},
-            weightCarried: 26,
+            weightCarried: new ValueBreakdown(26, "initial"),
             wounds: [{location: "H", damage: 5}, {location: "T", damage: 2}]
         });
         expect(handler.getWoundPenalties().aa).toEqual(-60);
@@ -178,7 +172,7 @@ describe('SkillHandler stats', function () {
             }),
             effects: [
                 factories.transientEffectFactory({fit: 10})],
-            weightCarried: 26
+            weightCarried: new ValueBreakdown(26, "initial"),
         });
         expect(handler.getBaseStats().fit).toEqual(40);
         expect(handler.getEffStats().fit.value()).toEqual(44);
@@ -237,7 +231,7 @@ describe('SkillHandler stats', function () {
     });
 
     it('takes armor into account with penalties', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: {
                 cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
             },
@@ -249,13 +243,14 @@ describe('SkillHandler stats', function () {
                 }
             }),
         });
+        expect(handler.getArmorStatMod('fit').value()).toEqual(-2);
         expect(handler.getEffStats().fit.value()).toEqual(38);
         expect(handler.getEffStats().ref.value()).toEqual(42);
         expect(handler.getEffStats().psy.value()).toEqual(45);
     });
 
     it('takes armor quality into account with penalties', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: factories.characterFactory({
                 cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
             }),
@@ -499,27 +494,30 @@ describe('SkillHandler stats', function () {
             }],
             armor: factories.armorFactory({
                 base: {
-                    mod_fit: 10,
+                    mod_fit: -10,
                     mod_ref: -15,
                     mod_psy: -5
                 }
             }),
         });
-        expect(handler.getEffStats().fit.value()).toEqual(40);
+        expect(handler.getEffStats().fit.value()).toEqual(30);
         expect(handler.getEffStats().ref.value()).toEqual(30);
         expect(handler.getEffStats().psy.value()).toEqual(45);
     });
 
-    xit('take power armor skill into account with powered armor', function () {
+    it('take power armor skill into account with powered armor', function () {
         const handler = factories.skillHandlerFactory({
             character: {
                 cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
             },
             skills: [{
-                skill: {
-                    name: "Power armor", "powered_ref_counter": 3,
-                    "powered_fit_mod": 2,
-                }, level: 3,
+                skill: "Power armor",
+                level: 3,
+            }],
+            allSkills: [{
+                name: "Power armor",
+                powered_ref_counter: 3,
+                powered_fit_mod: 2,
             }],
             armor: factories.armorFactory({
                 base: {
@@ -529,10 +527,47 @@ describe('SkillHandler stats', function () {
                     mod_psy: -5
                 }
             }),
+            weightCarried: 0
         });
-        expect(handler.getEffStats().fit.value()).toEqual(54);
-        expect(handler.getEffStats().ref.value()).toEqual(36);
+        expect(handler.getSkillBenefit("powered_fit_mod").value()).toEqual(6)
+        expect(handler.getSkillBenefit("powered_ref_counter").value()).toEqual(9)
+
+        expect(handler.getArmorStatMod("ref").value()).toEqual(-6)
+        expect(handler.getArmorStatMod("fit").value()).toEqual(16)
+
+        expect(handler.getEffStats().fit.value()).toEqual(56);
+        expect(handler.getEffStats().ref.value()).toEqual(39);
         expect(handler.getEffStats().psy.value()).toEqual(45);
+
+        expect(handler.getCarriedWeight().value()).toEqual(0)
     });
+
+    it('factors in power armor suspension from fit bonus', function () {
+        const handler = factories.skillHandlerFactory({
+            character: {
+                cur_fit: 40, cur_int: 50, cur_ref: 45, cur_psy: 50
+            },
+            skills: [{
+                skill: "Power armor",
+                level: 3,
+            }],
+            allSkills: [{
+                name: "Power armor",
+                powered_ref_counter: 3,
+                powered_fit_mod: 2,
+            }],
+            armor: factories.armorFactory({
+                base: {
+                    is_powered: true,
+                    mod_fit: 10,
+                    mod_ref: -15,
+                    mod_psy: -5
+                }
+            }),
+            weightCarried: new ValueBreakdown(40, "initial")
+        });
+        // 10 + 6 -> should suspend 16 kg of weight
+        expect(handler.getCarriedWeight().value()).toEqual(24)
+    })
 })
 ;

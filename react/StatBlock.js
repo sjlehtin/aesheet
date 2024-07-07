@@ -44,6 +44,7 @@ import {
 
 import * as rest from './sheet-rest'
 import * as util from './sheet-util'
+import ValueBreakdown from "./ValueBreakdown";
 
 export function staminaRecovery(effStats, skillHandler) {
     /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
@@ -80,7 +81,7 @@ export function manaRecovery(effStats, skillHandler) {
 
     const rates = [];
 
-    if (highStat != 0) {
+    if (highStat !== 0) {
         rates.push(highStat);
     }
     if (level > 0) {
@@ -889,8 +890,15 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Advancing initiatives</Loading>;
         }
-        return <InitiativeBlock className="m-1" style={{fontSize: "80%"}}
-                                stats={skillHandler} />;
+        return <Card className={"m-1"} style={this.props.style}>
+            <Card.Header>
+                <h4>Initiative penalty for advancing in combat</h4>
+            </Card.Header>
+            <Card.Body className={"table-responsive p-0"}>
+            <InitiativeBlock className="m-1" style={{fontSize: "80%"}}
+                                stats={skillHandler} />
+                            </Card.Body>
+        </Card>;
     }
 
     renderPortrait () {
@@ -950,7 +958,7 @@ class StatBlock extends React.Component {
             allSkills: this.state.allSkills,
             edges: this.state.edgeList,
             effects: this.getAllEffects(),
-            weightCarried: this.getCarriedWeight().value,
+            weightCarried: this.getCarriedWeight(),
             gravity: this.state.gravity,
             staminaDamage: this.state.sheet.stamina_damage,
             wounds: this.state.woundList,
@@ -996,56 +1004,28 @@ class StatBlock extends React.Component {
     }
 
     getCarriedWeight() {
-        let breakdown = []
-        let weight = 0
+        const bd = new ValueBreakdown()
+
         if (this.state.armor && this.state.armor.base) {
             const itemWeight = util.itemWeight(this.state.armor)
-            weight += itemWeight
-            breakdown.push(
-                {
-                    reason: "armor",
-                    value: itemWeight
-                }
-            )
+            bd.add(itemWeight, "armor")
         }
         if (this.state.helm && this.state.helm.base) {
             const itemWeight =  util.itemWeight(this.state.helm)
-            weight += itemWeight
-            breakdown.push(
-                {
-                    reason: "helm",
-                    value: itemWeight
-                }
-            )
+            bd.add(itemWeight, "helm")
         }
 
         let weaponWeight = 0
         for (let wpn of this.state.weaponList) {
             weaponWeight += util.itemWeight(wpn)
         }
-        weight += weaponWeight
-        if (weaponWeight) {
-            breakdown.push(
-                {
-                    reason: "CC weapons",
-                    value: weaponWeight
-                }
-            )
-        }
+        bd.add(weaponWeight, "CC weapons")
 
         let rangedWeaponWeight = 0
         for (let wpn of this.state.rangedWeaponList) {
             rangedWeaponWeight += util.itemWeight(wpn)
         }
-        weight += rangedWeaponWeight
-        if (weaponWeight) {
-            breakdown.push(
-                {
-                    reason: "ranged weapons",
-                    value: rangedWeaponWeight
-                }
-            )
-        }
+        bd.add(rangedWeaponWeight, "ranged weapons")
 
         let firearmWeight = 0
         let ammoWeight = 0
@@ -1059,65 +1039,19 @@ class StatBlock extends React.Component {
                 ammoWeight += util.magazineWeight(wpn, mag)
             }
         }
-        weight += firearmWeight
-        if (weaponWeight) {
-            breakdown.push(
-                {
-                    reason: "firearms",
-                    value: firearmWeight
-                }
-            )
-        }
 
-        weight += ammoWeight
-        if (ammoWeight) {
-            breakdown.push(
-                {
-                    reason: "ammunition",
-                    value: ammoWeight
-                }
-            )
-        }
+        bd.add(firearmWeight, "firearms")
+        bd.add(ammoWeight, "ammunition")
 
         let miscellaneousItemWeight = 0
         for (let item of this.state.miscellaneousItemList) {
             miscellaneousItemWeight += parseFloat(item.item.weight);
         }
-        weight += miscellaneousItemWeight
-        if (miscellaneousItemWeight) {
-            breakdown.push(
-                {
-                    reason: "miscellaneous items",
-                    value: miscellaneousItemWeight
-                }
-            )
-        }
+        bd.add(miscellaneousItemWeight, "miscellaneous items")
 
-        weight += this.state.carriedInventoryWeight
-        if (this.state.carriedInventoryWeight) {
-            breakdown.push(
-                {
-                    reason: "inventory",
-                    value: this.state.carriedInventoryWeight
-                }
-            )
-        }
+        bd.add(this.state.carriedInventoryWeight, "inventory")
 
-        const extraFromGravity = weight * (this.state.gravity - 1.0)
-        if (extraFromGravity) {
-            weight += extraFromGravity
-            breakdown.push(
-                {
-                    reason: "gravity",
-                    value: extraFromGravity
-                }
-            )
-        }
-
-        return {
-            value: weight,
-            breakdown: breakdown
-        }
+        return bd
     }
 
     rangeChanged(newRange) {
@@ -1486,12 +1420,12 @@ class StatBlock extends React.Component {
     }
 
     renderWeightCarried () {
-        if (this.state.loading) {
+        const skillHandler =  this.getSkillHandler();
+        if (this.state.loading || !skillHandler) {
             return <Loading>Inventory</Loading>
         }
-        const weight = this.getCarriedWeight()
         return <span>Weight carried: <span aria-label={"Weight carried"}>
-            <StatBreakdown style={{display: "inline-block"}} label={"Encumbrance"} toFixed={2} units={" kg"} value={Number.parseFloat(weight.value)} breakdown={weight.breakdown} /></span></span>
+                <StatBreakdown style={{display: "inline-block"}} label={"Encumbrance"} toFixed={2} units={" kg"} value={skillHandler.getCarriedWeight()} /></span></span>
     }
 
     render() {

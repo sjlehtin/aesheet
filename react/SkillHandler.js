@@ -43,9 +43,13 @@
  */
 
 import * as util from './sheet-util'
+import {getCounteredPenalty} from './sheet-util'
 import ValueBreakdown from "./ValueBreakdown";
 
 class SkillHandler {
+    #edgeMods
+    #armorMods
+
     constructor(props) {
         this.props = Object.assign({}, SkillHandler.defaultProps, props);
 
@@ -58,18 +62,10 @@ class SkillHandler {
 
         this.state.skillList = this.createSkillList();
 
-        this._hardMods = {};
         this._softMods = {};
 
         for (const st of SkillHandler.allStatNames) {
-            this._hardMods[st] = 0;
             this._softMods[st] = 0;
-        }
-
-        for (const mod of this.props.edges) {
-            for (let st of SkillHandler.allStatNames) {
-                this._hardMods[st] += mod[st];
-            }
         }
 
         for (const mod of this.props.effects) {
@@ -79,22 +75,87 @@ class SkillHandler {
         }
 
         for (const st of SkillHandler.allStatNames) {
-            this._softMods[st] += this.getArmorMod(this.props.helm, st) +
-                 this.getArmorMod(this.props.armor, st);
+            this._softMods[st] += this.getArmorStatMod(st).value()
         }
 
         this._baseStats = undefined;
         this._effStats = undefined;
     }
 
-    static getItemMap(list, accessor) {
-        if (!accessor) {
-            accessor = (item) => { return item.name; };
+    getEdgeStatMod(stat) {
+        if (!this.#edgeMods) {
+            this.#edgeMods = {}
+            for (let st of SkillHandler.allStatNames) {
+                this.#edgeMods[st] = new ValueBreakdown()
+            }
+
+            for (const mod of this.props.edges) {
+                for (let st of SkillHandler.allStatNames) {
+                    this.#edgeMods[st].add(mod[st], mod.name)
+                }
+            }
         }
+        return this.#edgeMods[stat]
+    }
+
+    getSkillBenefit(field) {
+        const bd = new ValueBreakdown()
+        for (let cs of this.props.characterSkills) {
+            const skill = this.state.skillMap[cs.skill] ?? {}
+            bd.add(skill[field] * cs.level, cs.skill)
+        }
+        return bd
+    }
+
+    getArmorStatMod(stat) {
+        if (!this.#armorMods) {
+            this.#armorMods = {}
+            for (let st of SkillHandler.allStatNames) {
+                this.#armorMods[st] = new ValueBreakdown()
+
+                const helmMod = this.getArmorMod(this.props.helm, st)
+                this.#armorMods[st].add(helmMod, "helm")
+                const armorMod = this.getArmorMod(this.props.armor, st)
+                this.#armorMods[st].add(armorMod, "armor")
+            }
+
+            if (this.props.armor.base?.is_powered) {
+                /*
+                 * The Space Suit / Power Armor skill enhancement is required
+                 * to use a power armor effectively. A successful skill
+                 * check (INT) is required to use a previously unfamiliar
+                 * type of suit the first time. When using a power armor,
+                 * exoskeleton, or a powered space suit, each level of
+                 * Power Armor skill increases the FIT bonus by +2 and
+                 * reduces the REF penalty by +3.
+                 */
+                this.#armorMods.ref.add(getCounteredPenalty(this.#armorMods.ref.value(), this.getSkillBenefit("powered_ref_counter").value()),
+                        "skill benefit")
+                this.#armorMods.fit.add(this.getSkillBenefit("powered_fit_mod").value(), "skill benefit")
+                this.#armorMods.suspendedWeight = this.#armorMods.fit.value()
+            } else {
+                this.#armorMods.suspendedWeight = 0
+            }
+        }
+        return this.#armorMods[stat]
+    }
+
+    getCarriedWeight() {
+        const bd = new ValueBreakdown()
+        if (this.props.weightCarried)
+            bd.addBreakdown(this.props.weightCarried)
+        bd.add(-Math.min(bd.value(),
+                         this.getArmorStatMod('suspendedWeight')),
+            "power armor suspension")
+        bd.multiply(this.props.gravity, "from gravity")
+        return bd
+    }
+
+    static getItemMap(list, accessor = (item) => { return item.name; }) {
         if (!list) {
             return {};
         }
-        var newMap = {};
+        const newMap = {};
         for (let item of list) {
             newMap[accessor(item)] = item;
         }
@@ -111,11 +172,9 @@ class SkillHandler {
             for (let sb of edge.edge_skill_bonuses) {
                 if (!(sb.skill in skillBonusMap)) {
                     skillBonusMap[sb.skill] = {bonus: 0
-                        // , breakdown: []
                     };
                 }
                 skillBonusMap[sb.skill].bonus += sb.bonus;
-                // skillBonusMap[sb.skill]
             }
         }
         return skillBonusMap;
@@ -298,9 +357,6 @@ class SkillHandler {
     }
 
     createSkillList() {
-        var newList = [];
-        var cs;
-
         // Make a deep copy of the list so as not accidentally mangle
         // parent copy of the props.
         var skillList = this.props.characterSkills.map(
@@ -320,7 +376,7 @@ class SkillHandler {
         };
 
         var root = [];
-        for (cs of skillList) {
+        for (let cs of skillList) {
             var skill = skillMap[cs.skill];
             if (!skill) {
                 cs._unknownSkill = true;
@@ -356,7 +412,7 @@ class SkillHandler {
                 depthFirst(child, indent + 1);
             }
         };
-        for (cs of root.sort(compare)) {
+        for (let cs of root.sort(compare)) {
             depthFirst(cs, 0);
         }
         return finalList;
@@ -495,21 +551,20 @@ class SkillHandler {
 
     // Stats.
 
+
     getArmorMod(armor, givenStat) {
-        var mod = 0;
-        var stat = "mod_" + givenStat;
+        let fromArmor = 0;
+        let fromQuality = 0;
+        const stat = "mod_" + givenStat;
         if (armor.base && stat in armor.base) {
-            mod += armor.base[stat];
+            fromArmor += armor.base[stat];
         }
         if (armor.quality && stat in armor.quality) {
-            mod += armor.quality[stat];
+            fromQuality += armor.quality[stat];
         }
         // Quality can not raise the stat, it only counters penalties.
         // Outlined in the armor excel.
-        if (mod > 0) {
-            mod = 0;
-        }
-        return mod;
+        return fromArmor + getCounteredPenalty(fromArmor, fromQuality)
     }
 
     getSkillMod(skill) {
@@ -551,14 +606,14 @@ class SkillHandler {
             for (let st of SkillHandler.baseStatNames) {
                 this._baseStats[st] = this.props.character['cur_' + st] +
                     this.props.character['base_mod_' + st] +
-                    this._hardMods[st];
+                    this.getEdgeStatMod(st).value();
             }
             this._baseStats.mov = util.roundup((this._baseStats.fit +
-                this._baseStats.ref)/2) + this._hardMods.mov;
+                this._baseStats.ref)/2) + this.getEdgeStatMod('mov').value();
             this._baseStats.dex = util.roundup((this._baseStats.int +
-                this._baseStats.ref)/2) + this._hardMods.dex;
+                this._baseStats.ref)/2) + this.getEdgeStatMod('dex').value();
             this._baseStats.imm = util.roundup((this._baseStats.fit +
-                this._baseStats.psy)/2) + this._hardMods.mov;
+                this._baseStats.psy)/2) + this.getEdgeStatMod('imm').value();
 
             this._baseStats.stamina = util.roundup(
                 (this._baseStats.ref + this._baseStats.wil)/ 4)
@@ -596,9 +651,6 @@ class SkillHandler {
         } else if (woundPenalties.aa < -20 || (!painResistance && acPenalty <= -20)) {
             /*
              * Pain resistance
-             *
-             * TODO: -20 AC not enough for CRITICAL with this edge
-             * TODO: also the AA calculation should take the edge into account
              *
              * Never shocked due to wounding. Not subject to AA penalties
              * from leg and arm wounds. Automatically continue combat at
@@ -690,7 +742,6 @@ class SkillHandler {
             this._effStats = {};
             this._effStatsV2 = {};
             this._effStats.breakdown = {}
-            this._effStats.breakdownV2 = {}
 
             const baseStats = this.getBaseStats();
 
@@ -703,15 +754,6 @@ class SkillHandler {
                 bd.add(baseStats[st], st.toUpperCase())
 
                 // TODO: handle armor mods separately
-                /*
-                 * The Space Suit / Power Armor skill enhancement is required
-                 * to use a power armor effectively. A successful skill
-                 * check (INT) is required to use a previously unfamiliar
-                 * type of suit the first time. When using a power armor,
-                 * exoskeleton, or a powered space suit, each level of
-                 * Power Armor skill increases the FIT bonus by +2 and
-                 * reduces the REF penalty by +3.
-                 */
                 const softMod = this._softMods[st];
                 bd.add(softMod, "soft mods")
 
@@ -722,7 +764,7 @@ class SkillHandler {
             // (transient effects, such as spells) and hard mods (edges)
             // in the Excel combat sheet.
             if (this._effStatsV2.fit.value() > 0) {
-                const encumbrancePenalty = calculateEncumbrancePenalty(this.props.weightCarried, this._effStatsV2.fit.value());
+                const encumbrancePenalty = calculateEncumbrancePenalty(this.getCarriedWeight().value(), this._effStatsV2.fit.value());
                 if (encumbrancePenalty < 0) {
                     this.addEncumbrancePenalty(encumbrancePenalty);
                 }
@@ -741,14 +783,12 @@ class SkillHandler {
                 }
             } else {
                 // Effective FIT zero or negative, the character cannot move.
-                this._effStats.fit = -100;
-                this._effStats.ref = -100;
                 this._effStatsV2.ref.set(-100, "Eff-FIT negative")
                 this._effStatsV2.fit.set(-100, "Eff-FIT negative")
             }
 
             const addStatMods = (stat) => {
-                this._effStatsV2[stat].add(this._hardMods[stat], "hard mods")
+                this._effStatsV2[stat].add(this.getEdgeStatMod(stat).value(), "edges")
                 this._effStatsV2[stat].add(this._softMods[stat], "soft mods")
             }
 
@@ -796,7 +836,7 @@ class SkillHandler {
     }
 
     getTotalModifier(target) {
-        return this._hardMods[target] + this._softMods[target];
+        return this.getEdgeStatMod(target).value() + this._softMods[target];
     }
 
     // TODO: there should be a visionCheck() call which incorporates day and
