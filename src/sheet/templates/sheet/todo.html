@@ -24,14 +24,20 @@
         + REF penalty for low gravity
         + REF penalties countered by low/high G-maneuvers skill
         + effect of gravity applies to ranged weapons...
-        - movement rates
+        + movement rates
         - allow changing gravity with 0.1 increments with cursor keys
+
+    - before summer of 2025, check offline functionality,
+        should be possible to add and remove damage and spend ammo, at least, even without network connectivity.
+        - tests to this effect
+
     - firearms in CC. (from firearms section)
     - add a generic skill check element to allow unskilled checks
         - at least render base skill checks
     - fix issue in skill list rendering with skills that are specializations
         of "standard" skills
-    - check breakdown for sweep fire
+    + check breakdown for sweep fire
+        - use counterpenaltyv2 to get more accurate breakdown
     - double range penalties for sweep fire missing in range view
     - allow adding number of targets in combat transients, to calculate penalties accurately
         - 5 per additional target in same arc, -10 per additional in different arc
@@ -41,8 +47,9 @@
     - check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
         - at least in normal daylight, acute vision does not work (probably because night vision check always used)
         - Render perks in the details, as an overlay for example
+    + power armor skill
     - character log to the side after skill panel. Should update dynamically,
-        use websockets for this
+        use websockets or swr for this
 
     - "add xp used ingame" with a possibility to enter description (to log)
     -- if a log entry is added, entry should not be coalesced.
@@ -127,7 +134,7 @@
     + notes changes should perhaps not be logged.
 
     - power armors
-        - skill reduces ref penalty
+        + skill reduces ref penalty
         - suspended weight
         + check that power armor fit bonus works.
 

@@ -1,3 +1,24 @@
+## [Unreleased]
+
+### Added
+
+* Added damage point calculation from armor quality.
+* Added reordering controls to sheet set.
+* Added confirmation dialog when deleting a sheet in sheet set.
+* Added handling for wound effects for wounds with damage greater than the location threshold.
+* Added movement rate calculation based on gravity.
+* Implement powered armors, with suspended weight, with possibility to add Power Armor skill.
+
+### Fixed
+
+* Sheet set backend rejects if the same sheet is attempted to be added to the set multiple times.
+* Sheet set frontend filters out sheets already in the set to avoid errors.
+* Improved layout on sheet sets.
+* Fixed issues when removing and deleting sheets from sheet set.
+* Fixed DR calculation based on quality.
+* Clear sheet stamina damage on sheet clone.
+* Fixed power armor positive FIT modifier.
+
 ## [0.21.0] - 2024-07-03
 
 ### Added
