@@ -1,19 +1,12 @@
-# encoding: utf-8
-
-from __future__ import division
-
 import logging
-import itertools
-from collections import namedtuple
 
 from django.test import TestCase
 import django.test
 
 from django.urls import reverse
-from sheet.models import Sheet, Character, Weapon, WeaponTemplate, Armor
-from sheet.models import CharacterSkill, Skill, CharacterEdge, EdgeLevel
+from sheet.models import Sheet
+from sheet.models import CharacterSkill, CharacterEdge
 import sheet.forms as forms
-import sheet.views as views
 import sheet.models
 from django_webtest import WebTest
 import django.http
