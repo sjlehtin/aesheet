@@ -296,7 +296,7 @@ describe('StatBlock', function() {
               return res(ctx.json({}))
           }),
         )
-        await user.click(within(screen.getByLabelText("Firearm Luger")).getByRole("button", {name: "Remove firearm"}))
+        await user.click(within(screen.findByLabelText("Firearm Luger")).getByRole("button", {name: "Remove firearm"}))
 
         await waitFor(() => expect(screen.queryByLabelText("Firearm Luger")).toBeNull())
         expect(values[0]).toBe(true)
