@@ -221,7 +221,7 @@ describe('StatBlock', function() {
 
         await user.click(screen.getByRole("button", {name: "Add skill"}))
 
-        const newRow = within(screen.getByRole("table", {name: "Skills"})).findByText("Gardening").closest('tr')
+        const newRow = (await within(screen.getByRole("table", {name: "Skills"})).findByText("Gardening")).closest('tr')
         expect(newRow).toBeInTheDocument()
 
         await user.click(within(newRow).getByRole("button", {name: "Increase skill level"}))
@@ -296,7 +296,7 @@ describe('StatBlock', function() {
               return res(ctx.json({}))
           }),
         )
-        await user.click(within(screen.findByLabelText("Firearm Luger")).getByRole("button", {name: "Remove firearm"}))
+        await user.click(within(await screen.findByLabelText("Firearm Luger")).getByRole("button", {name: "Remove firearm"}))
 
         await waitFor(() => expect(screen.queryByLabelText("Firearm Luger")).toBeNull())
         expect(values[0]).toBe(true)
