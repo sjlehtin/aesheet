@@ -18,6 +18,8 @@
 * Fixed DR calculation based on quality.
 * Clear sheet stamina damage on sheet clone.
 * Fixed power armor positive FIT modifier.
+* Fixed sheet set rendering in case a private sheet was included by accident or permissions later changed.
+* Fixed backend to respect character private setting. Private sheets that do not belong to the user are filtered out from the results.
 
 ## [0.21.0] - 2024-07-03
 
