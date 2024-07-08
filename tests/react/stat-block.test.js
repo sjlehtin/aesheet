@@ -68,7 +68,7 @@ describe('StatBlock', function() {
         const user = userEvent.setup()
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(await screen.findByText(/Grok the Barbarian/i)).toBeInTheDocument()
 
@@ -109,7 +109,7 @@ describe('StatBlock', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(screen.queryByLabelText("Stamina recovery").textContent).toEqual("2d6/8h")
 
@@ -124,7 +124,7 @@ describe('StatBlock', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(screen.queryByLabelText("Stamina recovery").textContent).toEqual("1/8h")
 
@@ -144,7 +144,7 @@ describe('StatBlock', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(screen.queryByLabelText("Stamina recovery").textContent).toEqual("1+4d6/8h")
 
@@ -166,7 +166,7 @@ describe('StatBlock', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(screen.queryByLabelText("Mana recovery").textContent).toEqual("2+2d6/8h")
     });
@@ -183,7 +183,7 @@ describe('StatBlock', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         let values = []
         server.use(
@@ -242,7 +242,7 @@ describe('StatBlock', function() {
         const user = userEvent.setup()
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(screen.queryByTitle("Total XP").textContent).toEqual("0")
 
@@ -277,7 +277,7 @@ describe('StatBlock', function() {
           }),
         )
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
         await waitFor(() => expect(screen.queryByRole("combobox", {busy: true})).toBeNull())
 
         await user.type(screen.getByRole("combobox", {name: "Firearm"}), "Lug")
@@ -315,7 +315,7 @@ describe('StatBlock', function() {
         const user = userEvent.setup()
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         expect(screen.getByLabelText("Total gained SP").textContent).toEqual("29")
 

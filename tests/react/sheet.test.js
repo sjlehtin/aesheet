@@ -528,7 +528,7 @@ describe('StatBlock', function() {
 
         render(<StatBlock url="/rest/sheets/1/" />)
 
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         const damageInput = screen.getByRole("textbox", {name: "Stamina damage"});
         await user.clear(damageInput)

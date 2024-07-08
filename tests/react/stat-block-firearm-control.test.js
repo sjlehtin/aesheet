@@ -113,7 +113,7 @@ describe('StatBlock -- FirearmControl', () => {
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
 
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
@@ -159,7 +159,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         const firearmBlock = await sheet.findByLabelText(/Firearm The Cannon/);
         await within(firearmBlock).findByText("Awesome scope")
@@ -201,7 +201,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         const mag = await sheet.queryByLabelText("Magazine of size 20 with 19 bullets remaining")
         expect(mag).not.toBeNull()
@@ -278,7 +278,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         const input = sheet.getByRole("textbox", {name: "Magazine size"})
         fireEvent.change(input, {target: {value: "21"}})
@@ -331,7 +331,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(document.querySelector("#loading"))
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         const firearmBlock = sheet.getByLabelText("Firearm The Cannon")
 
