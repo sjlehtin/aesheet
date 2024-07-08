@@ -17,7 +17,9 @@ class SheetTestCase(TestCase):
         self.owner = factories.UserFactory(username="luke")
         self.sheet = factories.SheetFactory(character__owner=self.owner)
         self.detail_view = views.SheetViewSet.as_view({'get': 'retrieve'})
+        self.list_view = views.SheetViewSet.as_view({'get': 'list'})
         self.url = reverse('sheet-detail', kwargs={'pk': self.sheet.pk})
+        self.list_url = reverse('sheet-list')
 
     def test_unauthenticated(self):
         req = self.request_factory.get(self.url)
@@ -36,13 +38,32 @@ class SheetTestCase(TestCase):
         response = self.detail_view(req, pk=self.sheet.pk)
         self.assertEqual(response.status_code, 200)
 
+    def test_list_view_authenticated_but_not_owner(self):
+        req = self.request_factory.get(self.list_url)
+        force_authenticate(req, user=self.user)
+        response = self.list_view(req)
+        assert response.status_code == 200
+        assert len(response.data) == 1
+        assert response.data[0]['id'] == self.sheet.pk
+
     def test_authenticated_but_not_owner_sheet_private(self):
         self.sheet.character.private = True
         self.sheet.character.save()
         req = self.request_factory.get(self.url)
         force_authenticate(req, user=self.user)
         response = self.detail_view(req, pk=self.sheet.pk)
-        self.assertEqual(response.status_code, 403)
+        # the sheet is hidden from the list view
+        self.assertEqual(response.status_code, 404)
+
+    def test_list_view_authenticated_but_not_owner_sheet_private(self):
+        self.sheet.character.private = True
+        self.sheet.character.save()
+
+        req = self.request_factory.get(self.list_url)
+        force_authenticate(req, user=self.user)
+        response = self.list_view(req)
+        assert response.status_code == 200
+        assert len(response.data) == 0
 
 
 class SheetCloneTestCase(TestCase):

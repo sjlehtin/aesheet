@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 from rest_framework import exceptions
 from django.db import transaction
+from django.db.models import Q
 from sheet.forms import log_stat_change
 import logging
 
@@ -56,7 +57,7 @@ class SheetViewSet(mixins.RetrieveModelMixin,
                                                      'ranged_weapons__quality',
                                                      'miscellaneous_items',
                                                      'character__campaign',
-                                                     ).all()
+                                                     ).filter(~Q(character__private=True) | Q(character__owner=self.request.user))
 
     def perform_update(self, serializer):
         instance = self.get_object()
