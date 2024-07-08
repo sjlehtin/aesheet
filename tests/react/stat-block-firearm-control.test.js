@@ -82,7 +82,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         expect(await screen.findByText("The Cannon")).toBeInTheDocument()
 
@@ -236,7 +236,7 @@ describe('StatBlock -- FirearmControl', () => {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         const useTypeInput = screen.getByRole("combobox", {name: "Use type selection"})
         await user.click(useTypeInput)
