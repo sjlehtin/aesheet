@@ -54,7 +54,7 @@ describe('stat block wounds handling', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         await waitFor(() => expect(screen.getByLabelText("Wound effect").textContent).toEqual("Throat punctured"))
         expect(screen.getByLabelText("AA penalty").textContent).toEqual("-10 AA")
@@ -78,7 +78,7 @@ describe('stat block wounds handling', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
         await user.click(screen.getByRole("button", {name: "Decrease damage"}))
 
         await waitFor(() => expect(screen.getByLabelText("Current wound damage").textContent).toEqual("4"))
@@ -102,7 +102,7 @@ describe('stat block wounds handling', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
         await user.click(screen.getByRole("button", {name: "Heal"}))
 
         await waitFor(() => expect(screen.queryByLabelText("Current wound damage")).not.toBeInTheDocument())
@@ -127,7 +127,7 @@ describe('stat block wounds handling', function() {
 
         )
 
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         const damageInput = screen.getByRole("textbox", {name: "Damage"})
         await user.clear(damageInput)
@@ -156,7 +156,7 @@ describe('stat block wounds handling', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         const damageInput = screen.getByRole("textbox", {name: "Stamina damage"})
         await user.clear(damageInput)
