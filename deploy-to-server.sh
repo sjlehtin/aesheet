@@ -9,10 +9,10 @@ version=$(jq -r .version package.json)
 
 package="aesheet-${version}-full.tar.xz"
 
-if [ ! -f "$package" ]; then
+if [ ! -f "dist/full/$package" ]; then
   echo "Package $package does not exist"
   exit 1
 fi
 
-scp $package $server:
+scp "dist/full/$package" $server:
 ssh $server "tar zxvf $package && cd /var/www/aesheet/$env && ../deploy.sh ~/aesheet-${version}"
