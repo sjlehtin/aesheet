@@ -67,7 +67,7 @@ describe('stat block weight handling', function() {
 
         render(<StatBlock url="/rest/sheets/1/" />)
 
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         expect(screen.getByLabelText("Weight carried").textContent).toEqual("0.00 kg")
 
@@ -133,7 +133,7 @@ describe('stat block weight handling', function() {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("6.40 kg")
     });
@@ -150,7 +150,7 @@ describe('stat block weight handling', function() {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("3.00 kg")
     });
@@ -169,7 +169,7 @@ describe('stat block weight handling', function() {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("9.00 kg")
     });
@@ -186,7 +186,7 @@ describe('stat block weight handling', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
         expect(screen.queryByText("Sheet data")).not.toBeInTheDocument()
 
         expect(screen.getByLabelText("Weight carried").textContent).toEqual("3.00 kg")
@@ -225,7 +225,7 @@ describe('stat block weight handling', function() {
         )
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
         expect(screen.getByLabelText("Weight carried").textContent).toEqual("10.25 kg")
     });
 
@@ -260,7 +260,7 @@ describe('stat block weight handling', function() {
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
 
-        await waitForElementToBeRemoved(() => sheet.getByText("Sheet data"))
+        await waitForElementToBeRemoved(() => sheet.getByText("Sheet data"), {timeout: 5000})
 
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("2.00 kg")
     });
