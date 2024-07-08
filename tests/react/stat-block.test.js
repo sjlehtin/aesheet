@@ -221,7 +221,7 @@ describe('StatBlock', function() {
 
         await user.click(screen.getByRole("button", {name: "Add skill"}))
 
-        const newRow = within(screen.getByRole("table", {name: "Skills"})).getByText("Gardening").closest('tr')
+        const newRow = within(screen.getByRole("table", {name: "Skills"})).findByText("Gardening").closest('tr')
         expect(newRow).toBeInTheDocument()
 
         await user.click(within(newRow).getByRole("button", {name: "Increase skill level"}))
