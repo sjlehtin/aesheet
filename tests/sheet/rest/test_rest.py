@@ -112,6 +112,10 @@ class CharacterTestCase(TestCase):
                            kwargs={'pk': self.character.pk})
         self.request = self.request_factory.get(self.url)
 
+        self.list_view = views.CharacterViewSet.as_view({'get': 'list'})
+        self.list_url = reverse('character-detail',
+                                kwargs={'pk': self.character.pk})
+
     def test_unauthenticated(self):
         response = self.detail_view(self.request, pk=self.character.pk)
         self.assertEqual(response.status_code, 403)
@@ -124,7 +128,8 @@ class CharacterTestCase(TestCase):
     def test_authenticated_but_not_owner(self):
         force_authenticate(self.request, user=self.user)
         response = self.detail_view(self.request, pk=self.character.pk)
-        self.assertEqual(response.status_code, 403)
+        # Already filtered out in the queryset
+        self.assertEqual(response.status_code, 404)
 
     def test_url(self):
         client = APIClient()
@@ -132,6 +137,21 @@ class CharacterTestCase(TestCase):
         self.assertTrue(client.login(username="luke", password="foobar"))
         response = client.get(url, format='json')
         self.assertEqual(response.status_code, 200)
+
+    def test_list_url_authenticated(self):
+        request = self.request_factory.get(self.list_url)
+        force_authenticate(request, user=self.owner)
+        response = self.list_view(request)
+        self.assertEqual(response.status_code, 200)
+        assert len(response.data) == 1
+        assert response.data[0]['id'] == self.character.id
+
+    def test_list_url_authenticated_but_not_owner(self):
+        request = self.request_factory.get(self.list_url)
+        force_authenticate(request, user=self.user)
+        response = self.list_view(request)
+        self.assertEqual(response.status_code, 200)
+        assert len(response.data) == 0
 
     def test_add_gained_sp(self):
         update_view = views.CharacterViewSet.as_view({
@@ -192,10 +212,6 @@ class CharacterTestCase(TestCase):
         deity_entry = qs[0]
         self.assertEqual(deity_entry.amount, 0)
         self.assertEqual(deity_entry.field, "deity")
-
-# TODO: add test case to verify that private characters and sheets do not
-# show to other users form the /rest/characters/ and /rest/sheets/ API
-# endpoints.
 
 
 class EdgeTestCase(TestCase):

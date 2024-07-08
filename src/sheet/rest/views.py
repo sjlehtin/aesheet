@@ -108,8 +108,9 @@ class CharacterViewSet(mixins.RetrieveModelMixin,
     permission_classes = [permissions.IsAuthenticated, IsAccessible]
 
     def get_queryset(self):
-        return models.Character.objects.prefetch_related('edges',
-                                                         'edges__edge',).all()
+        return (models.Character.objects
+        .prefetch_related('edges', 'edges__edge',)
+        .filter(~Q(private=True) | Q(owner=self.request.user)))
 
     def perform_update(self, serializer):
         instance = self.get_object()
