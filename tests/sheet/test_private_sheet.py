@@ -89,7 +89,7 @@ class SetOwnerTestCase(WebTest):
     def test_character_owner_is_retained_in_edit(self):
         character_url = reverse('edit_character',
                                 args=(self.sheet.character.id, ))
-        form = self.app.get(character_url, user=self.owner.username).form
+        form = self.app.get(character_url, user=self.owner.username).forms[1]
         request_dict = dict(form.submit_fields())
         response = self.other_client.post(character_url, request_dict)
         self.assertRedirects(response, character_url)
@@ -100,7 +100,7 @@ class SetOwnerTestCase(WebTest):
     def test_sheet_owner_is_retained_in_edit(self):
         sheet_url = reverse('edit_sheet',
                             args=(self.sheet.id, ))
-        form = self.app.get(sheet_url, user=self.owner.username).form
+        form = self.app.get(sheet_url, user=self.owner.username).forms[1]
         request_dict = dict(form.submit_fields())
         response = self.other_client.post(sheet_url, request_dict)
         self.assertRedirects(response, reverse("sheet_detail",
@@ -125,7 +125,7 @@ class MarkPrivateTestCase(WebTest):
     def test_only_owner_can_mark_private(self):
         character_url = reverse('edit_character',
                                 args=(self.sheet.character.id, ))
-        form = self.app.get(character_url, user=self.owner.username).form
+        form = self.app.get(character_url, user=self.owner.username).forms[1]
         request_dict = dict(form.submit_fields())
         request_dict['private'] = True
 
@@ -144,7 +144,7 @@ class MarkPrivateTestCase(WebTest):
 
     def test_create_character_private_checked(self):
         character_url = reverse('add_char')
-        form = self.app.get(character_url, user=self.owner.username).form
+        form = self.app.get(character_url, user=self.owner.username).forms[1]
         request_dict = dict(form.submit_fields())
         request_dict['name'] = "Foobar"
         request_dict['race'] = "Tsapdai"

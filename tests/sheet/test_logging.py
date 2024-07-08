@@ -68,7 +68,7 @@ class LoggingTestCase(WebTest):
         old_ch = Character.objects.get(pk=self.sheet.character.pk)
 
         det_url = reverse('edit_character', args=[self.sheet.character.pk])
-        form = self.app.get(det_url, user='admin').form
+        form = self.app.get(det_url, user='admin').forms[1]
         form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, det_url)
@@ -77,7 +77,7 @@ class LoggingTestCase(WebTest):
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, -2)
 
-        form = self.app.get(det_url, user='admin').form
+        form = self.app.get(det_url, user='admin').forms[1]
         form['cur_fit'].value = str(int(form['cur_fit'].value) + 5)
         response = form.submit()
         self.assertRedirects(response, det_url)
@@ -86,7 +86,7 @@ class LoggingTestCase(WebTest):
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 3)
 
-        form = self.app.get(det_url, user='admin').form
+        form = self.app.get(det_url, user='admin').forms[1]
         form['cur_fit'].value = str(int(form['cur_fit'].value) - 2)
         response = form.submit()
         self.assertRedirects(response, det_url)
@@ -95,7 +95,7 @@ class LoggingTestCase(WebTest):
 
         self.assertEqual(CharacterLogEntry.objects.latest().amount, 1)
 
-        form = self.app.get(det_url, user='admin').form
+        form = self.app.get(det_url, user='admin').forms[1]
         form['free_edges'].value = str(0)
         response = form.submit()
         self.assertRedirects(response, det_url)

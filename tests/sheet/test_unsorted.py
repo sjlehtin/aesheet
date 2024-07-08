@@ -148,7 +148,7 @@ class AddCharacterTestCase(TestHelperMixin, WebTest):
 
     def test_add_character(self):
         add_char_url = reverse('add_char')
-        form = self.app.get(add_char_url, user='admin').form
+        form = self.app.get(add_char_url, user='admin').forms[1]
         form['name'] = "John Doe"
         form['occupation'] = "adventurer"
         form['campaign'] = self.campaign.pk
@@ -176,7 +176,8 @@ class AddSheetTestCase(TestHelperMixin, WebTest):
 
     def test_add_sheet(self):
         add_sheet_url = reverse('add_sheet')
-        form = self.app.get(add_sheet_url, user='admin').form
+        # first form is the logout form
+        form = self.app.get(add_sheet_url, user='admin').forms[1]
         form['character'] = self.character.pk
         form.submit()
         post_response = self.client.post(add_sheet_url,
@@ -202,7 +203,7 @@ class EditCharacterTestCase(TestHelperMixin, WebTest):
         self.assertTrue(self.client.login(username="admin", password="admin"))
 
     def test_edit_character(self):
-        form = self.app.get(self.url, user='admin').form
+        form = self.app.get(self.url, user='admin').forms[1]
         form['cur_fit'].value = "50"
         post_response = self.client.post(self.url, dict(form.submit_fields()))
         response = self.client.get(self.url)
