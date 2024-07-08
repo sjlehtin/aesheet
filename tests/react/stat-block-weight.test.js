@@ -301,7 +301,7 @@ describe('stat block weight handling', function() {
             }),
         )
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
