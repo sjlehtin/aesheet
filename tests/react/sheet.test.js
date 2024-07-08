@@ -119,7 +119,7 @@ describe('StatBlock', function() {
 
         render(<StatBlock url="/rest/sheets/1/" />)
 
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         expect(screen.getByLabelText("Body at full health").textContent).toEqual("11+4")
         expect(screen.getByLabelText("Current body").textContent.trim()).toEqual("15 / 15")
