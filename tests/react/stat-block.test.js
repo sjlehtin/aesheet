@@ -82,8 +82,8 @@ describe('StatBlock', function() {
         await user.click(screen.getByText("Toughness 1"))
         await user.click(screen.getByRole("button", {name: "Add EdgeLevel"}))
 
-        expect(screen.queryByLabelText("Body from Toughness").textContent).toEqual("2")
-        expect(screen.queryByLabelText("XP used for edges").textContent).toEqual("25")
+        expect((await screen.findByLabelText("Body from Toughness")).textContent).toEqual("2")
+        expect((await screen.findByLabelText("XP used for edges")).textContent).toEqual("25")
 
         // Can toggle free edge for toughness on and off
         await user.click(screen.getByRole("checkbox", {name: "Ignore cost"}))
@@ -93,7 +93,7 @@ describe('StatBlock', function() {
         await waitFor(() => {expect(screen.queryByLabelText("XP used for edges").textContent).toEqual("25")})
 
         // Calculate mana and take bought mana into account
-        expect(screen.queryByLabelText("Maximum mana").textContent).toEqual("29")
+        expect((await screen.findByLabelText("Maximum mana")).textContent).toEqual("29")
     });
 
     // xit('handles edge removal', test.todo);
@@ -221,7 +221,7 @@ describe('StatBlock', function() {
 
         await user.click(screen.getByRole("button", {name: "Add skill"}))
 
-        const newRow = within(screen.getByRole("table", {name: "Skills"})).getByText("Gardening").closest('tr')
+        const newRow = (await within(screen.getByRole("table", {name: "Skills"})).findByText("Gardening")).closest('tr')
         expect(newRow).toBeInTheDocument()
 
         await user.click(within(newRow).getByRole("button", {name: "Increase skill level"}))
@@ -296,7 +296,7 @@ describe('StatBlock', function() {
               return res(ctx.json({}))
           }),
         )
-        await user.click(within(screen.queryByLabelText("Firearm Luger")).getByRole("button", {name: "Remove firearm"}))
+        await user.click(within(await screen.findByLabelText("Firearm Luger")).getByRole("button", {name: "Remove firearm"}))
 
         await waitFor(() => expect(screen.queryByLabelText("Firearm Luger")).toBeNull())
         expect(values[0]).toBe(true)
