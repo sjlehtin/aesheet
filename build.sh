@@ -1,7 +1,7 @@
 #!/bin/sh
 
 npm run build -- --mode=production
-python setup.py bdist_wheel
+python -m build
 python manage.py collectstatic --noinput --clear
 
 version=$(jq -r .version package.json)
