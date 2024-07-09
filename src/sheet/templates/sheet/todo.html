@@ -19,12 +19,21 @@
     - 5) spell skill cheks
     + 6) default to normal quality for armor, weapons
 
-    - fix issue when adding a private sheet to sheet set
-        - private sheets should be filtered out as choices to the sheet set
-    - fix logout
+    + fix issue when adding a private sheet to sheet set
+        + private sheets should be filtered out as choices to the sheet set
+    + fix logout
 
-    - visual indication of damage taken, per hit location
-    - concise view of current penalties, esp. in sheet set
+    + visual indication of damage taken, per hit location
+    + concise view of current penalties, esp. in sheet set
+
+    - firearms in CC. (from firearms section)
+    - add a generic skill check element to allow unskilled checks
+        - at least render base skill checks
+    - fix issue in skill list rendering with skills that are specializations
+        of "standard" skills
+
+    - character log to the side after skill panel. Should update dynamically,
+        use websockets or swr for this
 
     + gravity effects, encumbrance effects from high gravity
         + encumbrance increased from high gravity
@@ -34,15 +43,18 @@
         + movement rates
         - allow changing gravity with 0.1 increments with cursor keys
 
+    - range, light level, conditions, turns of combat to specific combat overlay to access it quickly while perusing the rest of the sheet.
+        + gravity control
+        + remember set range and detection level on reopen
+        - setting range once will affect firearms and ranged weapons
+        - highlights the correct column in senses
+        - make the drawer handle wider, the scrollbar is layered on top of the handle, making hard to toggle the overlay
+        - visible indication when non-standard selections, i.e., combat in progress
+
     - before summer of 2025, check offline functionality,
         should be possible to add and remove damage and spend ammo, at least, even without network connectivity.
         - tests to this effect
 
-    - firearms in CC. (from firearms section)
-    - add a generic skill check element to allow unskilled checks
-        - at least render base skill checks
-    - fix issue in skill list rendering with skills that are specializations
-        of "standard" skills
     + check breakdown for sweep fire
         - use counterpenaltyv2 to get more accurate breakdown
     - double range penalties for sweep fire missing in range view
@@ -55,23 +67,14 @@
         - at least in normal daylight, acute vision does not work (probably because night vision check always used)
         - Render perks in the details, as an overlay for example
     + power armor skill
-    - character log to the side after skill panel. Should update dynamically,
-        use websockets or swr for this
 
     - "add xp used ingame" with a possibility to enter description (to log)
     -- if a log entry is added, entry should not be coalesced.
     - "add xp" with an optional log entry, allowing for in-game notes.
 
-    - make the range control affect the advancing initiatives
+    + make the range control affect the advancing initiatives
         - sense table could highlight
 
-    - range, light level, conditions, turns of combat to specific combat overlay to access it quickly while perusing the rest of the sheet.
-        + gravity control
-        + remember set range and detection level on reopen
-        - setting range once will affect firearms and ranged weapons
-        - highlights the correct column in senses
-        - make the drawer handle wider, the scrollbar is layered on top of the handle, making hard to toggle the overlay
-        - visible indication when non-standard selections, i.e., combat in progress
     + inventory
     + damage taken
     ++ stamina
