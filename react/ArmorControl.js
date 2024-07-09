@@ -6,7 +6,8 @@ import AddArmorControl from './AddArmorControl';
 import StatBreakdown from "./StatBreakdown";
 import ValueBreakdown from "./ValueBreakdown";
 
-const util = require('./sheet-util');
+import * as util from './sheet-util'
+
 
 function getArmorStat(location, type, piece) {
     const getBaseValue = function(a, loc, typ) {
@@ -158,11 +159,26 @@ class ArmorControl extends React.Component {
         const descStyle = Object.assign({fontWeight: "bold"}, cellStyle);
 
         const headerCells = ["d8", "Loc", "P", "S", "B", "R", "DR", "DP",
-            "PL", "Threshold"].map((el, ii) => {
+            "PL"].map((el, ii) => {
             return <th style={headerStyle} key={ii}>{el}</th>;});
+        headerCells.push(
+          <th title="Location damage threshold" style={headerStyle} key={headerCells.length}>
+            Max
+          </th>,
+        );
 
+        const woundPenalties = this.props.handler?.getWoundPenalties() ?? {}
+        const damages = woundPenalties.locationsDamages
+        if (woundPenalties.bodyDamage) {
+            headerCells.push(
+                <th title="Current damage" style={headerStyle}
+                    key={headerCells.length}>
+                    Dmg
+                </th>,
+            );
+        }
         let locations = [];
-        const dice = { H: "8", T: "5-7", RA: "4", RL: "3", LA: "2", LL: "1"};
+        const dice = { H: "8", T: "5-7", RA: "4", RL: "3", LA: "2", LL: "1" };
         for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
             let row = [];
             row.push(<td style={descStyle} key={loc + "-1"}>{dice[loc]}</td>);
@@ -172,7 +188,27 @@ class ArmorControl extends React.Component {
                     <StatBreakdown label={`Armor ${loc} ${col}`} value={util.rounddown(armorStats[loc][col].value())} breakdown={armorStats[loc][col].breakdown()} />
                 </td>);
             }
-            row.push(<td style={{fontWeight: "bold", textAlign: "center"}} key={loc + "Threshold"}>{this.props.handler?.getDamageThreshold(loc)}</td>)
+
+            const threshold = this.props.handler?.getDamageThreshold(loc)
+            row.push(<td style={{fontWeight: "bold", textAlign: "center"}} key={loc + "Threshold"}>{threshold}</td>)
+            const damage = damages ? damages[loc] : 0
+            const greenLimit = util.rounddown(threshold * 0.4)
+            const yellowLimit = util.rounddown(threshold * 0.8)
+            let damageColor
+            if (damage === 0) {
+                damageColor = 'transparent'
+            } else if (damage < greenLimit) {
+                damageColor = 'green'
+            } else if (damage < yellowLimit) {
+                damageColor = 'yellow'
+            } else {
+                damageColor = 'red'
+            }
+
+            if (woundPenalties.bodyDamage) {
+                row.push(<td style={{fontWeight: "bold", textAlign: "center", background: damageColor}}
+                             key={loc + "Damage"}>{damages ? damages[loc] : ''}</td>)
+            }
             locations.push(<tr key={loc}>{row}</tr>);
         }
 

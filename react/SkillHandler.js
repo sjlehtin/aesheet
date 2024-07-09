@@ -25,7 +25,7 @@
  * 1.1.1.1        High-G maneuver
  * Higher than Earth gravity will have the following effects:
  * ·       AC penalty of -5*(effG-1). Note that this will most often apply in situations of temporary high-G acceleration. DONE
- * ·       Movement rates in all movement modes are reduced proportionally to the gravity. For example, movement of 30 m becomes 15 m in 2G. NOT DONE
+ * ·       Movement rates in all movement modes are reduced proportionally to the gravity. For example, movement of 30 m becomes 15 m in 2G. DONE
  * ·       Carried weight is multiplied with the effective gravity. For example, carried weight of 50 kg becomes 100 kg in 2G. DONE
  * ·       Ranges of missile weapons are reduced proportionally to the gravity. For example, a range of 100 m becomes 50 m in 2G. DONE
  * ·       Falling damage is increased proportional to the gravity.
@@ -703,6 +703,7 @@ class SkillHandler {
             return SkillHandler.STATUS_WOUNDED
         }
     }
+
     getWoundPenalties() {
         if (!this._woundPenalties) {
             // TODO: Use ValueBreakdown
@@ -732,6 +733,8 @@ class SkillHandler {
             }
 
             const toughness = this.edgeLevel("Toughness");
+
+            this._woundPenalties.locationsDamages = Object.assign({}, locationDamages)
 
             for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
                 locationDamages[loc] = Math.max(0, locationDamages[loc] - toughness);
