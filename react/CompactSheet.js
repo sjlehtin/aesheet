@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {Button, Modal} from 'react-bootstrap';
+import {Button, Container, Modal} from 'react-bootstrap';
 import StatRow from './StatRow';
 import StatBreakdown from "./StatBreakdown";
 import NoteBlock from './NoteBlock';
@@ -20,6 +20,7 @@ import {
     Col,
     Row,
 } from 'react-bootstrap';
+import WoundPenaltyBox from "./WoundPenaltyBox";
 
 const rest = require('./sheet-rest');
 const util = require('./sheet-util');
@@ -375,9 +376,9 @@ class CompactSheet extends StatBlock {
                     </Row>
                 </Card.Header>
             <Card.Body className={"p-0"}>
-                <Col>
+                <Container>
                     <Row>
-                        <Col>
+                        <Col className="xs-3">
                             <Row>
                                 {this.renderDescription()}
                             </Row>
@@ -392,6 +393,12 @@ class CompactSheet extends StatBlock {
                                 {this.renderNotes()}
                                 </Col>
                             </Row>
+                        </Col>
+                        <Col className="xs-3">
+                            { skillHandler ?
+                                <WoundPenaltyBox handler={skillHandler} /> :
+                                <Loading>Wounds</Loading>
+                            }
                         </Col>
                         <Col>
                             <Row>
@@ -422,7 +429,7 @@ class CompactSheet extends StatBlock {
                         {this.renderRangedWeapons(skillHandler)}
                         </Col>
                     </Row>
-                </Col>
+                </Container>
             </Card.Body>
             </Card>
             </div>
