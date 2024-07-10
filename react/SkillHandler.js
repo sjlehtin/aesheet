@@ -375,7 +375,7 @@ class SkillHandler {
     }
 
     edgeLevel(edgeName, givenMap) {
-        if (typeof(givenMap) === "undefined") {
+        if (givenMap === undefined) {
             givenMap = this.state.edgeMap;
         }
         if (edgeName in givenMap) {
@@ -883,19 +883,20 @@ class SkillHandler {
         return this.getEdgeStatMod(target).value() + this._softMods[target];
     }
 
-    // TODO: there should be a visionCheck() call which incorporates day and
-    // night vision checks
-    nightVisionCheck(range, detectionLevel, givenPerks) {
+    visionCheck(range, darknessDetectionLevel, givenPerks) {
         const ranges = [2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
             10000];
         let perks = {};
-        if (typeof(givenPerks) !== "undefined") {
+        if (givenPerks !== undefined) {
             perks = SkillHandler.getItemMap(givenPerks, (item) => { return item.edge; });
         }
 
-        const baseCheck = this.nightVisionBaseCheck(perks);
+        if (darknessDetectionLevel > 0) { throw("Invalid value for darknessDetectionLevel") }
+
+        const baseCheck = darknessDetectionLevel === 0 ? this.dayVisionBaseCheck(perks) : this.nightVisionBaseCheck(perks)
+
         const darknessDL = Math.min(0,
-            baseCheck.darknessDetectionLevel + detectionLevel);
+            baseCheck.darknessDetectionLevel + darknessDetectionLevel);
 
         const maxRangeIndex = baseCheck.detectionLevel + darknessDL +
             SkillHandler.BASE_VISION_RANGE;
@@ -919,12 +920,17 @@ class SkillHandler {
             darknessDL * 10;
     }
 
-    dayVisionBaseCheck() {
-        let check = this.skillCheck("Search", "INT", true)?.value();
-        check += this.getTotalModifier("vision");
-        check -= 5 * this.edgeLevel("Color Blind");
-        return {check: check,
-            detectionLevel: this.detectionLevel("Acute Vision", "Poor Vision")};
+    dayVisionBaseCheck(givenPerks) {
+        const check = this.skillCheck("Search", "INT", true)?.value();
+        let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
+        if (givenPerks !== undefined) {
+            acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", givenPerks);
+        }
+
+        const colorBlind = this.edgeLevel("Color Blind")
+        return {check: check + this.getTotalModifier("vision") - 5 * colorBlind,
+                detectionLevel: acuteVision,
+                darknessDetectionLevel: 0};
     }
 
     nightVisionBaseCheck(givenPerks) {
@@ -932,7 +938,7 @@ class SkillHandler {
         let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
         let nightVision = this.detectionLevel("Night Vision",
             "Night Blindness");
-        if (typeof(givenPerks) !== "undefined") {
+        if (givenPerks !== undefined) {
             acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", givenPerks);
             nightVision += this.detectionLevel("Night Vision", "Night Blindness", givenPerks);
         }

@@ -67,42 +67,42 @@ describe('SkillHandler edge skill bonuses', function() {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Acute Vision", level: 1}]});
 
-        expect(handler.dayVisionBaseCheck()).toEqual({check: 50, detectionLevel: 1});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 50, detectionLevel: 1, darknessDetectionLevel: 0});
     });
 
     it('handles Color Blind', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Color Blind", level: 1}]});
 
-        expect(handler.dayVisionBaseCheck()).toEqual({check: 45, detectionLevel: 0});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 45, detectionLevel: 0, darknessDetectionLevel: 0});
     });
 
     it('recognizes Poor Vision for detection level', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Poor Vision", level: 1}]});
 
-        expect(handler.dayVisionBaseCheck()).toEqual({check: 50, detectionLevel: -1});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 50, detectionLevel: -1, darknessDetectionLevel: 0});
     });
 
     it('handles edge vision modifiers', function () {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Peripheral Vision", level: 1, vision: 5}]});
 
-        expect(handler.dayVisionBaseCheck()).toEqual({check: 55, detectionLevel: 0});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 55, detectionLevel: 0, darknessDetectionLevel: 0});
     });
 
     it('handles armor vision modifiers', function () {
         const handler = factories.skillHandlerFactory({
                             character: {cur_int: 50},
                             armor: {base: {mod_vision: -5}}});
-        expect(handler.dayVisionBaseCheck()).toEqual({check: 45, detectionLevel: 0});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 45, detectionLevel: 0, darknessDetectionLevel: 0});
     });
 
     it('handles skill day vision modifiers', function () {
         const handler = factories.skillHandlerFactory({
                             character: {cur_int: 50},
                             skills: [{skill: "Search", level: 1}]});
-        expect(handler.dayVisionBaseCheck()).toEqual({check: 55, detectionLevel: 0});
+        expect(handler.dayVisionBaseCheck()).toEqual({check: 55, detectionLevel: 0, darknessDetectionLevel: 0});
     });
 
     it('handles edge surprise modifiers', function () {
@@ -221,14 +221,14 @@ describe('SkillHandler edge skill bonuses', function() {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50},
         edges: [{edge: "Night Vision", level: 1}]});
 
-        expect(handler.nightVisionCheck(90, 0)).toEqual(80);
+        expect(handler.visionCheck(90, 0)).toEqual(80);
         // night vision should cancel one level of darkness.
-        expect(handler.nightVisionCheck(90, -1)).toEqual(80);
-        expect(handler.nightVisionCheck(90, -2)).toEqual(60);
+        expect(handler.visionCheck(90, -1)).toEqual(80);
+        expect(handler.visionCheck(90, -2)).toEqual(60);
 
         //
-        expect(handler.nightVisionCheck(300, -3)).toBe(null);
-        expect(handler.nightVisionCheck(200, -3)).toEqual(30);
+        expect(handler.visionCheck(300, -3)).toBe(null);
+        expect(handler.visionCheck(200, -3)).toEqual(30);
 
     });
 
@@ -236,14 +236,14 @@ describe('SkillHandler edge skill bonuses', function() {
         const handler = factories.skillHandlerFactory({character: {cur_int: 50}});
         const perks = [{edge: "Night Vision", level: 1}];
 
-        expect(handler.nightVisionCheck(90, 0, perks)).toEqual(80);
+        expect(handler.visionCheck(90, 0, perks)).toEqual(80);
         // night vision should cancel one level of darkness.
-        expect(handler.nightVisionCheck(90, -1, perks)).toEqual(80);
-        expect(handler.nightVisionCheck(90, -2, perks)).toEqual(60);
+        expect(handler.visionCheck(90, -1, perks)).toEqual(80);
+        expect(handler.visionCheck(90, -2, perks)).toEqual(60);
 
         //
-        expect(handler.nightVisionCheck(300, -3, perks)).toBe(null);
-        expect(handler.nightVisionCheck(200, -3, perks)).toEqual(30);
+        expect(handler.visionCheck(300, -3, perks)).toBe(null);
+        expect(handler.visionCheck(200, -3, perks)).toEqual(30);
 
     });
 
@@ -254,10 +254,13 @@ describe('SkillHandler edge skill bonuses', function() {
             edges: [{edge: "Night Vision", level: 1},
                 {edge: "Acute Vision", level: 2}]
         });
-        expect(handler.nightVisionCheck(90, -1)).toEqual(90);
-        expect(handler.nightVisionCheck(510, -3)).toBe(null);
-        expect(handler.nightVisionCheck(300, -3)).toEqual(30);
-        expect(handler.nightVisionCheck(200, -3)).toEqual(40);
+        // Acute vision has full effect in daylight.
+        expect(handler.visionCheck(90, 0)).toEqual(100);
+        // Acute vision has half effect in dark conditions.
+        expect(handler.visionCheck(90, -1)).toEqual(90);
+        expect(handler.visionCheck(510, -3)).toBe(null);
+        expect(handler.visionCheck(300, -3)).toEqual(30);
+        expect(handler.visionCheck(200, -3)).toEqual(40);
     });
 
     it('allows using weapon perks for both night vision and acute vision', function (){
@@ -265,9 +268,9 @@ describe('SkillHandler edge skill bonuses', function() {
         const perks = [{edge: "Night Vision", level: 1},
         {edge: "Acute Vision", level: 2}];
 
-        expect(handler.nightVisionCheck(90, -1, perks)).toEqual(90);
-        expect(handler.nightVisionCheck(510, -3, perks)).toBe(null);
-        expect(handler.nightVisionCheck(300, -3, perks)).toEqual(30);
-        expect(handler.nightVisionCheck(200, -3, perks)).toEqual(40);
+        expect(handler.visionCheck(90, -1, perks)).toEqual(90);
+        expect(handler.visionCheck(510, -3, perks)).toBe(null);
+        expect(handler.visionCheck(300, -3, perks)).toEqual(30);
+        expect(handler.visionCheck(200, -3, perks)).toEqual(40);
     });
 });
