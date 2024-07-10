@@ -123,7 +123,7 @@ class FirearmControl extends RangedWeaponRow {
 
     }
 
-    skillCheck() {
+    skillCheck(sweepFire = false) {
         let effect = this.rangeEffect(this.props.toRange)
         if (!effect) {
             return null
@@ -134,7 +134,9 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         baseCheck.add(effect.check, "range")
-
+        if (sweepFire && effect.check < 0) {
+            baseCheck.add(effect.check, "sweep @range")
+        }
         return baseCheck
     }
 
@@ -349,7 +351,7 @@ class FirearmControl extends RangedWeaponRow {
             autofirePenalty.add(-10, "Unskilled @Autofire")
         }
 
-        const baseSkillCheck = this.skillCheck();
+        const baseSkillCheck = this.skillCheck(true);
         let checks = [];
         let penaltyMultiplier = 0;
         for (let multiplier of sweeps[sweepType]) {

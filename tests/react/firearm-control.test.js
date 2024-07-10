@@ -633,13 +633,15 @@ describe('FirearmControl', () => {
                 character: {cur_ref: 45, cur_int: 45, cur_psy: 45,
                     cur_fit: props.fit}
             },
+            toRange: props.toRange ?? "",
             weapon: factories.firearmFactory({
             base: {name: "Invented",
                 autofire_rpm: props.autofireRPM,
                 autofire_class: "B",
                 sweep_fire_disabled: props.sweepFireDisabled,
                 restricted_burst_rounds: props.restrictedBurstRounds,
-                base_skill: "Long guns"
+                base_skill: "Long guns",
+                sight: 600, barrel_length: 602, accuracy: 1.0
             }
         })})}/>);
         await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
@@ -701,9 +703,15 @@ describe('FirearmControl', () => {
     }
 
     it ("can render sweep fire", async () => {
-        await renderFirearmControlWithBurst({restrictedBurstRounds: 3});
+        await renderFirearmControlWithBurst();
         const values = await getSweepChecks("20");
         expect(values).toEqual(["-87", "-67", "-47", "-27", "-7", "3", "13", "23", "33", "37", "41", "45", "49", "51", "53", "55"]);
+    });
+
+    it ("can render sweep fire with double range penalties", async () => {
+        await renderFirearmControlWithBurst({toRange: 61});
+        const values = await getSweepChecks("20");
+        expect(values).toEqual(["-107", "-87", "-67", "-47", "-27", "-17", "-7", "3", "13", "17", "21", "25", "29", "31", "33", "35"]);
     });
 
     it ("does not render sweep fire if it is disabled", async () => {
