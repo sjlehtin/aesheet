@@ -503,6 +503,47 @@ class FirearmControl extends RangedWeaponRow {
         return Math.min(0, targetInitiative);
     }
 
+    rangeEffect(toRange) {
+        let effect = this.weaponRangeEffect(toRange);
+        let perks = [];
+
+        if (this.props.weapon.scope) {
+            perks = this.props.weapon.scope.perks;
+        }
+        const visionCheck = this.props.skillHandler.visionCheck(toRange,
+            this.props.darknessDetectionLevel,
+            perks);
+
+        if (effect === null || visionCheck === null) {
+            return null;
+        }
+
+        effect.visionCheck = visionCheck
+
+        // If vision check is under 75, the difference is penalty to the
+        // ranged skill check.
+        if (visionCheck < 75) {
+            effect.check += visionCheck - 75;
+        }
+
+        // Instinctive Fire
+        // Although listed under the Throwing weapons skill, the Instinctive
+        // fire enhancement is applicable to all missile weapons. The Inst
+        // fire skill level cannot be higher than the highest missile weapon
+        // skill level.
+        // Instinctive fire grants the PC a +1 bonus per level to Target-I
+        // with ranged weapons. The skill cannot raise the Target-I above 0.
+        // The skill can be used up to INT/2 m range.
+
+        if (util.isFloat(toRange) && toRange <= util.rounddown(
+            this.props.skillHandler.getStat("int") / 2)) {
+            effect.targetInitiative +=
+                this.props.skillHandler.skillLevel("Instinctive fire");
+        }
+        effect.bumpingAllowed = visionCheck >= 100;
+        return effect;
+    }
+
     render () {
         const weapon = this.props.weapon.base;
         const missing = this.missingSkills();
@@ -575,7 +616,7 @@ class FirearmControl extends RangedWeaponRow {
 
                 <div>
                 All range penalties are doubled in sweep fire
-                    (i.e. M -20, L -40, XL -60, E -80)
+                    (i.e. M -20, L -40, XL -60, E -80) (included in the calculated checks)
                 </div>
                 <div>
                     Bumping is not allowed in sweep fire.
@@ -594,24 +635,34 @@ class FirearmControl extends RangedWeaponRow {
                 <Table>
                     <tbody>
                     <tr aria-label={"Range effect"}>
-                        <th >Range effect</th>
-                        <td className={"mx-2"} aria-label={"Name"}>{`${rangeEffect.name}`}</td>
+                        <th>Range effect</th>
+                        <td className={"mx-2"}
+                            aria-label="Name">{`${rangeEffect.name}`}</td>
                         <th className={"ml-5"}>Bumping</th>
-                        <td className={"mx-2"}>{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
+                        <td className={"mx-2"}
+                            aria-label="Bumping allowed">{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
                         <th className={"ml-5"}>Check</th>
-                        <td className={"mx-2"} aria-label={"Check modifier"}>{`${this.renderInt(rangeEffect.check)}`}</td>
+                        <td className={"mx-2"}
+                            aria-label="Check modifier">{`${this.renderInt(rangeEffect.check)}`}</td>
                         <th className={"ml-2"}>TI</th>
-                        <td className={"mx-2"} aria-label={"Target initiative modifier"}>{`${this.renderInt(rangeEffect.targetInitiative)}`}</td>
+                        <td className={"mx-2"}
+                            aria-label="Target initiative modifier">{`${this.renderInt(rangeEffect.targetInitiative)}`}</td>
                         <th className={"ml-5"}>Dmg</th>
-                        <td className={"mx-2"} aria-label={"Damage modifier"}>{`${this.renderInt(rangeEffect.damage)}`}</td>
+                        <td className={"mx-2"}
+                            aria-label="Damage modifier">{`${this.renderInt(rangeEffect.damage)}`}</td>
                         <th className={"ml-5"}>Leth</th>
-                        <td className={"mx-2"} aria-label={"Lethality modifier"}>{`${this.renderInt(rangeEffect.leth)}`}</td>
+                        <td className={"mx-2"}
+                            aria-label="Lethality modifier">{`${this.renderInt(rangeEffect.leth)}`}</td>
+                        <th className={"ml-5"}>Vision</th>
+                        <td className={"mx-2"}
+                            aria-label="Vision check">{rangeEffect.visionCheck}</td>
                     </tr>
                     </tbody>
                 </Table>
             </div>;
         } else {
-            rangeInfo = <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
+            rangeInfo =
+                <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
         }
 
         const rof = this.rof(this.state.useType)
@@ -725,7 +776,7 @@ class FirearmControl extends RangedWeaponRow {
                                     </tr>
                                     <tr>
                                         <td style={firstCellStyle}
-                                            rowSpan={2}>
+                                            rowSpan={3}>
                                             <ScopeControl
                                                 scope={this.props.weapon.scope}
                                                 url={`/rest/scopes/campaign/${this.props.campaign}/`}
@@ -769,6 +820,9 @@ class FirearmControl extends RangedWeaponRow {
                                         <td style={cellStyle}
                                             colSpan={6}>{scope.notes}</td>
                                     </tr>
+                                    <tr><td colSpan={2}>{scope.perks?.length && <strong>Perks</strong>}</td><td colSpan={10}>{scope.perks?.map((p, index) => {
+                                        return <span key={`perk-${index}`}>{`${p.edge} ${p.level}`}</span>
+                                    })}</td></tr>
                                     </tbody>
                                 </table>
                             </div>

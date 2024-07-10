@@ -2,9 +2,9 @@ import React from 'react';
 import {
     render,
     screen,
-    within,
     waitFor,
-    waitForElementToBeRemoved
+    waitForElementToBeRemoved,
+    within
 } from '@testing-library/react'
 import {rest} from 'msw'
 import {setupServer} from 'msw/node'
@@ -39,7 +39,8 @@ describe('FirearmControl', () => {
                     level: 1
                 }]
             },
-            weapon: {base: {sight: 600, barrel_length: 602, accuracy: 1.0},
+            weapon: {
+                base: {sight: 600, barrel_length: 602, accuracy: 1.0},
                 scope: null,
                 ammo: {
                     num_dice: 2,
@@ -56,7 +57,9 @@ describe('FirearmControl', () => {
                 delete givenProps.handlerProps;
             }
             if (givenProps.weapon) {
+                const base = Object.assign({}, props.weapon.base, givenProps.weapon.base ?? {})
                 props.weapon = Object.assign(props.weapon, givenProps.weapon);
+                props.weapon.base = base
                 delete givenProps.weapon;
             }
             props = Object.assign(props, givenProps);
@@ -331,40 +334,138 @@ describe('FirearmControl', () => {
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Medium")
     });
 
+    it("calculate bumping based on range", async () => {
+        await renderFirearm({toRange: "25"});
 
-    // it("can calculate bumping based on range", () => {
-    //     const firearm = rangeFirearm();
-    //     let rangeEffect = firearm.rangeEffect(25);
-    //     expect(rangeEffect.check).toEqual(-10);
-    //     expect(rangeEffect.targetInitiative).toEqual(0);
-    //     // TODO: should be false
-    //     //expect(rangeEffect.bumpingAllowed).toBe(true);
-    // });
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+10")
+        expect(within(rangeEffect).getByLabelText("Bumping allowed").textContent).toEqual("no")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Very short")
+    });
 
-    // it("takes Acute Vision into account", () => {
-    //     const firearm = rangeFirearm({handlerProps: {
-    //         edges: [{edge: "Acute Vision", level: 2}]}});
-    //     let rangeEffect = firearm.rangeEffect(360);
-    //     // Acute vision 2 equals +1DL -> +10,
-    //     // Acute vision 2 should lower range penalties by +10
-    //     expect(rangeEffect.check).toEqual(-35);
-    //     expect(rangeEffect.targetInitiative).toEqual(-2);
-    // });
+    it("takes Acute Vision 2 into account", async () => {
+        await renderFirearm({
+            weapon: {base: {sight: 600, barrel_length: 500, stock: 1.5, accuracy: 1.2},
+                     ammo: {velocity: 900}},
+            toRange: "300",
+            handlerProps: { edges: [{edge: "Acute Vision", level: 2}]}
+        });
 
-    // it("takes scope's Acute Vision into account", () => {
-    //     const firearm = rangeFirearm();
-    //     let rangeEffect = firearm.rangeEffect(25);
-    //     expect(rangeEffect.check).toEqual(-10);
-    //     expect(rangeEffect.targetInitiative).toEqual(0);
-    //     // TODO: should be false
-    //     //expect(rangeEffect.bumpingAllowed).toBe(true);
-    //
-    //     // there should be only one call to the skillHandler.visionCheck TODO: TBC
-    // });
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("80")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
 
-    test.todo("takes character's Acute/Poor Vision correctly into account")
-    test.todo("takes scope's Acute Vision correctly into account")
-    test.todo("stacks scope's and characters Acute/Poor Vision correctly")
+        expect(getActionChecks().slice(2, 7)).toEqual(["35", "28", "21", "13", ""])
+    });
+
+    it("takes Acute Vision 1 into account", async () => {
+        await renderFirearm({
+            weapon: {base: {sight: 600, barrel_length: 500, stock: 1.5, accuracy: 1.2},
+                     ammo: {velocity: 900}},
+            toRange: "300",
+            handlerProps: { edges: [{edge: "Acute Vision", level: 1}]}
+        });
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("70")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-25")
+
+        expect(getActionChecks().slice(2, 7)).toEqual(["30", "23", "16", "8", ""])
+    });
+
+    it("takes Poor Vision into account", async () => {
+        await renderFirearm({
+            weapon: {base: {sight: 600, barrel_length: 500, stock: 1.5, accuracy: 1.2},
+                     ammo: {velocity: 900}},
+            toRange: "200", // 300 is too far
+            handlerProps: { edges: [{edge: "Poor Vision", level: 2}]}
+        });
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("50")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-45")
+
+        expect(getActionChecks().slice(2, 7)).toEqual(["10", "3", "-4", "-12", ""])
+    });
+
+    it("takes scope's Acute Vision into account", async () => {
+        await renderFirearm({
+            weapon: {
+                base: {
+                    sight: 600,
+                    barrel_length: 500,
+                    stock: 1.5,
+                    accuracy: 1.2
+                },
+                ammo: {velocity: 900},
+                scope: {
+                    name: "optical scope 8x",
+                    sight: 1000,
+                    perks: [{edge: "Acute Vision", level: 2}]
+                }
+            },
+            toRange: "300",
+        });
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("80")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
+
+        expect(getActionChecks().slice(2, 7)).toEqual(["35", "28", "21", "13", ""])
+        expect(screen.getByText(/Acute Vision 2/)).toBeInTheDocument()
+    });
+
+    it("stacks scope and character's Poor Vision correctly", async () => {
+        await renderFirearm({
+            weapon: {
+                base: {
+                    sight: 600,
+                    barrel_length: 500,
+                    stock: 1.5,
+                    accuracy: 1.2
+                },
+                ammo: {velocity: 900},
+                scope: {
+                    name: "optical scope 8x",
+                    sight: 1000,
+                    perks: [{edge: "Acute Vision", level: 2}]
+                }
+            },
+            toRange: "300",
+            handlerProps: {edges: [{edge: "Poor Vision", level: 1}]}
+        });
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("70")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-25")
+
+        expect(getActionChecks().slice(2, 7)).toEqual(["30", "23", "16", "8", ""])
+    });
+
+    it("stacks scope's and characters Acute Vision", async () => {
+        await renderFirearm({
+            weapon: {base: {sight: 600, barrel_length: 500, stock: 1.5, accuracy: 1.2},
+                     ammo: {velocity: 900},
+                scope: {name: "optical scope 8x", sight: 1000, perks: [{edge: "Acute Vision", level: 1}]}
+            },
+            handlerProps: { edges: [{edge: "Acute Vision", level: 1}]},
+            toRange: "300",
+        });
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("80")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
+
+        expect(getActionChecks().slice(2, 7)).toEqual(["35", "28", "21", "13", ""])
+        expect(screen.getByText(/Acute Vision 1/)).toBeInTheDocument()
+    });
+
     test.todo("allow specifying maximum range for scope/addon")
     test.todo('accounts for the Color blind flaw correctly in daylight')
     test.todo('ignores for the Color blind flaw correctly in night time')
@@ -499,7 +600,7 @@ describe('FirearmControl', () => {
 
     it("calculates long range for pistols", async () => {
         await renderFirearm({
-            weapon: {base: {stock: 1}, ammo: {velocity: 359}}
+            weapon: {base: {stock: 1, barrel_length: 102, sight:153}, ammo: {velocity: 359}}
         });
         expect(screen.getByLabelText("Short range").textContent).toEqual("12")
         expect(screen.getByLabelText("Long range").textContent).toEqual("36")
@@ -507,7 +608,7 @@ describe('FirearmControl', () => {
 
     it("calculates long range for assault rifles", async () => {
         await renderFirearm({
-            weapon: {base: {stock: 1.25}, ammo: {velocity: 715}}
+            weapon: {base: {stock: 1.25, barrel_length: 102, sight:153}, ammo: {velocity: 715}}
         });
         expect(screen.getByLabelText("Short range").textContent).toEqual("12")
         expect(screen.getByLabelText("Long range").textContent).toEqual("60")
@@ -515,7 +616,7 @@ describe('FirearmControl', () => {
 
     it("calculates long range for sniper rifles", async () => {
         await renderFirearm({
-            weapon: {base: {stock: 1.50}, ammo: {velocity: 900}}
+            weapon: {base: {stock: 1.50, barrel_length: 102, sight:153}, ammo: {velocity: 900}}
         });
         expect(screen.getByLabelText("Short range").textContent).toEqual("12")
         expect(screen.getByLabelText("Long range").textContent).toEqual("72")

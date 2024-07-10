@@ -319,7 +319,12 @@ const scopeFactory = (props) => {
     let perks = [];
     if (props.perks) {
         for (let edge of props.perks) {
-            perks.push(edgeLevelFactory(edge));
+            // Rest endpoint for firearm addons and scopes returns edge
+            // with only the name in the field.
+            const edgeName = edge.edge
+            const perk = edgeLevelFactory(edge);
+            perk.edge = edgeName
+            perks.push(perk);
         }
     }
 

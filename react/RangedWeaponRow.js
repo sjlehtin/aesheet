@@ -245,6 +245,7 @@ class RangedWeaponRow extends WeaponRow {
             this.props.darknessDetectionLevel,
             perks);
 
+        effect.visionCheck = visionCheck
         if (effect === null || visionCheck === null) {
             return null;
         }
