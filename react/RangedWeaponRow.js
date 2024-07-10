@@ -6,6 +6,7 @@ import ValueBreakdown from "./ValueBreakdown";
 import StatBreakdown from "StatBreakdown";
 const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
+import {isFloat} from "./sheet-util";
 
 class RangedWeaponRow extends WeaponRow {
     constructor(props) {
@@ -88,6 +89,188 @@ class RangedWeaponRow extends WeaponRow {
                 WeaponRow.lethalityFITModifiers[WeaponRow.PRI]);
         }
         return {damage: fitBonusDmg, leth: fitLethBonus};
+    }
+
+    weaponRangeEffect(toRange) {
+        // Range
+        // +2 TI, D/L (+2 to target initiative and damage and lethality)
+        //
+        // Contact
+        // +60 (+2 TI, D/L) (Firearms only)
+        // Close (0.5–1 m)
+        // +50 (+2 TI, D/L) (Firearms only)
+        // Point-blank (1–3 m)
+        // +40 (+1 TI, D/L)
+        // XXS (⅛ x S)
+        // +30 (+1 TI, D/L)
+        // Extra-short (¼ x S)
+        // +20
+        // Very short (½ x S)
+        // +10
+        // Short
+        // 0
+        // Medium
+        // -10
+        // Long
+        // -20
+        // Extra-long (1½ x L)
+        // -30 (-1 TI, D/L)
+        // XXL (2 x L)
+        // -40 (-2 TI, D/L)
+        // XXXL (2½ x L)
+        // -50 (-3 TI, D/L) (telescopic sight only)
+        // Extreme (3x L)
+        // -60 (-4 TI, D/L) (telescopic sight only)
+        const shortRangeEffect = {
+            check: 0,
+            targetInitiative: 0,
+            damage: 0,
+            leth: 0,
+            name: "Short"
+        };
+
+        if (!toRange && !isFloat(toRange)) {
+            return shortRangeEffect;
+        }
+        const shortRange = this.shortRange();
+        const longRange = this.longRange();
+
+        if (toRange < 0.5) {
+            // TODO: firearm only
+            return {
+                check: 60,
+                targetInitiative: 2,
+                damage: 2,
+                leth: 2,
+                name: "Contact"
+            };
+        } else if (toRange <= 1) {
+            // TODO: firearm only
+            return {
+                check: 50,
+                targetInitiative: 2,
+                damage: 2,
+                leth: 2,
+                name: "Close"
+            };
+        } else if (toRange <= 3) {
+            return {
+                check: 40,
+                targetInitiative: 1,
+                damage: 1,
+                leth: 1,
+                name: "Point-blank"
+            };
+        } else if (toRange <= shortRange/8) {
+            return {
+                check: 30,
+                targetInitiative: 1,
+                damage: 1,
+                leth: 1,
+                name: "XXS"
+            };
+        } else if (toRange <= shortRange/4) {
+            return {
+                check: 20,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                name: "Extra-short"
+            };
+
+        } else if (toRange <= shortRange/2) {
+            return {
+                check: 10,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                name: "Very short"
+            };
+
+        } else if (toRange <= shortRange) {
+            return shortRangeEffect;
+        } else if (toRange <= this.mediumRange()) {
+            return {
+                check: -10,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                name: "Medium"
+            };
+        } else if (toRange <= longRange) {
+            return {
+                check: -20,
+                targetInitiative: 0,
+                damage: 0,
+                leth: 0,
+                name: "Long"
+            };
+        } else if (toRange <= 1.5*longRange) {
+            return {
+                check: -30,
+                targetInitiative: -1,
+                damage: -1,
+                leth: -1,
+                name: "Extra-long"
+            };
+        } else if (toRange <= 2*longRange) {
+            return {
+                check: -40,
+                targetInitiative: -2,
+                damage: -2,
+                leth: -2,
+                name: "XXL"
+            };
+        } else if (toRange <= 2.5*longRange) {
+            // XXXL
+            // TODO: check scope
+            return null;
+        } else if (toRange <= 3*longRange) {
+            // Extreme
+            // TODO: check scope
+            return null;
+        }
+
+        return null;
+    }
+
+    rangeEffect(toRange) {
+        let effect = this.weaponRangeEffect(toRange);
+        let perks = [];
+
+        if (this.props.weapon.scope) {
+            perks = this.props.weapon.scope.perks;
+        }
+        const visionCheck = this.props.skillHandler.visionCheck(toRange,
+            this.props.darknessDetectionLevel,
+            perks);
+
+        if (effect === null || visionCheck === null) {
+            return null;
+        }
+
+        // If vision check is under 75, the difference is penalty to the
+        // ranged skill check.
+        if (visionCheck < 75) {
+            effect.check += visionCheck - 75;
+        }
+
+        // Instinctive Fire
+        // Although listed under the Throwing weapons skill, the Instinctive
+        // fire enhancement is applicable to all missile weapons. The Inst
+        // fire skill level cannot be higher than the highest missile weapon
+        // skill level.
+        // Instinctive fire grants the PC a +1 bonus per level to Target-I
+        // with ranged weapons. The skill cannot raise the Target-I above 0.
+        // The skill can be used up to INT/2 m range.
+
+        if (util.isFloat(toRange) && toRange <= util.rounddown(
+            this.props.skillHandler.getStat("int") / 2)) {
+            effect.targetInitiative +=
+                this.props.skillHandler.skillLevel("Instinctive fire");
+        }
+        effect.bumpingAllowed = visionCheck >= 100;
+        return effect;
     }
 
     render() {
