@@ -466,6 +466,113 @@ describe('FirearmControl', () => {
         expect(screen.getByText(/Acute Vision 1/)).toBeInTheDocument()
     });
 
+    it("calculates long range", async () => {
+        await renderFirearm({
+            weapon: {
+                base: {
+                    sight: 600,
+                    barrel_length: 500,
+                    stock: 1.5,
+                    accuracy: 1.2
+                },
+                ammo: {velocity: 900},
+                scope: {
+                    name: "optical scope 8x",
+                    sight: 1000,
+                    // perks: [{edge: "Acute Vision", level: 1}]
+                }
+            },
+            // handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
+            toRange: "1080",
+        });
+
+        expect(screen.getByLabelText("Long range").textContent).toEqual("540")
+        expect(screen.getByText("Unable to shoot to this range")).toBeTruthy()
+    })
+
+    it("calculates XXXL range with Acute Vision perk", async () => {
+        await renderFirearm({
+            weapon: {
+                base: {
+                    sight: 600,
+                    barrel_length: 500,
+                    stock: 1.5,
+                    accuracy: 1.2
+                },
+                ammo: {velocity: 900},
+                scope: {
+                    name: "optical scope 8x",
+                    sight: 1000,
+                    perks: [{edge: "Acute Vision", level: 1}]
+                }
+            },
+            // handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
+            toRange: "1081",
+        });
+
+        expect(screen.getByLabelText("Long range").textContent).toEqual("540")
+        expect(screen.queryByText("Unable to shoot to this range")).not.toBeInTheDocument()
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("XXXL")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-75")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("50")
+    })
+
+    it("does not allow Extreme range without Acute Vision 2 perk or equivalent", async () => {
+        await renderFirearm({
+            weapon: {
+                base: {
+                    sight: 600,
+                    barrel_length: 500,
+                    stock: 1.5,
+                    accuracy: 1.2
+                },
+                ammo: {velocity: 900},
+                scope: {
+                    name: "optical scope 8x",
+                    sight: 1000,
+                    perks: [{edge: "Acute Vision", level: 1}]
+                }
+            },
+            // handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
+            toRange: "1600",
+        });
+
+        expect(screen.getByLabelText("Long range").textContent).toEqual("540")
+        expect(screen.queryByText("Unable to shoot to this range")).toBeInTheDocument()
+    })
+
+    it("calculates Extreme range with Acute Vision perk", async () => {
+        await renderFirearm({
+            weapon: {
+                base: {
+                    sight: 600,
+                    barrel_length: 500,
+                    stock: 1.5,
+                    accuracy: 1.2
+                },
+                ammo: {velocity: 900},
+                scope: {
+                    name: "optical scope 8x",
+                    sight: 1000,
+                    perks: [{edge: "Acute Vision", level: 1}]
+                }
+            },
+            handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
+            toRange: "1600",
+        });
+
+        expect(screen.getByLabelText("Long range").textContent).toEqual("540")
+        expect(screen.queryByText("Unable to shoot to this range")).not.toBeInTheDocument()
+
+        const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Extreme")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-75")
+        expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("60")
+
+    })
+
     test.todo("allow specifying maximum range for scope/addon")
     test.todo('accounts for the Color blind flaw correctly in daylight')
     test.todo('ignores for the Color blind flaw correctly in night time')
