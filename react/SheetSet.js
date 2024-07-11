@@ -144,7 +144,7 @@ export function SheetSet({sheetSetId}) {
                 <Button size="sm" onClick={() => {
                     return handleClone(sheetSetId, sheetSetSheet, sheetSetSheets, sheetsMutate)
                 }}
-                        title="Clone sheet, add to sheet set"><GoCopy/>Clone</Button>
+                        title="Clone sheet, add to sheet set"><GoCopy/><span style={{fontSize: "xx-small"}}>{' '}Clone</span></Button>
                 {' '}
                 <Button size="sm" variant="danger"
                         onClick={async () => {
@@ -160,7 +160,7 @@ export function SheetSet({sheetSetId}) {
                                 }
                             })
                         }}
-                        title="Delete sheet permanently!"><GoTrash/>{''}Delete</Button>
+                        title="Delete sheet permanently!"><GoTrash/><span style={{fontSize: "xx-small"}}>{''}Delete</span></Button>
                 {' '}
                 <div className="vr"/>
                 {' '}
@@ -189,7 +189,7 @@ export function SheetSet({sheetSetId}) {
             </div>
 
             const url = `/rest/sheets/${sheetSetSheet.sheet.id}/`;
-            return <Col className="col-sm-4 mb-3" key={url}>
+            return <Col className="col-sm-4 mb-3 p-1" key={url}>
                 <ErrorBoundary fallback={fallback}>
                     <CompactSheet key={url} url={url} toRange={range}
                                   darknessDetectionLevel={detectionLevel}
