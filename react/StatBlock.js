@@ -136,8 +136,16 @@ class StatBlock extends React.Component {
             woundList: [],
 
             // Apply range on firearms.
-            firearmRange: ""
+            firearmRange: "",
+            firearmDarknessDetectionLevel: 0,
+
         };
+    }
+
+    combatTransientsActive() {
+        return this.state.firearmRange !== ""
+            || this.state.gravity !== 1.0
+            || this.state.firearmDarknessDetectionLevel !== 0
     }
 
     handleFirearmsLoaded(firearmList) {
@@ -779,7 +787,7 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Skills</Loading>
         }
-        return <SkillTable
+        return <div className={"mr-2"}><SkillTable
             style={{fontSize: "80%"}}
             skillHandler={skillHandler}
             onCharacterSkillRemove={
@@ -788,7 +796,7 @@ class StatBlock extends React.Component {
                       (skill) => this.handleCharacterSkillModify(skill)}
             onCharacterSkillAdd={
                       (skill) => this.handleCharacterSkillAdd(skill)}
-            />
+            /></div>
     }
 
     renderStats(skillHandler) {
@@ -1397,7 +1405,7 @@ class StatBlock extends React.Component {
                 <Col><a href={`/characters/edit_char/${this.state.char.id}/`}>Edit base character</a></Col>
                 <Col><a href={`/characters/edit_sheet/${this.state.sheet.id}/`}>Edit base sheet</a></Col>
                 <Col><a href={`/sheets/copy/${this.state.sheet.id}`}>Copy this sheet</a></Col>
-                <Col>
+                <Col className="mr-1 mb-1">
                     <Card>
                     <Card.Header>
                         <h4>Owner</h4>
@@ -1454,7 +1462,7 @@ class StatBlock extends React.Component {
 
         return (
             <>
-            <SideDrawer >
+            <SideDrawer highlight={this.combatTransientsActive()}>
                 <Row>
                     {rangeControl}
                 </Row>

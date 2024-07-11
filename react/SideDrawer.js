@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from "react";
 import {Offcanvas} from 'react-bootstrap'
 
-function SideDrawer({width= 20, children}) {
+function SideDrawer({width= 40, highlight = false, children}) {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -26,6 +26,8 @@ function SideDrawer({width= 20, children}) {
     const finalY = 400;
     const finalStrategy = "fixed"
 
+    const highlightStyle = highlight? "#922" : '#333'
+
     const verticalHandleStyle = {
               position: finalStrategy,
               top: finalY,
@@ -33,7 +35,7 @@ function SideDrawer({width= 20, children}) {
               width: `${width}px`,
               writingMode: 'vertical-rl',
               textAlign: 'center',
-              backgroundColor: '#333',
+              backgroundColor: highlightStyle,
               color: 'white',
               fontFamily: 'Arial, sans-serif',
               padding: '10px 0',
