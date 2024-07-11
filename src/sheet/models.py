@@ -763,26 +763,6 @@ class BaseWeaponTemplate(BaseArmament, BaseDamager):
         ordering = ["name"]
 
 
-Range = namedtuple("Range", ("pb", "xs", "vs", "s", "m", "l", "xl", "e"))
-
-
-class RangedWeaponMixin(models.Model):
-    target_initiative = models.IntegerField(default=-2)
-
-    range_pb = models.IntegerField(blank=True, null=True)
-    range_xs = models.IntegerField(blank=True, null=True)
-    range_vs = models.IntegerField(blank=True, null=True)
-    range_s = models.IntegerField()
-    range_m = models.IntegerField()
-    range_l = models.IntegerField()
-    range_xl = models.IntegerField(blank=True, null=True)
-    range_e = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        abstract = True
-        ordering = ["name"]
-
-
 class BaseFirearmAddOn(ExportedModel):
     """ """
 
@@ -790,6 +770,11 @@ class BaseFirearmAddOn(ExportedModel):
 
     target_i_mod = models.IntegerField(default=0)
     to_hit_mod = models.IntegerField(default=0)
+
+    # _range_choices = ["", "pb", "xs", "vs", "s", "m", "l", "xl", "xxl", "xxxl", "e"]
+    # max_range = models.CharField(max_length=10, blank=True, default="xxl",
+    #                              help_text="Addon maximum range",
+    #                              choices=zip(_range_choices, ["not restricted"] + _range_choices[1:]))
 
     tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
 
@@ -821,7 +806,7 @@ class Scope(BaseFirearmAddOn):
     """
 
     sight = models.IntegerField(
-        default=1000, help_text="Overrides weapon's " "sight modifier"
+        default=1000, help_text="Overrides weapon's sight modifier"
     )
 
     @classmethod
@@ -905,7 +890,7 @@ class FirearmAmmunitionType(models.Model):
         return f"{self.firearm} {self.calibre.name})"
 
 
-class BaseFirearm(BaseArmament, RangedWeaponMixin):
+class BaseFirearm(BaseArmament):
     """ """
 
     autofire_rpm = models.IntegerField(blank=True, null=True)
@@ -958,6 +943,8 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
         default=100, help_text="Weapon's barrel length in millimeters"
     )
 
+    target_initiative = models.IntegerField(default=-2)
+
     ammunition_types = models.ManyToManyField(
         Calibre, through=FirearmAmmunitionType
     )
@@ -989,6 +976,9 @@ class BaseFirearm(BaseArmament, RangedWeaponMixin):
             "sheetfirearm",
             "sheet"
         ]
+
+    class Meta:
+        ordering = ["name"]
 
 
 class SheetFirearm(models.Model):
@@ -1044,7 +1034,8 @@ class WeaponTemplate(BaseWeaponTemplate):
         return ["weapon"]
 
 
-class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
+
+class RangedWeaponTemplate(BaseWeaponTemplate):
     """ """
 
     type = models.CharField(max_length=5, default="P")
@@ -1053,19 +1044,18 @@ class RangedWeaponTemplate(BaseWeaponTemplate, RangedWeaponMixin):
         max_digits=6, decimal_places=3, default=0.1
     )
 
-    # TODO: Get rid of this, use base_skill to indicate the type instead.
-    THROWN = "thrown"
-    CROSSBOW = "xbow"
-    BOW = "bow"
-    weapon_type = models.CharField(
-        max_length=10,
-        default=THROWN,
-        choices=(("thrown", THROWN), ("xbow", CROSSBOW), ("bow", BOW)),
-    )
+    target_initiative = models.IntegerField(default=-2)
+
+    range_s = models.IntegerField()
+    range_m = models.IntegerField()
+    range_l = models.IntegerField()
 
     @classmethod
     def dont_export(self):
         return ["rangedweapon"]
+
+    class Meta:
+        ordering = ["name"]
 
 
 EFFECT_TYPES = [

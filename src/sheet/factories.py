@@ -281,10 +281,6 @@ class BaseFirearmFactory(DjangoModelFactory):
     base_skill__name = "Pistol"
     tech_level__name = "2K"
 
-    range_s = 15
-    range_m = 30
-    range_l = 100
-
     class Meta:
         model = models.BaseFirearm
         django_get_or_create = ('name', )
