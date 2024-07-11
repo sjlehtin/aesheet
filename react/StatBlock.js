@@ -919,8 +919,10 @@ class StatBlock extends React.Component {
                 <h4>Initiative penalty for advancing in combat</h4>
             </Card.Header>
             <Card.Body className={"table-responsive p-0"}>
-            <InitiativeBlock className="m-1" style={{fontSize: "80%"}}
-                                stats={skillHandler} />
+            <InitiativeBlock className="m-1"
+                             distance={this.state.firearmRange}
+                             style={{fontSize: "80%"}}
+                             stats={skillHandler} />
                             </Card.Body>
         </Card>;
     }
