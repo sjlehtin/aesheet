@@ -8,6 +8,10 @@
 * Added handling for wound effects for wounds with damage greater than the location threshold.
 * Added movement rate calculation based on gravity.
 * Implement powered armors, with suspended weight, with possibility to add Power Armor skill.
+* Sweep fire range penalties are doubled.
+* Add XXXL and Extreme ranges, provided that the scope or the user has high enough Acute Vision effect.
+* Added admin list edit for RangedWeaponTemplates.
+* Use range from combat transients in advancing initiatives of the normal sheet as well.
 
 ### Fixed
 
@@ -20,6 +24,9 @@
 * Fixed power armor positive FIT modifier.
 * Fixed sheet set rendering in case a private sheet was included by accident or permissions later changed.
 * Fixed backend to respect character private setting. Private sheets that do not belong to the user are filtered out from the results.
+* Acute vision should have full effect in Clear (darkness detection level 0) situations.
+* Improved combat transient usability. Made the handle wider and it will change color with non-default settings.
+* Make damage and current penalties more prominent in the sheet display.
 
 ## [0.21.0] - 2024-07-03
 

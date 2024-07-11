@@ -25,8 +25,16 @@
 
     + visual indication of damage taken, per hit location
     + concise view of current penalties, esp. in sheet set
+    - add a popover for damage effects in location to the display near armor
 
     - firearms in CC. (from firearms section)
+    - max range for firearm addons, rule to be determined
+
+    - skill mods from armor to affect skill in general, affected_by_armor_mod_climb etc to Skill
+        - 1) Stealth 2) Conceal 3) Climb, Jump, Tumble 4) Swim. each of these could affect several
+          skills, esp. Climb, Jump, Tumble. Add a field to skills to mark that
+          the modifier affects the skill and use in skill calculation,
+          instead of hardcoding skill names.
     - add a generic skill check element to allow unskilled checks
         - at least render base skill checks
     - fix issue in skill list rendering with skills that are specializations
@@ -48,8 +56,8 @@
         + remember set range and detection level on reopen
         - setting range once will affect firearms and ranged weapons
         - highlights the correct column in senses
-        - make the drawer handle wider, the scrollbar is layered on top of the handle, making hard to toggle the overlay
-        - visible indication when non-standard selections, i.e., combat in progress
+        + make the drawer handle wider, the scrollbar is layered on top of the handle, making hard to toggle the overlay
+        + visible indication when non-standard selections, i.e., combat in progress
 
     - before summer of 2025, check offline functionality,
         should be possible to add and remove damage and spend ammo, at least, even without network connectivity.
@@ -57,17 +65,18 @@
 
     + check breakdown for sweep fire
         - use counterpenaltyv2 to get more accurate breakdown
-    - double range penalties for sweep fire missing in range view
+    + double range penalties for sweep fire
     - allow adding number of targets in combat transients, to calculate penalties accurately
         - 5 per additional target in same arc, -10 per additional in different arc
         - -10 per additional opponent in close combat
     - pass combat transients down, to allow adding things like num opponents easily
     - range control for ranged weapons
-    - check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
-        - at least in normal daylight, acute vision does not work (probably because night vision check always used)
-        - Render perks in the details, as an overlay for example
+    + check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
+        + at least in normal daylight, acute vision does not work (probably because night vision check always used)
+        + Render perks in the details, as an overlay for example
     + power armor skill
 
+    - make SP addition a modal dialog to reduce possibility of human error
     - "add xp used ingame" with a possibility to enter description (to log)
     -- if a log entry is added, entry should not be coalesced.
     - "add xp" with an optional log entry, allowing for in-game notes.
@@ -90,8 +99,6 @@
     + add a log entry for added edges
     + add indication of last SP addition
     + add indication of last XP addition
-    - make SP addition a modal dialog to reduce possibility of human error
-    - "add xp used ingame" with a possibility to enter description (to log)
     - calculate shock check and add "times wounded" to sheet
 
     - weapons, ammo, armor, skills, should all be possible to update in the
