@@ -13,6 +13,19 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
     save_as = True
 
 
+class RangedWeaponTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'tech_level', 'draw_initiative', 'roa',
+                    'num_dice',
+                    'dice', 'extra_damage', 'leth', 'plus_leth',
+                    'target_initiative',
+                    'type', 'durability', 'dp', 'short_name',
+                    'notes',  'base_skill', 'skill', 'skill2')
+    list_filter = ('tech_level',)
+    search_fields = ('name', )
+    list_editable = list_display[2:]
+    save_as = True
+
+
 class CampaignAdmin(admin.ModelAdmin):
     @admin.display
     def campaign_tech_levels(self, obj):
@@ -215,6 +228,6 @@ admin.site.register(sm.WeaponSpecialQuality, EffectAdmin)
 admin.site.register(sm.WeaponTemplate, WeaponTemplateAdmin)
 admin.site.register(sm.Weapon)
 admin.site.register(sm.WeaponQuality, QualityAdmin)
-admin.site.register(sm.RangedWeaponTemplate, ItemAdmin)
+admin.site.register(sm.RangedWeaponTemplate, RangedWeaponTemplateAdmin)
 admin.site.register(sm.RangedWeapon)
 admin.site.register(sm.Scope, ItemAdmin)
