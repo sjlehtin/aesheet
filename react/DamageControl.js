@@ -121,25 +121,6 @@ class DamageControl extends React.Component {
         if (this.state.isBusy) {
             loading = <Loading />;
         }
-        var damage = '';
-        if (this.props.handler.getStaminaDamage()) {
-            let renderedAcPenalty, renderedInitPenalty;
-            const acPenalty = this.props.handler.getACPenalty().value;
-            const descrStyle = {marginLeft: "1em"};
-            renderedAcPenalty =
-                <span style={descrStyle}>{acPenalty} AC</span>;
-            const initPenalty = SkillHandler.getInitPenaltyFromACPenalty(acPenalty);
-            if (initPenalty) {
-                renderedInitPenalty =
-                    <span style={descrStyle}>{initPenalty} I</span>;
-            }
-            damage = <div style={{color: 'red'}}>
-                -{this.props.handler.getStaminaDamage()} STA
-                => {renderedAcPenalty}
-                {renderedInitPenalty}
-            </div>;
-        }
-
         var rows = this.props.wounds.map((wound, idx) => {
             return <WoundRow key={"wound-" + idx} wound={wound}
                              onMod={(data) => this.handleWoundMod(data)}
@@ -162,69 +143,76 @@ class DamageControl extends React.Component {
                                 title="The character is dead due to massive damage">✟</span>;
         }
 
-        return (<Card className={"m-1"}>
-            <Card.Header>
-                <h4>Stamina damage and wounds</h4>
-            </Card.Header>
-            <Card.Body className={"table-responsive"}>
-            <div>
-                <Row>
-                    <Col md={"1"}>
-                <label>Body</label>
-                        </Col>
-                    <Col md={"auto"}>
-                <div style={this.props.style}>
-                        <span style={{marginLeft: "1em"}} aria-label={"Current body"}>{this.props.handler.getCurrentBody()} / {stats.body} {deathSymbol}</span></div>
-                    </Col>
-                    </Row>
-                <Row>
-                    <Col md={"1"}>
-                <label>Stamina</label>
-                        </Col>
-                    <Col md={"auto"}>
-                <div style={this.props.style}>
-                        <span style={{marginLeft: "1em"}} aria-label={"Current stamina"}>{this.props.handler.getCurrentStamina()} / {stats.stamina} </span></div>
-                    </Col>
-                    </Row>
-            {damage}
+        return (
+            <Card className={"m-1"}>
+                <Card.Header>
+                    <h4>Stamina damage and wounds</h4>
+                </Card.Header>
+                <Card.Body className={"table-responsive"}>
+                    <div>
                         <Row>
-<Col md={"1"}>
-    <Form.Label htmlFor={"stamina-damage"}>Stamina damage</Form.Label>
-</Col>
-<Col md={"auto"}>
-            <Form.Control
-                    type="text"
-                    onChange={(e) => this.handleChange(e)}
-                    id={"stamina-damage"} isValid={this.isValid()}
-                    value={this.state.currentStaminaDamage}
-                    onKeyDown={async (e) => await this.handleKeyDown(e)}
-                    style={inputStyle}
-            />
-    </Col>
-                        <Col md={"auto"}>
-            <Button
-                style={{marginLeft: "1em"}}
-                size="sm"
-                    disabled={!this.isValid() || this.state.isBusy}
-                    onClick={async (e) => await this.handleSubmit()}>Change{loading}</Button>
-                        </Col>
-                        <Col md={"auto"}>
-            <Button style={{marginLeft: ".5em"}}
-                    size="sm"
-                    disabled={!this.isValid() || this.state.isBusy}
-                    id={"clear-stamina-damage"}
-                    onClick={async (e) => await this.handleClear()}>Clear{loading}</Button>
-                        </Col>
-                            </Row>
-            <WoundPenaltyBox handler={this.props.handler}/>
-            {wounds}
-        </div>
+                            <Col md={"1"}>
+                                <label>Body</label>
+                            </Col>
+                            <Col md={"auto"}>
+                                <div style={this.props.style}>
+                                <span style={{marginLeft: "1em"}}
+                                      aria-label={"Current body"}>{this.props.handler.getCurrentBody()} / {stats.body} {deathSymbol}</span>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={"1"}>
+                                <label>Stamina</label>
+                            </Col>
+                            <Col md={"auto"}>
+                                <div style={this.props.style}>
+                                <span style={{marginLeft: "1em"}}
+                                      aria-label={"Current stamina"}>{this.props.handler.getCurrentStamina()} / {stats.stamina} </span>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col md={"1"}>
+                                <Form.Label htmlFor={"stamina-damage"}>Stamina
+                                    damage</Form.Label>
+                            </Col>
+                            <Col md={"auto"}>
+                                <Form.Control
+                                    type="text"
+                                    onChange={(e) => this.handleChange(e)}
+                                    id={"stamina-damage"}
+                                    isValid={this.isValid()}
+                                    value={this.state.currentStaminaDamage}
+                                    onKeyDown={async (e) => await this.handleKeyDown(e)}
+                                    style={inputStyle}
+                                />
+                            </Col>
+                            <Col md={"auto"}>
+                                <Button
+                                    style={{marginLeft: "1em"}}
+                                    size="sm"
+                                    disabled={!this.isValid() || this.state.isBusy}
+                                    onClick={async (e) => await this.handleSubmit()}>Change{loading}</Button>
+                            </Col>
+                            <Col md={"auto"}>
+                                <Button style={{marginLeft: ".5em"}}
+                                        size="sm"
+                                        disabled={!this.isValid() || this.state.isBusy}
+                                        id={"clear-stamina-damage"}
+                                        onClick={async (e) => await this.handleClear()}>Clear{loading}</Button>
+                            </Col>
+                        </Row>
+                        <WoundPenaltyBox handler={this.props.handler} />
+                        {wounds}
+                    </div>
                 </Card.Body>
-            <Card.Footer>
-                <AddWoundControl onAdd={(data) => this.handleWoundAdd(data)}
-                                 handler={this.props.handler}/>
-            </Card.Footer>
-        </Card>);
+                <Card.Footer>
+                    <AddWoundControl
+                        onAdd={(data) => this.handleWoundAdd(data)}
+                        handler={this.props.handler}/>
+                </Card.Footer>
+            </Card>);
     }
 }
 

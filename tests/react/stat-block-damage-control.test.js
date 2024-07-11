@@ -57,7 +57,7 @@ describe('stat block wounds handling', function() {
         await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         await waitFor(() => expect(screen.getByLabelText("Wound effect").textContent).toEqual("Throat punctured"))
-        expect(screen.getByLabelText("AA penalty").textContent).toEqual("-10 AA")
+        expect(screen.getAllByLabelText("AA penalty")[0].textContent).toEqual("-10 AA")
     });
 
     it("allows wounds to be modified", async () => {
@@ -164,6 +164,6 @@ describe('stat block wounds handling', function() {
 
         await user.click(screen.getByRole("button", {name: "Change"}))
 
-        await waitFor(() => expect(screen.getByText(/-20 STA/)).toBeInTheDocument())
+        await waitFor(() => expect(screen.getAllByText(/-20 STA/)[0]).toBeInTheDocument())
     })
 });

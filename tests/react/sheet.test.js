@@ -39,24 +39,7 @@ describe('StatBlock', function() {
     })
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
-    //
-    // it('fetched initial data', function (done) {
-    //     var block = factories.statBlockFactory();
-    //     expect(block.state.char).toBe(undefined);
-    //
-    //     block.afterLoad(function () {
-    //         expect(block.state.sheet).not.toBe(undefined);
-    //         expect(block.state.url).not.toBe(undefined);
-    //         expect(getAllArgumentsByPosition(rest.getData.mock.calls, 0)).toContain('/rest/sheets/1/');
-    //
-    //         expect(getAllArgumentsByPosition(rest.getData.mock.calls, 0))
-    //                     .toContain('/rest/characters/2/');
-    //
-    //         expect(block.state.char).not.toBe(undefined);
-    //         done();
-    //     });
-    // });
-    //
+
     // it('calculates mana', function (done) {
     //     var block = factories.statBlockFactory({character: {
     //         cur_wil: 53, cur_psy: 42}});
@@ -122,7 +105,7 @@ describe('StatBlock', function() {
         await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
 
         expect(screen.getByLabelText("Body at full health").textContent).toEqual("11+4")
-        expect(screen.getByLabelText("Current body").textContent.trim()).toEqual("15 / 15")
+        expect(screen.getAllByLabelText("Current body")[0].textContent.trim()).toEqual("15")
     });
 
 //     it('collects a list of edges while updating with REST', function (done) {
@@ -469,8 +452,6 @@ describe('StatBlock', function() {
 //     //     // TODO
 //     // });
 //
-//
-//
 //     // TODO: Add system tests to check integration through this up till
 //     // SkillRow.
 //
@@ -534,6 +515,6 @@ describe('StatBlock', function() {
         await user.clear(damageInput)
         await user.type(damageInput, "8[Enter]")
 
-        await waitFor(() => expect(screen.getByLabelText("Current stamina").textContent.trim()).toEqual("14 / 22"))
+        await waitFor(() => expect(screen.getAllByLabelText("Current stamina")[0].textContent.trim()).toEqual("14"))
     });
 });

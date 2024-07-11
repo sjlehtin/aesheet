@@ -45,6 +45,7 @@ import {
 import * as rest from './sheet-rest'
 import * as util from './sheet-util'
 import ValueBreakdown from "./ValueBreakdown";
+import WoundPenaltyBox from "./WoundPenaltyBox";
 
 export function staminaRecovery(effStats, skillHandler) {
     /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
@@ -865,17 +866,32 @@ class StatBlock extends React.Component {
         };
 
         expendable = <tbody>
-        <tr><td style={statStyle}>B</td>
-            <td style={baseStyle} aria-label={"Body at full health"}>{baseStats.baseBody}{toughness}</td>
-            <td aria-label={"Body healing"} style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td></tr>
-        <tr><td style={statStyle}>S</td>
+        <tr>
+            <td style={statStyle}>B</td>
+            <td style={baseStyle}
+                aria-label={"Current body"}>{skillHandler.getCurrentBody()}</td>
+            <td style={baseStyle}
+                aria-label={"Body at full health"}>{baseStats.baseBody}{toughness}</td>
+            <td aria-label={"Body healing"}
+                style={recoveryStyle}>{this.bodyHealing(skillHandler)}</td>
+        </tr>
+        <tr>
+            <td style={statStyle}>S</td>
+            <td style={baseStyle}
+                aria-label={"Current stamina"}>{skillHandler.getCurrentStamina()}</td>
             <td style={baseStyle}>{baseStats.stamina}</td>
             <td aria-label={"Stamina recovery"} style={recoveryStyle}>{staminaRecovery(effStats, skillHandler)
             }</td></tr>
-        <tr><td style={statStyle}>M</td>
-            <td style={baseStyle} aria-label={"Maximum mana"}>{this.mana(baseStats)}</td>
-            <td aria-label={"Mana recovery"} style={recoveryStyle}>{manaRecovery(effStats, skillHandler)
-            }</td></tr>
+        <tr>
+            <td style={statStyle}>M</td>
+            <td style={baseStyle}
+                aria-label={"Current mana"}>{skillHandler.getCurrentMana()}</td>
+            <td style={baseStyle}
+                aria-label={"Maximum mana"}>{this.mana(baseStats)}</td>
+            <td aria-label={"Mana recovery"}
+                style={recoveryStyle}>{manaRecovery(effStats, skillHandler)
+            }</td>
+        </tr>
         </tbody>;
 
         return <div style={{position: "relative", width: "18em"}}>
@@ -1475,20 +1491,28 @@ class StatBlock extends React.Component {
                 <Row>
                 <Col md={8} >
                     <Row>
-                        <Col md={6}>
+                        <Col md={8}>
                             <Row>
                                 {this.renderDescription()}
                             </Row>
                             <Row>
+                                <Col md={7}>
                                 {this.renderStats(skillHandler)}
                                 {this.renderXPControl()}
                                 {this.renderSPControl(baseStats)}
+                                    </Col>
+                                <Col md={5}>
+                                    {skillHandler ?
+                                        <WoundPenaltyBox
+                                            handler={skillHandler}/>
+                                        : ''}
+                                </Col>
                             </Row>
                             <Row>
                                 <Col md={6}>{this.renderWeightCarried()}</Col>
                             </Row>
                         </Col>
-                        <Col md={6}>
+                        <Col md={4}>
                             <Row>
                                 {this.renderPortrait()}
                             </Row>

@@ -21,6 +21,7 @@ import {
     Row,
 } from 'react-bootstrap';
 import WoundPenaltyBox from "./WoundPenaltyBox";
+import {GoHeart} from "react-icons/go";
 
 const rest = require('./sheet-rest');
 const util = require('./sheet-util');
@@ -364,12 +365,13 @@ class CompactSheet extends StatBlock {
             <Card className={`m-0 ${statusClass}`}>
                 <Card.Header>
                     <Row fluid={"true"}>
-                        <Col xs={4}>
+                        <Col xs={4} className={"pl-1"}>
                     <strong style={{fontSize: "larger"}}>{title ? <a href={`/sheets/${this.state.sheet.id}/`}>{title}</a> : <Loading>Character</Loading>}{' '}{this.state.sheet?.description} {`(id: ${this.state.sheet?.id})`}</strong>
                         </Col>
-                        <Col xs={2}><Button size={"sm"} onClick={() => {this.setState(
+                        <Col xs={2} className={"p-0"}>
+                            <Button size={"sm"} onClick={() => {this.setState(
                           {showDamages: true}
-                      )}}>Damage</Button></Col>
+                      )}} title="Show and assign damage"><GoHeart/><span style={{fontSize: "xx-small"}}>{' '}Dmg</span></Button></Col>
                         <Col fluid={"true"} className="d-flex justify-content-end">
                             {this.props.children}
                         </Col>
@@ -378,13 +380,39 @@ class CompactSheet extends StatBlock {
             <Card.Body className={"p-0"}>
                 <Container>
                     <Row>
-                        <Col className="xs-3">
+                        <Col className="xs-12">
                             <Row>
                                 {this.renderDescription()}
                             </Row>
                             <Row>
-                                {this.renderStats(skillHandler)}
+                                <Col xs={3}>
+                                    {this.renderStats(skillHandler)}
+                                </Col>
+                                <Col xs={2} style={{fontSize: "70%"}}>
+                                    {skillHandler ?
+                                        <WoundPenaltyBox
+                                            handler={skillHandler}/> :
+                                        <Loading>Wounds</Loading>
+                                    }
+                                </Col>
+                                <Col xs={7}>
+                                    <Row>
+                                        <Col>
+                                            {this.renderArmor(skillHandler)}
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            {this.renderAdvancingInitiatives(skillHandler)}
+                                        </Col>
+                                    </Row>
+                                </Col>
+
                             </Row>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
                             <Row>
                                 <Col>{this.renderWeightCarried()}</Col>
                             </Row>
@@ -394,25 +422,6 @@ class CompactSheet extends StatBlock {
                                 </Col>
                             </Row>
                         </Col>
-                        <Col className="xs-3">
-                            { skillHandler ?
-                                <WoundPenaltyBox handler={skillHandler} /> :
-                                <Loading>Wounds</Loading>
-                            }
-                        </Col>
-                        <Col>
-                            <Row>
-                                <Col>
-                                 {this.renderArmor(skillHandler)}
-                                    </Col>
-                                </Row>
-                            <Row>
-                                <Col>
-                                {this.renderAdvancingInitiatives(skillHandler)}
-                                </Col>
-                            </Row>
-                        </Col>
-
                     </Row>
                     <Row>
                         <Col>

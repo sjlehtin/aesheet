@@ -20,6 +20,29 @@ class WoundPenaltyBox extends React.Component {
             color: "gray"
         };
 
+        let damage = '';
+        if (this.props.handler.getStaminaDamage()) {
+            let renderedAcPenalty, renderedInitPenalty;
+            const acPenalty = this.props.handler.getACPenalty().value;
+            const descrStyle = {marginLeft: "1em"};
+            renderedAcPenalty =
+                <span style={descrStyle}>{acPenalty} AC</span>;
+            const initPenalty = SkillHandler.getInitPenaltyFromACPenalty(acPenalty);
+            if (initPenalty) {
+                renderedInitPenalty =
+                    <span style={descrStyle}>{initPenalty} I</span>;
+            }
+            damage = <div>
+                <div style={{fontWeight: "bold"}}>From stamina damage</div>
+
+                <div style={{color: 'red'}}>
+                    -{this.props.handler.getStaminaDamage()} STA
+                    => {renderedAcPenalty}
+                    {renderedInitPenalty}
+                </div>
+            </div>
+        }
+
         const excessPenalties = {}
         for (const stat of SkillHandler.baseStatNames) {
             excessPenalties[stat] = stats[stat] < -penalties.aa;
@@ -79,7 +102,10 @@ class WoundPenaltyBox extends React.Component {
                 </div>
             </div>;
         }
-        return <div>{content}</div>;
+        return <div>
+            {damage}
+            {content}
+        </div>;
     }
 }
 
