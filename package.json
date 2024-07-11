@@ -1,6 +1,6 @@
 {
   "name": "aesheet",
-  "version": "0.22.0a5",
+  "version": "0.22.0a6",
   "description": "Client-side presentation and manipulation of the server-side sheet data.",
   "main": "react/main.js",
   "scripts": {
