@@ -703,7 +703,7 @@ class BaseArmament(ExportedModel):
     name = models.CharField(max_length=256, primary_key=True)
     short_name = models.CharField(
         max_length=64,
-        help_text="This is used when the name must be fit to a small space",
+        help_text="This is used when the name must fit to a small space",
         blank=True,
     )
     description = models.TextField(blank=True)
