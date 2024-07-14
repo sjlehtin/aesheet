@@ -51,7 +51,7 @@ gtar zcvf aesheet-0.11-full.tar.xz static/ dist/aesheet-0.11-py3-none-any.whl
 Take a backup of your database, e.g.,
 
 ```shell
-sudo -i -u postgres pg_dumpall > psql_backup.dump
+sudo -i -u postgres pg_dump -F c -b -v sheetdb > dump.dump
 ```
 
 Check `settings.py` for need of changes due to upgrades or configuration changes.
@@ -73,13 +73,8 @@ sudo systemctl restart aesheet.<env>
 Create containers
 
 ```zsh
-docker-compose -f docker-compose.yml up -d --build
-```
-
-Setup database
-
-```zsh 
-docker-compose -f docker-compose.yml exec web python manage.py migrate --noinput
+docker-compose build
+docker-compose up -d
 ```
 
 Create the superuser
@@ -88,24 +83,25 @@ Create the superuser
 docker-compose -f docker-compose.yml exec web python manage.py createsuperuser
 ```
 
-Build web assets
-
-```zsh
-docker-compose -f docker-compose.yml exec web npm run build -- --mode=development
-```
-
-Collect static web assets
-
-```zsh
-docker-compose -f docker-compose.yml exec web python manage.py collectstatic --noinput --clear
-```
 
 Add standard rules package
 ```zsh
 docker-compose -f docker-compose.yml exec web python manage.py loaddata basedata
 ```
 
-The sheet is now usable in `http://localhost:8000/`.
+Alternately, setup database from a previous dump
+
+```zsh 
+docker compose exec -T db pg_restore -c --no-owner -d $POSTGRES_DB --role $POSTGRES_USER -U $POSTGRES_USER -v <  dump.dump
+```
+
+Run migrations manually
+
+```zsh
+docker compose exec -e DJANGO_SETTINGS_MODULE=settings -e PYTHONPATH=/opt/aesheet web  django-admin migrate
+```
+
+The sheet is now usable in `http://localhost:8001/`.
 
 ### Starting over
 
