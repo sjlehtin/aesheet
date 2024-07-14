@@ -1,29 +1,62 @@
-# pull official base image
-FROM python:3.11-alpine
+FROM node:22-slim as react
+WORKDIR /usr/src/app
+COPY react ./react
+COPY package*.json ./
+COPY webpack.config.js ./
+
+RUN mkdir -p ./npmbuild/react/static
+
+RUN npm install
+RUN npm run build -- --mode production
+
+
+FROM python:3.12-slim-bookworm as python-build
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /opt/aesheet
+
+RUN apt update && apt install -y libpq-dev gcc
+RUN python -m venv /opt/aesheet/venv
+
+ENV PATH="/opt/aesheet/venv/bin:$PATH"
+
+COPY src ./src
+COPY manage.py .
+COPY settings.py .
+COPY setup.py .
+COPY Manifest.in .
+
+RUN pip install --upgrade pip
+RUN pip install -e .
+
+
+FROM python:3.12-slim-bookworm
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev \
-    && apk add npm
-
-COPY ./package*.json /tmp
-RUN cd /tmp && npm install
-RUN mkdir -p /opt/aesheet && cp -a /tmp/node_modules /opt/aesheet/
-
 # set work directory
 WORKDIR /opt/aesheet
 
-RUN mkdir /opt/aesheet/static
+RUN apt update && apt install -y libpq-dev
 
-# install dependencies
-RUN pip install --upgrade pip
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt
+RUN mkdir -p ./npmbuild/static/react
+
+COPY --from=react /usr/src/app/npmbuild/static/react ./npmbuild/static/react
+COPY --from=python-build /opt/aesheet/venv /opt/aesheet/venv
 
 # copy project
-COPY . .
+COPY src ./src
+COPY manage.py .
+COPY settings.py .
+COPY setup.py .
+COPY Manifest.in .
+
+ENV PATH="/opt/aesheet/venv/bin:$PATH"
+
+COPY entrypoint.sh .
 
 ENTRYPOINT ["/opt/aesheet/entrypoint.sh"]

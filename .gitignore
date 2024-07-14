@@ -23,6 +23,7 @@ build/
 dist/
 npmbuild/
 .env.*
+.env
 .python-version
 
 # Elastic Beanstalk Files

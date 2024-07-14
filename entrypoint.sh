@@ -1,14 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
-if [ "$DATABASE" = "postgres" ]
-then
-    echo "Waiting for postgres..."
+set -euo pipefail
 
-    while ! nc -z $DB_HOST $DB_PORT; do
-      sleep 0.1
-    done
+python manage.py migrate
 
-    echo "PostgreSQL started"
+if [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_NAME" ]; then
+  python manage.py createsuperuser --no-input --username "$DJANGO_SUPERUSER_NAME" || echo "Admin not created."
 fi
 
 exec "$@"
