@@ -65,7 +65,7 @@ class SheetSetSheetListSerializer(serializers.ModelSerializer):
 
 class EdgeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = sheet.models.Edge2
+        model = sheet.models.Edge
         fields = "__all__"
 
 

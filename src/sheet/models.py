@@ -297,7 +297,7 @@ class Character(PrivateMixin, models.Model):
         entry.save()
 
 
-class Edge2(models.Model):
+class Edge(ExportedModel):
     name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -380,7 +380,7 @@ class Skill(ExportedModel):
     required_skills = models.ManyToManyField(
         "self", symmetrical=False, blank=True
     )
-    required_edges = models.ManyToManyField(Edge2, blank=True)
+    required_edges = models.ManyToManyField(Edge, blank=True)
 
     skill_cost_0 = models.IntegerField(blank=True, null=True)
     skill_cost_1 = models.IntegerField(blank=True, null=True)
@@ -578,7 +578,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     level, like Eye-Hand Coordination 2.
     """
 
-    edge = models.ForeignKey(Edge2, on_delete=models.CASCADE)
+    edge = models.ForeignKey(Edge, on_delete=models.CASCADE)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)

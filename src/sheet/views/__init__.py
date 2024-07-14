@@ -12,8 +12,6 @@ from django.forms.models import modelform_factory
 import logging
 from django.contrib import messages
 
-Edge = Edge2
-
 logger = logging.getLogger(__name__)
 
 
