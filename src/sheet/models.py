@@ -424,11 +424,96 @@ class Skill(ExportedModel):
         return "%s" % self.name
 
 
+class Skill2(models.Model):
+    """ """
+
+    class Meta:
+        ordering = ["name"]
+
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+    can_be_defaulted = models.BooleanField(default=True)
+    is_specialization = models.BooleanField(default=False)
+
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
+
+    # XXX Should be any of these? See Construction.  Add another
+    # attribute for another required skill?
+    #
+    # TODO: Fix construction skill.
+
+    required_skills = models.ManyToManyField(
+        "self", symmetrical=False, blank=True
+    )
+    required_edges = models.ManyToManyField(Edge, blank=True)
+
+    skill_cost_0 = models.IntegerField(blank=True, null=True)
+    skill_cost_1 = models.IntegerField(blank=True, null=True)
+    skill_cost_2 = models.IntegerField(blank=True, null=True)
+    skill_cost_3 = models.IntegerField(blank=True, null=True)
+
+    type = models.CharField(max_length=64, choices=SKILL_TYPES)
+
+    stat = models.CharField(max_length=64, choices=STAT_TYPES)
+
+    powered_ref_counter = models.IntegerField(default=0, help_text="Counters this many points of REF penalty using a powered armor")
+    powered_fit_mod = models.IntegerField(default=0,  help_text="Grant this many points of FIT bonus using a powered armor")
+
+    def clean_fields(self, exclude=None):
+        self.stat = self.stat.upper()
+        super(Skill, self).clean_fields(exclude=exclude)
+
+    def get_minimum_level(self):
+        levels = [0, 1, 2, 3]
+        for lvl in levels:
+            cost = getattr(self, "skill_cost_{}".format(lvl))
+            if cost is not None and not (
+                cost == 0 and self.is_specialization
+            ):
+                return lvl
+        raise ValueError("Skill is invalid")
+
+    def get_maximum_level(self):
+        if self.skill_cost_3 is not None:
+            return 8
+
+        levels = [2, 1, 0]
+        for lvl in levels:
+            cost = getattr(self, "skill_cost_{}".format(lvl))
+            if cost is not None:
+                return lvl
+        raise ValueError("Skill is invalid")
+
+    @classmethod
+    def dont_export(cls):
+        return [
+            "characterskill",
+            "primary_for_rangedweapontemplate",
+            "secondary_for_rangedweapontemplate",
+            "base_skill_for_rangedweapontemplate",
+            "primary_for_weapontemplate",
+            "secondary_for_weapontemplate",
+            "base_skill_for_weapontemplate",
+            "primary_for_basefirearm",
+            "secondary_for_basefirearm",
+            "base_skill_for_basefirearm",
+            "skill",
+            "edgeskillbonus",
+            "characterlogentry",
+            "edgelevel",
+        ]
+
+    def __str__(self):
+        return "%s" % self.name
+
+
 class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(
         Character, related_name="skills", on_delete=models.CASCADE
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    skill_new = models.ForeignKey(Skill2, on_delete=models.CASCADE, null=True)
     level = models.IntegerField(default=0)
 
     def access_allowed(self, user):
@@ -612,6 +697,7 @@ class EdgeSkillBonus(ExportedModel):
         EdgeLevel, related_name="edge_skill_bonuses", on_delete=models.CASCADE
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
+    skill_new = models.ForeignKey(Skill2, on_delete=models.CASCADE, null=True)
     bonus = models.IntegerField(default=15)
 
     def __str__(self):
@@ -736,6 +822,27 @@ class BaseArmament(ExportedModel):
     )
     skill2 = models.ForeignKey(
         Skill,
+        blank=True,
+        null=True,
+        related_name="secondary_for_%(class)s",
+        on_delete=models.SET_NULL,
+    )
+
+    base_skill_new = models.ForeignKey(
+        Skill2,
+        null=True,
+        related_name="base_skill_for_%(class)s",
+        on_delete=models.CASCADE,
+    )
+    skill_new = models.ForeignKey(
+        Skill2,
+        blank=True,
+        null=True,
+        related_name="primary_for_%(class)s",
+        on_delete=models.SET_NULL,
+    )
+    skill2_new = models.ForeignKey(
+        Skill2,
         blank=True,
         null=True,
         related_name="secondary_for_%(class)s",
@@ -1701,6 +1808,9 @@ class CharacterLogEntry(models.Model):
 
     skill = models.ForeignKey(
         Skill, blank=True, null=True, on_delete=models.SET_NULL
+    )
+    skill_new = models.ForeignKey(
+        Skill2, blank=True, null=True, on_delete=models.SET_NULL
     )
     skill_level = models.PositiveIntegerField(default=0)
 
