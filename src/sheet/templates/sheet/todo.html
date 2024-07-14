@@ -30,11 +30,13 @@
     - firearms in CC. (from firearms section)
     - max range for firearm addons, rule to be determined
 
-    - skill mods from armor to affect skill in general, affected_by_armor_mod_climb etc to Skill
+    - From JW: skill mods from armor to affect skill in general, affected_by_armor_mod_climb etc to Skill
         - 1) Stealth 2) Conceal 3) Climb, Jump, Tumble 4) Swim. each of these could affect several
           skills, esp. Climb, Jump, Tumble. Add a field to skills to mark that
           the modifier affects the skill and use in skill calculation,
           instead of hardcoding skill names.
+    - From JW: 1m (CC) sense check column
+    - rename the "all" skills as per rules
     - add a generic skill check element to allow unskilled checks
         - at least render base skill checks
     - fix issue in skill list rendering with skills that are specializations
@@ -70,7 +72,6 @@
         - 5 per additional target in same arc, -10 per additional in different arc
         - -10 per additional opponent in close combat
     - pass combat transients down, to allow adding things like num opponents easily
-    - range control for ranged weapons
     + check that scopes correctly affect long range, low light detection levels, now seems to bug in main sheet
         + at least in normal daylight, acute vision does not work (probably because night vision check always used)
         + Render perks in the details, as an overlay for example
