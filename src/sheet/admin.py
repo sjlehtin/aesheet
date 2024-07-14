@@ -177,9 +177,15 @@ class CharacterEdgeAdmin(admin.ModelAdmin):
     list_select_related = True
     list_per_page = 50
 
-    list_display = ('character', 'edge',  'ignore_cost')
-    list_filter = ('character__name', 'edge__edge__name')
-    search_fields = ('character__name', 'edge__edge__name')
+    list_display = ('character',
+                    # 'edge',
+                    'ignore_cost')
+    list_filter = ('character__name',
+                   # 'edge__edge__name'
+                   )
+    search_fields = ('character__name',
+                     # 'edge__edge__name'
+                     )
     save_as = True
 
     ordering = ('character__name', )
@@ -189,19 +195,23 @@ class EdgeLevelAdmin(admin.ModelAdmin):
     list_select_related = True
     list_per_page = 50
 
-    list_display = ('edge', 'level',  'cost',
-                    'extra_skill_points', 'armor_l', 'armor_dr',
-                    'cc_skill_levels', 'fit', 'ref', 'lrn', 'int',
-                    'psy', 'wil', 'cha', 'pos', 'mov', 'dex', 'imm',
-                    'run_multiplier', 'swim_multiplier', 'climb_multiplier',
-                    'fly_multiplier', 'vision', 'hear', 'smell', 'surprise',
-                    'requires_hero')
+    list_display = (
+        # 'edge',
+        'level', 'cost',
+        'extra_skill_points', 'armor_l', 'armor_dr',
+        'cc_skill_levels', 'fit', 'ref', 'lrn', 'int',
+        'psy', 'wil', 'cha', 'pos', 'mov', 'dex', 'imm',
+        'run_multiplier', 'swim_multiplier', 'climb_multiplier',
+        'fly_multiplier', 'vision', 'hear', 'smell', 'surprise',
+        'requires_hero')
     list_editable = list_display[2:]
-    list_filter = ('edge__name', )
-    search_fields = ('edge__name', )
+    # list_filter = ('edge__name', )
+    # search_fields = ('edge__name', )
     save_as = True
 
-    ordering = ('edge__name', 'level', 'cost')
+    ordering = (
+        # 'edge__name',
+        'level', 'cost')
 
 
 admin.site.register(sm.Armor, ArmorAdmin)

@@ -579,7 +579,6 @@ class EdgeLevel(ExportedModel, StatModifier):
     level, like Eye-Hand Coordination 2.
     """
 
-    edge = models.ForeignKey(Edge, on_delete=models.CASCADE)
     edge2 = models.ForeignKey(Edge2, on_delete=models.CASCADE)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
@@ -615,7 +614,9 @@ class EdgeLevel(ExportedModel, StatModifier):
         return "%s %s (%s)" % (self.edge, self.level, self.cost)
 
     class Meta:
-        ordering = ("edge", "level")
+        ordering = (
+            # "edge",
+            "level",)
 
 
 class EdgeSkillBonus(ExportedModel):
