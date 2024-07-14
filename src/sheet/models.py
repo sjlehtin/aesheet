@@ -1,5 +1,5 @@
 import logging
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 import django.contrib.auth as auth
 from django.db import models
@@ -164,7 +164,7 @@ class Character(PrivateMixin, models.Model):
 
     portrait = models.ImageField(blank=True, upload_to="portraits")
 
-    # XXX race can be used to fill in basic edges and stats later for,
+    # TODO race could be used to fill in basic edges and stats later for,
     # e.g., GM usage.
     race = models.CharField(max_length=256)
     description = models.TextField(blank=True)
@@ -297,12 +297,29 @@ class Character(PrivateMixin, models.Model):
         entry.save()
 
 
+class Edge2(models.Model):
+    name = models.CharField(max_length=256, unique=True)
+    description = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
+
+    @classmethod
+    def dont_export(self):
+        return ["skill", "edgelevel"]
+
+    def __str__(self):
+        return "%s" % (self.name)
+
+    class Meta:
+        ordering = ["name"]
+
+
 class Edge(ExportedModel):
     """
     A base model for edges.  Here is information that would otherwise
     repeat through all the edge levels.
     """
 
+    # id = models.BigIntegerField(null=True, blank=True, unique=True)
     name = models.CharField(max_length=256, primary_key=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -344,7 +361,10 @@ class Skill(ExportedModel):
     class Meta:
         ordering = ["name"]
 
-    name = models.CharField(max_length=256, primary_key=True)
+    #id = models.BigIntegerField(unique=True, null=True, blank=True, default=None)
+    name = models.CharField(max_length=256
+                             , primary_key=True
+                            )
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     can_be_defaulted = models.BooleanField(default=True)
@@ -361,6 +381,7 @@ class Skill(ExportedModel):
         "self", symmetrical=False, blank=True
     )
     required_edges = models.ManyToManyField(Edge, blank=True)
+    required_edges2 = models.ManyToManyField(Edge2, blank=True)
 
     skill_cost_0 = models.IntegerField(blank=True, null=True)
     skill_cost_1 = models.IntegerField(blank=True, null=True)
@@ -559,6 +580,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     """
 
     edge = models.ForeignKey(Edge, on_delete=models.CASCADE)
+    edge2 = models.ForeignKey(Edge2, on_delete=models.CASCADE, null=True)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
@@ -1191,7 +1213,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
 
 
 class BaseWeapon(ExportedModel):
-    # XXX name from template (appended with quality or something to that
+    # TODO: name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
     # verify this.
@@ -1472,7 +1494,7 @@ class ArmorQuality(ExportedModel):
 class Armor(ExportedModel):
     """ """
 
-    # XXX name from template (appended with quality or something to that
+    # TODO name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
     # verify this.
