@@ -8,7 +8,7 @@ def edges(apps, schema_editor):
     Edge2 = apps.get_model('sheet', 'Edge2')
 
     for edge in Edge.objects.all():
-        e2 = Edge2.objects.get_or_create(name=edge.name)
+        e2, _ = Edge2.objects.get_or_create(name=edge.name)
         e2.description = edge.description
         e2.notes = edge.notes
         e2.save()
@@ -28,7 +28,7 @@ def skills(apps, schema_editor):
     Edge2 = apps.get_model('sheet', 'Edge2')
 
     for skill in Skill.objects.all():
-        for e in skill.required_edges:
+        for e in skill.required_edges.all():
             skill.required_edges2.add(Edge2.objects.get(name=e.name))
 
 
