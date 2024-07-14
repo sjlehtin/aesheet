@@ -1,5 +1,5 @@
 import logging
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 import django.contrib.auth as auth
 from django.db import models
@@ -164,7 +164,7 @@ class Character(PrivateMixin, models.Model):
 
     portrait = models.ImageField(blank=True, upload_to="portraits")
 
-    # XXX race can be used to fill in basic edges and stats later for,
+    # TODO race could be used to fill in basic edges and stats later for,
     # e.g., GM usage.
     race = models.CharField(max_length=256)
     description = models.TextField(blank=True)
@@ -302,8 +302,7 @@ class Edge(ExportedModel):
     A base model for edges.  Here is information that would otherwise
     repeat through all the edge levels.
     """
-
-    name = models.CharField(max_length=256, primary_key=True)
+    name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
@@ -344,7 +343,10 @@ class Skill(ExportedModel):
     class Meta:
         ordering = ["name"]
 
-    name = models.CharField(max_length=256, primary_key=True)
+    #id = models.BigIntegerField(unique=True, null=True, blank=True, default=None)
+    name = models.CharField(max_length=256
+                             , primary_key=True
+                            )
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     can_be_defaulted = models.BooleanField(default=True)
@@ -593,7 +595,9 @@ class EdgeLevel(ExportedModel, StatModifier):
         return "%s %s (%s)" % (self.edge, self.level, self.cost)
 
     class Meta:
-        ordering = ("edge", "level")
+        ordering = (
+            # "edge",
+            "level",)
 
 
 class EdgeSkillBonus(ExportedModel):
@@ -1191,7 +1195,7 @@ class ArmorSpecialQuality(ExportedModel, Effect):
 
 
 class BaseWeapon(ExportedModel):
-    # XXX name from template (appended with quality or something to that
+    # TODO: name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
     # verify this.
@@ -1472,7 +1476,7 @@ class ArmorQuality(ExportedModel):
 class Armor(ExportedModel):
     """ """
 
-    # XXX name from template (appended with quality or something to that
+    # TODO name from template (appended with quality or something to that
     # effect) will be used if this is not set (= is blank).  If this is
     # set, the name given here should be unique.  Add a validator to
     # verify this.
