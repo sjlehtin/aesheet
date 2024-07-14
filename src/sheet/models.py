@@ -380,7 +380,6 @@ class Skill(ExportedModel):
     required_skills = models.ManyToManyField(
         "self", symmetrical=False, blank=True
     )
-    required_edges = models.ManyToManyField(Edge, blank=True)
     required_edges2 = models.ManyToManyField(Edge2, blank=True)
 
     skill_cost_0 = models.IntegerField(blank=True, null=True)
