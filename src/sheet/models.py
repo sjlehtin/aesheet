@@ -579,7 +579,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     level, like Eye-Hand Coordination 2.
     """
 
-    edge2 = models.ForeignKey(Edge2, on_delete=models.CASCADE)
+    edge = models.ForeignKey(Edge2, on_delete=models.CASCADE)
     level = models.IntegerField(default=1)
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
