@@ -313,26 +313,26 @@ class Edge2(models.Model):
         ordering = ["name"]
 
 
-class Edge(ExportedModel):
-    """
-    A base model for edges.  Here is information that would otherwise
-    repeat through all the edge levels.
-    """
-
-    # id = models.BigIntegerField(null=True, blank=True, unique=True)
-    name = models.CharField(max_length=256, primary_key=True)
-    description = models.TextField(blank=True)
-    notes = models.TextField(blank=True)
-
-    @classmethod
-    def dont_export(self):
-        return ["skill", "edgelevel"]
-
-    def __str__(self):
-        return "%s" % (self.name)
-
-    class Meta:
-        ordering = ["name"]
+# class Edge(ExportedModel):
+#     """
+#     A base model for edges.  Here is information that would otherwise
+#     repeat through all the edge levels.
+#     """
+#
+#     # id = models.BigIntegerField(null=True, blank=True, unique=True)
+#     name = models.CharField(max_length=256, primary_key=True)
+#     description = models.TextField(blank=True)
+#     notes = models.TextField(blank=True)
+#
+#     @classmethod
+#     def dont_export(self):
+#         return ["skill", "edgelevel"]
+#
+#     def __str__(self):
+#         return "%s" % (self.name)
+#
+#     class Meta:
+#         ordering = ["name"]
 
 
 SKILL_TYPES = [
