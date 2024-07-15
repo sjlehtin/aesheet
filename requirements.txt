@@ -1,13 +1,6 @@
-psycopg2
-gunicorn
+Django
 django-widget-tweaks
 djangorestframework
-Django
-Pillow
-pytz
 chardet
-tox
-pytest
-pytest-django
-django-webtest
-factory_boy
+Pillow
+psycopg2

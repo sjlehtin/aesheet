@@ -22,14 +22,9 @@ RUN python -m venv /opt/aesheet/venv
 
 ENV PATH="/opt/aesheet/venv/bin:$PATH"
 
-COPY src ./src
-COPY manage.py .
-COPY settings.py .
-COPY setup.py .
-COPY Manifest.in .
-
+COPY requirements.txt .
 RUN pip install --upgrade pip
-RUN pip install -e .
+RUN pip install -r requirements.txt
 
 
 FROM python:3.12-slim-bookworm
@@ -56,6 +51,8 @@ COPY setup.py .
 COPY Manifest.in .
 
 ENV PATH="/opt/aesheet/venv/bin:$PATH"
+
+RUN pip install --no-deps -e .
 
 COPY entrypoint.sh .
 
