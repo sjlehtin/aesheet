@@ -112,7 +112,7 @@ class CharacterEdgeListSerializer(serializers.ModelSerializer):
 
 class BaseFirearmSerializer(serializers.ModelSerializer):
     class Meta:
-        model = sheet.models.BaseFirearmNew
+        model = sheet.models.BaseFirearm
         fields = "__all__"
 
 

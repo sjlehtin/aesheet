@@ -1032,7 +1032,7 @@ class FirearmAmmunitionType(ExportedModel):
     #     "BaseFirearm", on_delete=models.CASCADE
     # )
     firearm = models.ForeignKey(
-        "BaseFirearmNew", on_delete=models.CASCADE
+        "BaseFirearm", on_delete=models.CASCADE
     )
     calibre = models.ForeignKey(
         Calibre, on_delete=models.CASCADE
@@ -1133,7 +1133,7 @@ class FirearmAmmunitionType(ExportedModel):
 #         ordering = ["name"]
 
 
-class BaseFirearmNew(BaseArmamentNew):
+class BaseFirearm(BaseArmamentNew):
     """ """
 
     autofire_rpm = models.IntegerField(blank=True, null=True)
@@ -1226,7 +1226,7 @@ class BaseFirearmNew(BaseArmamentNew):
 
 class SheetFirearm(models.Model):
     sheet = models.ForeignKey("Sheet", on_delete=models.CASCADE)
-    base = models.ForeignKey(BaseFirearmNew, on_delete=models.CASCADE)
+    base = models.ForeignKey(BaseFirearm, on_delete=models.CASCADE)
     ammo = models.ForeignKey(Ammunition, on_delete=models.CASCADE)
 
     scope = models.ForeignKey(
@@ -1841,7 +1841,7 @@ class Sheet(PrivateMixin, models.Model):
 
     # firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
     #                                   blank=True)
-    firearms = models.ManyToManyField(BaseFirearmNew, through=SheetFirearm,
+    firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
                                           blank=True)
     miscellaneous_items = models.ManyToManyField(
         MiscellaneousItem, blank=True, through=SheetMiscellaneousItem

@@ -212,7 +212,7 @@ class AddRangedWeaponView(AddWeaponView):
 
 
 class AddFirearmView(AddWeaponView):
-    model = sheet.models.BaseFirearmNew
+    model = sheet.models.BaseFirearm
     form_class = sheet.forms.CreateBaseFirearmForm
 
 
