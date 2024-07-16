@@ -535,7 +535,7 @@ class StatBlock extends React.Component {
     }
 
     handleFirearmAdded(firearm) {
-        rest.post(this.getFirearmURL(), {base: firearm.base.name,
+        rest.post(this.getFirearmURL(), {base: firearm.base.id,
         ammo: firearm.ammo.id}).then((json) => {
             console.log("POST success", json);
             firearm.id = json.id;

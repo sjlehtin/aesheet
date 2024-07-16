@@ -225,6 +225,8 @@ const baseFirearmFactory = (props) => {
     }
 
     let _base = {
+            "id": objectId,
+
             "name": "Glock 19",
             "short_name": "",
             "description": "",

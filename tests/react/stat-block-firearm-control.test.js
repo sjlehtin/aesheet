@@ -58,9 +58,49 @@ describe('StatBlock -- FirearmControl', () => {
     afterEach(() => server.resetHandlers())
     afterAll(() => server.close())
 
+    it ("allows adding a firearm", async () => {
+        const user = userEvent.setup()
+        const baseFirearm = factories.baseFirearmFactory({id: 43, name: "The Cannon"});
+
+        server.use(
+            rest.get("http://localhost/rest/firearms/campaign/2/", (req, res, ctx) => {
+                return res(ctx.json([
+                    baseFirearm
+                ]))
+            }),
+            rest.post("http://localhost/rest/sheets/1/sheetfirearms/", async (req, res, ctx) => {
+                const json = await req.json()
+                expect(json.base).toEqual(43)
+                expect(json.ammo).toEqual(42)
+                return res(ctx.json([
+                    baseFirearm
+                ]))
+            })
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
+
+        expect(await screen.queryByLabelText(/Firearm The Cannon/)).not.toBeInTheDocument()
+
+        const firearmInput = await screen.findByRole("combobox", {name: "Firearm"})
+        await user.click(firearmInput)
+
+        await user.click(screen.getByText(/The Cannon/))
+
+        const input = await screen.findByRole("combobox", {name: "Ammo"})
+        await user.click(input)
+
+        await user.click(screen.getByText(/FooAmmo/))
+
+        await user.click(screen.getByRole("button", {name: "Add Firearm"}))
+
+        expect(await screen.findByLabelText(/Firearm The Cannon/)).toBeInTheDocument()
+    })
+
     it('allows changing a firearm', async () => {
         const user = userEvent.setup()
-        const firearm = factories.firearmFactory({'base': {name: "The Cannon"}});
+        const firearm = factories.firearmFactory({'id': 42, 'base': {name: "The Cannon"}});
 
         server.use(
             rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
@@ -68,7 +108,7 @@ describe('StatBlock -- FirearmControl', () => {
                     firearm
                 ]))
             }),
-            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/1/", (req, res, ctx) => {
+            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/42/", (req, res, ctx) => {
                 return res(ctx.json(
                     Object.assign({}, firearm, req)
                 ))
