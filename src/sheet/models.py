@@ -1028,11 +1028,11 @@ class Ammunition(ExportedModel, BaseDamager):
 
 
 class FirearmAmmunitionType(ExportedModel):
+    # firearm = models.ForeignKey(
+    #     "BaseFirearm", on_delete=models.CASCADE
+    # )
     firearm = models.ForeignKey(
-        "BaseFirearm", on_delete=models.CASCADE
-    )
-    firearm_new = models.ForeignKey(
-        "BaseFirearmNew", on_delete=models.CASCADE, null=True
+        "BaseFirearmNew", on_delete=models.CASCADE
     )
     calibre = models.ForeignKey(
         Calibre, on_delete=models.CASCADE
@@ -1042,95 +1042,95 @@ class FirearmAmmunitionType(ExportedModel):
         return f"{self.firearm} {self.calibre.name})"
 
 
-class BaseFirearm(BaseArmament):
-    """ """
-
-    autofire_rpm = models.IntegerField(blank=True, null=True)
-    _class_choices = ("A", "B", "C", "D", "E")
-    autofire_class = models.CharField(
-        max_length=1, blank=True, choices=zip(_class_choices, _class_choices)
-    )
-    sweep_fire_disabled = models.BooleanField(default=False)
-    restricted_burst_rounds = models.IntegerField(default=0)
-
-    stock = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        default=1,
-        help_text="Weapon stock modifier for recoil "
-        "calculation. Larger "
-        "is better.",
-    )
-
-    duration = models.DecimalField(
-        max_digits=5,
-        decimal_places=3,
-        default=0.1,
-        help_text="Modifier for recoil.  In "
-        "principle, time in seconds "
-        "from "
-        "the muzzle break, whatever "
-        "that "
-        "means. Bigger is better.",
-    )
-
-    weapon_class_modifier = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        default=6,
-        help_text="ROF modifier for weapon class. Generally from 6-15, "
-                  "smaller is better.",
-    )
-
-    accuracy = models.DecimalField(
-        max_digits=4,
-        decimal_places=2,
-        default=1,
-        help_text="Weapon's inherent accuracy modifier. Larger is better.",
-    )
-    sight = models.IntegerField(
-        default=100, help_text="Weapon's sight modifier in millimeters"
-    )
-    barrel_length = models.IntegerField(
-        default=100, help_text="Weapon's barrel length in millimeters"
-    )
-
-    target_initiative = models.IntegerField(default=-2)
-
-    ammunition_types = models.ManyToManyField(
-        Calibre, through=FirearmAmmunitionType
-    )
-
-    magazine_size = models.IntegerField(
-        default=8, help_text="Typical clip size for the firearm"
-    )
-    magazine_weight = models.DecimalField(max_digits=7, decimal_places=4, default=0.35,
-                                          help_text="Empty magazine weight")
-
-    def get_ammunition_types(self):
-        """
-        Return the accepted ammunition types for the firearm.
-        """
-        # TODO: get rid of this indirection, wasteful.
-        return [ammo.name for ammo in self.ammunition_types.all()]
-
-    @classmethod
-    def dont_export(cls):
-        return [
-            "short_name",
-            "range_pb",
-            "range_xs",
-            "range_vs",
-            "range_xl",
-            "range_e",
-            "firearm",
-            "firearmammunitiontype",
-            "sheetfirearm",
-            "sheet"
-        ]
-
-    class Meta:
-        ordering = ["name"]
+# class BaseFirearm(BaseArmament):
+#     """ """
+#
+#     autofire_rpm = models.IntegerField(blank=True, null=True)
+#     _class_choices = ("A", "B", "C", "D", "E")
+#     autofire_class = models.CharField(
+#         max_length=1, blank=True, choices=zip(_class_choices, _class_choices)
+#     )
+#     sweep_fire_disabled = models.BooleanField(default=False)
+#     restricted_burst_rounds = models.IntegerField(default=0)
+#
+#     stock = models.DecimalField(
+#         max_digits=4,
+#         decimal_places=2,
+#         default=1,
+#         help_text="Weapon stock modifier for recoil "
+#         "calculation. Larger "
+#         "is better.",
+#     )
+#
+#     duration = models.DecimalField(
+#         max_digits=5,
+#         decimal_places=3,
+#         default=0.1,
+#         help_text="Modifier for recoil.  In "
+#         "principle, time in seconds "
+#         "from "
+#         "the muzzle break, whatever "
+#         "that "
+#         "means. Bigger is better.",
+#     )
+#
+#     weapon_class_modifier = models.DecimalField(
+#         max_digits=4,
+#         decimal_places=2,
+#         default=6,
+#         help_text="ROF modifier for weapon class. Generally from 6-15, "
+#                   "smaller is better.",
+#     )
+#
+#     accuracy = models.DecimalField(
+#         max_digits=4,
+#         decimal_places=2,
+#         default=1,
+#         help_text="Weapon's inherent accuracy modifier. Larger is better.",
+#     )
+#     sight = models.IntegerField(
+#         default=100, help_text="Weapon's sight modifier in millimeters"
+#     )
+#     barrel_length = models.IntegerField(
+#         default=100, help_text="Weapon's barrel length in millimeters"
+#     )
+#
+#     target_initiative = models.IntegerField(default=-2)
+#
+#     # ammunition_types = models.ManyToManyField(
+#     #     Calibre, through=FirearmAmmunitionType
+#     # )
+#
+#     magazine_size = models.IntegerField(
+#         default=8, help_text="Typical clip size for the firearm"
+#     )
+#     magazine_weight = models.DecimalField(max_digits=7, decimal_places=4, default=0.35,
+#                                           help_text="Empty magazine weight")
+#
+#     def get_ammunition_types(self):
+#         """
+#         Return the accepted ammunition types for the firearm.
+#         """
+#         # TODO: get rid of this indirection, wasteful.
+#         return [ammo.name for ammo in self.ammunition_types.all()]
+#
+#     @classmethod
+#     def dont_export(cls):
+#         return [
+#             "short_name",
+#             "range_pb",
+#             "range_xs",
+#             "range_vs",
+#             "range_xl",
+#             "range_e",
+#             "firearm",
+#             "firearmammunitiontype",
+#             "sheetfirearm",
+#             "sheet"
+#         ]
+#
+#     class Meta:
+#         ordering = ["name"]
 
 
 class BaseFirearmNew(BaseArmamentNew):
@@ -1226,8 +1226,7 @@ class BaseFirearmNew(BaseArmamentNew):
 
 class SheetFirearm(models.Model):
     sheet = models.ForeignKey("Sheet", on_delete=models.CASCADE)
-    base = models.ForeignKey(BaseFirearm, on_delete=models.CASCADE)
-    base_new = models.ForeignKey(BaseFirearmNew, on_delete=models.CASCADE, null=True)
+    base = models.ForeignKey(BaseFirearmNew, on_delete=models.CASCADE)
     ammo = models.ForeignKey(Ammunition, on_delete=models.CASCADE)
 
     scope = models.ForeignKey(
@@ -1840,9 +1839,9 @@ class Sheet(PrivateMixin, models.Model):
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
 
-    firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
-                                      blank=True)
-    firearms_new = models.ManyToManyField(BaseFirearmNew, through=SheetFirearm,
+    # firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
+    #                                   blank=True)
+    firearms = models.ManyToManyField(BaseFirearmNew, through=SheetFirearm,
                                           blank=True)
     miscellaneous_items = models.ManyToManyField(
         MiscellaneousItem, blank=True, through=SheetMiscellaneousItem
