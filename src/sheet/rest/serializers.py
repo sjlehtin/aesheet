@@ -296,6 +296,8 @@ class SheetMiscellaneousItemListSerializer(serializers.ModelSerializer):
 
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
+    skill__name = serializers.CharField(read_only=True, source="skill.name")
+
     def validate(self, data):
         if 'skill' in data:
             skill = data['skill']

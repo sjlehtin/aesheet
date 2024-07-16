@@ -270,7 +270,7 @@ class Character(PrivateMixin, models.Model):
         entry.character = self
         entry.user = request.user if request else None
         entry.entry_type = entry.SKILL
-        entry.skill = skill
+        entry.skill_new = skill
         entry.skill_level = level
         entry.amount = amount
         entry.removed = removed
@@ -512,7 +512,7 @@ class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(
         Character, related_name="skills", on_delete=models.CASCADE
     )
-    skill_new = models.ForeignKey(SkillNew, on_delete=models.CASCADE)
+    skill = models.ForeignKey(SkillNew, on_delete=models.CASCADE)
     level = models.IntegerField(default=0)
 
     def access_allowed(self, user):
@@ -522,8 +522,8 @@ class CharacterSkill(PrivateMixin, models.Model):
         return "%s: %s %s" % (self.character, self.skill, self.level)
 
     class Meta:
-        ordering = ("skill_new__name",)
-        unique_together = ("character", "skill_new")
+        ordering = ("skill__name",)
+        unique_together = ("character", "skill")
 
 
 class StatModifier(models.Model):
@@ -2015,18 +2015,18 @@ class CharacterLogEntry(models.Model):
         elif self.entry_type == self.SKILL:
             if self.amount < 0:
                 return "Skill {skill} decreased to level {level}".format(
-                    skill=self.skill, level=self.skill_level
+                    skill=self.skill_new, level=self.skill_level
                 )
             elif self.amount > 0:
                 return "Skill {skill} increased to level {level}".format(
-                    skill=self.skill, level=self.skill_level
+                    skill=self.skill_new, level=self.skill_level
                 )
             elif self.removed:
                 return "Removed skill {skill} {level}.".format(
-                    skill=self.skill, level=self.skill_level
+                    skill=self.skill_new, level=self.skill_level
                 )
             else:
-                return "Added skill %s %d." % (self.skill, self.skill_level)
+                return "Added skill %s %d." % (self.skill_new, self.skill_level)
         elif self.entry_type == self.EDGE:
             if self.removed:
                 return f"Removed edge {self.edge}"
