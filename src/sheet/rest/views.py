@@ -25,10 +25,6 @@ class WeaponAmmunitionList(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """
-        This view should return a list of all the purchases for
-        the user as determined by the username portion of the URL.
-        """
         weapon = self.kwargs['firearm']
         try:
             weapon = sheet.models.BaseFirearm.objects.get(name=weapon)
