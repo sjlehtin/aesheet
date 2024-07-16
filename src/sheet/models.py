@@ -270,7 +270,7 @@ class Character(PrivateMixin, models.Model):
         entry.character = self
         entry.user = request.user if request else None
         entry.entry_type = entry.SKILL
-        entry.skill_new = skill
+        entry.skill = skill
         entry.skill_level = level
         entry.amount = amount
         entry.removed = removed
@@ -1982,9 +1982,6 @@ class CharacterLogEntry(models.Model):
     amount = models.IntegerField(default=0)
 
     skill = models.ForeignKey(
-        Skill, blank=True, null=True, on_delete=models.SET_NULL
-    )
-    skill_new = models.ForeignKey(
         SkillNew, blank=True, null=True, on_delete=models.SET_NULL
     )
     skill_level = models.PositiveIntegerField(default=0)
@@ -2015,18 +2012,18 @@ class CharacterLogEntry(models.Model):
         elif self.entry_type == self.SKILL:
             if self.amount < 0:
                 return "Skill {skill} decreased to level {level}".format(
-                    skill=self.skill_new, level=self.skill_level
+                    skill=self.skill, level=self.skill_level
                 )
             elif self.amount > 0:
                 return "Skill {skill} increased to level {level}".format(
-                    skill=self.skill_new, level=self.skill_level
+                    skill=self.skill, level=self.skill_level
                 )
             elif self.removed:
                 return "Removed skill {skill} {level}.".format(
-                    skill=self.skill_new, level=self.skill_level
+                    skill=self.skill, level=self.skill_level
                 )
             else:
-                return "Added skill %s %d." % (self.skill_new, self.skill_level)
+                return "Added skill %s %d." % (self.skill, self.skill_level)
         elif self.entry_type == self.EDGE:
             if self.removed:
                 return f"Removed edge {self.edge}"
