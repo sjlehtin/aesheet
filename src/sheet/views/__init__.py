@@ -97,7 +97,7 @@ class AddWeaponView(BaseCreateView):
 
 
 class AddWeaponTemplateView(AddWeaponView):
-    model = WeaponTemplate
+    model = WeaponTemplateNew
 
 
 class AddWeaponQualityView(AddWeaponView):

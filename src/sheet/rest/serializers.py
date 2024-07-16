@@ -121,7 +121,7 @@ class BaseFirearmSerializer(serializers.ModelSerializer):
 
 class WeaponTemplateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = sheet.models.WeaponTemplate
+        model = sheet.models.WeaponTemplateNew
         fields = "__all__"
 
 
@@ -379,7 +379,7 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
     item = serializers.IntegerField(required=False)
 
     base = serializers.PrimaryKeyRelatedField(
-            queryset=sheet.models.WeaponTemplate.objects.all(),
+            queryset=sheet.models.WeaponTemplateNew.objects.all(),
             required=False)
     quality = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.WeaponQuality.objects.all(),

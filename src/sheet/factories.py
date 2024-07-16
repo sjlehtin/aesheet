@@ -51,7 +51,7 @@ class SkillFactory(DjangoModelFactory):
     stat = "fit"
 
     class Meta:
-        model = models.Skill
+        model = models.SkillNew
         django_get_or_create = ('name', )
 
     @factory.post_generation
@@ -401,7 +401,7 @@ class WeaponTemplateFactory(DjangoModelFactory):
     base_skill__name = "Weapon combat"
 
     class Meta:
-        model = models.WeaponTemplate
+        model = models.WeaponTemplateNew
         django_get_or_create = ('name', )
 
 

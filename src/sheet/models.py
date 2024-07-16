@@ -1257,24 +1257,6 @@ class SheetFirearmMagazine(models.Model):
     current = models.PositiveSmallIntegerField()
 
 
-class WeaponTemplate(BaseWeaponTemplate):
-    """ """
-
-    type = models.CharField(max_length=5, default="S")
-
-    ccv = models.IntegerField(default=10)
-    ccv_unskilled_modifier = models.IntegerField(default=-10)
-
-    defense_leth = models.IntegerField(default=5)
-
-    is_lance = models.BooleanField(default=False)
-    is_shield = models.BooleanField(default=False)
-
-    @classmethod
-    def dont_export(cls):
-        return ["weapon"]
-
-
 class WeaponTemplateNew(BaseWeaponTemplateNew):
     """ """
 
@@ -1517,8 +1499,7 @@ class BaseWeapon(ExportedModel):
 class Weapon(BaseWeapon):
     """ """
 
-    base = models.ForeignKey(WeaponTemplate, on_delete=models.CASCADE)
-    base_new = models.ForeignKey(WeaponTemplateNew, on_delete=models.CASCADE, null=True)
+    base = models.ForeignKey(WeaponTemplateNew, on_delete=models.CASCADE)
     special_qualities = models.ManyToManyField(
         WeaponSpecialQuality, blank=True
     )
