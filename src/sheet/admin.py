@@ -165,9 +165,9 @@ class CharacterSkillAdmin(admin.ModelAdmin):
     list_select_related = True
     list_per_page = 50
 
-    list_display = ('character', 'skill', 'level')
-    list_filter = ('character__name', 'skill__name')
-    search_fields = ('character__name', 'skill__name')
+    list_display = ('character', 'skill_new', 'level')
+    list_filter = ('character__name', 'skill_new__name')
+    search_fields = ('character__name', 'skill_new__name')
     save_as = True
 
     ordering = ('character__name', )

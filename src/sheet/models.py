@@ -512,8 +512,7 @@ class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(
         Character, related_name="skills", on_delete=models.CASCADE
     )
-    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    skill_new = models.ForeignKey(SkillNew, on_delete=models.CASCADE, null=True)
+    skill_new = models.ForeignKey(SkillNew, on_delete=models.CASCADE)
     level = models.IntegerField(default=0)
 
     def access_allowed(self, user):
@@ -523,8 +522,8 @@ class CharacterSkill(PrivateMixin, models.Model):
         return "%s: %s %s" % (self.character, self.skill, self.level)
 
     class Meta:
-        ordering = ("skill__name",)
-        unique_together = ("character", "skill")
+        ordering = ("skill_new__name",)
+        unique_together = ("character", "skill_new")
 
 
 class StatModifier(models.Model):
