@@ -86,6 +86,7 @@ class EdgeLevelSerializer(serializers.ModelSerializer):
 
 
 class SkillSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
     min_level = serializers.IntegerField(read_only=True,
                                          source='get_minimum_level')
     max_level = serializers.IntegerField(read_only=True,

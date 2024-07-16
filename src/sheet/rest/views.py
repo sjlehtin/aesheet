@@ -156,8 +156,8 @@ class SkillViewSet(CampaignMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_base_queryset(self):
-        return models.Skill.objects.prefetch_related('required_skills',
-                                                     'required_edges').all()
+        return models.SkillNew.objects.prefetch_related('required_skills',
+                                                        'required_edges').all()
 
 
 class FirearmViewSet(CampaignMixin, viewsets.ModelViewSet):
