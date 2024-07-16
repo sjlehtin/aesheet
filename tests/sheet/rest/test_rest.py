@@ -614,7 +614,7 @@ class FirearmAmmunitionTypeTestCase(TestCase):
 
     def test_correct_types_for_pistol(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
-            quote(self.pistol.pk)), format='json')
+            quote(self.pistol.name)), format='json')
         assert response.status_code == 200
         assert len(response.data) == 2
         ammo = response.data[0]
@@ -624,9 +624,11 @@ class FirearmAmmunitionTypeTestCase(TestCase):
 
     def test_correct_types_for_complex_url(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
-            quote(self.rifle.pk)), format='json')
+            quote(self.rifle.name)), format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+    # TODO: should work also with integer primary key
 
 
 class FirearmTestCase(TestCase):
