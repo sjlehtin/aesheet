@@ -424,7 +424,7 @@ class Skill(ExportedModel):
         return "%s" % self.name
 
 
-class Skill2(models.Model):
+class SkillNew(ExportedModel):
     """ """
 
     class Meta:
@@ -513,7 +513,7 @@ class CharacterSkill(PrivateMixin, models.Model):
         Character, related_name="skills", on_delete=models.CASCADE
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    skill_new = models.ForeignKey(Skill2, on_delete=models.CASCADE, null=True)
+    skill_new = models.ForeignKey(SkillNew, on_delete=models.CASCADE, null=True)
     level = models.IntegerField(default=0)
 
     def access_allowed(self, user):
@@ -697,7 +697,7 @@ class EdgeSkillBonus(ExportedModel):
         EdgeLevel, related_name="edge_skill_bonuses", on_delete=models.CASCADE
     )
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    skill_new = models.ForeignKey(Skill2, on_delete=models.CASCADE, null=True)
+    skill_new = models.ForeignKey(SkillNew, on_delete=models.CASCADE, null=True)
     bonus = models.IntegerField(default=15)
 
     def __str__(self):
@@ -828,21 +828,48 @@ class BaseArmament(ExportedModel):
         on_delete=models.SET_NULL,
     )
 
-    base_skill_new = models.ForeignKey(
-        Skill2,
-        null=True,
+    def __str__(self):
+        return "%s" % self.name
+
+
+
+class BaseArmamentNew(ExportedModel):
+    class Meta:
+        abstract = True
+        ordering = ["name"]
+
+    name = models.CharField(max_length=256, unique=True)
+    short_name = models.CharField(
+        max_length=64,
+        help_text="This is used when the name must fit to a small space",
+        blank=True,
+    )
+    description = models.TextField(blank=True)
+    notes = models.CharField(max_length=64, blank=True)
+
+    tech_level = models.ForeignKey(TechLevel, on_delete=models.CASCADE)
+
+    draw_initiative = models.IntegerField(default=-3, blank=True, null=True)
+
+    durability = models.IntegerField(default=5)
+    dp = models.IntegerField(default=10)
+
+    weight = models.DecimalField(max_digits=7, decimal_places=4, default=1.0)
+
+    base_skill = models.ForeignKey(
+        SkillNew,
         related_name="base_skill_for_%(class)s",
         on_delete=models.CASCADE,
     )
-    skill_new = models.ForeignKey(
-        Skill2,
+    skill = models.ForeignKey(
+        SkillNew,
         blank=True,
         null=True,
         related_name="primary_for_%(class)s",
         on_delete=models.SET_NULL,
     )
-    skill2_new = models.ForeignKey(
-        Skill2,
+    skill2 = models.ForeignKey(
+        SkillNew,
         blank=True,
         null=True,
         related_name="secondary_for_%(class)s",
@@ -865,6 +892,17 @@ class BaseDamager(models.Model):
 
 
 class BaseWeaponTemplate(BaseArmament, BaseDamager):
+    roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
+
+    bypass = models.IntegerField(default=0)
+
+    class Meta:
+        abstract = True
+        ordering = ["name"]
+
+
+
+class BaseWeaponTemplateNew(BaseArmamentNew, BaseDamager):
     roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
 
     bypass = models.IntegerField(default=0)
@@ -993,6 +1031,9 @@ class FirearmAmmunitionType(models.Model):
     firearm = models.ForeignKey(
         "BaseFirearm", on_delete=models.CASCADE
     )
+    firearm_new = models.ForeignKey(
+        "BaseFirearmNew", on_delete=models.CASCADE, null=True
+    )
     calibre = models.ForeignKey(
         Calibre, on_delete=models.CASCADE
     )
@@ -1092,9 +1133,101 @@ class BaseFirearm(BaseArmament):
         ordering = ["name"]
 
 
+class BaseFirearmNew(BaseArmamentNew):
+    """ """
+
+    autofire_rpm = models.IntegerField(blank=True, null=True)
+    _class_choices = ("A", "B", "C", "D", "E")
+    autofire_class = models.CharField(
+        max_length=1, blank=True, choices=zip(_class_choices, _class_choices)
+    )
+    sweep_fire_disabled = models.BooleanField(default=False)
+    restricted_burst_rounds = models.IntegerField(default=0)
+
+    stock = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=1,
+        help_text="Weapon stock modifier for recoil "
+        "calculation. Larger "
+        "is better.",
+    )
+
+    duration = models.DecimalField(
+        max_digits=5,
+        decimal_places=3,
+        default=0.1,
+        help_text="Modifier for recoil.  In "
+        "principle, time in seconds "
+        "from "
+        "the muzzle break, whatever "
+        "that "
+        "means. Bigger is better.",
+    )
+
+    weapon_class_modifier = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=6,
+        help_text="ROF modifier for weapon class. Generally from 6-15, "
+                  "smaller is better.",
+    )
+
+    accuracy = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        default=1,
+        help_text="Weapon's inherent accuracy modifier. Larger is better.",
+    )
+    sight = models.IntegerField(
+        default=100, help_text="Weapon's sight modifier in millimeters"
+    )
+    barrel_length = models.IntegerField(
+        default=100, help_text="Weapon's barrel length in millimeters"
+    )
+
+    target_initiative = models.IntegerField(default=-2)
+
+    ammunition_types = models.ManyToManyField(
+        Calibre, through=FirearmAmmunitionType
+    )
+
+    magazine_size = models.IntegerField(
+        default=8, help_text="Typical clip size for the firearm"
+    )
+    magazine_weight = models.DecimalField(max_digits=7, decimal_places=4, default=0.35,
+                                          help_text="Empty magazine weight")
+
+    def get_ammunition_types(self):
+        """
+        Return the accepted ammunition types for the firearm.
+        """
+        # TODO: get rid of this indirection, wasteful.
+        return [ammo.name for ammo in self.ammunition_types.all()]
+
+    @classmethod
+    def dont_export(cls):
+        return [
+            "short_name",
+            "range_pb",
+            "range_xs",
+            "range_vs",
+            "range_xl",
+            "range_e",
+            "firearm",
+            "firearmammunitiontype",
+            "sheetfirearm",
+            "sheet"
+        ]
+
+    class Meta:
+        ordering = ["name"]
+
+
 class SheetFirearm(models.Model):
     sheet = models.ForeignKey("Sheet", on_delete=models.CASCADE)
     base = models.ForeignKey(BaseFirearm, on_delete=models.CASCADE)
+    base_new = models.ForeignKey(BaseFirearmNew, on_delete=models.CASCADE, null=True)
     ammo = models.ForeignKey(Ammunition, on_delete=models.CASCADE)
 
     scope = models.ForeignKey(
@@ -1145,8 +1278,48 @@ class WeaponTemplate(BaseWeaponTemplate):
         return ["weapon"]
 
 
+class WeaponTemplateNew(BaseWeaponTemplateNew):
+    """ """
+
+    type = models.CharField(max_length=5, default="S")
+
+    ccv = models.IntegerField(default=10)
+    ccv_unskilled_modifier = models.IntegerField(default=-10)
+
+    defense_leth = models.IntegerField(default=5)
+
+    is_lance = models.BooleanField(default=False)
+    is_shield = models.BooleanField(default=False)
+
+    @classmethod
+    def dont_export(cls):
+        return ["weapon"]
+
 
 class RangedWeaponTemplate(BaseWeaponTemplate):
+    """ """
+
+    type = models.CharField(max_length=5, default="P")
+
+    ammo_weight = models.DecimalField(
+        max_digits=6, decimal_places=3, default=0.1
+    )
+
+    target_initiative = models.IntegerField(default=-2)
+
+    range_s = models.IntegerField()
+    range_m = models.IntegerField()
+    range_l = models.IntegerField()
+
+    @classmethod
+    def dont_export(self):
+        return ["rangedweapon"]
+
+    class Meta:
+        ordering = ["name"]
+
+
+class RangedWeaponTemplateNew(BaseWeaponTemplateNew):
     """ """
 
     type = models.CharField(max_length=5, default="P")
@@ -1348,6 +1521,7 @@ class Weapon(BaseWeapon):
     """ """
 
     base = models.ForeignKey(WeaponTemplate, on_delete=models.CASCADE)
+    base_new = models.ForeignKey(WeaponTemplateNew, on_delete=models.CASCADE, null=True)
     special_qualities = models.ManyToManyField(
         WeaponSpecialQuality, blank=True
     )
@@ -1368,6 +1542,7 @@ class RangedWeapon(BaseWeapon):
     """ """
 
     base = models.ForeignKey(RangedWeaponTemplate, on_delete=models.CASCADE)
+    base_new = models.ForeignKey(RangedWeaponTemplateNew, on_delete=models.CASCADE, null=True)
     ammo_quality = models.ForeignKey(
         WeaponQuality,
         blank=True,
@@ -1667,6 +1842,8 @@ class Sheet(PrivateMixin, models.Model):
 
     firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
                                       blank=True)
+    firearms_new = models.ManyToManyField(BaseFirearmNew, through=SheetFirearm,
+                                          blank=True)
     miscellaneous_items = models.ManyToManyField(
         MiscellaneousItem, blank=True, through=SheetMiscellaneousItem
     )
@@ -1810,7 +1987,7 @@ class CharacterLogEntry(models.Model):
         Skill, blank=True, null=True, on_delete=models.SET_NULL
     )
     skill_new = models.ForeignKey(
-        Skill2, blank=True, null=True, on_delete=models.SET_NULL
+        SkillNew, blank=True, null=True, on_delete=models.SET_NULL
     )
     skill_level = models.PositiveIntegerField(default=0)
 
