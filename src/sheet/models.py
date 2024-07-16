@@ -695,8 +695,7 @@ class EdgeSkillBonus(ExportedModel):
     edge_level = models.ForeignKey(
         EdgeLevel, related_name="edge_skill_bonuses", on_delete=models.CASCADE
     )
-    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
-    skill_new = models.ForeignKey(SkillNew, on_delete=models.CASCADE, null=True)
+    skill = models.ForeignKey(SkillNew, on_delete=models.CASCADE)
     bonus = models.IntegerField(default=15)
 
     def __str__(self):

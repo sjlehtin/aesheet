@@ -171,10 +171,10 @@ class SkillHandler {
         for (let edge of this.props.edges) {
             for (let sb of edge.edge_skill_bonuses) {
                 if (!(sb.skill in skillBonusMap)) {
-                    skillBonusMap[sb.skill] = {bonus: 0
+                    skillBonusMap[sb.skill__name] = {bonus: 0
                     };
                 }
-                skillBonusMap[sb.skill].bonus += sb.bonus;
+                skillBonusMap[sb.skill__name].bonus += sb.bonus;
             }
         }
         return skillBonusMap;

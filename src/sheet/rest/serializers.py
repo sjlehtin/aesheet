@@ -70,9 +70,11 @@ class EdgeSerializer(serializers.ModelSerializer):
 
 
 class EdgeSkillBonusSerializer(serializers.ModelSerializer):
+    skill__name = serializers.CharField(source='skill.name', read_only=True)
+
     class Meta:
         model = sheet.models.EdgeSkillBonus
-        fields = ("id", "skill", "bonus")
+        fields = ("id", "skill", "skill__name", "bonus")
 
 
 class EdgeLevelSerializer(serializers.ModelSerializer):

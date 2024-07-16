@@ -93,3 +93,9 @@ REST endpoints at the same go.
 * Remove orphan old models
 * Rename new models to the old names
 * Fix REST interfaces, either by using optional "name" field lookup in conjunction with primary key lookup, or by just making the transition at the same go
+
+### Impact analysis
+
+* firearm addition, change
+* character log entries with edges and skills
+* Edge skill bonuses (acute touch to surgery)

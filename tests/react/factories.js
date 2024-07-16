@@ -108,7 +108,8 @@ const edgeSkillBonusFactory = function (overrideFields) {
 
     let _baseBonus = {
         "id": objectId,
-        "skill": "Surgery",
+        "skill": 42,
+        "skill__name": "Surgery",
         "bonus": 15
     };
 

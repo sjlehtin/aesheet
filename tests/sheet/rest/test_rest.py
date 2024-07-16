@@ -234,6 +234,7 @@ class EdgeSkillBonusTestCase(TestCase):
     def setUp(self):
         self.request_factory = APIRequestFactory()
         self.owner = factories.UserFactory(username="luke")
+        self.surgery_skill = factories.SkillFactory(name="Surgery")
         self.edge_level = factories.EdgeLevelFactory(
             edge__name="Acute Touch",
             level=1, edge_skill_bonuses=(("Surgery", 13),))
@@ -249,7 +250,8 @@ class EdgeSkillBonusTestCase(TestCase):
         self.assertIn("edge_skill_bonuses", response.data)
         self.assertEqual(response.data['edge_skill_bonuses'],
                          [{'id': 1,
-                           'skill': "Surgery",
+                           'skill': self.surgery_skill.id,
+                           'skill__name': "Surgery",
                            'bonus': 13}])
 
 
