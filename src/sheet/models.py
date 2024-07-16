@@ -1027,7 +1027,7 @@ class Ammunition(ExportedModel, BaseDamager):
         ordering = ['calibre__name', 'bullet_type']
 
 
-class FirearmAmmunitionType(models.Model):
+class FirearmAmmunitionType(ExportedModel):
     firearm = models.ForeignKey(
         "BaseFirearm", on_delete=models.CASCADE
     )
