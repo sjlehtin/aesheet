@@ -401,7 +401,7 @@ class WeaponTemplateFactory(DjangoModelFactory):
     base_skill__name = "Weapon combat"
 
     class Meta:
-        model = models.WeaponTemplateNew
+        model = models.WeaponTemplate
         django_get_or_create = ('name', )
 
 

@@ -139,7 +139,7 @@ class WeaponTemplateSerializer(serializers.ModelSerializer):
     skill2 = SkillMinimalSerializer(read_only=True)
 
     class Meta:
-        model = sheet.models.WeaponTemplateNew
+        model = sheet.models.WeaponTemplate
         fields = "__all__"
 
 
@@ -403,7 +403,7 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
     item = serializers.IntegerField(required=False)
 
     base = serializers.PrimaryKeyRelatedField(
-            queryset=sheet.models.WeaponTemplateNew.objects.all(),
+            queryset=sheet.models.WeaponTemplate.objects.all(),
             required=False)
     quality = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.WeaponQuality.objects.all(),

@@ -1020,7 +1020,7 @@ class SheetFirearmMagazine(models.Model):
     current = models.PositiveSmallIntegerField()
 
 
-class WeaponTemplateNew(BaseWeaponTemplateNew):
+class WeaponTemplate(BaseWeaponTemplateNew):
     """ """
 
     type = models.CharField(max_length=5, default="S")
@@ -1239,7 +1239,7 @@ class BaseWeapon(ExportedModel):
 class Weapon(BaseWeapon):
     """ """
 
-    base = models.ForeignKey(WeaponTemplateNew, on_delete=models.CASCADE)
+    base = models.ForeignKey(WeaponTemplate, on_delete=models.CASCADE)
     special_qualities = models.ManyToManyField(
         WeaponSpecialQuality, blank=True
     )
