@@ -449,7 +449,7 @@ class RangedWeaponTemplateFactory(WeaponTemplateFactory):
     range_l = 60
 
     class Meta:
-        model = models.RangedWeaponTemplate
+        model = models.RangedWeaponTemplateNew
 
 
 class RangedWeaponFactory(DjangoModelFactory):

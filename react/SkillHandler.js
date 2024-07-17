@@ -359,8 +359,8 @@ class SkillHandler {
         if (!cs) {
             if (skill.required_skills.length > 0) {
                 for (let reqd of skill.required_skills) {
-                    // TODO
-                    if (!(reqd in this.state.characterSkillMap)) {
+                    // TODO: should use id key
+                    if (!(reqd.name in this.state.characterSkillMap)) {
                         return "U";
                     }
                 }
@@ -427,12 +427,11 @@ class SkillHandler {
                 root.push(cs);
             } else {
                 if (skill.required_skills.length > 0) {
-                    // TODO
-                    var parent = skill.required_skills[0];
+                    const parent = skill.required_skills[0].name;
                     cs._missingRequired = [];
                     for (let sk of skill.required_skills) {
-                        if (!(sk in csMap)) {
-                            cs._missingRequired.push(sk);
+                        if (!(sk.name in csMap)) {
+                            cs._missingRequired.push(sk.name);
                         }
                     }
                     if (parent in csMap) {

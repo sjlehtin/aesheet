@@ -76,7 +76,7 @@ describe('SkillRow', function() {
             skillName: "Acting / Bluff",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_cha: 55},
-                allSkills: [{skill: "Acting / Bluff", stat: "CHA"}]
+                allSkills: [{name: "Acting / Bluff", stat: "CHA"}]
             }),
 
             skill: skillFactory({stat: "CHA"})});

@@ -57,6 +57,13 @@ const characterFactory = function (statOverrides) {
     return Object.assign(_charData, statOverrides);
 };
 
+
+function minimalSkillFactory(overrideFields = {}) {
+    const sk = skillFactory(overrideFields)
+    return {id: sk.id, name: sk.name}
+}
+
+
 const skillFactory = function (overrideFields = {}) {
     let props = {};
     // Simplify generating skills to allow using only the name.  Slight
@@ -89,6 +96,8 @@ const skillFactory = function (overrideFields = {}) {
     };
     const newSkill = Object.assign(_baseSkill, props);
 
+    newSkill.required_skills = newSkill.required_skills.map((req) => minimalSkillFactory(req))
+
     if (created.skills[newSkill.name] === undefined) {
         created.skills[newSkill.name] = newSkill
     } else {
@@ -99,9 +108,6 @@ const skillFactory = function (overrideFields = {}) {
     return newSkill
 };
 
-const minimalSkillFactory = function (overrideFields = {}) {
-    return {}
-}
 
 export function characterSkillFactory (overrideFields = {}) {
     if (typeof(overrideFields.skill) === "string") {

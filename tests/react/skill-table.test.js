@@ -114,7 +114,7 @@ describe('SkillTable', function() {
             // TODO: should not be part of the post
             indent: 0,
             // not needed, but should not matter
-            id: 0,
+            id: 11,
             skill__name: "Gardening",
             character: 1,
         });
