@@ -1038,7 +1038,7 @@ class WeaponTemplateNew(BaseWeaponTemplateNew):
         return ["weapon"]
 
 
-class RangedWeaponTemplateNew(BaseWeaponTemplateNew):
+class RangedWeaponTemplate(BaseWeaponTemplateNew):
     """ """
 
     type = models.CharField(max_length=5, default="P")
@@ -1259,7 +1259,7 @@ class Weapon(BaseWeapon):
 class RangedWeapon(BaseWeapon):
     """ """
 
-    base = models.ForeignKey(RangedWeaponTemplateNew, on_delete=models.CASCADE)
+    base = models.ForeignKey(RangedWeaponTemplate, on_delete=models.CASCADE)
     ammo_quality = models.ForeignKey(
         WeaponQuality,
         blank=True,

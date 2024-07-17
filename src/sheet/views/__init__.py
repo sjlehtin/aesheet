@@ -221,7 +221,7 @@ class AddAmmunitionView(AddWeaponView):
 
 
 class AddRangedWeaponTemplateView(AddRangedWeaponView):
-    model = RangedWeaponTemplateNew
+    model = RangedWeaponTemplate
 
 
 class AddArmorView(AddTransientEffectView):
