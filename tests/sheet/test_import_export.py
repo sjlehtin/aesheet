@@ -5,7 +5,7 @@ from django.test import TestCase
 import django.test
 
 from django.urls import reverse
-from sheet.models import Skill
+from sheet.models import SkillNew as Skill
 from sheet.views import marshal
 import sheet.models
 import django.http
