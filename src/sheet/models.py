@@ -1519,8 +1519,7 @@ class Weapon(BaseWeapon):
 class RangedWeapon(BaseWeapon):
     """ """
 
-    base = models.ForeignKey(RangedWeaponTemplate, on_delete=models.CASCADE)
-    base_new = models.ForeignKey(RangedWeaponTemplateNew, on_delete=models.CASCADE, null=True)
+    base = models.ForeignKey(RangedWeaponTemplateNew, on_delete=models.CASCADE)
     ammo_quality = models.ForeignKey(
         WeaponQuality,
         blank=True,

@@ -1076,7 +1076,7 @@ class WeaponTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
 
-    def test_gz_campaign_url_for_rangedweapon__templates(self):
+    def test_gz_campaign_url_for_rangedweapon_templates(self):
         url = '/rest/rangedweapontemplates/campaign/{}/'.format(
             self.campaign_gz.pk)
         response = self.client.get(url, format='json')

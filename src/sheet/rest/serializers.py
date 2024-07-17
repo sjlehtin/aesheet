@@ -164,13 +164,12 @@ class WeaponListSerializer(serializers.ModelSerializer):
 
 
 class RangedWeaponTemplateSerializer(serializers.ModelSerializer):
-
     base_skill = SkillMinimalSerializer(read_only=True)
     skill = SkillMinimalSerializer(read_only=True)
     skill2 = SkillMinimalSerializer(read_only=True)
 
     class Meta:
-        model = sheet.models.RangedWeaponTemplate
+        model = sheet.models.RangedWeaponTemplateNew
         fields = "__all__"
 
 
@@ -465,7 +464,7 @@ class SheetRangedWeaponListSerializer(serializers.ModelSerializer):
 
 class SheetRangedWeaponCreateSerializer(SheetWeaponCreateSerializer):
     base = serializers.PrimaryKeyRelatedField(
-            queryset=sheet.models.RangedWeaponTemplate.objects.all(),
+            queryset=sheet.models.RangedWeaponTemplateNew.objects.all(),
             required=False)
     quality = serializers.PrimaryKeyRelatedField(
             queryset=sheet.models.WeaponQuality.objects.all(),
