@@ -1,8 +1,16 @@
 import * as factories from './factories'
 import SkillHandler from "../../react/SkillHandler";
 import ValueBreakdown from "../../react/ValueBreakdown";
+import {testSetup} from "./testutils";
 
 describe('SkillHandler stats', function () {
+    beforeAll(() => {
+        testSetup()
+    })
+    afterEach(() => {
+        factories.clearAll()
+    })
+
     it('calculates eff stats', function () {
         var handler = factories.skillHandlerFactory({
             character: {cur_ref: 50, cur_int: 50}
@@ -468,7 +476,7 @@ describe('SkillHandler stats', function () {
     });
 
     it('applies AC penalty to skill check', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: {
                 cur_ref: 45, cur_int: 45,
                 cur_psy: 46, cur_wil: 45,
@@ -477,6 +485,7 @@ describe('SkillHandler stats', function () {
             staminaDamage: 15,
             skills: [{skill: {name: "Pistol", stat: 'DEX'}, level: 1,}]
         });
+        expect(handler.skillLevel("Pistol")).toEqual(1)
         expect(handler.skillCheck("Pistol").value()).toEqual(40);
     });
 

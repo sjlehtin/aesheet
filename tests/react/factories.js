@@ -1,6 +1,12 @@
 import SkillHandler from 'SkillHandler'
 
 let objectId = 1;
+let created = {skills: {}}
+
+export function clearAll() {
+    objectId = 1
+    created = {skills: {}}
+}
 
 const characterFactory = function (statOverrides) {
     let _charData = {
@@ -51,17 +57,18 @@ const characterFactory = function (statOverrides) {
     return Object.assign(_charData, statOverrides);
 };
 
-const skillFactory = function (overrideFields) {
+const skillFactory = function (overrideFields = {}) {
     let props = {};
     // Simplify generating skills to allow using only the name.  Slight
     // allowance for older code.
-    if (typeof(overrideFields) === "object") {
-        props = overrideFields;
-    } else if (overrideFields){
+    if (typeof(overrideFields) === "string") {
         props.name = overrideFields;
+    } else if (overrideFields){
+        props = overrideFields;
     }
     let _baseSkill = {
-        "name": "Acting / Bluff",
+        id: objectId,
+        "name": "Foo Skill",
         "description": "",
         "notes": "",
         "can_be_defaulted": true,
@@ -80,7 +87,43 @@ const skillFactory = function (overrideFields) {
         "powered_ref_counter": 0,
         "powered_fit_mod": 0,
     };
-    return Object.assign(_baseSkill, props);
+    const newSkill = Object.assign(_baseSkill, props);
+
+    if (created.skills[newSkill.name] === undefined) {
+        created.skills[newSkill.name] = newSkill
+    } else {
+        return created.skills[newSkill.name]
+    }
+    objectId = newSkill.id + 1;
+
+    return newSkill
+};
+
+const minimalSkillFactory = function (overrideFields = {}) {
+    return {}
+}
+
+export function characterSkillFactory (overrideFields = {}) {
+    if (typeof(overrideFields.skill) === "string") {
+        overrideFields.skill__name = overrideFields.skill
+        delete overrideFields.skill
+    }
+    let _baseCS = {
+        "id": objectId,
+        "level": 1,
+        "character": 1,
+        "skill": objectId,
+        "skill__name": "Acting / Bluff"
+    };
+    const newSkill = Object.assign(_baseCS, overrideFields);
+    /* Overriding ID is possible. */
+    objectId = newSkill.id + 1;
+
+    const baseSkill = skillFactory(newSkill.skill__name)
+    newSkill.skill = baseSkill.id
+    newSkill.skill__name = baseSkill.name
+
+    return newSkill
 };
 
 const edgeFactory = function (overrideFields) {
@@ -204,21 +247,6 @@ const characterEdgeFactory = function (overrideFields) {
     return newEdge;
 };
 
-// Tests pollute each other, needs some reset functionality.
-let nextSkillID = 0;
-
-const characterSkillFactory = function (overrideFields) {
-    let _baseCS = {
-        "id": nextSkillID,
-        "level": 1,
-        "character": 1,
-        "skill": "Acting / Bluff"
-    };
-    const newSkill = Object.assign(_baseCS, overrideFields);
-    /* Overriding ID is possible. */
-    nextSkillID = newSkill.id + 1;
-    return newSkill
-};
 
 const baseFirearmFactory = (props) => {
     if (!props) {
@@ -251,6 +279,7 @@ const baseFirearmFactory = (props) => {
             "barrel_length": 102,
             "weapon_class_modifier": "6.00",
             "tech_level": 4,
+        // TODO: fix skill objects
             "base_skill": "Handguns",
             "skill": null,
             "skill2": null,
@@ -835,7 +864,21 @@ const sheetFactory = function (statOverrides) {
     return Object.assign(_sheetData, statOverrides);
 };
 
-const skillHandlerFactory = function (givenProps) {
+function getSkillName(characterSkillCandidate) {
+    // TODO: harmonize across tests. This function should not be needed.
+    if (typeof(characterSkillCandidate) === "string") {
+        return characterSkillCandidate
+    } else if (characterSkillCandidate.skill__name !== undefined) {
+        return characterSkillCandidate.skill__name
+    } else if (typeof(characterSkillCandidate.skill) === "string") {
+        return characterSkillCandidate.skill
+    } else if (characterSkillCandidate.skill?.name !== undefined) {
+        return characterSkillCandidate.skill.name
+    }
+    throw Error("unrecognized character skill candidate")
+}
+
+export function skillHandlerFactory (givenProps) {
     if (!givenProps) {
         givenProps = {};
     }
@@ -844,21 +887,26 @@ const skillHandlerFactory = function (givenProps) {
     let skillMap = {};
     if (givenProps.allSkills) {
         for (let sk of givenProps.allSkills) {
-            var newSkill = skillFactory(sk);
+            const newSkill = skillFactory(sk);
             allSkills.push(newSkill);
             skillMap[newSkill.name] = newSkill;
         }
     }
     if (givenProps.skills) {
         for (let sk of givenProps.skills) {
-            var skill = skillFactory(sk.skill);
+            let skill
+            if (typeof(sk.skill) === "object") {
+                skill = skillFactory(sk.skill);
+            } else {
+                skill = skillFactory(getSkillName(sk))
+            }
             if (!(skill.name in skillMap)) {
                 allSkills.push(skill);
             } else {
                 skill = skillMap[skill.name];
             }
-            var charSkill = characterSkillFactory(
-                Object.assign({}, sk, {skill: skill.name}));
+            const charSkill = characterSkillFactory(
+                Object.assign({}, sk, {skill: skill.id, skill__name: skill.name}));
             skills.push(charSkill);
         }
     }
@@ -905,7 +953,7 @@ const skillHandlerFactory = function (givenProps) {
 };
 
 export {
-    characterFactory, sheetFactory, characterSkillFactory, skillFactory,
+    characterFactory, sheetFactory, skillFactory,
     edgeLevelFactory, edgeFactory, characterEdgeFactory, ammunitionFactory,
     scopeFactory, baseFirearmFactory, firearmControlPropsFactory,
     magazineFactory, firearmFactory, weaponTemplateFactory,
@@ -913,5 +961,5 @@ export {
     transientEffectFactory, sheetTransientEffectFactory,
     inventoryEntryFactory, armorTemplateFactory, armorQualityFactory,
     armorFactory, miscellaneousItemFactory, sheetMiscellaneousItemFactory,
-    skillHandlerFactory, woundFactory
+    woundFactory
 }

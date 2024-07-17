@@ -1,4 +1,5 @@
 import {screen, within} from "@testing-library/react";
+import * as factories from './factories'
 
 function testSetup() {
     // Required for Offcanvas component in react-bootstrap.
@@ -23,6 +24,8 @@ function testSetup() {
             disconnect: jest.fn()
         }))
     })
+
+    factories.clearAll()
 }
 
 function defer() {

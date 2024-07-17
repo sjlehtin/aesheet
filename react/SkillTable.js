@@ -45,7 +45,7 @@ class SkillTable extends React.Component {
 
     mangleSkillList() {
         return this.props.skillHandler.getSkillList().filter(
-            (cs) => { return !(cs.skill in SkillTable.prefilledPhysicalSkillsMap)});
+            (cs) => { return !(cs.skill__name in SkillTable.prefilledPhysicalSkillsMap)});
     }
 
     static getCharacterSkillMap(skillList) {
@@ -54,7 +54,7 @@ class SkillTable extends React.Component {
         }
         let csMap = {};
         for (let cs of skillList) {
-            csMap[cs.skill] = cs;
+            csMap[cs.skill__name] = cs;
         }
         return csMap;
     }
@@ -170,7 +170,7 @@ class SkillTable extends React.Component {
 
         for (ii = 0; ii < skillList.length; ii++) {
             var cs = skillList[ii];
-            skill = skillMap[cs.skill];
+            skill = skillMap[cs.skill__name];
             if (skill) {
                 spCost = SkillTable.spCost(cs, skill);
                 var idx = SkillTable.prefilledPhysicalSkills.length + ii;
@@ -188,7 +188,7 @@ class SkillTable extends React.Component {
             } else {
                 rows.push(<tr key={`${cs.skill}-${idx}`}>
                     <td style={{color: "red"}}
-                    >Real skill missing for {cs.skill}.</td></tr>);
+                    >Real skill missing for {cs.skill__name}.</td></tr>);
             }
         }
 

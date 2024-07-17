@@ -61,7 +61,10 @@ describe('StatBlock', function() {
         testSetup()
         server.listen({ onUnhandledRequest: 'error' })
     })
-    afterEach(() => server.resetHandlers())
+    afterEach(() => {
+        server.resetHandlers()
+        factories.clearAll()
+    })
     afterAll(() => server.close())
 
     it('can load the sheet and perform edits', async function () {
@@ -174,10 +177,11 @@ describe('StatBlock', function() {
     it('can load the sheet and perform skill edits', async function () {
         const user = userEvent.setup()
 
+        const gardening = factories.skillFactory("Gardening")
+
         server.use(
             rest.get("http://localhost/rest/characters/2/characterskills/", (req, res, ctx) => {
-                const skill = factories.characterSkillFactory({skill: "Gardening", level: 2, id: 300});
-                console.log("loading character skills", skill)
+                const skill = factories.characterSkillFactory({skill: 42, skill__name: "Gardening", level: 2, id: 300});
                 return res(ctx.json([skill]))
             }),
         )
@@ -207,9 +211,14 @@ describe('StatBlock', function() {
         await user.type(skillInput, "gard")
         await user.click(screen.getByText("Gardening"))
 
+
         server.use(
             rest.post("http://localhost/rest/characters/2/characterskills/", async (req, res, ctx) => {
-                return res(ctx.json(Object.assign(await req.json(), {id: 422})))
+
+                const json = await req.json();
+                expect(json.skill).toEqual(gardening.id)
+                expect(json.level).toEqual(0)
+                return res(ctx.json({id: 422, skill: gardening.id, skill__name: "Gardening", level: 0}))
             }),
             rest.patch("http://localhost/rest/characters/2/characterskills/422", async (req, res, ctx) => {
                 return res(ctx.json(await req.json()))
@@ -221,7 +230,7 @@ describe('StatBlock', function() {
 
         await user.click(screen.getByRole("button", {name: "Add skill"}))
 
-        const newRow = (await within(screen.getByRole("table", {name: "Skills"})).findByText("Gardening")).closest('tr')
+        const newRow = (await within(await screen.findByRole("table", {name: "Skills"})).findByText("Gardening")).closest('tr')
         expect(newRow).toBeInTheDocument()
 
         await user.click(within(newRow).getByRole("button", {name: "Increase skill level"}))
