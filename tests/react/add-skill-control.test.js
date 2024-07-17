@@ -13,7 +13,7 @@ describe('AddSkillControl', function() {
     var _basicSkills = [
         factories.skillFactory({name: "Endurance / run",
             stat: "WIL", skill_cost_0: 0, type: "Physical"}),
-        factories.skillFactory({name: "Persuasion", type: "Social"}),
+        factories.skillFactory({id: 42, name: "Persuasion", type: "Social"}),
         factories.skillFactory({name: "Mental Fortitude", type: "Mystical"}),
         factories.skillFactory({name: "Two-weapon Style", type: "Physical",
             min_level: 1, max_level: 4 })
@@ -35,7 +35,7 @@ describe('AddSkillControl', function() {
 
         renderAddSkillControl({characterSkillMap:
             SkillTable.getCharacterSkillMap([
-                factories.characterSkillFactory({skill: "Persuasion"})])});
+                factories.characterSkillFactory({skill__name: "Persuasion"})])});
 
         await user.click(within(screen.getByLabelText("Add skill name")).getByRole("button"))
         let values = []
@@ -129,7 +129,7 @@ describe('AddSkillControl', function() {
         const addButton = screen.getByRole("button", {name: "Add skill"})
         expect(addButton).not.toBeDisabled()
         await user.click(addButton)
-        expect(spy).toHaveBeenCalledWith({skill: "Persuasion", level: 2});
+        expect(spy).toHaveBeenCalledWith({skill: 42, level: 2});
     });
 
 });
