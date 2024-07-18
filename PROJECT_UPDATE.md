@@ -99,3 +99,21 @@ REST endpoints at the same go.
 * firearm addition, change
 * character log entries with edges and skills
 * Edge skill bonuses (acute touch to surgery)
+* Skill lists, skill addition, deletion, required skills for weapons, firearms
+* base skill, extra skills as integers or objects instead of just strings
+  * more factoryboy like behavior from `factories.js` 
+* Sheet weapons, adding and deleting
+* Sheet ranged weapons, adding and deleting
+
+### Status update
+
+It did not help.
+
+```log
+django.db.utils.IntegrityError: The row in table 'sheet_weapontemplate' with primary key '1' has an invalid foreign key: sheet_weapontemplate.skill_id contains a value '62' that does not have a corresponding value in sheet_skillnew.id.
+```
+
+When renaming the new `SkillNew` model to the old `Skill` name, the classes with multiple foreign keys to it fail to migrate with the above error. I suspect a bug in the SQLite migration code.
+
+Changing to one field with a foreign key and a many-to-many-relation for the rest fixed the issue.
+
