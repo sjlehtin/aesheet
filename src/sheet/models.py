@@ -337,8 +337,10 @@ STAT_TYPES = [st.upper() for st in ALL_STATS]
 STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 
 
-class SkillNew(ExportedModel):
+class Skill(ExportedModel):
     """ """
+
+    objects = NameManager()
 
     class Meta:
         ordering = ["name"]
@@ -402,15 +404,12 @@ class SkillNew(ExportedModel):
     def dont_export(cls):
         return [
             "characterskill",
-            "primary_for_rangedweapontemplate",
-            "secondary_for_rangedweapontemplate",
             "base_skill_for_rangedweapontemplate",
-            "primary_for_weapontemplate",
-            "secondary_for_weapontemplate",
             "base_skill_for_weapontemplate",
-            "primary_for_basefirearm",
-            "secondary_for_basefirearm",
             "base_skill_for_basefirearm",
+            "rangedweapontemplate",
+            "weapontemplate",
+            "basefirearm",
             "skill",
             "edgeskillbonus",
             "characterlogentry",
@@ -425,7 +424,7 @@ class CharacterSkill(PrivateMixin, models.Model):
     character = models.ForeignKey(
         Character, related_name="skills", on_delete=models.CASCADE
     )
-    skill = models.ForeignKey(SkillNew, on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
     level = models.IntegerField(default=0)
 
     def access_allowed(self, user):
@@ -608,7 +607,7 @@ class EdgeSkillBonus(ExportedModel):
     edge_level = models.ForeignKey(
         EdgeLevel, related_name="edge_skill_bonuses", on_delete=models.CASCADE
     )
-    skill = models.ForeignKey(SkillNew, on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
     bonus = models.IntegerField(default=15)
 
     def __str__(self):
@@ -720,26 +719,11 @@ class BaseArmament(ExportedModel):
     weight = models.DecimalField(max_digits=7, decimal_places=4, default=1.0)
 
     base_skill = models.ForeignKey(
-        SkillNew,
+        Skill,
         related_name="base_skill_for_%(class)s",
         on_delete=models.CASCADE,
     )
-    required_skills = models.ManyToManyField(SkillNew, blank=True)
-
-    # skill = models.ForeignKey(
-    #     SkillNew,
-    #     blank=True,
-    #     null=True,
-    #     related_name="primary_for_%(class)s",
-    #     on_delete=models.SET_NULL,
-    # )
-    # skill2 = models.ForeignKey(
-    #     SkillNew,
-    #     blank=True,
-    #     null=True,
-    #     related_name="secondary_for_%(class)s",
-    #     on_delete=models.SET_NULL,
-    # )
+    required_skills = models.ManyToManyField(Skill, blank=True)
 
     def __str__(self):
         return "%s" % self.name
@@ -1700,7 +1684,7 @@ class CharacterLogEntry(models.Model):
     amount = models.IntegerField(default=0)
 
     skill = models.ForeignKey(
-        SkillNew, blank=True, null=True, on_delete=models.SET_NULL
+        Skill, blank=True, null=True, on_delete=models.SET_NULL
     )
     skill_level = models.PositiveIntegerField(default=0)
 

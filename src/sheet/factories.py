@@ -51,7 +51,7 @@ class SkillFactory(DjangoModelFactory):
     stat = "fit"
 
     class Meta:
-        model = models.SkillNew
+        model = models.Skill
         django_get_or_create = ('name', )
 
     @factory.post_generation

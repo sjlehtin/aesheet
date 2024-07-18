@@ -5,7 +5,7 @@ from django.test import TestCase
 import django.test
 
 from django.urls import reverse
-from sheet.models import SkillNew as Skill
+from sheet.models import Skill
 from sheet.views import marshal
 import sheet.models
 import django.http
@@ -167,11 +167,11 @@ class ImportExportDependencies(TestCase):
     def test_import_with_deps(self):
         csv_data = u"""\
 Skill
-name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
-Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
-Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
-Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
-Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
+id,name,tech_level,description,notes,can_be_defaulted,is_specialization,skill_cost_0,skill_cost_1,skill_cost_2,skill_cost_3,type,stat,required_edges,required_skills
+1,Jackadeering,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Nutcasing
+2,Throw,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Unarmed combat
+3,Unarmed combat,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,Jackadeering
+4,Nutcasing,all,,,TRUE,TRUE,0,2,,,Combat,MOV,,
 """
         marshal.import_text(csv_data.encode('utf-8'))
         self.assertListEqual(

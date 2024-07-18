@@ -87,7 +87,7 @@ class EdgeLevelSerializer(serializers.ModelSerializer):
 
 class SkillMinimalSerializer(serializers.ModelSerializer):
     class Meta:
-        model = sheet.models.SkillNew
+        model = sheet.models.Skill
         fields = ("id", "name")
         read_only_fields = ("id", "name")
 
@@ -102,7 +102,7 @@ class SkillSerializer(serializers.ModelSerializer):
     required_skills = SkillMinimalSerializer(many=True)
 
     class Meta:
-        model = sheet.models.SkillNew
+        model = sheet.models.Skill
         fields = "__all__"
 
 
