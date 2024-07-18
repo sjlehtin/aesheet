@@ -696,7 +696,7 @@ def format_damage(num_dice, dice, extra_damage=0, leth=0, plus_leth=0):
     )
 
 
-class BaseArmamentNew(ExportedModel):
+class BaseArmament(ExportedModel):
     class Meta:
         abstract = True
         ordering = ["name"]
@@ -754,7 +754,7 @@ class BaseDamager(models.Model):
         abstract = True
 
 
-class BaseWeaponTemplateNew(BaseArmamentNew, BaseDamager):
+class BaseWeaponTemplate(BaseArmament, BaseDamager):
     roa = models.DecimalField(max_digits=4, decimal_places=3, default=1.0)
 
     bypass = models.IntegerField(default=0)
@@ -894,7 +894,7 @@ class FirearmAmmunitionType(ExportedModel):
         return f"{self.firearm} {self.calibre.name})"
 
 
-class BaseFirearm(BaseArmamentNew):
+class BaseFirearm(BaseArmament):
     """ """
 
     autofire_rpm = models.IntegerField(blank=True, null=True)
@@ -1020,7 +1020,7 @@ class SheetFirearmMagazine(models.Model):
     current = models.PositiveSmallIntegerField()
 
 
-class WeaponTemplate(BaseWeaponTemplateNew):
+class WeaponTemplate(BaseWeaponTemplate):
     """ """
 
     type = models.CharField(max_length=5, default="S")
@@ -1038,7 +1038,7 @@ class WeaponTemplate(BaseWeaponTemplateNew):
         return ["weapon"]
 
 
-class RangedWeaponTemplate(BaseWeaponTemplateNew):
+class RangedWeaponTemplate(BaseWeaponTemplate):
     """ """
 
     type = models.CharField(max_length=5, default="P")
