@@ -14,6 +14,7 @@ import FirearmControl from 'FirearmControl'
 import WeaponRow from 'WeaponRow'
 
 import * as factories from './factories'
+import {testSetup} from "./testutils";
 
 const server = setupServer(
   rest.get('http://localhost/rest/ammunition/firearm/*/', (req, res, ctx) => {
@@ -25,8 +26,14 @@ const server = setupServer(
 )
 
 describe('FirearmControl', () => {
-    beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-    afterEach(() => server.resetHandlers());
+    beforeAll(() => {
+        testSetup()
+        server.listen({onUnhandledRequest: 'error'})
+    })
+    afterEach(() => {
+        factories.clearAll()
+        server.resetHandlers()
+    })
     afterAll(() => server.close());
 
     const renderFirearm = async (givenProps) => {
@@ -628,7 +635,7 @@ describe('FirearmControl', () => {
                     level: 1
                 }]
             },
-            weapon: factories.firearmFactory({base: {base_skill: "Handguns", skill: "Pistol"}})});
+            weapon: {base: {base_skill: "Handguns", skill: "Pistol"}}});
         expect(screen.getByLabelText("Base check").textContent).toEqual("45")
     });
 
@@ -644,7 +651,7 @@ describe('FirearmControl', () => {
                     level: 1
                 }]
             },
-            weapon: factories.firearmFactory({base: {base_skill: "Handguns", skill: "Pistol"}})});
+            weapon: {base: {base_skill: "Handguns", skill: "Pistol"}}});
         expect(screen.getByLabelText("Base check").textContent).toEqual("55")
     });
 
@@ -762,7 +769,7 @@ describe('FirearmControl', () => {
                     skill: "Pistol",
                     level: 0
                 }]},
-            weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
+            weapon: {base: {base_skill: "Pistol"}}
         })
 
         const values = getActionChecks();
@@ -778,7 +785,7 @@ describe('FirearmControl', () => {
                 }],
                 character: {cur_int: 45, cur_ref: 45, cur_fit: 63}
             },
-            weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
+            weapon: {base: {base_skill: "Pistol"}}
         })
 
         const values = getActionChecks();
@@ -842,7 +849,7 @@ describe('FirearmControl', () => {
                     cur_fit: props.fit}
             },
             toRange: props.toRange ?? "",
-            weapon: factories.firearmFactory({
+            weapon: {
             base: {name: "Invented",
                 autofire_rpm: props.autofireRPM,
                 autofire_class: "B",
@@ -851,7 +858,7 @@ describe('FirearmControl', () => {
                 base_skill: "Long guns",
                 sight: 600, barrel_length: 602, accuracy: 1.0
             }
-        })})}/>);
+        }})}/>);
         await waitForElementToBeRemoved(() => screen.queryAllByRole("status"))
 
         return firearm
@@ -978,10 +985,10 @@ describe('FirearmControl', () => {
                     skill: "Pistol",
                     level: 0
                 }]},
-            weapon: factories.firearmFactory({
+            weapon: {
                 base: {base_skill: "Pistol"},
                 use_type: "PRI"
-            })
+            }
         })
 
         expect(screen.getByLabelText("Rate of fire").textContent).toEqual("2.61")
@@ -996,10 +1003,10 @@ describe('FirearmControl', () => {
                     skill: "Pistol",
                     level: 0
                 }]},
-            weapon: factories.firearmFactory({
+            weapon: {
                 base: {base_skill: "Pistol"},
                 use_type: "SEC"
-            })
+            }
         })
 
         expect(screen.getByLabelText("Rate of fire").textContent).toEqual("2.36")

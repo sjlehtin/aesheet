@@ -844,6 +844,8 @@ class SheetWeaponTestCase(TestCase):
         template = factories.WeaponTemplateFactory(name="Long sword")
         quality = factories.WeaponQualityFactory(name="L1")
 
+        assert isinstance(template.pk, int)
+
         response = self.client.post(
                 self.url,
                 data={'base': template.pk,
@@ -930,13 +932,17 @@ class SheetRangedWeaponTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_weapons(self):
-        self.sheet.ranged_weapons.add(factories.RangedWeaponFactory())
+        skill = factories.SkillFactory(name="Bow")
+        self.sheet.ranged_weapons.add(factories.RangedWeaponFactory(base__base_skill__name="Bow"))
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
         self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['base']['base_skill'], dict)
+        assert response.data[0]['base']['base_skill']['id'] == skill.id
+        assert response.data[0]['base']['base_skill']['name'] == "Bow"
         self.assertIsInstance(response.data[0]['quality'], dict)
 
     def test_adding_items(self):

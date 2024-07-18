@@ -20,7 +20,7 @@ class RangedWeaponRow extends WeaponRow {
 
     skillCheck() {
         const gottenCheck = this.props.skillHandler.skillCheck(
-            this.props.weapon.base.base_skill);
+            this.props.weapon.base.base_skill.name);
 
         if (!gottenCheck) {
             return null;
@@ -34,15 +34,15 @@ class RangedWeaponRow extends WeaponRow {
 
         if (this.props.weapon.base.skill) {
             if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill)) {
-                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill})`)
+                    this.props.weapon.base.skill.name)) {
+                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill.name})`)
             }
         }
 
         if (this.props.weapon.base.skill2) {
             if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill2)) {
-                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill2})`)
+                    this.props.weapon.base.skill2.name)) {
+                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill2.name})`)
             }
         }
 
@@ -53,7 +53,7 @@ class RangedWeaponRow extends WeaponRow {
         var roa = this.baseROA();
         roa *= this.skillROAMultiplier();
 
-        if (this.props.weapon.base.base_skill === "Bow") {
+        if (this.props.weapon.base.base_skill.name === "Bow") {
             var level = this.props.skillHandler.skillLevel("Rapid archery");
             if (level > 0) {
                 roa += level * 0.05;
@@ -72,14 +72,14 @@ class RangedWeaponRow extends WeaponRow {
     fitDamageBonus(useType) {
         var base = this.props.weapon.base;
 
-        if (base.base_skill === "Crossbow") {
+        if (base.base_skill.name === "Crossbow") {
             fitBonusDmg = 0;
             fitLethBonus = 0
         } else {
             var quality = this.props.weapon.quality;
             var fit = this.getStat("fit");
             /* Cap the damage according to max pull of the bow.*/
-            if (base.base_skill === "Bow" && quality.max_fit) {
+            if (base.base_skill.name === "Bow" && quality.max_fit) {
                 fit = Math.min(quality.max_fit, fit);
             }
             var ccFITBonus = fit - 45;
