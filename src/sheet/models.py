@@ -724,20 +724,22 @@ class BaseArmament(ExportedModel):
         related_name="base_skill_for_%(class)s",
         on_delete=models.CASCADE,
     )
-    skill = models.ForeignKey(
-        SkillNew,
-        blank=True,
-        null=True,
-        related_name="primary_for_%(class)s",
-        on_delete=models.SET_NULL,
-    )
-    skill2 = models.ForeignKey(
-        SkillNew,
-        blank=True,
-        null=True,
-        related_name="secondary_for_%(class)s",
-        on_delete=models.SET_NULL,
-    )
+    required_skills = models.ManyToManyField(SkillNew, blank=True)
+
+    # skill = models.ForeignKey(
+    #     SkillNew,
+    #     blank=True,
+    #     null=True,
+    #     related_name="primary_for_%(class)s",
+    #     on_delete=models.SET_NULL,
+    # )
+    # skill2 = models.ForeignKey(
+    #     SkillNew,
+    #     blank=True,
+    #     null=True,
+    #     related_name="secondary_for_%(class)s",
+    #     on_delete=models.SET_NULL,
+    # )
 
     def __str__(self):
         return "%s" % self.name
@@ -880,9 +882,6 @@ class Ammunition(ExportedModel, BaseDamager):
 
 
 class FirearmAmmunitionType(ExportedModel):
-    # firearm = models.ForeignKey(
-    #     "BaseFirearm", on_delete=models.CASCADE
-    # )
     firearm = models.ForeignKey(
         "BaseFirearm", on_delete=models.CASCADE
     )
