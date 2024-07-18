@@ -124,8 +124,7 @@ class CharacterEdgeListSerializer(serializers.ModelSerializer):
 
 class BaseFirearmSerializer(serializers.ModelSerializer):
     base_skill = SkillMinimalSerializer(read_only=True)
-    skill = SkillMinimalSerializer(read_only=True)
-    skill2 = SkillMinimalSerializer(read_only=True)
+    required_skills = SkillMinimalSerializer(many=True)
 
     class Meta:
         model = sheet.models.BaseFirearm
@@ -134,8 +133,7 @@ class BaseFirearmSerializer(serializers.ModelSerializer):
 
 class WeaponTemplateSerializer(serializers.ModelSerializer):
     base_skill = SkillMinimalSerializer(read_only=True)
-    skill = SkillMinimalSerializer(read_only=True)
-    skill2 = SkillMinimalSerializer(read_only=True)
+    required_skills = SkillMinimalSerializer(many=True)
 
     class Meta:
         model = sheet.models.WeaponTemplate
@@ -164,8 +162,7 @@ class WeaponListSerializer(serializers.ModelSerializer):
 
 class RangedWeaponTemplateSerializer(serializers.ModelSerializer):
     base_skill = SkillMinimalSerializer(read_only=True)
-    skill = SkillMinimalSerializer(read_only=True)
-    skill2 = SkillMinimalSerializer(read_only=True)
+    required_skills = SkillMinimalSerializer(many=True)
 
     class Meta:
         model = sheet.models.RangedWeaponTemplate

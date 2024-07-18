@@ -699,7 +699,14 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_firearms(self):
-        self.sheet.firearms.add(factories.BaseFirearmFactory(name="Glock 19"),
+        skill1 = factories.SkillFactory(name="Argumentation")
+        skill2 = factories.SkillFactory(name="Punching")
+
+        firearm = factories.BaseFirearmFactory(name="Glock 19")
+        firearm.required_skills.add(skill1)
+        firearm.required_skills.add(skill2)
+
+        self.sheet.firearms.add(firearm,
                                 through_defaults={"ammo": factories.AmmunitionFactory(calibre__name="45FCK")})
 
         response = self.client.get(self.url, format='json')
@@ -713,6 +720,11 @@ class SheetFirearmTestCase(TestCase):
         assert 'calibre' in weapon_data['ammo']
         assert 'name' in weapon_data['ammo']['calibre']
         assert weapon_data['ammo']['calibre']['name'] == "45FCK"
+
+        required = weapon_data['base']['required_skills']
+        assert isinstance(required, list)
+        assert len(required) == 2
+        assert isinstance(required[0], dict)
 
     def test_adding_items(self):
         firearm = factories.BaseFirearmFactory(name="AK-47")
@@ -831,7 +843,14 @@ class SheetWeaponTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_weapons(self):
-        self.sheet.weapons.add(factories.WeaponFactory())
+        skill1 = factories.SkillFactory(name="Argumentation")
+        skill2 = factories.SkillFactory(name="Punching")
+
+        weapon = factories.WeaponFactory()
+        weapon.base.required_skills.add(skill1)
+        weapon.base.required_skills.add(skill2)
+
+        self.sheet.weapons.add(weapon)
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
@@ -839,6 +858,11 @@ class SheetWeaponTestCase(TestCase):
 
         self.assertIsInstance(response.data[0]['base'], dict)
         self.assertIsInstance(response.data[0]['quality'], dict)
+
+        required = response.data[0]['base']['required_skills']
+        assert isinstance(required, list)
+        assert len(required) == 2
+        assert isinstance(required[0], dict)
 
     def test_adding_items(self):
         template = factories.WeaponTemplateFactory(name="Long sword")
@@ -933,7 +957,13 @@ class SheetRangedWeaponTestCase(TestCase):
 
     def test_shows_weapons(self):
         skill = factories.SkillFactory(name="Bow")
-        self.sheet.ranged_weapons.add(factories.RangedWeaponFactory(base__base_skill__name="Bow"))
+        skill1 = factories.SkillFactory(name="Argumentation")
+        skill2 = factories.SkillFactory(name="Punching")
+        weapon = factories.RangedWeaponFactory(base__base_skill__name="Bow")
+
+        weapon.base.required_skills.add(skill1)
+        weapon.base.required_skills.add(skill2)
+        self.sheet.ranged_weapons.add(weapon)
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
@@ -944,6 +974,11 @@ class SheetRangedWeaponTestCase(TestCase):
         assert response.data[0]['base']['base_skill']['id'] == skill.id
         assert response.data[0]['base']['base_skill']['name'] == "Bow"
         self.assertIsInstance(response.data[0]['quality'], dict)
+
+        required = response.data[0]['base']['required_skills']
+        assert isinstance(required, list)
+        assert len(required) == 2
+        assert isinstance(required[0], dict)
 
     def test_adding_items(self):
         template = factories.RangedWeaponTemplateFactory(name="Bow")
