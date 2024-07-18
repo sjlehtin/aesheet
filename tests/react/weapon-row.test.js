@@ -66,7 +66,7 @@ describe('WeaponRow', function() {
                 weapon: factories.weaponFactory({
                     base: {
                         base_skill: "Weapon combat",
-                        skill: "Greatsword",
+                        required_skills: ["Greatsword", ],
                         ccv: 15,
                         ccv_unskilled_modifier: -10
                     }
@@ -373,7 +373,8 @@ describe('WeaponRow', function() {
     });
 
     it("observes weapon One-handed use requirement", function () {
-        renderWeapon({size: 2, base: {skill2: "One-handed use"}});
+        // TODO: should be fixed to not give double penalty etc
+        renderWeapon({size: 2, base: {required_skills: ["One-handed use",]}});
 
         expect(screen.getByRole("row", {name: "Action row for FULL"}).textContent).not.toMatch(/Unskilled/)
         expect(screen.getByRole("row", {name: "Action row for PRI"}).textContent).toMatch(/Unskilled/)

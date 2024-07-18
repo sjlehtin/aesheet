@@ -286,8 +286,7 @@ const baseFirearmFactory = (props) => {
             "weapon_class_modifier": "6.00",
             "tech_level": 4,
             "base_skill": "Handguns",
-            "skill": null,
-            "skill2": null,
+            "required_skills": [],
             "magazine_size": 8,
             "magazine_weight": 0.350
     };
@@ -296,15 +295,9 @@ const baseFirearmFactory = (props) => {
 
     objectId = newFirearm.id + 1
 
-    if (newFirearm.base_skill) {
-        newFirearm.base_skill = minimalSkillFactory(newFirearm.base_skill)
-    }
-    if (newFirearm.skill) {
-        newFirearm.skill = minimalSkillFactory(newFirearm.skill)
-    }
-    if (newFirearm.skill2) {
-        newFirearm.skill2 = minimalSkillFactory(newFirearm.skill2)
-    }
+    newFirearm.base_skill = minimalSkillFactory(newFirearm.base_skill)
+    newFirearm.required_skills = newFirearm.required_skills.map((req) => minimalSkillFactory(req))
+
     return newFirearm
 };
 
@@ -647,8 +640,7 @@ export function weaponTemplateFactory(overrideFields) {
             "is_shield": false,
             "tech_level": 3,
             "base_skill": "Sword",
-            "skill": null,
-            "skill2": null
+            "required_skills": []
         };
     if (!overrideFields) {
         overrideFields = {};
@@ -657,15 +649,8 @@ export function weaponTemplateFactory(overrideFields) {
 
     objectId = newWeapon.id + 1;
 
-    if (newWeapon.base_skill) {
-        newWeapon.base_skill = minimalSkillFactory(newWeapon.base_skill)
-    }
-    if (newWeapon.skill) {
-        newWeapon.skill = minimalSkillFactory(newWeapon.skill)
-    }
-    if (newWeapon.skill2) {
-        newWeapon.skill2 = minimalSkillFactory(newWeapon.skill2)
-    }
+    newWeapon.base_skill = minimalSkillFactory(newWeapon.base_skill)
+    newWeapon.required_skills = newWeapon.required_skills.map((req) => minimalSkillFactory(req))
 
     return newWeapon
 };
@@ -753,8 +738,7 @@ export function rangedWeaponTemplateFactory(overrideFields) {
             "weapon_type": "bow",
             "tech_level": 1,
             "base_skill": "Bow",
-            "skill": null,
-            "skill2": null
+            "required_skills": []
         };
     if (!overrideFields) {
         overrideFields = {};
@@ -763,15 +747,8 @@ export function rangedWeaponTemplateFactory(overrideFields) {
 
     objectId = newWeapon.id + 1
 
-    if (newWeapon.base_skill) {
-        newWeapon.base_skill = minimalSkillFactory(newWeapon.base_skill)
-    }
-    if (newWeapon.skill) {
-        newWeapon.skill = minimalSkillFactory(newWeapon.skill)
-    }
-    if (newWeapon.skill2) {
-        newWeapon.skill2 = minimalSkillFactory(newWeapon.skill2)
-    }
+    newWeapon.base_skill = minimalSkillFactory(newWeapon.base_skill)
+    newWeapon.required_skills = newWeapon.required_skills.map((req) => minimalSkillFactory(req))
     return newWeapon
 };
 

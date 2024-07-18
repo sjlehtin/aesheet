@@ -30,8 +30,9 @@ class WeaponRow extends React.Component {
             }
         };
         checkSkill(this.props.weapon.base.base_skill.name);
-        checkSkill(this.props.weapon.base.skill?.name);
-        checkSkill(this.props.weapon.base.skill2?.name);
+        for (let req of this.props.weapon.base.required_skills) {
+            checkSkill(req.name)
+        }
         return missing;
     }
 
@@ -366,9 +367,16 @@ class WeaponRow extends React.Component {
         }
     }
 
+    oneHandedUseRequiresSkill(wpn) {
+        for (let req of wpn.required_skills) {
+            if (req.name === "One-handed use")
+                return true
+        }
+        return false
+    }
+
     oneHandedUseAvailable() {
-        if ([this.props.weapon.base.skill?.name, this.props.weapon.base.skill2?.name]
-                .indexOf("One-handed use") >= 0) {
+        if (this.oneHandedUseRequiresSkill(this.props.weapon.base)) {
             return this.props.skillHandler.hasSkill("One-handed use");
         } else {
             return true;

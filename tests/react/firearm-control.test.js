@@ -38,7 +38,7 @@ describe('FirearmControl', () => {
 
     const renderFirearm = async (givenProps) => {
         let props = {
-            base: {base_skill: "Handguns", skill: "Pistol"},
+            base: {base_skill: "Handguns", required_skills: ["Pistol",]},
             handlerProps: {
                 character: {cur_int: 50, cur_ref: 50, cur_fit: 45, cur_psy: 50},
                 skills: [{
@@ -635,7 +635,8 @@ describe('FirearmControl', () => {
                     level: 1
                 }]
             },
-            weapon: {base: {base_skill: "Handguns", skill: "Pistol"}}});
+            weapon: {base: {base_skill: "Handguns", required_skills: ["Pistol",]
+            }}});
         expect(screen.getByLabelText("Base check").textContent).toEqual("45")
     });
 
@@ -651,7 +652,7 @@ describe('FirearmControl', () => {
                     level: 1
                 }]
             },
-            weapon: {base: {base_skill: "Handguns", skill: "Pistol"}}});
+            weapon: {base: {base_skill: "Handguns", required_skills: ["Pistol",]}}});
         expect(screen.getByLabelText("Base check").textContent).toEqual("55")
     });
 

@@ -32,20 +32,12 @@ class RangedWeaponRow extends WeaponRow {
 
         const unskilledPenalty = -10;
 
-        if (this.props.weapon.base.skill) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill.name)) {
-                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill.name})`)
+        const missing = this.missingSkills()
+        if (missing.length) {
+            for (let sk in missing) {
+                bd.add(unskilledPenalty, `unskilled (${sk})`)
             }
         }
-
-        if (this.props.weapon.base.skill2) {
-            if (!this.props.skillHandler.hasSkill(
-                    this.props.weapon.base.skill2.name)) {
-                bd.add(unskilledPenalty, `unskilled (${this.props.weapon.base.skill2.name})`)
-            }
-        }
-
         return bd
     }
 
