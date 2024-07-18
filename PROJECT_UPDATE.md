@@ -74,3 +74,46 @@ First stab at this is in the `ModificationButton.js`. New components should use 
 
 https://webpack.js.org/guides/typescript/
 
+## Fix primary keys for models
+
+* `Skill`
+* `WeaponTemplate`
+* `RangedWeaponTemplate`
+* `BaseFirearm`
+
+Apparently needs to be done at one go to make it possible to run tests with
+SQLite3 backend. Postgres would probably work ok. Will require changes to the
+REST endpoints at the same go.
+
+* Add new models with "normal" id fields
+* Add fields mirroring old relations to old models to contain the new objects
+* After copying the old objects to new  and populating the foreign keys and many-to-many fields, enforce the same non-nullable constraints on the new fields
+* Remove the old fields to the old models
+* Rename the new fields to the old names
+* Remove orphan old models
+* Rename new models to the old names
+* Fix REST interfaces, either by using optional "name" field lookup in conjunction with primary key lookup, or by just making the transition at the same go
+
+### Impact analysis
+
+* firearm addition, change
+* character log entries with edges and skills
+* Edge skill bonuses (acute touch to surgery)
+* Skill lists, skill addition, deletion, required skills for weapons, firearms
+* base skill, extra skills as integers or objects instead of just strings
+  * more factoryboy like behavior from `factories.js` 
+* Sheet weapons, adding and deleting
+* Sheet ranged weapons, adding and deleting
+
+### Status update
+
+It did not help.
+
+```log
+django.db.utils.IntegrityError: The row in table 'sheet_weapontemplate' with primary key '1' has an invalid foreign key: sheet_weapontemplate.skill_id contains a value '62' that does not have a corresponding value in sheet_skillnew.id.
+```
+
+When renaming the new `SkillNew` model to the old `Skill` name, the classes with multiple foreign keys to it fail to migrate with the above error. I suspect a bug in the SQLite migration code.
+
+Changing to one field with a foreign key and a many-to-many-relation for the rest fixed the issue.
+

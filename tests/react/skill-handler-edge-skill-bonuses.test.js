@@ -19,9 +19,9 @@ describe('SkillHandler edge skill bonuses', function() {
                 {
                     edge: {name: "Acute Touch"}, level: 1,
                     edge_skill_bonuses: [
-                        {skill: "Disable devices", bonus: 7},
-                        {skill: "Surgery", bonus: 13},
-                        {skill: "Field Surgery", bonus: 20},
+                        {skill__name: "Disable devices", bonus: 7},
+                        {skill__name: "Surgery", bonus: 13},
+                        {skill__name: "Field Surgery", bonus: 20},
                     ]
                 },
                 {

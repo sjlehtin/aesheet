@@ -101,8 +101,8 @@ class SkillHandler {
     getSkillBenefit(field) {
         const bd = new ValueBreakdown()
         for (let cs of this.props.characterSkills) {
-            const skill = this.state.skillMap[cs.skill] ?? {}
-            bd.add(skill[field] * cs.level, cs.skill)
+            const skill = this.state.skillMap[cs.skill__name] ?? {}
+            bd.add(skill[field] * cs.level, cs.skill__name)
         }
         return bd
     }
@@ -171,10 +171,10 @@ class SkillHandler {
         for (let edge of this.props.edges) {
             for (let sb of edge.edge_skill_bonuses) {
                 if (!(sb.skill in skillBonusMap)) {
-                    skillBonusMap[sb.skill] = {bonus: 0
+                    skillBonusMap[sb.skill__name] = {bonus: 0
                     };
                 }
-                skillBonusMap[sb.skill].bonus += sb.bonus;
+                skillBonusMap[sb.skill__name].bonus += sb.bonus;
             }
         }
         return skillBonusMap;
@@ -359,7 +359,8 @@ class SkillHandler {
         if (!cs) {
             if (skill.required_skills.length > 0) {
                 for (let reqd of skill.required_skills) {
-                    if (!(reqd in this.state.characterSkillMap)) {
+                    // TODO: should use id key
+                    if (!(reqd.name in this.state.characterSkillMap)) {
                         return "U";
                     }
                 }
@@ -400,13 +401,15 @@ class SkillHandler {
     createSkillList() {
         // Make a deep copy of the list so as not accidentally mangle
         // parent copy of the props.
-        var skillList = this.props.characterSkills.map(
-            (elem) => {var obj = Object.assign({}, elem);
-        obj._children = [];
-        return obj; });
+        const skillList = this.props.characterSkills.map(
+            (elem) => {
+                const obj = Object.assign({}, elem);
+                obj._children = [];
+                return obj;
+            });
 
         this.state.characterSkillMap = SkillHandler.getItemMap(skillList,
-                (item) => { return item.skill; });
+                (item) => { return item.skill__name; });
         this.state.skillMap = SkillHandler.getItemMap(this.props.allSkills);
 
         var csMap = this.state.characterSkillMap;
@@ -418,17 +421,17 @@ class SkillHandler {
 
         var root = [];
         for (let cs of skillList) {
-            var skill = skillMap[cs.skill];
+            var skill = skillMap[cs.skill__name];
             if (!skill) {
                 cs._unknownSkill = true;
                 root.push(cs);
             } else {
                 if (skill.required_skills.length > 0) {
-                    var parent = skill.required_skills[0];
+                    const parent = skill.required_skills[0].name;
                     cs._missingRequired = [];
                     for (let sk of skill.required_skills) {
-                        if (!(sk in csMap)) {
-                            cs._missingRequired.push(sk);
+                        if (!(sk.name in csMap)) {
+                            cs._missingRequired.push(sk.name);
                         }
                     }
                     if (parent in csMap) {
@@ -444,7 +447,7 @@ class SkillHandler {
 
         var finalList = [];
         var compare = function (a, b) {
-            return +(a.skill > b.skill) || +(a.skill === b.skill) - 1;
+            return +(a.skill__name > b.skill__name) || +(a.skill__name === b.skill__name) - 1;
         };
         var depthFirst = function (cs, indent) {
             cs.indent = indent;

@@ -2,8 +2,25 @@ import React from 'react';
 import WeaponRow from 'WeaponRow'
 import { screen, render } from '@testing-library/react'
 import * as factories from './factories'
+import {testSetup} from "./testutils";
 
 describe('WeaponRow', function() {
+    beforeAll(() => {
+        testSetup()
+    })
+    beforeEach(() => {
+        factories.skillFactory({
+                        name: "Weapon combat",
+                        stat: "MOV"
+                    })
+        factories.skillFactory({
+                        name: "Greatsword",
+                        stat: "MOV"
+                    })
+    })
+    afterEach(() => {
+        factories.clearAll()
+    })
 
     const renderWeaponRow = (givenProps) => {
         let handlerProps = {
@@ -19,9 +36,9 @@ describe('WeaponRow', function() {
 
         let allSkills = [];
         for (let skill of handlerProps.skills) {
-            allSkills.push({
-                name: skill.skill,
-                stat: "mov"});
+            const filled = factories.skillFactory({name: skill.skill, stat: "MOV"});
+            expect(filled.stat).toEqual("MOV")
+            allSkills.push(filled)
         }
         handlerProps.allSkills = allSkills;
 
@@ -41,15 +58,15 @@ describe('WeaponRow', function() {
         () => {
             renderWeaponRow({
                 handlerProps: {
-                    skills: [{
-                        skill: "Weapon combat",
+                    skills: [factories.characterSkillFactory({
+                        skill__name: "Weapon combat",
                         level: 0
-                    }]
+                    })]
                 },
                 weapon: factories.weaponFactory({
                     base: {
                         base_skill: "Weapon combat",
-                        skill: "Greatsword",
+                        required_skills: ["Greatsword", ],
                         ccv: 15,
                         ccv_unskilled_modifier: -10
                     }
@@ -356,7 +373,8 @@ describe('WeaponRow', function() {
     });
 
     it("observes weapon One-handed use requirement", function () {
-        renderWeapon({size: 2, base: {skill2: "One-handed use"}});
+        // TODO: should be fixed to not give double penalty etc
+        renderWeapon({size: 2, base: {required_skills: ["One-handed use",]}});
 
         expect(screen.getByRole("row", {name: "Action row for FULL"}).textContent).not.toMatch(/Unskilled/)
         expect(screen.getByRole("row", {name: "Action row for PRI"}).textContent).toMatch(/Unskilled/)

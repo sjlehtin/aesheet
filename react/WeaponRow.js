@@ -17,7 +17,7 @@ class WeaponRow extends React.Component {
 
     skillLevel() {
         return this.props.skillHandler.skillLevel(
-            this.props.weapon.base.base_skill);
+            this.props.weapon.base.base_skill.name);
     }
 
     missingSkills() {
@@ -29,9 +29,10 @@ class WeaponRow extends React.Component {
                 }
             }
         };
-        checkSkill(this.props.weapon.base.base_skill);
-        checkSkill(this.props.weapon.base.skill);
-        checkSkill(this.props.weapon.base.skill2);
+        checkSkill(this.props.weapon.base.base_skill.name);
+        for (let req of this.props.weapon.base.required_skills) {
+            checkSkill(req.name)
+        }
         return missing;
     }
 
@@ -47,7 +48,7 @@ class WeaponRow extends React.Component {
 
     skillROAMultiplier() {
         const level = this.props.skillHandler.skillLevel(
-            this.props.weapon.base.base_skill);
+            this.props.weapon.base.base_skill.name);
         if (level > 0) {
             return (1 + 0.1 * level);
         }
@@ -112,7 +113,7 @@ class WeaponRow extends React.Component {
 
     skillCheck() {
         const gottenCheck = this.props.skillHandler.skillCheck(
-            this.props.weapon.base.base_skill);
+            this.props.weapon.base.base_skill.name);
 
         if (!gottenCheck) {
             return null;
@@ -366,9 +367,16 @@ class WeaponRow extends React.Component {
         }
     }
 
+    oneHandedUseRequiresSkill(wpn) {
+        for (let req of wpn.required_skills) {
+            if (req.name === "One-handed use")
+                return true
+        }
+        return false
+    }
+
     oneHandedUseAvailable() {
-        if ([this.props.weapon.base.skill, this.props.weapon.base.skill2]
-                .indexOf("One-handed use") >= 0) {
+        if (this.oneHandedUseRequiresSkill(this.props.weapon.base)) {
             return this.props.skillHandler.hasSkill("One-handed use");
         } else {
             return true;

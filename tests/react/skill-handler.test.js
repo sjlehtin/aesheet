@@ -1,6 +1,13 @@
 import * as factories from './factories'
+import {testSetup} from "./testutils";
 
 describe('SkillHandler', function() {
+    beforeAll(() => {
+        testSetup()
+    })
+    afterEach(() => {
+        factories.clearAll()
+    })
 
     it('calculates skill level', function () {
         const handler = factories.skillHandlerFactory({skills: [
@@ -51,7 +58,7 @@ describe('SkillHandler', function() {
         ]});
 
         const newList = handler.getSkillList();
-        expect(newList[0].skill).toEqual("Agriculture");
+        expect(newList[0].skill__name).toEqual("Agriculture");
     });
 
     it("finds missing skills while mangling from all requires", function () {
@@ -68,7 +75,7 @@ describe('SkillHandler', function() {
         ]});
 
         const newList = handler.getSkillList();
-        expect(newList[2].skill).toEqual("Naval Gunnery");
+        expect(newList[2].skill__name).toEqual("Naval Gunnery");
         expect(newList[2]._missingRequired).toEqual(["Gardening"]);
     });
 
@@ -90,12 +97,12 @@ describe('SkillHandler', function() {
 
         const newList = handler.getSkillList();
 
-        expect(newList[0].skill).toEqual("Aesthetism");
+        expect(newList[0].skill__name).toEqual("Aesthetism");
         expect(newList[0].indent).toEqual(0);
-        expect(newList[1].skill).toEqual("Agriculture");
+        expect(newList[1].skill__name).toEqual("Agriculture");
         expect(newList[1].indent).toEqual(0);
         expect(newList[2].indent).toEqual(1);
-        expect(newList[3].skill).toEqual("Florism");
+        expect(newList[3].skill__name).toEqual("Florism");
         expect(newList[3].indent).toEqual(2);
     });
 
@@ -115,10 +122,10 @@ describe('SkillHandler', function() {
         ]});
 
         const newList = handler.getSkillList();
-        expect(newList[0].skill).toEqual("Agriculture");
+        expect(newList[0].skill__name).toEqual("Agriculture");
         expect(newList[0].indent).toEqual(0);
         expect(newList[1].indent).toEqual(1);
-        expect(newList[2].skill).toEqual("Florism");
+        expect(newList[2].skill__name).toEqual("Florism");
         expect(newList[2].indent).toEqual(2);
     });
 

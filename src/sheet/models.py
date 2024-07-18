@@ -340,13 +340,12 @@ STAT_TYPES = zip(STAT_TYPES, STAT_TYPES)
 class Skill(ExportedModel):
     """ """
 
+    objects = NameManager()
+
     class Meta:
         ordering = ["name"]
 
-    #id = models.BigIntegerField(unique=True, null=True, blank=True, default=None)
-    name = models.CharField(max_length=256
-                             , primary_key=True
-                            )
+    name = models.CharField(max_length=256, unique=True)
     description = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     can_be_defaulted = models.BooleanField(default=True)
@@ -405,15 +404,12 @@ class Skill(ExportedModel):
     def dont_export(cls):
         return [
             "characterskill",
-            "primary_for_rangedweapontemplate",
-            "secondary_for_rangedweapontemplate",
             "base_skill_for_rangedweapontemplate",
-            "primary_for_weapontemplate",
-            "secondary_for_weapontemplate",
             "base_skill_for_weapontemplate",
-            "primary_for_basefirearm",
-            "secondary_for_basefirearm",
             "base_skill_for_basefirearm",
+            "rangedweapontemplate",
+            "weapontemplate",
+            "basefirearm",
             "skill",
             "edgeskillbonus",
             "characterlogentry",
@@ -704,7 +700,7 @@ class BaseArmament(ExportedModel):
         abstract = True
         ordering = ["name"]
 
-    name = models.CharField(max_length=256, primary_key=True)
+    name = models.CharField(max_length=256, unique=True)
     short_name = models.CharField(
         max_length=64,
         help_text="This is used when the name must fit to a small space",
@@ -727,20 +723,7 @@ class BaseArmament(ExportedModel):
         related_name="base_skill_for_%(class)s",
         on_delete=models.CASCADE,
     )
-    skill = models.ForeignKey(
-        Skill,
-        blank=True,
-        null=True,
-        related_name="primary_for_%(class)s",
-        on_delete=models.SET_NULL,
-    )
-    skill2 = models.ForeignKey(
-        Skill,
-        blank=True,
-        null=True,
-        related_name="secondary_for_%(class)s",
-        on_delete=models.SET_NULL,
-    )
+    required_skills = models.ManyToManyField(Skill, blank=True)
 
     def __str__(self):
         return "%s" % self.name
@@ -882,7 +865,7 @@ class Ammunition(ExportedModel, BaseDamager):
         ordering = ['calibre__name', 'bullet_type']
 
 
-class FirearmAmmunitionType(models.Model):
+class FirearmAmmunitionType(ExportedModel):
     firearm = models.ForeignKey(
         "BaseFirearm", on_delete=models.CASCADE
     )
@@ -1036,7 +1019,6 @@ class WeaponTemplate(BaseWeaponTemplate):
     @classmethod
     def dont_export(cls):
         return ["weapon"]
-
 
 
 class RangedWeaponTemplate(BaseWeaponTemplate):
@@ -1558,8 +1540,10 @@ class Sheet(PrivateMixin, models.Model):
     weapons = models.ManyToManyField(Weapon, blank=True)
     ranged_weapons = models.ManyToManyField(RangedWeapon, blank=True)
 
+    # firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
+    #                                   blank=True)
     firearms = models.ManyToManyField(BaseFirearm, through=SheetFirearm,
-                                      blank=True)
+                                          blank=True)
     miscellaneous_items = models.ManyToManyField(
         MiscellaneousItem, blank=True, through=SheetMiscellaneousItem
     )

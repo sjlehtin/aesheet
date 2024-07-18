@@ -2,12 +2,13 @@ import sheet.models as sm
 from django.contrib import admin
 
 
+# TODO show required skills somehow
 class WeaponTemplateAdmin(admin.ModelAdmin):
     list_display = ('name', 'tech_level', 'ccv', 'draw_initiative', 'roa',
                     'num_dice',
                     'dice', 'extra_damage', 'leth', 'plus_leth',
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
-                    'notes', 'is_lance', 'base_skill', 'skill', 'skill2')
+                    'notes', 'is_lance', 'base_skill')
     list_filter = ('tech_level',)
     search_fields = ('name', )
     save_as = True
@@ -19,7 +20,7 @@ class RangedWeaponTemplateAdmin(admin.ModelAdmin):
                     'dice', 'extra_damage', 'leth', 'plus_leth',
                     'target_initiative',
                     'type', 'durability', 'dp', 'short_name',
-                    'notes',  'base_skill', 'skill', 'skill2')
+                    'notes',  'base_skill')
     list_filter = ('tech_level',)
     search_fields = ('name', )
     list_editable = list_display[2:]
@@ -72,7 +73,7 @@ class BaseFirearmAdmin(admin.ModelAdmin):
                     'stock', 'duration',
                     'weapon_class_modifier', 'accuracy', 'sight',
                     'barrel_length',
-                    'base_skill', 'skill', 'skill2',
+                    'base_skill',
                     'durability', 'dp']
     list_editable = ['draw_initiative', 'weight',
                      'magazine_size', 'magazine_weight',

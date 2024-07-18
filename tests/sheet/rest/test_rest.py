@@ -234,6 +234,7 @@ class EdgeSkillBonusTestCase(TestCase):
     def setUp(self):
         self.request_factory = APIRequestFactory()
         self.owner = factories.UserFactory(username="luke")
+        self.surgery_skill = factories.SkillFactory(name="Surgery")
         self.edge_level = factories.EdgeLevelFactory(
             edge__name="Acute Touch",
             level=1, edge_skill_bonuses=(("Surgery", 13),))
@@ -249,7 +250,8 @@ class EdgeSkillBonusTestCase(TestCase):
         self.assertIn("edge_skill_bonuses", response.data)
         self.assertEqual(response.data['edge_skill_bonuses'],
                          [{'id': 1,
-                           'skill': "Surgery",
+                           'skill': self.surgery_skill.id,
+                           'skill__name': "Surgery",
                            'bonus': 13}])
 
 
@@ -411,9 +413,10 @@ class CharacterSkillTestCase(TestCase):
         self.char = factories.CharacterFactory(owner=self.owner, private=True)
         self.assertTrue(
             self.client.login(username="luke", password="foobar"))
-        factories.CharacterSkillFactory(character=self.char,
-                                        skill__name="Ice Dancing",
-                                        level=3)
+        self.character_skill = factories.CharacterSkillFactory(
+            character=self.char,
+            skill__name="Ice Dancing",
+            level=3)
         self.url = '/rest/characters/{}/characterskills/'.format(
                 self.char.pk)
 
@@ -421,8 +424,9 @@ class CharacterSkillTestCase(TestCase):
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['skill'], 'Ice Dancing')
+        self.assertEqual(response.data[0]['skill'], self.character_skill.skill.id)
         self.assertEqual(response.data[0]['level'], 3)
+        self.assertEqual(response.data[0]['skill__name'], 'Ice Dancing')
 
     def test_url_invalid_user(self):
         self.assertTrue(
@@ -431,33 +435,33 @@ class CharacterSkillTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_verify_skill_level(self):
-        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
-                               skill_cost_1=2, skill_cost_2=3,
-                               skill_cost_3=None)
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=None)
 
-        response = self.client.post(self.url, {"skill": "Lightsaber",
+        response = self.client.post(self.url, {"skill": skill.pk,
                                                "level": 0}, format="json")
         self.assertEqual(response.status_code, 400)
-        response = self.client.post(self.url, {"skill": "Lightsaber",
+        response = self.client.post(self.url, {"skill": skill.pk,
                                                "level": 3}, format="json")
         self.assertEqual(response.status_code, 400)
-        response = self.client.post(self.url, {"skill": "Lightsaber",
+        response = self.client.post(self.url, {"skill": skill.pk,
                                                "level": 2}, format="json")
         self.assertEqual(response.status_code, 201)
         cs = models.CharacterSkill.objects.get(character=self.char,
-                                               skill="Lightsaber")
+                                               skill__name="Lightsaber")
         self.assertEqual(cs.level, 2)
 
     def test_verify_skill_level_5(self):
-        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
-                               skill_cost_1=2, skill_cost_2=3,
-                               skill_cost_3=4)
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
 
-        response = self.client.post(self.url, {"skill": "Lightsaber",
+        response = self.client.post(self.url, {"skill": skill.pk,
                                                "level": 5}, format="json")
         self.assertEqual(response.status_code, 201)
         cs = models.CharacterSkill.objects.get(character=self.char,
-                                               skill="Lightsaber")
+                                               skill__name="Lightsaber")
         self.assertEqual(cs.level, 5)
 
     def test_verify_skill_level_modification_logged(self):
@@ -469,13 +473,17 @@ class CharacterSkillTestCase(TestCase):
 
         url = "{}{}/".format(self.url, cs.pk)
 
-        response = self.client.patch(url, {"skill": "Lightsaber",
+        response = self.client.patch(url, {"skill": skill.pk,
                                            "level": 5}, format="json")
         self.assertEqual(response.status_code, 200)
 
         cs = models.CharacterSkill.objects.get(character=self.char,
-                                               skill="Lightsaber")
+                                               skill__name="Lightsaber")
         self.assertEqual(cs.level, 5)
+
+        log = models.CharacterLogEntry.objects.latest()
+        self.assertIn("Skill Lightsaber increased to level 5",
+                      str(log))
 
     def test_skill_remove_logged(self):
         skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
@@ -504,11 +512,11 @@ class CharacterSkillTestCase(TestCase):
                       str(log))
 
     def test_skill_add_logged(self):
-        factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
-                               skill_cost_1=2, skill_cost_2=3,
-                               skill_cost_3=4)
+        skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
+                                       skill_cost_1=2, skill_cost_2=3,
+                                       skill_cost_3=4)
 
-        response = self.client.post(self.url, {"skill": "Lightsaber",
+        response = self.client.post(self.url, {"skill": skill.id,
                                                "level": 5}, format="json")
         self.assertEqual(response.status_code, 201)
         log = models.CharacterLogEntry.objects.latest()
@@ -516,10 +524,10 @@ class CharacterSkillTestCase(TestCase):
                       str(log))
 
     def test_skill_invariant(self):
-        factories.SkillFactory(name="Unarmed Combat",
-                               skill_cost_0=None,
-                               skill_cost_1=2, skill_cost_2=3,
-                               skill_cost_3=4)
+        unarmed = factories.SkillFactory(name="Unarmed Combat",
+                                         skill_cost_0=None,
+                                         skill_cost_1=2, skill_cost_2=3,
+                                         skill_cost_3=4)
 
         skill = factories.SkillFactory(name="Lightsaber", skill_cost_0=None,
                                        skill_cost_1=2, skill_cost_2=3,
@@ -528,12 +536,13 @@ class CharacterSkillTestCase(TestCase):
         cs = factories.CharacterSkillFactory(character=self.char, skill=skill,
                                              level=2)
         url = "{}{}/".format(self.url, cs.pk)
-        response = self.client.patch(url, {'skill': "Unarmed Combat"})
+        response = self.client.patch(url, {'skill': unarmed.pk})
         self.assertEqual(response.status_code, 400)
-        response = self.client.patch(url, {'skill': "Unarmed Combat",
+        response = self.client.patch(url, {'skill': unarmed.pk,
                                            'level': 2})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['skill'], "Lightsaber")
+        self.assertEqual(response.data['skill'], skill.pk)
+        self.assertEqual(response.data['skill__name'], "Lightsaber")
 
 
 class SkillTestCase(TestCase):
@@ -614,7 +623,7 @@ class FirearmAmmunitionTypeTestCase(TestCase):
 
     def test_correct_types_for_pistol(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
-            quote(self.pistol.pk)), format='json')
+            quote(self.pistol.name)), format='json')
         assert response.status_code == 200
         assert len(response.data) == 2
         ammo = response.data[0]
@@ -624,9 +633,11 @@ class FirearmAmmunitionTypeTestCase(TestCase):
 
     def test_correct_types_for_complex_url(self):
         response = self.client.get('/rest/ammunition/firearm/{}/'.format(
-            quote(self.rifle.pk)), format='json')
+            quote(self.rifle.name)), format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+    # TODO: should work also with integer primary key
 
 
 class FirearmTestCase(TestCase):
@@ -688,7 +699,14 @@ class SheetFirearmTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_firearms(self):
-        self.sheet.firearms.add(factories.BaseFirearmFactory(name="Glock 19"),
+        skill1 = factories.SkillFactory(name="Argumentation")
+        skill2 = factories.SkillFactory(name="Punching")
+
+        firearm = factories.BaseFirearmFactory(name="Glock 19")
+        firearm.required_skills.add(skill1)
+        firearm.required_skills.add(skill2)
+
+        self.sheet.firearms.add(firearm,
                                 through_defaults={"ammo": factories.AmmunitionFactory(calibre__name="45FCK")})
 
         response = self.client.get(self.url, format='json')
@@ -702,6 +720,11 @@ class SheetFirearmTestCase(TestCase):
         assert 'calibre' in weapon_data['ammo']
         assert 'name' in weapon_data['ammo']['calibre']
         assert weapon_data['ammo']['calibre']['name'] == "45FCK"
+
+        required = weapon_data['base']['required_skills']
+        assert isinstance(required, list)
+        assert len(required) == 2
+        assert isinstance(required[0], dict)
 
     def test_adding_items(self):
         firearm = factories.BaseFirearmFactory(name="AK-47")
@@ -820,7 +843,14 @@ class SheetWeaponTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_weapons(self):
-        self.sheet.weapons.add(factories.WeaponFactory())
+        skill1 = factories.SkillFactory(name="Argumentation")
+        skill2 = factories.SkillFactory(name="Punching")
+
+        weapon = factories.WeaponFactory()
+        weapon.base.required_skills.add(skill1)
+        weapon.base.required_skills.add(skill2)
+
+        self.sheet.weapons.add(weapon)
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
@@ -829,9 +859,16 @@ class SheetWeaponTestCase(TestCase):
         self.assertIsInstance(response.data[0]['base'], dict)
         self.assertIsInstance(response.data[0]['quality'], dict)
 
+        required = response.data[0]['base']['required_skills']
+        assert isinstance(required, list)
+        assert len(required) == 2
+        assert isinstance(required[0], dict)
+
     def test_adding_items(self):
         template = factories.WeaponTemplateFactory(name="Long sword")
         quality = factories.WeaponQualityFactory(name="L1")
+
+        assert isinstance(template.pk, int)
 
         response = self.client.post(
                 self.url,
@@ -919,14 +956,29 @@ class SheetRangedWeaponTestCase(TestCase):
         self.assertEqual(response.data, [])
 
     def test_shows_weapons(self):
-        self.sheet.ranged_weapons.add(factories.RangedWeaponFactory())
+        skill = factories.SkillFactory(name="Bow")
+        skill1 = factories.SkillFactory(name="Argumentation")
+        skill2 = factories.SkillFactory(name="Punching")
+        weapon = factories.RangedWeaponFactory(base__base_skill__name="Bow")
+
+        weapon.base.required_skills.add(skill1)
+        weapon.base.required_skills.add(skill2)
+        self.sheet.ranged_weapons.add(weapon)
 
         response = self.client.get(self.url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
         self.assertIsInstance(response.data[0]['base'], dict)
+        self.assertIsInstance(response.data[0]['base']['base_skill'], dict)
+        assert response.data[0]['base']['base_skill']['id'] == skill.id
+        assert response.data[0]['base']['base_skill']['name'] == "Bow"
         self.assertIsInstance(response.data[0]['quality'], dict)
+
+        required = response.data[0]['base']['required_skills']
+        assert isinstance(required, list)
+        assert len(required) == 2
+        assert isinstance(required[0], dict)
 
     def test_adding_items(self):
         template = factories.RangedWeaponTemplateFactory(name="Bow")
@@ -1065,7 +1117,7 @@ class WeaponTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
 
-    def test_gz_campaign_url_for_rangedweapon__templates(self):
+    def test_gz_campaign_url_for_rangedweapon_templates(self):
         url = '/rest/rangedweapontemplates/campaign/{}/'.format(
             self.campaign_gz.pk)
         response = self.client.get(url, format='json')

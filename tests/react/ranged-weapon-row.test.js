@@ -5,19 +5,22 @@ import RangedWeaponRow from "RangedWeaponRow";
 import {render, screen} from '@testing-library/react'
 
 import * as factories from './factories'
+import {testSetup} from "./testutils";
 
 describe('RangedWeaponRow', function() {
+    beforeAll(() => {
+        testSetup()
+    })
+    afterEach(() => {
+        factories.clearAll()
+    })
 
-    const renderWeaponRow = function (givenProps) {
+    const renderWeaponRow = function (givenProps = {}) {
         let handlerProps = {
             characterSkills: [],
             edges: [],
             stats: {mov: 45}
         };
-
-        if (!givenProps) {
-            givenProps = {};
-        }
 
         if ('handlerProps' in givenProps) {
             handlerProps = Object.assign(handlerProps,
@@ -25,36 +28,32 @@ describe('RangedWeaponRow', function() {
             delete givenProps.handlerProps;
         }
 
-        const weaponProps = givenProps.weaponProps;
+        const weaponProps = Object.assign({base: {base_skill: "Bow"}}, givenProps?.weaponProps ?? {})
         delete givenProps.weaponProps;
 
-        const weapon = factories.rangedWeaponFactory(
-                Object.assign({base: {base_skill: "Bow"}},
-                    weaponProps ? weaponProps : {}));
+        const addExtraSkill = function (skill) {
+            if (skill) {
+                allSkills.push(factories.skillFactory({
+                    name: skill,
+                    stat: "dex"}))
+            }
+        }
 
         let allSkills = [];
         for (let skill of handlerProps.skills) {
-            allSkills.push({
-                name: skill.skill,
-                stat: "dex"});
+            addExtraSkill(skill.skill)
         }
-        const addExtraSkill = function (skill) {
-            if (skill) {
-                allSkills.push({
-                    name: skill,
-                    stat: "dex"});
-            }
-        };
-
-        addExtraSkill(weapon.base.base_skill);
-        addExtraSkill(weapon.base.skill);
-        addExtraSkill(weapon.base.skill2);
+        addExtraSkill(weaponProps.base?.base_skill);
+        addExtraSkill(weaponProps.base?.skill);
+        addExtraSkill(weaponProps.base?.skill2);
 
         handlerProps.allSkills = allSkills;
 
+        const skillHandler = factories.skillHandlerFactory(handlerProps);
+        const weapon = factories.rangedWeaponFactory(weaponProps)
         let props = {
             weapon: weapon,
-            skillHandler: factories.skillHandlerFactory(handlerProps)
+            skillHandler: skillHandler
         };
 
         props = Object.assign(props, givenProps);

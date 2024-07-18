@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+* Skills and weapons to have standard integer primary keys instead of their names in the backend. This was a huge effort that will pay dividends in the future in easy of renaming skills and items. In general, the sentiment is to use built-in characteristics of skills and edges instead of their of their names when calculating effects.
+
 ### Added
 
 * Added damage point calculation from armor quality.

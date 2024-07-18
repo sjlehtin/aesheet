@@ -3,11 +3,9 @@ import PropTypes from 'prop-types';
 
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
-import Combobox from 'react-widgets/Combobox';
+import DropdownList from "react-widgets/DropdownList";
 
 const rest = require('./sheet-rest');
-
-// TODO: Add tests
 
 class AddRangedWeaponControl extends React.Component {
     constructor(props) {
@@ -48,7 +46,7 @@ class AddRangedWeaponControl extends React.Component {
     handleAdd() {
         if (this.props.onAdd) {
             let weapon;
-            if ('id' in this.state.selectedWeapon) {
+            if (this.state.selectedWeapon.base !== undefined) {
                 weapon = this.state.selectedWeapon;
             } else {
                 weapon = {
@@ -83,9 +81,10 @@ class AddRangedWeaponControl extends React.Component {
         if (this.state.selectedWeapon && this.state.selectedWeapon.quality) {
             quality = <span>{this.state.selectedWeapon.quality.name}</span>
         } else {
-            quality = <Combobox
+            quality = <DropdownList
                 data={this.state.qualityChoices}
                 value={this.state.selectedQuality}
+                aria-labelledby="ranged-weapon-quality-choice"
                 textField={'name'}
                 onChange={(value) => this.handleQualityChange(value)}/>;
         }
@@ -96,10 +95,11 @@ class AddRangedWeaponControl extends React.Component {
         }
         return <div>
             <Row>
-                <Col sm={2}><label>Weapon</label></Col>
-                <Col sm={4}><Combobox data={choices}
+                <Col sm={2}><label id="ranged-weapon-choice">Ranged Weapon</label></Col>
+                <Col sm={4}><DropdownList data={choices}
                                       textField='name'
                                       busy={this.state.isBusy}
+                                          aria-labelledby="ranged-weapon-choice"
                                       filter="contains"
                                       value={this.state.selectedWeapon}
                                       groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
@@ -108,7 +108,7 @@ class AddRangedWeaponControl extends React.Component {
                 </Col>
             </Row>
             <Row>
-                <Col sm={2}><label>Quality</label></Col>
+                <Col sm={2}><label id="ranged-weapon-quality-choice">Ranged Weapon Quality</label></Col>
                 <Col sm={4}>
                     {quality}
                 </Col>
@@ -118,7 +118,7 @@ class AddRangedWeaponControl extends React.Component {
                     <Button size="sm" disabled={!this.fieldsValid()}
                             ref={(c) => this._addButton = c}
                             onClick={() => this.handleAdd()}>
-                        Add Weapon</Button>
+                        Add Ranged Weapon</Button>
                 </Col>
             </Row>
             <Row>

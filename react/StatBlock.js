@@ -444,7 +444,7 @@ class StatBlock extends React.Component {
     }
 
     handleCharacterSkillAdd(skill) {
-        rest.post(this.getCharacterSkillURL(), skill).then((json) => {
+        return rest.post(this.getCharacterSkillURL(), skill).then((json) => {
             if (!("skill" in json) || !("id" in json)) {
                 throw Error("Got invalid reply", json);
             }
@@ -458,7 +458,7 @@ class StatBlock extends React.Component {
         let data = this.state.char,
             newGained = data.gained_sp + addedSP;
 
-        rest.patch(this.state.url, {gained_sp: newGained}).then((json) => {
+        return rest.patch(this.state.url, {gained_sp: newGained}).then((json) => {
             data.gained_sp = newGained;
             this.setState({char: data});
         }).catch((err) => console.log("Failed adding gained sp:", err));
@@ -535,7 +535,7 @@ class StatBlock extends React.Component {
     }
 
     handleFirearmAdded(firearm) {
-        rest.post(this.getFirearmURL(), {base: firearm.base.name,
+        rest.post(this.getFirearmURL(), {base: firearm.base.id,
         ammo: firearm.ammo.id}).then((json) => {
             console.log("POST success", json);
             firearm.id = json.id;
@@ -623,17 +623,17 @@ class StatBlock extends React.Component {
     }
 
     handleWeaponAdded(weapon) {
-        var data;
-        if ('id' in weapon) {
+        let data;
+        if (weapon.id !== undefined) {
             data = {item: weapon.id};
         } else {
             data = {
-                base: weapon.base.name,
+                base: weapon.base.id,
                 quality: weapon.quality.name
             };
         }
         console.log("Adding: ", data, weapon);
-        rest.post(this.getWeaponURL(), data).then((json) => {
+        return rest.post(this.getWeaponURL(), data).then((json) => {
             console.log("POST success", json);
             weapon.id = json.id;
             weapon.name = json.name;
@@ -663,17 +663,18 @@ class StatBlock extends React.Component {
     }
 
     handleRangedWeaponAdded(weapon) {
-        var data;
-        if ('id' in weapon) {
+        let data;
+        if (weapon.id !== undefined) {
             data = {item: weapon.id};
         } else {
             data = {
-                base: weapon.base.name,
+                base: weapon.base.id,
                 quality: weapon.quality.name
             };
         }
+
         console.log("Adding: ", data, weapon);
-        rest.post(this.getRangedWeaponURL(), data).then((json) => {
+        return rest.post(this.getRangedWeaponURL(), data).then((json) => {
             console.log("POST success", json);
             weapon.id = json.id;
             weapon.name = json.name;

@@ -10,6 +10,7 @@ import SkillRow from 'SkillRow'
 import { render } from '@testing-library/react'
 import { within } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
+import {testSetup} from "./testutils";
 
 const renderSkillRow = (givenProps) => {
     let props = {skill: "Unarmed Combat"};
@@ -23,6 +24,12 @@ const renderSkillRow = (givenProps) => {
 }
 
 describe('SkillRow', function() {
+    beforeAll(() => {
+        testSetup()
+    })
+    afterEach(() => {
+        factories.clearAll()
+    })
 
     it('calculates skill check', async () => {
         const user = userEvent.setup()
@@ -69,7 +76,7 @@ describe('SkillRow', function() {
             skillName: "Acting / Bluff",
             skillHandler: factories.skillHandlerFactory({
                 character: {cur_cha: 55},
-                allSkills: [{skill: "Acting / Bluff", stat: "CHA"}]
+                allSkills: [{name: "Acting / Bluff", stat: "CHA"}]
             }),
 
             skill: skillFactory({stat: "CHA"})});
@@ -86,7 +93,7 @@ describe('SkillRow', function() {
                     skill_cost_0: 0,
                     stat: "CHA"}]
             }),
-            skill: skillFactory({stat: "CHA", skill_cost_0: 0})});
+            skill: skillFactory({name: "Acting / Bluff", stat: "CHA", skill_cost_0: 0})});
         expect(row.getByLabelText("Skill check").textContent).toEqual("55")
     });
 

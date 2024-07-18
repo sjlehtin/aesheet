@@ -70,9 +70,11 @@ class EdgeSerializer(serializers.ModelSerializer):
 
 
 class EdgeSkillBonusSerializer(serializers.ModelSerializer):
+    skill__name = serializers.CharField(source='skill.name', read_only=True)
+
     class Meta:
         model = sheet.models.EdgeSkillBonus
-        fields = ("id", "skill", "bonus")
+        fields = ("id", "skill", "skill__name", "bonus")
 
 
 class EdgeLevelSerializer(serializers.ModelSerializer):
@@ -83,11 +85,21 @@ class EdgeLevelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SkillMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = sheet.models.Skill
+        fields = ("id", "name")
+        read_only_fields = ("id", "name")
+
+
 class SkillSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(read_only=True)
     min_level = serializers.IntegerField(read_only=True,
                                          source='get_minimum_level')
     max_level = serializers.IntegerField(read_only=True,
                                          source='get_maximum_level')
+
+    required_skills = SkillMinimalSerializer(many=True)
 
     class Meta:
         model = sheet.models.Skill
@@ -111,12 +123,18 @@ class CharacterEdgeListSerializer(serializers.ModelSerializer):
 
 
 class BaseFirearmSerializer(serializers.ModelSerializer):
+    base_skill = SkillMinimalSerializer(read_only=True)
+    required_skills = SkillMinimalSerializer(many=True)
+
     class Meta:
         model = sheet.models.BaseFirearm
         fields = "__all__"
 
 
 class WeaponTemplateSerializer(serializers.ModelSerializer):
+    base_skill = SkillMinimalSerializer(read_only=True)
+    required_skills = SkillMinimalSerializer(many=True)
+
     class Meta:
         model = sheet.models.WeaponTemplate
         fields = "__all__"
@@ -135,6 +153,7 @@ class WeaponCreateSerializer(serializers.ModelSerializer):
 
 
 class WeaponListSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = sheet.models.Weapon
         fields = "__all__"
@@ -142,6 +161,9 @@ class WeaponListSerializer(serializers.ModelSerializer):
 
 
 class RangedWeaponTemplateSerializer(serializers.ModelSerializer):
+    base_skill = SkillMinimalSerializer(read_only=True)
+    required_skills = SkillMinimalSerializer(many=True)
+
     class Meta:
         model = sheet.models.RangedWeaponTemplate
         fields = "__all__"
@@ -296,6 +318,8 @@ class SheetMiscellaneousItemListSerializer(serializers.ModelSerializer):
 
 class CharacterSkillSerializer(serializers.ModelSerializer):
 
+    skill__name = serializers.CharField(read_only=True, source="skill.name")
+
     def validate(self, data):
         if 'skill' in data:
             skill = data['skill']
@@ -349,10 +373,11 @@ class SheetFirearmListSerializer(serializers.ModelSerializer):
     scope = ScopeListSerializer()
     ammo = AmmunitionListSerializer()
     magazines = SheetFirearmMagazineListSerializer(many=True)
+    base = BaseFirearmSerializer()
 
     class Meta:
         model = sheet.models.SheetFirearm
-        fields = "__all__"
+        exclude = ("sheet", )
         depth = 1
 
 
@@ -363,6 +388,8 @@ class SheetFirearmCreateSerializer(serializers.ModelSerializer):
 
 
 class SheetWeaponListSerializer(serializers.ModelSerializer):
+
+    base = WeaponTemplateSerializer()
 
     class Meta:
         model = sheet.models.Weapon
@@ -426,6 +453,7 @@ class SheetWeaponCreateSerializer(serializers.ModelSerializer):
 
 
 class SheetRangedWeaponListSerializer(serializers.ModelSerializer):
+    base = RangedWeaponTemplateSerializer()
 
     class Meta:
         model = sheet.models.RangedWeapon

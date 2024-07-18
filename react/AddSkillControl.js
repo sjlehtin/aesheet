@@ -71,7 +71,7 @@ class AddSkillControl extends React.Component {
     handleAdd() {
         if (typeof(this.props.onCharacterSkillAdd) !== "undefined") {
             this.props.onCharacterSkillAdd(
-                {skill: this.state.selectedSkill.name,
+                {skill: this.state.selectedSkill.id,
                  level: parseInt(this.state.selectedLevel)});
             this.setState({skillValue: '',
                 selectedSkill: undefined,

@@ -5,8 +5,16 @@ import { screen, render, waitForElementToBeRemoved, within, fireEvent, prettyDOM
 import userEvent from '@testing-library/user-event'
 
 import * as factories from './factories'
+import {testSetup} from "./testutils";
 
 describe('SkillTable', function() {
+    beforeAll(() => {
+        testSetup()
+    })
+    afterEach(() => {
+        factories.clearAll()
+    })
+
     const _basicPhysical = [
         factories.skillFactory({name: "Endurance / run",
             stat: "WIL", skill_cost_0: 0}),
@@ -65,9 +73,8 @@ describe('SkillTable', function() {
     it("does render all skills", function () {
         const table = render(getSkillTable({
             skills: [
-                factories.characterSkillFactory({skill: "Search", level: 1}),
-                factories.characterSkillFactory(
-                    {skill: "Agriculture", level: 3})
+                {skill: "Search", level: 1},
+                {skill: "Agriculture", level: 3}
             ]
         }));
         const elems = screen.queryAllByText(/Search/)
@@ -90,23 +97,27 @@ describe('SkillTable', function() {
     it("calls the passed onCharacterSkillModify handler", async function () {
         const user = userEvent.setup()
 
-        const gardeningSkill = factories.characterSkillFactory({skill: "Gardening", id: 42, level: 3});
+        const gardening = factories.skillFactory("Gardening");
 
-        const data = Object.assign(
-            // TODO: figure out where this is added, the passed object should not be mutated.
-            {indent: 0},
-            gardeningSkill,
-            {level: 4});
-        let spy = jasmine.createSpy("callback");
-        const table = render(getSkillTable({
+        let spy = jest.fn();
+        render(getSkillTable({
             onCharacterSkillModify: spy,
-            skills: [gardeningSkill]
+            skills: [{skill: "Gardening", level: 3}]
         }));
 
         const row = screen.getByText("Gardening").closest('tr')
         const increaseButton = within(row).getByRole("button", {name: "Increase skill level"})
         await user.click(increaseButton)
-        expect(spy).toHaveBeenCalledWith(data);
+        const received = spy.mock.calls[0][0]
+        expect(received).toEqual({skill: gardening.id,
+            level: 4,
+            // TODO: should not be part of the post
+            indent: 0,
+            // not needed, but should not matter
+            id: 11,
+            skill__name: "Gardening",
+            character: 1,
+        });
     });
 
     it("calls the passed onCharacterSkillRemove handler", async function () {
@@ -133,11 +144,11 @@ describe('SkillTable', function() {
     it("calls the passed onCharacterSkillAdd handler", async function () {
         const user = userEvent.setup()
 
-        const data = {level: 3, skill: "Gardening"};
         let spy = jasmine.createSpy("callback");
+        const gardening = factories.skillFactory({name: "Gardening"});
         const table = render(getSkillTable({
             onCharacterSkillAdd: spy,
-            allSkills: [factories.skillFactory({name: "Gardening"}),]
+            allSkills: [gardening,]
         }));
         const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
         await user.clear(skillInput)
@@ -151,7 +162,7 @@ describe('SkillTable', function() {
         const addButton = screen.getByRole("button", {name: "Add skill"})
         expect(addButton).not.toBeDisabled()
         await user.click(addButton)
-        expect(spy).toHaveBeenCalledWith(data);
+        expect(spy).toHaveBeenCalledWith({skill: gardening.id, level: 3});
     });
 
     it("can calculate sp costs", function () {

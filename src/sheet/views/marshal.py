@@ -100,7 +100,7 @@ def sort_by_dependencies(header, rows):
     Sort the list of rows, so that dependencies are satisfied as well as
     possible.
     """
-    logger.debug("Sorting skill rows rows by dependencies")
+    logger.debug("Sorting skill rows by dependencies")
     name_index = header.index("name")
     if name_index < 0:
         raise ValueError("No name column")
@@ -301,7 +301,7 @@ def import_text(data):
                             continue
 
                         try:
-                            if 'name' in field.remote_field.model._meta.fields:
+                            if hasattr(field.remote_field.model, "name"):
                                 obj = field.remote_field.model.objects.get(name=name)
                             else:
                                 obj = field.remote_field.model.objects.get(pk=name)
