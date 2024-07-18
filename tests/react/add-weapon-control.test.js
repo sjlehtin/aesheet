@@ -45,31 +45,34 @@ describe('add weapon control', function() {
         const user = userEvent.setup();
 
         // Default quality should allow adding the weapon immediately.
-        await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
-        await user.click(screen.getByRole('option', {name: "Long sword"}));
-        screen.getByDisplayValue("normal");
-        const button = screen.getByRole('button', {name: /Add Weapon/});
+        // await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
+        await user.click(screen.getByRole("combobox", {name: "CC Weapon"}))
+        await user.click(screen.getByText(/Long sword/))
+        // await user.click(screen.getByRole('option', {name: "Long sword"}));
+        expect(screen.getByText("normal")).toBeInTheDocument()
+        const button = screen.getByRole('button', {name: /Add CC Weapon/});
         expect(button).not.toHaveAttribute("disabled");
         await user.click(button);
         expect(spy).toHaveBeenCalled();
         const firstWeapon = spy.calls.argsFor(0)[0];
+
         expect(firstWeapon.base.name).toEqual("Long sword");
         expect(firstWeapon.quality.name).toEqual("normal");
         spy.calls.reset();
 
         // Default quality field should still be filled.
-        screen.getByDisplayValue("normal");
+        expect(screen.getByText("normal")).toBeInTheDocument()
 
         // Existing weapon (with template and quality) should show immutable quality.
-        await user.click(screen.getAllByRole('button', {name: /open combobox/})[0]);
+        await user.click(screen.getByRole("combobox", {name: "CC Weapon"}))
         await user.click(screen.getByText("Awesome long sword"));
-        screen.getByText("awesome");
+        expect(screen.getByText("awesome")).toBeInTheDocument()
 
-        await user.click(screen.getByRole('option', {name: "Long sword"}));
-        screen.getByDisplayValue("normal");
-        await user.click(screen.getAllByRole('button', {name: /open combobox/})[1]);
-        await user.click(screen.getByRole('option', {name: "awesome"}));
-        await user.click(screen.getByRole('button', {name: /Add Weapon/}));
+        await user.click(screen.getByText(/Long sword/))
+        expect(screen.getByText("normal")).toBeInTheDocument()
+        await user.click(screen.getByRole("combobox", {name: "CC Weapon Quality"}))
+        await user.click(screen.getByText(/awesome/))
+        await user.click(screen.getByRole('button', {name: /Add CC Weapon/}));
 
         expect(spy).toHaveBeenCalled();
         const weapon = spy.calls.argsFor(0)[0];

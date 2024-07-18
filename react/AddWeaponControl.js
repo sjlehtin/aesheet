@@ -5,7 +5,7 @@ import {Button, Col, Row} from 'react-bootstrap';
 
 import Loading from './Loading';
 
-import Combobox from 'react-widgets/Combobox';
+import DropdownList from "react-widgets/DropdownList";
 
 const rest = require('./sheet-rest');
 
@@ -47,7 +47,7 @@ class AddWeaponControl extends React.Component {
     handleAdd() {
         if (this.props.onAdd) {
             let weapon;
-            if ('id' in this.state.selectedWeapon) {
+            if (this.state.selectedWeapon.base !== undefined) {
                 weapon = this.state.selectedWeapon;
             } else {
                 weapon = {
@@ -91,9 +91,10 @@ class AddWeaponControl extends React.Component {
         if (this.state.selectedWeapon && this.state.selectedWeapon.quality) {
             quality = <span>{this.state.selectedWeapon.quality.name}</span>;
         } else {
-            quality = <Combobox
+            quality = <DropdownList
                 data={this.state.qualityChoices}
                 value={this.state.selectedQuality}
+                aria-labelledby="cc-weapon-quality-choice"
                 textField='name'
                 filter="contains"
                 onChange={(value) => this.handleQualityChange(value)} />;
@@ -106,12 +107,13 @@ class AddWeaponControl extends React.Component {
         return <div>
             <Row>
                 <Col sm={2}>
-                    <label>Weapon</label>
+                    <label id="cc-weapon-choice">CC Weapon</label>
                 </Col>
                 <Col sm={4}>
-                    <Combobox data={choices}
+                    <DropdownList data={choices}
                               textField='name'
                               filter="contains"
+                              aria-labelledby="cc-weapon-choice"
                               value={this.state.selectedWeapon}
                               groupBy={(obj) => 'base' in obj ? "Existing" : "Template"}
                               onChange={(value) => this.handleWeaponChange(value)} />
@@ -119,7 +121,7 @@ class AddWeaponControl extends React.Component {
             </Row>
             <Row>
                 <Col sm={2}>
-                    <label>Quality</label>
+                    <label id="cc-weapon-quality-choice">CC Weapon Quality</label>
                 </Col>
                 <Col sm={4}>
                     {quality}
@@ -128,9 +130,9 @@ class AddWeaponControl extends React.Component {
             <Row>
                 <Col>
                     <Button size="sm" disabled={!this.fieldsValid()}
-                            ref={(c) => this._addButton = c}
+                            // ref={(c) => this._addButton = c}
                             onClick={() => this.handleAdd()}>
-                        Add Weapon</Button>
+                        Add CC Weapon</Button>
                 </Col>
             </Row>
             <Row>

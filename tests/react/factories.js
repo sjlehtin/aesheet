@@ -285,14 +285,27 @@ const baseFirearmFactory = (props) => {
             "barrel_length": 102,
             "weapon_class_modifier": "6.00",
             "tech_level": 4,
-        // TODO: fix skill objects
             "base_skill": "Handguns",
             "skill": null,
             "skill2": null,
             "magazine_size": 8,
             "magazine_weight": 0.350
     };
-    return Object.assign(_base, props);
+
+    const newFirearm = Object.assign(_base, props);
+
+    objectId = newFirearm.id + 1
+
+    if (newFirearm.base_skill) {
+        newFirearm.base_skill = minimalSkillFactory(newFirearm.base_skill)
+    }
+    if (newFirearm.skill) {
+        newFirearm.skill = minimalSkillFactory(newFirearm.skill)
+    }
+    if (newFirearm.skill2) {
+        newFirearm.skill2 = minimalSkillFactory(newFirearm.skill2)
+    }
+    return newFirearm
 };
 
 const ammunitionFactory = (props) => {
@@ -318,7 +331,7 @@ const ammunitionFactory = (props) => {
         }
     };
     let newAmmo = Object.assign(_base, props);
-    objectId += 1;
+    objectId = newAmmo.id + 1;
     return newAmmo;
 };
 
@@ -403,12 +416,12 @@ function firearmControlPropsFactory(givenProps) {
         skills: [],
         allSkills: [
             {
-                name: "Pistol", stat: "dex",
-                required_skills: ["Basic Firearms"]
-            },
-            {
                 name: "Basic Firearms",
                 stat: "dex"
+            },
+            {
+                name: "Pistol", stat: "dex",
+                required_skills: ["Basic Firearms"]
             },
             {
                 name: "Wheeled",
@@ -435,10 +448,12 @@ function firearmControlPropsFactory(givenProps) {
     if (givenProps.weapon) {
         weaponProps = Object.assign(weaponProps, givenProps.weapon);
     }
+    // Should be initialized before firearm to prime the base skills.
+    const skillHandler = skillHandlerFactory(handlerProps);
     let props = {
         campaign: givenProps.campaign || 3,
         weapon: firearmFactory(weaponProps),
-        skillHandler: skillHandlerFactory(handlerProps)
+        skillHandler: skillHandler
     };
 
     return Object.assign(givenProps, props);
@@ -605,8 +620,10 @@ const armorFactory = function(overrideFields) {
     return Object.assign(armor, overrideFields);
 };
 
-const weaponTemplateFactory = function (overrideFields) {
+export function weaponTemplateFactory(overrideFields) {
     let template = {
+            "id": objectId,
+
             "name": "Broadsword",
             "short_name": "Spatha",
             "description": "",
@@ -636,7 +653,21 @@ const weaponTemplateFactory = function (overrideFields) {
     if (!overrideFields) {
         overrideFields = {};
     }
-    return Object.assign(template, overrideFields);
+    let newWeapon = Object.assign(template, overrideFields);
+
+    objectId = newWeapon.id + 1;
+
+    if (newWeapon.base_skill) {
+        newWeapon.base_skill = minimalSkillFactory(newWeapon.base_skill)
+    }
+    if (newWeapon.skill) {
+        newWeapon.skill = minimalSkillFactory(newWeapon.skill)
+    }
+    if (newWeapon.skill2) {
+        newWeapon.skill2 = minimalSkillFactory(newWeapon.skill2)
+    }
+
+    return newWeapon
 };
 
 const weaponQualityFactory = function (overrideFields) {
@@ -675,60 +706,24 @@ const weaponFactory = function (overrideFields) {
         "description": "",
         "size": 1,
         "quality": weaponQualityFactory(overrideFields.quality),
-        "base": {
-            "name": "Broadsword",
-            "short_name": "Spatha",
-            "description": "",
-            "notes": "",
-            "draw_initiative": -4,
-            "durability": 7,
-            "dp": 7,
-            "weight": "1.4",
-            "num_dice": 1,
-            "dice": 8,
-            "extra_damage": 0,
-            "leth": 5,
-            "plus_leth": 0,
-            "roa": "1.000",
-            "bypass": -1,
-            "type": "S",
-            "ccv": 13,
-            "ccv_unskilled_modifier": -10,
-            "defense_leth": 5,
-            "is_lance": false,
-            "is_shield": false,
-            "tech_level": 3,
-            "base_skill": "Sword",
-            "skill": null,
-            "skill2": null
-        },
+        "base": weaponTemplateFactory(overrideFields.base),
         "special_qualities": []
     };
     
     let overrides = Object.assign({}, overrideFields);
-    if ('base' in overrides) {
-        weapon.base = Object.assign(weapon.base, overrideFields.base);
+    if (overrides.base !== undefined) {
         delete overrides.base;
     }
 
-    if ('quality' in overrides) {
+    if (overrides.quality !== undefined) {
         delete overrides.quality;
     }
     return Object.assign(weapon, overrides);
 };
 
-const rangedWeaponFactory = function (overrideFields) {
-    if (!overrideFields) {
-        overrideFields = {};
-    }
-
-    let weapon = {
-        "id": 1,
-        "name": "Short bow, 2h w/ Broadhead arrow Exceptional",
-        "description": "",
-        "size": 1,
-        "quality": weaponQualityFactory(overrideFields.quality),
-        "base": {
+export function rangedWeaponTemplateFactory(overrideFields) {
+    let template = {
+            "id": objectId,
             "name": "Short bow, 2h w/ Broadhead arrow",
             "short_name": "Sb-bh",
             "description": "",
@@ -760,17 +755,42 @@ const rangedWeaponFactory = function (overrideFields) {
             "base_skill": "Bow",
             "skill": null,
             "skill2": null
-        },
+        };
+    if (!overrideFields) {
+        overrideFields = {};
+    }
+    let newWeapon = Object.assign(template, overrideFields);
+
+    objectId = newWeapon.id + 1
+
+    if (newWeapon.base_skill) {
+        newWeapon.base_skill = minimalSkillFactory(newWeapon.base_skill)
+    }
+    if (newWeapon.skill) {
+        newWeapon.skill = minimalSkillFactory(newWeapon.skill)
+    }
+    if (newWeapon.skill2) {
+        newWeapon.skill2 = minimalSkillFactory(newWeapon.skill2)
+    }
+    return newWeapon
+};
+
+const rangedWeaponFactory = function (overrideFields = {}) {
+    let weapon = {
+        "id": 1,
+        "name": "Short bow, 2h w/ Broadhead arrow Exceptional",
+        "description": "",
+        "size": 1,
+        "quality": weaponQualityFactory(overrideFields.quality),
+        "base": rangedWeaponTemplateFactory(overrideFields.base),
         "ammo_quality": null,
         "special_qualities": []
     };
 
     let overrides = Object.assign({}, overrideFields);
     if ('base' in overrides) {
-        weapon.base = Object.assign(weapon.base, overrideFields.base);
         delete overrides.base;
     }
-
     if ('quality' in overrides) {
         delete overrides.quality;
     }
@@ -962,7 +982,7 @@ export {
     characterFactory, sheetFactory, skillFactory,
     edgeLevelFactory, edgeFactory, characterEdgeFactory, ammunitionFactory,
     scopeFactory, baseFirearmFactory, firearmControlPropsFactory,
-    magazineFactory, firearmFactory, weaponTemplateFactory,
+    magazineFactory, firearmFactory,
     weaponQualityFactory, weaponFactory, rangedWeaponFactory,
     transientEffectFactory, sheetTransientEffectFactory,
     inventoryEntryFactory, armorTemplateFactory, armorQualityFactory,
