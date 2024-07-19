@@ -16,6 +16,7 @@
 * Add XXXL and Extreme ranges, provided that the scope or the user has high enough Acute Vision effect.
 * Added admin list edit for RangedWeaponTemplates.
 * Use range from combat transients in advancing initiatives of the normal sheet as well.
+* Added natural weapons to close combat. Calculate durability dynamically from edges Hardened Skin and Toughness.
 
 ### Fixed
 

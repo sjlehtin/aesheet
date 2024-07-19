@@ -8,8 +8,11 @@ class WeaponTemplateAdmin(admin.ModelAdmin):
                     'num_dice',
                     'dice', 'extra_damage', 'leth', 'plus_leth',
                     'defense_leth', 'type', 'durability', 'dp', 'short_name',
-                    'notes', 'is_lance', 'base_skill')
+                    'notes', 'is_lance',
+                    'is_natural_weapon',
+                    'base_skill')
     list_filter = ('tech_level',)
+    list_editable = list_display[2:]
     search_fields = ('name', )
     save_as = True
 
