@@ -132,7 +132,7 @@ class CompactSheet extends StatBlock {
             </tr>
         </tbody>;
 
-        const bodyFromToughness = skillHandler.edgeLevel("Toughness") * 2;
+        const bodyFromToughness = skillHandler.getEdgeModifier("toughness") * 2;
         let toughness;
         if (bodyFromToughness) {
             toughness = <span>+<span style={{ fontWeight: "bold"}}

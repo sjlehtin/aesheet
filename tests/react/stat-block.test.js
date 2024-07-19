@@ -29,7 +29,7 @@ const server = setupServer(
         cur_wil: 53, cur_psy: 42, bought_mana: 5})))
   }),
   rest.get('http://localhost/rest/edgelevels/campaign/2/', (req, res, ctx) => {
-    return res(ctx.json([factories.edgeLevelFactory({edge: "Toughness", level: 1, cost: 2.0})]))
+    return res(ctx.json([factories.edgeLevelFactory({edge: "Toughness", toughness: 1, level: 1, cost: 2.0})]))
   }),
 
   rest.get("http://localhost/rest/skills/campaign/2/", (req, res, ctx) => {

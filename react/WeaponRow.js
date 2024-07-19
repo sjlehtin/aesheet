@@ -305,6 +305,14 @@ class WeaponRow extends React.Component {
     }
 
     durability() {
+        /*
+         * TODO:
+         *  The Durability of natural weapons (for example, fists or bear
+         *  paws) is calculated as follows: Attack base lethality +
+         *  Hardened Skin LR + Toughness L/2. When natural weapons are
+         *  damaged, their owner takes non-lethal damage.
+         */
+
         return this.props.weapon.base.durability +
             this.props.weapon.quality.durability +
             2 * (this.props.weapon.size - 1);

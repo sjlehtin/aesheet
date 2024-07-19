@@ -23,7 +23,7 @@ class AddWoundControl extends React.Component {
     findEffect(wound) {
         const threshold = this.props.handler.getDamageThreshold(wound.location)
 
-        const toughness = this.props.handler?.edgeLevel("Toughness") ?? 0;
+        const toughness = this.props.handler?.getEdgeModifier("toughness") ?? 0;
         const effDamage = wound.damage - toughness;
         const choices = AddWoundControl.getWoundChoices(wound.location, wound.type);
 
@@ -198,11 +198,6 @@ class AddWoundControl extends React.Component {
 AddWoundControl.propTypes = {
     onAdd: PropTypes.func,
     handler: PropTypes.object,
-    toughness: PropTypes.number
-};
-
-AddWoundControl.defaultProps = {
-    toughness: 0
 };
 
 AddWoundControl.locations = [

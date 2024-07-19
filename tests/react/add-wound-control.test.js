@@ -146,7 +146,7 @@ describe('AddWoundControl', function() {
     it("takes toughness into account in the effect", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl handler={factories.skillHandlerFactory({edges: [{edge: "Toughness", level: 3}]})} />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory({edges: [{edge: "Toughness", toughness: 3, level: 3}]})} />)
 
         await user.clear(screen.getByRole("textbox", {name: "Damage"}))
         await user.type(screen.getByRole("textbox", {name: "Damage"}), "8")
@@ -158,7 +158,7 @@ describe('AddWoundControl', function() {
     it("takes damage threshold into account", async () => {
         const user = userEvent.setup()
 
-        render(<AddWoundControl handler={factories.skillHandlerFactory({edges: [{edge: "Toughness", level: 3}]})} />)
+        render(<AddWoundControl handler={factories.skillHandlerFactory({edges: [{edge: "Toughness", toughness: 3, level: 3}]})} />)
 
         await user.click(screen.getByRole("combobox", {name: "Location"}))
         await user.click(screen.getByText("Left leg (1)"))

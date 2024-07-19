@@ -213,6 +213,7 @@ const edgeLevelFactory = function (overrideFields) {
     "armor_l": "0.00",
     "armor_dr": "0.00",
     "pain_resistance": 0,
+        "toughness": 0,
     "vision": 0,
     "hear": 0,
     "smell": 0,
@@ -222,7 +223,7 @@ const edgeLevelFactory = function (overrideFields) {
     "requires_hero": false,
     "edge": edge,
     "edge_skill_bonuses": edgeSkillBonuses,
-    "extra_skill_points": 0
+    "extra_skill_points": 0,
     };
 
     const newEdge = Object.assign(_baseEdge, overrideFields);

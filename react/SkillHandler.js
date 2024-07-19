@@ -665,7 +665,7 @@ class SkillHandler {
 
             this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
             this._baseStats.body =
-                this._baseStats.baseBody + 2 * this.edgeLevel("Toughness");
+                this._baseStats.baseBody + 2 * this.getEdgeModifier("toughness");
 
             this._baseStats.mana = util.roundup(
                 (this._baseStats.psy + this._baseStats.wil)/ 4)
@@ -680,7 +680,7 @@ class SkillHandler {
             const divider = {H: 10, T: 5, RA: 15, RL: 10, LA: 15, LL: 10}
             this._thresholds = {}
             for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
-                this._thresholds[loc] = util.roundup(this.getBaseStats().fit / divider[loc]) + this.edgeLevel("Toughness")
+                this._thresholds[loc] = util.roundup(this.getBaseStats().fit / divider[loc]) + this.getEdgeModifier("toughness")
             }
         }
         return this._thresholds[givenLoc]
@@ -735,7 +735,7 @@ class SkillHandler {
                 this._woundPenalties.bodyDamage += locationDamages[loc]
             }
 
-            const toughness = this.edgeLevel("Toughness");
+            const toughness = this.getEdgeModifier("toughness");
 
             this._woundPenalties.locationsDamages = Object.assign({}, locationDamages)
 
