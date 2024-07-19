@@ -2,7 +2,7 @@
 
 ### Changed
 
-* Skills and weapons to have standard integer primary keys instead of their names in the backend. This was a huge effort that will pay dividends in the future in easy of renaming skills and items. In general, the sentiment is to use built-in characteristics of skills and edges instead of their of their names when calculating effects.
+* Skills and weapons to have standard integer primary keys instead of their names in the backend. This was a huge effort that will pay dividends in the future in ease of renaming skills and items. In general, the sentiment is to use built-in characteristics of skills and edges instead of their of their names when calculating effects.
 
 ### Added
 
@@ -31,6 +31,7 @@
 * Acute vision should have full effect in Clear (darkness detection level 0) situations.
 * Improved combat transient usability. Made the handle wider and it will change color with non-default settings.
 * Make damage and current penalties more prominent in the sheet display.
+* Fix skill check calculation with defaulted handguns check.
 
 ## [0.21.0] - 2024-07-03
 
