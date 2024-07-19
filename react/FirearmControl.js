@@ -10,9 +10,11 @@ import MagazineControl from 'MagazineControl';
 import UseTypeControl from 'UseTypeControl';
 
 import * as util from './sheet-util'
-import {Col, Row, Button, Table} from 'react-bootstrap';
-import {isFloat} from "./sheet-util";
+import {isFloat} from './sheet-util'
+import {Button, Col, Row, Table} from 'react-bootstrap';
 import ValueBreakdown from "./ValueBreakdown";
+import {BaseCheck} from "./BaseCheck";
+import {Unskilled} from "./Unskilled";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -699,12 +701,6 @@ class FirearmControl extends RangedWeaponRow {
     render () {
         const weapon = this.props.weapon.base;
         const missing = this.missingSkills();
-        let unskilled = '';
-        if (missing.length > 0) {
-            unskilled = <div style={{color:"red"}}
-                             title={`Missing skills: ${missing.join(' ,')}`}>
-                Unskilled</div>;
-        }
 
         const actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -729,12 +725,7 @@ class FirearmControl extends RangedWeaponRow {
         // TODO: extract?
         let baseCheckContainer;
         if (baseCheck) {
-            const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
-            baseCheckContainer = <div><label id={"base-check"} style={baseCheckStyle}>Base check</label><span
-                aria-labelledby={"base-check"}><StatBreakdown
-                value={baseCheck.value()}
-                breakdown={baseCheck.breakdown()}
-                style={baseCheckStyle}/></span></div>
+            baseCheckContainer = <BaseCheck baseCheck={baseCheck} />
         }
 
         let skillChecks = this.skillChecksV2(actions, {useType: this.state.useType});
@@ -867,7 +858,7 @@ class FirearmControl extends RangedWeaponRow {
                                             <div>
                                                 {weapon.name}
 
-                                                {unskilled}
+                                                <Unskilled missingSkills={this.missingSkills()} />
                                                 {baseCheckContainer}
                                             </div>
                                         </td>

@@ -189,4 +189,47 @@ describe('RangedWeaponRow', function() {
         expect(screen.getByLabelText("Long range").textContent).toEqual("15")
     });
 
+    it("can calculate effect of defaulted skill check", async () => {
+        const props = {
+            handlerProps: {
+                allSkills: [{name: "Basic Missile Weapons", stat: "DEX"},
+                    {name: "Bow", required_skills: ["Basic Missile Weapons"], stat: "DEX"}],
+                skills: [{skill: "Basic Missile Weapons", level: 0}],
+                character: {cur_ref: 50, cur_int: 50, cur_fit: 66}
+            },
+            weaponProps: {
+                base: {
+                    roa: "1.5",
+                    base_skill: "Bow",
+                    range_s: 5,
+                    range_m: 20,
+                    range_l: 30 }
+            },
+        };
+        renderWeaponRow(props)
+        expect(screen.getByLabelText("Base check").textContent).toEqual("25")
+    });
+
+    it("can calculate effect of missing required skill check", async () => {
+        const props = {
+            handlerProps: {
+                allSkills: [{name: "Basic Missile Weapons", stat: "DEX"},
+                    {name: "Bow", required_skills: ["Basic Missile Weapons"], stat: "DEX"}],
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 50, cur_int: 50, cur_fit: 66}
+            },
+            weaponProps: {
+                base: {
+                    roa: "1.5",
+                    base_skill: "Bow",
+                    required_skills: ["Longbow",],
+                    range_s: 5,
+                    range_m: 20,
+                    range_l: 30 }
+            },
+        };
+        renderWeaponRow(props)
+        expect(screen.getByLabelText("Base check").textContent).toEqual("40")
+    });
+
 });

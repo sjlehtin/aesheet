@@ -11,7 +11,7 @@ describe('WeaponRow', function() {
     beforeEach(() => {
         factories.skillFactory({
                         name: "Weapon combat",
-                        stat: "MOV"
+                        stat: "MOV",
                     })
         factories.skillFactory({
                         name: "Greatsword",
@@ -22,13 +22,14 @@ describe('WeaponRow', function() {
         factories.clearAll()
     })
 
-    const renderWeaponRow = (givenProps) => {
+    const renderWeaponRow = (givenProps = {}) => {
         let handlerProps = {
+            skills: [],
             characterSkills: [],
             edges: [],
             character: {cur_fit: 45, cur_ref: 45}
         };
-        if (givenProps && 'handlerProps' in givenProps) {
+        if (givenProps.handlerProps !== undefined) {
             handlerProps = Object.assign(handlerProps,
                 givenProps.handlerProps);
             delete givenProps.handlerProps;
@@ -74,6 +75,21 @@ describe('WeaponRow', function() {
             });
             expect(screen.getByLabelText("Base check").textContent).toEqual("50")
         });
+
+    // TODO: fix defaulted skills
+    // it("can calculate effect of defaulted skill checks",
+    //     () => {
+    //         renderWeaponRow({
+    //             weapon: factories.weaponFactory({
+    //                 base: {
+    //                     base_skill: "Weapon combat",
+    //                     ccv: 15,
+    //                     ccv_unskilled_modifier: -10
+    //                 }
+    //             })
+    //         });
+    //         expect(screen.getByLabelText("Base check").textContent).toEqual("50")
+    //     });
 
     it("notices specializations", function () {
         renderWeaponRow({

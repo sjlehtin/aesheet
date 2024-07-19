@@ -7,6 +7,8 @@ import StatBreakdown from "StatBreakdown";
 const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
 import {isFloat} from "./sheet-util";
+import {Unskilled} from "./Unskilled";
+import {BaseCheck} from "./BaseCheck";
 
 class RangedWeaponRow extends WeaponRow {
     constructor(props) {
@@ -324,7 +326,11 @@ class RangedWeaponRow extends WeaponRow {
                 <tbody>
                 <tr aria-label={"Actions"}>
                     <td style={cellStyle} rowSpan={2}>{
-                        this.weaponName()}</td>
+                        this.weaponName()}
+                        <Unskilled missingSkills={this.missingSkills()} />
+                        <BaseCheck baseCheck={this.skillCheck()} />
+                    </td>
+
                     <td style={cellStyle}>{this.skillLevel()}</td>
                     <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().value.toFixed(2)}</td>
                     {checkCells}
