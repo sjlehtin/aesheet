@@ -32,7 +32,6 @@ describe('WeaponRow', function() {
         if (givenProps.handlerProps !== undefined) {
             handlerProps = Object.assign(handlerProps,
                 givenProps.handlerProps);
-            delete givenProps.handlerProps;
         }
 
         let allSkills = [];
@@ -43,16 +42,10 @@ describe('WeaponRow', function() {
         }
         handlerProps.allSkills = allSkills;
 
-        let props = {
-            weapon: factories.weaponFactory(
-                {base: {base_skill: "Weapon combat"}}),
-            skillHandler: factories.skillHandlerFactory(handlerProps)
-        };
-        if (givenProps) {
-            props = Object.assign(props, givenProps);
-        }
-
-        return render(<WeaponRow {...props}/>)
+        return render(<WeaponRow weapon={factories.weaponFactory(
+            Object.assign({base: {base_skill: "Weapon combat"}},
+                givenProps.weapon ?? {}))}
+                                 skillHandler={factories.skillHandlerFactory(handlerProps)}/>)
     };
 
     it("can calculate effect of missing specialization skill checks",
@@ -64,14 +57,14 @@ describe('WeaponRow', function() {
                         level: 0
                     })]
                 },
-                weapon: factories.weaponFactory({
+                weapon: {
                     base: {
                         base_skill: "Weapon combat",
                         required_skills: ["Greatsword", ],
                         ccv: 15,
                         ccv_unskilled_modifier: -10
                     }
-                })
+                }
             });
             expect(screen.getByLabelText("Base check").textContent).toEqual("50")
         });
@@ -103,14 +96,14 @@ describe('WeaponRow', function() {
                         level: 1
                     }]
             },
-            weapon: factories.weaponFactory({
+            weapon: {
                 base: {
                     base_skill: "Weapon combat",
                     skill: "Greatsword",
                     ccv: 15,
                     ccv_unskilled_modifier: -10
                 }
-            })
+            }
         });
         expect(screen.getByLabelText("Base check").textContent).toEqual("65")
     });
@@ -123,8 +116,8 @@ describe('WeaponRow', function() {
                     level: 3
                 }]
             },
-            weapon: factories.weaponFactory({
-                base: {base_skill: "Weapon combat", roa: "1.5"}})
+            weapon: {
+                base: {base_skill: "Weapon combat", roa: "1.5"}}
         });
         expect(screen.getByLabelText("ROA for FULL").textContent).toEqual("1.95")
     });
@@ -157,10 +150,10 @@ describe('WeaponRow', function() {
                 edges: props.edges,
                 character: {cur_ref: 45, cur_int: props.int, cur_fit: props.fit}
             },
-            weapon: factories.weaponFactory({
+            weapon: {
                 base: base,
                 quality: props.quality,
-                size: props.size})
+                size: props.size}
         });
     };
 
@@ -338,12 +331,12 @@ describe('WeaponRow', function() {
         expect(screen.getByLabelText("Defense damage for FULL").textContent).toEqual("4d6+5/7")
     });
 
-    it("takes size into account with durabibility", function () {
+    it("takes size into account with durability", function () {
         renderWeapon({size: 2});
         expect(screen.getByLabelText("Durability").textContent).toEqual("9")
     });
 
-    it("takes large size into account with damagae points", function () {
+    it("takes large size into account with damage points", function () {
         renderWeapon({size: 2});
         expect(screen.getByLabelText("Damage points").textContent).toEqual("14")
     });
@@ -401,4 +394,61 @@ describe('WeaponRow', function() {
     // Special damage
 
     // TODO: Lance damage on charge.
+
+    const naturalProps = {
+        handlerProps: {
+            skills: [{
+                skill: "Unarmed combat",
+                level: 1
+            }]
+        },
+        weapon: {
+            base: {
+                base_skill: "Unarmed combat",
+                is_natural_weapon: true,
+                ccv: 15,
+                durability: 0,
+                leth: 4
+            }
+        }
+    };
+
+    it("supports natural weapons", function () {
+        renderWeaponRow(naturalProps);
+        expect(screen.getByLabelText("Base check").textContent).toEqual("65")
+        expect(screen.getByLabelText("Durability").textContent).toEqual("4")
+    });
+
+    it("supports large natural weapons", function () {
+        const props = Object.assign({}, naturalProps);
+        props.weapon = Object.assign({size: 2}, props.weapon)
+        renderWeaponRow(props)
+        expect(screen.getByLabelText("Base check").textContent).toEqual("70")
+        expect(screen.getByLabelText("Durability").textContent).toEqual("6")
+    });
+
+    it("supports natural weapons with high hardened skin", function () {
+        const props = Object.assign({}, naturalProps)
+        props.handlerProps = Object.assign({edges: [{edge: "Hardened Skin", level: 2, armor_l:-1.5, armor_dr:-3.0}]}, naturalProps.handlerProps)
+        renderWeaponRow(props)
+        expect(screen.getByLabelText("Base check").textContent).toEqual("65")
+        expect(screen.getByLabelText("Durability").textContent).toEqual("5")
+    });
+
+    it("supports natural weapons with high toughness", function () {
+        const props = Object.assign({}, naturalProps)
+        props.handlerProps = Object.assign({edges: [{edge: "Toughness", toughness: 2, level: 2}]}, naturalProps.handlerProps)
+        renderWeaponRow(props)
+        expect(screen.getByLabelText("Base check").textContent).toEqual("65")
+        expect(screen.getByLabelText("Durability").textContent).toEqual("5")
+    });
+
+    it("supports natural weapons with low hardened skin and low toughness", function () {
+        const props = Object.assign({}, naturalProps)
+        props.handlerProps = Object.assign({edges: [{edge: "Hardened Skin", level: 1, armor_l:-0.5, armor_dr:-2.0},
+                {edge: "Toughness", toughness: 1, level: 1}]}, naturalProps.handlerProps)
+        renderWeaponRow(props)
+        expect(screen.getByLabelText("Base check").textContent).toEqual("65")
+        expect(screen.getByLabelText("Durability").textContent).toEqual("5")
+    });
 });

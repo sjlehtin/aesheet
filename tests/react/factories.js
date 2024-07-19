@@ -639,6 +639,7 @@ export function weaponTemplateFactory(overrideFields) {
             "defense_leth": 5,
             "is_lance": false,
             "is_shield": false,
+        "is_natural_weapon": false,
             "tech_level": 3,
             "base_skill": "Sword",
             "required_skills": []
