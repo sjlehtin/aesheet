@@ -627,6 +627,23 @@ describe('FirearmControl', () => {
         expect(values).toEqual(["+9", "+6", "+2", "-3", "+5", "+0", "-5", "",  "", ""])
     });
 
+    it("can calculate effect of defaulted skill check", async () => {
+        await renderFirearm({
+            handlerProps: {
+                skills: [{
+                    skill: "Basic Firearms",
+                    level: 0
+                }]
+            },
+            weapon: {
+                base: {
+                    base_skill: "Handguns"
+                }
+            }
+        });
+        expect(screen.getByLabelText("Base check").textContent).toEqual("25")
+    });
+
     it("can calculate effect of missing specialization skill checks", async () => {
         await renderFirearm({
             handlerProps: {

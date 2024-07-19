@@ -32,6 +32,8 @@ describe('SkillHandler', function() {
                 name: "Pistol", required_skills: ["Basic Firearms"]}]
         });
         expect(handler.skillCheck("Pistol").value()).toEqual(22)
+        // TODO: this is broken.
+        // expect(handler.skillCheck("Basic Firearms").value()).toEqual(22)
     });
 
     it('calculates extremely unskilled check', function () {

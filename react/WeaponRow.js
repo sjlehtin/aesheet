@@ -1,10 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
-const util = require('./sheet-util');
 import {Button} from 'react-bootstrap';
 import StatBreakdown from "./StatBreakdown";
 import ValueBreakdown from "./ValueBreakdown";
+import {BaseCheck} from "./BaseCheck";
+
+import * as util from './sheet-util';
+
 
 class WeaponRow extends React.Component {
     constructor(props) {
@@ -29,10 +31,11 @@ class WeaponRow extends React.Component {
                 }
             }
         };
-        checkSkill(this.props.weapon.base.base_skill.name);
+
         for (let req of this.props.weapon.base.required_skills) {
             checkSkill(req.name)
         }
+
         return missing;
     }
 
@@ -453,19 +456,6 @@ class WeaponRow extends React.Component {
             return <th style={headerStyle} key={`act-${ii}`}>{el.toFixed(1)}</th>;
         });
 
-        const baseCheck = this.skillCheck();
-
-        // TODO: extract?
-        let baseCheckContainer;
-        if (baseCheck) {
-            const baseCheckStyle = {display: 'inline-block', fontSize: "80%", marginLeft: "2em", color: "gray"}
-            baseCheckContainer = <div><label id={"base-check"} style={baseCheckStyle}>Base check</label><span
-                aria-labelledby={"base-check"}><StatBreakdown
-                value={baseCheck.value()}
-                breakdown={baseCheck.breakdown()}
-                style={baseCheckStyle}/></span></div>
-        }
-
         return <div style={this.props.style}>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
@@ -481,7 +471,8 @@ class WeaponRow extends React.Component {
                 <tbody>
                 <tr>
                     <td style={cellStyle} rowSpan={4}>{this.weaponName()}
-                        {baseCheckContainer}</td>
+                        <BaseCheck baseCheck={this.skillCheck()} />
+                    </td>
                     <td style={cellStyle} rowSpan={4}>{this.skillLevel()}</td>
                 </tr>
                 {this.renderUseType(WeaponRow.FULL)}

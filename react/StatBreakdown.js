@@ -27,12 +27,12 @@ class StatBreakdown extends React.Component {
         }
 
         let value
-        let breakdown
+        let breakdown = []
 
         if (typeof(this.props.value) === "number") {
             value = this.props.value
             breakdown = this.props.breakdown ?? []
-        } else {
+        } else if (this.props.value) {
             value = this.props.value.value()
             breakdown = this.props.value.breakdown()
         }
@@ -49,7 +49,7 @@ class StatBreakdown extends React.Component {
         const containerRef = React.createRef()
         const targetRef = React.createRef()
         const label = this.props.label ?? "Skill check"
-        return <div ref={containerRef}
+        return value !== undefined ? <div ref={containerRef}
                     onClick={() => {
                         this.setState({show: !this.state.show})
                     }}
@@ -80,7 +80,7 @@ class StatBreakdown extends React.Component {
                 }>
                 <div ref={targetRef}>{renderValue(value)}{this.props.units}</div>
             </OverlayTrigger>
-        </div>
+        </div> : ''
     }
 }
 
