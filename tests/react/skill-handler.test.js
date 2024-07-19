@@ -10,11 +10,12 @@ describe('SkillHandler', function() {
     })
 
     it('calculates skill level', function () {
-        const handler = factories.skillHandlerFactory({skills: [
-            {skill: "Pistol", level: 1}]});
+        const handler = factories.skillHandlerFactory(
+            {character: {cur_ref: 50, cur_int: 50}, skills: [
+            {skill: {name: "Pistol", stat: "DEX"}, level: 1}]});
 
         expect(handler.skillLevel("Pistol")).toEqual(1);
-        expect(handler.skillCheck("Pistol").value()).toEqual(48);
+        expect(handler.skillCheck("Pistol").value()).toEqual(55);
     });
 
     it('calculates skill check for zero cost skill', function () {

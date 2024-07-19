@@ -573,6 +573,8 @@ class EdgeLevel(ExportedModel, StatModifier):
                                    help_text="Overall damage reduction")
 
     pain_resistance = models.IntegerField(default=0)
+    toughness = models.IntegerField(default=0,
+                                    help_text="Level of toughness, decreasing damage effects and increasing body")
 
     @classmethod
     def dont_export(cls):
@@ -1015,6 +1017,10 @@ class WeaponTemplate(BaseWeaponTemplate):
 
     is_lance = models.BooleanField(default=False)
     is_shield = models.BooleanField(default=False)
+
+    is_natural_weapon = models.BooleanField(
+        default=False,
+        help_text="Marks the weapon as natural weapon, which affects damage, lethality and durability calculations")
 
     @classmethod
     def dont_export(cls):

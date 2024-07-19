@@ -114,7 +114,7 @@ describe('SkillHandler wounds', function() {
 
     it('calculates penalties taking toughness into account', function () {
         var handler = factories.skillHandlerFactory({
-            edges: [{edge: "Toughness", level: 4}],
+            edges: [{edge: "Toughness", toughness: 4, level: 4}],
             wounds: [{damage: 5, location: "H"}]
         });
 
@@ -125,7 +125,7 @@ describe('SkillHandler wounds', function() {
         ' account', function () {
         // The Atlas example of the rules.
         var handler = factories.skillHandlerFactory({
-            edges: [{edge: "Toughness", level: 3}],
+            edges: [{edge: "Toughness", toughness: 3, level: 3}],
             wounds: [{damage: 2, location: "RL"}, {damage: 2, location: "RL"},
                 {damage: 1, location: "RL"}, {damage: 1, location: "RL"}]
         });
@@ -136,7 +136,7 @@ describe('SkillHandler wounds', function() {
     it('does not overdo toughness', function () {
         // The Atlas example of the rules.
         var handler = factories.skillHandlerFactory({
-            edges: [{edge: "Toughness", level: 3}],
+            edges: [{edge: "Toughness", toughness: 3, level: 3}],
             wounds: [{damage: 2, location: "RL"}]
         });
 
@@ -147,7 +147,7 @@ describe('SkillHandler wounds', function() {
         ' account', function () {
         // The Atlas example of the rules.
         var handler = factories.skillHandlerFactory({
-            edges: [{edge: "Toughness", level: 3}],
+            edges: [{edge: "Toughness", toughness: 3, level: 3}],
             wounds: [{damage: 2, location: "RL"}, {damage: 2, location: "RL"},
                 {damage: 1, location: "RL"}, {damage: 1, location: "RL"}]
         });
@@ -158,7 +158,7 @@ describe('SkillHandler wounds', function() {
     it('should not incur MOV penalty from torso or arms', function () {
         // The Atlas example of the rules.
         var handler = factories.skillHandlerFactory({
-            edges: [{edge: "Toughness", level: 3}],
+            edges: [{edge: "Toughness", toughness: 3, level: 3}],
             wounds: [{damage: 2, location: "RA"}, {damage: 2, location: "LA"},
                 {damage: 1, location: "T"}, {damage: 1, location: "H"}]
         });
@@ -195,7 +195,7 @@ describe('SkillHandler wounds', function() {
 
     it('calculates penalties to wounds to right arm with toughness', function () {
         var handler = factories.skillHandlerFactory({
-            edges: [{edge: "Toughness", level: 3}],
+            edges: [{edge: "Toughness", toughness: 3, level: 3}],
             wounds: [{damage: 5, location: "RA"}]
         });
 

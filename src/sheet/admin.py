@@ -196,6 +196,7 @@ class EdgeLevelAdmin(admin.ModelAdmin):
                     'psy', 'wil', 'cha', 'pos', 'mov', 'dex', 'imm',
                     'run_multiplier', 'swim_multiplier', 'climb_multiplier',
                     'fly_multiplier', 'vision', 'hear', 'smell', 'surprise',
+                    'toughness',
                     'requires_hero')
     list_editable = list_display[2:]
     list_filter = ('edge__name', )

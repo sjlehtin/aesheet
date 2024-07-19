@@ -421,7 +421,7 @@ describe('SkillHandler stats', function () {
                 cur_fit: 61
             },
             edges: [
-                {edge: "Toughness", level: 2},
+                {edge: "Toughness", toughness: 2, level: 2},
             ]
         });
         expect(handler.getBaseStats().baseBody).toEqual(16);

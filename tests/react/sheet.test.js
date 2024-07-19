@@ -96,7 +96,7 @@ describe('StatBlock', function() {
     it('adds correct body for Toughness', async () => {
         server.use(
             rest.get("http://localhost/rest/characters/2/characteredges/", (req, res, ctx) => {
-            return res(ctx.json([factories.characterEdgeFactory({edge: {edge: "Toughness", level: 2}})]))
+            return res(ctx.json([factories.characterEdgeFactory({edge: {edge: "Toughness", toughness: 2, level: 2}})]))
         })
         )
 
