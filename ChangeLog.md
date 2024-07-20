@@ -1,8 +1,19 @@
+## [Unreleased]
+
+### Added
+
+* Sense table sense checks have breakdowns as tooltips.
+* Allow fractional damage from weapon and quality, rounded down last.
+
+### Changed
+
+* Skills have boolean attributes on whether they are affected by armor skill mods. This makes it easier to add skills that are affected by armor.
+
 ## [0.22.0] - 2024-07-19
 
 ### Changed
 
-* Skills and weapons to have standard integer primary keys instead of their names in the backend. This was a huge effort that will pay dividends in the future in ease of renaming skills and items. In general, the sentiment is to use built-in characteristics of skills and edges instead of their of their names when calculating effects.
+* Skills and weapons to have standard integer primary keys instead of their names in the backend. This was a huge effort that will pay dividends in the future in ease of renaming skills and items. In general, the sentiment is to use built-in characteristics of skills and edges instead of their names when calculating effects.
 
 ### Added
 
