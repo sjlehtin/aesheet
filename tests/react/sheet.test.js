@@ -37,7 +37,10 @@ describe('StatBlock', function() {
         testSetup()
         server.listen({ onUnhandledRequest: 'error' })
     })
-    afterEach(() => server.resetHandlers())
+    afterEach(() => {
+        server.resetHandlers()
+        factories.clearAll()
+    })
     afterAll(() => server.close())
 
     // it('calculates mana', function (done) {
