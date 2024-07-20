@@ -1,10 +1,15 @@
 import * as util from "./sheet-util";
+import {message} from "react-widgets/PropTypes";
 
 export default class ValueBreakdown {
     #value = 0
     #breakdown = []
 
     #setValue = null
+    #maximum = null
+    #maxMessage = "Max value"
+    #minimum = null
+    #minMessage = "Min value"
 
     constructor(initialValue, initialDescription) {
         if (initialValue !== undefined) {
@@ -84,14 +89,58 @@ export default class ValueBreakdown {
         }
     }
 
+    setMaximum(maxValue, message) {
+        this.#maximum = maxValue
+        if (message) {
+            this.#maxMessage = message
+        }
+    }
+
+    setMinimum(minValue, message) {
+        this.#minimum = minValue
+        if (message) {
+            this.#minMessage = message
+        }
+    }
+
     value() {
         if (this.#setValue !== null) {
             return this.#setValue
         }
+        if (this.#maximum !== null) {
+            if (this.#value > this.#maximum) {
+                return this.#maximum
+            }
+        }
+        if (this.belowMinimum()) {
+            return this.#minimum
+        }
         return this.#value
     }
 
+    aboveMaximum() {
+        return this.#maximum !== null && this.#value > this.#maximum
+    }
+
+    belowMinimum() {
+        return this.#minimum !== null && this.#value < this.#minimum
+    }
+
     breakdown() {
+        if (this.belowMinimum()) {
+            return [...this.#breakdown, {
+                value: this.#minimum,
+                operator: "MIN",
+                reason: this.#minMessage
+            }]
+        }
+        if (this.aboveMaximum()) {
+            return [...this.#breakdown, {
+                value: this.#maximum,
+                operator: "MAX",
+                reason: this.#maxMessage
+            }]
+        }
         return this.#breakdown
     }
 }
