@@ -123,7 +123,14 @@ class FirearmControl extends RangedWeaponRow {
         this.readiedBaseI = -1;
         this.baseCheckBonusForSlowActions = 10;
         this.extraActionModifier = 15;
-        this.penaltyCounterStat = "FIT";
+    }
+
+    penaltyCounterStat() {
+        if (this.props.inCloseCombat) {
+            return "INT"
+        } else {
+            return "FIT"
+        }
     }
 
     roa(useType) {
@@ -229,7 +236,7 @@ class FirearmControl extends RangedWeaponRow {
                 }
 
                 mod = FirearmControl.counterPenalty(mod,
-                        this.getStat("FIT"));
+                        this.getStat(this.penaltyCounterStat()));
                 bd.add(mod, "burst penalty")
                 bd.addBreakdown(autofirePenalty)
 
@@ -801,8 +808,7 @@ class FirearmControl extends RangedWeaponRow {
             skillChecks = skillChecks.map((chk, ii) => {
                 let cellContent;
                 if (chk) {
-                    cellContent = <StatBreakdown value={chk.value()}
-                                                 breakdown={chk.breakdown()}/>
+                    cellContent = <StatBreakdown value={chk}/>
                 } else {
                     cellContent = ""
                 }

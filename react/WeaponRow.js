@@ -14,10 +14,11 @@ class WeaponRow extends React.Component {
         this.readiedBaseI = -3;
         this.baseCheckBonusForSlowActions = 5;
         this.extraActionModifier = 10;
-        // TODO: changes for firearms when in CC
-        this.penaltyCounterStat = "INT";
     }
 
+    penaltyCounterStat() {
+        return "INT"
+    }
 
     skillLevel() {
         return this.props.skillHandler.skillLevel(
@@ -178,7 +179,7 @@ class WeaponRow extends React.Component {
         const baseCheck = this.skillCheck();
         if (!baseCheck) {
             // Actions not available.
-            return null; //actions.map((e) => {return null;});
+            return null;
         }
         const checks = [];
 
@@ -213,7 +214,7 @@ class WeaponRow extends React.Component {
                 // TODO: counterPenalty is a bad name, as a bad stat will give actual penalty for actions with these, see AE2K_Weapons_17.xls
                 if (props.counterPenalty) {
                     let counter = WeaponRow.counterPenaltyV2(
-                        this.getStat(this.penaltyCounterStat))
+                        this.getStat(this.penaltyCounterStat()))
                     if (counter > 0) {
                         if (mod > 0) {
                             counter = 0
@@ -222,7 +223,7 @@ class WeaponRow extends React.Component {
                         }
                     }
 
-                    bd.add(counter, `Modifier from ${this.penaltyCounterStat}`)
+                    bd.add(counter, `Modifier from ${this.penaltyCounterStat()}`)
                 }
                 checks.push(bd)
             }
@@ -503,7 +504,6 @@ class WeaponRow extends React.Component {
             <span style={infoStyle}><label>Bypass:</label> <span aria-label={"Bypass"}>{this.bypass()}</span></span>
             <span style={infoStyle}><label>Weight:</label> <span aria-label={"Weight"}>{util.itemWeight(this.props.weapon).toFixed(2)} kg</span></span>
                     <Button onClick={(e) => this.handleRemove()}
-                            ref={(c) => this._removeButton = c}
                             size="sm"
                     >Remove</Button>
             </div>

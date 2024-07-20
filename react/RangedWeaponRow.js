@@ -17,7 +17,10 @@ class RangedWeaponRow extends WeaponRow {
         this.readiedBaseI = -1;
         this.baseCheckBonusForSlowActions = 10;
         this.extraActionModifier = 10;
-        this.penaltyCounterStat = "FIT";
+    }
+
+    penaltyCounterStat() {
+        return "FIT"
     }
 
     skillCheck() {
