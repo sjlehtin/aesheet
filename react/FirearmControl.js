@@ -55,7 +55,7 @@ import {Unskilled} from "./Unskilled";
  *
  * The PC may also select to take close-combat actions. In this case, the
  * ROA of the firearm is one half of the ROF. The ROA and the to-hit roll are
- * modified by the Instinctive fire skill. As in all close combat, 2,5 is the
+ * modified by the Instinctive fire skill (MOV +5L). As in all close combat, 2,5 is the
  * maximum ROA. Successful attacks are at +2 lethality.
  * If the firearm uses burst fire, each burst takes two actions (#1, #3, #5),
  * all rounds hit, and normal lethality modifiers apply, so that the rounds
@@ -71,6 +71,43 @@ import {Unskilled} from "./Unskilled";
  * (the defender manages to turn the gun down to ground and is hit only by
  * ricochet).
  */
+
+function RangeInfo({rangeEffect}) {
+    if (rangeEffect) {
+        return <div>
+            <Table>
+                <tbody>
+                <tr aria-label={"Range effect"}>
+                    <th>Range effect</th>
+                    <td className={"mx-2"}
+                        aria-label="Name">{`${rangeEffect.name}`}</td>
+                    <th className={"ml-5"}>Bumping</th>
+                    <td className={"mx-2"}
+                        aria-label="Bumping allowed">{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
+                    <th className={"ml-5"}>Check</th>
+                    <td className={"mx-2"}
+                        aria-label="Check modifier">{`${util.renderInt(rangeEffect.check)}`}</td>
+                    <th className={"ml-2"}>TI</th>
+                    <td className={"mx-2"}
+                        aria-label="Target initiative modifier">{`${util.renderInt(rangeEffect.targetInitiative)}`}</td>
+                    <th className={"ml-5"}>Dmg</th>
+                    <td className={"mx-2"}
+                        aria-label="Damage modifier">{`${util.renderInt(rangeEffect.damage)}`}</td>
+                    <th className={"ml-5"}>Leth</th>
+                    <td className={"mx-2"}
+                        aria-label="Lethality modifier">{`${util.renderInt(rangeEffect.leth)}`}</td>
+                    <th className={"ml-5"}>Vision</th>
+                    <td className={"mx-2"}
+                        aria-label="Vision check">{rangeEffect.visionCheck}</td>
+                </tr>
+                </tbody>
+            </Table>
+        </div>;
+    } else {
+        return <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span>
+        </div>;
+    }
+}
 
 class FirearmControl extends RangedWeaponRow {
     constructor(props) {
@@ -105,6 +142,8 @@ class FirearmControl extends RangedWeaponRow {
         } else if (useType === WeaponRow.SEC) {
             mod = -0.5;
         }
+
+        // TODO: two-weapon style
 
         rof += mod
         if (mod) {
@@ -701,7 +740,6 @@ class FirearmControl extends RangedWeaponRow {
 
     render () {
         const weapon = this.props.weapon.base;
-        const missing = this.missingSkills();
 
         const actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -722,12 +760,6 @@ class FirearmControl extends RangedWeaponRow {
         });
 
         const baseCheck = super.skillCheck();
-
-        // TODO: extract?
-        let baseCheckContainer;
-        if (baseCheck) {
-            baseCheckContainer = <BaseCheck baseCheck={baseCheck} />
-        }
 
         let skillChecks = this.skillChecksV2(actions, {useType: this.state.useType});
         if (skillChecks == null) {
@@ -770,44 +802,6 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         let scope = this.props.weapon.scope || {};
-
-        let rangeEffect = this.rangeEffect(this.props.toRange);
-
-        let rangeInfo;
-        if (rangeEffect) {
-            rangeInfo = <div>
-                <Table>
-                    <tbody>
-                    <tr aria-label={"Range effect"}>
-                        <th>Range effect</th>
-                        <td className={"mx-2"}
-                            aria-label="Name">{`${rangeEffect.name}`}</td>
-                        <th className={"ml-5"}>Bumping</th>
-                        <td className={"mx-2"}
-                            aria-label="Bumping allowed">{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
-                        <th className={"ml-5"}>Check</th>
-                        <td className={"mx-2"}
-                            aria-label="Check modifier">{`${this.renderInt(rangeEffect.check)}`}</td>
-                        <th className={"ml-2"}>TI</th>
-                        <td className={"mx-2"}
-                            aria-label="Target initiative modifier">{`${this.renderInt(rangeEffect.targetInitiative)}`}</td>
-                        <th className={"ml-5"}>Dmg</th>
-                        <td className={"mx-2"}
-                            aria-label="Damage modifier">{`${this.renderInt(rangeEffect.damage)}`}</td>
-                        <th className={"ml-5"}>Leth</th>
-                        <td className={"mx-2"}
-                            aria-label="Lethality modifier">{`${this.renderInt(rangeEffect.leth)}`}</td>
-                        <th className={"ml-5"}>Vision</th>
-                        <td className={"mx-2"}
-                            aria-label="Vision check">{rangeEffect.visionCheck}</td>
-                    </tr>
-                    </tbody>
-                </Table>
-            </div>;
-        } else {
-            rangeInfo =
-                <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
-        }
 
         const rof = this.rof(this.state.useType)
 
@@ -860,7 +854,8 @@ class FirearmControl extends RangedWeaponRow {
                                                 {weapon.name}
 
                                                 <Unskilled missingSkills={this.missingSkills()} />
-                                                {baseCheckContainer}
+                                                {<BaseCheck
+                                                    baseCheck={baseCheck}/>}
                                             </div>
                                         </td>
                                         <td style={cellStyle}>{this.skillLevel()}</td>
@@ -991,7 +986,7 @@ class FirearmControl extends RangedWeaponRow {
                     </Row>
                     <Row>
                         <Col>
-                            {rangeInfo}
+                            <RangeInfo rangeEffect={this.rangeEffect(this.props.toRange)} />
                         </Col>
                     </Row>
                     <Row>
