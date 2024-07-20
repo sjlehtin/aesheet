@@ -14,7 +14,8 @@ function GravityControl({onChange, initialValue}) {
     const [value, setValue] = useState(initialValue ? initialValue : "")
     const [isValid, setIsValid] = useState(true)
 
-    return <Form.Group aas={Row}>
+    return <Row>
+        <Form.Group as={Row}>
         <Col>
         <Form.Label id={"gravity-input"} column sm="2">
           Gravity
@@ -40,7 +41,8 @@ function GravityControl({onChange, initialValue}) {
                       type={"text"}
                       placeholder={"1.0"}/>
             </Col>
-        </Form.Group>;
+        </Form.Group>
+    </Row>;
 }
 
 GravityControl.propTypes = {onChange: PropTypes.func};
