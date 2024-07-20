@@ -5,8 +5,12 @@ describe('SkillHandler skill mods', function() {
     beforeAll(() => {
         testSetup()
     })
-    afterEach(() => {
+    beforeEach(() => {
         factories.clearAll()
+        factories.skillFactory({name: "Climbing", stat: "MOV", affected_by_armor_mod_climb: true})
+        factories.skillFactory({name: "Stealth", stat: "MOV", affected_by_armor_mod_stealth: true})
+        factories.skillFactory({name: "Concealment", stat: "INT", affected_by_armor_mod_conceal: true})
+        factories.skillFactory({name: "Swimming", stat: "MOV", affected_by_armor_mod_swim: true})
     })
 
     it('takes armor into account with climbing skill penalties', function () {
@@ -77,16 +81,16 @@ describe('SkillHandler skill mods', function() {
         expect(handler.skillCheck("Concealment").value()).toEqual(51);
     });
 
-    it('counts armor penalties in to the tumbling skill check', function () {
+    it('counts armor penalties in to the swimming skill check', function () {
         const handler = factories.skillHandlerFactory({
             character: {cur_fit: 45, cur_ref: 45},
-            skills: [{skill: {name: "Tumbling", stat: "REF"}, level: 2}],
+            skills: [{skill: {name: "Swimming", stat: "MOV"}, level: 2}],
             armor: {
                 base: {
-                    mod_tumble: -5
+                    mod_swim: -5
                 },
             }
         });
-        expect(handler.skillCheck("Tumbling").value()).toEqual(50);
+        expect(handler.skillCheck("Swimming").value()).toEqual(50);
     });
 });

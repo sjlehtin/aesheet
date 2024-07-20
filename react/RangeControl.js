@@ -52,7 +52,7 @@ class RangeControl extends React.Component {
         if (this.props.skillHandler) {
             if (util.isFloat(this.state.currentRange)) {
                 const check = this.props.skillHandler.visionCheck(this.state.currentRange,
-                    this.state.currentDetectionLevel);
+                    this.state.currentDetectionLevel).value();
 
                 let style = {};
                 let verbose = '';

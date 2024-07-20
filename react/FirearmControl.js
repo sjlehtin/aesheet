@@ -661,17 +661,18 @@ class FirearmControl extends RangedWeaponRow {
     rangeEffect(toRange) {
         let perks = this.props.weapon.scope?.perks ?? [];
 
-        const visionCheck = this.props.skillHandler.visionCheck(toRange,
+        const visionCheckBreakdown = this.props.skillHandler.visionCheck(toRange,
             this.props.darknessDetectionLevel,
             perks);
 
         const dayBaseCheck = this.props.skillHandler.dayVisionBaseCheck(perks)
         let effect = this.weaponRangeEffect(toRange, dayBaseCheck.detectionLevel);
 
-        if (effect === null || visionCheck === null) {
+        if (effect === null || visionCheckBreakdown === null) {
             return null;
         }
 
+        const visionCheck = visionCheckBreakdown.value()
         effect.visionCheck = visionCheck
 
         // If vision check is under 75, the difference is penalty to the
