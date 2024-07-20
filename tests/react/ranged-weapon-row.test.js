@@ -44,8 +44,6 @@ describe('RangedWeaponRow', function() {
             addExtraSkill(skill.skill)
         }
         addExtraSkill(weaponProps.base?.base_skill);
-        addExtraSkill(weaponProps.base?.skill);
-        addExtraSkill(weaponProps.base?.skill2);
 
         handlerProps.allSkills = allSkills;
 
@@ -130,6 +128,31 @@ describe('RangedWeaponRow', function() {
             num_dice: 1, dice: 6, extra_damage: 2, leth: 5, plus_leth: 1}}
         });
         expect(weapon.getByLabelText("Damage").textContent).toEqual("1d6+4/5+1")
+    });
+
+    it("allows fractional lethality", function () {
+        const weapon = renderWeaponRow({
+            handlerProps: {
+                skills: [{skill: "Bow", level: 0}],
+                character: {cur_ref: 45, cur_int: 45, cur_fit: 66}
+            },
+            weaponProps: {
+                base: {
+                    roa: "1.5",
+                    base_skill: "Bow",
+                    num_dice: 1,
+                    dice: 6,
+                    extra_damage: 2,
+                    leth: 5,
+                    plus_leth: 1
+                },
+                quality: {
+                    damage: "0.5",
+                    leth: "0.5"
+                }
+            }
+        });
+        expect(weapon.getByLabelText("Damage").textContent).toEqual("1d6+4/6+1")
     });
 
     it("caps FIT bonus", function () {

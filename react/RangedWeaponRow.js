@@ -64,23 +64,26 @@ class RangedWeaponRow extends WeaponRow {
     }
 
     fitDamageBonus(useType) {
-        var base = this.props.weapon.base;
+        const base = this.props.weapon.base;
+
+        let fitLethBonus
+        let fitBonusDmg
 
         if (base.base_skill.name === "Crossbow") {
             fitBonusDmg = 0;
             fitLethBonus = 0
         } else {
-            var quality = this.props.weapon.quality;
-            var fit = this.getStat("fit");
+            const quality = this.props.weapon.quality;
+            let fit = this.getStat("fit");
             /* Cap the damage according to max pull of the bow.*/
             if (base.base_skill.name === "Bow" && quality.max_fit) {
                 fit = Math.min(quality.max_fit, fit);
             }
-            var ccFITBonus = fit - 45;
-            var fitBonusDmg = util.rounddown(ccFITBonus /
-                WeaponRow.damageFITModifiers[WeaponRow.PRI]);
-            var fitLethBonus = util.rounddown(ccFITBonus /
-                WeaponRow.lethalityFITModifiers[WeaponRow.PRI]);
+            const ccFITBonus = fit - 45;
+            fitBonusDmg = ccFITBonus /
+                WeaponRow.damageFITModifiers[WeaponRow.PRI];
+            fitLethBonus = ccFITBonus /
+                WeaponRow.lethalityFITModifiers[WeaponRow.PRI];
         }
         return {damage: fitBonusDmg, leth: fitLethBonus};
     }

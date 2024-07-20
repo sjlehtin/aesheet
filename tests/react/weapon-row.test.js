@@ -288,6 +288,27 @@ describe('WeaponRow', function() {
         expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("2d6+5/6+2")
     });
 
+    it("calculates damage with quality with fractional leth", function () {
+        renderWeapon({
+            quality: {
+                damage: "3.5", leth: "1.5",
+                plus_leth: 1
+            }
+        });
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("2d6+5/6+2")
+    });
+
+    it("calculates damage with quality with fractional leth and high fit", function () {
+        renderWeapon({
+            fit: 65,
+            quality: {
+                damage: "3.5", leth: "1.5",
+                plus_leth: 1
+            }
+        });
+        expect(screen.getByLabelText("Attack damage for FULL").textContent).toEqual("2d6+8/7+2")
+    });
+
     it("calculates defense damage", function () {
         renderWeapon();
         expect(screen.getByLabelText("Defense damage for FULL").textContent).toEqual("2d6+2/6")

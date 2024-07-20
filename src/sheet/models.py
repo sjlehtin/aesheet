@@ -651,8 +651,8 @@ class BaseWeaponQuality(ExportedModel):
     roa = models.DecimalField(max_digits=6, decimal_places=4, default=0)
     ccv = models.IntegerField(default=0)
 
-    damage = models.IntegerField(default=0)
-    leth = models.IntegerField(default=0)
+    damage = models.DecimalField(default=0, max_digits=8, decimal_places=4)
+    leth = models.DecimalField(default=0, max_digits=8, decimal_places=4)
     plus_leth = models.IntegerField(default=0)
 
     bypass = models.IntegerField(default=0)
