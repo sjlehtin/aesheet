@@ -61,13 +61,27 @@ export default class ValueBreakdown {
     roundup() {
         const oldValue = this.#value
         this.#value = util.roundup(this.#value)
-        this.#breakdown.push({value: this.#value - oldValue, operator: "U", reason: "roundup"})
+        const diff = this.#value - oldValue
+        if (diff) {
+            this.#breakdown.push({
+                value: diff,
+                operator: "U",
+                reason: "round up"
+            })
+        }
     }
 
     rounddown() {
         const oldValue = this.#value
         this.#value = util.rounddown(this.#value)
-        this.#breakdown.push({value: this.#value - oldValue, operator: "D", reason: "rounddown"})
+        const diff = this.#value - oldValue
+        if (diff) {
+            this.#breakdown.push({
+                value: diff,
+                operator: "D",
+                reason: "round down"
+            })
+        }
     }
 
     value() {

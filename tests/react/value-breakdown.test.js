@@ -94,6 +94,10 @@ describe("ValueBreakdown", function () {
 
         expect(bd.value()).toEqual(1)
         expect(bd.breakdown().length).toEqual(3)
+
+        expect(bd.value()).toEqual(1)
+        bd.roundup()
+        expect(bd.breakdown().length).toEqual(3)
     })
 
     it ("can round values down", function() {
@@ -103,6 +107,9 @@ describe("ValueBreakdown", function () {
         bd.rounddown()
 
         expect(bd.value()).toEqual(1)
+        expect(bd.breakdown().length).toEqual(3)
+
+        bd.rounddown()
         expect(bd.breakdown().length).toEqual(3)
     })
 
