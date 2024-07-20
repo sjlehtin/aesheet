@@ -375,6 +375,18 @@ class Skill(ExportedModel):
     powered_ref_counter = models.IntegerField(default=0, help_text="Counters this many points of REF penalty using a powered armor")
     powered_fit_mod = models.IntegerField(default=0,  help_text="Grant this many points of FIT bonus using a powered armor")
 
+    # skill mods from armor to affect skill in general,
+    # affected_by_armor_mod_climb etc to Skill
+    #
+    # 1) Stealth 2) Conceal 3) Climb, Jump, Tumble 4) Swim. each of these
+    # could affect several skills, esp. Climb, Jump, Tumble. Add a field to
+    # skills to mark that the modifier affects the skill and use in skill
+    # calculation, instead of hardcoding skill names.
+    affected_by_armor_mod_stealth = models.BooleanField(default=False)
+    affected_by_armor_mod_conceal = models.BooleanField(default=False)
+    affected_by_armor_mod_climb = models.BooleanField(default=False)
+    affected_by_armor_mod_swim = models.BooleanField(default=False)
+
     def clean_fields(self, exclude=None):
         self.stat = self.stat.upper()
         super(Skill, self).clean_fields(exclude=exclude)
@@ -1398,6 +1410,7 @@ class ArmorTemplate(ExportedModel):
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
     mod_tumble = models.IntegerField(default=0)
+    mod_swim = models.IntegerField(default=0)
 
     weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)
     # 0 no armor, 1 light, 2 medium, 3 heavy

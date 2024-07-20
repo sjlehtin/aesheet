@@ -93,6 +93,10 @@ const skillFactory = function (overrideFields = {}) {
         "max_level": 8,
         "powered_ref_counter": 0,
         "powered_fit_mod": 0,
+        "affected_by_armor_mod_stealth": 0,
+        "affected_by_armor_mod_conceal": 0,
+        "affected_by_armor_mod_climb": 0,
+        "affected_by_armor_mod_swim": 0,
     };
     const newSkill = Object.assign(_baseSkill, props);
 
@@ -917,21 +921,18 @@ export function skillHandlerFactory (givenProps) {
     }
     if (givenProps.edges) {
         for (let edge of givenProps.edges) {
-            var createdEdge = edgeLevelFactory(edge);
-            edgeList.push(createdEdge);
+            edgeList.push(edgeLevelFactory(edge));
         }
     }
     if (givenProps.effects) {
         for (let eff of givenProps.effects) {
-            var createdEff = transientEffectFactory(eff);
-            effects.push(createdEff);
+            effects.push(transientEffectFactory(eff));
         }
     }
 
     if (givenProps.wounds) {
         for (let ww of givenProps.wounds) {
-            var wound = woundFactory(ww);
-            wounds.push(wound);
+            wounds.push(woundFactory(ww));
         }
 
     }
