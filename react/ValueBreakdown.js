@@ -1,3 +1,5 @@
+import * as util from "./sheet-util";
+
 export default class ValueBreakdown {
     #value = 0
     #breakdown = []
@@ -54,6 +56,18 @@ export default class ValueBreakdown {
         if (this.#setValue === null) {
             this.#setValue = breakdown.#setValue
         }
+    }
+
+    roundup() {
+        const oldValue = this.#value
+        this.#value = util.roundup(this.#value)
+        this.#breakdown.push({value: this.#value - oldValue, operator: "U", reason: "roundup"})
+    }
+
+    rounddown() {
+        const oldValue = this.#value
+        this.#value = util.rounddown(this.#value)
+        this.#breakdown.push({value: this.#value - oldValue, operator: "D", reason: "rounddown"})
     }
 
     value() {
