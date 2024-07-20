@@ -321,7 +321,7 @@ class SkillHandler {
         const effStats = this.getEffStats();
         const ability = effStats[stat.toLowerCase()].value();
 
-        const level= this.skillLevel(skillName);
+        const level = this.skillLevel(skillName);
 
         if (level === "U" && !ignoreMissingSkill) {
             bd.add(Math.round(ability / 4), `1/4*${stat} (U)`)

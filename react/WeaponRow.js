@@ -14,8 +14,10 @@ class WeaponRow extends React.Component {
         this.readiedBaseI = -3;
         this.baseCheckBonusForSlowActions = 5;
         this.extraActionModifier = 10;
+        // TODO: changes for firearms when in CC
         this.penaltyCounterStat = "INT";
     }
+
 
     skillLevel() {
         return this.props.skillHandler.skillLevel(
@@ -51,9 +53,9 @@ class WeaponRow extends React.Component {
         return bd
     }
 
-    skillROAMultiplier() {
+    skillROAMultiplier(skillName) {
         const level = this.props.skillHandler.skillLevel(
-            this.props.weapon.base.base_skill.name);
+            skillName ?? this.props.weapon.base.base_skill.name);
         if (level > 0) {
             return (1 + 0.1 * level);
         }

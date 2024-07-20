@@ -31,6 +31,7 @@ import SenseTable from './SenseTable';
 import RangeControl from './RangeControl';
 import SideDrawer from "./SideDrawer";
 import GravityControl from "./GravityControl";
+import CloseCombatToggle from "./CloseCombatToggle";
 
 import {
     Badge,
@@ -127,8 +128,6 @@ class StatBlock extends React.Component {
             transientEffectList: [],
             miscellaneousItemList: [],
 
-            gravity: 1.0,
-
             carriedInventoryWeight: 0,
 
             armor: undefined,
@@ -136,17 +135,20 @@ class StatBlock extends React.Component {
 
             woundList: [],
 
+            // Combat transients
             // Apply range on firearms.
             firearmRange: "",
             firearmDarknessDetectionLevel: 0,
-
-        };
+            inCloseCombat: false,
+            gravity: 1.0,
+        }
     }
 
     combatTransientsActive() {
         return this.state.firearmRange !== ""
             || this.state.gravity !== 1.0
             || this.state.firearmDarknessDetectionLevel !== 0
+            || this.state.inCloseCombat
     }
 
     handleFirearmsLoaded(firearmList) {
@@ -1118,6 +1120,7 @@ class StatBlock extends React.Component {
                 campaign={this.state.char.campaign}
                 style={Object.assign({}, baseStyle, {backgroundColor: bgColor})}
                 toRange={this.state.firearmRange}
+                inCloseCombat={this.state.inCloseCombat}
                 darknessDetectionLevel={this.state.firearmDarknessDetectionLevel}
             />);
         }
@@ -1484,6 +1487,10 @@ class StatBlock extends React.Component {
             <SideDrawer highlight={this.combatTransientsActive()}>
                 <Row>
                     {rangeControl}
+                </Row>
+                <Row>
+                    <CloseCombatToggle inCloseCombat={this.state.inCloseCombat} onToggle={(val) => {
+                        this.setState({inCloseCombat: !this.state.inCloseCombat})}} />
                 </Row>
                 <Row>
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
