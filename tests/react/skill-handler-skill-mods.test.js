@@ -1,104 +1,96 @@
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
+import * as factories from './factories'
+import {testSetup} from "./testutils";
 
-var factories = require('./factories');
-
-
-describe('SkillHandler stats', function() {
-    "use strict";
+describe('SkillHandler skill mods', function() {
+    beforeAll(() => {
+        testSetup()
+    })
+    beforeEach(() => {
+        factories.clearAll()
+        factories.skillFactory({name: "Climbing", stat: "MOV", affected_by_armor_mod_climb: true})
+        factories.skillFactory({name: "Stealth", stat: "MOV", affected_by_armor_mod_stealth: true})
+        factories.skillFactory({name: "Concealment", stat: "INT", affected_by_armor_mod_conceal: true})
+        factories.skillFactory({name: "Swimming", stat: "MOV", affected_by_armor_mod_swim: true})
+    })
 
     it('takes armor into account with climbing skill penalties', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
+            skills: [{skill: {name: "Climbing", stat: "MOV"}, level: 0}],
             character: {
                 cur_fit: 45, cur_ref: 45
             },
-            armor: factories.armorFactory({
+            armor: {
                 base: {
-                    mod_fit: -2,
                     mod_climb: -10
                 },
                 quality: {
                     mod_climb: 5
                 }
-            }),
+            },
         });
-        expect(handler.getSkillMod("Climbing")).toEqual(-5);
+        expect(handler.skillCheck("Climbing").value()).toEqual(40);
     });
 
     it('caps armor quality penalty counter', function () {
-        var handler = factories.skillHandlerFactory({
-            armor: factories.armorFactory({
+        const handler = factories.skillHandlerFactory({
+            skills: [{skill: {name: "Climbing", stat: "MOV"}, level: 0}],
+            character: {
+                cur_fit: 45, cur_ref: 45
+            },
+            armor: {
                 base: {
                     mod_climb: -5
                 },
                 quality: {
                     mod_climb: 10
                 }
-            }),
+            },
         });
-        expect(handler.getSkillMod("Climbing")).toEqual(0);
-    });
-
-    it('counts armor penalties in to the climbing skill check', function () {
-        var handler = factories.skillHandlerFactory({
-            character: {cur_fit: 45, cur_ref: 45},
-            skills: [{skill: "Climbing", level: 1}],
-            armor: factories.armorFactory({
-                base: {
-                    mod_climb: -5
-                },
-                quality: {
-                    mod_climb: 0
-                }
-            })
-        });
-        expect(handler.skillCheck("Climbing", "mov").value()).toEqual(45);
+        expect(handler.skillCheck("Climbing").value()).toEqual(45);
     });
 
     it('counts armor penalties in to the stealth skill check', function () {
-        var handler = factories.skillHandlerFactory({
+        const handler = factories.skillHandlerFactory({
             character: {cur_fit: 45, cur_ref: 45},
-            skills: [{skill: "Stealth", level: 1}],
-            armor: factories.armorFactory({
+            skills: [{skill: {name: "Stealth", stat: "MOV"}, level: 1}],
+            armor: {
                 base: {
                     mod_stealth: -5
                 },
                 quality: {
                     mod_stealth: 2
                 }
-            })
+            }
         });
-        expect(handler.skillCheck("Stealth", "mov").value()).toEqual(47);
+        expect(handler.skillCheck("Stealth").value()).toEqual(47);
     });
 
     it('counts armor penalties in to the concealment skill check', function () {
-        var handler = factories.skillHandlerFactory({
-            character: {cur_fit: 45, cur_ref: 45},
-            skills: [{skill: "Concealment", level: 2}],
-            armor: factories.armorFactory({
+        const handler = factories.skillHandlerFactory({
+            character: {cur_int: 45},
+            skills: [{skill: {name: "Concealment", stat: "INT"}, level: 2}],
+            armor: {
                 base: {
                     mod_conceal: -5
                 },
                 quality: {
                     mod_conceal: 1
                 }
-            })
+            }
         });
-        expect(handler.skillCheck("Concealment", "mov").value()).toEqual(51);
+        expect(handler.skillCheck("Concealment").value()).toEqual(51);
     });
 
-    it('counts armor penalties in to the tumbling skill check', function () {
-        var handler = factories.skillHandlerFactory({
+    it('counts armor penalties in to the swimming skill check', function () {
+        const handler = factories.skillHandlerFactory({
             character: {cur_fit: 45, cur_ref: 45},
-            skills: [{skill: "Tumbling", level: 2}],
-            armor: factories.armorFactory({
+            skills: [{skill: {name: "Swimming", stat: "MOV"}, level: 2}],
+            armor: {
                 base: {
-                    mod_tumble: -5
+                    mod_swim: -5
                 },
-            })
+            }
         });
-        expect(handler.skillCheck("Tumbling", "ref").value()).toEqual(50);
+        expect(handler.skillCheck("Swimming").value()).toEqual(50);
     });
-
 });

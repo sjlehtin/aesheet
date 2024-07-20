@@ -33,13 +33,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {Table, Card} from 'react-bootstrap';
+import ValueBreakdown from "./ValueBreakdown";
+import StatBreakdown from "./StatBreakdown";
 
 class SenseTable extends React.Component {
 
     static getChecks(baseNumChecks, baseCheck) {
         let checks = [];
         for (let ii = 0; ii < baseNumChecks + baseCheck.detectionLevel; ii++) {
-            checks.push(baseCheck.check + ii * 10);
+            const bd = new ValueBreakdown()
+            bd.addBreakdown(baseCheck.check);
+            bd.add(ii * 10, "from detection level")
+            checks.push(bd);
         }
         checks.reverse();
         return checks;
@@ -75,7 +80,7 @@ class SenseTable extends React.Component {
                 }
             }
             let style = Object.assign({}, baseStyle, extras);
-            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}>{chk}</td>;
+            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}><StatBreakdown value={chk} /></td>;
         });
 
         const numPad = 12 - checks.length;
@@ -107,7 +112,10 @@ class SenseTable extends React.Component {
                 SenseTable.BASE_VISION_RANGE + totalDarknessDL,
                 check);
             checks = checks.map((chk) => {
-                return chk + 10 * totalDarknessDL;
+                const bd = new ValueBreakdown()
+                bd.addBreakdown(chk);
+                bd.add(totalDarknessDL * 10, "from darkness")
+                return bd;
             });
         }
         return SenseTable.renderCheckCells(checks,

@@ -44,7 +44,21 @@ class SkillAdmin(admin.ModelAdmin):
                     'can_be_defaulted',
                     'is_specialization',
                     'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
-                    'skill_cost_3', 'stat', 'type')
+                    'skill_cost_3',
+                    'affected_by_armor_mod_stealth',
+                    'affected_by_armor_mod_conceal',
+                    'affected_by_armor_mod_climb',
+                    'affected_by_armor_mod_swim',
+                    'stat', 'type')
+    list_editable = ('can_be_defaulted',
+                    'is_specialization',
+                    'skill_cost_0', 'skill_cost_1', 'skill_cost_2',
+                    'skill_cost_3',
+                    'affected_by_armor_mod_stealth',
+                    'affected_by_armor_mod_conceal',
+                    'affected_by_armor_mod_climb',
+                    'affected_by_armor_mod_swim',
+                    'stat', 'type')
     list_filter = ('tech_level',)
     search_fields = ('name', )
     save_as = True

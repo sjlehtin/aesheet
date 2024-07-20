@@ -1,3 +1,5 @@
+import * as util from "./sheet-util";
+
 export default class ValueBreakdown {
     #value = 0
     #breakdown = []
@@ -53,6 +55,32 @@ export default class ValueBreakdown {
         // Inherit set value from the new bd unless already set here.
         if (this.#setValue === null) {
             this.#setValue = breakdown.#setValue
+        }
+    }
+
+    roundup() {
+        const oldValue = this.#value
+        this.#value = util.roundup(this.#value)
+        const diff = this.#value - oldValue
+        if (diff) {
+            this.#breakdown.push({
+                value: diff,
+                operator: "U",
+                reason: "round up"
+            })
+        }
+    }
+
+    rounddown() {
+        const oldValue = this.#value
+        this.#value = util.rounddown(this.#value)
+        const diff = this.#value - oldValue
+        if (diff) {
+            this.#breakdown.push({
+                value: diff,
+                operator: "D",
+                reason: "round down"
+            })
         }
     }
 

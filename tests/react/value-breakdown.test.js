@@ -86,6 +86,33 @@ describe("ValueBreakdown", function () {
         expect(bd.breakdown().length).toEqual(3)
     })
 
+    it ("can round values up", function() {
+        const bd = new ValueBreakdown()
+        bd.add(1, "because")
+        bd.divide(5, "coefficient")
+        bd.roundup()
+
+        expect(bd.value()).toEqual(1)
+        expect(bd.breakdown().length).toEqual(3)
+
+        expect(bd.value()).toEqual(1)
+        bd.roundup()
+        expect(bd.breakdown().length).toEqual(3)
+    })
+
+    it ("can round values down", function() {
+        const bd = new ValueBreakdown()
+        bd.add(9, "because")
+        bd.divide(5, "coefficient")
+        bd.rounddown()
+
+        expect(bd.value()).toEqual(1)
+        expect(bd.breakdown().length).toEqual(3)
+
+        bd.rounddown()
+        expect(bd.breakdown().length).toEqual(3)
+    })
+
     it("can take initial values", function () {
         const bd = new ValueBreakdown(5, "foo")
         expect(bd.value()).toEqual(5)

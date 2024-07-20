@@ -113,9 +113,9 @@ class SkillHandler {
             for (let st of SkillHandler.allStatNames) {
                 this.#armorMods[st] = new ValueBreakdown()
 
-                const helmMod = this.getArmorMod(this.props.helm, st)
+                const helmMod = this.getArmorPartMod(this.props.helm, st)
                 this.#armorMods[st].add(helmMod, "helm")
-                const armorMod = this.getArmorMod(this.props.armor, st)
+                const armorMod = this.getArmorPartMod(this.props.armor, st)
                 this.#armorMods[st].add(armorMod, "armor")
             }
 
@@ -338,7 +338,8 @@ class SkillHandler {
             bd.add(this.state.skillBonusMap[skillName].bonus, "skill bonuses")
         }
 
-        bd.add(this.getSkillMod(skillName), "skill mods")
+        if (skill)
+            bd.addBreakdown(this.getSkillMod(skill))
         bd.add(this.getACPenalty().value, "AC penalty")
 
         return bd
@@ -596,7 +597,7 @@ class SkillHandler {
     // Stats.
 
 
-    getArmorMod(armor, givenStat) {
+    getArmorPartMod(armor, givenStat) {
         let fromArmor = 0;
         let fromQuality = 0;
         const stat = "mod_" + givenStat;
@@ -612,16 +613,13 @@ class SkillHandler {
     }
 
     getSkillMod(skill) {
-        let normalized = skill.toLowerCase();
-        if (normalized === "climbing") {
-            normalized = "climb";
-        } else if (normalized === "concealment") {
-            normalized = "conceal";
-        } else if (normalized === "tumbling") {
-            normalized = "tumble";
+        const bd = new ValueBreakdown()
+        for (let mod of ["stealth", "conceal", "climb", "swim"]) {
+            if (skill[`affected_by_armor_mod_${mod}`]) {
+                bd.addBreakdown(this.getArmorStatMod(mod))
+            }
         }
-        return this.getArmorMod(this.props.armor, normalized) +
-            this.getArmorMod(this.props.helm, normalized);
+        return bd
     }
 
     getEdgeModifier(mod) {
@@ -915,35 +913,57 @@ class SkillHandler {
         // the last of the checks is the basic check, with each range
         // increment below getting a +10 bump; for night detection levels, the
         // total detection level is also added as a penalty (* 10).
-        return baseCheck.check + (maxRangeIndex - index) * 10 +
-            darknessDL * 10;
+        const bd = new ValueBreakdown()
+        bd.addBreakdown(baseCheck.check)
+        bd.add((maxRangeIndex - index) * 10, "from range")
+        bd.add(darknessDL * 10, "from darkness")
+        return bd
     }
 
     dayVisionBaseCheck(givenPerks) {
-        const perks = givenPerks ? SkillHandler.getItemMap(givenPerks, (item) => { return item.edge; }) : {};
+        const perks = givenPerks ? SkillHandler.getItemMap(givenPerks, (item) => {
+            return item.edge;
+        }) : {};
 
-        const check = this.skillCheck("Search", "INT", true)?.value();
+        const bd = new ValueBreakdown()
+        bd.addBreakdown(this.skillCheck("Search", "INT", true))
+        bd.add(this.getTotalModifier("vision"), "vision mods")
+
+        bd.add(-5 * this.edgeLevel("Color Blind"),
+            "from color blind")
+
         let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
         acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", perks);
 
-        const colorBlind = this.edgeLevel("Color Blind")
-        return {check: check + this.getTotalModifier("vision") - 5 * colorBlind,
-                detectionLevel: acuteVision,
-                darknessDetectionLevel: 0};
+        return {
+            check: bd,
+            detectionLevel: acuteVision,
+            darknessDetectionLevel: 0
+        };
     }
 
     nightVisionBaseCheck(givenPerks) {
-        const perks = givenPerks ? SkillHandler.getItemMap(givenPerks, (item) => { return item.edge; }) : {};
+        const perks = givenPerks ? SkillHandler.getItemMap(givenPerks, (item) => {
+            return item.edge;
+        }) : {};
 
-        const check = this.skillCheck("Search", "INT", true)?.value();
+        const bd = new ValueBreakdown()
+
+        bd.addBreakdown(this.skillCheck("Search", "INT", true))
+        bd.add(this.getTotalModifier("vision"), "vision mods")
+
         let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
+        acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", perks);
+
         let nightVision = this.detectionLevel("Night Vision",
             "Night Blindness");
-        acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", perks);
         nightVision += this.detectionLevel("Night Vision", "Night Blindness", perks);
-        return {check: check + this.getTotalModifier("vision"),
+
+        return {
+            check: bd,
             detectionLevel: util.rounddown(acuteVision / 2),
-            darknessDetectionLevel: nightVision};
+            darknessDetectionLevel: nightVision
+        };
     }
 
     surpriseCheck() {
@@ -952,22 +972,33 @@ class SkillHandler {
     }
 
     smellCheck() {
-        const smellCheck = this.skillCheck("Search", "INT", true)?.value();
-        return {check: smellCheck + this.getTotalModifier("smell"),
+        const bd = new ValueBreakdown()
+
+        bd.addBreakdown(this.skillCheck("Search", "INT", true))
+        bd.add(this.getTotalModifier("smell"), "smell mods")
+
+        return {check: bd,
             detectionLevel: this.detectionLevel("Acute Smell and Taste",
                             "Poor Smell and Taste")};
     }
 
     hearingCheck() {
-        const hearingCheck = this.skillCheck("Search", "INT", true)?.value();
-        return {check: hearingCheck + this.getTotalModifier("hear"),
+        const bd = new ValueBreakdown()
+
+        bd.addBreakdown(this.skillCheck("Search", "INT", true))
+        bd.add(this.getTotalModifier("hear"), "hear mods")
+
+        return {check: bd,
             detectionLevel: this.detectionLevel("Acute Hearing", "Poor Hearing")};
     }
 
     touchCheck() {
-        const touchCheck = this.skillCheck("Search", "INT", true)?.value();
-        return {check: touchCheck +
-                        util.roundup(this.getSkillMod("climb") / 2),
+        const bd = new ValueBreakdown()
+        bd.addBreakdown(this.getArmorStatMod("climb"))
+        bd.divide(2, "touch coefficient")
+        bd.roundup()
+        bd.addBreakdown(this.skillCheck("Search", "INT", true))
+        return {check: bd,
                 detectionLevel: this.edgeLevel("Acute Touch")};
     }
 }
@@ -975,7 +1006,8 @@ class SkillHandler {
 SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
                 "pos"];
 SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
-    ["mov", "dex", "imm", "vision", "hear", "smell", "surprise"]);
+    ["mov", "dex", "imm", "vision", "hear", "smell", "surprise",
+        "climb", "stealth", "conceal", "swim"]);
 
 SkillHandler.defaultProps = {
     weightCarried: 0,
