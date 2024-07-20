@@ -34,6 +34,7 @@ import PropTypes from 'prop-types';
 
 import {Table, Card} from 'react-bootstrap';
 import ValueBreakdown from "./ValueBreakdown";
+import StatBreakdown from "./StatBreakdown";
 
 class SenseTable extends React.Component {
 
@@ -79,7 +80,7 @@ class SenseTable extends React.Component {
                 }
             }
             let style = Object.assign({}, baseStyle, extras);
-            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}>{chk.value()}</td>;
+            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}><StatBreakdown value={chk} /></td>;
         });
 
         const numPad = 12 - checks.length;
