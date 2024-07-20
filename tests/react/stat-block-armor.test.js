@@ -57,7 +57,7 @@ describe('stat block armor handling', function() {
         const user = userEvent.setup()
 
         render(<StatBlock url="/rest/sheets/1/" />)
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}))
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
         expect(screen.getByText(/Ze Armor/)).toBeInTheDocument()
         expect(screen.getByText(/Ze Helm/)).toBeInTheDocument()

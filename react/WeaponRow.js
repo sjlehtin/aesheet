@@ -333,10 +333,10 @@ class WeaponRow extends React.Component {
             ccFITBonus += maeLevel * 5;
         }
 
-        const fitBonusDmg = util.rounddown(ccFITBonus /
-            WeaponRow.damageFITModifiers[useType]);
-        const fitLethBonus = util.rounddown(ccFITBonus /
-            WeaponRow.lethalityFITModifiers[useType]);
+        const fitBonusDmg = ccFITBonus /
+            WeaponRow.damageFITModifiers[useType];
+        const fitLethBonus = ccFITBonus /
+            WeaponRow.lethalityFITModifiers[useType];
         return {damage: fitBonusDmg, leth: fitLethBonus};
     }
 
@@ -349,10 +349,10 @@ class WeaponRow extends React.Component {
         const quality = this.props.weapon.quality;
         const numDice = base.num_dice * this.props.weapon.size;
 
-        let extraDamage = base.extra_damage * this.props.weapon.size
-            + quality.damage;
+        let extraDamage = parseFloat(base.extra_damage) * this.props.weapon.size
+            + parseFloat(quality.damage)
 
-        let leth = base.leth + (this.props.weapon.size - 1) + quality.leth;
+        let leth = parseFloat(base.leth) + (this.props.weapon.size - 1) + parseFloat(quality.leth);
         let plusLeth = base.plus_leth + quality.plus_leth;
         if (props.defense) {
             plusLeth = null;
@@ -369,8 +369,8 @@ class WeaponRow extends React.Component {
         leth = Math.min(leth + fitLethBonus, this.durability() + 1);
 
         return `${numDice}d${base.dice}${
-            extraDamage ? this.renderInt(extraDamage) : ''
-            }/${leth}${plusLeth ? this.renderInt(plusLeth) : ''}`;
+            extraDamage ? this.renderInt(util.rounddown(extraDamage)) : ''
+            }/${util.rounddown(leth)}${plusLeth ? this.renderInt(plusLeth) : ''}`;
     }
 
     renderInt(value) {
