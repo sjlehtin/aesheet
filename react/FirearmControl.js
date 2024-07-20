@@ -131,37 +131,20 @@ class FirearmControl extends RangedWeaponRow {
             (parseFloat(base.weight) + 6));
 
         let rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
-        let breakdown = [{
-                value: rof,
-                reason: "firearm"
-            }]
 
+        const bd = new ValueBreakdown(rof, "firearm")
         let mod = 0;
         if (useType === WeaponRow.PRI) {
             mod = -0.25;
         } else if (useType === WeaponRow.SEC) {
             mod = -0.5;
         }
+        bd.add(mod, `${useType} use type`)
 
         // TODO: two-weapon style
 
-        rof += mod
-        if (mod) {
-            breakdown.push({
-                value: mod,
-                reason: `${useType} use type`
-            })
-        }
-        const skillRof = rof * this.skillROAMultiplier()
-        breakdown.push({
-            value: skillRof - rof,
-            reason: "skill"
-        })
-        return {
-            value: skillRof,
-            breakdown: breakdown
-        }
-
+        bd.multiply(this.skillROAMultiplier(), "skill")
+        return bd
     }
 
     skillCheck(sweepFire = false) {
@@ -862,8 +845,7 @@ class FirearmControl extends RangedWeaponRow {
                                         <td style={cellStyle}
                                             aria-label={"Rate of fire"}>
                                             <StatBreakdown label={"ROF"}
-                                                           value={rof.value}
-                                                           breakdown={rof.breakdown}/>
+                                                           value={rof} />
                                         </td>
                                         {skillChecks}
                                         <td style={cellStyle}

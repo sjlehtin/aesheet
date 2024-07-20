@@ -44,9 +44,11 @@ class WeaponRow extends React.Component {
     }
 
     baseROA() {
-        return parseFloat(this.props.weapon.base.roa) +
-            (-0.15) * (this.props.weapon.size - 1) +
-            parseFloat(this.props.weapon.quality.roa);
+        const bd = new ValueBreakdown()
+        bd.add(parseFloat(this.props.weapon.base.roa), "Base")
+        bd.add((-0.15) * (this.props.weapon.size - 1), "size")
+        bd.add(parseFloat(this.props.weapon.quality.roa), "quality")
+        return bd
     }
 
     skillROAMultiplier() {
@@ -62,7 +64,8 @@ class WeaponRow extends React.Component {
         if (!useType) {
             useType = WeaponRow.FULL;
         }
-        let roa = this.baseROA();
+
+        const roa = this.baseROA();
 
         let specLevel;
         if (useType === WeaponRow.SPECIAL || useType === WeaponRow.FULL) {
@@ -71,25 +74,20 @@ class WeaponRow extends React.Component {
             if (!util.isInt(specLevel)) {
                 specLevel = 0;
             }
-            roa += specLevel * 0.05;
+            roa.add(specLevel * 0.05, "SWS");
         } else {
             specLevel = this.props.skillHandler.skillLevel(
                 "Two-weapon style");
             if (!util.isInt(specLevel)) {
                 specLevel = 0;
             }
-            let mod;
-            if (useType === WeaponRow.PRI) {
-                mod = -0.25;
-            } else if (useType === WeaponRow.SEC) {
-                mod = -0.5;
-            }
-            mod += specLevel * 0.05;
-
-            roa += Math.min(mod, 0);
+            const fromUseType = useType === WeaponRow.PRI ? -0.25 : -0.5
+            roa.add(fromUseType, "use type")
+            roa.add(Math.min(specLevel * 0.05, -fromUseType), "counter from TWS")
         }
-        roa *= this.skillROAMultiplier();
-        return {value: Math.min(roa, 2.5), breakdown: []};
+        roa.multiply(this.skillROAMultiplier(), "from skill");
+        roa.setMaximum(2.5, "Max ROA")
+        return roa;
     }
 
     ccv() {
@@ -174,7 +172,7 @@ class WeaponRow extends React.Component {
             props = Object.assign(props, givenProps);
         }
 
-        const roa = this.roa(props.useType).value;
+        const roa = this.roa(props.useType).value();
         const baseCheck = this.skillCheck();
         if (!baseCheck) {
             // Actions not available.
@@ -261,7 +259,7 @@ class WeaponRow extends React.Component {
         if (givenProps) {
             props = Object.assign(props, givenProps);
         }
-        const rof = this.roa(props.useType).value;
+        const rof = this.roa(props.useType).value();
         const baseI = -5 / rof;
         const readiedBaseI = this.readiedBaseI;
         let targetI = this.targetInitiative();
@@ -444,7 +442,7 @@ class WeaponRow extends React.Component {
             return <td key={`di-${ii}`} style={defenseInitStyle} aria-label={`Defense initiative for ${useType}`}
             >{this.renderInt(el)}</td>;});
 
-        return <tr aria-label={`Action row for ${useType}`}><td style={cellStyle} aria-label={`ROA for ${useType}`}>{this.roa(useType).value.toFixed(2)}</td>
+        return <tr aria-label={`Action row for ${useType}`}><td style={cellStyle} aria-label={`ROA for ${useType}`}>{this.roa(useType).value().toFixed(2)}</td>
             {checkCells}
             {attackInitiativeCells}
             <td style={attackDamageStyle} aria-label={`Attack damage for ${useType}`}>{

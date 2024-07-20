@@ -44,19 +44,14 @@ class RangedWeaponRow extends WeaponRow {
     }
 
     roa(useType) {
-        var roa = this.baseROA();
-        roa *= this.skillROAMultiplier();
+        const roa = this.baseROA();
+        roa.multiply(this.skillROAMultiplier(), "from skill")
 
         if (this.props.weapon.base.base_skill.name === "Bow") {
-            var level = this.props.skillHandler.skillLevel("Rapid archery");
-            if (level > 0) {
-                roa += level * 0.05;
-            }
+            roa.add(this.props.skillHandler.skillLevel("Rapid archery") * 0.05, "Rapid archery")
         }
-        return {
-            value: Math.min(roa, 5.0),
-            breakdown: []
-        };
+        roa.setMaximum(5.0, "Max ROF");
+        return roa
     }
 
     rof(useType) {
@@ -335,7 +330,7 @@ class RangedWeaponRow extends WeaponRow {
                     </td>
 
                     <td style={cellStyle}>{this.skillLevel()}</td>
-                    <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().value.toFixed(2)}</td>
+                    <td style={cellStyle} aria-label={"Rate of fire"}>{this.rof().value().toFixed(2)}</td>
                     {checkCells}
                     <td style={cellStyle}>{this.targetInitiative()}</td>
                     <td style={cellStyle}>{this.drawInitiative()}</td>
