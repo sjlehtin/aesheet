@@ -8,6 +8,7 @@ function GravityControl({ onChange, initialValue, ...extraProps }) {
       placeHolder={"1.0"}
       onChange={onChange}
       initialValue={initialValue}
+      defaultValue={1.0}
       {...extraProps}
     />
   );
