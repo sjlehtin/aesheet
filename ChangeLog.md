@@ -4,6 +4,7 @@
 
 * Sense table sense checks have breakdowns as tooltips.
 * Allow fractional damage from weapon and quality, rounded down last.
+* Added firearms in close combat. Combat transients now has a "in close combat" toggle, which will change firearms to CC mode.
 
 ### Changed
 

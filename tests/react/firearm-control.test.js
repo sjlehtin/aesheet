@@ -882,7 +882,6 @@ describe('FirearmControl', () => {
         return firearm
     };
 
-
     async function getBurstChecks(burst) {
         const elems = await screen.findAllByLabelText(new RegExp(`Burst ${burst} To-Hit`))
         const values = elems.map((el) => {

@@ -1,6 +1,6 @@
 {
   "name": "aesheet",
-  "version": "0.23.0a1",
+  "version": "0.23.0a2",
   "description": "Client-side presentation and manipulation of the server-side sheet data.",
   "main": "react/main.js",
   "scripts": {
@@ -45,6 +45,7 @@
     "jest-jasmine2": "^29.3.1",
     "jest-webpack-alias": "^3.3.3",
     "msw": "^1.2.2",
+    "prettier": "^3.3.3",
     "style-loader": "^3.3.3",
     "terser-webpack-plugin": "^5.3.10",
     "url-loader": "^4.1.1",

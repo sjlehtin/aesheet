@@ -11,10 +11,11 @@ import UseTypeControl from 'UseTypeControl';
 
 import * as util from './sheet-util'
 import {isFloat} from './sheet-util'
-import {Button, Col, Row, Table} from 'react-bootstrap';
+import {Badge, Button, Col, Row, Table} from 'react-bootstrap';
 import ValueBreakdown from "./ValueBreakdown";
 import {BaseCheck} from "./BaseCheck";
 import {Unskilled} from "./Unskilled";
+import {GoAlert} from "react-icons/go";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -51,11 +52,9 @@ import {Unskilled} from "./Unskilled";
  *
  * Close-Combat Actions
  *
- * TODO: The firearms in CC is currently missing completely
- *
  * The PC may also select to take close-combat actions. In this case, the
  * ROA of the firearm is one half of the ROF. The ROA and the to-hit roll are
- * modified by the Instinctive fire skill. As in all close combat, 2,5 is the
+ * modified by the Instinctive fire skill (MOV +5L). As in all close combat, 2,5 is the
  * maximum ROA. Successful attacks are at +2 lethality.
  * If the firearm uses burst fire, each burst takes two actions (#1, #3, #5),
  * all rounds hit, and normal lethality modifiers apply, so that the rounds
@@ -72,6 +71,49 @@ import {Unskilled} from "./Unskilled";
  * ricochet).
  */
 
+function RangeInfo({rangeEffect}) {
+    if (rangeEffect) {
+        let bumping
+        if (rangeEffect.bumpingAllowed && rangeEffect.bumpingLevel > 0) {
+            bumping = `yes (${rangeEffect.bumpingLevel})`;
+        } else {
+            bumping = `no`;
+        }
+        return <div>
+            <Table>
+                <tbody>
+                <tr aria-label={"Range effect"}>
+                    <th>Range effect</th>
+                    <td className={"mx-2"}
+                        aria-label="Name">{`${rangeEffect.name}`}</td>
+                    <th className={"ml-5"}>Bumping</th>
+                    <td className={"mx-2"}
+                        aria-label="Bumping allowed">{bumping}</td>
+                    <th className={"ml-5"}>Check</th>
+                    <td className={"mx-2"}
+                        aria-label="Check modifier">{`${util.renderInt(rangeEffect.check)}`}</td>
+                    <th className={"ml-2"}>TI</th>
+                    <td className={"mx-2"}
+                        aria-label="Target initiative modifier">{`${util.renderInt(rangeEffect.targetInitiative)}`}</td>
+                    <th className={"ml-5"}>Dmg</th>
+                    <td className={"mx-2"}
+                        aria-label="Damage modifier">{`${util.renderInt(rangeEffect.damage)}`}</td>
+                    <th className={"ml-5"}>Leth</th>
+                    <td className={"mx-2"}
+                        aria-label="Lethality modifier">{`${util.renderInt(rangeEffect.leth)}`}</td>
+                    <th className={"ml-5"}>Vision</th>
+                    <td className={"mx-2"}
+                        aria-label="Vision check">{rangeEffect.visionCheck}</td>
+                </tr>
+                </tbody>
+            </Table>
+        </div>;
+    } else {
+        return <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span>
+        </div>;
+    }
+}
+
 class FirearmControl extends RangedWeaponRow {
     constructor(props) {
         super(props);
@@ -81,7 +123,14 @@ class FirearmControl extends RangedWeaponRow {
         this.readiedBaseI = -1;
         this.baseCheckBonusForSlowActions = 10;
         this.extraActionModifier = 15;
-        this.penaltyCounterStat = "FIT";
+    }
+
+    penaltyCounterStat() {
+        if (this.props.inCloseCombat) {
+            return "INT"
+        } else {
+            return "FIT"
+        }
     }
 
     roa(useType) {
@@ -94,52 +143,47 @@ class FirearmControl extends RangedWeaponRow {
             (parseFloat(base.weight) + 6));
 
         let rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
-        let breakdown = [{
-                value: rof,
-                reason: "firearm"
-            }]
 
+        const bd = new ValueBreakdown(rof, "firearm")
         let mod = 0;
         if (useType === WeaponRow.PRI) {
             mod = -0.25;
         } else if (useType === WeaponRow.SEC) {
             mod = -0.5;
         }
+        bd.add(mod, `${useType} use type`)
 
-        rof += mod
-        if (mod) {
-            breakdown.push({
-                value: mod,
-                reason: `${useType} use type`
-            })
+        // TODO: two-weapon style
+        if (this.props.inCloseCombat) {
+            bd.divide(2, "Firearm in CC")
+            bd.multiply(this.skillROAMultiplier("Instinctive fire"), "inst fire")
+            bd.setMaximum(2.5, "Max ROA");
+        } else {
+            bd.multiply(this.skillROAMultiplier(), "skill")
+            bd.setMaximum(5.0, "Max ROF");
         }
-        const skillRof = rof * this.skillROAMultiplier()
-        breakdown.push({
-            value: skillRof - rof,
-            reason: "skill"
-        })
-        return {
-            value: skillRof,
-            breakdown: breakdown
-        }
-
+        return bd
     }
 
     skillCheck(sweepFire = false) {
-        let effect = this.rangeEffect(this.props.toRange)
+        let effect = this.rangeEffect()
         if (!effect) {
             return null
         }
-        const baseCheck = super.skillCheck()
-        if (!baseCheck) {
-            return null
-        }
+        if (this.props.inCloseCombat) {
+            return this.props.skillHandler.skillCheck("Instinctive fire", "MOV", true)
+        } else {
+            const baseCheck = super.skillCheck()
+            if (!baseCheck) {
+                return null
+            }
 
-        baseCheck.add(effect.check, "range")
-        if (sweepFire && effect.check < 0) {
-            baseCheck.add(effect.check, "sweep @range")
+            baseCheck.add(effect.check, "range")
+            if (sweepFire && effect.check < 0) {
+                baseCheck.add(effect.check, "sweep @range")
+            }
+            return baseCheck
         }
-        return baseCheck
     }
 
     singleBurstChecks(check) {
@@ -184,11 +228,15 @@ class FirearmControl extends RangedWeaponRow {
                 //     autofireClasses[base.autofire_class],
                 //     "autofire class")
 
-                mod += burstMultipliers[ii] *
-                    autofireClasses[base.autofire_class];
+                // In CC, all burst shots have same check.
+                if (!this.props.inCloseCombat) {
+
+                    mod += burstMultipliers[ii] *
+                        autofireClasses[base.autofire_class];
+                }
 
                 mod = FirearmControl.counterPenalty(mod,
-                        this.getStat("FIT"));
+                        this.getStat(this.penaltyCounterStat()));
                 bd.add(mod, "burst penalty")
                 bd.addBreakdown(autofirePenalty)
 
@@ -241,7 +289,7 @@ class FirearmControl extends RangedWeaponRow {
             plusLeth = ` (${this.renderInt(ammo.plus_leth)})`;
         }
 
-        let rangeEffect = this.rangeEffect(this.props.toRange);
+        let rangeEffect = this.rangeEffect();
 
         if (rangeEffect === null) {
             return <span className="damage"><strong>range too long!</strong></span>;
@@ -377,8 +425,13 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     hasSweep() {
+
         return this.props.weapon.base.autofire_rpm &&
             !this.props.weapon.base.sweep_fire_disabled;
+    }
+
+    sweepAvailable() {
+        return this.hasSweep() && !this.props.inCloseCombat
     }
 
     shortRange() {
@@ -408,6 +461,10 @@ class FirearmControl extends RangedWeaponRow {
     renderSweepTable() {
         if (!this.hasSweep()) {
             return '';
+        }
+
+        if (this.props.inCloseCombat) {
+            return <div className={"p-1"}><Badge bg="warning"><GoAlert size={"2em"}/></Badge>{' '}Sweep fire not available in close combat!</div>
         }
 
         var sweepRows = [];
@@ -494,7 +551,7 @@ class FirearmControl extends RangedWeaponRow {
             targetInitiative += this.props.weapon.scope.target_i_mod;
         }
 
-        let rangeEffect = this.rangeEffect(this.props.toRange);
+        let rangeEffect = this.rangeEffect();
         if (rangeEffect === null) {
             return null;
         }
@@ -658,7 +715,19 @@ class FirearmControl extends RangedWeaponRow {
         return null;
     }
 
-    rangeEffect(toRange) {
+    rangeEffect() {
+        if (this.props.inCloseCombat) {
+            return {
+                check: 0,
+                targetInitiative: 0,
+                damage: 2,
+                leth: 2,
+                name: "Contact",
+                bumpingAllowed: true,
+                bumpingLevel: this.skillLevel() ?? 0
+            }
+        }
+        const toRange = this.props.toRange
         let perks = this.props.weapon.scope?.perks ?? [];
 
         const visionCheckBreakdown = this.props.skillHandler.visionCheck(toRange,
@@ -696,14 +765,23 @@ class FirearmControl extends RangedWeaponRow {
                 this.props.skillHandler.skillLevel("Instinctive fire");
         }
         effect.bumpingAllowed = visionCheck >= 100;
+        effect.bumpingLevel = this.skillLevel();
         return effect;
+    }
+
+    skillLevel() {
+        if (this.props.inCloseCombat) {
+            return this.props.skillHandler.skillLevel("Instinctive fire") ?? 0
+        } else {
+            return this.props.skillHandler.skillLevel(
+                this.props.weapon.base.base_skill.name);
+        }
     }
 
     render () {
         const weapon = this.props.weapon.base;
-        const missing = this.missingSkills();
 
-        const actions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        const actions = this.props.inCloseCombat ? [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5] : [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
         const headerStyle = {padding: 2};
         const inlineHeaderStyle = Object.assign({}, headerStyle, {textAlign: 'center'});
@@ -721,23 +799,16 @@ class FirearmControl extends RangedWeaponRow {
                 util.renderInt(init)}</td>
         });
 
-        const baseCheck = super.skillCheck();
-
-        // TODO: extract?
-        let baseCheckContainer;
-        if (baseCheck) {
-            baseCheckContainer = <BaseCheck baseCheck={baseCheck} />
-        }
+        const baseCheck = this.skillCheck();
 
         let skillChecks = this.skillChecksV2(actions, {useType: this.state.useType});
         if (skillChecks == null) {
-            skillChecks = <td colSpan={9}><strong>Range too long!</strong></td>;
+            skillChecks = <td colSpan={9}><strong>No attacks</strong></td>;
         } else {
             skillChecks = skillChecks.map((chk, ii) => {
                 let cellContent;
                 if (chk) {
-                    cellContent = <StatBreakdown value={chk.value()}
-                                                 breakdown={chk.breakdown()}/>
+                    cellContent = <StatBreakdown value={chk}/>
                 } else {
                     cellContent = ""
                 }
@@ -749,7 +820,7 @@ class FirearmControl extends RangedWeaponRow {
         const labelStyle = {marginRight: "0.5em"};
 
         let sweepInstructions = '';
-        if (this.hasSweep()) {
+        if (this.sweepAvailable()) {
             sweepInstructions = <Row style={{color: "hotpink"}}>
                 <Col>
                 <div >
@@ -770,44 +841,6 @@ class FirearmControl extends RangedWeaponRow {
         }
 
         let scope = this.props.weapon.scope || {};
-
-        let rangeEffect = this.rangeEffect(this.props.toRange);
-
-        let rangeInfo;
-        if (rangeEffect) {
-            rangeInfo = <div>
-                <Table>
-                    <tbody>
-                    <tr aria-label={"Range effect"}>
-                        <th>Range effect</th>
-                        <td className={"mx-2"}
-                            aria-label="Name">{`${rangeEffect.name}`}</td>
-                        <th className={"ml-5"}>Bumping</th>
-                        <td className={"mx-2"}
-                            aria-label="Bumping allowed">{`${rangeEffect.bumpingAllowed ? "yes" : "no"}`}</td>
-                        <th className={"ml-5"}>Check</th>
-                        <td className={"mx-2"}
-                            aria-label="Check modifier">{`${this.renderInt(rangeEffect.check)}`}</td>
-                        <th className={"ml-2"}>TI</th>
-                        <td className={"mx-2"}
-                            aria-label="Target initiative modifier">{`${this.renderInt(rangeEffect.targetInitiative)}`}</td>
-                        <th className={"ml-5"}>Dmg</th>
-                        <td className={"mx-2"}
-                            aria-label="Damage modifier">{`${this.renderInt(rangeEffect.damage)}`}</td>
-                        <th className={"ml-5"}>Leth</th>
-                        <td className={"mx-2"}
-                            aria-label="Lethality modifier">{`${this.renderInt(rangeEffect.leth)}`}</td>
-                        <th className={"ml-5"}>Vision</th>
-                        <td className={"mx-2"}
-                            aria-label="Vision check">{rangeEffect.visionCheck}</td>
-                    </tr>
-                    </tbody>
-                </Table>
-            </div>;
-        } else {
-            rangeInfo =
-                <div><span style={{fontWeight: "bold"}}>Unable to shoot to this range</span></div>;
-        }
 
         const rof = this.rof(this.state.useType)
 
@@ -858,17 +891,15 @@ class FirearmControl extends RangedWeaponRow {
                                         <td rowSpan="2" style={cellStyle}>
                                             <div>
                                                 {weapon.name}
-
                                                 <Unskilled missingSkills={this.missingSkills()} />
-                                                {baseCheckContainer}
+                                                <BaseCheck baseCheck={baseCheck} />
                                             </div>
                                         </td>
-                                        <td style={cellStyle}>{this.skillLevel()}</td>
+                                        <td style={cellStyle} aria-label="Skill level">{this.skillLevel()}</td>
                                         <td style={cellStyle}
                                             aria-label={"Rate of fire"}>
                                             <StatBreakdown label={"ROF"}
-                                                           value={rof.value}
-                                                           breakdown={rof.breakdown}/>
+                                                           value={rof} />
                                         </td>
                                         {skillChecks}
                                         <td style={cellStyle}
@@ -948,7 +979,6 @@ class FirearmControl extends RangedWeaponRow {
                                             colSpan={3}>
                                             <Button
                                                 onClick={(e) => this.handleScopeRemove()}
-                                                ref={(c) => this._scopeRemoveButton = c}
                                                 disabled={this.props.weapon.scope === null}
                                                 size="sm">Remove
                                                 scope</Button>
@@ -991,10 +1021,10 @@ class FirearmControl extends RangedWeaponRow {
                     </Row>
                     <Row>
                         <Col>
-                            {rangeInfo}
+                            <RangeInfo rangeEffect={this.rangeEffect(this.props.toRange)} />
                         </Col>
                     </Row>
-                    <Row>
+                        <Row>
                         <Col>
                             {this.renderSweepTable()}
                         </Col>
@@ -1026,6 +1056,7 @@ FirearmControl.propTypes = {
     weapon: PropTypes.object.isRequired,
     campaign: PropTypes.number.isRequired,
     toRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    inCloseCombat: PropTypes.bool,
     darknessDetectionLevel: PropTypes.number,
     onRemove: PropTypes.func,
     onChange: PropTypes.func,
@@ -1036,7 +1067,8 @@ FirearmControl.propTypes = {
 
 FirearmControl.defaultProps = {
     toRange: "",
-    darknessDetectionLevel: 0
+    darknessDetectionLevel: 0,
+    inCloseCombat: false
 };
 
 export default FirearmControl;
