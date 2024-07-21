@@ -48,6 +48,7 @@ import * as util from './sheet-util'
 import ValueBreakdown from "./ValueBreakdown";
 import WoundPenaltyBox from "./WoundPenaltyBox";
 import VisionCheckIndicator from "./VisionCheckIndicator";
+import RangeControl from "./RangeControl";
 
 export function staminaRecovery(effStats, skillHandler) {
     /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
@@ -1462,10 +1463,6 @@ class StatBlock extends React.Component {
     render() {
         const skillHandler = this.getSkillHandler();
         let baseStats;
-        const rangeControl = <DetectionLevelControl onChange={(e) => this.rangeChanged(e)}
-                                  initialRange={this.state.firearmRange}
-                                  initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
-                    />
 
         if (skillHandler) {
             baseStats = skillHandler.getBaseStats();
@@ -1483,7 +1480,13 @@ class StatBlock extends React.Component {
             <>
             <SideDrawer highlight={this.combatTransientsActive()}>
                 <Row>
-                    {rangeControl}
+                    <RangeControl initialValue={this.state.firearmRange}
+                                          onChange={(newRange) => this.setState({
+                                                        firearmRange: newRange, })} />
+                    <DetectionLevelControl
+                        initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
+                        onChange={(newDl) => this.setState({
+                        firearmDarknessDetectionLevel: newDl })} />
                 </Row>
                 <Row>
                     <CloseCombatToggle initialValue={this.state.inCloseCombat} onToggle={(val) => {

@@ -7,7 +7,7 @@ export default function CloseCombatToggle({ initialValue, onToggle }) {
     <Row>
         <Col>
           <Form.Check
-            size="sm"
+              id="close-combat-toggle"
             type="checkbox"
             label="In close combat"
             aria-label="In close combat"

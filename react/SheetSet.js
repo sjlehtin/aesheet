@@ -16,6 +16,7 @@ import DetectionLevelControl from "./DetectionLevelControl";
 import GravityControl from "./GravityControl";
 import {useState} from 'react';
 import CloseCombatToggle from "./CloseCombatToggle";
+import RangeControl from "./RangeControl";
 
 
 async function handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate){
@@ -243,13 +244,13 @@ export function SheetSet({sheetSetId}) {
                                      await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
                                  }}/>
             </Col>
-            <Col><DetectionLevelControl onChange={(newRange) => {
-                setRange(newRange.range),
-                    setDetectionLevel(newRange.darknessDetectionLevel)
-            }}
-                               initialRange={range}
-                               initialDetectionLevel={detectionLevel}
-            />
+            <Col>
+                <RangeControl initialValue={range} onChange={setRange} />
+            </Col>
+            <Col>
+                <DetectionLevelControl
+                        initialDetectionLevel={detectionLevel}
+                        onChange={setDetectionLevel} />
             </Col>
             <Col>
                 <GravityControl initialValue={gravity} onChange={setGravity}/>
