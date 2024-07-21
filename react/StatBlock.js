@@ -28,7 +28,7 @@ import CharacterNotes from './CharacterNotes';
 import MovementRates from './MovementRates';
 import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
-import RangeControl from './RangeControl';
+import DetectionLevelControl from './DetectionLevelControl';
 import SideDrawer from "./SideDrawer";
 import GravityControl from "./GravityControl";
 import CloseCombatToggle from "./CloseCombatToggle";
@@ -1462,7 +1462,7 @@ class StatBlock extends React.Component {
     render() {
         const skillHandler = this.getSkillHandler();
         let baseStats;
-        const rangeControl = <RangeControl onChange={(e) => this.rangeChanged(e)}
+        const rangeControl = <DetectionLevelControl onChange={(e) => this.rangeChanged(e)}
                                   initialRange={this.state.firearmRange}
                                   initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
                     />

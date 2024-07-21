@@ -3,7 +3,7 @@ import React from 'react';
 import { screen, render, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import RangeControl from 'RangeControl';
+import DetectionLevelControl from 'DetectionLevelControl';
 
 import * as factories from './factories'
 
@@ -16,7 +16,7 @@ describe('RangeControl', () => {
         if (!props.skillHandler) {
             props.skillHandler = factories.skillHandlerFactory();
         }
-        return render(<RangeControl {...props}/>);
+        return render(<DetectionLevelControl {...props}/>);
     };
 
     it('calls the onChange when input is changed with valid value', async () => {
@@ -62,7 +62,7 @@ describe('RangeControl', () => {
     it('uses initial value for range', async () => {
         const user = userEvent.setup()
         let spy = jest.fn();
-        renderRangeControl({onChange: spy, initialRange: 60});
+        renderRangeControl({onChange: spy, initialRange: "60"});
 
 
         const input = screen.getByRole("textbox", {name: "Range"});

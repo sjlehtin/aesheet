@@ -157,7 +157,7 @@ describe('StatBlock -- FirearmControl', () => {
 
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
-        const input = await sheet.findByLabelText("Target at range")
+        const input = await sheet.findByLabelText("Range")
 
         fireEvent.change(input, {target: {value: "50"}})
 

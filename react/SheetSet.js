@@ -12,7 +12,7 @@ import {AddSheetControl} from "./AddSheetControl";
 import useSwr from 'swr'
 import Loading from "./Loading";
 import * as rest from './sheet-rest'
-import RangeControl from "./RangeControl";
+import DetectionLevelControl from "./DetectionLevelControl";
 import GravityControl from "./GravityControl";
 import {useState} from 'react';
 import CloseCombatToggle from "./CloseCombatToggle";
@@ -243,7 +243,7 @@ export function SheetSet({sheetSetId}) {
                                      await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
                                  }}/>
             </Col>
-            <Col><RangeControl onChange={(newRange) => {
+            <Col><DetectionLevelControl onChange={(newRange) => {
                 setRange(newRange.range),
                     setDetectionLevel(newRange.darknessDetectionLevel)
             }}
