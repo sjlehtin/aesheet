@@ -69,18 +69,21 @@ class SenseTable extends React.Component {
         const baseStyle = {};
         checks = checks.map((chk, ii) => {
             let props = {}, extras = {};
+            let role = "generic"
             if (typeof(isVision) !== "undefined" && isVision) {
-                if (chk >= 100) {
+                if (chk.value() >= 100) {
                     extras.fontWeight = 'bold';
+                    role = "strong"
                 }
 
-                if (chk <= 75) {
+                if (chk.value() <= 75) {
                     extras.color = 'hotpink';
                     props = {title: `Ranged penalty: ${75 - chk}`};
+                    role = "emphasis"
                 }
             }
             let style = Object.assign({}, baseStyle, extras);
-            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}><StatBreakdown value={chk} /></td>;
+            return <td className="check" aria-label={"check"} key={"chk-" + ii} style={style} {...props}><span role={role}><StatBreakdown value={chk} /></span></td>;
         });
 
         const numPad = 12 - checks.length;

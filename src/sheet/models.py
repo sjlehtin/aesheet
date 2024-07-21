@@ -1770,8 +1770,11 @@ class SheetSet(PrivateMixin, models.Model):
         Sheet, through="SheetSetSheet", blank=True
     )
 
+    # TODO: could store
     # gravity = models.DecimalField(default=1.0)
     # turns played
+    # number of opponents
+
     def access_allowed(self, user):
         # TODO: hide from other users?
         return True
@@ -1784,8 +1787,6 @@ class SheetSetSheet(PrivateMixin, models.Model):
     sheet_set = models.ForeignKey(SheetSet, on_delete=models.CASCADE)
 
     order = models.PositiveIntegerField(default=0)
-    # order / grid location
-    # folded
 
 
 def _collect_exportable_classes(start_model):

@@ -25,8 +25,7 @@ describe('RangeControl', () => {
         renderRangeControl({onChange: spy});
 
         await user.type(screen.getByRole("textbox", {name: "Range"}), "19")
-        expect(spy).toHaveBeenCalledWith({range: 19,
-            darknessDetectionLevel: 0});
+        expect(spy).toHaveBeenCalledWith(19);
     });
 
     it('calls the onChange when input is changed with valid float value', async () => {
@@ -35,8 +34,7 @@ describe('RangeControl', () => {
         renderRangeControl({onChange: spy});
 
         await user.type(screen.getByRole("textbox", {name: "Range"}), "0.4")
-        expect(spy).toHaveBeenCalledWith({range: 0.4,
-            darknessDetectionLevel: 0});
+        expect(spy).toHaveBeenCalledWith(0.4);
     });
 
     it('calls the onChange when input is cleared', async () => {
@@ -45,9 +43,9 @@ describe('RangeControl', () => {
         renderRangeControl({onChange: spy});
 
         await user.type(screen.getByRole("textbox", {name: "Range"}), "0.4")
-        expect(spy).toHaveBeenCalledWith({range: 0.4, darknessDetectionLevel: 0});
+        expect(spy).toHaveBeenCalledWith(0.4);
         await user.clear(screen.getByRole("textbox", {name: "Range"}))
-        expect(spy).toHaveBeenCalledWith({range: "", darknessDetectionLevel: 0});
+        expect(spy).toHaveBeenCalledWith("");
     });
 
     it('does not call the onChange when input is invalid', async () => {
@@ -62,8 +60,7 @@ describe('RangeControl', () => {
     it('uses initial value for range', async () => {
         const user = userEvent.setup()
         let spy = jest.fn();
-        renderRangeControl({onChange: spy, initialRange: 60});
-
+        renderRangeControl({onChange: spy, initialValue: "60"});
 
         const input = screen.getByRole("textbox", {name: "Range"});
         expect(input.getAttribute('value')).toEqual("60")
@@ -71,20 +68,7 @@ describe('RangeControl', () => {
         await user.clear(input)
         await user.type(input, "30")
 
-        expect(spy).toHaveBeenCalledWith({range: 3, darknessDetectionLevel: 0});
-    });
-
-    it('uses initial value for detection level', async () => {
-        const user = userEvent.setup()
-        let spy = jest.fn();
-        renderRangeControl({onChange: spy, initialDetectionLevel: -3});
-
-        const input = screen.getByRole("combobox", {name: "Darkness DL"});
-        await user.click(input)
-        expect(screen.getByText(/Moonlight/, {selector: "[role=option]"})).toHaveAttribute('aria-selected', "true")
-        await user.click(screen.getByText(/Artificial/))
-
-        expect(spy).toHaveBeenCalledWith({range: null, darknessDetectionLevel: -2})
+        expect(spy).toHaveBeenCalledWith(30);
     });
 
 });

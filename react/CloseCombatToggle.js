@@ -1,17 +1,13 @@
 import React, {useState} from "react";
 import {Col, Form, Row} from "react-bootstrap";
 
-export default function CloseCombatToggle({ inCloseCombat, onToggle }) {
-  const [checked, setChecked] = useState(inCloseCombat);
+export default function CloseCombatToggle({ initialValue, onToggle }) {
+  const [checked, setChecked] = useState(initialValue);
   return (
     <Row>
-      <Form.Group as={Row}>
         <Col>
-          {/*<Form.Label id={"close-combat-toggle-label"}>*/}
-          {/*  In close combat*/}
-          {/*</Form.Label>*/}
           <Form.Check
-            size="sm"
+              id="close-combat-toggle"
             type="checkbox"
             label="In close combat"
             aria-label="In close combat"
@@ -22,7 +18,6 @@ export default function CloseCombatToggle({ inCloseCombat, onToggle }) {
             checked={checked}
           />
         </Col>
-      </Form.Group>
     </Row>
   );
 }

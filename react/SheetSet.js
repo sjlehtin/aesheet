@@ -12,9 +12,11 @@ import {AddSheetControl} from "./AddSheetControl";
 import useSwr from 'swr'
 import Loading from "./Loading";
 import * as rest from './sheet-rest'
-import RangeControl from "./RangeControl";
+import DetectionLevelControl from "./DetectionLevelControl";
 import GravityControl from "./GravityControl";
 import {useState} from 'react';
+import CloseCombatToggle from "./CloseCombatToggle";
+import RangeControl from "./RangeControl";
 
 
 async function handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate){
@@ -101,6 +103,7 @@ export function SheetSet({sheetSetId}) {
     const [range, setRange] = useState('')
     const [detectionLevel, setDetectionLevel] = useState(0)
     const [gravity, setGravity] = useState(1.0)
+    const [inCloseCombat, setInCloseCombat] = useState(false)
     const [showDeleteSheet, setShowDeleteSheet] = useState(false)
     const [sheetToDelete, setSheetToDelete] = useState('')
 
@@ -192,6 +195,7 @@ export function SheetSet({sheetSetId}) {
             return <Col className="col-sm-4 mb-3 p-1" key={url}>
                 <ErrorBoundary fallback={fallback}>
                     <CompactSheet key={url} url={url} toRange={range}
+                                  inCloseCombat={inCloseCombat}
                                   darknessDetectionLevel={detectionLevel}
                                   gravity={gravity} style={{fontSize: "70%"}}>
                         {controls}
@@ -240,13 +244,16 @@ export function SheetSet({sheetSetId}) {
                                      await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
                                  }}/>
             </Col>
-            <Col><RangeControl onChange={(newRange) => {
-                setRange(newRange.range),
-                    setDetectionLevel(newRange.darknessDetectionLevel)
-            }}
-                               initialRange={range}
-                               initialDetectionLevel={detectionLevel}
-            />
+            <Col xs={2}>
+                <CloseCombatToggle initialValue={inCloseCombat} onToggle={setInCloseCombat}/>
+            </Col>
+            <Col>
+                <RangeControl initialValue={range} onChange={setRange} />
+            </Col>
+            <Col>
+                <DetectionLevelControl
+                        initialDetectionLevel={detectionLevel}
+                        onChange={setDetectionLevel} />
             </Col>
             <Col>
                 <GravityControl initialValue={gravity} onChange={setGravity}/>

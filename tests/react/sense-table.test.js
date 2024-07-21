@@ -5,7 +5,17 @@ import { screen, render, within } from '@testing-library/react'
 import SenseTable from 'SenseTable'
 import * as factories from './factories'
 
-import {getSenseChecks} from './testutils'
+export function getSenseChecks(checkLabel) {
+    return getSenseCheckNodes(checkLabel).map((el) => parseInt(el.textContent))
+}
+
+function getSenseCheckNodes(checkLabel) {
+    let elements = []
+    within(screen.getByLabelText(checkLabel)).queryAllByRole("cell", {name: "check"}).forEach((el) => {
+        elements.push(el)
+    })
+    return elements;
+}
 
 describe('SenseTable', function() {
     let getSenseTable = function (givenProps) {
@@ -25,6 +35,15 @@ describe('SenseTable', function() {
         expect(checks[checks.length - 1]).toEqual(50);
         // Distance of 2k with Acute Vision.
         expect(checks.length).toEqual(10);
+    });
+
+    it('indicates ranged check penalty and bumping allowed', function () {
+        getSenseTable({character: {cur_int: 50},
+            edges: [{edge: "Acute Vision", level: 1}]});
+
+        const nodes = getSenseCheckNodes("Day vision")
+        expect(nodes[0].children[0].getAttribute("role")).toEqual("strong")
+        expect(nodes[nodes.length - 1].children[0].getAttribute("role")).toEqual("emphasis")
     });
 
     it('displays hearing checks with Poor Hearing', function () {

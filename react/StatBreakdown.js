@@ -68,7 +68,7 @@ export default function StatBreakdown({
         show={showOverlay}
         onToggle={(shouldShow) => setShowOverlay(shouldShow)}
         delay={{ show: 200, hide: 400 }}
-        placement={"right"}
+        placement={"auto"}
         container={containerRef}
         target={targetRef}
         overlay={(props) => (

@@ -245,6 +245,7 @@ class CompactSheet extends StatBlock {
                 campaign={this.state.char.campaign}
                 style={Object.assign({}, baseStyle, {backgroundColor: bgColor})}
                 toRange={this.props.toRange}
+                inCloseCombat={this.props.inCloseCombat}
                 darknessDetectionLevel={this.props.darknessDetectionLevel}
             />);
         }
@@ -452,6 +453,7 @@ CompactSheet.propTypes = {
     toRange: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     darknessDetectionLevel: PropTypes.number.isRequired,
     gravity: PropTypes.number.isRequired,
+    inCloseCombat: PropTypes.bool,
     onCharacterSkillAdd: PropTypes.func,
     onCharacterSkillRemove: PropTypes.func,
     onCharacterSkillModify: PropTypes.func

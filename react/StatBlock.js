@@ -28,7 +28,7 @@ import CharacterNotes from './CharacterNotes';
 import MovementRates from './MovementRates';
 import DamageControl from './DamageControl';
 import SenseTable from './SenseTable';
-import RangeControl from './RangeControl';
+import DetectionLevelControl from './DetectionLevelControl';
 import SideDrawer from "./SideDrawer";
 import GravityControl from "./GravityControl";
 import CloseCombatToggle from "./CloseCombatToggle";
@@ -47,6 +47,8 @@ import * as rest from './sheet-rest'
 import * as util from './sheet-util'
 import ValueBreakdown from "./ValueBreakdown";
 import WoundPenaltyBox from "./WoundPenaltyBox";
+import VisionCheckIndicator from "./VisionCheckIndicator";
+import RangeControl from "./RangeControl";
 
 export function staminaRecovery(effStats, skillHandler) {
     /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
@@ -1461,17 +1463,9 @@ class StatBlock extends React.Component {
     render() {
         const skillHandler = this.getSkillHandler();
         let baseStats;
-        let rangeControl;
 
         if (skillHandler) {
             baseStats = skillHandler.getBaseStats();
-            rangeControl = <RangeControl onChange={(e) => this.rangeChanged(e)}
-                                  skillHandler={skillHandler}
-                                  initialRange={this.state.firearmRange}
-                                  initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
-                    />
-        } else {
-            rangeControl = <Loading>Range control</Loading>
         }
 
         const statusMap = new Map([
@@ -1486,14 +1480,26 @@ class StatBlock extends React.Component {
             <>
             <SideDrawer highlight={this.combatTransientsActive()}>
                 <Row>
-                    {rangeControl}
-                </Row>
-                <Row>
-                    <CloseCombatToggle inCloseCombat={this.state.inCloseCombat} onToggle={(val) => {
+                    <CloseCombatToggle initialValue={this.state.inCloseCombat} onToggle={(val) => {
                         this.setState({inCloseCombat: !this.state.inCloseCombat})}} />
                 </Row>
                 <Row>
+                    <RangeControl initialValue={this.state.firearmRange}
+                                          onChange={(newRange) => this.setState({
+                                                        firearmRange: newRange, })} />
+                </Row>
+                <Row className="mb-3">
+                    <DetectionLevelControl
+                        initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
+                        onChange={(newDl) => this.setState({
+                        firearmDarknessDetectionLevel: newDl })} />
+                </Row>
+                <Row>
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
+                </Row>
+                <Row>
+                    <h4>Effects</h4>
+                    <VisionCheckIndicator skillHandler={skillHandler} range={this.state.firearmRange} detectionLevel={this.state.firearmDarknessDetectionLevel} />
                 </Row>
             </SideDrawer>
             <Container fluid={true} className={`m-0 ${statusClass}`}>

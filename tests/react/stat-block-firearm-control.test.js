@@ -157,17 +157,16 @@ describe('StatBlock -- FirearmControl', () => {
 
         await user.click(screen.getByRole("button", {name: "Combat transients"}))
 
-        const input = await sheet.findByLabelText("Target at range")
+        const input = await sheet.findByLabelText("Range")
 
-        fireEvent.change(input, {target: {value: "50"}})
+        await user.type(input, "50")
+        // fireEvent.change(input, {target: {value: "50"}})
 
-        const dlInput = await sheet.findByRole("combobox", {name: "Darkness DL"})
-        await user.click(dlInput)
+        const dlInput = sheet.getByRole("combobox", {name: "Darkness DL"})
+        await user.selectOptions(dlInput, ["Artificial light (-2)"])
 
-        await user.click(await within(dlInput).findByText(/Artificial light/))
-
-        expect((await sheet.findByLabelText("Vision check")).textContent).toEqual("43")
-        expect((await sheet.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 32")
+        expect((await screen.findByLabelText("Vision check")).textContent).toEqual("43")
+        expect((await screen.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 32")
     });
 
 
