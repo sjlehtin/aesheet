@@ -244,6 +244,9 @@ export function SheetSet({sheetSetId}) {
                                      await handleAdd(sheetSetId, sheetId, sheetSetSheets, sheetsMutate)
                                  }}/>
             </Col>
+            <Col xs={2}>
+                <CloseCombatToggle initialValue={inCloseCombat} onToggle={setInCloseCombat}/>
+            </Col>
             <Col>
                 <RangeControl initialValue={range} onChange={setRange} />
             </Col>
@@ -254,9 +257,6 @@ export function SheetSet({sheetSetId}) {
             </Col>
             <Col>
                 <GravityControl initialValue={gravity} onChange={setGravity}/>
-            </Col>
-            <Col>
-                <CloseCombatToggle initialValue={inCloseCombat} onToggle={setInCloseCombat}/>
             </Col>
         </Row>
         <Row fluid={"true"}>

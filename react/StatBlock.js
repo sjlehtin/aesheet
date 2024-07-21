@@ -1480,17 +1480,19 @@ class StatBlock extends React.Component {
             <>
             <SideDrawer highlight={this.combatTransientsActive()}>
                 <Row>
+                    <CloseCombatToggle initialValue={this.state.inCloseCombat} onToggle={(val) => {
+                        this.setState({inCloseCombat: !this.state.inCloseCombat})}} />
+                </Row>
+                <Row>
                     <RangeControl initialValue={this.state.firearmRange}
                                           onChange={(newRange) => this.setState({
                                                         firearmRange: newRange, })} />
+                </Row>
+                <Row className="mb-3">
                     <DetectionLevelControl
                         initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
                         onChange={(newDl) => this.setState({
                         firearmDarknessDetectionLevel: newDl })} />
-                </Row>
-                <Row>
-                    <CloseCombatToggle initialValue={this.state.inCloseCombat} onToggle={(val) => {
-                        this.setState({inCloseCombat: !this.state.inCloseCombat})}} />
                 </Row>
                 <Row>
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
