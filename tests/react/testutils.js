@@ -42,13 +42,4 @@ function defer() {
     return promise;
 }
 
-function getSenseChecks(checkLabel) {
-    let values = []
-    within(screen.getByLabelText(checkLabel)).queryAllByRole("cell", {name: "check"}).forEach((el) => {
-        values.push(parseInt(el.textContent))
-    })
-    return values;
-}
-
-
-export {defer, getSenseChecks, testSetup};
+export {defer, testSetup};

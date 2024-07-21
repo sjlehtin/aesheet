@@ -7,7 +7,9 @@ import * as factories from './factories'
 import {render, waitForElementToBeRemoved, screen} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import {getSenseChecks, testSetup} from "./testutils";
+import {testSetup} from "./testutils";
+import {getSenseChecks} from "./sense-table.test";
+
 
 const server = setupServer(
   rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
