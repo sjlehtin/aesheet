@@ -47,6 +47,7 @@ import * as rest from './sheet-rest'
 import * as util from './sheet-util'
 import ValueBreakdown from "./ValueBreakdown";
 import WoundPenaltyBox from "./WoundPenaltyBox";
+import VisionCheckIndicator from "./VisionCheckIndicator";
 
 export function staminaRecovery(effStats, skillHandler) {
     /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
@@ -1461,17 +1462,13 @@ class StatBlock extends React.Component {
     render() {
         const skillHandler = this.getSkillHandler();
         let baseStats;
-        let rangeControl;
-
-        if (skillHandler) {
-            baseStats = skillHandler.getBaseStats();
-            rangeControl = <RangeControl onChange={(e) => this.rangeChanged(e)}
-                                  skillHandler={skillHandler}
+        const rangeControl = <RangeControl onChange={(e) => this.rangeChanged(e)}
                                   initialRange={this.state.firearmRange}
                                   initialDetectionLevel={this.state.firearmDarknessDetectionLevel}
                     />
-        } else {
-            rangeControl = <Loading>Range control</Loading>
+
+        if (skillHandler) {
+            baseStats = skillHandler.getBaseStats();
         }
 
         const statusMap = new Map([
@@ -1494,6 +1491,10 @@ class StatBlock extends React.Component {
                 </Row>
                 <Row>
                     <GravityControl onChange={(e) => this.gravityChanged(e)} initialValue={this.state.gravity} />
+                </Row>
+                <Row>
+                    <h4>Effects</h4>
+                    <VisionCheckIndicator skillHandler={skillHandler} range={this.state.firearmRange} detectionLevel={this.state.firearmDarknessDetectionLevel} />
                 </Row>
             </SideDrawer>
             <Container fluid={true} className={`m-0 ${statusClass}`}>

@@ -48,31 +48,8 @@ class RangeControl extends React.Component {
     }
 
     render() {
-        let visionCheck = '';
-        if (this.props.skillHandler) {
-            if (util.isFloat(this.state.currentRange)) {
-                const check = this.props.skillHandler.visionCheck(this.state.currentRange,
-                    this.state.currentDetectionLevel).value();
-
-                let style = {};
-                let verbose = '';
-                if (check < 75) {
-                    style.color = 'hotpink';
-                    verbose = `Ranged penalty: ${75 - check}`;
-                } else if (check >= 100) {
-                    style.fontWeight = 'bold';
-                    verbose = "Bumping enabled";
-                }
-                visionCheck =
-                    <div><span>Vision check:</span><span style={style}
-                                                         aria-label={"Vision check"}>{check}</span>
-                        <span className={"ml-2"} style={{fontStyle: "italic"}}
-                              aria-label={"Vision check detail"}>{verbose}</span>
-                    </div>;
-            }
-        }
         return <div>
-            <Form.Group aas={Row}>
+            <Form.Group as={Row}>
                 <Col>
             <Form.Label id={"range-control-label"} column sm={"2"}>Range</Form.Label>
                 <Form.Control
@@ -97,18 +74,12 @@ class RangeControl extends React.Component {
                           onChange={(value) => this.handleDetectionLevelChange(value)} />
                 </Col>
             </Form.Group>
-            <Row>
-                <Col>
-                    {visionCheck}
-                </Col>
-            </Row>
         </div>;
     }
 }
 
 RangeControl.propTypes = {
     onChange: PropTypes.func,
-    skillHandler: PropTypes.object,
     initialRange: PropTypes.oneOfType([
         PropTypes.string,  PropTypes.number ]),
     initialDetectionLevel: PropTypes.number
