@@ -1,4 +1,4 @@
-import React, {useState, useRef} from "react";
+import React, { useRef, useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export default function StatBreakdown({
