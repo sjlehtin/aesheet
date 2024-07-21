@@ -1489,7 +1489,7 @@ class StatBlock extends React.Component {
                     {rangeControl}
                 </Row>
                 <Row>
-                    <CloseCombatToggle inCloseCombat={this.state.inCloseCombat} onToggle={(val) => {
+                    <CloseCombatToggle initialValue={this.state.inCloseCombat} onToggle={(val) => {
                         this.setState({inCloseCombat: !this.state.inCloseCombat})}} />
                 </Row>
                 <Row>
