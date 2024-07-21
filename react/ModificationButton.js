@@ -12,7 +12,7 @@ function ModificationButton({name, onClick, symbol, style}) {
                          onClick()
                      }
                  }}
-                 onClick={() => onClick()}>{symbol}</span>;
+                 onClick={onClick}>{symbol}</span>;
 }
 
 function IncreaseButton({name, onClick, style = {}}) {
