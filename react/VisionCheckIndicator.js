@@ -1,6 +1,7 @@
 import React from "react";
 import { Badge } from "react-bootstrap";
 import { GoAlert } from "react-icons/go";
+import StatBreakdown from "./StatBreakdown";
 
 export default function VisionCheckIndicator({
   skillHandler,
@@ -38,8 +39,8 @@ export default function VisionCheckIndicator({
   return (
     <div {...extraProps}>
       <span>Vision check:</span>
-      <span style={style} aria-label={"Vision check"}>
-        {check}
+      <span style={style}>
+        <StatBreakdown value={bd} label="Vision check" />
       </span>
       <span
         className={"ml-2"}
