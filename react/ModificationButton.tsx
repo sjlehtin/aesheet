@@ -1,7 +1,7 @@
-import React from "react";
+import {CSSProperties, ReactElement} from "react";
 import {GoArrowUp, GoArrowDown} from 'react-icons/go'
 
-function ModificationButton({name, onClick, symbol, style}) {
+function ModificationButton({name, onClick, symbol, style}: { name: string, onClick: () => Promise<void>, symbol: ReactElement, style?: CSSProperties }) {
     return <span style={style} role={"button"}
                  aria-label={name}
                  tabIndex={0}
@@ -12,10 +12,10 @@ function ModificationButton({name, onClick, symbol, style}) {
                          onClick()
                      }
                  }}
-                 onClick={() => onClick()}>{symbol}</span>;
+                 onClick={onClick}>{symbol}</span>;
 }
 
-function IncreaseButton({name, onClick, style = {}}) {
+function IncreaseButton({name, onClick, style = {}}: { name: string, onClick: () => Promise<void>, style?: CSSProperties }) {
     return <ModificationButton name={name} onClick={onClick} symbol={<GoArrowUp />} style={Object.assign({
         color: "green",
         position: "absolute",
@@ -25,7 +25,7 @@ function IncreaseButton({name, onClick, style = {}}) {
     }, style)} />
 }
 
-function DecreaseButton({name, onClick, style= {}}) {
+function DecreaseButton({name, onClick, style= {}} : { name: string, onClick: () => Promise<void>, style?: CSSProperties }) {
     return <ModificationButton name={name} onClick={onClick}
                                symbol={<GoArrowDown/>} style={Object.assign({
         color: "red",
