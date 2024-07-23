@@ -1,22 +1,28 @@
 import * as util from "./sheet-util";
 
+interface BreakdownItem {
+  value: number;
+  reason: string;
+  operation: string;
+}
+
 export default class ValueBreakdown {
   #value = 0;
-  #breakdown = [];
+  #breakdown: BreakdownItem[] = [];
 
-  #setValue = null;
-  #maximum = null;
+  #setValue: number | null = null;
+  #maximum: number | null = null;
   #maxMessage = "Max value";
-  #minimum = null;
+  #minimum: number | null = null;
   #minMessage = "Min value";
 
-  constructor(initialValue, initialDescription) {
+  constructor(initialValue?: number, initialDescription?: string) {
     if (initialValue !== undefined) {
-      this.add(initialValue, initialDescription);
+      this.add(initialValue, initialDescription ?? "");
     }
   }
 
-  add(newValue, description, forceAdd = false) {
+  add(newValue: number, description: string, forceAdd = false) {
     if (newValue || forceAdd) {
       this.#value += newValue;
       this.#breakdown.push({
@@ -27,7 +33,7 @@ export default class ValueBreakdown {
     }
   }
 
-  multiply(newValue, description, forceAdd) {
+  multiply(newValue: number, description: string, forceAdd = false) {
     if (newValue !== 1.0 || forceAdd) {
       this.#value *= newValue;
       this.#breakdown.push({
@@ -38,7 +44,7 @@ export default class ValueBreakdown {
     }
   }
 
-  divide(newValue, description, forceAdd) {
+  divide(newValue: number, description: string, forceAdd = false) {
     if (newValue !== 1.0 || forceAdd) {
       this.#value /= newValue;
       this.#breakdown.push({
@@ -49,12 +55,12 @@ export default class ValueBreakdown {
     }
   }
 
-  set(valueToReturn, description) {
+  set(valueToReturn: number, description: string) {
     this.#setValue = valueToReturn;
-    this.#breakdown.push({ value: 0, reason: description });
+    this.#breakdown.push({ value: 0, operation: "=", reason: description });
   }
 
-  addBreakdown(breakdown) {
+  addBreakdown(breakdown: ValueBreakdown) {
     this.#value += breakdown.value();
     this.#breakdown = [...this.#breakdown, ...breakdown.breakdown()];
     // Inherit set value from the new bd unless already set here.
@@ -70,7 +76,7 @@ export default class ValueBreakdown {
     if (diff) {
       this.#breakdown.push({
         value: diff,
-        operator: "U",
+        operation: "U",
         reason: "round up",
       });
     }
@@ -83,27 +89,27 @@ export default class ValueBreakdown {
     if (diff) {
       this.#breakdown.push({
         value: diff,
-        operator: "D",
+        operation: "D",
         reason: "round down",
       });
     }
   }
 
-  setMaximum(maxValue, message) {
+  setMaximum(maxValue: number, message: string) {
     this.#maximum = maxValue;
     if (message) {
       this.#maxMessage = message;
     }
   }
 
-  setMinimum(minValue, message) {
+  setMinimum(minValue: number, message: string) {
     this.#minimum = minValue;
     if (message) {
       this.#minMessage = message;
     }
   }
 
-  value() {
+  value(): number {
     if (this.#setValue !== null) {
       return this.#setValue;
     }
@@ -113,7 +119,7 @@ export default class ValueBreakdown {
       }
     }
     if (this.belowMinimum()) {
-      return this.#minimum;
+      return this.#minimum as number;
     }
     return this.#value;
   }
@@ -126,13 +132,13 @@ export default class ValueBreakdown {
     return this.#minimum !== null && this.#value < this.#minimum;
   }
 
-  breakdown() {
+  breakdown(): BreakdownItem[] {
     if (this.belowMinimum()) {
       return [
         ...this.#breakdown,
         {
-          value: this.#minimum,
-          operator: "MIN",
+          value: this.#minimum as number,
+          operation: "MIN",
           reason: this.#minMessage,
         },
       ];
@@ -141,8 +147,8 @@ export default class ValueBreakdown {
       return [
         ...this.#breakdown,
         {
-          value: this.#maximum,
-          operator: "MAX",
+          value: this.#maximum as number,
+          operation: "MAX",
           reason: this.#maxMessage,
         },
       ];
