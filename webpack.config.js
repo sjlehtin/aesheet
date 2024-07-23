@@ -13,10 +13,23 @@ module.exports = {
 
     resolve: {
         modules: [path.resolve(__dirname, 'react'), 'node_modules'],
-        extensions: ['.js', '.jsx', '.css']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.css']
     },
+
     module: {
         rules: [
+            {
+                test: /\.tsx?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        compilerOptions: {
+                            "noEmit": false
+                        }
+                    },
+                }
+            },
             {
                 test: /\.m?jsx?$/,
                 exclude: /node_modules/,

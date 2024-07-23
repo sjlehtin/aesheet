@@ -1,21 +1,51 @@
-import React, { useState } from "react";
+import React from "react";
+import { CSSProperties } from "react";
 
-import { Button, FormControl } from "react-bootstrap";
-import { DecreaseButton, IncreaseButton } from "ModificationButton";
+import Button from "react-bootstrap/Button"
+import FormControl from "react-bootstrap/FormControl"
+import { DecreaseButton, IncreaseButton } from "./ModificationButton";
 
-export function WoundRow({ wound, onMod, onRemove, style = {} }) {
-  const [editingEffect, setEditingEffect] = useState(false);
-  const [effect, setEffect] = useState(wound.effect);
+interface Wound {
+  id: number;
+  effect: string;
+  damage: number;
+  healed: number;
+  location: string;
+  damage_type: string;
+}
 
-  async function handleKeyDown(e) {
-    if (e.code === "Enter") {
+interface WoundChange {
+  id: number;
+  effect?: string;
+  damage?: number;
+  healed?: number;
+  location?: string;
+  damage_type?: string;
+}
+
+export function WoundRow({
+  wound,
+  onMod,
+  onRemove,
+  style = {},
+}: {
+  wound: Wound;
+  style?: CSSProperties;
+  onRemove: (wound: WoundChange) => Promise<void>;
+  onMod: (wound: WoundChange) => Promise<void>;
+}) {
+  const [editingEffect, setEditingEffect] = React.useState(false);
+  const [effect, setEffect] = React.useState(wound.effect);
+
+  async function handleKeyDown(code: string) {
+    if (code === "Enter") {
       /* Enter. */
       await onMod({
         id: wound.id,
         effect: effect,
       });
       setEditingEffect(false);
-    } else if (e.code === "Escape") {
+    } else if (code === "Escape") {
       /* Escape. */
       setEffect(wound.effect);
       setEditingEffect(false);
@@ -35,9 +65,8 @@ export function WoundRow({ wound, onMod, onRemove, style = {} }) {
     />
   );
 
-  let decreaseButton = "";
-  if (wound.healed < wound.damage) {
-    decreaseButton = (
+  const decreaseButton =
+    wound.healed < wound.damage ? (
       <DecreaseButton
         style={{ color: "green" }}
         onClick={() =>
@@ -48,15 +77,16 @@ export function WoundRow({ wound, onMod, onRemove, style = {} }) {
         }
         name={"Decrease damage"}
       />
+    ) : (
+      ""
     );
-  }
 
   const effectField = editingEffect ? (
     <FormControl
       type="text"
       aria-label="Wound effect"
       onChange={(e) => setEffect(e.target.value)}
-      onKeyDown={handleKeyDown}
+      onKeyDown={(e) => handleKeyDown(e.code)}
       onClick={(c) => c.stopPropagation()}
       value={effect}
     />
