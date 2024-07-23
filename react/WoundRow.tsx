@@ -4,24 +4,7 @@ import { CSSProperties } from "react";
 import Button from "react-bootstrap/Button"
 import FormControl from "react-bootstrap/FormControl"
 import { DecreaseButton, IncreaseButton } from "./ModificationButton";
-
-interface Wound {
-  id: number;
-  effect: string;
-  damage: number;
-  healed: number;
-  location: string;
-  damage_type: string;
-}
-
-interface WoundChange {
-  id: number;
-  effect?: string;
-  damage?: number;
-  healed?: number;
-  location?: string;
-  damage_type?: string;
-}
+import {Wound, WoundChange} from "./api";
 
 export function WoundRow({
   wound,

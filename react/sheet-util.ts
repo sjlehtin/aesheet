@@ -1,4 +1,6 @@
-export function isInt(value) {
+import {SheetFirearm, SheetFirearmMagazine, GenericItem} from "./api";
+
+export function isInt(value : any) {
         /* Checking if a number is an integer
          *
          *  http://stackoverflow.com/questions/14636536/how-to-check-if-a-variable-is-an-integer-in-javascript
@@ -9,7 +11,7 @@ export function isInt(value) {
         return false;
 }
 
-export function magazineWeight(wpn, mag) {
+export function magazineWeight(wpn: SheetFirearm, mag: SheetFirearmMagazine) {
     let magWeight = 0
     magWeight += parseFloat(wpn.base.magazine_weight)
     // Ammo has weight in grams. Estimate cartridge weighs 1.5 as
@@ -18,14 +20,14 @@ export function magazineWeight(wpn, mag) {
     return magWeight;
 }
 
-export function itemWeight(item) {
+export function itemWeight(item: GenericItem) {
     const size = item.size ?? 1
     return parseFloat(item.base.weight) *
             parseFloat(item.quality.weight_multiplier ?? item.quality.mod_weight_multiplier ?? 1) *
         Math.pow(3, (size - 1))
 }
 
-export function isFloat(value) {
+export function isFloat(value: any) {
     if (typeof(value) === "number") {
         return true;
     }
@@ -42,7 +44,7 @@ export function isFloat(value) {
 }
 
 /* Like excel ROUNDUP, rounds away from zero. */
-export function roundup(value) {
+export function roundup(value: number) {
     if (value < 0) {
         return Math.floor(value);
     } else {
@@ -51,7 +53,7 @@ export function roundup(value) {
 }
 
 /* Like excel ROUNDDOWN, rounds towards zero. */
-export function rounddown(value) {
+export function rounddown(value : number) {
     if (value < 0) {
         return Math.ceil(value);
     } else {
@@ -59,27 +61,20 @@ export function rounddown(value) {
     }
 }
 
-export function toObject(array) {
-    var map = {};
-    for (let obj of array) {
-        map[obj] = 1;
-    }
-    return map;
-}
 
-export function renderInt (value) {
+export function renderInt (value: number) {
     if (value !== null) {
         if (value >= 0) {
             return "+" + value;
         } else {
-            return value;
+            return value.toString();
         }
     } else {
         return '';
     }
 }
 
-export function getCounteredPenalty(penalty, counter) {
+export function getCounteredPenalty(penalty: number, counter: number) {
     // If the counter is negative, assume it is more penalty.
     if (counter < 0) {
         return counter;

@@ -300,7 +300,15 @@ SkillTable.prefilledPhysicalSkills =
     "Sleight of hand"
 ];
 
-SkillTable.prefilledPhysicalSkillsMap = util.toObject(
+function toObject(array) {
+    var map = {};
+    for (let obj of array) {
+        map[obj] = 1;
+    }
+    return map;
+}
+
+SkillTable.prefilledPhysicalSkillsMap = toObject(
     SkillTable.prefilledPhysicalSkills);
 
 export default SkillTable;
