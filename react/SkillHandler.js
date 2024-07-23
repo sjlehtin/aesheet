@@ -50,23 +50,38 @@ class SkillHandler {
   #edgeMods;
   #armorMods;
 
-  constructor(props) {
-    this.props = Object.assign(
-      {},
-      {
-        weightCarried: 0,
-        staminaDamage: 0,
-        armor: {},
-        helm: {},
-        effects: [],
-        edges: [],
-        wounds: [],
-        gravity: 1.0,
-      },
-      props,
-    );
+  constructor({
+    character,
+    weightCarried,
+    characterSkills = [],
+    allSkills = [],
+    staminaDamage = 0,
+    armor = {},
+    helm = {},
+    effects = [],
+    edges = [],
+    wounds = [],
+    gravity = 1.0,
+  }) {
+    this.props = {
+      // TODO: fix skilltable
+      character: character,
+      characterSkills: characterSkills,
+      allSkills: allSkills,
+    };
+    this.character = character;
+    this.staminaDamage = staminaDamage;
+    this.weightCarried = weightCarried;
+    this.edges = edges;
+    this.characterSkills = characterSkills;
+    this.allSkills = allSkills;
+    this.gravity = gravity;
+    this.effects = effects;
+    this.armor = armor;
+    this.helm = helm;
+    this.wounds = wounds;
 
-    this.edgeMap = SkillHandler.getItemMap(this.props.edges, (item) => {
+    this.edgeMap = SkillHandler.getItemMap(this.edges, (item) => {
       return item.edge.name;
     });
 
@@ -79,7 +94,7 @@ class SkillHandler {
       this._softMods[st] = 0;
     }
 
-    for (const mod of this.props.effects) {
+    for (const mod of this.effects) {
       for (let st of SkillHandler.allStatNames) {
         this._softMods[st] += mod[st];
       }
@@ -100,7 +115,7 @@ class SkillHandler {
         this.#edgeMods[st] = new ValueBreakdown();
       }
 
-      for (const mod of this.props.edges) {
+      for (const mod of this.edges) {
         for (let st of SkillHandler.allStatNames) {
           this.#edgeMods[st].add(mod[st], mod.name);
         }
@@ -111,7 +126,7 @@ class SkillHandler {
 
   getSkillBenefit(field) {
     const bd = new ValueBreakdown();
-    for (let cs of this.props.characterSkills) {
+    for (let cs of this.characterSkills) {
       const skill = this.skillMap[cs.skill__name] ?? {};
       bd.add(skill[field] * cs.level, cs.skill__name);
     }
@@ -124,13 +139,13 @@ class SkillHandler {
       for (let st of SkillHandler.allStatNames) {
         this.#armorMods[st] = new ValueBreakdown();
 
-        const helmMod = this.getArmorPartMod(this.props.helm, st);
+        const helmMod = this.getArmorPartMod(this.helm, st);
         this.#armorMods[st].add(helmMod, "helm");
-        const armorMod = this.getArmorPartMod(this.props.armor, st);
+        const armorMod = this.getArmorPartMod(this.armor, st);
         this.#armorMods[st].add(armorMod, "armor");
       }
 
-      if (this.props.armor.base?.is_powered) {
+      if (this.armor.base?.is_powered) {
         /*
          * The Space Suit / Power Armor skill enhancement is required
          * to use a power armor effectively. A successful skill
@@ -161,12 +176,12 @@ class SkillHandler {
 
   getCarriedWeight() {
     const bd = new ValueBreakdown();
-    if (this.props.weightCarried) bd.addBreakdown(this.props.weightCarried);
+    if (this.weightCarried) bd.addBreakdown(this.weightCarried);
     bd.add(
       -Math.min(bd.value(), this.getArmorStatMod("suspendedWeight")),
       "power armor suspension",
     );
-    bd.multiply(this.props.gravity, "from gravity");
+    bd.multiply(this.gravity, "from gravity");
     return bd;
   }
 
@@ -187,12 +202,12 @@ class SkillHandler {
   }
 
   getSkillBonusMap() {
-    if (!this.props.edges) {
+    if (!this.edges) {
       return {};
     }
 
     var skillBonusMap = {};
-    for (let edge of this.props.edges) {
+    for (let edge of this.edges) {
       for (let sb of edge.edge_skill_bonuses) {
         if (!(sb.skill in skillBonusMap)) {
           skillBonusMap[sb.skill__name] = {
@@ -230,9 +245,9 @@ class SkillHandler {
     let penalty = 0;
 
     /* Extra stamina should not give AC bonus. */
-    if (this.props.staminaDamage > 0) {
+    if (this.staminaDamage > 0) {
       penalty = util.rounddown(
-        (this.props.staminaDamage / this.getBaseStats().stamina) * -20,
+        (this.staminaDamage / this.getBaseStats().stamina) * -20,
       );
       if (penalty > 0) {
         breakdown.push({
@@ -242,8 +257,8 @@ class SkillHandler {
       }
     }
 
-    if (this.props.gravity > 1) {
-      const gravityPenalty = util.roundup(-5 * (this.props.gravity - 1.0));
+    if (this.gravity > 1) {
+      const gravityPenalty = util.roundup(-5 * (this.gravity - 1.0));
       penalty += gravityPenalty;
       breakdown.push({
         reason: "gravity",
@@ -372,9 +387,9 @@ class SkillHandler {
   }
 
   /* U is quarter-skill, i.e., using a pistol even without Basic
-       Firearms.  B is half-skill, i.e., the character has top-level skill,
-       but not the skill required.  Otherwise, if the character has the
-        skill, return the level of the skill. */
+           Firearms.  B is half-skill, i.e., the character has top-level skill,
+           but not the skill required.  Otherwise, if the character has the
+            skill, return the level of the skill. */
   skillLevel(skillName) {
     const cs = this.characterSkillMap[skillName];
     const skill = this.skillMap[skillName];
@@ -418,7 +433,7 @@ class SkillHandler {
   }
 
   getEdgeList() {
-    return this.props.edges;
+    return this.edges;
   }
 
   getSkillList() {
@@ -428,7 +443,7 @@ class SkillHandler {
   createSkillList() {
     // Make a deep copy of the list so as not accidentally mangle
     // parent copy of the props.
-    const skillList = this.props.characterSkills.map((elem) => {
+    const skillList = this.characterSkills.map((elem) => {
       const obj = Object.assign({}, elem);
       obj._children = [];
       return obj;
@@ -437,7 +452,7 @@ class SkillHandler {
     this.characterSkillMap = SkillHandler.getItemMap(skillList, (item) => {
       return item.skill__name;
     });
-    this.skillMap = SkillHandler.getItemMap(this.props.allSkills);
+    this.skillMap = SkillHandler.getItemMap(this.allSkills);
 
     var csMap = this.characterSkillMap;
     var skillMap = this.skillMap;
@@ -511,7 +526,7 @@ class SkillHandler {
   }
 
   getGravityMovementMultiplier() {
-    return Math.min(4, 1 / this.props.gravity);
+    return Math.min(4, 1 / this.gravity);
   }
 
   runningSpeed() {
@@ -651,13 +666,13 @@ class SkillHandler {
 
   getEdgeModifier(mod) {
     // Return the sum of modifiers from edges for modifier `mod`.
-    return this.getEffectModifier(mod, this.props.edges ?? []);
+    return this.getEffectModifier(mod, this.edges ?? []);
   }
 
   getEffectModifier(mod, effects) {
     // Return the sum of modifiers from effects for modifier `mod`.
     if (!effects) {
-      effects = this.props.effects;
+      effects = this.effects;
       if (!effects) {
         effects = [];
       }
@@ -674,8 +689,8 @@ class SkillHandler {
       this._baseStats = {};
       for (let st of SkillHandler.baseStatNames) {
         this._baseStats[st] =
-          this.props.character["cur_" + st] +
-          this.props.character["base_mod_" + st] +
+          this.character["cur_" + st] +
+          this.character["base_mod_" + st] +
           this.getEdgeStatMod(st).value();
       }
       this._baseStats.mov =
@@ -690,7 +705,7 @@ class SkillHandler {
 
       this._baseStats.stamina =
         util.roundup((this._baseStats.ref + this._baseStats.wil) / 4) +
-        this.props.character.bought_stamina;
+        this.character.bought_stamina;
 
       this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
       this._baseStats.body =
@@ -698,7 +713,7 @@ class SkillHandler {
 
       this._baseStats.mana =
         util.roundup((this._baseStats.psy + this._baseStats.wil) / 4) +
-        this.props.character.bought_mana;
+        this.character.bought_mana;
     }
 
     return this._baseStats;
@@ -750,7 +765,7 @@ class SkillHandler {
       this._woundPenalties.staminaDamage = 0;
 
       let locationDamages = { H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0 };
-      for (const ww of this.props.wounds) {
+      for (const ww of this.wounds) {
         const damage = ww.damage - ww.healed;
         locationDamages[ww.location] += damage;
       }
@@ -817,7 +832,7 @@ class SkillHandler {
   }
 
   getStaminaDamage() {
-    return this.props.staminaDamage + this.getWoundPenalties().staminaDamage;
+    return this.staminaDamage + this.getWoundPenalties().staminaDamage;
   }
 
   getCurrentStamina() {
@@ -868,8 +883,8 @@ class SkillHandler {
           this.addEncumbrancePenalty(encumbrancePenalty);
         }
 
-        if (this.props.gravity < 1.0) {
-          const gravityPenalty = util.roundup(-25 * (1.0 - this.props.gravity));
+        if (this.gravity < 1.0) {
+          const gravityPenalty = util.roundup(-25 * (1.0 - this.gravity));
 
           this._effStatsV2.ref.add(gravityPenalty, "gravity");
 
