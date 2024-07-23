@@ -51,16 +51,24 @@ class SkillHandler {
     #armorMods
 
     constructor(props) {
-        this.props = Object.assign({}, SkillHandler.defaultProps, props);
+        this.props = Object.assign(
+            {},
+            {
+                    weightCarried: 0,
+                    staminaDamage: 0,
+                    armor: {},
+                    helm: {},
+                    effects: [],
+                    edges: [],
+                    wounds: [],
+                    gravity: 1.0
+            }, props);
 
-        // TODO: unify state variables after meld.
-        this.state = {
-            edgeMap: SkillHandler.getItemMap(this.props.edges,
-            (item) => { return item.edge.name; }),
-            skillBonusMap: this.getSkillBonusMap()
-        };
+        this.edgeMap = SkillHandler.getItemMap(this.props.edges,
+            (item) => { return item.edge.name; })
 
-        this.state.skillList = this.createSkillList();
+        this.skillBonusMap = this.getSkillBonusMap()
+        this.skillList = this.createSkillList();
 
         this._softMods = {};
 
@@ -101,7 +109,7 @@ class SkillHandler {
     getSkillBenefit(field) {
         const bd = new ValueBreakdown()
         for (let cs of this.props.characterSkills) {
-            const skill = this.state.skillMap[cs.skill__name] ?? {}
+            const skill = this.skillMap[cs.skill__name] ?? {}
             bd.add(skill[field] * cs.level, cs.skill__name)
         }
         return bd
@@ -182,7 +190,7 @@ class SkillHandler {
 
     /* A base-level skill, i.e., Basic Artillery and the like. */
     isBaseSkill(skillName) {
-        const skill = this.state.skillMap[skillName];
+        const skill = this.skillMap[skillName];
 
         return skill.skill_cost_1 === null;
     }
@@ -301,7 +309,7 @@ class SkillHandler {
      */
 
     skillCheck(skillName, stat, ignoreMissingSkill) {
-        const skill = this.state.skillMap[skillName];
+        const skill = this.skillMap[skillName];
 
         if (!ignoreMissingSkill) {
             if (!skill || this.isBaseSkill(skillName)) {
@@ -334,8 +342,8 @@ class SkillHandler {
             bd.add(levelBonus, "skill level")
         }
 
-        if (skillName in this.state.skillBonusMap) {
-            bd.add(this.state.skillBonusMap[skillName].bonus, "skill bonuses")
+        if (skillName in this.skillBonusMap) {
+            bd.add(this.skillBonusMap[skillName].bonus, "skill bonuses")
         }
 
         if (skill)
@@ -350,8 +358,8 @@ class SkillHandler {
        but not the skill required.  Otherwise, if the character has the
         skill, return the level of the skill. */
     skillLevel(skillName) {
-        const cs = this.state.characterSkillMap[skillName];
-        const skill = this.state.skillMap[skillName];
+        const cs = this.characterSkillMap[skillName];
+        const skill = this.skillMap[skillName];
 
         if (!skill) {
             return null;
@@ -361,7 +369,7 @@ class SkillHandler {
             if (skill.required_skills.length > 0) {
                 for (let reqd of skill.required_skills) {
                     // TODO: should use id key
-                    if (!(reqd.name in this.state.characterSkillMap)) {
+                    if (!(reqd.name in this.characterSkillMap)) {
                         return "U";
                     }
                 }
@@ -378,7 +386,7 @@ class SkillHandler {
 
     edgeLevel(edgeName, givenMap) {
         if (givenMap === undefined) {
-            givenMap = this.state.edgeMap;
+            givenMap = this.edgeMap;
         }
         if (edgeName in givenMap) {
             return givenMap[edgeName].level;
@@ -388,7 +396,7 @@ class SkillHandler {
     }
 
     hasSkill(skillName) {
-        return skillName in this.state.characterSkillMap;
+        return skillName in this.characterSkillMap;
     }
 
     getEdgeList() {
@@ -396,7 +404,7 @@ class SkillHandler {
     }
 
     getSkillList() {
-        return this.state.skillList;
+        return this.skillList;
     }
 
     createSkillList() {
@@ -409,12 +417,12 @@ class SkillHandler {
                 return obj;
             });
 
-        this.state.characterSkillMap = SkillHandler.getItemMap(skillList,
+        this.characterSkillMap = SkillHandler.getItemMap(skillList,
                 (item) => { return item.skill__name; });
-        this.state.skillMap = SkillHandler.getItemMap(this.props.allSkills);
+        this.skillMap = SkillHandler.getItemMap(this.props.allSkills);
 
-        var csMap = this.state.characterSkillMap;
-        var skillMap = this.state.skillMap;
+        var csMap = this.characterSkillMap;
+        var skillMap = this.skillMap;
 
         var addChild = function (parent, child) {
             parent._children.push(child);
@@ -1008,17 +1016,6 @@ SkillHandler.baseStatNames = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
 SkillHandler.allStatNames =  SkillHandler.baseStatNames.concat(
     ["mov", "dex", "imm", "vision", "hear", "smell", "surprise",
         "climb", "stealth", "conceal", "swim"]);
-
-SkillHandler.defaultProps = {
-    weightCarried: 0,
-    staminaDamage: 0,
-    armor: {},
-    helm: {},
-    effects: [],
-    edges: [],
-    wounds: [],
-    gravity: 1.0
-};
 
 SkillHandler.BASE_VISION_RANGE = 9;
 SkillHandler.BASE_HEARING_RANGE = 6;
