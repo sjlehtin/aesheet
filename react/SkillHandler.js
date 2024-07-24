@@ -231,6 +231,27 @@ class SkillHandler {
     return this.getEffStats()[stat.toLowerCase()].value();
   }
 
+  getEdgeSkillPoints() {
+    let sum = 0;
+    for (let edge of this.getEdgeList()) {
+      sum += edge.extra_skill_points;
+    }
+    return sum;
+  }
+
+  getInitialSkillPoints() {
+    const char = this.character;
+    return (
+      util.roundup(char.start_lrn / 3) +
+      util.roundup(char.start_int / 5) +
+      util.roundup(char.start_psy / 10)
+    );
+  }
+
+  getEarnedSkillPoints() {
+    return this.character.gained_sp;
+  }
+
   getInitiative() {
     return (
       this.getStat("ref") / 10 +
@@ -401,7 +422,7 @@ class SkillHandler {
     if (!cs) {
       if (skill.required_skills.length > 0) {
         for (let reqd of skill.required_skills) {
-          // TODO: should use id key
+          // TODO: should use id as key
           if (!(reqd.name in this.characterSkillMap)) {
             return "U";
           }

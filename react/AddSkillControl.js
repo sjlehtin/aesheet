@@ -14,16 +14,6 @@ class AddSkillControl extends React.Component {
     };
   }
 
-  static filterSkills(skillList, characterSkills) {
-    var filtered = [];
-    for (var skill of skillList) {
-      if (!(skill.name in characterSkills)) {
-        filtered.push(skill);
-      }
-    }
-    return filtered;
-  }
-
   getLevelChoices() {
     if (this.state.selectedSkill) {
       var range = [];
@@ -72,25 +62,16 @@ class AddSkillControl extends React.Component {
     return false;
   }
 
-  handleAdd() {
-    if (typeof this.props.onCharacterSkillAdd !== "undefined") {
-      this.props.onCharacterSkillAdd({
+  async handleAdd() {
+      await this.props.onCharacterSkillAdd({
         skill: this.state.selectedSkill.id,
         level: parseInt(this.state.selectedLevel),
-      });
+      })
       this.setState({
         skillValue: "",
         selectedSkill: undefined,
         selectedLevel: "",
       });
-    }
-  }
-
-  getSkillChoices() {
-    return AddSkillControl.filterSkills(
-      this.props.allSkills,
-      this.props.characterSkillMap,
-    );
   }
 
   render() {
@@ -106,7 +87,7 @@ class AddSkillControl extends React.Component {
               </td>
               <td>
                 <Combobox
-                  data={this.getSkillChoices()}
+                  data={this.props.allSkills}
                   textField="name"
                   filter="contains"
                   groupBy="type"
@@ -133,7 +114,6 @@ class AddSkillControl extends React.Component {
           aria-label={"Add skill"}
           size="sm"
           disabled={!this.skillValid()}
-          ref={(c) => (this._addButton = c)}
           onClick={() => this.handleAdd()}
         >
           Add Skill
@@ -144,7 +124,6 @@ class AddSkillControl extends React.Component {
 }
 
 AddSkillControl.propTypes = {
-  characterSkillMap: PropTypes.object.isRequired,
   allSkills: PropTypes.array.isRequired,
   onCharacterSkillAdd: PropTypes.func,
 };

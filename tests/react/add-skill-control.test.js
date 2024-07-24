@@ -30,21 +30,6 @@ describe('AddSkillControl', function() {
         return render(<AddSkillControl {...props}/>)
     };
 
-    it("can filter skills the user already has", async function () {
-        const user = userEvent.setup()
-
-        renderAddSkillControl({characterSkillMap:
-            SkillTable.getCharacterSkillMap([
-                factories.characterSkillFactory({skill__name: "Persuasion"})])});
-
-        await user.click(within(screen.getByLabelText("Add skill name")).getByRole("button"))
-        let values = []
-        within(screen.getByLabelText("Add skill name")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
-
-        expect(values).toEqual(["Endurance / run", "Two-weapon Style", "Mental Fortitude"]);
-
-    });
-
     it("can render correct values for skill level based on selected skill", async function () {
         const user = userEvent.setup()
 

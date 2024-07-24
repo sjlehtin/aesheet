@@ -7,6 +7,16 @@ import { Card, Table } from "react-bootstrap";
 import SkillRow from "./SkillRow";
 import AddSkillControl from "./AddSkillControl";
 
+function filterSkills(skillList, characterSkills) {
+  const filtered = [];
+  for (let skill of skillList) {
+    if (!(skill.name in characterSkills)) {
+      filtered.push(skill);
+    }
+  }
+  return filtered;
+}
+
 class SkillTable extends React.Component {
   mangleSkillList() {
     return this.props.skillHandler.getSkillList().filter((cs) => {
@@ -63,41 +73,14 @@ class SkillTable extends React.Component {
     return cost;
   }
 
-  // TODO: move to skillhandler
-  edgeSkillPoints() {
-    var sum = 0;
-    for (let edge of this.props.skillHandler.getEdgeList()) {
-      sum += edge.extra_skill_points;
-    }
-    return sum;
-  }
-
-  initialSkillPoints() {
-    // TODO: data privacy.
-    const char = this.props.skillHandler.props.character;
-    console.assert(typeof char !== "undefined");
-    return (
-      util.roundup(char.start_lrn / 3) +
-      util.roundup(char.start_int / 5) +
-      util.roundup(char.start_psy / 10)
-    );
-  }
-
-  earnedSkillPoints() {
-    // TODO: data privacy.
-    var char = this.props.skillHandler.props.character;
-
-    return char.gained_sp;
-  }
-
   optimizeAgeSP() {
-    var baseStats = this.props.skillHandler.getBaseStats();
+    const baseStats = this.props.skillHandler.getBaseStats();
     /* Optimal stat raises, slightly munchkin, but only sensible. */
-    var raw = baseStats.lrn / 15 + baseStats.int / 25 + baseStats.psy / 50;
-    var diff = util.roundup(raw) - raw;
-    var lrn = util.rounddown(diff * 15);
-    var int = util.rounddown((diff - lrn / 15) * 25);
-    var psy = util.roundup(diff - lrn / 15 - int / 25);
+    const raw = baseStats.lrn / 15 + baseStats.int / 25 + baseStats.psy / 50;
+    const diff = util.roundup(raw) - raw;
+    const lrn = util.rounddown(diff * 15);
+    const int = util.rounddown((diff - lrn / 15) * 25);
+    const psy = util.roundup(diff - lrn / 15 - int / 25);
     return { lrn: lrn, int: int, psy: psy };
   }
 
@@ -186,9 +169,9 @@ class SkillTable extends React.Component {
       }
     }
 
-    const edgeSP = this.edgeSkillPoints(),
-      initialSP = this.initialSkillPoints(),
-      ageSP = this.earnedSkillPoints();
+    const edgeSP = this.props.skillHandler.getEdgeSkillPoints(),
+      initialSP = this.props.skillHandler.getInitialSkillPoints(),
+      ageSP = this.props.skillHandler.getEarnedSkillPoints();
     const gainedSP = edgeSP + initialSP + ageSP;
 
     let totalStyle = {};
@@ -268,8 +251,10 @@ class SkillTable extends React.Component {
         </Card.Body>
         <Card.Footer>
           <AddSkillControl
-            characterSkillMap={csMap}
-            allSkills={this.props.skillHandler.props.allSkills}
+            allSkills={filterSkills(
+              this.props.skillHandler.props.allSkills,
+              csMap,
+            )}
             onCharacterSkillAdd={this.props.onCharacterSkillAdd}
             style={this.props.style}
           />
