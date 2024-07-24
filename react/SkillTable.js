@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const rest = require('./sheet-rest');
-const util = require('./sheet-util');
+import * as util from './sheet-util';
 
 import {Card, Table} from 'react-bootstrap';
 import SkillRow from './SkillRow';
@@ -45,7 +44,7 @@ class SkillTable extends React.Component {
 
     mangleSkillList() {
         return this.props.skillHandler.getSkillList().filter(
-            (cs) => { return !(cs.skill__name in SkillTable.prefilledPhysicalSkillsMap)});
+            (cs) => { return SkillTable.prefilledPhysicalSkills.indexOf(cs.skill__name) === -1});
     }
 
     static getCharacterSkillMap(skillList) {
@@ -299,17 +298,6 @@ SkillTable.prefilledPhysicalSkills =
     "Swimming",
     "Sleight of hand"
 ];
-
-function toObject(array) {
-    var map = {};
-    for (let obj of array) {
-        map[obj] = 1;
-    }
-    return map;
-}
-
-SkillTable.prefilledPhysicalSkillsMap = toObject(
-    SkillTable.prefilledPhysicalSkills);
 
 export default SkillTable;
 
