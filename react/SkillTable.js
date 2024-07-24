@@ -1,225 +1,289 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
-import * as util from './sheet-util';
+import * as util from "./sheet-util";
 
-import {Card, Table} from 'react-bootstrap';
-import SkillRow from './SkillRow';
-import AddSkillControl from './AddSkillControl';
+import { Card, Table } from "react-bootstrap";
+import SkillRow from "./SkillRow";
+import AddSkillControl from "./AddSkillControl";
 
 class SkillTable extends React.Component {
+  mangleSkillList() {
+    return this.props.skillHandler.getSkillList().filter((cs) => {
+      return SkillTable.prefilledPhysicalSkills.indexOf(cs.skill__name) === -1;
+    });
+  }
 
-    mangleSkillList() {
-        return this.props.skillHandler.getSkillList().filter(
-            (cs) => { return SkillTable.prefilledPhysicalSkills.indexOf(cs.skill__name) === -1});
+  static getCharacterSkillMap(skillList) {
+    if (!skillList) {
+      return {};
     }
-
-    static getCharacterSkillMap(skillList) {
-        if (!skillList) {
-            return {};
-        }
-        let csMap = {};
-        for (let cs of skillList) {
-            csMap[cs.skill__name] = cs;
-        }
-        return csMap;
+    let csMap = {};
+    for (let cs of skillList) {
+      csMap[cs.skill__name] = cs;
     }
+    return csMap;
+  }
 
-    static getSkillMap(skillList) {
-        if (!skillList) {
-            return {};
-        }
-        var skillMap = {};
-        for (let skill of skillList) {
-            skillMap[skill.name] = skill;
-        }
-        return skillMap;
+  static getSkillMap(skillList) {
+    if (!skillList) {
+      return {};
     }
-
-    static spCost(cs, skill) {
-        if (!skill) {
-            return null;
-        }
-        if (!cs) {
-            return 0;
-        }
-        var cost = 0;
-        var level = cs.level;
-        if (level > 3) {
-            cost += (level - 3) * (skill.skill_cost_3 + 2);
-        }
-        if (level >= 3){
-            cost += skill.skill_cost_3;
-        }
-        if (level >= 2){
-            cost += skill.skill_cost_2;
-        }
-        if (level >= 1){
-            cost += skill.skill_cost_1;
-        }
-        if (level >= 0){
-            cost += skill.skill_cost_0;
-        }
-        return cost
+    var skillMap = {};
+    for (let skill of skillList) {
+      skillMap[skill.name] = skill;
     }
+    return skillMap;
+  }
 
-    // TODO: move to skillhandler
-    edgeSkillPoints() {
-        var sum = 0;
-        for (let edge of this.props.skillHandler.getEdgeList()) {
-            sum += edge.extra_skill_points;
-        }
-        return sum;
+  static spCost(cs, skill) {
+    if (!skill) {
+      return null;
     }
-
-    initialSkillPoints() {
-        // TODO: data privacy.
-        const char = this.props.skillHandler.props.character;
-        console.assert(typeof(char) !== "undefined");
-        return util.roundup(char.start_lrn/3) + util.roundup(char.start_int/5) +
-                util.roundup(char.start_psy/10);
+    if (!cs) {
+      return 0;
     }
-
-    earnedSkillPoints() {
-        // TODO: data privacy.
-        var char = this.props.skillHandler.props.character;
-
-        return char.gained_sp;
+    var cost = 0;
+    var level = cs.level;
+    if (level > 3) {
+      cost += (level - 3) * (skill.skill_cost_3 + 2);
     }
-
-    optimizeAgeSP() {
-        var baseStats = this.props.skillHandler.getBaseStats();
-        /* Optimal stat raises, slightly munchkin, but only sensible. */
-        var raw = baseStats.lrn/15 + baseStats.int/25
-            + baseStats.psy/50;
-        var diff = util.roundup(raw) - raw;
-        var lrn = util.rounddown(diff * 15);
-        var int = util.rounddown((diff - lrn/15) * 25);
-        var psy = util.roundup(diff - lrn/15 - int/25);
-        return {lrn: lrn, int: int, psy: psy};
+    if (level >= 3) {
+      cost += skill.skill_cost_3;
     }
+    if (level >= 2) {
+      cost += skill.skill_cost_2;
+    }
+    if (level >= 1) {
+      cost += skill.skill_cost_1;
+    }
+    if (level >= 0) {
+      cost += skill.skill_cost_0;
+    }
+    return cost;
+  }
 
-    render () {
-        var rows = [];
-        var ii;
-        var csMap = SkillTable.getCharacterSkillMap(
-            this.props.skillHandler.props.characterSkills);
-        var skillMap = SkillTable.getSkillMap(this.props.skillHandler.props.allSkills);
-        var totalSP = 0, spCost;
-        var skill;
+  // TODO: move to skillhandler
+  edgeSkillPoints() {
+    var sum = 0;
+    for (let edge of this.props.skillHandler.getEdgeList()) {
+      sum += edge.extra_skill_points;
+    }
+    return sum;
+  }
 
-        for (ii = 0; ii < SkillTable.prefilledPhysicalSkills.length; ii++) {
-            var skillName = SkillTable.prefilledPhysicalSkills[ii];
-            skill = skillMap[skillName];
-            if (skill) {
-                spCost = SkillTable.spCost(csMap[skillName], skill);
-                rows.push(
-                    <SkillRow key={`${skillName}-${ii}`}
-                              skillHandler={this.props.skillHandler}
-                              skillName={skillName}
-                              onCharacterSkillRemove={(skill) => this.props.onCharacterSkillRemove(skill)}
-                              onCharacterSkillModify={(skill) => this.props.onCharacterSkillModify(skill)}
+  initialSkillPoints() {
+    // TODO: data privacy.
+    const char = this.props.skillHandler.props.character;
+    console.assert(typeof char !== "undefined");
+    return (
+      util.roundup(char.start_lrn / 3) +
+      util.roundup(char.start_int / 5) +
+      util.roundup(char.start_psy / 10)
+    );
+  }
 
-                              stats={this.props.skillHandler.getEffStats()}
-                              characterSkill={csMap[skillName]}
-                              skillPoints={spCost}
-                              skill={skill}/>);
-                totalSP += spCost;
-            } else {
-                rows.push(<tr key={`${skillName}-${ii}`}>
-                    <td style={{color: "red"}}
-                    >Real skill missing for {skillName}.</td></tr>);
+  earnedSkillPoints() {
+    // TODO: data privacy.
+    var char = this.props.skillHandler.props.character;
+
+    return char.gained_sp;
+  }
+
+  optimizeAgeSP() {
+    var baseStats = this.props.skillHandler.getBaseStats();
+    /* Optimal stat raises, slightly munchkin, but only sensible. */
+    var raw = baseStats.lrn / 15 + baseStats.int / 25 + baseStats.psy / 50;
+    var diff = util.roundup(raw) - raw;
+    var lrn = util.rounddown(diff * 15);
+    var int = util.rounddown((diff - lrn / 15) * 25);
+    var psy = util.roundup(diff - lrn / 15 - int / 25);
+    return { lrn: lrn, int: int, psy: psy };
+  }
+
+  render() {
+    var rows = [];
+    var ii;
+    var csMap = SkillTable.getCharacterSkillMap(
+      this.props.skillHandler.props.characterSkills,
+    );
+    var skillMap = SkillTable.getSkillMap(
+      this.props.skillHandler.props.allSkills,
+    );
+    var totalSP = 0,
+      spCost;
+    var skill;
+
+    for (ii = 0; ii < SkillTable.prefilledPhysicalSkills.length; ii++) {
+      var skillName = SkillTable.prefilledPhysicalSkills[ii];
+      skill = skillMap[skillName];
+      if (skill) {
+        spCost = SkillTable.spCost(csMap[skillName], skill);
+        rows.push(
+          <SkillRow
+            key={`${skillName}-${ii}`}
+            skillHandler={this.props.skillHandler}
+            skillName={skillName}
+            onCharacterSkillRemove={(skill) =>
+              this.props.onCharacterSkillRemove(skill)
             }
-        }
-
-        var skillList = this.mangleSkillList();
-
-        for (ii = 0; ii < skillList.length; ii++) {
-            var cs = skillList[ii];
-            skill = skillMap[cs.skill__name];
-            if (skill) {
-                spCost = SkillTable.spCost(cs, skill);
-                var idx = SkillTable.prefilledPhysicalSkills.length + ii;
-                rows.push(<SkillRow key={`${cs.skill}-${idx}`}
-                                    skillName={skill.name}
-                                    skillHandler={this.props.skillHandler}
-                                    stats={this.props.skillHandler.getEffStats()}
-                                    characterSkill={cs}
-                                    onCharacterSkillRemove={(skill) => this.props.onCharacterSkillRemove(skill)}
-                                    onCharacterSkillModify={(skill) => this.props.onCharacterSkillModify(skill)}
-                                    indent={cs.indent}
-                                    skillPoints={spCost}
-                                    skill={skill}/>);
-                totalSP += spCost;
-            } else {
-                rows.push(<tr key={`${cs.skill}-${idx}`}>
-                    <td style={{color: "red"}}
-                    >Real skill missing for {cs.skill__name}.</td></tr>);
+            onCharacterSkillModify={(skill) =>
+              this.props.onCharacterSkillModify(skill)
             }
-        }
+            stats={this.props.skillHandler.getEffStats()}
+            characterSkill={csMap[skillName]}
+            skillPoints={spCost}
+            skill={skill}
+          />,
+        );
+        totalSP += spCost;
+      } else {
+        rows.push(
+          <tr key={`${skillName}-${ii}`}>
+            <td style={{ color: "red" }}>
+              Real skill missing for {skillName}.
+            </td>
+          </tr>,
+        );
+      }
+    }
 
-        const edgeSP = this.edgeSkillPoints(),
-            initialSP = this.initialSkillPoints(),
-            ageSP = this.earnedSkillPoints();
-        const gainedSP = edgeSP + initialSP + ageSP;
+    var skillList = this.mangleSkillList();
 
-        let totalStyle = {};
-        let totalTitle = "";
-        if (totalSP > gainedSP) {
-            totalTitle = "Too much SP used!";
-            totalStyle.color = "red";
-        }
-        const opt = this.optimizeAgeSP();
+    for (ii = 0; ii < skillList.length; ii++) {
+      var cs = skillList[ii];
+      skill = skillMap[cs.skill__name];
+      if (skill) {
+        spCost = SkillTable.spCost(cs, skill);
+        var idx = SkillTable.prefilledPhysicalSkills.length + ii;
+        rows.push(
+          <SkillRow
+            key={`${cs.skill}-${idx}`}
+            skillName={skill.name}
+            skillHandler={this.props.skillHandler}
+            stats={this.props.skillHandler.getEffStats()}
+            characterSkill={cs}
+            onCharacterSkillRemove={(skill) =>
+              this.props.onCharacterSkillRemove(skill)
+            }
+            onCharacterSkillModify={(skill) =>
+              this.props.onCharacterSkillModify(skill)
+            }
+            indent={cs.indent}
+            skillPoints={spCost}
+            skill={skill}
+          />,
+        );
+        totalSP += spCost;
+      } else {
+        rows.push(
+          <tr key={`${cs.skill}-${idx}`}>
+            <td style={{ color: "red" }}>
+              Real skill missing for {cs.skill__name}.
+            </td>
+          </tr>,
+        );
+      }
+    }
 
-        return <Card style={this.props.style}>
-            <Card.Header>
-                <h4>Skills</h4>
-            </Card.Header>
-            <Card.Body className={"table-responsive p-0"}>
-            <Table aria-label={"Skills"} style={{fontSize: "inherit"}} striped>
+    const edgeSP = this.edgeSkillPoints(),
+      initialSP = this.initialSkillPoints(),
+      ageSP = this.earnedSkillPoints();
+    const gainedSP = edgeSP + initialSP + ageSP;
+
+    let totalStyle = {};
+    let totalTitle = "";
+    if (totalSP > gainedSP) {
+      totalTitle = "Too much SP used!";
+      totalStyle.color = "red";
+    }
+    const opt = this.optimizeAgeSP();
+
+    return (
+      <Card style={this.props.style}>
+        <Card.Header>
+          <h4>Skills</h4>
+        </Card.Header>
+        <Card.Body className={"table-responsive p-0"}>
+          <Table aria-label={"Skills"} style={{ fontSize: "inherit" }} striped>
             <thead>
-            <tr><th>Skill</th><th>Level</th><th>SP</th><th>Check</th></tr>
+              <tr>
+                <th>Skill</th>
+                <th>Level</th>
+                <th>SP</th>
+                <th>Check</th>
+              </tr>
             </thead>
             <tbody>{rows}</tbody>
-            <tfoot><tr>
-                <td colSpan="2" style={{ fontWeight: 'bold'}}>
-                    Total SP used</td>
-                <td colSpan={2} style={totalStyle} title={totalTitle}>{totalSP}</td></tr>
-            <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Gained SP</td>
+            <tfoot>
+              <tr>
+                <td colSpan="2" style={{ fontWeight: "bold" }}>
+                  Total SP used
+                </td>
+                <td colSpan={2} style={totalStyle} title={totalTitle}>
+                  {totalSP}
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2} style={{ fontWeight: "bold" }}>
+                  Gained SP
+                </td>
                 <td colSpan={2}>
-                <span title="From starting stats" aria-label={"SP from starting stats"}>{initialSP}</span>
-                <span> + </span>
-                <span title="From edges" aria-label={"SP from edges"}>{edgeSP}</span>
-                <span> + </span>
-                <span title="Earned during play" aria-label={"SP earned during play"}>{ageSP}</span>
-                <span> = </span>
-                <span title="Total gained" aria-label={"Total gained SP"}>{gainedSP}</span></td></tr>
-            <tr><td colSpan={2} style={{ fontWeight: 'bold'}}>Next age SP increase</td>
+                  <span
+                    title="From starting stats"
+                    aria-label={"SP from starting stats"}
+                  >
+                    {initialSP}
+                  </span>
+                  <span> + </span>
+                  <span title="From edges" aria-label={"SP from edges"}>
+                    {edgeSP}
+                  </span>
+                  <span> + </span>
+                  <span
+                    title="Earned during play"
+                    aria-label={"SP earned during play"}
+                  >
+                    {ageSP}
+                  </span>
+                  <span> = </span>
+                  <span title="Total gained" aria-label={"Total gained SP"}>
+                    {gainedSP}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2} style={{ fontWeight: "bold" }}>
+                  Next age SP increase
+                </td>
                 <td colSpan={2}>
-                    <span aria-label={"SP optimization hint"}>{util.renderInt(opt.lrn)
-                } LRN, {util.renderInt(opt.int)} INT, {
-                    util.renderInt(opt.psy)} PSY
-                </span></td>
-            </tr>
+                  <span aria-label={"SP optimization hint"}>
+                    {util.renderInt(opt.lrn)} LRN, {util.renderInt(opt.int)}{" "}
+                    INT, {util.renderInt(opt.psy)} PSY
+                  </span>
+                </td>
+              </tr>
             </tfoot>
-        </Table>
-            </Card.Body>
-            <Card.Footer>
-            <AddSkillControl
-                characterSkillMap={csMap}
-                             allSkills={this.props.skillHandler.props.allSkills}
-                             onCharacterSkillAdd={this.props.onCharacterSkillAdd}
-                             style={this.props.style}/>
-            </Card.Footer>
-        </Card>;
-    }
+          </Table>
+        </Card.Body>
+        <Card.Footer>
+          <AddSkillControl
+            characterSkillMap={csMap}
+            allSkills={this.props.skillHandler.props.allSkills}
+            onCharacterSkillAdd={this.props.onCharacterSkillAdd}
+            style={this.props.style}
+          />
+        </Card.Footer>
+      </Card>
+    );
+  }
 }
 
 SkillTable.propTypes = {
-    skillHandler: PropTypes.object.isRequired,
-    onCharacterSkillAdd: PropTypes.func,
-    onCharacterSkillRemove: PropTypes.func,
-    onCharacterSkillModify: PropTypes.func,
+  skillHandler: PropTypes.object.isRequired,
+  onCharacterSkillAdd: PropTypes.func,
+  onCharacterSkillRemove: PropTypes.func,
+  onCharacterSkillModify: PropTypes.func,
 };
 
 /*
@@ -247,25 +311,23 @@ SkillTable.propTypes = {
  * Swim (FIT)                                                      1/1/2/3
  */
 
-SkillTable.prefilledPhysicalSkills =
-    [
-    "Acquire asset",
-    "Balance",
-    "Dodge",
-    "Endurance / run",
-    "Find information",
-    "Mental fortitude",
-    "Persuasion",
-    "Physical fortitude",
-    "Search",
-    "Stealth",
-    "Tailing / Shadowing",
-    "Climbing",
-    "Concealment",
-    "Jump",
-    "Swimming",
-    "Sleight of hand"
+SkillTable.prefilledPhysicalSkills = [
+  "Acquire asset",
+  "Balance",
+  "Dodge",
+  "Endurance / run",
+  "Find information",
+  "Mental fortitude",
+  "Persuasion",
+  "Physical fortitude",
+  "Search",
+  "Stealth",
+  "Tailing / Shadowing",
+  "Climbing",
+  "Concealment",
+  "Jump",
+  "Swimming",
+  "Sleight of hand",
 ];
 
 export default SkillTable;
-
