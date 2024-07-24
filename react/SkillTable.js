@@ -9,18 +9,6 @@ import AddSkillControl from './AddSkillControl';
 
 class SkillTable extends React.Component {
 
-    handleCharacterSkillRemove(skill) {
-        if (this.props.onCharacterSkillRemove) {
-            this.props.onCharacterSkillRemove(skill);
-        }
-    }
-
-    handleCharacterSkillModify(skill) {
-        if (this.props.onCharacterSkillModify) {
-            this.props.onCharacterSkillModify(skill);
-        }
-    }
-
     mangleSkillList() {
         return this.props.skillHandler.getSkillList().filter(
             (cs) => { return SkillTable.prefilledPhysicalSkills.indexOf(cs.skill__name) === -1});
@@ -129,8 +117,8 @@ class SkillTable extends React.Component {
                     <SkillRow key={`${skillName}-${ii}`}
                               skillHandler={this.props.skillHandler}
                               skillName={skillName}
-                              onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
-                              onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
+                              onCharacterSkillRemove={(skill) => this.props.onCharacterSkillRemove(skill)}
+                              onCharacterSkillModify={(skill) => this.props.onCharacterSkillModify(skill)}
 
                               stats={this.props.skillHandler.getEffStats()}
                               characterSkill={csMap[skillName]}
@@ -157,8 +145,8 @@ class SkillTable extends React.Component {
                                     skillHandler={this.props.skillHandler}
                                     stats={this.props.skillHandler.getEffStats()}
                                     characterSkill={cs}
-                                    onCharacterSkillRemove={(skill) => this.handleCharacterSkillRemove(skill)}
-                                    onCharacterSkillModify={(skill) => this.handleCharacterSkillModify(skill)}
+                                    onCharacterSkillRemove={(skill) => this.props.onCharacterSkillRemove(skill)}
+                                    onCharacterSkillModify={(skill) => this.props.onCharacterSkillModify(skill)}
                                     indent={cs.indent}
                                     skillPoints={spCost}
                                     skill={skill}/>);
@@ -217,7 +205,8 @@ class SkillTable extends React.Component {
         </Table>
             </Card.Body>
             <Card.Footer>
-            <AddSkillControl characterSkillMap={csMap}
+            <AddSkillControl
+                characterSkillMap={csMap}
                              allSkills={this.props.skillHandler.props.allSkills}
                              onCharacterSkillAdd={this.props.onCharacterSkillAdd}
                              style={this.props.style}/>
