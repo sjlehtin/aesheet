@@ -140,7 +140,7 @@ describe('SkillRow', function() {
     it('has controls to increase skill levels', async () => {
         const user = userEvent.setup();
         const spy = jest.fn().mockResolvedValue();
-        const cs = characterSkillFactory({level: 1});
+        const cs = characterSkillFactory({id: 420, level: 1});
         const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
@@ -153,27 +153,27 @@ describe('SkillRow', function() {
         });
         const el = row.getByRole("button", {name: "Increase skill level"})
         await user.click(el)
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+        expect(spy).toHaveBeenCalledWith({id: 420, level: 2})
 
         // ARIA spec says that the button role should be actionable with Enter and Space keys as well as click.
         spy.mockClear()
         expect(spy).not.toHaveBeenCalled()
         await el.focus()
         await user.keyboard("{Space}")
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+        expect(spy).toHaveBeenCalledWith({id: 420, level: 2})
 
         spy.mockClear()
         expect(spy).not.toHaveBeenCalled()
         await el.focus()
         await user.keyboard("{Enter}")
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 2}))
+        expect(spy).toHaveBeenCalledWith({id: 420, level: 2})
 
     });
 
     it('has controls to decrease skill levels', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue()
-        const cs = characterSkillFactory({level: 1})
+        const cs = characterSkillFactory({id: 420, level: 1})
         const row = renderSkillRow({
             skillName: "Balance",
             skillHandler: factories.skillHandlerFactory({
@@ -186,20 +186,20 @@ describe('SkillRow', function() {
         })
         const el = row.getByRole("button", {name: "Decrease skill level"})
         await user.click(el)
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
+        expect(spy).toHaveBeenCalledWith({id: 420, level: 0})
 
         // ARIA spec says that the button role should be actionable with Enter and Space keys as well as click.
         spy.mockClear()
         expect(spy).not.toHaveBeenCalled()
         await el.focus()
         await user.keyboard("{Space}")
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
+        expect(spy).toHaveBeenCalledWith({id: 420, level: 0})
 
         spy.mockClear()
         expect(spy).not.toHaveBeenCalled()
         await el.focus()
         await user.keyboard("{Enter}")
-        expect(spy).toHaveBeenCalledWith(Object.assign({}, cs, {level: 0}))
+        expect(spy).toHaveBeenCalledWith({id: 420, level: 0})
     });
 
     it('should not have a level controls without a skill', function () {

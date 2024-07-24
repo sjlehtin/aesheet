@@ -98,25 +98,20 @@ describe('SkillTable', function() {
         const user = userEvent.setup()
 
         const gardening = factories.skillFactory("Gardening");
-
+        const cs = factories.characterSkillFactory({id: 420, skill: "Gardening", level: 3})
         let spy = jest.fn();
         render(getSkillTable({
             onCharacterSkillModify: spy,
-            skills: [{skill: "Gardening", level: 3}]
+            skills: [cs]
         }));
 
         const row = screen.getByText("Gardening").closest('tr')
         const increaseButton = within(row).getByRole("button", {name: "Increase skill level"})
         await user.click(increaseButton)
         const received = spy.mock.calls[0][0]
-        expect(received).toEqual({skill: gardening.id,
+        expect(received).toEqual({
             level: 4,
-            // TODO: should not be part of the post
-            indent: 0,
-            // not needed, but should not matter
-            id: 11,
-            skill__name: "Gardening",
-            character: 1,
+            id: 420,
         });
     });
 
@@ -138,7 +133,7 @@ describe('SkillTable', function() {
         const row = screen.getByText("Gardening").closest('tr')
         const removeButton = within(row).getByLabelText("Remove skill")
         await user.click(removeButton)
-        expect(spy).toHaveBeenCalledWith(data);
+        expect(spy).toHaveBeenCalledWith({id: 42});
     });
 
     it("calls the passed onCharacterSkillAdd handler", async function () {

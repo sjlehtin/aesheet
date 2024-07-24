@@ -8,37 +8,16 @@ import SkillRow from './SkillRow';
 import AddSkillControl from './AddSkillControl';
 
 class SkillTable extends React.Component {
-    handleCharacterSkillAdd(skill) {
-        if (typeof(this.props.onCharacterSkillAdd) != "undefined") {
-            this.props.onCharacterSkillAdd(SkillTable.sanitizeSkillObject(skill));
-        }
-    }
-
-    static sanitizeSkillObject(skill) {
-        var obj = Object.assign({}, skill);
-        var toRemove = [];
-        for (var field in obj) {
-            if (obj.hasOwnProperty(field)) {
-                if (field[0] === '_') {
-                    toRemove.push(field);
-                }
-            }
-        }
-        for (field of toRemove) {
-            delete obj[field];
-        }
-        return obj;
-    }
 
     handleCharacterSkillRemove(skill) {
         if (this.props.onCharacterSkillRemove) {
-            this.props.onCharacterSkillRemove(SkillTable.sanitizeSkillObject(skill));
+            this.props.onCharacterSkillRemove(skill);
         }
     }
 
     handleCharacterSkillModify(skill) {
         if (this.props.onCharacterSkillModify) {
-            this.props.onCharacterSkillModify(SkillTable.sanitizeSkillObject(skill));
+            this.props.onCharacterSkillModify(skill);
         }
     }
 

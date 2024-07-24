@@ -35,19 +35,13 @@ class SkillRow extends React.Component {
   }
 
   handleIncrease() {
-    if (typeof this.props.onCharacterSkillModify !== "undefined") {
-      var cs = Object.assign({}, this.props.characterSkill);
-      cs.level += 1;
-      this.props.onCharacterSkillModify(cs);
-    }
+    const cs = this.props.characterSkill
+    this.props.onCharacterSkillModify({ id: cs.id, level: cs.level + 1 });
   }
 
   handleDecrease() {
-    if (typeof this.props.onCharacterSkillModify !== "undefined") {
-      var cs = Object.assign({}, this.props.characterSkill);
-      cs.level -= 1;
-      this.props.onCharacterSkillModify(cs);
-    }
+    const cs = this.props.characterSkill
+    this.props.onCharacterSkillModify({ id: cs.id, level: cs.level - 1 });
   }
 
   canDecrease() {
@@ -106,32 +100,25 @@ class SkillRow extends React.Component {
       indent = `${this.props.indent}em`;
     }
 
-    var remove;
-    if (
-      this.props.skillHandler.hasSkill(this.props.skillName) &&
-      this.props.onCharacterSkillRemove
-    ) {
-      remove = (
-        <span
-          aria-label={"Remove skill"}
-          name={"Remove skill"}
-          role={"button"}
-          style={{
-            color: "red",
-            cursor: "pointer",
-            float: "right",
-            paddingRight: 5,
-          }}
-          onClick={(e) => {
-            this.props.onCharacterSkillRemove(this.props.characterSkill);
-          }}
-        >
-          <GoX />
-        </span>
-      );
-    } else {
-      remove = "";
-    }
+    const remove = this.props.skillHandler.hasSkill(this.props.skillName) ? (
+      <span
+        aria-label={"Remove skill"}
+        role={"button"}
+        style={{
+          color: "red",
+          cursor: "pointer",
+          float: "right",
+          paddingRight: 5,
+        }}
+        onClick={(e) => {
+          this.props.onCharacterSkillRemove({id: this.props.characterSkill.id});
+        }}
+      >
+        <GoX />
+      </span>
+    ) : (
+      ""
+    );
 
     var increaseButton, decreaseButton;
     if (this.canIncrease()) {
@@ -190,7 +177,7 @@ SkillRow.propTypes = {
   skillHandler: PropTypes.object.isRequired,
 
   /* Defaults to stat in the skill, but can be overridden for
-       special cases. */
+         special cases. */
   renderForStats: PropTypes.array,
 
   indent: PropTypes.number,
@@ -202,8 +189,8 @@ SkillRow.propTypes = {
   // prop.
 
   /* Either characterSkill of skillName must be given.  If
-       characterSkill is missing, it is assumed that the character does not
-       possess the skill. */
+         characterSkill is missing, it is assumed that the character does not
+         possess the skill. */
   characterSkill: PropTypes.object,
   skill: PropTypes.object.isRequired,
 
