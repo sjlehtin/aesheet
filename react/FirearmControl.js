@@ -592,6 +592,22 @@ class FirearmControl extends RangedWeaponRow {
         // -50 (-3 TI, D/L) (telescopic sight only)
         // Extreme (3x L)
         // -60 (-4 TI, D/L) (telescopic sight only)
+
+        // TODO: Range changed 2024/08
+        // Contact +60 (+2 D/L) (Firearms only)
+        // Close (0.5–1 m) +50 (+2 D/L) (Firearms only)
+        // Point-blank (PB = 1–3 m) +40 (+1 D/L) (not for thrown weapons)
+        // Octant-short (OS = ⅛ x S) +30 (+1 D/L) (not for thrown weapons)
+        // Quarter-short (QS = ¼ x S) +20
+        // Half-short (HS = ½ x S) +10
+        // Short (S) 0
+        // Medium (M) -10
+        // Long (L) -20
+        // Very-long (VL = 1½ x L) -30 (-1 D/L)
+        // Double-long (DL = 2 x L) -40 (-1 D/L)
+        // Extra-long (EL = 2½ x L) -50 (-2 D/L) (Firearms with telescopic sight only)
+        // Triple-long (TL = 3x L) -60 (-2 D/L) (Firearms with telescopic sight only)
+
         const shortRangeEffect = {
             check: 0,
             targetInitiative: 0,
