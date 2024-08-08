@@ -1,8 +1,4 @@
-jest.dontMock('SkillHandler');
-jest.dontMock('sheet-util');
-jest.dontMock('./factories');
-
-var factories = require('./factories');
+import * as factories from './factories'
 
 const SkillHandler = require('SkillHandler').default;
 

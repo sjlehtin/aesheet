@@ -212,16 +212,18 @@ describe('StatBlock', function() {
         await user.click(screen.getByText("Gardening"))
 
 
+        const csSkillData = {id: 422, skill: gardening.id, skill__name: "Gardening", level: 0};
+
         server.use(
             rest.post("http://localhost/rest/characters/2/characterskills/", async (req, res, ctx) => {
 
                 const json = await req.json();
                 expect(json.skill).toEqual(gardening.id)
                 expect(json.level).toEqual(0)
-                return res(ctx.json({id: 422, skill: gardening.id, skill__name: "Gardening", level: 0}))
+                return res(ctx.json(csSkillData))
             }),
             rest.patch("http://localhost/rest/characters/2/characterskills/422", async (req, res, ctx) => {
-                return res(ctx.json(await req.json()))
+                return res(ctx.json(Object.assign({}, csSkillData, await req.json())))
             }),
             rest.delete("http://localhost/rest/characters/2/characterskills/422/", (req, res, ctx) => {
                 return res(ctx.json({}))

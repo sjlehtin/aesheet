@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.23.0]
 
 ### Added
 
@@ -9,6 +9,7 @@
 ### Changed
 
 * Skills have boolean attributes on whether they are affected by armor skill mods. This makes it easier to add skills that are affected by armor.
+* Range effect rule changes as per JW 2024/08. Target initiative affected by vision INT check instead of weapon range. Changes not yet completely done for ranged weapons and close combat not reviewed yet. 
 
 ## [0.22.0] - 2024-07-19
 

@@ -87,36 +87,49 @@ describe('SkillTable', function() {
         expect(within(agriculture.closest('tr')).getByLabelText("Skill level").textContent).toEqual("3")
     });
 
-    // -> to skillrow.  Here we just pass the callbacks forward.
-    xit("allows adding a physical skill level from the start set", test.todo);
-    xit("allows increasing a skill level from the start set", test.todo);
-    xit("allows removing skills", test.todo);
+    // -> also to skillrow.  Here we just pass the callbacks forward.
+    test.todo("allows adding a physical skill level from the start set");
+    test.todo("allows increasing a skill level from the start set");
 
-    xit("allows adding a new skill", test.todo);
+    test.todo("allows removing skills");
+    test.todo("allows adding a new skill");
+
+    it ("filters out skills the character already has from the suggested skills", async function () {
+        const user = userEvent.setup()
+
+        const gardening = factories.skillFactory("Gardening");
+        const agriculture = factories.skillFactory("Agriculture");
+
+        render(getSkillTable({
+            skills: [factories.characterSkillFactory({skill: "Gardening"})],
+            allSkills: [gardening, agriculture],
+        }));
+
+        await user.click(within(screen.getByLabelText("Add skill name")).getByRole("button"))
+        let values = []
+        within(screen.getByLabelText("Add skill name")).queryAllByRole("option").forEach((el) => {values.push(el.textContent)})
+
+        expect(values).toEqual([..._basicPhysical.map((sk) => sk.name), "Agriculture"]);
+    })
 
     it("calls the passed onCharacterSkillModify handler", async function () {
         const user = userEvent.setup()
 
         const gardening = factories.skillFactory("Gardening");
-
+        const cs = factories.characterSkillFactory({id: 420, skill: "Gardening", level: 3})
         let spy = jest.fn();
         render(getSkillTable({
             onCharacterSkillModify: spy,
-            skills: [{skill: "Gardening", level: 3}]
+            skills: [cs]
         }));
 
         const row = screen.getByText("Gardening").closest('tr')
         const increaseButton = within(row).getByRole("button", {name: "Increase skill level"})
         await user.click(increaseButton)
         const received = spy.mock.calls[0][0]
-        expect(received).toEqual({skill: gardening.id,
+        expect(received).toEqual({
             level: 4,
-            // TODO: should not be part of the post
-            indent: 0,
-            // not needed, but should not matter
-            id: 11,
-            skill__name: "Gardening",
-            character: 1,
+            id: 420,
         });
     });
 
@@ -138,7 +151,7 @@ describe('SkillTable', function() {
         const row = screen.getByText("Gardening").closest('tr')
         const removeButton = within(row).getByLabelText("Remove skill")
         await user.click(removeButton)
-        expect(spy).toHaveBeenCalledWith(data);
+        expect(spy).toHaveBeenCalledWith({id: 42});
     });
 
     it("calls the passed onCharacterSkillAdd handler", async function () {
@@ -180,15 +193,6 @@ describe('SkillTable', function() {
             Object.assign(cs, {level: 0}), skill)).toEqual(1);
         expect(SkillTable.spCost(undefined, skill)).toEqual(0);
     });
-
-    // if the parent stores the passed object directly, state should not
-    // get passed over.  TODO: test for sanitizeSkillObject usage in
-    // handleCharacterSkillModify.
-    xit("should clean away internal fields from parent notifications",
-        test.todo);
-    xit("calculates edge skill bonuses correctly and passes them to" +
-        " skillrows", test.todo);
-    xit("passes armor modifiers them to skillrows", test.todo);
 
     it("calculates SPs from edges", function () {
         const table = render(getSkillTable({

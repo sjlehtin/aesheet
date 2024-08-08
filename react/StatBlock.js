@@ -511,11 +511,12 @@ class StatBlock extends React.Component {
         }
     }
 
-    handleCharacterSkillModify(skill) {
-        rest.patch(this.getCharacterSkillURL(skill), skill).then(() => {
-            var index = StatBlock.findItemIndex(
-                this.state.characterSkills, skill);
-            this.state.characterSkills.splice(index, 1, skill);
+    handleCharacterSkillModify(payload) {
+        rest.patch(this.getCharacterSkillURL(payload), payload).then((json) => {
+            const index = StatBlock.findItemIndex(
+                this.state.characterSkills, payload);
+            const newSkill = Object.assign({}, this.state.characterSkills[index], json);
+            this.state.characterSkills.splice(index, 1, newSkill);
             this.setState({characterSkills: this.state.characterSkills});
         }).catch((err) => console.log(err));
     }
@@ -1617,9 +1618,6 @@ class StatBlock extends React.Component {
 
 StatBlock.propTypes = {
     url: PropTypes.string.isRequired,
-    onCharacterSkillAdd: PropTypes.func,
-    onCharacterSkillRemove: PropTypes.func,
-    onCharacterSkillModify: PropTypes.func
 };
 
 export default StatBlock;

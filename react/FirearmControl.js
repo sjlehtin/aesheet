@@ -592,6 +592,45 @@ class FirearmControl extends RangedWeaponRow {
         // -50 (-3 TI, D/L) (telescopic sight only)
         // Extreme (3x L)
         // -60 (-4 TI, D/L) (telescopic sight only)
+
+        // Range changed 2024/08, biggest difference is removal of TI mods for range here, they are vision check based going forward.
+        // Contact +60 (+2 D/L) (Firearms only)
+        // Close (0.5–1 m) +50 (+2 D/L) (Firearms only)
+        // Point-blank (PB = 1–3 m) +40 (+1 D/L) (not for thrown weapons)
+        // Octant-short (OS = ⅛ x S) +30 (+1 D/L) (not for thrown weapons)
+        // Quarter-short (QS = ¼ x S) +20
+        // Half-short (HS = ½ x S) +10
+        // Short (S) 0
+        // Medium (M) -10
+        // Long (L) -20
+        // Very-long (VL = 1½ x L) -30 (-1 D/L)
+        // Double-long (DL = 2 x L) -40 (-1 D/L)
+        // Extra-long (EL = 2½ x L) -50 (-2 D/L) (Firearms with telescopic sight only)
+        // Triple-long (TL = 3x L) -60 (-2 D/L) (Firearms with telescopic sight only)
+
+        // Effects of low vision
+        //
+        // If the Vision-based Observation (INT) check at a particular range
+        // to detect the opponent is less than 95, the PC will suffer an
+        // additional penalty to Target-I. The Target-I penalty is equal to
+        // (OBSERVE_CHECK-95)/10.
+        //
+        // If the Vision-based Observation (INT) check at a particular range
+        // to detect the opponent is less than 45, the PC will suffer an
+        // additional penalty to the combat skill check. The penalty is equal
+        // to OBSERVE_CHECK-45, and it applies both in close combat attack
+        // and defense as well as ranged combat. NOT DONE CC
+
+        // 3) Bumping
+        //
+        // In close combat, bumping is allowed if the Vision-based
+        // Observation (INT) check against the opponent at close range is 95
+        // or greater. NOT DONE
+        //
+        // In ranged fire, bumping is allowed if the Vision-based Observation
+        // (INT) check against the opponent is 95 or greater AND the opponent
+        // is full in view (does not have any cover).
+
         const shortRangeEffect = {
             check: 0,
             targetInitiative: 0,
@@ -609,7 +648,7 @@ class FirearmControl extends RangedWeaponRow {
         if (toRange < 0.5) {
             return {
                 check: 60,
-                targetInitiative: 2,
+                targetInitiative: 0,
                 damage: 2,
                 leth: 2,
                 name: "Contact"
@@ -617,7 +656,7 @@ class FirearmControl extends RangedWeaponRow {
         } else if (toRange <= 1) {
             return {
                 check: 50,
-                targetInitiative: 2,
+                targetInitiative: 0,
                 damage: 2,
                 leth: 2,
                 name: "Close"
@@ -625,7 +664,7 @@ class FirearmControl extends RangedWeaponRow {
         } else if (toRange <= 3) {
             return {
                 check: 40,
-                targetInitiative: 1,
+                targetInitiative: 0,
                 damage: 1,
                 leth: 1,
                 name: "Point-blank"
@@ -633,10 +672,10 @@ class FirearmControl extends RangedWeaponRow {
         } else if (toRange <= shortRange/8) {
             return {
                 check: 30,
-                targetInitiative: 1,
+                targetInitiative: 0,
                 damage: 1,
                 leth: 1,
-                name: "XXS"
+                name: "Octant-short"
             };
         } else if (toRange <= shortRange/4) {
             return {
@@ -644,7 +683,7 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 0,
                 damage: 0,
                 leth: 0,
-                name: "Extra-short"
+                name: "Quarter-short"
             };
 
         } else if (toRange <= shortRange/2) {
@@ -653,7 +692,7 @@ class FirearmControl extends RangedWeaponRow {
                 targetInitiative: 0,
                 damage: 0,
                 leth: 0,
-                name: "Very short"
+                name: "Half-short"
             };
 
         } else if (toRange <= shortRange) {
@@ -677,38 +716,38 @@ class FirearmControl extends RangedWeaponRow {
         } else if (toRange <= 1.5*longRange) {
             return {
                 check: -30,
-                targetInitiative: -1,
+                targetInitiative: 0,
                 damage: -1,
                 leth: -1,
-                name: "Extra-long"
+                name: "Very-long"
             };
         } else if (toRange <= 2*longRange) {
             return {
                 check: -40,
-                targetInitiative: -2,
-                damage: -2,
-                leth: -2,
-                name: "XXL"
+                targetInitiative: 0,
+                damage: -1,
+                leth: -1,
+                name: "Double-long"
             };
         } else if (acuteVision >= 1 && toRange <= 2.5*longRange) {
             // XXXL (2½ x L)
             // -50 (-3 TI, D/L) (telescopic sight only)
             return {
                 check: -50,
-                targetInitiative: -3,
-                damage: -3,
-                leth: -3,
-                name: "XXXL"
+                targetInitiative: 0,
+                damage: -2,
+                leth: -2,
+                name: "Extra-long"
             };
         } else if (acuteVision >= 2 && toRange <= 3*longRange) {
             // Extreme (3x L)
             // -60 (-4 TI, D/L) (telescopic sight only)
             return {
                 check: -60,
-                targetInitiative: -4,
-                damage: -4,
-                leth: -4,
-                name: "Extreme"
+                targetInitiative: 0,
+                damage: -2,
+                leth: -2,
+                name: "Triple-long"
             };
         }
 
@@ -746,8 +785,12 @@ class FirearmControl extends RangedWeaponRow {
 
         // If vision check is under 75, the difference is penalty to the
         // ranged skill check.
-        if (visionCheck < 75) {
-            effect.check += visionCheck - 75;
+        if (visionCheck < this.VISION_CHECK_PENALTY_LIMIT) {
+            effect.check += visionCheck - this.VISION_CHECK_PENALTY_LIMIT;
+        }
+
+        if (visionCheck < this.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) {
+            effect.targetInitiative += (visionCheck - this.VISION_TARGET_INITIATIVE_PENALTY_LIMIT)/10;
         }
 
         // Instinctive Fire
@@ -764,7 +807,7 @@ class FirearmControl extends RangedWeaponRow {
             effect.targetInitiative +=
                 this.props.skillHandler.skillLevel("Instinctive fire");
         }
-        effect.bumpingAllowed = visionCheck >= 100;
+        effect.bumpingAllowed = visionCheck >= this.VISION_BUMPING_LIMIT;
         effect.bumpingLevel = this.skillLevel();
         return effect;
     }

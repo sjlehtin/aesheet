@@ -161,4 +161,26 @@ describe('SkillHandler', function() {
         expect(handler.getACPenalty().value).toEqual(0)
     });
 
+    it("calculates skill points from edges", function () {
+        const handler =  factories.skillHandlerFactory({
+            edges: [factories.edgeLevelFactory({extra_skill_points: 6}),
+                factories.edgeLevelFactory({extra_skill_points: 8})
+            ]
+        });
+        expect(handler.getEdgeSkillPoints()).toEqual(14)
+    })
+
+    it("calcualate initial skill points", function () {
+        const handler =  factories.skillHandlerFactory({character: {
+            start_lrn: 50, start_int: 38, start_psy: 47}
+        });
+        expect(handler.getInitialSkillPoints()).toEqual(30)
+    })
+
+    it("calculate earned skill points", function () {
+        const handler =  factories.skillHandlerFactory({character: {
+           gained_sp: 23}
+        });
+        expect(handler.getEarnedSkillPoints()).toEqual(23)
+    })
 });
