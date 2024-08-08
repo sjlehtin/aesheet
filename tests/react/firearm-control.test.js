@@ -107,7 +107,7 @@ describe('FirearmControl', () => {
         const values = getActionChecks();
         expect(values[0]).toEqual("125")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+2")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+2")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+2")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Contact")
@@ -118,7 +118,7 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+50")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+2")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+2")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+2")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Close")
@@ -129,7 +129,7 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+40")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+1")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+1")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+1")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Point-blank")
@@ -140,10 +140,10 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+30")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+1")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+1")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+1")
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("XXS")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Octant-short")
     });
 
     it("can calculate extra-short range effects", async () => {
@@ -154,7 +154,7 @@ describe('FirearmControl', () => {
         expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+0")
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Extra-short")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Quarter-short")
     });
 
     it("can calculate very short range effects", async () => {
@@ -162,10 +162,10 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+10")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-0.5")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+0")
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Very short")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Half-short")
     });
 
     it("can calculate short range effects", async () => {
@@ -173,7 +173,7 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+0")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-1.5")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Short")
@@ -184,7 +184,7 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-10")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-1.5")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Medium")
@@ -193,10 +193,9 @@ describe('FirearmControl', () => {
     it("can calculate long range effects", async () => {
         await renderFirearm({toRange: "180"});
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
-        // Includes -5 for INT check
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-25")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-2.5")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("+0")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
@@ -205,25 +204,23 @@ describe('FirearmControl', () => {
     it("can calculate extra long range effects", async () => {
         await renderFirearm({toRange: "270"});
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
-        // Includes -15 for INT check
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-45")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-30")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-1")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-3.5")
         expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("-1")
         expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("-1")
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Extra-long")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Very-long")
     });
 
     it("can calculate XXL range effects", async () => {
         await renderFirearm({toRange: "360"});
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
-        // Includes -15 for INT check
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-55")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-40")
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-2")
-        expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("-2")
-        expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("-2")
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("XXL")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-3.5")
+        expect(within(rangeEffect).getByLabelText("Damage modifier").textContent).toEqual("-1")
+        expect(within(rangeEffect).getByLabelText("Lethality modifier").textContent).toEqual("-1")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Double-long")
     });
 
     it("can calculate instinctive fire", async () => {
@@ -238,7 +235,7 @@ describe('FirearmControl', () => {
         });
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+2")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+1.5")
     });
 
     it("recognizes INT for instinctive fire range", async () => {
@@ -253,7 +250,7 @@ describe('FirearmControl', () => {
         });
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+0")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-0.5")
     });
 
     it("recognizes that target-I can not be positive", async () => {
@@ -271,7 +268,7 @@ describe('FirearmControl', () => {
         });
         const rangeEffect = screen.getByRole("row", {name: "Range effect"})
 
-        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+2")
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("+1.5")
         expect(screen.getByLabelText("Target initiative").textContent).toEqual("+0")
     });
 
@@ -293,12 +290,12 @@ describe('FirearmControl', () => {
         expect(screen.getByLabelText("Target initiative").textContent).toEqual("-1")
     });
 
-    it("renders damage with XXL range effects", async () => {
+    it("renders damage with double-long range effects", async () => {
         await renderFirearm({toRange: "360"});
-        expect(screen.getByLabelText("Damage").textContent).toContain("2d6+0/3 (+1)")
+        expect(screen.getByLabelText("Damage").textContent).toContain("2d6+1/4 (+1)")
     });
 
-    it("renders damage with XXL range effects", async () => {
+    it("renders damage with close range effects", async () => {
         await renderFirearm({toRange: "0.3"});
         expect(screen.getByLabelText("Damage").textContent).toContain("2d6+4/7 (+1)")
     });
@@ -337,7 +334,7 @@ describe('FirearmControl', () => {
         await renderFirearm({darknessDetectionLevel: -3, toRange: "100"});
 
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-65")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-35")
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Medium")
     });
 
@@ -347,7 +344,7 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("+10")
         expect(within(rangeEffect).getByLabelText("Bumping allowed").textContent).toEqual("no")
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Very short")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Half-short")
     });
 
     it("takes Acute Vision 2 into account", async () => {
@@ -377,9 +374,9 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
         expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("70")
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-25")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
 
-        expect(getActionChecks().slice(2, 7)).toEqual(["30", "23", "16", "8", ""])
+        expect(getActionChecks().slice(2, 7)).toEqual(["35", "28", "21", "13", ""])
     });
 
     it("takes Poor Vision into account", async () => {
@@ -393,9 +390,9 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
         expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("50")
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-45")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
 
-        expect(getActionChecks().slice(2, 7)).toEqual(["10", "3", "-4", "-12", ""])
+        expect(getActionChecks().slice(2, 7)).toEqual(["35", "28", "21", "13", ""])
     });
 
     it("takes scope's Acute Vision into account", async () => {
@@ -449,9 +446,9 @@ describe('FirearmControl', () => {
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
         expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Long")
         expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("70")
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-25")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-20")
 
-        expect(getActionChecks().slice(2, 7)).toEqual(["30", "23", "16", "8", ""])
+        expect(getActionChecks().slice(2, 7)).toEqual(["35", "28", "21", "13", ""])
     });
 
     it("stacks scope's and characters Acute Vision", async () => {
@@ -486,10 +483,8 @@ describe('FirearmControl', () => {
                 scope: {
                     name: "optical scope 8x",
                     sight: 1000,
-                    // perks: [{edge: "Acute Vision", level: 1}]
-                }
+                 }
             },
-            // handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
             toRange: "1080",
         });
 
@@ -513,7 +508,6 @@ describe('FirearmControl', () => {
                     perks: [{edge: "Acute Vision", level: 1}]
                 }
             },
-            // handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
             toRange: "1081",
         });
 
@@ -521,8 +515,8 @@ describe('FirearmControl', () => {
         expect(screen.queryByText("Unable to shoot to this range")).not.toBeInTheDocument()
 
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("XXXL")
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-75")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Extra-long")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-50")
         expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("50")
     })
 
@@ -542,7 +536,6 @@ describe('FirearmControl', () => {
                     perks: [{edge: "Acute Vision", level: 1}]
                 }
             },
-            // handlerProps: {edges: [{edge: "Acute Vision", level: 1}]},
             toRange: "1600",
         });
 
@@ -574,8 +567,8 @@ describe('FirearmControl', () => {
         expect(screen.queryByText("Unable to shoot to this range")).not.toBeInTheDocument()
 
         const rangeEffect = screen.queryByRole("row", {name: "Range effect"})
-        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Extreme")
-        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-75")
+        expect(within(rangeEffect).getByLabelText("Name").textContent).toEqual("Triple-long")
+        expect(within(rangeEffect).getByLabelText("Check modifier").textContent).toEqual("-60")
         expect(within(rangeEffect).getByLabelText("Vision check").textContent).toEqual("60")
 
     })
@@ -616,15 +609,18 @@ describe('FirearmControl', () => {
     it ("can calculate a row of initiatives to short range", async () => {
         await renderFirearm({toRange: 60});
 
+        const rangeEffect = screen.getByRole("row", {name: "Range effect"})
+        expect(within(rangeEffect).getByLabelText("Target initiative modifier").textContent).toEqual("-1.5")
+
         const values = getInitiatives();
-        expect(values).toEqual(["+9", "+7", "+3", "-2", "+6", "+1", "-4", "",  "", ""])
+        expect(values).toEqual(["+9", "+6", "+1", "-4", "+4", "+0", "-5", "",  "", ""])
     });
 
     it ("can calculate a row of initiatives to extra-long range", async () => {
         await renderFirearm({toRange: 181});
 
         const values = getInitiatives();
-        expect(values).toEqual(["+9", "+6", "+2", "-3", "+5", "+0", "-5", "",  "", ""])
+        expect(values).toEqual(["+9", "+5", "+0", "-5", "+3", "-1", "-6", "",  "", ""])
     });
 
     it("can calculate effect of defaulted skill check", async () => {

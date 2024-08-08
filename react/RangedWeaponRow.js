@@ -10,7 +10,19 @@ import {isFloat} from "./sheet-util";
 import {Unskilled} from "./Unskilled";
 import {BaseCheck} from "./BaseCheck";
 
+function calculateRange(r, g) {
+    // Low-G does not improve range in other than extreme range.
+    if (g < 1) {
+        g = 1.0
+    }
+    return util.rounddown(r / (g ?? 1.0))
+}
+
 class RangedWeaponRow extends WeaponRow {
+    VISION_CHECK_PENALTY_LIMIT = 45
+    VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95
+    VISION_BUMPING_LIMIT = 95
+
     constructor(props) {
         super(props);
 
@@ -86,36 +98,20 @@ class RangedWeaponRow extends WeaponRow {
         return {damage: fitBonusDmg, leth: fitLethBonus};
     }
 
-    weaponRangeEffect(toRange) {
-        // Range
-        // +2 TI, D/L (+2 to target initiative and damage and lethality)
-        //
-        // Contact
-        // +60 (+2 TI, D/L) (Firearms only)
-        // Close (0.5–1 m)
-        // +50 (+2 TI, D/L) (Firearms only)
-        // Point-blank (1–3 m)
-        // +40 (+1 TI, D/L)
-        // XXS (⅛ x S)
-        // +30 (+1 TI, D/L)
-        // Extra-short (¼ x S)
-        // +20
-        // Very short (½ x S)
-        // +10
-        // Short
-        // 0
-        // Medium
-        // -10
-        // Long
-        // -20
-        // Extra-long (1½ x L)
-        // -30 (-1 TI, D/L)
-        // XXL (2 x L)
-        // -40 (-2 TI, D/L)
-        // XXXL (2½ x L)
-        // -50 (-3 TI, D/L) (telescopic sight only)
-        // Extreme (3x L)
-        // -60 (-4 TI, D/L) (telescopic sight only)
+    shortRange() {
+        return calculateRange(this.props.weapon.base.range_s, this.props.gravity)
+    }
+
+    mediumRange() {
+        return calculateRange(this.props.weapon.base.range_m, this.props.gravity)
+    }
+
+    longRange() {
+        return calculateRange(this.props.weapon.base.range_l, this.props.gravity)
+    }
+
+    weaponRangeEffect(toRange, skillHandler) {
+        // See FirearmControl for more complete documentation.
         const shortRangeEffect = {
             check: 0,
             targetInitiative: 0,
@@ -124,30 +120,19 @@ class RangedWeaponRow extends WeaponRow {
             name: "Short"
         };
 
+        // Characters with FIT45+ can extend the E range proportionally (E+ range).
+        // However, FIT damage and lethality bonuses do not apply at E+ range.
+        const extremePlusRange = null
+
         if (!toRange && !isFloat(toRange)) {
             return shortRangeEffect;
         }
         const shortRange = this.shortRange();
         const longRange = this.longRange();
 
-        if (toRange < 0.5) {
-            // TODO: firearm only
-            return {
-                check: 60,
-                targetInitiative: 2,
-                damage: 2,
-                leth: 2,
-                name: "Contact"
-            };
-        } else if (toRange <= 1) {
-            // TODO: firearm only
-            return {
-                check: 50,
-                targetInitiative: 2,
-                damage: 2,
-                leth: 2,
-                name: "Close"
-            };
+        if (toRange <= 1) {
+            // Too close for bow.
+            return null
         } else if (toRange <= 3) {
             return {
                 check: 40,
@@ -206,24 +191,26 @@ class RangedWeaponRow extends WeaponRow {
                 targetInitiative: -1,
                 damage: -1,
                 leth: -1,
-                name: "Extra-long"
+                name: "Very long"
             };
         } else if (toRange <= 2*longRange) {
+            // Affected by gravity
             return {
                 check: -40,
                 targetInitiative: -2,
                 damage: -2,
                 leth: -2,
-                name: "XXL"
+                name: "Extra-long"
             };
-        } else if (toRange <= 2.5*longRange) {
-            // XXXL
-            // TODO: check scope
-            return null;
-        } else if (toRange <= 3*longRange) {
-            // Extreme
-            // TODO: check scope
-            return null;
+        } else if (extremePlusRange && toRange <= extremePlusRange) {
+            return {
+                check: -60,
+                targetInitiative: -2,
+                damage: -2,
+                leth: -2,
+                fitBonusDisabled: true,
+                name: "Extreme"
+            };
         }
 
         return null;
@@ -233,9 +220,6 @@ class RangedWeaponRow extends WeaponRow {
         let effect = this.weaponRangeEffect(toRange);
         let perks = [];
 
-        if (this.props.weapon.scope) {
-            perks = this.props.weapon.scope.perks;
-        }
         const visionCheck = this.props.skillHandler.visionCheck(toRange,
             this.props.darknessDetectionLevel,
             perks);
@@ -247,8 +231,12 @@ class RangedWeaponRow extends WeaponRow {
 
         // If vision check is under 75, the difference is penalty to the
         // ranged skill check.
-        if (visionCheck < 75) {
-            effect.check += visionCheck - 75;
+        if (visionCheck < this.VISION_CHECK_PENALTY_LIMIT) {
+            effect.check += visionCheck - this.VISION_CHECK_PENALTY_LIMIT;
+        }
+
+        if (visionCheck < this.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) {
+            effect.targetInitiative += (visionCheck - this.VISION_TARGET_INITIATIVE_PENALTY_LIMIT)/10;
         }
 
         // Instinctive Fire
@@ -265,7 +253,7 @@ class RangedWeaponRow extends WeaponRow {
             effect.targetInitiative +=
                 this.props.skillHandler.skillLevel("Instinctive fire");
         }
-        effect.bumpingAllowed = visionCheck >= 100;
+        effect.bumpingAllowed = visionCheck >= this.VISION_BUMPING_LIMIT;
         return effect;
     }
 
@@ -298,16 +286,6 @@ class RangedWeaponRow extends WeaponRow {
         const initCells = this.initiatives(actions).map((el, ii) =>
         { return <td style={initStyle} key={`init-${ii}`}>{util.renderInt(el)}</td>; });
 
-        const base = this.props.weapon.base;
-
-        function calculateRange(r, g) {
-            // Low-G does not improve range in other than extreme range.
-            if (g < 1) {
-                g = 1.0
-            }
-            return util.rounddown(r / (g ?? 1.0))
-        }
-
         return <div style={this.props.style}>
             <table style={{fontSize: 'inherit'}}>
                 <thead>
@@ -338,9 +316,9 @@ class RangedWeaponRow extends WeaponRow {
                     <td style={cellStyle}>{this.targetInitiative()}</td>
                     <td style={cellStyle}>{this.drawInitiative()}</td>
                     <td style={cellStyle} aria-label={"Damage"}>{this.renderDamage()}</td>
-                    <td style={cellStyle} aria-label={"Short range"}>{calculateRange(base.range_s, this.props.gravity)}</td>
-                    <td style={cellStyle} aria-label={"Medium range"}>{calculateRange(base.range_m, this.props.gravity)}</td>
-                    <td style={cellStyle} aria-label={"Long range"}>{calculateRange(base.range_l, this.props.gravity)}</td>
+                    <td style={cellStyle} aria-label={"Short range"}>{this.shortRange()}</td>
+                    <td style={cellStyle} aria-label={"Medium range"}>{this.mediumRange()}</td>
+                    <td style={cellStyle} aria-label={"Long range"}>{this.longRange()}</td>
                 </tr>
                 <tr>
                     <td colSpan={2}><span style={helpStyle}>I vs. 1 target</span></td>
