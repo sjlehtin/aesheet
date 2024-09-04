@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Added
+
+* Added search functionality for sheets in admin.
+
 ## [0.23.0]
 
 ### Added
