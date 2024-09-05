@@ -155,5 +155,7 @@ describe('ArmorControl', function() {
         expect(screen.getByLabelText("Armor T R").textContent).toEqual("0")
         expect(screen.getByLabelText("Armor H P").textContent).toEqual("0")
         expect(screen.getByLabelText("Armor H DR").textContent).toEqual("-2")
+
+        expect(screen.getByLabelText("Overall damage reduction").textContent).toEqual("-16")
     })
 });
