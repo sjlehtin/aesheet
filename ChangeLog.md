@@ -6,6 +6,7 @@
 * Added one-handed use penalty for firearms, big pistols and such are hard to aim with only one hand.
 * Added overall damage reduction to armor.
 * Added attribute `autofire_only` to firearms.
+* Added optional `cartridge_weight` for ammunition, which will be used instead of heuristics for ammunition weight if defined.
 
 ## [0.23.0]
 

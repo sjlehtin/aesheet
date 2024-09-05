@@ -21,7 +21,8 @@ export interface BaseFirearm {
 }
 
 export interface Ammunition {
-  weight: string
+  weight: string;
+  cartridge_weight?: string;
 }
 
 export interface SheetFirearm {
