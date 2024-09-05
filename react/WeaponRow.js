@@ -169,6 +169,10 @@ class WeaponRow extends React.Component {
         return this.props.skillHandler.getStat(stat);
     }
 
+    oneHandedPenalty() {
+        return 0
+    }
+
     skillChecksV2(actions, givenProps) {
         let props = {useType: WeaponRow.FULL, counterPenalty: true};
         if (givenProps) {
@@ -197,6 +201,8 @@ class WeaponRow extends React.Component {
             }
         }
 
+        const oneHandedPenalty = this.oneHandedPenalty()
+
         for (let act of actions) {
             if (act > 2 * roa) {
                 checks.push(null);
@@ -204,6 +210,10 @@ class WeaponRow extends React.Component {
                 const bd = new ValueBreakdown()
 
                 bd.addBreakdown(baseCheck)
+
+                if (props.useType !== WeaponRow.FULL) {
+                    bd.add(oneHandedPenalty, "One-handed penalty")
+                }
 
                 const mod = Math.round(WeaponRow.checkMod(roa, act,
                     this.baseCheckBonusForSlowActions,
@@ -225,6 +235,7 @@ class WeaponRow extends React.Component {
 
                     bd.add(counter, `Modifier from ${this.penaltyCounterStat()}`)
                 }
+                bd.rounddown()
                 checks.push(bd)
             }
         }

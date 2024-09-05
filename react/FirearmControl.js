@@ -165,10 +165,7 @@ class FirearmControl extends RangedWeaponRow {
 
   roa(useType) {
     const base = this.props.weapon.base;
-    const impulse =
-      (parseFloat(this.props.weapon.ammo.weight) *
-        parseFloat(this.props.weapon.ammo.velocity)) /
-      1000;
+    const impulse = this.impulse();
 
     const recoil =
       impulse /
@@ -197,6 +194,24 @@ class FirearmControl extends RangedWeaponRow {
       bd.setMaximum(5.0, "Max ROF");
     }
     return bd;
+  }
+
+  impulse() {
+    return (
+      (parseFloat(this.props.weapon.ammo.weight) *
+        parseFloat(this.props.weapon.ammo.velocity)) /
+      1000
+    );
+  }
+
+  oneHandedPenalty() {
+    // =MIN(0;-3*Weight-2*Impulse+(25-range_s)/2)
+    return Math.min(
+      0,
+      -3 * parseFloat(this.props.weapon.base.weight) -
+        2 * this.impulse() +
+        (25 - this.shortRange()) / 2,
+    );
   }
 
   skillCheck(sweepFire = false) {
