@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.24.0] - 2024-09-05
 
 ### Added
 
@@ -8,7 +8,7 @@
 * Added attribute `autofire_only` to firearms.
 * Added optional `cartridge_weight` for ammunition, which will be used instead of heuristics for ammunition weight if defined.
 
-## [0.23.0]
+## [0.23.0] - 2024-08-08
 
 ### Added
 
