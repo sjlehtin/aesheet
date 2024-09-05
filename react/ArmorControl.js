@@ -119,6 +119,16 @@ function calculateArmorStats(armor, helm, miscItems, handler) {
     return stats
 }
 
+// The overall damage reduction is the (weighted) average damage reduction times two.
+function getOverallDamageReduction(armorStats) {
+    let dr = 0
+    for (let loc of ["H", "RA", "LA", "RL", "LL"]) {
+        dr += armorStats[loc]["DR"].value()
+    }
+    dr += armorStats["T"]["DR"].value() * 3
+    return util.rounddown((dr / 8) * 2)
+}
+
 class ArmorControl extends React.Component {
     constructor(props) {
         super(props);
@@ -212,6 +222,8 @@ class ArmorControl extends React.Component {
             locations.push(<tr key={loc}>{row}</tr>);
         }
 
+        const overallDamageReduction = getOverallDamageReduction(armorStats)
+        locations.push(<tr key="Overall DR"><td colSpan={6}><em>Overall damage reduction</em></td><td aria-label="Overall damage reduction" style={{textAlign: "center"}}>{overallDamageReduction}</td></tr>);
         let editButtonName = "Edit Armor"
         if (this.state.editing) {
             editButtonName = "Close edit"
