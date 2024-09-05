@@ -839,7 +839,9 @@ describe('FirearmControl', () => {
         let props = {
             fit: 45,
             hasAutofireSkill: true,
-            autofireRPM: 600
+            autofireRPM: 600,
+            sweepFireDisabled: false,
+            autofireOnly: false
         };
         if (givenProps) {
             props = Object.assign(props, givenProps);
@@ -867,6 +869,7 @@ describe('FirearmControl', () => {
             base: {name: "Invented",
                 autofire_rpm: props.autofireRPM,
                 autofire_class: "B",
+                autofire_only: props.autofireOnly,
                 sweep_fire_disabled: props.sweepFireDisabled,
                 restricted_burst_rounds: props.restrictedBurstRounds,
                 base_skill: "Long guns",
@@ -958,6 +961,14 @@ describe('FirearmControl', () => {
         await renderFirearmControlWithBurst({fit: 72});
         const values = await getSweepChecks("10");
         expect(values).toEqual(["", "", "", "", "", "", "", "", "-16", "4", "24", "34", "44", "45", "45", "45"]);
+    });
+
+    it ("does not render single fire if it is disabled", async () => {
+        await renderFirearmControlWithBurst({autofireOnly: true});
+        const values = await getSweepChecks("20");
+        expect(values).toEqual(["-87", "-67", "-47", "-27", "-7", "3", "13", "23", "33", "37", "41", "45", "49", "51", "53", "55"]);
+        const singleFireValues = getActionChecks()
+        expect(singleFireValues[0]).toEqual("Weapon only supports autofire.")
     });
 
     it ("can remove firearm", async () => {

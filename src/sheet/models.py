@@ -904,6 +904,7 @@ class BaseFirearm(BaseArmament):
     )
     sweep_fire_disabled = models.BooleanField(default=False)
     restricted_burst_rounds = models.IntegerField(default=0)
+    autofire_only = models.BooleanField(default=False)
 
     stock = models.DecimalField(
         max_digits=4,
@@ -918,12 +919,8 @@ class BaseFirearm(BaseArmament):
         max_digits=5,
         decimal_places=3,
         default=0.1,
-        help_text="Modifier for recoil.  In "
-        "principle, time in seconds "
-        "from "
-        "the muzzle break, whatever "
-        "that "
-        "means. Bigger is better.",
+        help_text="Modifier for recoil.  In principle, time in seconds "
+        "from the muzzle break. Bigger is better.",
     )
 
     weapon_class_modifier = models.DecimalField(

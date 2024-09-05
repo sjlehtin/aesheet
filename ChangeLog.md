@@ -3,8 +3,9 @@
 ### Added
 
 * Added search functionality for sheets in admin.
-* Add one-handed use penalty for firearms, big pistols and such are hard to aim with only one hand.
-* Add overall damage reduction to armor.
+* Added one-handed use penalty for firearms, big pistols and such are hard to aim with only one hand.
+* Added overall damage reduction to armor.
+* Added attribute `autofire_only` to firearms.
 
 ## [0.23.0]
 
