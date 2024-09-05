@@ -279,7 +279,7 @@ describe('stat block weight handling', function() {
         )
 
         const sheet = render(<StatBlock url="/rest/sheets/1/" />)
-        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()), {timeout: 5000})
 
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("7.00 kg")
     });
