@@ -11,10 +11,21 @@ export function isInt(value: any) {
 export function magazineWeight(wpn: SheetFirearm, mag: SheetFirearmMagazine) {
   let magWeight = 0;
   magWeight += parseFloat(wpn.base.magazine_weight);
-  // Ammo has weight in grams. Estimate cartridge weighs 1.5 as
-  // much as the bullet, based on 7.62x51 Nato caliber.
-  magWeight +=
-    parseFloat(wpn.ammo.weight) * 0.001 * 2.5 * parseInt(mag.current);
+
+  const ammoWeight = parseFloat(wpn.ammo.weight) * 0.001;
+  const ammoLeftInMagazine = parseInt(mag.current);
+  magWeight += ammoWeight  * ammoLeftInMagazine
+
+  let cartridgeWeight = 0
+  if (isFloat(wpn.ammo.cartridge_weight)) {
+    cartridgeWeight = parseFloat(wpn.ammo.cartridge_weight ?? "0") * 0.001
+  } else {
+    // Ammo has weight in grams. Estimate cartridge weighs 1.5 as
+    // much as the bullet, based on 7.62x51 Nato caliber.
+    cartridgeWeight = ammoWeight * 1.5
+  }
+
+  magWeight += cartridgeWeight * ammoLeftInMagazine;
   return magWeight;
 }
 

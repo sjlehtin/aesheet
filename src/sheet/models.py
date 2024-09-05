@@ -866,6 +866,13 @@ class Ammunition(ExportedModel, BaseDamager):
                   "recoil.",
     )
 
+    cartridge_weight = models.DecimalField(
+        decimal_places=3, max_digits=7,
+        default=None, null=True, blank=True,
+        help_text="Additional weight for cartridge and propellant. A `null` "
+                  "value means cartridge weight is counted as 2.5 times the "
+                  "weight of the bullet.")
+
     velocity = models.IntegerField(
         help_text="Velocity of the bullet at muzzle in meters per second. "
                   "Used to calculate recoil."
