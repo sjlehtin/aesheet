@@ -65,8 +65,9 @@ class SkillAdmin(admin.ModelAdmin):
 
 
 class EdgeSkillBonusAdmin(admin.ModelAdmin):
+    search_fields = ('edge_level__edge__name', )
     list_filter = ('edge_level__level',)
-    ordering = ('edge_level__edge__name', 'edge_level__level',)
+    ordering = ('edge_level__edge__name', 'edge_level__level', 'edge_level__skill__name')
 
 
 class FirearmAmmunitionTypeInline(admin.TabularInline):
@@ -223,6 +224,10 @@ class EdgeLevelAdmin(admin.ModelAdmin):
     ordering = ('edge__name', 'level', 'cost')
 
 
+class SheetAdmin(admin.ModelAdmin):
+    search_fields = ('character__name', 'description')
+
+
 admin.site.register(sm.Armor, ArmorAdmin)
 admin.site.register(sm.ArmorQuality, ArmorQualityAdmin)
 admin.site.register(sm.ArmorTemplate, ArmorTemplateAdmin)
@@ -233,7 +238,7 @@ admin.site.register(sm.CharacterSkill, CharacterSkillAdmin)
 admin.site.register(sm.Edge)
 admin.site.register(sm.EdgeLevel, EdgeLevelAdmin)
 admin.site.register(sm.EdgeSkillBonus, EdgeSkillBonusAdmin)
-admin.site.register(sm.Sheet)
+admin.site.register(sm.Sheet, SheetAdmin)
 admin.site.register(sm.TechLevel)
 admin.site.register(sm.Campaign, CampaignAdmin)
 admin.site.register(sm.MiscellaneousItem, ItemAdmin)

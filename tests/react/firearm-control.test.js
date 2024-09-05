@@ -999,14 +999,16 @@ describe('FirearmControl', () => {
                     level: 0
                 }]},
             weapon: {
-                base: {base_skill: "Pistol"},
+                base: {base_skill: "Pistol", stock: 1.0, duration: 0.11, sight: 200, barrel_length: 150, accuracy: 0.8,
+                    target_initiative: -1},
+                ammo: {weight: 5, velocity: 320},
                 use_type: "PRI"
             }
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("2.61")
+        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.42")
         const values = getActionChecks();
-        expect(values).toEqual(["60", "53", "50", "42", "34", "27", "", "",  "", ""])
+        expect(values).toEqual(["60", "53", "50", "50", "42", "36", "30", "", "",  ""])
     });
 
     it ("calculates correct ROF and checks for secondary use type", async () => {
@@ -1017,14 +1019,58 @@ describe('FirearmControl', () => {
                     level: 0
                 }]},
             weapon: {
-                base: {base_skill: "Pistol"},
+                base: {base_skill: "Pistol", stock: 1.0, duration: 0.11, sight: 200, barrel_length: 150, accuracy: 0.8,
+                    target_initiative: -1},
+                ammo: {weight: 5, velocity: 320},
                 use_type: "SEC"
             }
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("2.36")
+        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.17")
         const values = getActionChecks();
-        expect(values).toEqual(["35", "27", "25", "15", "6", "", "", "",  "", ""])
+        expect(values).toEqual(["35", "28", "25", "25", "15", "8", "2", "", "",  ""])
+    });
+
+    it ("calculates correct ROF and checks that full use type does not add one handed penalty", async () => {
+        await renderFirearm({
+            handlerProps: {
+                skills: [{
+                    skill: "Pistol",
+                    level: 0
+                }]},
+            weapon: {
+                base: {base_skill: "Pistol", stock: 1.0, duration: 0.11, sight: 200, barrel_length: 150, accuracy: 1.0,
+                    target_initiative: -1},
+                ammo: {weight: 22.68, velocity: 387},
+                         scope: null,
+                    use_type: "FULL"
+            }
+        })
+
+        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("1.68")
+        const values = getActionChecks();
+        expect(values).toEqual(["60", "50", "41", "29", "", "", "", "",  "", ""])
+    });
+
+    it ("calculates correct ROF and checks that primary use type includes one handed penalty", async () => {
+        await renderFirearm({
+            handlerProps: {
+                skills: [{
+                    skill: "Pistol",
+                    level: 0
+                }]},
+            weapon: {
+                base: {base_skill: "Pistol", stock: 1.0, duration: 0.11, sight: 200, barrel_length: 150, accuracy: 1.0,
+                    target_initiative: -1},
+                ammo: {weight: 22.68, velocity: 387},
+                         scope: null,
+                    use_type: "PRI"
+            }
+        })
+
+        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("1.43")
+        const values = getActionChecks();
+        expect(values).toEqual(["44", "34", "21", "", "", "", "", "",  "", ""])
     });
 
 });

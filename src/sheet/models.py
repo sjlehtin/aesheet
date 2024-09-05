@@ -627,6 +627,9 @@ class EdgeSkillBonus(ExportedModel):
     def __str__(self):
         return "%s -> %s: %+d" % (self.edge_level, self.skill, self.bonus)
 
+    class Meta:
+        verbose_name_plural = "Edge skill bonuses"
+
 
 class CharacterEdge(PrivateMixin, models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)

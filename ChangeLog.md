@@ -1,3 +1,10 @@
+## [Unreleased]
+
+### Added
+
+* Added search functionality for sheets in admin.
+* Add one-handed use penalty for firearms, big pistols and such are hard to aim with only one hand.
+
 ## [0.23.0]
 
 ### Added
