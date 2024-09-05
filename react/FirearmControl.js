@@ -1026,24 +1026,32 @@ class FirearmControl extends RangedWeaponRow {
     });
     if (skillChecks == null) {
       skillChecks = (
-        <td colSpan={9}>
+        <td colSpan={10}>
           <strong>No attacks</strong>
         </td>
       );
     } else {
-      skillChecks = skillChecks.map((chk, ii) => {
-        let cellContent;
-        if (chk) {
-          cellContent = <StatBreakdown value={chk} />;
-        } else {
-          cellContent = "";
-        }
-        return (
-          <td key={`chk-${ii}`} style={cellStyle}>
-            {cellContent}
+      if (weapon.autofire_only) {
+        skillChecks = (
+          <td colSpan={10}>
+            <em>Weapon only supports autofire.</em>
           </td>
         );
-      });
+      } else {
+        skillChecks = skillChecks.map((chk, ii) => {
+          let cellContent;
+          if (chk) {
+            cellContent = <StatBreakdown value={chk}/>;
+          } else {
+            cellContent = "";
+          }
+          return (
+              <td key={`chk-${ii}`} style={cellStyle}>
+                {cellContent}
+              </td>
+          );
+        });
+      }
     }
 
     const marginRightStyle = { marginRight: "1em" };
