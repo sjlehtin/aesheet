@@ -869,7 +869,7 @@ class Ammunition(ExportedModel, BaseDamager):
     cartridge_weight = models.DecimalField(
         decimal_places=3, max_digits=7,
         default=None, null=True, blank=True,
-        help_text="Additional weight for cartridge and propellant. A `null` "
+        help_text="Explicit weight for cartridge (bullet, casing, propellant). A `null` "
                   "value means cartridge weight is counted as 2.5 times the "
                   "weight of the bullet.")
 
