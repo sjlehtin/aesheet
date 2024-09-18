@@ -236,7 +236,7 @@ describe('stat block weight handling', function() {
                     [factories.firearmFactory({
                         base: {weight: 5, magazine_weight: 0.75},
                         scope: null,
-                        ammo: {weight: 12, cartridge_weight: 0.2 },
+                        ammo: {weight: 12, cartridge_weight: 12.2 },
                         magazines: [{current: 30, capacity: 40}, {current: 30, capacity: 40}, {current: 40, capacity: 40}]
                     })]
                 ))
