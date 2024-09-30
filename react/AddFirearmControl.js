@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import {Grid, Col, Row, Label, Button} from 'react-bootstrap';
 
 import DropdownList from 'react-widgets/DropdownList';
+import WeaponRow from "./WeaponRow";
 
 var rest = require('./sheet-rest');
 
@@ -53,7 +54,8 @@ class AddFirearmControl extends React.Component {
         if (this.props.onFirearmAdd) {
             this.props.onFirearmAdd({
                 base: this.state.selectedFirearm,
-                ammo: this.state.selectedAmmo
+                ammo: this.state.selectedAmmo,
+                use_type: WeaponRow.FULL
             });
 
             this.setState({selectedFirearm: null, selectedAmmo: null});

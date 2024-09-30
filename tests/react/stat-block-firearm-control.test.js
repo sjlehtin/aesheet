@@ -96,7 +96,14 @@ describe('StatBlock -- FirearmControl', () => {
         await user.click(screen.getByRole("button", {name: "Add Firearm"}))
 
         expect(await screen.findByLabelText(/Firearm The Cannon/)).toBeInTheDocument()
+        expect(screen.getAllByLabelText(/Use type/)[1].textContent).toEqual("FULL")
     })
+
+    test.todo('verify that an existing firearm loaded from the sheet data behaves identically to one that has been just added')
+    test.todo('verify shoot button expends ammo')
+    test.todo('verify you can shoot a sweep')
+    test.todo('verify you can shoot a short burst')
+    test.todo('verify you can set the current ammo in a clip') // Add an edit control when hovering over clip data
 
     it('allows changing a firearm', async () => {
         const user = userEvent.setup()

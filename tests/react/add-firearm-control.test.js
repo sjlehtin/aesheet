@@ -46,5 +46,6 @@ describe('AddFireArmControl',  function() {
         expect(spy).toHaveBeenCalled()
         expect(spy.mock.lastCall[0].ammo.id).toEqual(301)
         expect(spy.mock.lastCall[0].base.name).toEqual("Luger")
+        expect(spy.mock.lastCall[0].use_type).toEqual("FULL")
     });
 })
