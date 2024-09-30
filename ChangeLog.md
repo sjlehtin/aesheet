@@ -1,3 +1,15 @@
+## [0.25.0] - 2024-10-01
+
+### Changed
+
+* Ammunition property `cartridge_weight` is now used as the full weight if given. Bullet weight is not added anymore.
+* If armor is powered, armor weight is ignored in weight calculations.
+* Updated `npm` dependencies.
+
+### Fixed
+
+* Fixed issue with use type when adding firearms. Now newly added firearms will correctly be treated with "full" use type.
+
 ## [0.24.0] - 2024-09-05
 
 ### Added

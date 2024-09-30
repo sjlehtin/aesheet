@@ -2,7 +2,7 @@
 import setuptools
 
 setuptools.setup(name='aesheet',
-                 version='0.24.0',
+                 version='0.25.0',
                  python_requires=">=3.8",
                  install_requires=["Django",
                                    "django-widget-tweaks",
