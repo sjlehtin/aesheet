@@ -1038,11 +1038,11 @@ class StatBlock extends React.Component {
     getCarriedWeight() {
         const bd = new ValueBreakdown()
 
-        if (this.state.armor && this.state.armor.base) {
+        if (this.state.armor && this.state.armor.base && !this.state.armor.base.is_powered) {
             const itemWeight = util.itemWeight(this.state.armor)
             bd.add(itemWeight, "armor")
         }
-        if (this.state.helm && this.state.helm.base) {
+        if (this.state.helm && this.state.helm.base && !this.state.helm.base.is_powered) {
             const itemWeight =  util.itemWeight(this.state.helm)
             bd.add(itemWeight, "helm")
         }

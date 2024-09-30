@@ -138,6 +138,33 @@ describe('stat block weight handling', function() {
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("6.40 kg")
     });
 
+    it("ignores armor weight if powered", async () => {
+        server.use(
+            rest.get('http://localhost/rest/sheets/1/sheetarmor/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [
+                        factories.armorFactory({base: {is_powered: true, weight: 8}})
+                    ]
+                ))
+            }),
+            rest.get('http://localhost/rest/sheets/1/sheethelm/', async (req, res, ctx) => {
+                return res(ctx.json(
+                    [
+                        factories.armorFactory({
+                            base: {is_helm: true, is_powered: true, weight: 8},
+                            quality: {mod_weight_multiplier: 0.8}
+                        })
+                    ]
+                ))
+            }),
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+
+        expect(sheet.getByLabelText("Weight carried").textContent).toEqual("0.00 kg")
+    });
+
     it("adds close combat weapons weight", async () => {
         server.use(
             rest.get('http://localhost/rest/sheets/1/sheetweapons/', async (req, res, ctx) => {
@@ -330,4 +357,6 @@ describe('stat block weight handling', function() {
         expect(input).toHaveClass("is-valid")
         expect(sheet.getByLabelText("Weight carried").textContent).toEqual("11.00 kg")
     });
+
+    test.todo("power armor suspended weight")
 });
