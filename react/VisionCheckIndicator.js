@@ -2,6 +2,7 @@ import React from "react";
 import { Badge } from "react-bootstrap";
 import { GoAlert } from "react-icons/go";
 import StatBreakdown from "./StatBreakdown";
+import RangedWeaponRow from "./RangedWeaponRow"
 
 export default function VisionCheckIndicator({
   skillHandler,
@@ -28,10 +29,10 @@ export default function VisionCheckIndicator({
   const check = bd.value();
   let style = {};
   let verbose = "";
-  if (check < 75) {
+  if (check < RangedWeaponRow.VISION_CHECK_PENALTY_LIMIT) {
     style.color = "hotpink";
-    verbose = `Ranged penalty: ${75 - check}`;
-  } else if (check >= 100) {
+    verbose = `Ranged penalty: ${RangedWeaponRow.VISION_CHECK_PENALTY_LIMIT - check}`;
+  } else if (check >= RangedWeaponRow.VISION_BUMPING_LIMIT) {
     style.fontWeight = "bold";
     verbose = "Bumping enabled";
   }
