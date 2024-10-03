@@ -1,6 +1,6 @@
 ## What is this?
 
-[![Build Status](https://travis-ci.org/sjlehtin/aesheet.svg?branch=master)](https://travis-ci.org/sjlehtin/aesheet)
+AESheet renders a character sheet for the Advanced Engine (house rules system based originally on TSR's Amazing Engine).
 
 ## Features
 
@@ -12,7 +12,7 @@ See new features from the Changelog.
 ### Implementation
 
 The most intensive page or the character sheet, is pretty much
-completely written with the React JS framework, allowing for a fairly
+completely written with the React JS framework, allowing for a
 responsive page. The backend for the sheet are REST APIs written with
 Django Rest Framework.
 
