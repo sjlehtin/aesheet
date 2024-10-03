@@ -3,6 +3,7 @@ WORKDIR /usr/src/app
 COPY react ./react
 COPY package*.json ./
 COPY webpack.config.js ./
+COPY tsconfig.json ./
 
 RUN mkdir -p ./npmbuild/react/static
 
