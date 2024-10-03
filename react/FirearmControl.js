@@ -15,7 +15,9 @@ import { Badge, Button, Col, Row, Table } from "react-bootstrap";
 import ValueBreakdown from "./ValueBreakdown";
 import { BaseCheck } from "./BaseCheck";
 import { Unskilled } from "./Unskilled";
-import { GoAlert } from "react-icons/go"; /*
+import { GoAlert } from "react-icons/go";
+
+/*
  * Firearms are sheet specific. Firearms can contain add-ons, most
  * notably scopes. Add-ons affect weapon range, to-hit and target initiative,
  * among other factors.
@@ -125,8 +127,8 @@ function RangeInfo({ rangeEffect }) {
                 aria-label="Lethality modifier"
               >{`${util.renderInt(rangeEffect.leth)}`}</td>
               <th className={"ml-5"}>Vision</th>
-              <td className={"mx-2"} aria-label="Vision check">
-                {rangeEffect.visionCheck}
+              <td className={"mx-2"}>
+                <StatBreakdown value={rangeEffect.visionCheck} label={"Vision check"} />
               </td>
             </tr>
           </tbody>
@@ -937,7 +939,7 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     const visionCheck = visionCheckBreakdown.value();
-    effect.visionCheck = visionCheck;
+    effect.visionCheck = visionCheckBreakdown;
 
     // If vision check is under 75, the difference is penalty to the
     // ranged skill check.
