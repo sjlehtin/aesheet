@@ -153,6 +153,7 @@ class WeaponCreateSerializer(serializers.ModelSerializer):
 
 
 class WeaponListSerializer(serializers.ModelSerializer):
+    base = WeaponTemplateSerializer(read_only=True)
 
     class Meta:
         model = sheet.models.Weapon
@@ -176,6 +177,8 @@ class RangedWeaponCreateSerializer(serializers.ModelSerializer):
 
 
 class RangedWeaponListSerializer(serializers.ModelSerializer):
+    base = RangedWeaponTemplateSerializer(read_only=True)
+
     class Meta:
         model = sheet.models.RangedWeapon
         fields = "__all__"
