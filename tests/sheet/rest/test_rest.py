@@ -2,6 +2,7 @@ from rest_framework.test import APIClient, APIRequestFactory
 from rest_framework.test import force_authenticate
 from django.test import TestCase
 from django.urls import reverse
+import collections
 
 import sheet.factories as factories
 import sheet.rest.views as views
@@ -1071,19 +1072,33 @@ class WeaponTestCase(TestCase):
                                                 tech_level__name="2K")
         nanotech = factories.WeaponQualityFactory(name="nanotech",
                                                   tech_level__name="3K")
+        sword_skill = factories.SkillFactory(name="Sword",)
+        powered_weapons_skill = factories.SkillFactory(name="Powered weapons",)
+
         sword = factories.WeaponTemplateFactory(name="Sword",
-                                                 tech_level=self.tech_twok)
+                                                base_skill=sword_skill,
+                                                tech_level=self.tech_twok)
+
         power = factories.WeaponTemplateFactory(name="Powersword",
+                                                base_skill=sword_skill,
                                                 tech_level=self.tech_threek)
+        power.required_skills.add(powered_weapons_skill)
 
         factories.WeaponFactory(base=sword, quality=normal)
         factories.WeaponFactory(base=sword, quality=nanotech)
         factories.WeaponFactory(base=power, quality=normal)
 
+        bow_skill = factories.SkillFactory(name="Bow",)
+
         bow = factories.RangedWeaponTemplateFactory(name="Composite bow",
-                                                 tech_level=self.tech_twok)
+                                                    base_skill=bow_skill,
+                                                    tech_level=self.tech_twok)
+
         powerbow = factories.RangedWeaponTemplateFactory(name="Powerbow",
-                                                tech_level=self.tech_threek)
+                                                         base_skill=bow_skill,
+                                                         tech_level=self.tech_threek)
+        powerbow.required_skills.add(powered_weapons_skill)
+
         factories.RangedWeaponFactory(base=bow, quality=normal)
         factories.RangedWeaponFactory(base=bow, quality=nanotech)
         factories.RangedWeaponFactory(base=powerbow, quality=normal)
@@ -1171,6 +1186,13 @@ class WeaponTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 3)
 
+        powersword = response.data[2]
+        assert powersword['base']['name'] == 'Powersword'
+        assert isinstance(powersword['base']['base_skill'], dict)
+        assert powersword['base']['base_skill']['name'] == 'Sword'
+        assert isinstance(powersword['base']['required_skills'][0], dict)
+        assert powersword['base']['required_skills'][0]['name'] == 'Powered weapons'
+
     def test_mr_campaign_url_weapons(self):
         url = '/rest/weapons/campaign/{}/'.format(self.campaign_mr.pk)
         response = self.client.get(url, format='json')
@@ -1190,6 +1212,13 @@ class WeaponTestCase(TestCase):
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 3)
+
+        powerbow = response.data[2]
+        assert powerbow['base']['name'] == 'Powerbow'
+        assert isinstance(powerbow['base']['base_skill'], dict)
+        assert powerbow['base']['base_skill']['name'] == 'Bow'
+        assert isinstance(powerbow['base']['required_skills'][0], dict)
+        assert powerbow['base']['required_skills'][0]['name'] == 'Powered weapons'
 
     def test_mr_campaign_url_rangedweapons(self):
         url = '/rest/rangedweapons/campaign/{}/'.format(self.campaign_mr.pk)
