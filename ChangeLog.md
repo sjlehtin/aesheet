@@ -4,6 +4,7 @@
 
 * Existing weapons and ranged weapons correctly show skill checks. This was broken in the skill refactoring.
 * Fixed running under Docker.
+* Fixed scope perks which were broken in the skill and edge refactoring.
 
 ## [0.25.0] - 2024-10-01
 

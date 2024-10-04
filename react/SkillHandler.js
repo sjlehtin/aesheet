@@ -1022,7 +1022,7 @@ class SkillHandler {
   dayVisionBaseCheck(givenPerks) {
     const perks = givenPerks
       ? SkillHandler.getItemMap(givenPerks, (item) => {
-          return item.edge;
+          return item.edge.name;
         })
       : {};
 
@@ -1045,7 +1045,7 @@ class SkillHandler {
   nightVisionBaseCheck(givenPerks) {
     const perks = givenPerks
       ? SkillHandler.getItemMap(givenPerks, (item) => {
-          return item.edge;
+          return item.edge.name;
         })
       : {};
 
