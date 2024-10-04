@@ -19,9 +19,9 @@ function calculateRange(r, g) {
 }
 
 class RangedWeaponRow extends WeaponRow {
-    VISION_CHECK_PENALTY_LIMIT = 45
-    VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95
-    VISION_BUMPING_LIMIT = 95
+    static VISION_CHECK_PENALTY_LIMIT = 45
+    static VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95
+    static VISION_BUMPING_LIMIT = 95
 
     constructor(props) {
         super(props);

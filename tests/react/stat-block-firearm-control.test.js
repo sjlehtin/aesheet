@@ -174,7 +174,7 @@ describe('StatBlock -- FirearmControl', () => {
           (await screen.findByLabelText("Vision check")).textContent,
         ).toEqual("43");
         // TODO: broken due to VisionCheckControl changes
-        expect((await screen.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 32")
+        expect((await screen.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 2")
     });
 
     it('verify scope can offset darkness penalty', async () => {

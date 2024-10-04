@@ -943,13 +943,13 @@ class FirearmControl extends RangedWeaponRow {
 
     // If vision check is under 75, the difference is penalty to the
     // ranged skill check.
-    if (visionCheck < this.VISION_CHECK_PENALTY_LIMIT) {
-      effect.check += visionCheck - this.VISION_CHECK_PENALTY_LIMIT;
+    if (visionCheck < RangedWeaponRow.VISION_CHECK_PENALTY_LIMIT) {
+      effect.check += visionCheck - RangedWeaponRow.VISION_CHECK_PENALTY_LIMIT;
     }
 
-    if (visionCheck < this.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) {
+    if (visionCheck < RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) {
       effect.targetInitiative +=
-        (visionCheck - this.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) / 10;
+        (visionCheck - RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) / 10;
     }
 
     // Instinctive Fire
@@ -968,7 +968,7 @@ class FirearmControl extends RangedWeaponRow {
       effect.targetInitiative +=
         this.props.skillHandler.skillLevel("Instinctive fire");
     }
-    effect.bumpingAllowed = visionCheck >= this.VISION_BUMPING_LIMIT;
+    effect.bumpingAllowed = visionCheck >= RangedWeaponRow.VISION_BUMPING_LIMIT;
     effect.bumpingLevel = this.skillLevel();
     return effect;
   }
