@@ -1,11 +1,22 @@
 import SkillHandler from 'SkillHandler'
 
 let objectId = 1;
-let created = {skills: {}}
+let created = {skills: {}, edges: {}}
 
 export function clearAll() {
     objectId = 1
-    created = {skills: {}}
+    created = {skills: {}, edges: {}}
+}
+
+function factoryStore (objectType, obj) {
+    if (created[objectType][obj.name] === undefined) {
+        created[objectType][obj.name] = obj
+    } else {
+        return created[objectType][obj.name]
+    }
+    objectId = obj.id + 1;
+
+    return obj
 }
 
 const characterFactory = function (statOverrides) {
@@ -102,18 +113,11 @@ const skillFactory = function (overrideFields = {}) {
 
     newSkill.required_skills = newSkill.required_skills.map((req) => minimalSkillFactory(req))
 
-    if (created.skills[newSkill.name] === undefined) {
-        created.skills[newSkill.name] = newSkill
-    } else {
-        return created.skills[newSkill.name]
-    }
-    objectId = newSkill.id + 1;
-
-    return newSkill
+    return factoryStore('skills', newSkill)
 };
 
 
-export function characterSkillFactory (overrideFields = {}) {
+export function characterSkillFactory(overrideFields = {}) {
     if (typeof(overrideFields.skill) === "string") {
         overrideFields.skill__name = overrideFields.skill
         delete overrideFields.skill
@@ -134,9 +138,15 @@ export function characterSkillFactory (overrideFields = {}) {
     newSkill.skill__name = baseSkill.name
 
     return newSkill
-};
+}
 
-const edgeFactory = function (overrideFields) {
+function minimalEdgeFactory(overrideFields = {}) {
+    const edge = edgeFactory(overrideFields)
+    return {id: edge.id, name: edge.name}
+}
+
+
+export function edgeFactory(overrideFields) {
     let props = {};
 
     // Treat an existing non-object as name.
@@ -147,12 +157,15 @@ const edgeFactory = function (overrideFields) {
     }
 
     let edge = {
+        id: objectId,
         "name": "Acute Hearing",
         "description": "Can hear very well",
         "notes": "No notes to talk about"
     };
-    return Object.assign(edge, props);
-};
+    const newEdge = Object.assign(edge, props);
+    return factoryStore('edges', newEdge)
+}
+
 
 const edgeSkillBonusFactory = function (overrideFields) {
     if (!overrideFields){
@@ -176,7 +189,7 @@ const edgeLevelFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
     }
-    const edge = edgeFactory(overrideFields.edge);
+    const edge = minimalEdgeFactory(overrideFields.edge);
 
     if ('edge' in overrideFields) {
         delete overrideFields.edge;
@@ -190,7 +203,7 @@ const edgeLevelFactory = function (overrideFields) {
         delete overrideFields.edge_skill_bonuses;
     }
 
-    let _baseEdge = {
+    let baseEdgeLevel = {
         "id": objectId,
     "notes": "",
     "cc_skill_levels": 0,
@@ -230,17 +243,17 @@ const edgeLevelFactory = function (overrideFields) {
     "extra_skill_points": 0,
     };
 
-    const newEdge = Object.assign(_baseEdge, overrideFields);
+    const newEdgeLevel = Object.assign(baseEdgeLevel, overrideFields);
     /* Overriding ID is possible. */
-    objectId = newEdge.id + 1;
-    return newEdge;
+    objectId = newEdgeLevel.id + 1;
+    return newEdgeLevel;
 };
 
 const characterEdgeFactory = function (overrideFields) {
     if (!overrideFields){
         overrideFields = {};
     }
-    let edge= edgeLevelFactory(overrideFields.edge);
+    const edge= edgeLevelFactory(overrideFields.edge);
 
     if ('edge' in overrideFields) {
         delete overrideFields.edge;
@@ -368,12 +381,7 @@ const scopeFactory = (props) => {
     let perks = [];
     if (props.perks) {
         for (let edge of props.perks) {
-            // Rest endpoint for firearm addons and scopes returns edge
-            // with only the name in the field.
-            const edgeName = edge.edge
-            const perk = edgeLevelFactory(edge);
-            perk.edge = edgeName
-            perks.push(perk);
+            perks.push(edgeLevelFactory(edge));
         }
     }
 
@@ -643,7 +651,7 @@ export function weaponTemplateFactory(overrideFields) {
             "defense_leth": 5,
             "is_lance": false,
             "is_shield": false,
-        "is_natural_weapon": false,
+            "is_natural_weapon": false,
             "tech_level": 3,
             "base_skill": "Sword",
             "required_skills": []
@@ -960,7 +968,7 @@ export function skillHandlerFactory (givenProps) {
 
 export {
     characterFactory, sheetFactory, skillFactory,
-    edgeLevelFactory, edgeFactory, characterEdgeFactory, ammunitionFactory,
+    edgeLevelFactory, characterEdgeFactory, ammunitionFactory,
     scopeFactory, baseFirearmFactory, firearmControlPropsFactory,
     magazineFactory, firearmFactory,
     weaponQualityFactory, weaponFactory, rangedWeaponFactory,

@@ -7,7 +7,6 @@ import {
     waitForElementToBeRemoved,
     within,
     fireEvent,
-    prettyDOM,
     waitFor,
     screen
 } from '@testing-library/react'
@@ -49,6 +48,14 @@ const server = setupServer(
         ]))
     }),
 )
+
+async function setRangeAndDarknessDL(user, range, darkness) {
+  await user.click(screen.getByRole("button", { name: "Combat transients" }));
+  const input = await screen.findByLabelText("Range");
+  await user.type(input, range);
+  const dlInput = screen.getByRole("combobox", { name: "Darkness DL" });
+  await user.selectOptions(dlInput, [darkness]);
+}
 
 describe('StatBlock -- FirearmControl', () => {
     beforeAll(() => {
@@ -153,27 +160,64 @@ describe('StatBlock -- FirearmControl', () => {
 
         server.use(
             rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
+                return res(ctx.json([]))
+            }),
+        )
+
+        const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
+
+        await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
+
+        await setRangeAndDarknessDL(user, "50", "Artificial light (-2)");
+
+        expect(
+          (await screen.findByLabelText("Vision check")).textContent,
+        ).toEqual("43");
+        // TODO: broken due to VisionCheckControl changes
+        expect((await screen.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 32")
+    });
+
+    it('verify scope can offset darkness penalty', async () => {
+        const user = userEvent.setup()
+
+        const firearm = factories.firearmFactory({'id': 42, 'base': {name: "The Cannon"}})
+        const scope = factories.scopeFactory({id: 42, name: "Baff baff", perks: [{edge: "Acute Vision", level: 1}, {edge: "Night Vision", level: 2}], notes: "Awesome scope"})
+
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetfirearms/", (req, res, ctx) => {
                 return res(ctx.json([
+                    firearm
+                ]))
+            }),
+            rest.patch("http://localhost/rest/sheets/1/sheetfirearms/42/", (req, res, ctx) => {
+                return res(ctx.json(
+                    Object.assign({}, firearm, req)
+                ))
+            }),
+
+            rest.get("http://localhost/rest/scopes/campaign/2/", (req, res, ctx) => {
+                return res(ctx.json([
+                    scope,
                 ]))
             }),
         )
 
-        const sheet = render(<StatBlock url="/rest/sheets/1/" />)
+        const sheet = render(<StatBlock url="/rest/sheets/1/"/>)
 
         await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
-        await user.click(screen.getByRole("button", {name: "Combat transients"}))
+        await setRangeAndDarknessDL(user, "50", "Artificial light (-2)");
 
-        const input = await sheet.findByLabelText("Range")
+        // Verify that darkness penalty gets countered by the scope.
+        expect(within(await screen.findByLabelText(/Range effect/)).getByLabelText("Vision check").textContent).toEqual("43")
 
-        await user.type(input, "50")
-        // fireEvent.change(input, {target: {value: "50"}})
+        const scopeInput = await screen.findByRole("combobox", {name: "Scope selection"})
+        await user.click(scopeInput)
 
-        const dlInput = sheet.getByRole("combobox", {name: "Darkness DL"})
-        await user.selectOptions(dlInput, ["Artificial light (-2)"])
+        await user.click(await screen.findByText(/Baff baff/))
 
-        expect((await screen.findByLabelText("Vision check")).textContent).toEqual("43")
-        expect((await screen.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 32")
+        await within(await screen.findByLabelText(/Firearm The Cannon/)).findByText("Awesome scope")
+        expect(within(await screen.findByLabelText(/Range effect/)).getByLabelText("Vision check").textContent).toEqual("83")
     });
 
 

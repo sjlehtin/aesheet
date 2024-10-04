@@ -1281,7 +1281,7 @@ class FirearmControl extends RangedWeaponRow {
                             return (
                               <span
                                 key={`perk-${index}`}
-                              >{`${p.edge} ${p.level}`}</span>
+                              >{`${p.edge.name} ${p.level}`}</span>
                             );
                           })}
                         </td>

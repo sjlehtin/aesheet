@@ -249,6 +249,8 @@ class FirearmAddOnCreateSerializer(serializers.ModelSerializer):
 
 
 class FirearmAddOnListSerializer(serializers.ModelSerializer):
+    perks = EdgeLevelSerializer(read_only=True, many=True)
+
     class Meta:
         model = sheet.models.FirearmAddOn
         fields = "__all__"
@@ -300,6 +302,7 @@ class AmmunitionListSerializer(serializers.ModelSerializer):
 
 
 class ScopeListSerializer(serializers.ModelSerializer):
+    perks = EdgeLevelSerializer(read_only=True, many=True)
     class Meta:
         model = sheet.models.Scope
         fields = "__all__"

@@ -2,7 +2,6 @@ from rest_framework.test import APIClient, APIRequestFactory
 from rest_framework.test import force_authenticate
 from django.test import TestCase
 from django.urls import reverse
-import collections
 
 import sheet.factories as factories
 import sheet.rest.views as views
@@ -1458,8 +1457,13 @@ class ScopeTestCase(TestCase):
                                                      tech_levels=["2K"])
         self.campaign_gz = factories.CampaignFactory(name='GZ',
                                                      tech_levels=["2K", "3K"])
-        factories.ScopeFactory(name="Telescopic scope",
+        el = factories.EdgeLevelFactory(
+            edge__name="Acute Vision",
+            level=1)
+        scope = factories.ScopeFactory(name="Telescopic scope",
                                tech_level=self.tech_twok)
+        scope.perks.add(el)
+
         factories.ScopeFactory(name="X-Ray scope",
                                tech_level=self.tech_threek)
 
@@ -1483,7 +1487,12 @@ class ScopeTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         item = response.data[0]
-        self.assertEqual(item['name'], "Telescopic scope")
+        assert item['name'] =="Telescopic scope"
+        assert isinstance(item['perks'][0], dict)
+        assert isinstance(item['perks'][0]['edge'], dict)
+        assert isinstance(item['perks'][0]['edge']['id'], int)
+        assert item['perks'][0]['edge']['name'] == "Acute Vision"
+        assert item['perks'][0]['level'] == 1
 
 
 class SheetArmorTestCase(TestCase):
