@@ -58,7 +58,7 @@ class DamageControl extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentStaminaDamage: this.props.sheet.stamina_damage,
+            currentStaminaDamage: "",
             isBusy: false
         };
     }
@@ -66,8 +66,8 @@ class DamageControl extends React.Component {
     async handleSubmit(event) {
         this.setState({isBusy: true});
         await this.props.onMod('stamina_damage', this.props.sheet.stamina_damage,
-            parseInt(this.state.currentStaminaDamage))
-        this.setState({isBusy: false})
+            this.props.sheet.stamina_damage + parseInt(this.state.currentStaminaDamage))
+        this.setState({isBusy: false, currentStaminaDamage: ""})
     }
 
     handleChange(event) {
@@ -75,7 +75,7 @@ class DamageControl extends React.Component {
     }
 
     async handleClear(event) {
-        this.setState({currentStaminaDamage: 0,
+        this.setState({currentStaminaDamage: "",
             isBusy: true});
         await this.props.onMod('stamina_damage',
             this.props.sheet.stamina_damage,
@@ -84,7 +84,7 @@ class DamageControl extends React.Component {
     }
 
     isValid() {
-        return  util.isInt(this.state.currentStaminaDamage);
+        return util.isInt(this.state.currentStaminaDamage) && parseInt(this.state.currentStaminaDamage) !== 0;
     }
 
     async handleKeyDown(e) {
@@ -193,14 +193,14 @@ class DamageControl extends React.Component {
                                     style={{marginLeft: "1em"}}
                                     size="sm"
                                     disabled={!this.isValid() || this.state.isBusy}
-                                    onClick={async (e) => await this.handleSubmit()}>Change{loading}</Button>
+                                    onClick={async (e) => await this.handleSubmit()}>Add{loading}</Button>
                             </Col>
                             <Col md={"auto"}>
                                 <Button style={{marginLeft: ".5em"}}
                                         size="sm"
-                                        disabled={!this.isValid() || this.state.isBusy}
+                                        disabled={this.state.isBusy || parseInt(this.props.sheet.stamina_damage) === 0}
                                         id={"clear-stamina-damage"}
-                                        onClick={async (e) => await this.handleClear()}>Clear{loading}</Button>
+                                        onClick={async (e) => await this.handleClear()}>Heal{loading}</Button>
                             </Col>
                         </Row>
                         <WoundPenaltyBox handler={this.props.handler} />
