@@ -103,7 +103,7 @@ describe('stat block wounds handling', function() {
 
         render(<StatBlock url="/rest/sheets/1/" />)
         await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
-        await user.click(screen.getByRole("button", {name: "Heal"}))
+        await user.click(screen.getAllByRole("button", {name: "Heal"})[1])
 
         await waitFor(() => expect(screen.queryByLabelText("Current wound damage")).not.toBeInTheDocument())
     });
@@ -142,7 +142,6 @@ describe('stat block wounds handling', function() {
         expect(screen.getByText("Fuzznozzle")).toBeInTheDocument()
     });
 
-    // TODO: move this an sheet.test.js stamina damage test to same place
     it("can handle stamina damage", async () => {
         const user = userEvent.setup()
 
@@ -152,18 +151,25 @@ describe('stat block wounds handling', function() {
                 console.log("got json", json)
                 return res(ctx.json(Object.assign({}, json)))
             })
-
         )
 
         render(<StatBlock url="/rest/sheets/1/"/>)
         await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
 
+        expect(screen.getAllByLabelText("Current stamina")[0].textContent.trim()).toEqual("22")
+
         const damageInput = screen.getByRole("textbox", {name: "Stamina damage"})
         await user.clear(damageInput)
-        await user.type(damageInput, "20")
+        await user.type(damageInput, "8")
 
-        await user.click(screen.getByRole("button", {name: "Change"}))
+        await user.click(screen.getByRole("button", {name: "Add"}))
 
-        await waitFor(() => expect(screen.getAllByText(/-20 STA/)[0]).toBeInTheDocument())
+        await waitFor(() => expect(screen.getAllByText(/-8 STA/)[0]).toBeInTheDocument())
+
+        await user.clear(damageInput)
+        await user.type(damageInput, "8[Enter]")
+
+        await waitFor(() => expect(screen.getAllByLabelText("Current stamina")[0].textContent.trim()).toEqual("6"))
+        expect(damageInput.value).toEqual("")
     })
 });

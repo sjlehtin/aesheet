@@ -489,35 +489,4 @@ describe('StatBlock', function() {
 //         });
 //     });
 //
-    it("handles stamina changes", async () => {
-        const user = userEvent.setup()
-
-        const sheet = factories.sheetFactory()
-        const character = factories.characterFactory()
-        server.use(
-            rest.get('http://localhost/rest/characters/2/', (req, res, ctx) => {
-                return res(ctx.json(character))
-            }),
-            rest.get('http://localhost/rest/sheets/1/', (req, res, ctx) => {
-                return res(ctx.json(sheet))
-            }),
-            rest.patch("http://localhost/rest/sheets/1/", async (req, res, ctx) => {
-
-                const json = await req.json();
-                console.log("got", json)
-                return res(ctx.json(Object.assign({}, sheet, json)))
-            })
-
-        )
-
-        render(<StatBlock url="/rest/sheets/1/" />)
-
-        await waitForElementToBeRemoved(() => screen.queryAllByRole("status"), {timeout: 5000})
-
-        const damageInput = screen.getByRole("textbox", {name: "Stamina damage"});
-        await user.clear(damageInput)
-        await user.type(damageInput, "8[Enter]")
-
-        await waitFor(() => expect(screen.getAllByLabelText("Current stamina")[0].textContent.trim()).toEqual("14"))
-    });
 });
