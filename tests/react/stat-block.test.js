@@ -267,7 +267,7 @@ describe('StatBlock', function() {
             }),
         )
 
-        await user.click(screen.getByRole("button", {name: "Add"}))
+        await user.click(within(screen.getByTitle("Add XP")).getByRole("button", {name: "Add"}))
 
         await waitFor(() => expect(screen.queryByTitle("Total XP").textContent).toEqual("20"))
     });
@@ -341,25 +341,4 @@ describe('StatBlock', function() {
         await waitFor(() => expect(screen.getByLabelText("Total gained SP").textContent).toEqual("35"))
     });
 
-    // // it("handles stamina changes", function (done) {
-    // //     var block = factories.statBlockFactory({
-    // //         character: factories.characterFactory({cur_wil: 40, cur_ref: 40})
-    // //     });
-    // //
-    // //     block.afterLoad(function () {
-    // //
-    // //         rest.patch.mockClear();
-    // //
-    // //         var control = TestUtils.findRenderedComponentWithType(
-    // //             block, DamageControl);
-    // //
-    // //         TestUtils.Simulate.change(control._inputField,
-    // //             {target: {value: 8}});
-    // //         TestUtils.Simulate.click(control._changeButton);
-    // //
-    // //         expect(rest.patch.mock.calls[0][1]).toEqual({stamina_damage: 12});
-    // //
-    // //         done();
-    // //     });
-    // });
 });

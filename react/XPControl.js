@@ -105,7 +105,7 @@ class XPControl extends React.Component {
                         ref={(c) => this._addButton = c}
                         onClick={this.showEditControl.bind(this)}>
                     Add XP</Button></span>
-            <Modal show={this.state.showDialog} keyboard
+            <Modal title={"Add XP"} show={this.state.showDialog} keyboard
                    onHide={this.handleCancel.bind(this)}>
                 <Modal.Header closeButton={true}><Modal.Title>Add
                     XP</Modal.Title></Modal.Header>
