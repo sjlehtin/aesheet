@@ -156,21 +156,15 @@ class ArmorControl extends React.Component {
 
           <AddArmorControl
             tag="Helmet"
+              current={this.props.helm}
             onChange={(value) => this.props.onHelmChange(value)}
             campaign={this.props.campaign}
           />
           <AddArmorControl
-            onChange={(value) => this.props.onArmorChange(value)}
-            campaign={this.props.campaign}
+              current={this.props.armor}
+              onChange={(value) => this.props.onArmorChange(value)}
+              campaign={this.props.campaign}
           />
-          <div>
-            <a href="/sheets/add_armor/">Create a new armor</a>{" "}
-            <a href="/sheets/add_armor_template/">Create a new armortemplate</a>{" "}
-            <a href="/sheets/add_armor_quality/">Create new quality</a>{" "}
-            <a href="/sheets/add_armor_special_quality/">
-              Create new special quality
-            </a>
-          </div>
         </Row>
       );
     }

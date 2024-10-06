@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Button, Form, Row } from "react-bootstrap";
 import Combobox from "react-widgets/Combobox";
 
-const rest = require("./sheet-rest");
+import * as rest from './sheet-rest'
 
 class AddArmorControl extends React.Component {
   constructor(props) {
@@ -15,8 +15,6 @@ class AddArmorControl extends React.Component {
       selectedArmor: null,
       qualityChoices: [],
       isBusy: true,
-      armorChoices: [],
-      armorTemplateChoices: [],
     };
   }
 
@@ -37,12 +35,36 @@ class AddArmorControl extends React.Component {
       return /normal/i.exec(q.name);
     });
 
+    const shouldBeHelmet = this.props.tag !== "Armor";
+    const templateChoices = templates.filter((value) => {
+      return value.is_helm === shouldBeHelmet;
+    });
+    const choices = [
+      ...templateChoices,
+      ...armors.filter((value) => {
+        return value.base.is_helm === shouldBeHelmet;
+      }),
+    ];
+
+    let currentArmorTemplate
+    let currentQuality
+    if (this.props.current) {
+      currentQuality = qualities.find((q) => {
+        return q.name === this.props.current.quality.name;
+      })
+      currentArmorTemplate = templateChoices.find((t) => {
+        return t.name === this.props.current.base.name
+      })
+    } else {
+      currentQuality = normalQuality
+    }
+
     this.setState({
       normalQuality: normalQuality,
-      selectedQuality: normalQuality,
+      selectedQuality: currentQuality,
+      selectedArmor: currentArmorTemplate,
       qualityChoices: qualities,
-      armorChoices: armors,
-      armorTemplateChoices: templates,
+      choices: choices,
       isBusy: false,
     });
   }
@@ -74,7 +96,7 @@ class AddArmorControl extends React.Component {
 
   handleAdd() {
     if (this.props.onChange) {
-      var armor;
+      let armor;
       if ("id" in this.state.selectedArmor) {
         armor = this.state.selectedArmor;
       } else {
@@ -85,16 +107,11 @@ class AddArmorControl extends React.Component {
         };
       }
       this.props.onChange(armor);
-
-      this.setState({
-        selectedQuality: this.state.normalQuality,
-        selectedArmor: null,
-      });
     }
   }
 
   render() {
-    var quality;
+    let quality;
     if (this.state.selectedArmor && this.state.selectedArmor.quality) {
       quality = <span>{this.state.selectedArmor.quality.name}</span>;
     } else {
@@ -105,22 +122,9 @@ class AddArmorControl extends React.Component {
           textField="name"
           filter="contains"
           busy={this.state.isBusy}
-          aria-label={"Select quality"}
+          aria-label={`Select ${this.props.tag.toLowerCase()} quality`}
           onChange={(value) => this.handleQualityChange(value)}
         />
-      );
-    }
-
-    var choices = [];
-    if (this.state.armorTemplateChoices && this.state.armorChoices) {
-      var helm = this.props.tag !== "Armor";
-      choices = this.state.armorTemplateChoices.filter((value) => {
-        return value.is_helm === helm;
-      });
-      choices = choices.concat(
-        this.state.armorChoices.filter((value) => {
-          return value.base.is_helm === helm;
-        }),
       );
     }
 
@@ -135,7 +139,7 @@ class AddArmorControl extends React.Component {
                 </td>
                 <td>
                   <Combobox
-                    data={choices}
+                    data={this.state.choices}
                     textField="name"
                     busy={this.state.isBusy}
                     filter="contains"

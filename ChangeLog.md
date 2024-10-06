@@ -3,7 +3,8 @@
 ### Changed
 
 * Stamina damage controls are now "Add" and "Heal", it now adds to the existing damage instead of directly changing the backing value. This is more intuitive and removes the need for the player to calculate the damage.
- 
+* When changing armor, the sheet uses the last selected template and quality of the current armor as default values. This should make it easier to apply, say, melting plague quality effects and experiment stat changes with and without armor.
+
 ### Fixed
 
 * Existing weapons and ranged weapons correctly show skill checks. This was broken in the skill refactoring.
