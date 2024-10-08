@@ -11,11 +11,12 @@ import UseTypeControl from "UseTypeControl";
 
 import * as util from "./sheet-util";
 import { isFloat } from "./sheet-util";
-import { Badge, Button, Col, Row, Table } from "react-bootstrap";
+import { Badge, Button, Col, Row } from "react-bootstrap";
 import ValueBreakdown from "./ValueBreakdown";
 import { BaseCheck } from "./BaseCheck";
 import { Unskilled } from "./Unskilled";
 import { GoAlert } from "react-icons/go";
+import { RangeInfo } from "./RangeInfo";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -83,68 +84,6 @@ import { GoAlert } from "react-icons/go";
  * (the defender manages to turn the gun down to ground and is hit only by
  * ricochet).
  */
-
-function RangeInfo({ rangeEffect }) {
-  if (rangeEffect) {
-    let bumping;
-    if (rangeEffect.bumpingAllowed && rangeEffect.bumpingLevel > 0) {
-      bumping = `yes (${rangeEffect.bumpingLevel})`;
-    } else {
-      bumping = `no`;
-    }
-    return (
-      <div>
-        <Table>
-          <tbody>
-            <tr aria-label={"Range effect"}>
-              <th>Range effect</th>
-              <td
-                className={"mx-2"}
-                aria-label="Name"
-              >{`${rangeEffect.name}`}</td>
-              <th className={"ml-5"}>Bumping</th>
-              <td className={"mx-2"} aria-label="Bumping allowed">
-                {bumping}
-              </td>
-              <th className={"ml-5"}>Check</th>
-              <td
-                className={"mx-2"}
-                aria-label="Check modifier"
-              >{`${util.renderInt(rangeEffect.check)}`}</td>
-              <th className={"ml-2"}>TI</th>
-              <td
-                className={"mx-2"}
-                aria-label="Target initiative modifier"
-              >{`${util.renderInt(rangeEffect.targetInitiative)}`}</td>
-              <th className={"ml-5"}>Dmg</th>
-              <td
-                className={"mx-2"}
-                aria-label="Damage modifier"
-              >{`${util.renderInt(rangeEffect.damage)}`}</td>
-              <th className={"ml-5"}>Leth</th>
-              <td
-                className={"mx-2"}
-                aria-label="Lethality modifier"
-              >{`${util.renderInt(rangeEffect.leth)}`}</td>
-              <th className={"ml-5"}>Vision</th>
-              <td className={"mx-2"}>
-                <StatBreakdown value={rangeEffect.visionCheck} label={"Vision check"} />
-              </td>
-            </tr>
-          </tbody>
-        </Table>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <span style={{ fontWeight: "bold" }}>
-          Unable to shoot to this range
-        </span>
-      </div>
-    );
-  }
-}
 
 class FirearmControl extends RangedWeaponRow {
   constructor(props) {
@@ -949,7 +888,8 @@ class FirearmControl extends RangedWeaponRow {
 
     if (visionCheck < RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) {
       effect.targetInitiative +=
-        (visionCheck - RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) / 10;
+        (visionCheck - RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) /
+        10;
     }
 
     // Instinctive Fire
@@ -1043,14 +983,14 @@ class FirearmControl extends RangedWeaponRow {
         skillChecks = skillChecks.map((chk, ii) => {
           let cellContent;
           if (chk) {
-            cellContent = <StatBreakdown value={chk}/>;
+            cellContent = <StatBreakdown value={chk} />;
           } else {
             cellContent = "";
           }
           return (
-              <td key={`chk-${ii}`} style={cellStyle}>
-                {cellContent}
-              </td>
+            <td key={`chk-${ii}`} style={cellStyle}>
+              {cellContent}
+            </td>
           );
         });
       }
