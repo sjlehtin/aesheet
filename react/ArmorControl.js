@@ -156,14 +156,14 @@ class ArmorControl extends React.Component {
 
           <AddArmorControl
             tag="Helmet"
-              current={this.props.helm}
+            current={this.props.helm}
             onChange={(value) => this.props.onHelmChange(value)}
             campaign={this.props.campaign}
           />
           <AddArmorControl
-              current={this.props.armor}
-              onChange={(value) => this.props.onArmorChange(value)}
-              campaign={this.props.campaign}
+            current={this.props.armor}
+            onChange={(value) => this.props.onArmorChange(value)}
+            campaign={this.props.campaign}
           />
         </Row>
       );
@@ -328,12 +328,41 @@ class ArmorControl extends React.Component {
           )}
         </Row>
         {addControls}
-        <table>
-          <thead style={headerStyle} key={"thead"}>
-            <tr>{headerCells}</tr>
-          </thead>
-          <tbody key={0}>{locations}</tbody>
-        </table>
+        <Row>
+          <Col>
+            <table>
+              <thead style={headerStyle} key={"thead"}>
+                <tr>{headerCells}</tr>
+              </thead>
+              <tbody key={0}>{locations}</tbody>
+            </table>
+          </Col>
+          <Col>
+            <table>
+              <thead>
+                <tr>
+                  <th>Mod</th>
+                  <th>value</th>
+                </tr>
+              </thead>
+              <tbody>
+              {
+                [["fit", "FIT"], ["ref", "REF"], "surprise", "climb", "stealth", "conceal", ["suspendedWeight", "Suspension"]].map((item) => {
+                  let val, descr
+                  if (typeof(item) === "string") {
+                    val = item
+                    descr = val[0].toUpperCase() + val.slice(1)
+                  } else {
+                    val = item[0]
+                    descr = item[1]
+                  }
+                  return <tr key={`mod-${val}`}><td>{descr}</td><td style={{paddingLeft: '1em'}}><StatBreakdown value={this.props.handler.getArmorStatMod(val)} label={`Stat mod for ${val}`} /></td></tr>
+                })
+              }
+              </tbody>
+            </table>
+          </Col>
+        </Row>
       </div>
     );
   }

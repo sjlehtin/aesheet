@@ -1,5 +1,9 @@
 ## Unreleased
 
+### Added
+
+* Display key modifications to stats from armor.
+
 ### Changed
 
 * Stamina damage controls are now "Add" and "Heal", it now adds to the existing damage instead of directly changing the backing value. This is more intuitive and removes the need for the player to calculate the damage.
