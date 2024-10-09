@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import RangedWeaponRow from "RangedWeaponRow";
 import WeaponRow from "WeaponRow";
 import AmmoControl from "AmmoControl";
 import ScopeControl from "ScopeControl";
@@ -10,284 +9,44 @@ import MagazineControl from "MagazineControl";
 import UseTypeControl from "UseTypeControl";
 
 import * as util from "./sheet-util";
-import { isFloat } from "./sheet-util";
 import { Badge, Button, Col, Row } from "react-bootstrap";
-import ValueBreakdown from "./ValueBreakdown";
 import { BaseCheck } from "./BaseCheck";
 import { Unskilled } from "./Unskilled";
 import { GoAlert } from "react-icons/go";
 import { RangeInfo } from "./RangeInfo";
 
-/*
- * Firearms are sheet specific. Firearms can contain add-ons, most
- * notably scopes. Add-ons affect weapon range, to-hit and target initiative,
- * among other factors.
- *
- * A firearm can have a single scope. There may be other add-ons, and the sheet
- * will not restrict the add-ons in any way. Use common sense on what add-ons
- * you put to a firearm (no sense in, e.g., adding both bipod and a tripod).
- *
- * The add-ons may affect the user's senses when using the firearm, notably
- * sight, which is used to calculate the range penalties for the weapon.
- */
+import FirearmModel, {SweepType} from "./FirearmModel";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
  * notably scopes. Add-ons affect weapon range, to-hit and target initiative,
  * among other factors.
  *
- * A firearm can have a single scope. There may be other add-ons, and the sheet
- * will not restrict the add-ons in any way. Use common sense on what add-ons
- * you put to a firearm (no sense in, e.g., adding both bipod and a tripod).
+ * A firearm can have a single scope.
  *
  * The add-ons may affect the user's senses when using the firearm, notably
  * sight, which is used to calculate the range penalties for the weapon.
+ *
+ * TODO: There may be other add-ons, and the sheet
+ * will not restrict the add-ons in any way. Use common sense on what add-ons
+ * you put to a firearm (no sense in, e.g., adding both bipod and a tripod).
  */
 
-/*
- * Firearms in Close Combat (AE HR 22, ref 2024-05-22)
- * A PC who finds herself in close combat with a firearm has two options.
- *
- * Ranged-Fire Actions
- *
- * ** This is handled in current sheet by using 0 (point blank) as range **
- * ** TODO: Maybe add a comment about Ranged-Fire only working if initiative
- *     won, as indicated below? **
- *
- * The PC may select to take ranged-fire actions (at +60 to hit, +2 D/L), but
- * in order to do so she must win the initiative. If she loses the initiative,
- * she loses the actions for that turn. In case the PC takes several firing
- * actions, she is allowed to complete the actions up till the first
- * close-combat action made by an enemy (irrespective of the success of the
- * close-combat action). In any case, the PC is not allowed any close-combat
- * defenses.
- * If this action is chosen, it makes sense to combine it with Instinctive
- * fire.
- *
- * Close-Combat Actions
- *
- * The PC may also select to take close-combat actions. In this case, the
- * ROA of the firearm is one half of the ROF. The ROA and the to-hit roll are
- * modified by the Instinctive fire skill (MOV +5L). As in all close combat, 2,5 is the
- * maximum ROA. Successful attacks are at +2 lethality.
- * If the firearm uses burst fire, each burst takes two actions (#1, #3, #5),
- * all rounds hit, and normal lethality modifiers apply, so that the rounds
- * of a three-round burst are at +2, 0, and +4 lethality.
- * To defend, the PC must use another skill (Unarmed combat with a pistol,
- * Staff with a longarm). When used together with firing attacks, the
- * defenses are counted as one action each (and normal attacks are not
- * allowed). Note that this is a special case of close combat as the
- * attacks and defenses are made with different skills and their rates are
- *  calculated separately.
- * Firearm attacks may be defended normally. If the defense results to
- * reduced damage, the rolled damage is reduced from each round separately
- * (the defender manages to turn the gun down to ground and is hit only by
- * ricochet).
- */
-
-class FirearmControl extends RangedWeaponRow {
+class FirearmControl extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = { useType: this.props.weapon.use_type };
-    // TODO: move to class statics
-    this.readiedBaseI = -1;
-    this.baseCheckBonusForSlowActions = 10;
-    this.extraActionModifier = 15;
-  }
-
-  penaltyCounterStat() {
-    if (this.props.inCloseCombat) {
-      return "INT";
-    } else {
-      return "FIT";
-    }
-  }
-
-  roa(useType) {
-    const base = this.props.weapon.base;
-    const impulse = this.impulse();
-
-    const recoil =
-      impulse /
-      (parseFloat(base.duration) *
-        parseFloat(base.stock) *
-        (parseFloat(base.weight) + 6));
-
-    let rof = 30 / (recoil + parseFloat(base.weapon_class_modifier));
-
-    const bd = new ValueBreakdown(rof, "firearm");
-    let mod = 0;
-    if (useType === WeaponRow.PRI) {
-      mod = -0.25;
-    } else if (useType === WeaponRow.SEC) {
-      mod = -0.5;
-    }
-    bd.add(mod, `${useType} use type`);
-
-    // TODO: two-weapon style
-    if (this.props.inCloseCombat) {
-      bd.divide(2, "Firearm in CC");
-      bd.multiply(this.skillROAMultiplier("Instinctive fire"), "inst fire");
-      bd.setMaximum(2.5, "Max ROA");
-    } else {
-      bd.multiply(this.skillROAMultiplier(), "skill");
-      bd.setMaximum(5.0, "Max ROF");
-    }
-    return bd;
-  }
-
-  impulse() {
-    return (
-      (parseFloat(this.props.weapon.ammo.weight) *
-        parseFloat(this.props.weapon.ammo.velocity)) /
-      1000
-    );
-  }
-
-  oneHandedPenalty() {
-    // =MIN(0;-3*Weight-2*Impulse+(25-range_s)/2)
-    return Math.min(
-      0,
-      -3 * parseFloat(this.props.weapon.base.weight) -
-        2 * this.impulse() +
-        (25 - this.shortRange()) / 2,
-    );
-  }
-
-  skillCheck(sweepFire = false) {
-    let effect = this.rangeEffect();
-    if (!effect) {
-      return null;
-    }
-    if (this.props.inCloseCombat) {
-      return this.props.skillHandler.skillCheck(
-        "Instinctive fire",
-        "MOV",
-        true,
-      );
-    } else {
-      const baseCheck = super.skillCheck();
-      if (!baseCheck) {
-        return null;
-      }
-
-      baseCheck.add(effect.check, "range");
-      if (sweepFire && effect.check < 0) {
-        baseCheck.add(effect.check, "sweep @range");
-      }
-      return baseCheck;
-    }
-  }
-
-  singleBurstChecks(check) {
-    const base = this.props.weapon.base;
-    const checks = [];
-
-    let maxHits = Math.min(util.rounddown(base.autofire_rpm / 120), 5);
-
-    if (base.restricted_burst_rounds > 0) {
-      maxHits = Math.min(maxHits, base.restricted_burst_rounds);
-    }
-    const baseSkillCheck = this.skillCheck();
-    const burstMultipliers = [0, 1, 3, 6, 10];
-    const autofireClasses = { A: -1, B: -2, C: -3, D: -4, E: -5 };
-
-    const autofirePenalty = new ValueBreakdown();
-    if (!this.props.skillHandler.hasSkill("Autofire")) {
-      autofirePenalty.add(-10, "Unskilled @Autofire");
-    }
-
-    for (let ii = 0; ii < 5; ii++) {
-      if (ii >= maxHits || check === null || baseSkillCheck === null) {
-        checks.push(null);
-      } else {
-        // The modifier might be positive at this point, and penalty
-        // countering could leave the overall mod as positive.
-        let mod = check.value() - baseSkillCheck.value();
-
-        const bd = new ValueBreakdown();
-
-        bd.addBreakdown(baseSkillCheck);
-
-        let bonus = 0;
-        if (mod > 0) {
-          bonus = mod;
-          mod = 0;
-        }
-
-        bd.add(bonus, "bonus from ROA");
-        //bd.add(mod, "penalty #act")
-        // bd.add(burstMultipliers[ii] *
-        //     autofireClasses[base.autofire_class],
-        //     "autofire class")
-
-        // In CC, all burst shots have same check.
-        if (!this.props.inCloseCombat) {
-          mod += burstMultipliers[ii] * autofireClasses[base.autofire_class];
-        }
-
-        mod = FirearmControl.counterPenalty(
-          mod,
-          this.getStat(this.penaltyCounterStat()),
-        );
-        bd.add(mod, "burst penalty");
-        bd.addBreakdown(autofirePenalty);
-
-        checks.push(bd);
-      }
-    }
-    return checks;
-  }
-
-  /* Maps a burst action to normal action for initiative and skill check
-       calculation. */
-  mapBurstActions(actions) {
-    return actions.map((act) => {
-      if (act >= 1) {
-        act = act * 2 - 1;
-      }
-      return act;
-    });
-  }
-
-  burstChecks(actions) {
-    if (!this.props.weapon.base.autofire_rpm) {
-      /* No burst fire with this weapon. */
-      return null;
-    }
-
-    const checks = this.skillChecksV2(this.mapBurstActions(actions), {
-      useType: this.state.useType,
-      counterPenalty: false,
-    });
-    if (checks === null) {
-      // no actions available.
-      return actions.map(() => {
-        return [];
-      });
-    }
-    return checks.map((chk) => {
-      return this.singleBurstChecks(chk);
-    });
-  }
-
-  burstInitiatives(actions) {
-    if (!this.props.weapon.base.autofire_rpm) {
-      /* No burst fire with this weapon. */
-      return null;
-    }
-    return this.initiatives(this.mapBurstActions(actions));
   }
 
   renderDamage() {
     const ammo = this.props.weapon.ammo;
     let plusLeth = "";
     if (ammo.plus_leth) {
-      plusLeth = ` (${this.renderInt(ammo.plus_leth)})`;
+      plusLeth = ` (${util.renderInt(ammo.plus_leth)})`;
     }
 
-    let rangeEffect = this.rangeEffect();
+    let rangeEffect = this.firearm.rangeEffect();
 
     if (rangeEffect === null) {
       return (
@@ -321,7 +80,7 @@ class FirearmControl extends RangedWeaponRow {
       return "";
     }
     const actions = [0.5, 1, 2, 3, 4];
-    const burstChecks = this.burstChecks(actions);
+    const burstChecks = this.firearm.burstChecks(actions, this.state.useType);
     const lethalities = [0, -2, 2, 0, -2];
     const hitLocations = [0, 0, 0, -1, -1];
     const burstRows = [];
@@ -371,8 +130,8 @@ class FirearmControl extends RangedWeaponRow {
       );
     }
 
-    const inits = this.burstInitiatives(actions).map((init, ii) => {
-      return <th key={"init-" + ii}>{this.renderInt(init)}</th>;
+    const inits = this.firearm.burstInitiatives(actions).map((init, ii) => {
+      return <th key={"init-" + ii}>{util.renderInt(init)}</th>;
     });
 
     let autoUnskilled = "";
@@ -408,52 +167,6 @@ class FirearmControl extends RangedWeaponRow {
     );
   }
 
-  sweepChecks(sweepType) {
-    // TODO: Sweep fire with non-full?
-    const sweeps = {
-      5: [0, 2, 5, 10],
-      10: [0, 1, 2, 2, 5, 5, 10, 10],
-      15: [0, 1, 1, 2, 2, 2, 5, 5, 5, 10, 10, 10],
-      20: [0, 1, 1, 1, 2, 2, 2, 2, 5, 5, 5, 5, 10, 10, 10, 10],
-    };
-    if (!(sweepType in sweeps)) {
-      throw Error("Invalid sweep type: " + sweepType);
-    }
-    const autofireClasses = { A: -1, B: -2, C: -3, D: -4, E: -5 };
-
-    const afClass = autofireClasses[this.props.weapon.base.autofire_class];
-
-    const autofirePenalty = new ValueBreakdown();
-    autofirePenalty.add(-10, "Autofire");
-    if (!this.props.skillHandler.hasSkill("Autofire")) {
-      autofirePenalty.add(-10, "Unskilled @Autofire");
-    }
-
-    const baseSkillCheck = this.skillCheck(true);
-    let checks = [];
-    let penaltyMultiplier = 0;
-    for (let multiplier of sweeps[sweepType]) {
-      penaltyMultiplier += multiplier;
-      if (baseSkillCheck === null) {
-        checks.push(null);
-      } else {
-        const bd = new ValueBreakdown();
-
-        bd.addBreakdown(baseSkillCheck);
-        bd.add(sweepType, "sweep bonus");
-        const penalty = penaltyMultiplier * afClass;
-        // TODO, use counterPenaltyV2
-        bd.add(
-          FirearmControl.counterPenalty(penalty, this.getStat("fit")),
-          "sweep penalty",
-        );
-        bd.addBreakdown(autofirePenalty);
-        checks.push(bd);
-      }
-    }
-    return checks;
-  }
-
   hasSweep() {
     return (
       this.props.weapon.base.autofire_rpm &&
@@ -463,29 +176,6 @@ class FirearmControl extends RangedWeaponRow {
 
   sweepAvailable() {
     return this.hasSweep() && !this.props.inCloseCombat;
-  }
-
-  shortRange() {
-    const base = this.props.weapon.base;
-    let sight = base.sight;
-    const scopeSight = this.props.weapon.scope?.sight ?? 0;
-    if (scopeSight > 0) {
-      sight = scopeSight;
-    }
-    return util.rounddown(((sight + base.barrel_length) * base.accuracy) / 20);
-  }
-
-  mediumRange() {
-    return this.shortRange() * 2;
-  }
-
-  longRange() {
-    return util.rounddown(this.shortRange() * this.longRangeMultiplier());
-  }
-
-  longRangeMultiplier() {
-    let ref600 = Math.min(1, this.props.weapon.ammo.velocity / 600);
-    return Math.max(3, 4 * ref600 * this.props.weapon.base.stock);
   }
 
   renderSweepTable() {
@@ -515,7 +205,7 @@ class FirearmControl extends RangedWeaponRow {
     var cellStyle = Object.assign({ borderStyle: "dotted" }, baseStyle);
 
     for (let sweep of [5, 10, 15, 20]) {
-      let checks = this.sweepChecks(sweep);
+      let checks = this.firearm.sweepChecks(sweep);
       for (let ii = checks.length; ii < 16; ii++) {
         checks[ii] = null;
       }
@@ -642,289 +332,16 @@ class FirearmControl extends RangedWeaponRow {
     }
   }
 
-  targetInitiative() {
-    let targetInitiative = this.props.weapon.base.target_initiative;
-    if (this.props.weapon.scope) {
-      targetInitiative += this.props.weapon.scope.target_i_mod;
-    }
-
-    let rangeEffect = this.rangeEffect();
-    if (rangeEffect === null) {
-      return null;
-    }
-
-    targetInitiative += rangeEffect.targetInitiative;
-
-    // Target-I can be at most zero.
-    return Math.min(0, targetInitiative);
-  }
-
-  weaponRangeEffect(toRange, acuteVision) {
-    // Range
-    // Notation "+2 TI, D/L" means "+2 to target initiative and damage and lethality"
-    //
-    // Contact
-    // +60 (+2 TI, D/L) (Firearms only)
-    // Close (0.5–1 m)
-    // +50 (+2 TI, D/L) (Firearms only)
-    // Point-blank (1–3 m)
-    // +40 (+1 TI, D/L)
-    // XXS (⅛ x S)
-    // +30 (+1 TI, D/L)
-    // Extra-short (¼ x S)
-    // +20
-    // Very short (½ x S)
-    // +10
-    // Short
-    // 0
-    // Medium
-    // -10
-    // Long
-    // -20
-    // Extra-long (1½ x L)
-    // -30 (-1 TI, D/L)
-    // XXL (2 x L)
-    // -40 (-2 TI, D/L)
-    // XXXL (2½ x L)
-    // -50 (-3 TI, D/L) (telescopic sight only)
-    // Extreme (3x L)
-    // -60 (-4 TI, D/L) (telescopic sight only)
-
-    // Range changed 2024/08, biggest difference is removal of TI mods for range here, they are vision check based going forward.
-    // Contact +60 (+2 D/L) (Firearms only)
-    // Close (0.5–1 m) +50 (+2 D/L) (Firearms only)
-    // Point-blank (PB = 1–3 m) +40 (+1 D/L) (not for thrown weapons)
-    // Octant-short (OS = ⅛ x S) +30 (+1 D/L) (not for thrown weapons)
-    // Quarter-short (QS = ¼ x S) +20
-    // Half-short (HS = ½ x S) +10
-    // Short (S) 0
-    // Medium (M) -10
-    // Long (L) -20
-    // Very-long (VL = 1½ x L) -30 (-1 D/L)
-    // Double-long (DL = 2 x L) -40 (-1 D/L)
-    // Extra-long (EL = 2½ x L) -50 (-2 D/L) (Firearms with telescopic sight only)
-    // Triple-long (TL = 3x L) -60 (-2 D/L) (Firearms with telescopic sight only)
-
-    // Effects of low vision
-    //
-    // If the Vision-based Observation (INT) check at a particular range
-    // to detect the opponent is less than 95, the PC will suffer an
-    // additional penalty to Target-I. The Target-I penalty is equal to
-    // (OBSERVE_CHECK-95)/10.
-    //
-    // If the Vision-based Observation (INT) check at a particular range
-    // to detect the opponent is less than 45, the PC will suffer an
-    // additional penalty to the combat skill check. The penalty is equal
-    // to OBSERVE_CHECK-45, and it applies both in close combat attack
-    // and defense as well as ranged combat. NOT DONE CC
-
-    // 3) Bumping
-    //
-    // In close combat, bumping is allowed if the Vision-based
-    // Observation (INT) check against the opponent at close range is 95
-    // or greater. NOT DONE
-    //
-    // In ranged fire, bumping is allowed if the Vision-based Observation
-    // (INT) check against the opponent is 95 or greater AND the opponent
-    // is full in view (does not have any cover).
-
-    const shortRangeEffect = {
-      check: 0,
-      targetInitiative: 0,
-      damage: 0,
-      leth: 0,
-      name: "Short",
-    };
-
-    if (!toRange && !isFloat(toRange)) {
-      return shortRangeEffect;
-    }
-    const shortRange = this.shortRange();
-    const longRange = this.longRange();
-
-    if (toRange < 0.5) {
-      return {
-        check: 60,
-        targetInitiative: 0,
-        damage: 2,
-        leth: 2,
-        name: "Contact",
-      };
-    } else if (toRange <= 1) {
-      return {
-        check: 50,
-        targetInitiative: 0,
-        damage: 2,
-        leth: 2,
-        name: "Close",
-      };
-    } else if (toRange <= 3) {
-      return {
-        check: 40,
-        targetInitiative: 0,
-        damage: 1,
-        leth: 1,
-        name: "Point-blank",
-      };
-    } else if (toRange <= shortRange / 8) {
-      return {
-        check: 30,
-        targetInitiative: 0,
-        damage: 1,
-        leth: 1,
-        name: "Octant-short",
-      };
-    } else if (toRange <= shortRange / 4) {
-      return {
-        check: 20,
-        targetInitiative: 0,
-        damage: 0,
-        leth: 0,
-        name: "Quarter-short",
-      };
-    } else if (toRange <= shortRange / 2) {
-      return {
-        check: 10,
-        targetInitiative: 0,
-        damage: 0,
-        leth: 0,
-        name: "Half-short",
-      };
-    } else if (toRange <= shortRange) {
-      return shortRangeEffect;
-    } else if (toRange <= this.mediumRange()) {
-      return {
-        check: -10,
-        targetInitiative: 0,
-        damage: 0,
-        leth: 0,
-        name: "Medium",
-      };
-    } else if (toRange <= longRange) {
-      return {
-        check: -20,
-        targetInitiative: 0,
-        damage: 0,
-        leth: 0,
-        name: "Long",
-      };
-    } else if (toRange <= 1.5 * longRange) {
-      return {
-        check: -30,
-        targetInitiative: 0,
-        damage: -1,
-        leth: -1,
-        name: "Very-long",
-      };
-    } else if (toRange <= 2 * longRange) {
-      return {
-        check: -40,
-        targetInitiative: 0,
-        damage: -1,
-        leth: -1,
-        name: "Double-long",
-      };
-    } else if (acuteVision >= 1 && toRange <= 2.5 * longRange) {
-      // XXXL (2½ x L)
-      // -50 (-3 TI, D/L) (telescopic sight only)
-      return {
-        check: -50,
-        targetInitiative: 0,
-        damage: -2,
-        leth: -2,
-        name: "Extra-long",
-      };
-    } else if (acuteVision >= 2 && toRange <= 3 * longRange) {
-      // Extreme (3x L)
-      // -60 (-4 TI, D/L) (telescopic sight only)
-      return {
-        check: -60,
-        targetInitiative: 0,
-        damage: -2,
-        leth: -2,
-        name: "Triple-long",
-      };
-    }
-
-    return null;
-  }
-
-  rangeEffect() {
-    if (this.props.inCloseCombat) {
-      return {
-        check: 0,
-        targetInitiative: 0,
-        damage: 2,
-        leth: 2,
-        name: "Contact",
-        bumpingAllowed: true,
-        bumpingLevel: this.skillLevel() ?? 0,
-      };
-    }
-    const toRange = this.props.toRange;
-    let perks = this.props.weapon.scope?.perks ?? [];
-
-    const visionCheckBreakdown = this.props.skillHandler.visionCheck(
-      toRange,
-      this.props.darknessDetectionLevel,
-      perks,
-    );
-
-    const dayBaseCheck = this.props.skillHandler.dayVisionBaseCheck(perks);
-    let effect = this.weaponRangeEffect(toRange, dayBaseCheck.detectionLevel);
-
-    if (effect === null || visionCheckBreakdown === null) {
-      return null;
-    }
-
-    const visionCheck = visionCheckBreakdown.value();
-    effect.visionCheck = visionCheckBreakdown;
-
-    // If vision check is under 75, the difference is penalty to the
-    // ranged skill check.
-    if (visionCheck < RangedWeaponRow.VISION_CHECK_PENALTY_LIMIT) {
-      effect.check += visionCheck - RangedWeaponRow.VISION_CHECK_PENALTY_LIMIT;
-    }
-
-    if (visionCheck < RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) {
-      effect.targetInitiative +=
-        (visionCheck - RangedWeaponRow.VISION_TARGET_INITIATIVE_PENALTY_LIMIT) /
-        10;
-    }
-
-    // Instinctive Fire
-    // Although listed under the Throwing weapons skill, the Instinctive
-    // fire enhancement is applicable to all missile weapons. The Inst
-    // fire skill level cannot be higher than the highest missile weapon
-    // skill level.
-    // Instinctive fire grants the PC a +1 bonus per level to Target-I
-    // with ranged weapons. The skill cannot raise the Target-I above 0.
-    // The skill can be used up to INT/2 m range.
-
-    if (
-      util.isFloat(toRange) &&
-      toRange <= util.rounddown(this.props.skillHandler.getStat("int") / 2)
-    ) {
-      effect.targetInitiative +=
-        this.props.skillHandler.skillLevel("Instinctive fire");
-    }
-    effect.bumpingAllowed = visionCheck >= RangedWeaponRow.VISION_BUMPING_LIMIT;
-    effect.bumpingLevel = this.skillLevel();
-    return effect;
-  }
-
-  skillLevel() {
-    if (this.props.inCloseCombat) {
-      return this.props.skillHandler.skillLevel("Instinctive fire") ?? 0;
-    } else {
-      return this.props.skillHandler.skillLevel(
-        this.props.weapon.base.base_skill.name,
-      );
-    }
-  }
-
   render() {
     const weapon = this.props.weapon.base;
+
+    this.firearm = new FirearmModel(
+      this.props.skillHandler,
+      this.props.weapon,
+      this.props.inCloseCombat,
+      this.props.toRange,
+      this.props.darknessDetectionLevel,
+    );
 
     const actions = this.props.inCloseCombat
       ? [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
@@ -953,7 +370,7 @@ class FirearmControl extends RangedWeaponRow {
     const helpStyle = Object.assign({ color: "hotpink" }, cellStyle);
     const initStyle = Object.assign({ color: "red" }, cellStyle);
 
-    const initiatives = this.initiatives(actions).map((init, ii) => {
+    const initiatives = this.firearm.initiatives(actions).map((init, ii) => {
       return (
         <td key={`init-${ii}`} style={initStyle}>
           {util.renderInt(init)}
@@ -961,11 +378,9 @@ class FirearmControl extends RangedWeaponRow {
       );
     });
 
-    const baseCheck = this.skillCheck();
+    const baseCheck = this.firearm.skillCheck();
 
-    let skillChecks = this.skillChecksV2(actions, {
-      useType: this.state.useType,
-    });
+    let skillChecks = this.firearm.skillChecksV2(actions, this.state.useType);
     if (skillChecks == null) {
       skillChecks = (
         <td colSpan={10}>
@@ -1020,8 +435,6 @@ class FirearmControl extends RangedWeaponRow {
     }
 
     let scope = this.props.weapon.scope || {};
-
-    const rof = this.rof(this.state.useType);
 
     const backgroundStyle = {
       scale: "800%",
@@ -1082,21 +495,24 @@ class FirearmControl extends RangedWeaponRow {
                         <td rowSpan="2" style={cellStyle}>
                           <div>
                             {weapon.name}
-                            <Unskilled missingSkills={this.missingSkills()} />
+                            <Unskilled missingSkills={this.firearm.missingSkills()} />
                             <BaseCheck baseCheck={baseCheck} />
                           </div>
                         </td>
                         <td style={cellStyle} aria-label="Skill level">
-                          {this.skillLevel()}
+                          {this.firearm.skillLevel()}
                         </td>
                         <td style={cellStyle} aria-label={"Rate of fire"}>
-                          <StatBreakdown label={"ROF"} value={rof} />
+                          <StatBreakdown
+                            label={"ROF"}
+                            value={this.firearm.rof(this.state.useType)}
+                          />
                         </td>
                         {skillChecks}
                         <td
                           style={cellStyle}
                           aria-label={"Target initiative"}
-                        >{`${util.renderInt(this.targetInitiative())}`}</td>
+                        >{`${util.renderInt(this.firearm.targetInitiative())}`}</td>
                         <td style={cellStyle}>{weapon.draw_initiative}</td>
                       </tr>
                       <tr aria-label={"Initiatives"}>
@@ -1143,21 +559,21 @@ class FirearmControl extends RangedWeaponRow {
                           colSpan={2}
                           aria-label={"Short range"}
                         >
-                          {this.shortRange()}
+                          {this.firearm.shortRange()}
                         </td>
                         <td
                           style={cellStyle}
                           colSpan={2}
                           aria-label={"Medium range"}
                         >
-                          {this.mediumRange()}
+                          {this.firearm.mediumRange()}
                         </td>
                         <td
                           style={cellStyle}
                           colSpan={2}
                           aria-label={"Long range"}
                         >
-                          {this.longRange()}
+                          {this.firearm.longRange()}
                         </td>
                       </tr>
                       <tr>
@@ -1251,7 +667,7 @@ class FirearmControl extends RangedWeaponRow {
             </Row>
             <Row>
               <Col>
-                <RangeInfo rangeEffect={this.rangeEffect(this.props.toRange)} />
+                <RangeInfo rangeEffect={this.firearm.rangeEffect(this.props.toRange)} />
               </Col>
             </Row>
             <Row>
@@ -1273,8 +689,7 @@ class FirearmControl extends RangedWeaponRow {
         </Row>
         {sweepInstructions}
         <Button
-          onClick={(e) => this.handleRemove()}
-          ref={(c) => (this._removeButton = c)}
+          onClick={(e) => this.props.onRemove({id: this.props.weapon.id})}
           size="sm"
         >
           Remove firearm
