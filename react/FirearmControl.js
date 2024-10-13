@@ -35,8 +35,6 @@ import FirearmModel, {SweepType} from "./FirearmModel";
 class FirearmControl extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = { useType: this.props.weapon.use_type };
   }
 
   renderDamage() {

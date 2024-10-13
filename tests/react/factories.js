@@ -653,7 +653,7 @@ export function weaponTemplateFactory(overrideFields) {
             "is_shield": false,
             "is_natural_weapon": false,
             "tech_level": 3,
-            "base_skill": "Sword",
+            "base_skill": "Weapon combat",
             "required_skills": []
         };
     if (!overrideFields) {

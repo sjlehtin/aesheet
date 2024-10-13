@@ -3,6 +3,7 @@ import * as util from "./sheet-util";
 import { isFloat } from "./sheet-util";
 import ValueBreakdown from "./ValueBreakdown";
 import SkillHandler from "./SkillHandler";
+import WeaponModel, { UseType } from "./WeaponModel";
 
 /*
  * Firearms in Close Combat (AE HR 22, ref 2024-05-22)
@@ -128,13 +129,6 @@ import SkillHandler from "./SkillHandler";
  * Handgun]
  */
 
-enum UseType {
-  SPECIAL = "SPECIAL",
-  FULL = "FULL",
-  PRI = "PRI",
-  SEC = "SEC",
-}
-
 export type SweepType = 5 | 10 | 15 | 20;
 
 export interface RangeEffect {
@@ -148,7 +142,8 @@ export interface RangeEffect {
   visionCheck?: ValueBreakdown;
 }
 
-export default class FirearmModel {
+// TODO: delegate instead?
+export default class FirearmModel extends WeaponModel {
   static VISION_CHECK_PENALTY_LIMIT = 45;
   static VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95;
   static VISION_BUMPING_LIMIT = 95;
@@ -159,9 +154,9 @@ export default class FirearmModel {
   readonly #toRange: number;
   readonly #darknessDetectionLevel: number;
 
-  readonly readiedBaseI = -1;
-  readonly baseCheckBonusForSlowActions = 10;
-  readonly extraActionModifier = 15;
+  readiedBaseI: number = -1;
+  baseCheckBonusForSlowActions: number = 10;
+  extraActionModifier: number = 15;
 
   constructor(
     handler: SkillHandler,
@@ -170,6 +165,7 @@ export default class FirearmModel {
     toRange: number,
     darknessDetectionLevel: number,
   ) {
+    super(handler, weapon);
     this.#handler = handler;
     this.#weapon = weapon;
     this.#inCC = inCloseCombat;
@@ -278,33 +274,6 @@ export default class FirearmModel {
   weaponRangeEffect(toRange: number, acuteVision: number): RangeEffect | null {
     // Range
     // Notation "+2 TI, D/L" means "+2 to target initiative and damage and lethality"
-    //
-    // Contact
-    // +60 (+2 TI, D/L) (Firearms only)
-    // Close (0.5–1 m)
-    // +50 (+2 TI, D/L) (Firearms only)
-    // Point-blank (1–3 m)
-    // +40 (+1 TI, D/L)
-    // XXS (⅛ x S)
-    // +30 (+1 TI, D/L)
-    // Extra-short (¼ x S)
-    // +20
-    // Very short (½ x S)
-    // +10
-    // Short
-    // 0
-    // Medium
-    // -10
-    // Long
-    // -20
-    // Extra-long (1½ x L)
-    // -30 (-1 TI, D/L)
-    // XXL (2 x L)
-    // -40 (-2 TI, D/L)
-    // XXXL (2½ x L)
-    // -50 (-3 TI, D/L) (telescopic sight only)
-    // Extreme (3x L)
-    // -60 (-4 TI, D/L) (telescopic sight only)
 
     // Range changed 2024/08, biggest difference is removal of TI mods for range here, they are vision check based going forward.
     // Contact +60 (+2 D/L) (Firearms only)
@@ -601,117 +570,6 @@ export default class FirearmModel {
   }
 
   // TODO: duplicated from WeaponRow
-  static checkMod(
-    roa: number,
-    act: number,
-    baseBonus: number,
-    extraActionModifier: number,
-  ) {
-    if (1 / act >= 1 / roa + 1) {
-      return baseBonus;
-    }
-    if (act < 0.5 * roa) {
-      return roa / act;
-    }
-    /* Gap.*/
-    if (act > roa) {
-      return (-act / roa) * 20 + extraActionModifier;
-    }
-
-    // Value in the gap.
-    return 0;
-  }
-
-  // TODO: duplicated from WeaponRow
-  static counterPenalty(modifier: number, stat: number) {
-    if (modifier > 0) {
-      /* Not a penalty, a bonus. */
-      return modifier;
-    }
-    return Math.min(0, modifier + util.rounddown((stat - 45) / 3));
-  }
-
-  // TODO: duplicated from WeaponRow
-  static counterPenaltyV2(stat: number) {
-    return util.rounddown((stat - 45) / 3);
-  }
-
-  // TODO: duplicated from WeaponRow
-  skillChecksV2(
-    actions: number[],
-    useType: UseType = UseType.FULL,
-    counterPenalty: boolean = true,
-  ) {
-    const roa = this.roa(useType).value();
-    const baseCheck = this.skillCheck();
-    if (!baseCheck) {
-      // Actions not available.
-      return null;
-    }
-    const checks = [];
-
-    if (useType === UseType.SEC) {
-      // TODO: handling shields is CC weapon specific
-      // if (!this.#weapon.base.is_shield) {
-      const wrongHandPenalty = -25;
-
-      baseCheck.add(wrongHandPenalty, "Wrong hand penalty");
-
-      const counter = Math.min(
-        this.#handler.edgeLevel("Ambidexterity") * 5,
-        -wrongHandPenalty,
-      );
-
-      baseCheck.add(counter, "Counter from Ambidexterity");
-      // }
-    }
-
-    const oneHandedPenalty = this.oneHandedPenalty();
-
-    for (let act of actions) {
-      if (act > 2 * roa) {
-        checks.push(null);
-      } else {
-        const bd = new ValueBreakdown();
-
-        bd.addBreakdown(baseCheck);
-
-        if (useType !== UseType.FULL) {
-          bd.add(oneHandedPenalty, "One-handed penalty");
-        }
-
-        const mod = Math.round(
-          FirearmModel.checkMod(
-            roa,
-            act,
-            this.baseCheckBonusForSlowActions,
-            this.extraActionModifier,
-          ),
-        );
-
-        bd.add(mod, "ROA");
-
-        // TODO: counterPenalty is a bad name, as a bad stat will give actual penalty for actions with these, see AE2K_Weapons_17.xls
-        if (counterPenalty) {
-          let counter = FirearmModel.counterPenaltyV2(
-            this.#handler.getStat(this.penaltyCounterStat()),
-          );
-          if (counter > 0) {
-            if (mod > 0) {
-              counter = 0;
-            } else {
-              counter = Math.min(counter, -mod);
-            }
-          }
-
-          bd.add(counter, `Modifier from ${this.penaltyCounterStat()}`);
-        }
-        bd.rounddown();
-        checks.push(bd);
-      }
-    }
-    return checks;
-  }
 
   singleBurstChecks(check: ValueBreakdown) {
     const checks = [];
@@ -880,58 +738,5 @@ export default class FirearmModel {
       return null;
     }
     return this.initiatives(this.mapBurstActions(actions));
-  }
-
-  initiatives(
-    actions: number[],
-    useType = UseType.FULL,
-    /* Whether the weapon can be readied with a multi-turn action. */
-    canReady = true,
-    /* 2 for attacks, 4 for defenses. */
-    maxActionMultiplier = 2,
-    baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9],
-  ) {
-    const rof = this.roa(useType).value();
-    const baseI = -5 / rof;
-    const readiedBaseI = this.readiedBaseI;
-    let targetI = this.targetInitiative();
-    if (targetI === null) {
-      // Range too long, actions are not available.
-      return actions.map(() => {
-        return null;
-      });
-    }
-    const initiative = this.#handler.getInitiative();
-
-    const initiatives = [];
-    for (let act of actions) {
-      if (act > maxActionMultiplier * rof) {
-        initiatives.push(null);
-      } else {
-        if (canReady && rof > 2 * act && act < 1) {
-          /* Assuming multi-turn action, where readying of the
-                     weapon is possible and target has already been
-                     acquired.  House Rules, initiative, p. 8. */
-          initiatives.push(
-            Math.max(readiedBaseI, baseI) + Math.min(targetI + 3, 0),
-          );
-        } else {
-          /* One target acquire is assumed for the rest of the
-                     initiatives.  If target is changed, target-I should
-                     be added to the rest of the initiatives.
-                     */
-          initiatives.push(
-            baseIMultipliers[Math.ceil(act) - 1] * baseI + targetI,
-          );
-        }
-      }
-    }
-    return initiatives.map(function (el) {
-      if (el !== null) {
-        return Math.round(el + initiative);
-      } else {
-        return null;
-      }
-    });
   }
 }

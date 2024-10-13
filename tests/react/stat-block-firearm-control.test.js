@@ -173,7 +173,6 @@ describe('StatBlock -- FirearmControl', () => {
         expect(
           (await screen.findByLabelText("Vision check")).textContent,
         ).toEqual("43");
-        // TODO: broken due to VisionCheckControl changes
         expect((await screen.findByLabelText("Vision check detail")).textContent).toEqual("Ranged penalty: 2")
     });
 
