@@ -84,6 +84,48 @@ import SkillHandler from "./SkillHandler";
  * reduced damage, the rolled damage is reduced from each round separately
  * (the defender manages to turn the gun down to ground and is hit only by
  * ricochet).
+ *
+ * TODO: New rule 10/2024
+ *
+ * The PC may also select to take close-combat actions using the Weapon combat
+ * skill. The ROA depends on the firearm type (Handgun or Long gun) and is
+ * modified by the Weapon combat skill level, as normally. The to-hit roll is
+ * modified by the CCV based on the firearm type (= one-handed penalty of the
+ * firearm +20). A PC without the Gun fu skill enhancement suffers a penalty
+ * of -10 to CCV. As a special exception, the CCV in defense is -10 points
+ * weaker.
+ *
+ * When firearms are used in close combat, their Stock modifier is always 1.0.
+ * Note that this may affect the ROF of the firearm. [ROF includes character
+ * skill level with the weapon!]
+ *
+ * Attack action expends 1 CC action, as normally. A successful attack
+ * indicates the PC can fire the firearm up to its ROF (modified by the
+ * relevant firearms skill, as normally). For example, an autofiring gun with
+ * an ROF of 3,0 can expend 3 single rounds or 2 short bursts after a
+ * successful CC attack. The hit location is bumped based on the close-combat
+ * skill level difference, as normally in close combat. Successful attacks
+ * are at +2 lethality and damage. If the firearm uses burst fire, all
+ * rounds hit, and normal lethality modifiers apply, so that the rounds of a
+ * three-round burst are at +2, 0, and +4 lethality.
+ * [Bursts may be further shortened by rules as indicated by JW.]
+ *
+ * Defense actions can be taken normally, each expending 0,5 CC actions, with
+ * a -10 to CCV compared to attack. A PC without the Gun fu skill enhancement
+ * suffers an additional penalty of -10 to CCV. A successful defense allows
+ * damage reduction based on the firearm type (Handgun or Long gun). See
+ * Weapon tables (CCW) for details.
+ * [Need to calculate defense initiatives. Need to have separate function for
+ * defense skill checks to allow differentiation between weapons.]
+ *
+ * Firearm attacks may be defended normally. If the defense results to
+ * reduced damage, the rolled damage is reduced from each round separately
+ * (the defender manages to turn the gun down to ground and is hit only by
+ * ricochet).
+ *
+ * [Weapon type may be looked from the skill or perhaps from the base stock of
+ * the BaseFirearm. Assumption that stock >1.2 is a Long gun, <=1.2 would be a
+ * Handgun]
  */
 
 enum UseType {
