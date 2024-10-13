@@ -80,7 +80,7 @@ class FirearmControl extends React.Component {
       return "";
     }
     const actions = [0.5, 1, 2, 3, 4];
-    const burstChecks = this.firearm.burstChecks(actions, this.state.useType);
+    const burstChecks = this.firearm.burstChecks(actions, this.props.weapon.use_type);
     const lethalities = [0, -2, 2, 0, -2];
     const hitLocations = [0, 0, 0, -1, -1];
     const burstRows = [];
@@ -323,7 +323,6 @@ class FirearmControl extends React.Component {
   }
 
   async handleUseTypeChange(useType) {
-    this.setState({ useType: useType });
     if (this.props.onChange) {
       await this.props.onChange({
         id: this.props.weapon.id,
@@ -380,7 +379,7 @@ class FirearmControl extends React.Component {
 
     const baseCheck = this.firearm.skillCheck();
 
-    let skillChecks = this.firearm.skillChecksV2(actions, this.state.useType);
+    let skillChecks = this.firearm.skillChecksV2(actions, this.props.weapon.use_type);
     if (skillChecks == null) {
       skillChecks = (
         <td colSpan={10}>
@@ -451,8 +450,8 @@ class FirearmControl extends React.Component {
       position: "relative",
     });
     const backgroundText =
-      this.state.useType !== WeaponRow.FULL ? (
-        <div style={backgroundStyle}>{this.state.useType}</div>
+      this.props.weapon.use_type !== WeaponRow.FULL ? (
+        <div style={backgroundStyle}>{this.props.weapon.use_type}</div>
       ) : (
         ""
       );
@@ -505,7 +504,7 @@ class FirearmControl extends React.Component {
                         <td style={cellStyle} aria-label={"Rate of fire"}>
                           <StatBreakdown
                             label={"ROF"}
-                            value={this.firearm.rof(this.state.useType)}
+                            value={this.firearm.rof(this.props.weapon.use_type)}
                           />
                         </td>
                         {skillChecks}
@@ -586,7 +585,7 @@ class FirearmControl extends React.Component {
                             }
                           />
                           <UseTypeControl
-                            useType={this.state.useType}
+                            useType={this.props.weapon.use_type}
                             onChange={async (value) =>
                               await this.handleUseTypeChange(value)
                             }
@@ -659,7 +658,7 @@ class FirearmControl extends React.Component {
                   </span>
                   <span style={marginRightStyle}>
                     <label style={labelStyle}>Use type:</label>
-                    <span aria-label={"Use type"}>{this.state.useType}</span>
+                    <span aria-label={"Use type"}>{this.props.weapon.use_type}</span>
                   </span>
                 </div>
               </Col>

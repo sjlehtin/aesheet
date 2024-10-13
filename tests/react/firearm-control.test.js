@@ -998,8 +998,6 @@ describe('FirearmControl', () => {
         await user.click(await screen.findByText(/Secondary/))
 
         expect(spy).toHaveBeenCalledWith({id: 5, use_type: "SEC"})
-
-        await waitFor(() => expect(screen.getByLabelText("Use type").textContent).toEqual("SEC"))
     });
 
     it ("calculates correct ROF and checks for primary use type", async () => {
