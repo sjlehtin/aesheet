@@ -385,7 +385,7 @@ class FirearmControl extends React.Component {
         </td>
       );
     } else {
-      if (weapon.autofire_only) {
+      if (weapon.autofire_only && !this.props.inCloseCombat) {
         skillChecks = (
           <td colSpan={10}>
             <em>Weapon only supports autofire.</em>

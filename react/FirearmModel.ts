@@ -66,34 +66,14 @@ import WeaponModel, { UseType } from "./WeaponModel";
  * If this action is chosen, it makes sense to combine it with Instinctive
  * fire.
  *
- * Close-Combat Actions
- *
- * The PC may also select to take close-combat actions. In this case, the
- * ROA of the firearm is one half of the ROF. The ROA and the to-hit roll are
- * modified by the Instinctive fire skill (MOV +5L). As in all close combat, 2,5 is the
- * maximum ROA. Successful attacks are at +2 lethality.
- * If the firearm uses burst fire, each burst takes two actions (#1, #3, #5),
- * all rounds hit, and normal lethality modifiers apply, so that the rounds
- * of a three-round burst are at +2, 0, and +4 lethality.
- * To defend, the PC must use another skill (Unarmed combat with a pistol,
- * Staff with a longarm). When used together with firing attacks, the
- * defenses are counted as one action each (and normal attacks are not
- * allowed). Note that this is a special case of close combat as the
- * attacks and defenses are made with different skills and their rates are
- *  calculated separately.
- * Firearm attacks may be defended normally. If the defense results to
- * reduced damage, the rolled damage is reduced from each round separately
- * (the defender manages to turn the gun down to ground and is hit only by
- * ricochet).
- *
- * TODO: New rule 10/2024
+ * Close-Combat Actions [Rule updated 10/2024]
  *
  * The PC may also select to take close-combat actions using the Weapon combat
  * skill. The ROA depends on the firearm type (Handgun or Long gun) and is
  * modified by the Weapon combat skill level, as normally. The to-hit roll is
  * modified by the CCV based on the firearm type (= one-handed penalty of the
  * firearm +20). A PC without the Gun fu skill enhancement suffers a penalty
- * of -10 to CCV. As a special exception, the CCV in defense is -10 points
+ * of -10 to CCV. TODO: As a special exception, the CCV in defense is -10 points
  * weaker.
  *
  * When firearms are used in close combat, their Stock modifier is always 1.0.
@@ -106,7 +86,7 @@ import WeaponModel, { UseType } from "./WeaponModel";
  * an ROF of 3,0 can expend 3 single rounds or 2 short bursts after a
  * successful CC attack. The hit location is bumped based on the close-combat
  * skill level difference, as normally in close combat. Successful attacks
- * are at +2 lethality and damage. If the firearm uses burst fire, all
+ * are at +2 lethality and damage. TODO: If the firearm uses burst fire, all
  * rounds hit, and normal lethality modifiers apply, so that the rounds of a
  * three-round burst are at +2, 0, and +4 lethality.
  * [Bursts may be further shortened by rules as indicated by JW.]
@@ -124,7 +104,7 @@ import WeaponModel, { UseType } from "./WeaponModel";
  * (the defender manages to turn the gun down to ground and is hit only by
  * ricochet).
  *
- * [Weapon type may be looked from the skill or perhaps from the base stock of
+ * [TODO: Weapon type may be looked from the skill or perhaps from the base stock of
  * the BaseFirearm. Assumption that stock >1.2 is a Long gun, <=1.2 would be a
  * Handgun]
  */
@@ -201,7 +181,7 @@ export default class FirearmModel extends WeaponModel {
 
   longRangeMultiplier() {
     let ref600 = Math.min(1, this.#weapon.ammo.velocity / 600);
-    return Math.max(3, 4 * ref600 * parseFloat(this.#weapon.base.stock));
+    return Math.max(3, 4 * ref600 * this.stock());
   }
 
   oneHandedPenalty() {
@@ -225,47 +205,69 @@ export default class FirearmModel extends WeaponModel {
     return 1;
   }
 
-  rof(useType: UseType) {
-    const impulse = this.impulse();
-
-    const recoil =
-      impulse /
-      (parseFloat(this.#weapon.base.duration) *
-        parseFloat(this.#weapon.base.stock) *
-        (parseFloat(this.#weapon.base.weight) + 6));
-
-    let rof =
-      30 / (recoil + parseFloat(this.#weapon.base.weapon_class_modifier));
-
-    const bd = new ValueBreakdown(rof, "firearm");
+  private applyUseTypeROAPenalty(
+      bd: ValueBreakdown,
+      useType: UseType | UseType.SPECIAL | UseType.FULL | UseType.SEC,
+  ) {
     let mod = 0;
     if (useType === UseType.PRI) {
       mod = -0.25;
     } else if (useType === UseType.SEC) {
       mod = -0.5;
     }
-    bd.add(mod, `${useType} use type`);
+    // TODO: instinctive fire reduces two-weapon penalties.
 
-    // TODO: two-weapon style
+    bd.add(mod, `${useType} use type`);
+  }
+
+  stock() {
     if (this.#inCC) {
-      bd.divide(2, "Firearm in CC");
-      bd.multiply(this.skillROAMultiplier("Instinctive fire"), "inst fire");
-      bd.setMaximum(2.5, "Max ROA");
+      return 1.0;
     } else {
-      bd.multiply(this.skillROAMultiplier(), "skill");
-      bd.setMaximum(5.0, "Max ROF");
+      return parseFloat(this.#weapon.base.stock);
     }
+  }
+
+  rof(useType: UseType) {
+    const impulse = this.impulse();
+
+    const recoil =
+      impulse /
+      (parseFloat(this.#weapon.base.duration) *
+        this.stock() *
+        (parseFloat(this.#weapon.base.weight) + 6));
+
+    let rof =
+      30 / (recoil + parseFloat(this.#weapon.base.weapon_class_modifier));
+
+    const bd = new ValueBreakdown(rof, "firearm");
+    this.applyUseTypeROAPenalty(bd, useType);
+
+    bd.multiply(this.skillROAMultiplier(), "skill");
+    bd.setMaximum(5.0, "Max ROF");
     return bd;
   }
 
-  // TODO: CC
   roa(useType: UseType) {
-    return this.rof(useType);
+    if (this.#inCC) {
+
+      const roa = new ValueBreakdown();
+      if (this.#weapon.base.base_skill.name === "Handguns") {
+        roa.add(1.3, "Handgun in CC")
+      } else {
+        roa.add(1.1, "Long gun in CC")
+      }
+      this.applyUseTypeROAPenalty(roa, useType)
+      roa.multiply(this.skillROAMultiplier("Weapon combat"), "skill");
+      return roa;
+    } else {
+      return this.rof(useType);
+    }
   }
 
   skillLevel() {
     if (this.#inCC) {
-      return this.#handler.skillLevel("Instinctive fire") ?? 0;
+      return this.#handler.skillLevel("Weapon combat") ?? 0;
     } else {
       return this.#handler.skillLevel(this.#weapon.base.base_skill.name);
     }
@@ -540,13 +542,26 @@ export default class FirearmModel extends WeaponModel {
     return bd;
   }
 
-  skillCheck(sweepFire = false) {
+  ccv() {
+    return 20 + this.oneHandedPenalty();
+  }
+
+  skillCheck(options: {sweepFire?: boolean} = {sweepFire: false}) {
     let effect = this.rangeEffect();
     if (!effect) {
       return null;
     }
     if (this.#inCC) {
-      return this.#handler.skillCheck("Instinctive fire", "MOV", true);
+      const ccCheck = this.#handler.skillCheck("Weapon combat", "MOV", true);
+
+      if (!ccCheck) return null;
+
+      // TODO: Move to CCV
+      if (!this.#handler.hasSkill("Gun fu")) {
+        ccCheck.add(-10, "Gun fu missing");
+      }
+      ccCheck.add(this.ccv(), "CCV");
+      return ccCheck;
     } else {
       const baseCheck = this.rangedWeaponSkillCheck();
       if (!baseCheck) {
@@ -554,7 +569,7 @@ export default class FirearmModel extends WeaponModel {
       }
 
       baseCheck.add(effect.check, "range");
-      if (sweepFire && effect.check < 0) {
+      if (options.sweepFire && effect.check < 0) {
         baseCheck.add(effect.check, "sweep @range");
       }
       return baseCheck;
@@ -636,7 +651,7 @@ export default class FirearmModel extends WeaponModel {
   }
 
   /* Maps a burst action to normal action for initiative and skill check
-           calculation. */
+             calculation. */
   mapBurstActions(actions: number[]) {
     return actions.map((act) => {
       if (act >= 1) {
@@ -690,7 +705,7 @@ export default class FirearmModel extends WeaponModel {
       autofirePenalty.add(-10, "Unskilled @Autofire");
     }
 
-    const baseSkillCheck = this.skillCheck(true);
+    const baseSkillCheck = this.skillCheck({sweepFire: true});
     let checks = [];
     let penaltyMultiplier = 0;
     for (let multiplier of sweeps[sweepType]) {
