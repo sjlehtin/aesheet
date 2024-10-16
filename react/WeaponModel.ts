@@ -135,12 +135,14 @@ export default abstract class WeaponModel {
 
   initiatives(
     actions: number[],
-    useType = UseType.FULL,
-    /* Whether the weapon can be readied with a multi-turn action. */
-    canReady = true,
-    /* 2 for attacks, 4 for defenses. */
-    maxActionMultiplier = 2,
-    baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9],
+    {
+      useType = UseType.FULL,
+      /* Whether the weapon can be readied with a multi-turn action. */
+      canReady = true,
+      /* 2 for attacks, 4 for defenses. */
+      maxActionMultiplier = 2,
+      baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9],
+    }: {useType?: UseType, canReady?: boolean, maxActionMultiplier?: number, baseIMultipliers?: number[]}
   ) {
     const rof = this.roa(useType).value();
     const baseI = -5 / rof;

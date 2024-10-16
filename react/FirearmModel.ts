@@ -752,6 +752,6 @@ export default class FirearmModel extends WeaponModel {
       /* No burst fire with this weapon. */
       return null;
     }
-    return this.initiatives(this.mapBurstActions(actions));
+    return this.initiatives(this.mapBurstActions(actions), {});
   }
 }

@@ -15,7 +15,7 @@ import { Unskilled } from "./Unskilled";
 import { GoAlert } from "react-icons/go";
 import { RangeInfo } from "./RangeInfo";
 
-import FirearmModel, {SweepType} from "./FirearmModel";
+import FirearmModel from "./FirearmModel";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -78,7 +78,10 @@ class FirearmControl extends React.Component {
       return "";
     }
     const actions = [0.5, 1, 2, 3, 4];
-    const burstChecks = this.firearm.burstChecks(actions, this.props.weapon.use_type);
+    const burstChecks = this.firearm.burstChecks(
+      actions,
+      this.props.weapon.use_type,
+    );
     const lethalities = [0, -2, 2, 0, -2];
     const hitLocations = [0, 0, 0, -1, -1];
     const burstRows = [];
@@ -367,7 +370,7 @@ class FirearmControl extends React.Component {
     const helpStyle = Object.assign({ color: "hotpink" }, cellStyle);
     const initStyle = Object.assign({ color: "red" }, cellStyle);
 
-    const initiatives = this.firearm.initiatives(actions).map((init, ii) => {
+    const initiatives = this.firearm.initiatives(actions, {}).map((init, ii) => {
       return (
         <td key={`init-${ii}`} style={initStyle}>
           {util.renderInt(init)}
@@ -377,7 +380,10 @@ class FirearmControl extends React.Component {
 
     const baseCheck = this.firearm.skillCheck();
 
-    let skillChecks = this.firearm.skillChecksV2(actions, this.props.weapon.use_type);
+    let skillChecks = this.firearm.skillChecksV2(
+      actions,
+      this.props.weapon.use_type,
+    );
     if (skillChecks == null) {
       skillChecks = (
         <td colSpan={10}>
@@ -411,25 +417,24 @@ class FirearmControl extends React.Component {
     const marginRightStyle = { marginRight: "1em" };
     const labelStyle = { marginRight: "0.5em" };
 
-    let sweepInstructions = "";
-    if (this.sweepAvailable()) {
-      sweepInstructions = (
-        <Row style={{ color: "hotpink" }}>
-          <Col>
-            <div>
-              The distance between sweep targets may be up to 1 m (-5 penalty /
-              target), or up to 2 m (-10 penalty / target).
-            </div>
+    const sweepInstructions = this.sweepAvailable() ? (
+      <Row style={{ color: "hotpink" }}>
+        <Col>
+          <div>
+            The distance between sweep targets may be up to 1 m (-5 penalty /
+            target), or up to 2 m (-10 penalty / target).
+          </div>
 
-            <div>
-              All range penalties are doubled in sweep fire (i.e. M -20, L -40,
-              XL -60, E -80) (included in the calculated checks)
-            </div>
-            <div>Bumping is not allowed in sweep fire.</div>
-          </Col>
-        </Row>
-      );
-    }
+          <div>
+            All range penalties are doubled in sweep fire (i.e. M -20, L -40, XL
+            -60, E -80) (included in the calculated checks)
+          </div>
+          <div>Bumping is not allowed in sweep fire.</div>
+        </Col>
+      </Row>
+    ) : (
+      ""
+    );
 
     let scope = this.props.weapon.scope || {};
 
@@ -492,7 +497,9 @@ class FirearmControl extends React.Component {
                         <td rowSpan="2" style={cellStyle}>
                           <div>
                             {weapon.name}
-                            <Unskilled missingSkills={this.firearm.missingSkills()} />
+                            <Unskilled
+                              missingSkills={this.firearm.missingSkills()}
+                            />
                             <BaseCheck baseCheck={baseCheck} />
                           </div>
                         </td>
@@ -656,7 +663,9 @@ class FirearmControl extends React.Component {
                   </span>
                   <span style={marginRightStyle}>
                     <label style={labelStyle}>Use type:</label>
-                    <span aria-label={"Use type"}>{this.props.weapon.use_type}</span>
+                    <span aria-label={"Use type"}>
+                      {this.props.weapon.use_type}
+                    </span>
                   </span>
                 </div>
               </Col>
@@ -664,7 +673,9 @@ class FirearmControl extends React.Component {
             </Row>
             <Row>
               <Col>
-                <RangeInfo rangeEffect={this.firearm.rangeEffect(this.props.toRange)} />
+                <RangeInfo
+                  rangeEffect={this.firearm.rangeEffect(this.props.toRange)}
+                />
               </Col>
             </Row>
             <Row>
@@ -686,7 +697,7 @@ class FirearmControl extends React.Component {
         </Row>
         {sweepInstructions}
         <Button
-          onClick={(e) => this.props.onRemove({id: this.props.weapon.id})}
+          onClick={(e) => this.props.onRemove({ id: this.props.weapon.id })}
           size="sm"
         >
           Remove firearm

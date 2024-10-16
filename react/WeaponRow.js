@@ -14,8 +14,9 @@ class WeaponRow extends React.Component {
         super(props);
     }
 
-    defenseInitiatives(actions, useType= UseType.FULL) {
-        return this.weapon.initiatives(actions, useType, false, 4, [0, 3, 6, 0, 3, 6, 0, 3, 6]);
+    defenseInitiatives(actions, options = {useType: UseType.FULL}) {
+        return this.weapon.initiatives(actions,
+            {useType: options.useType, canReady: false, maxActionMultiplier: 4, baseIMultipliers: [0, 3, 6, 0, 3, 6, 0, 3, 6]});
     }
 
     renderDamage({ useType = UseType.FULL, defense = false }) {
@@ -80,13 +81,13 @@ class WeaponRow extends React.Component {
                 return <td key={`chk-${ii}`} style={cellStyle} aria-label={`Attack for ${useType}`}>{cellContent}</td>;
             });
         }
-        const attackInitiatives = this.weapon.initiatives([1, 2, 3, 4], useType)
+        const attackInitiatives = this.weapon.initiatives([1, 2, 3, 4], {useType})
 
         const attackInitiativeCells = attackInitiatives.map((el, ii) => {
             return <td key={`ai-${ii}`} style={initStyle} aria-label={`Attack initiative for ${useType}`}
             >{util.renderInt(el)}</td>;});
 
-        const defenseInitiatives = this.defenseInitiatives([1, 2, 3], useType)
+        const defenseInitiatives = this.defenseInitiatives([1, 2, 3], {useType})
         const defenseInitiativeCells = defenseInitiatives.map((el, ii) => {
             return <td key={`di-${ii}`} style={defenseInitStyle} aria-label={`Defense initiative for ${useType}`}
             >{util.renderInt(el)}</td>;});

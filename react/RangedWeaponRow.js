@@ -73,7 +73,7 @@ class RangedWeaponRow extends React.Component {
                 return <td style={cellStyle} key={`chk-${ii}`}>{cellContent}</td>;
             });
         }
-        const initCells = this.weapon.initiatives(actions).map((el, ii) =>
+        const initCells = this.weapon.initiatives(actions, {}).map((el, ii) =>
         { return <td style={initStyle} key={`init-${ii}`}>{util.renderInt(el)}</td>; });
 
         return <div style={this.props.style}>
