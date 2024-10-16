@@ -36,17 +36,6 @@ describe("CCWeaponModel", function () {
       handlerProps = Object.assign(handlerProps, handler);
     }
 
-    // let allSkills = [];1
-    // for (let skill of handlerProps.skills) {
-    //   const filled = factories.skillFactory({
-    //     name: skill.skill,
-    //     stat: "MOV",
-    //   });
-    //   expect(filled.stat).toEqual("MOV");
-    //   allSkills.push(filled);
-    // }
-    // handlerProps.allSkills = allSkills;
-
     return new CCWeaponModel(
       factories.skillHandlerFactory(handlerProps),
       factories.weaponFactory(weapon),
