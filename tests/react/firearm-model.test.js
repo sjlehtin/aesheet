@@ -112,6 +112,24 @@ describe("FirearmModel", function () {
     expect(weapon.ccHits()).toEqual({single: 2, bursts: [3]})
   });
 
+
+  it("takes autofire only into account with CC hits", () => {
+    const weapon = createWeaponModel({
+      handler: {
+        skills: [
+          {
+            skill__name: "Long guns",
+            level: 0,
+          },
+        ],
+      },
+      weapon: { base: { base_skill: "Long guns", autofire_only: true, autofire_rpm: 360 } },
+      combat: { inCloseCombat: true },
+    });
+
+    expect(weapon.ccHits()).toEqual({single: null, bursts: [3]})
+  });
+
   it("takes Gun fu into account", () => {
     const weapon = createWeaponModel({
       handler: {

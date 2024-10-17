@@ -722,7 +722,7 @@ class FirearmControl extends React.Component {
                   </span>
                 </div>
               </Col>
-              <Col md={3}>
+              <Col md={4}>
                 {this.props.inCloseCombat
                   ? ccHitDescription
                   : this.renderBurstTable()}

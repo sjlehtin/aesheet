@@ -654,12 +654,17 @@ export default class FirearmModel extends WeaponModel {
 
   ccHits(useType: UseType) {
     const single = this.rof(useType).value();
-    const maxHits = this.maxBurstHits()
-    return {single: util.rounddown(single), bursts: maxHits ? new Array(util.rounddown((single + 1) / 2)).fill(maxHits) : null }
+    const maxHits = this.maxBurstHits();
+    return {
+      single: !this.#weapon.base.autofire_only ? util.rounddown(single) : null,
+      bursts: maxHits
+        ? new Array(util.rounddown((single + 1) / 2)).fill(maxHits)
+        : null,
+    };
   }
 
   /* Maps a burst action to normal action for initiative and skill check
-               calculation. */
+                 calculation. */
   mapBurstActions(actions: number[]) {
     return actions.map((act) => {
       if (act >= 1) {
