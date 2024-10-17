@@ -94,7 +94,7 @@ describe('FirearmControl', () => {
     it("can calculate single fire skill checks", async () => {
         await renderFirearm()
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.15")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.15")
         const values = getActionChecks();
         expect(values.slice(0, 8)).toEqual(["65", "58", "55", "55", "45", "38", "32", ""])
     });
@@ -581,7 +581,7 @@ describe('FirearmControl', () => {
         await renderFirearm({
             weapon: {ammo: {weight: "7.450", velocity: 440}}
         })
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.16")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.16")
         const values = getActionChecks();
         expect(values).toEqual(["65", "58", "55", "55", "45", "38", "32", "",  "", ""])
     });
@@ -591,7 +591,7 @@ describe('FirearmControl', () => {
             toRange: "60",
             weapon: {ammo: {weight: "7.450", velocity: 440}}
         })
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.16")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.16")
         const values = getActionChecks();
         expect(values).toEqual(["65", "58", "55", "55", "45", "38", "32", "",  "", ""])
     });
@@ -601,7 +601,7 @@ describe('FirearmControl', () => {
             toRange: "61",
             weapon: {ammo: {weight: "7.450", velocity: 440}}
         })
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.16")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.16")
         const values = getActionChecks();
         expect(values).toEqual(["55", "48", "45", "45", "35", "28", "22", "",  "", ""])
     });
@@ -760,7 +760,7 @@ describe('FirearmControl', () => {
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("2.86")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("2.86")
     });
 
     it ("calculates correct ROF for higher skill level", async () => {
@@ -773,7 +773,7 @@ describe('FirearmControl', () => {
             weapon: factories.firearmFactory({base: {base_skill: "Pistol"}})
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.72")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.72")
     });
 
     it ("can calculate a row of checks", async () => {
@@ -1015,7 +1015,7 @@ describe('FirearmControl', () => {
             }
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.42")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.42")
         const values = getActionChecks();
         expect(values).toEqual(["60", "53", "50", "50", "42", "36", "30", "", "",  ""])
     });
@@ -1035,7 +1035,7 @@ describe('FirearmControl', () => {
             }
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("3.17")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("3.17")
         const values = getActionChecks();
         expect(values).toEqual(["35", "28", "25", "25", "15", "8", "2", "", "",  ""])
     });
@@ -1056,7 +1056,7 @@ describe('FirearmControl', () => {
             }
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("1.68")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("1.68")
         const values = getActionChecks();
         expect(values).toEqual(["60", "50", "41", "29", "", "", "", "",  "", ""])
     });
@@ -1077,9 +1077,10 @@ describe('FirearmControl', () => {
             }
         })
 
-        expect(screen.getByLabelText("Rate of fire").textContent).toEqual("1.43")
+        expect(screen.getByLabelText("Rate of action").textContent).toEqual("1.43")
         const values = getActionChecks();
         expect(values).toEqual(["44", "34", "21", "", "", "", "", "",  "", ""])
     });
 
+    test.todo("verifies CC hits integration")
 });

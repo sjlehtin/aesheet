@@ -314,13 +314,11 @@ class FirearmControl extends React.Component {
     await this.handleScopeChanged(null);
   }
 
-  async handleScopeChanged(value) {
-    if (this.props.onChange) {
-      await this.props.onChange({
+  handleScopeChanged(value) {
+      return this.props.onChange({
         id: this.props.weapon.id,
         scope: value,
       });
-    }
   }
 
   async handleUseTypeChange(useType) {
@@ -332,6 +330,7 @@ class FirearmControl extends React.Component {
     }
   }
 
+  
   render() {
     const weapon = this.props.weapon.base;
 
@@ -370,13 +369,15 @@ class FirearmControl extends React.Component {
     const helpStyle = Object.assign({ color: "hotpink" }, cellStyle);
     const initStyle = Object.assign({ color: "red" }, cellStyle);
 
-    const initiatives = this.firearm.initiatives(actions, {}).map((init, ii) => {
-      return (
-        <td key={`init-${ii}`} style={initStyle}>
-          {util.renderInt(init)}
-        </td>
-      );
-    });
+    const initiatives = this.firearm
+      .initiatives(actions, {})
+      .map((init, ii) => {
+        return (
+          <td key={`init-${ii}`} style={initStyle}>
+            {util.renderInt(init)}
+          </td>
+        );
+      });
 
     const baseCheck = this.firearm.skillCheck();
 
@@ -459,6 +460,67 @@ class FirearmControl extends React.Component {
         ""
       );
 
+      function formatList(numbers) {
+        if (numbers.length === 0) return "";
+        if (numbers.length === 1) return numbers[0].toString();
+        if (numbers.length === 2) return numbers.join(" and ");
+
+        const allButLast = numbers.slice(0, -1).join(", ");
+        const last = numbers[numbers.length - 1];
+        return `${allButLast}, and ${last}`;
+      }
+
+    const ccHits = this.firearm.ccHits(this.props.weapon.use_type);
+    const singleDescription = ccHits.single ? (
+      <>
+        With single fire, {ccHits.single} shot{ccHits.single !== 1 ? "s" : ""}{" "}
+        can be fired at the opponent
+      </>
+    ) : (
+      ""
+    );
+    const burstDescription = ccHits.bursts ? (
+      <>
+        With burst fire, {ccHits.bursts.length} burst
+        {ccHits.bursts.length !== 1 ? "s" : ""}, with {formatList(ccHits.bursts)}{" "}
+        hits. Shots are at +0, -2, and +2 lethality.
+      </>
+    ) : (
+      ""
+    );
+    const listItemStyle = { listStyleType: "disc" };
+    const ccHitDescription = (
+      <div
+        style={
+          {
+            // padding: "0.5em"
+          }
+        }
+      >
+        <p>
+          On a successful CC check (ROF:{" "}
+          <StatBreakdown
+            label={"ROF"}
+            value={this.firearm.rof(this.props.weapon.use_type)}
+            style={{ display: "inline-block" }}
+          />
+          ):
+        </p>
+        <ul>
+          {singleDescription ? (
+            <li style={listItemStyle}>{singleDescription}</li>
+          ) : (
+            ""
+          )}
+          {burstDescription ? (
+            <li style={listItemStyle}>{burstDescription}</li>
+          ) : (
+            ""
+          )}
+        </ul>
+      </div>
+    );
+    const rateLabel = this.props.inCloseCombat ? "ROA" : "ROF";
     return (
       <div
         aria-label={`Firearm ${this.props.weapon.base.name}`}
@@ -467,7 +529,7 @@ class FirearmControl extends React.Component {
         <Row>
           <Col xs={"auto"}>
             <Row>
-              <Col>
+              <Col md={"auto"}>
                 <div
                   style={{
                     fontSize: "inherit",
@@ -486,7 +548,7 @@ class FirearmControl extends React.Component {
                       <tr>
                         <th style={headerStyle}>Weapon</th>
                         <th style={headerStyle}>Lvl</th>
-                        <th style={headerStyle}>ROF</th>
+                        <th style={headerStyle}>{rateLabel}</th>
                         {actionCells}
                         <th style={headerStyle}>TI</th>
                         <th style={headerStyle}>DI</th>
@@ -506,10 +568,10 @@ class FirearmControl extends React.Component {
                         <td style={cellStyle} aria-label="Skill level">
                           {this.firearm.skillLevel()}
                         </td>
-                        <td style={cellStyle} aria-label={"Rate of fire"}>
+                        <td style={cellStyle} aria-label={"Rate of action"}>
                           <StatBreakdown
-                            label={"ROF"}
-                            value={this.firearm.rof(this.props.weapon.use_type)}
+                            label={rateLabel}
+                            value={this.firearm.roa(this.props.weapon.use_type)}
                           />
                         </td>
                         {skillChecks}
@@ -669,7 +731,11 @@ class FirearmControl extends React.Component {
                   </span>
                 </div>
               </Col>
-              <Col md={3}>{this.renderBurstTable()}</Col>
+              <Col md={3}>
+                {this.props.inCloseCombat
+                  ? ccHitDescription
+                  : this.renderBurstTable()}
+              </Col>
             </Row>
             <Row>
               <Col>

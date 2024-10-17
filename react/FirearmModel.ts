@@ -86,7 +86,7 @@ import WeaponModel, { UseType } from "./WeaponModel";
  * an ROF of 3,0 can expend 3 single rounds or 2 short bursts after a
  * successful CC attack. The hit location is bumped based on the close-combat
  * skill level difference, as normally in close combat. Successful attacks
- * are at +2 lethality and damage. TODO: If the firearm uses burst fire, all
+ * are at +2 lethality and damage. If the firearm uses burst fire, all
  * rounds hit, and normal lethality modifiers apply, so that the rounds of a
  * three-round burst are at +2, 0, and +4 lethality.
  * [Bursts may be further shortened by rules as indicated by JW.]
@@ -206,8 +206,8 @@ export default class FirearmModel extends WeaponModel {
   }
 
   private applyUseTypeROAPenalty(
-      bd: ValueBreakdown,
-      useType: UseType | UseType.SPECIAL | UseType.FULL | UseType.SEC,
+    bd: ValueBreakdown,
+    useType: UseType | UseType.SPECIAL | UseType.FULL | UseType.SEC,
   ) {
     let mod = 0;
     if (useType === UseType.PRI) {
@@ -250,14 +250,13 @@ export default class FirearmModel extends WeaponModel {
 
   roa(useType: UseType) {
     if (this.#inCC) {
-
       const roa = new ValueBreakdown();
       if (this.#weapon.base.base_skill.name === "Handguns") {
-        roa.add(1.3, "Handgun in CC")
+        roa.add(1.3, "Handgun in CC");
       } else {
-        roa.add(1.1, "Long gun in CC")
+        roa.add(1.1, "Long gun in CC");
       }
-      this.applyUseTypeROAPenalty(roa, useType)
+      this.applyUseTypeROAPenalty(roa, useType);
       roa.multiply(this.skillROAMultiplier("Weapon combat"), "skill");
       return roa;
     } else {
@@ -546,7 +545,7 @@ export default class FirearmModel extends WeaponModel {
     return 20 + this.oneHandedPenalty();
   }
 
-  skillCheck(options: {sweepFire?: boolean} = {sweepFire: false}) {
+  skillCheck(options: { sweepFire?: boolean } = { sweepFire: false }) {
     let effect = this.rangeEffect();
     if (!effect) {
       return null;
@@ -584,19 +583,10 @@ export default class FirearmModel extends WeaponModel {
     }
   }
 
-  // TODO: duplicated from WeaponRow
-
   singleBurstChecks(check: ValueBreakdown) {
     const checks = [];
 
-    let maxHits = Math.min(
-      util.rounddown((this.#weapon.base.autofire_rpm ?? 0) / 120),
-      5,
-    );
-
-    if (this.#weapon.base.restricted_burst_rounds > 0) {
-      maxHits = Math.min(maxHits, this.#weapon.base.restricted_burst_rounds);
-    }
+    const maxHits = this.maxBurstHits();
     const baseSkillCheck = this.skillCheck();
     const burstMultipliers = [0, 1, 3, 6, 10];
     const autofireClasses = { A: -1, B: -2, C: -3, D: -4, E: -5 };
@@ -650,8 +640,26 @@ export default class FirearmModel extends WeaponModel {
     return checks;
   }
 
+  private maxBurstHits() {
+    let maxHits = Math.min(
+      util.rounddown((this.#weapon.base.autofire_rpm ?? 0) / 120),
+      5,
+    );
+
+    if (this.#weapon.base.restricted_burst_rounds > 0) {
+      maxHits = Math.min(maxHits, this.#weapon.base.restricted_burst_rounds);
+    }
+    return maxHits;
+  }
+
+  ccHits(useType: UseType) {
+    const single = this.rof(useType).value();
+    const maxHits = this.maxBurstHits()
+    return {single: util.rounddown(single), bursts: maxHits ? new Array(util.rounddown((single + 1) / 2)).fill(maxHits) : null }
+  }
+
   /* Maps a burst action to normal action for initiative and skill check
-             calculation. */
+               calculation. */
   mapBurstActions(actions: number[]) {
     return actions.map((act) => {
       if (act >= 1) {
@@ -705,7 +713,7 @@ export default class FirearmModel extends WeaponModel {
       autofirePenalty.add(-10, "Unskilled @Autofire");
     }
 
-    const baseSkillCheck = this.skillCheck({sweepFire: true});
+    const baseSkillCheck = this.skillCheck({ sweepFire: true });
     let checks = [];
     let penaltyMultiplier = 0;
     for (let multiplier of sweeps[sweepType]) {
