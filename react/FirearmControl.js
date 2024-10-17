@@ -16,6 +16,7 @@ import { GoAlert } from "react-icons/go";
 import { RangeInfo } from "./RangeInfo";
 
 import FirearmModel from "./FirearmModel";
+import {UseType} from "./WeaponModel";
 
 /*
  * Firearms are sheet specific. Firearms can contain add-ons, most
@@ -37,31 +38,23 @@ class FirearmControl extends React.Component {
     super(props);
   }
 
-  renderDamage() {
-    const ammo = this.props.weapon.ammo;
-    let plusLeth = "";
-    if (ammo.plus_leth) {
-      plusLeth = ` (${util.renderInt(ammo.plus_leth)})`;
-    }
-
-    let rangeEffect = this.firearm.rangeEffect();
-
-    if (rangeEffect === null) {
-      return (
+  renderDamage({ useType = UseType.FULL, defense = false }) {
+    const damage = this.firearm.weaponDamage({
+      useType: useType,
+      defense: defense,
+    });
+    if (!damage) {
+       return (
         <span className="damage">
           <strong>range too long!</strong>
         </span>
-      );
+      )
     }
-
-    return (
-      <span className="damage">
-        {ammo.num_dice}d{ammo.dice}
-        {util.renderInt(ammo.extra_damage + rangeEffect.damage)}/
-        {ammo.leth + rangeEffect.leth}
-        {plusLeth}
-      </span>
-    );
+    return <span className="damage">{`${damage.numDice}d${damage.dice}${
+      damage.extraDamage
+        ? util.renderInt(util.rounddown(damage.extraDamage))
+        : ""
+    }/${util.rounddown(damage.leth)}${damage.plusLeth ? util.renderInt(damage.plusLeth) : ""}`}</span>;
   }
 
   async handleAmmoChanged(value) {
@@ -315,10 +308,10 @@ class FirearmControl extends React.Component {
   }
 
   handleScopeChanged(value) {
-      return this.props.onChange({
-        id: this.props.weapon.id,
-        scope: value,
-      });
+    return this.props.onChange({
+      id: this.props.weapon.id,
+      scope: value,
+    });
   }
 
   async handleUseTypeChange(useType) {
@@ -330,7 +323,6 @@ class FirearmControl extends React.Component {
     }
   }
 
-  
   render() {
     const weapon = this.props.weapon.base;
 
@@ -368,6 +360,7 @@ class FirearmControl extends React.Component {
     const firstCellStyle = Object.assign({}, cellStyle, { minWidth: "8em" });
     const helpStyle = Object.assign({ color: "hotpink" }, cellStyle);
     const initStyle = Object.assign({ color: "red" }, cellStyle);
+    const defenseInitStyle = Object.assign({ color: "blue" }, cellStyle);
 
     const initiatives = this.firearm
       .initiatives(actions, {})
@@ -460,15 +453,15 @@ class FirearmControl extends React.Component {
         ""
       );
 
-      function formatList(numbers) {
-        if (numbers.length === 0) return "";
-        if (numbers.length === 1) return numbers[0].toString();
-        if (numbers.length === 2) return numbers.join(" and ");
+    function formatList(numbers) {
+      if (numbers.length === 0) return "";
+      if (numbers.length === 1) return numbers[0].toString();
+      if (numbers.length === 2) return numbers.join(" and ");
 
-        const allButLast = numbers.slice(0, -1).join(", ");
-        const last = numbers[numbers.length - 1];
-        return `${allButLast}, and ${last}`;
-      }
+      const allButLast = numbers.slice(0, -1).join(", ");
+      const last = numbers[numbers.length - 1];
+      return `${allButLast}, and ${last}`;
+    }
 
     const ccHits = this.firearm.ccHits(this.props.weapon.use_type);
     const singleDescription = ccHits.single ? (
@@ -482,11 +475,46 @@ class FirearmControl extends React.Component {
     const burstDescription = ccHits.bursts ? (
       <>
         With burst fire, {ccHits.bursts.length} burst
-        {ccHits.bursts.length !== 1 ? "s" : ""}, with {formatList(ccHits.bursts)}{" "}
-        hits. Shots are at +0, -2, and +2 lethality.
+        {ccHits.bursts.length !== 1 ? "s" : ""}, with{" "}
+        {formatList(ccHits.bursts)} hits. Shots are at +0, -2, and +2 lethality.
       </>
     ) : (
       ""
+    );
+    const defenses = this.props.inCloseCombat ? (
+      <>
+        <tr>
+          <th style={inlineHeaderStyle} colSpan={3}>
+            Defenses
+          </th>
+          <th>1</th>
+          <th>2</th>
+          <th>3</th>
+          <th style={inlineHeaderStyle} colSpan={3}>
+            Reduced
+          </th>
+        </tr>
+        <tr>
+          <td colSpan={3} />
+          {this.firearm
+            .defenseInitiatives([1, 2, 3], {
+              useType: this.props.weapon.use_type,
+            })
+            .map((init, ii) => {
+              return (
+                <td key={`def-${ii}`} style={defenseInitStyle}>
+                  {util.renderInt(init)}
+                </td>
+              );
+            })}
+          <td style={cellStyle} colSpan={3}>{this.renderDamage({useType: this.props.weapon.use_type, defense: true})}</td>
+        </tr>
+      </>
+    ) : (
+      <>
+        <tr></tr>
+        <tr></tr>
+      </>
     );
     const listItemStyle = { listStyleType: "disc" };
     const ccHitDescription = (
@@ -588,7 +616,7 @@ class FirearmControl extends React.Component {
                         {initiatives}
                       </tr>
                       <tr>
-                        <td style={firstCellStyle} rowSpan={2}>
+                        <td style={firstCellStyle} rowSpan={4}>
                           <AmmoControl
                             ammo={this.props.weapon.ammo}
                             url={`/rest/ammunition/firearm/${encodeURIComponent(this.props.weapon.base.name)}/`}
@@ -615,7 +643,7 @@ class FirearmControl extends React.Component {
                       </tr>
                       <tr>
                         <td style={cellStyle} colSpan={3} aria-label={"Damage"}>
-                          {this.renderDamage()}
+                          {this.renderDamage({})}
                         </td>
                         <td style={cellStyle} colSpan={2}>
                           {this.props.weapon.ammo.type}
@@ -642,6 +670,7 @@ class FirearmControl extends React.Component {
                           {this.firearm.longRange()}
                         </td>
                       </tr>
+                      {defenses}
                       <tr>
                         <td style={firstCellStyle} rowSpan={3}>
                           <ScopeControl

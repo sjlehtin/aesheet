@@ -251,7 +251,7 @@ export default class FirearmModel extends WeaponModel {
   roa(useType: UseType) {
     if (this.#inCC) {
       const roa = new ValueBreakdown();
-      if (this.#weapon.base.base_skill.name === "Handguns") {
+      if (this.isHandgun()) {
         roa.add(1.3, "Handgun in CC");
       } else {
         roa.add(1.1, "Long gun in CC");
@@ -262,6 +262,10 @@ export default class FirearmModel extends WeaponModel {
     } else {
       return this.rof(useType);
     }
+  }
+
+  private isHandgun() {
+    return this.#weapon.base.base_skill.name === "Handguns";
   }
 
   skillLevel() {
@@ -664,7 +668,7 @@ export default class FirearmModel extends WeaponModel {
   }
 
   /* Maps a burst action to normal action for initiative and skill check
-                 calculation. */
+                     calculation. */
   mapBurstActions(actions: number[]) {
     return actions.map((act) => {
       if (act >= 1) {
@@ -766,5 +770,46 @@ export default class FirearmModel extends WeaponModel {
       return null;
     }
     return this.initiatives(this.mapBurstActions(actions), {});
+  }
+
+  weaponDamage({
+    useType = UseType.FULL,
+    defense = false,
+  }: {
+    useType?: UseType;
+    defense?: boolean;
+  }) {
+    if (this.#inCC && defense) {
+      const { damage: fitBonusDmg, leth: fitLethBonus } =
+        this.fitDamageBonus(useType);
+
+      return {
+        numDice: 1,
+        dice: this.isHandgun() ? 4 : 6,
+        extraDamage: fitBonusDmg,
+        leth: (this.isHandgun() ? 1 : 3) + fitLethBonus,
+        plusLeth: 0,
+      };
+    } else {
+      const ammo = this.#weapon.ammo;
+      let plusLeth = "";
+      if (ammo.plus_leth) {
+        plusLeth = ` (${util.renderInt(ammo.plus_leth)})`;
+      }
+
+      let rangeEffect = this.rangeEffect();
+
+      if (rangeEffect === null) {
+        return null;
+      }
+
+      return {
+        numDice: ammo.num_dice,
+        dice: ammo.dice,
+        extraDamage: ammo.extra_damage + rangeEffect.damage,
+        leth: ammo.leth + rangeEffect.leth,
+        plusLeth: plusLeth,
+      };
+    }
   }
 }

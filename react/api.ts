@@ -135,6 +135,12 @@ export interface BaseFirearm extends GenericArmament {
 }
 
 export interface Ammunition {
+  num_dice: number;
+  dice: number;
+  extra_damage: number;
+  leth: number;
+  plus_leth: number;
+
   weight: string;
   cartridge_weight?: string;
 

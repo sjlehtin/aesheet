@@ -108,10 +108,10 @@ describe("FirearmModel", function () {
     const res = weapon.skillChecksV2([1, 2], UseType.SEC);
     expect(res.map((v) => v?.value() || null)).toEqual([17, null]);
 
-    // TODO: defense checks
     // Burst in CC
     expect(weapon.ccHits(UseType.FULL)).toEqual({single: 2, bursts: [3]})
     expect(weapon.defenseInitiatives([1, 2, 3], {})).toEqual([8, -4, -15])
+    expect(weapon.weaponDamage({useType: UseType.FULL, defense: true})).toEqual({numDice: 1, dice: 4, extraDamage: 0, leth: 1, plusLeth: 0})
   });
 
 
@@ -218,6 +218,9 @@ describe("FirearmModel", function () {
     expect(weapon.roa().value()).toBeCloseTo(1.1);
     expect(weapon.skillCheck().value()).toEqual(53.8);
     expect(weapon.rof().value()).toBeCloseTo(3.72);
+
+    expect(weapon.defenseInitiatives([1, 2, 3], {})).toEqual([8, -6, -19])
+    expect(weapon.weaponDamage({useType: UseType.FULL, defense: true})).toEqual({numDice: 1, dice: 6, extraDamage: 0, leth: 3, plusLeth: 0})
   });
 
   test.todo("takes Two-weapon style into account in firearms akimbo case");

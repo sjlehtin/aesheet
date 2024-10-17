@@ -14,6 +14,19 @@ export default abstract class WeaponModel {
   // static VISION_CHECK_PENALTY_LIMIT = 45;
   // static VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95;
   // static VISION_BUMPING_LIMIT = 95;
+  static damageFITModifiers = {
+    SPECIAL: 5,
+    FULL: 7.5,
+    PRI: 10,
+    SEC: 15,
+  };
+
+  static lethalityFITModifiers = {
+    SPECIAL: 20,
+    FULL: 30,
+    PRI: 40,
+    SEC: 60,
+  };
 
   #weapon: SheetWeapon;
   #handler: SkillHandler;
@@ -166,16 +179,16 @@ export default abstract class WeaponModel {
       } else {
         if (canReady && rof > 2 * act && act < 1) {
           /* Assuming multi-turn action, where readying of the
-                               weapon is possible and target has already been
-                               acquired.  House Rules, initiative, p. 8. */
+                                         weapon is possible and target has already been
+                                         acquired.  House Rules, initiative, p. 8. */
           initiatives.push(
             Math.max(readiedBaseI, baseI) + Math.min(targetI + 3, 0),
           );
         } else {
           /* One target acquire is assumed for the rest of the
-                               initiatives.  If target is changed, target-I should
-                               be added to the rest of the initiatives.
-                               */
+                                         initiatives.  If target is changed, target-I should
+                                         be added to the rest of the initiatives.
+                                         */
           initiatives.push(
             baseIMultipliers[Math.ceil(act) - 1] * baseI + targetI,
           );
@@ -265,5 +278,21 @@ export default abstract class WeaponModel {
       }
     }
     return checks;
+  }
+
+  fitDamageBonus(useType: UseType) {
+    /* Martial arts expertise skill grants a bonus to damage. */
+    const maeLevel = this.#handler.skillLevel("Martial arts expertise");
+
+    let ccFITBonus = this.#handler.getStat("fit") - 45;
+    if (maeLevel > 0) {
+      ccFITBonus += maeLevel * 5;
+    }
+
+    const fitBonusDmg = ccFITBonus / WeaponModel.damageFITModifiers[useType];
+    const fitLethBonus =
+      ccFITBonus / WeaponModel.lethalityFITModifiers[useType];
+
+    return { damage: fitBonusDmg, leth: fitLethBonus };
   }
 }

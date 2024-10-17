@@ -1,23 +1,9 @@
-import WeaponModel, { UseType } from "./WeaponModel";
+import WeaponModel from "./WeaponModel";
 import { SheetPhysicalWeapon } from "./api";
 import SkillHandler from "./SkillHandler";
 import ValueBreakdown from "./ValueBreakdown";
 
 export abstract class PhysicalWeaponModel extends WeaponModel {
-  static damageFITModifiers = {
-    SPECIAL: 5,
-    FULL: 7.5,
-    PRI: 10,
-    SEC: 15,
-  };
-
-  static lethalityFITModifiers = {
-    SPECIAL: 20,
-    FULL: 30,
-    PRI: 40,
-    SEC: 60,
-  };
-
   #weapon: SheetPhysicalWeapon;
 
   // #handler: SkillHandler;
@@ -60,9 +46,4 @@ export abstract class PhysicalWeaponModel extends WeaponModel {
   drawInitiative() {
     return this.#weapon.base.draw_initiative - 2 * (this.#weapon.size - 1);
   }
-
-  abstract fitDamageBonus(useType: UseType): {
-    damage: number;
-    leth: number;
-  };
 }

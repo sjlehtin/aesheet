@@ -104,22 +104,6 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
     return bd;
   }
 
-  fitDamageBonus(useType: UseType) {
-    /* Martial arts expertise skill grants a bonus to damage. */
-    const maeLevel = this.#handler.skillLevel("Martial arts" + " expertise");
-
-    let ccFITBonus = this.#handler.getStat("fit") - 45;
-    if (maeLevel > 0) {
-      ccFITBonus += maeLevel * 5;
-    }
-
-    const fitBonusDmg = ccFITBonus / CCWeaponModel.damageFITModifiers[useType];
-    const fitLethBonus =
-      ccFITBonus / CCWeaponModel.lethalityFITModifiers[useType];
-
-    return { damage: fitBonusDmg, leth: fitLethBonus };
-  }
-
   durability() {
     /*
      *  The Durability of natural weapons (for example, fists or bear
