@@ -418,7 +418,7 @@ class FirearmControl extends React.Component {
             The distance between sweep targets may be up to 1 m (-5 penalty /
             target), or up to 2 m (-10 penalty / target).
           </div>
-
+          <div>When changing targets, apply initiative penalty of <strong>{Math.min(-1, this.firearm.targetInitiative() + 2)}</strong> per change.</div>
           <div>
             All range penalties are doubled in sweep fire (i.e. M -20, L -40, XL
             -60, E -80) (included in the calculated checks)
