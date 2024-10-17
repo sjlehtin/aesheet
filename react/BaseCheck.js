@@ -10,7 +10,7 @@ export function BaseCheck({baseCheck}) {
     }
     return <div><label id={"base-check"} style={baseCheckStyle}>Base check</label>
         <span aria-labelledby={"base-check"}>
-            <StatBreakdown value={baseCheck} style={baseCheckStyle}/>
+            <StatBreakdown value={baseCheck} style={baseCheckStyle} toFixed={0} />
         </span>
     </div>
 }

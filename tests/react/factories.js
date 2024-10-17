@@ -289,9 +289,6 @@ const baseFirearmFactory = (props) => {
             "dp": 3,
             "weight": "0.7",
             "target_initiative": -1,
-            "range_pb": null, "range_xs": null, "range_vs": null,
-            "range_s": 12, "range_m": 24, "range_l": 48,
-            "range_xl": null, "range_e": null,
             "autofire_rpm": null,
             "autofire_class": "",
             "sweep_fire_disabled": false,
@@ -653,7 +650,7 @@ export function weaponTemplateFactory(overrideFields) {
             "is_shield": false,
             "is_natural_weapon": false,
             "tech_level": 3,
-            "base_skill": "Sword",
+            "base_skill": "Weapon combat",
             "required_skills": []
         };
     if (!overrideFields) {

@@ -3,11 +3,14 @@
 ### Added
 
 * Display key modifications to stats from armor.
+* Added note about Target-I penalty when changing targets in sweep fire.
 
 ### Changed
 
+* Take new firearms in CC rule into use. The whole rule has been revamped.
 * Stamina damage controls are now "Add" and "Heal", it now adds to the existing damage instead of directly changing the backing value. This is more intuitive and removes the need for the player to calculate the damage.
 * When changing armor, the sheet uses the last selected template and quality of the current armor as default values. This should make it easier to apply, say, melting plague quality effects and experiment stat changes with and without armor.
+* Scope removal done by selecting "Remove scope" from the dropdown instead of a button, frees space in the layout.
 
 ### Fixed
 
