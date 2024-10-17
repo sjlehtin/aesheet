@@ -14,11 +14,6 @@ class WeaponRow extends React.Component {
         super(props);
     }
 
-    defenseInitiatives(actions, options = {useType: UseType.FULL}) {
-        return this.weapon.initiatives(actions,
-            {useType: options.useType, canReady: false, maxActionMultiplier: 4, baseIMultipliers: [0, 3, 6, 0, 3, 6, 0, 3, 6]});
-    }
-
     renderDamage({ useType = UseType.FULL, defense = false }) {
         const damage = this.weapon.weaponDamage({ useType: useType, defense: defense })
         return `${damage.numDice}d${damage.dice}${
@@ -87,7 +82,7 @@ class WeaponRow extends React.Component {
             return <td key={`ai-${ii}`} style={initStyle} aria-label={`Attack initiative for ${useType}`}
             >{util.renderInt(el)}</td>;});
 
-        const defenseInitiatives = this.defenseInitiatives([1, 2, 3], {useType})
+        const defenseInitiatives = this.weapon.defenseInitiatives([1, 2, 3], {useType})
         const defenseInitiativeCells = defenseInitiatives.map((el, ii) => {
             return <td key={`di-${ii}`} style={defenseInitStyle} aria-label={`Defense initiative for ${useType}`}
             >{util.renderInt(el)}</td>;});

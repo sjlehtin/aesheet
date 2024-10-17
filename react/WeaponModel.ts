@@ -55,9 +55,7 @@ export default abstract class WeaponModel {
   }
 
   skillLevel() {
-    return this.#handler.skillLevel(
-      this.#weapon.base.base_skill.name,
-    );
+    return this.#handler.skillLevel(this.#weapon.base.base_skill.name);
   }
 
   skillROAMultiplier(skillName?: string) {
@@ -142,7 +140,12 @@ export default abstract class WeaponModel {
       /* 2 for attacks, 4 for defenses. */
       maxActionMultiplier = 2,
       baseIMultipliers = [1, 4, 7, 2, 5, 8, 3, 6, 9],
-    }: {useType?: UseType, canReady?: boolean, maxActionMultiplier?: number, baseIMultipliers?: number[]}
+    }: {
+      useType?: UseType;
+      canReady?: boolean;
+      maxActionMultiplier?: number;
+      baseIMultipliers?: number[];
+    },
   ) {
     const rof = this.roa(useType).value();
     const baseI = -5 / rof;
@@ -163,16 +166,16 @@ export default abstract class WeaponModel {
       } else {
         if (canReady && rof > 2 * act && act < 1) {
           /* Assuming multi-turn action, where readying of the
-                     weapon is possible and target has already been
-                     acquired.  House Rules, initiative, p. 8. */
+                               weapon is possible and target has already been
+                               acquired.  House Rules, initiative, p. 8. */
           initiatives.push(
             Math.max(readiedBaseI, baseI) + Math.min(targetI + 3, 0),
           );
         } else {
           /* One target acquire is assumed for the rest of the
-                     initiatives.  If target is changed, target-I should
-                     be added to the rest of the initiatives.
-                     */
+                               initiatives.  If target is changed, target-I should
+                               be added to the rest of the initiatives.
+                               */
           initiatives.push(
             baseIMultipliers[Math.ceil(act) - 1] * baseI + targetI,
           );
@@ -185,6 +188,22 @@ export default abstract class WeaponModel {
       } else {
         return null;
       }
+    });
+  }
+
+  defenseInitiatives(
+    actions: number[],
+    {
+      useType = UseType.FULL,
+    }: {
+      useType?: UseType;
+    },
+  ) {
+    return this.initiatives(actions, {
+      useType: useType,
+      canReady: false,
+      maxActionMultiplier: 4,
+      baseIMultipliers: [0, 3, 6, 0, 3, 6, 0, 3, 6],
     });
   }
 

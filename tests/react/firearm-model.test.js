@@ -101,6 +101,7 @@ describe("FirearmModel", function () {
     expect(
       weapon.skillChecksV2([1, 2, 3]).map((v) => v?.value() || null),
     ).toEqual([53, 37, null]);
+    expect(weapon.initiatives([1, 2, 3], {})).toEqual([4, -7, null])
 
     expect(weapon.roa(UseType.SEC).value()).toBeCloseTo(0.8);
 
@@ -109,7 +110,8 @@ describe("FirearmModel", function () {
 
     // TODO: defense checks
     // Burst in CC
-    expect(weapon.ccHits()).toEqual({single: 2, bursts: [3]})
+    expect(weapon.ccHits(UseType.FULL)).toEqual({single: 2, bursts: [3]})
+    expect(weapon.defenseInitiatives([1, 2, 3], {})).toEqual([8, -4, -15])
   });
 
 
@@ -127,7 +129,7 @@ describe("FirearmModel", function () {
       combat: { inCloseCombat: true },
     });
 
-    expect(weapon.ccHits()).toEqual({single: null, bursts: [3]})
+    expect(weapon.ccHits(UseType.FULL)).toEqual({single: null, bursts: [3]})
   });
 
   it("takes Gun fu into account", () => {
@@ -195,6 +197,8 @@ describe("FirearmModel", function () {
     expect(weapon.roa().value()).toBeCloseTo(1.1);
     expect(weapon.skillCheck().value()).toEqual(53.8);
     expect(weapon.rof().value()).toBeCloseTo(2.86);
+
+    expect(weapon.defenseInitiatives([1, 2, 3], {})).toEqual([8, -6, -19])
   });
 
   it("takes high Long guns skill into account", () => {
@@ -216,7 +220,7 @@ describe("FirearmModel", function () {
     expect(weapon.rof().value()).toBeCloseTo(3.72);
   });
 
-  test.todo("takes Instinctive fire into account in firearms akimbo case");
+  test.todo("takes Two-weapon style into account in firearms akimbo case");
 
   test.todo("firearm modes");
 });
