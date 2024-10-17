@@ -3,6 +3,7 @@
 ### Added
 
 * Display key modifications to stats from armor.
+* Added note about Target-I penalty when changing targets in sweep fire.
 
 ### Changed
 
