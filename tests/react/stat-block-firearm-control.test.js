@@ -251,8 +251,12 @@ describe('StatBlock -- FirearmControl', () => {
         await waitForElementToBeRemoved(document.querySelector("#loading"), {timeout: 5000})
 
         const firearmBlock = await sheet.findByLabelText(/Firearm The Cannon/);
-        await within(firearmBlock).findByText("Awesome scope")
-        await user.click(await within(firearmBlock).findByRole("button", {name: "Remove scope"}))
+        expect(await within(firearmBlock).findByText("Awesome scope")).toBeInTheDocument()
+        const scopeSelector = within(firearmBlock).getByRole("combobox", {name: "Scope selection"})
+        await user.click(scopeSelector);
+
+        await user.click(await screen.findByText('Remove scope', {}));
+
         await waitFor(() => expect(within(firearmBlock).queryByText("Awesome scope")).toBeNull())
     });
 

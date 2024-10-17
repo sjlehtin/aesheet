@@ -20,14 +20,14 @@ class ScopeControl extends React.Component {
     }
 
     async componentDidMount() {
-        await this.updateScopeSelection();
+        return this.updateScopeSelection();
     }
 
     async updateScopeSelection() {
         if (this.props.url) {
             this.setState({busy: true})
             let json = await rest.getData(this.props.url)
-            this.setState({busy: false, scopeChoices: json, loading: false})
+            this.setState({busy: false, scopeChoices: [null, ...json], loading: false})
         }
     }
 
@@ -47,7 +47,7 @@ class ScopeControl extends React.Component {
         <DropdownList value={this.props.scope}
                              busy={this.state.busy}
                              textField={(obj) => {
-                                 return obj ? obj.name : "";
+                                 return obj ? obj.name : "Remove scope";
                              }}
                              onChange={async (value) => await this.handleChange(value)}
                              filter="contains"

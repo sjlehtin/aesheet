@@ -3,7 +3,11 @@ import ScopeControl from 'ScopeControl';
 
 import * as factories from './factories'
 
-import { render, screen } from '@testing-library/react'
+import {
+    render,
+    screen,
+    waitForElementToBeRemoved
+} from '@testing-library/react'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import userEvent from '@testing-library/user-event'
@@ -90,11 +94,46 @@ describe('ScopeControl', () => {
 
         let options = await control.findAllByRole('option', {});
 
-        expect(options.length).toEqual(3)
+        expect(options.length).toEqual(4)
 
-        await user.click(options[0])
+        await user.click(options[1])
 
         // Check that the control passes the correct value up.
         expect(spy).toHaveBeenCalledWith(newScope)
     });
+
+    it("allows removing scope", async () => {
+        const user = userEvent.setup()
+
+        let scope = factories.scopeFactory({name: "current", id: 42});
+        let newScope = factories.scopeFactory({name: "New scope", id: 12});
+
+        server.use(
+            rest.get("http://localhost/rest/foo/", async (req, res, ctx) => {
+                return res(ctx.json([
+                    newScope,
+                    Object.assign({}, scope, {"name": "Copy"}), // Ensure distinct, but equal otherwise, object.
+                    factories.scopeFactory({id: 50})]))
+            })
+        )
+
+        let spy = jest.fn().mockResolvedValue({});
+
+        renderScopeControl({
+            scope: scope,
+            url: "/rest/foo/",
+            onChange: spy
+        });
+
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
+
+        const scopeSelector = screen.getByRole("combobox", {name: "Scope selection", busy: false})
+
+        await user.click(scopeSelector);
+
+        await user.click(await screen.findByText('Remove scope', {}));
+
+        expect(spy).toHaveBeenCalledWith(null)
+
+    })
 });

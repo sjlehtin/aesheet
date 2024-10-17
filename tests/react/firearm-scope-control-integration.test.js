@@ -40,14 +40,7 @@ describe('FirearmControl -- ScopeControl', () => {
             {scope: null}});
         await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
 
-        control.getByRole("button", {name: "Remove scope"})
         control.getByText("Add a scope")
-    });
-
-    it('shows a disabled remove button without a scope', () => {
-        const control = renderFirearm({weapon:
-            {scope: null}});
-        expect(control.getByRole("button", {name: "Remove scope"})).toBeDisabled()
     });
 
     it('integrates ScopeControl for changing scope', async () => {
@@ -84,6 +77,12 @@ describe('FirearmControl -- ScopeControl', () => {
 
     it('allows removing scope', async () => {
         const user = userEvent.setup()
+        server.use(
+            rest.get("http://localhost/rest/scopes/campaign/4/", (req, res, ctx) => {
+                return res(ctx.json([
+                ]))
+            })
+        )
         const spy = jest.fn().mockResolvedValue({})
         const control = renderFirearm({
             weapon:
@@ -93,7 +92,12 @@ describe('FirearmControl -- ScopeControl', () => {
                 },
             onChange: spy
         });
-        await user.click(control.getByRole("button", {name: "Remove scope"}))
+        await waitFor(() => (expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument()))
+        const scopeSelector = screen.getByRole("combobox", {name: "Scope selection"})
+        await user.click(scopeSelector);
+
+        await user.click(await screen.findByText('Remove scope', {}));
+
         expect(spy).toHaveBeenCalledWith({id: 19, scope: null})
     });
 

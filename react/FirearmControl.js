@@ -670,15 +670,6 @@ class FirearmControl extends React.Component {
                         <th style={inlineHeaderStyle} colSpan={6}>
                           Notes
                         </th>
-                        <td style={cellStyle} rowSpan={2} colSpan={3}>
-                          <Button
-                            onClick={(e) => this.handleScopeRemove()}
-                            disabled={this.props.weapon.scope === null}
-                            size="sm"
-                          >
-                            Remove scope
-                          </Button>
-                        </td>
                       </tr>
                       <tr title={"Modifiers counted into checks already"}>
                         <td style={cellStyle} colSpan={2}>
