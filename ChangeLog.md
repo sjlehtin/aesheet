@@ -1,3 +1,9 @@
+## [0.26.1] - 2024-10-29
+
+### Fixed
+
+* Fix issue with armor selection if sheet did not have it previously.
+
 ## [0.26.0] - 2024-10-17
 
 ### Added

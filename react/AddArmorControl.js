@@ -50,10 +50,10 @@ class AddArmorControl extends React.Component {
     let currentQuality
     if (this.props.current) {
       currentQuality = qualities.find((q) => {
-        return q.name === this.props.current.quality.name;
+        return q.name === this.props.current.quality?.name;
       })
       currentArmorTemplate = templateChoices.find((t) => {
-        return t.name === this.props.current.base.name
+        return t.name === this.props.current.base?.name
       })
     } else {
       currentQuality = normalQuality
