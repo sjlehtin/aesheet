@@ -1,3 +1,9 @@
+## [0.27.0] - 2024-12-10
+
+### Changed
+
+* Allow armor quality modifier to be a bonus on skill checks.
+
 ## [0.26.1] - 2024-10-29
 
 ### Fixed
