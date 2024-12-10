@@ -50,6 +50,8 @@ class SkillHandler {
   #edgeMods;
   #armorMods;
 
+  skillsToMod = ["stealth", "conceal", "climb", "swim"];
+
   constructor({
     character,
     weightCarried,
@@ -672,12 +674,17 @@ class SkillHandler {
     }
     // Quality can not raise the stat, it only counters penalties.
     // Outlined in the armor excel.
-    return fromArmor + getCounteredPenalty(fromArmor, fromQuality);
+
+    if (this.skillsToMod.indexOf(givenStat) >= 0) {
+      return fromArmor + fromQuality;
+    } else {
+      return fromArmor + getCounteredPenalty(fromArmor, fromQuality);
+    }
   }
 
   getSkillMod(skill) {
     const bd = new ValueBreakdown();
-    for (let mod of ["stealth", "conceal", "climb", "swim"]) {
+    for (let mod of this.skillsToMod) {
       if (skill[`affected_by_armor_mod_${mod}`]) {
         bd.addBreakdown(this.getArmorStatMod(mod));
       }
