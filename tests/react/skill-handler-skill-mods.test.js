@@ -33,9 +33,27 @@ describe('SkillHandler skill mods', function() {
 
     it('caps armor quality penalty counter', function () {
         const handler = factories.skillHandlerFactory({
+            skills: [{skill: {name: "Tail / Shadow", stat: "PSY"}, level: 0}],
+            character: {
+                cur_fit: 45, cur_ref: 45, cur_psy: 45
+            },
+            armor: {
+                base: {
+                    mod_psy: -5
+                },
+                quality: {
+                    mod_psy: 10
+                }
+            },
+        });
+        expect(handler.skillCheck("Tail / Shadow").value()).toEqual(45);
+    });
+
+    it('does not cap armor quality bonus to skills', function () {
+        const handler = factories.skillHandlerFactory({
             skills: [{skill: {name: "Climbing", stat: "MOV"}, level: 0}],
             character: {
-                cur_fit: 45, cur_ref: 45
+                cur_fit: 45, cur_ref: 45, cur_psy: 45
             },
             armor: {
                 base: {
@@ -46,7 +64,7 @@ describe('SkillHandler skill mods', function() {
                 }
             },
         });
-        expect(handler.skillCheck("Climbing").value()).toEqual(45);
+        expect(handler.skillCheck("Climbing").value()).toEqual(50);
     });
 
     it('counts armor penalties in to the stealth skill check', function () {
