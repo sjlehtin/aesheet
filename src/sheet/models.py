@@ -878,6 +878,20 @@ class Ammunition(ExportedModel, BaseDamager):
                   "Used to calculate recoil."
     )
 
+    weapon_class_modifier_multiplier = (
+        models.DecimalField(default=1.0,
+                            decimal_places=3,
+                            max_digits=5,
+                            help_text="Weapon class modifier multiplier from "
+                                      "ammo, for example from charged weapons."))
+
+    ammo_usage_multiplier = (
+        models.IntegerField(default=1,
+                            help_text="Firing the weapon with this ammo "
+                                      "will actually spend this amount of "
+                                      "ammunition.")
+    )
+
     @classmethod
     def dont_export(cls):
         return ["firearm", "sheetfirearm"]
@@ -1492,6 +1506,7 @@ class Armor(ExportedModel):
     description = models.TextField(blank=True)
     base = models.ForeignKey(ArmorTemplate, on_delete=models.CASCADE)
     quality = models.ForeignKey(ArmorQuality, on_delete=models.CASCADE)
+    # TODO: not really used
     special_qualities = models.ManyToManyField(
         ArmorSpecialQuality, blank=True
     )

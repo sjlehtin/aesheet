@@ -334,6 +334,8 @@ const ammunitionFactory = (props) => {
         "weight": "7.500",
         "velocity": 440,
         "tech_level": 4,
+        "weapon_class_modifier_multiplier": 1,
+        "ammo_usage_multiplier": 1,
         "calibre": {
             "name": "9Pb"
         }

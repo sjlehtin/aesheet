@@ -238,7 +238,8 @@ export default class FirearmModel extends WeaponModel {
         (parseFloat(this.#weapon.base.weight) + 6));
 
     let rof =
-      30 / (recoil + parseFloat(this.#weapon.base.weapon_class_modifier));
+      30 / (recoil + parseFloat(this.#weapon.base.weapon_class_modifier) *
+        parseFloat(this.#weapon.ammo.weapon_class_modifier_multiplier));
 
     const bd = new ValueBreakdown(rof, "firearm");
     this.applyUseTypeROAPenalty(bd, useType);

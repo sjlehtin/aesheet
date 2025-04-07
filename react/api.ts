@@ -145,6 +145,8 @@ export interface Ammunition {
   cartridge_weight?: string;
 
   velocity: number;
+
+  weapon_class_modifier_multiplier: string;
 }
 
 export interface Scope {
