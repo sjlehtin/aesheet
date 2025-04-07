@@ -15,7 +15,9 @@ class MagazineRow extends React.Component {
     }
 
     async handleShoot() {
-        await this.props.onChange({current: this.props.current - 1})
+        await this.props.onChange({
+          current: this.props.current - (this.props.ammoUsageMultiplier ?? 1),
+        });
     }
 
     async handleLoad() {

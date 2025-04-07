@@ -160,8 +160,8 @@ class AmmunitionAdmin(admin.ModelAdmin):
     search_fields = ('calibre__name', 'bullet_type')
     list_filter = ('tech_level', )
     save_as = True
-    list_display = ['calibre', 'type', 'bullet_type', 'weight', 'cartridge_weight', 'velocity', 'damage', 'num_dice', 'dice', 'extra_damage', 'leth', 'plus_leth']
-    list_editable = ['type', 'bullet_type', 'weight', 'cartridge_weight', 'velocity', 'num_dice', 'dice', 'extra_damage', 'leth', 'plus_leth']
+    list_display = ['calibre', 'type', 'bullet_type', 'weight', 'cartridge_weight', 'velocity', 'damage', 'num_dice', 'dice', 'extra_damage', 'leth', 'plus_leth', 'weapon_class_modifier_multiplier', 'ammo_usage_multiplier']
+    list_editable = ['type', 'bullet_type', 'weight', 'cartridge_weight', 'velocity', 'num_dice', 'dice', 'extra_damage', 'leth', 'plus_leth', 'weapon_class_modifier_multiplier', 'ammo_usage_multiplier']
 
     @admin.display
     def damage(self, obj):

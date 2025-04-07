@@ -36,6 +36,7 @@ class MagazineControl extends React.Component {
             for (const [ind, mag] of this.props.firearm.magazines.entries()) {
                 magazines.push(<MagazineRow key={ind} capacity={mag.capacity}
                                             current={mag.current}
+                                            ammoUsageMultiplier={this.props.firearm.ammo.ammo_usage_multiplier}
                                             currentMagazineWeight={util.magazineWeight(this.props.firearm, mag)}
                                             onChange={async (change) => {
                                                 await this.props.onChange(Object.assign({}, mag, change))}}

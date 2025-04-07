@@ -180,6 +180,14 @@ describe("FirearmModel", function () {
     expect(weapon.ccHits()).toEqual({single: 3, bursts: [3, 3]})
   });
 
+  it("takes ammo weapon class modifier multiplier into account", () => {
+    const weapon = createWeaponModel({
+      weapon: {ammo: { weapon_class_modifier_multiplier: 2 }},
+    });
+
+    expect(weapon.rof().value()).toBeCloseTo(1.82);
+  });
+
   it("gives different ROA for long guns and handguns", () => {
     const weapon = createWeaponModel({
       handler: {

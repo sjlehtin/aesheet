@@ -128,6 +128,26 @@ describe('MagazineControl', () => {
         expect(spy).toHaveBeenCalledWith({id: 2, capacity: 15, current: 2})
     })
 
+    it ("can spend more than one charge", async () => {
+        const user = userEvent.setup()
+
+        const spy = jest.fn().mockResolvedValue()
+
+        const mag = factories.magazineFactory({
+            id: 2, capacity: 15, current: 3
+        });
+        const control = renderMagazineControl({
+          firearm: {
+            ammo: { ammo_usage_multiplier: 2 },
+            magazines: [mag],
+          },
+          onChange: spy,
+        });
+        const button = screen.getByRole("button", {name: "Shoot"})
+        await user.click(button)
+        expect(spy).toHaveBeenCalledWith({id: 2, capacity: 15, current: 1})
+    })
+    
     it ("can load magazines", async () => {
         const user = userEvent.setup()
 

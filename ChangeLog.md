@@ -1,3 +1,9 @@
+## [0.28.0] - 2024-12
+
+### Added
+
+* Added `weapon_class_modifier_multiplier` and `ammo_usage_multiplier` to Ammunition. These allow easily creating, e.g., charged weapon loads.
+
 ## [0.27.0] - 2024-12-10
 
 ### Changed
