@@ -4,11 +4,8 @@ import StatBlock from 'StatBlock'
 
 import {
     render,
-    waitForElementToBeRemoved,
-    within,
-    fireEvent,
-    prettyDOM,
     waitFor,
+    waitForElementToBeRemoved,
     screen
 } from '@testing-library/react'
 import { rest } from 'msw'
@@ -87,4 +84,29 @@ describe('StatBlock -- RangedWeaponControl', () => {
 
         expect(await screen.findByText(/Stingy Puncher/)).toBeInTheDocument()
     })
+
+    it ("allows removing a weapon", async () => {
+        const user = userEvent.setup()
+
+        server.use(
+            rest.get("http://localhost/rest/sheets/1/sheetrangedweapons/", async (req, res, ctx) => {
+                return res(ctx.json(
+                    [factories.rangedWeaponFactory({id: 300, name: "Stingy Puncher"})]
+                ))
+            }),
+            rest.delete("http://localhost/rest/sheets/1/sheetrangedweapons/300/", async (req, res, ctx) => {
+                return res(ctx.status(204))
+            })
+        )
+
+        render(<StatBlock url="/rest/sheets/1/" />)
+        await waitForElementToBeRemoved(() => screen.queryAllByRole("status", {"busy": true}), {timeout: 5000})
+
+        expect(screen.getByText(/Stingy Puncher/)).toBeInTheDocument()
+
+        await user.click(screen.getByRole("button", {name: "Remove"}))
+
+        await waitFor(() => expect(screen.queryByText(/Stingy Puncher/)).not.toBeInTheDocument())
+    })
+
 });
