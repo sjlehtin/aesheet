@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import WeaponRow from 'WeaponRow';
 import StatBreakdown from "StatBreakdown";
 import * as util from './sheet-util';
 import {Button} from 'react-bootstrap';
@@ -41,6 +40,12 @@ class RangedWeaponRow extends React.Component {
         return `${damage.numDice}d${damage.dice}${
             damage.extraDamage ? util.renderInt(util.rounddown(damage.extraDamage)) : ''
         }/${util.rounddown(damage.leth)}${damage.plusLeth ? util.renderInt(damage.plusLeth) : ''}`;
+    }
+
+    handleRemove() {
+        if (this.props.onRemove) {
+            this.props.onRemove({id: this.props.weapon.id});
+        }
     }
 
     render() {
@@ -129,7 +134,6 @@ class RangedWeaponRow extends React.Component {
             </div>
         </div>;
     }
-
 }
 
 RangedWeaponRow.props = {
