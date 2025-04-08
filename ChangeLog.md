@@ -4,7 +4,7 @@
 
 * Fixed removing ranged weapons.
 
-## [0.28.0] - 2024-12
+## [0.28.0] - 2025-04-08
 
 ### Added
 
