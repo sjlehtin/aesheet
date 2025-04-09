@@ -3,6 +3,7 @@
 ### Changed
 
 * SP addition uses a modal dialog now, making accidental additions harder.
+* Ammunition `weapon_class_modifier_multiplier` affects autofire RPM.
 
 ### Fixed
 
