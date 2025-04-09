@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+* SP addition uses a modal dialog now, making accidental additions harder.
+
 ### Fixed
 
 * Fixed removing ranged weapons.

@@ -338,6 +338,8 @@ describe('StatBlock', function() {
 
         await user.click(screen.getByRole("button", {name: "Add SP"}))
 
+        await user.click(within(screen.getByTitle("Add SP")).getByRole("button", {name: "Add"}))
+
         await waitFor(() => expect(screen.getByLabelText("Total gained SP").textContent).toEqual("35"))
     });
 

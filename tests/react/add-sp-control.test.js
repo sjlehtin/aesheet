@@ -1,6 +1,10 @@
 import React from 'react';
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import {
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 
@@ -8,7 +12,7 @@ import AddSPControl from 'AddSPControl';
 
 describe('AddSPControl', function() {
     const renderAddSPControl = function(givenProps) {
-        var props = {
+        let props = {
             initialAgeSP: 6
         };
 
@@ -21,24 +25,32 @@ describe('AddSPControl', function() {
     it('notifies parent of addition', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
+        renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        const el = await control.findByRole("button")
-        await user.click(el);
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
+
+        await user.click(screen.getByRole("button", {name: "Add"}))
 
         expect(spy).toHaveBeenCalledWith(6);
     });
 
     it('validates input and notifies about invalid', async () => {
+        const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
+
         const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        expect(control.getByRole("button")).not.toBeDisabled()
-        const input = control.getByRole("textbox")
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
 
-        fireEvent.change(input, {target: {value: "a2b"}})
+        expect(screen.getByRole("button", {name: "Add"})).not.toBeDisabled()
 
-        await waitFor(() => { expect(control.getByRole("button")).toBeDisabled() } )
+        const input = screen.getByRole("textbox", {label: "add-sp-input"})
+
+        // fireEvent.change(input, {target: {value: "a2b"}})
+        await user.clear(input)
+        await user.type(input, "a2b")
+
+        expect(screen.getByRole("button", {name: "Add"})).toBeDisabled()
 
         expect(spy).not.toHaveBeenCalled()
     });
@@ -46,18 +58,24 @@ describe('AddSPControl', function() {
     it('validates input and accepts valid', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        expect(control.getByRole("button")).not.toBeDisabled()
+        renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        const input = control.getByRole("textbox")
-        fireEvent.change(input, {target: {value: 8}})
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
 
-        const button = control.getByRole("button")
+        expect(screen.getByRole("button", {name: "Add"})).not.toBeDisabled()
+
+        const input = screen.getByRole("textbox")
+        await user.clear(input)
+        await user.type(input, "8")
+
+        const button = screen.getByRole("button", {name: "Add"})
         expect(button).not.toBeDisabled()
 
         await user.click(button)
         expect(spy).toHaveBeenCalledWith(8)
+
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
     });
 
     it('validates input and accepts negative', async ()  => {
@@ -65,30 +83,41 @@ describe('AddSPControl', function() {
         const spy = jest.fn().mockResolvedValue({})
         const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        expect(control.getByRole("button")).not.toBeDisabled()
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
 
-        const input = control.getByRole("textbox")
-        fireEvent.change(input, {target: {value: "-3"}})
+        expect(control.getByRole("button", {name: "Add"})).not.toBeDisabled()
 
-        const button = control.getByRole("button")
+        const input = screen.getByRole("textbox")
+
+        await user.clear(input)
+        await user.type(input, "-3")
+
+        const button = control.getByRole("button", {name: "Add"})
         expect(button).not.toBeDisabled()
-
         await user.click(button)
+
         expect(spy).toHaveBeenCalledWith(-3)
+
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
     });
 
     it('submits on Enter', async () => {
         const user = userEvent.setup()
         const spy = jest.fn().mockResolvedValue({})
-        const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        const input = control.getByRole("textbox")
-        fireEvent.change(input, {target: {value: "-3"}})
+        renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        await user.click(input)
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
+
+        const input = screen.getByRole("textbox")
+
+        await user.clear(input)
+        await user.type(input, "-3")
         await user.keyboard('[Enter]')
 
         await waitFor(() => { expect(spy).toHaveBeenCalledWith(-3) } )
+
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
     });
 
     it('returns to normal ageSP after submit', async () => {
@@ -96,17 +125,46 @@ describe('AddSPControl', function() {
         const spy = jest.fn().mockResolvedValue({})
         const control = renderAddSPControl({onAdd: spy, initialAgeSP: 6});
 
-        const input = control.getByRole("textbox")
-        fireEvent.change(input, {target: {value: "-3"}})
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
 
-        const button = control.getByRole("button")
+        const input = screen.getByRole("textbox")
+
+        await user.clear(input)
+        await user.type(input, "-3")
+
+        const button = screen.getByRole("button", {name: "Add"})
         expect(button).not.toBeDisabled()
 
         await user.click(button)
         expect(spy).toHaveBeenCalledWith(-3)
 
+        await user.click(screen.getByRole("button", {name: "Add SP"}));
+
         await waitFor(() => expect(control.getByRole("textbox")).toHaveValue("6"))
     });
+
+    it('allows the addition to be cancelled', async () => {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderAddSPControl({onAdd: spy, initialAgeSP: 6});
+
+        await user.click(screen.getByRole("button", {name: "Add SP"}))
+        expect(spy).not.toHaveBeenCalled()
+
+        const input = screen.getByRole("textbox")
+
+        await user.clear(input)
+        await user.type(input, "-3")
+
+        await user.keyboard("[Escape]")
+
+        expect(spy).not.toHaveBeenCalled()
+
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+
+        await user.click(screen.getByRole("button", {name: "Add SP"}))
+        await expect(screen.getByRole("textbox")).toHaveValue("6")
+    })
 
     xit("should toast the user about the added sp", test.todo)
 });
