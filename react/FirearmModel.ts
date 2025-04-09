@@ -238,8 +238,10 @@ export default class FirearmModel extends WeaponModel {
         (parseFloat(this.#weapon.base.weight) + 6));
 
     let rof =
-      30 / (recoil + parseFloat(this.#weapon.base.weapon_class_modifier) *
-        parseFloat(this.#weapon.ammo.weapon_class_modifier_multiplier));
+      30 /
+      (recoil +
+        parseFloat(this.#weapon.base.weapon_class_modifier) *
+          parseFloat(this.#weapon.ammo.weapon_class_modifier_multiplier));
 
     const bd = new ValueBreakdown(rof, "firearm");
     this.applyUseTypeROAPenalty(bd, useType);
@@ -645,9 +647,9 @@ export default class FirearmModel extends WeaponModel {
     return checks;
   }
 
-  private maxBurstHits() {
+  maxBurstHits() {
     let maxHits = Math.min(
-      util.rounddown((this.#weapon.base.autofire_rpm ?? 0) / 120),
+      util.rounddown((this.maxAutofireRounds() ?? 0) / 8),
       5,
     );
 
@@ -680,7 +682,7 @@ export default class FirearmModel extends WeaponModel {
   }
 
   burstChecks(actions: number[], useType: UseType) {
-    if (!this.#weapon.base.autofire_rpm) {
+    if (!this.hasBurst()) {
       /* No burst fire with this weapon. */
       return null;
     }
@@ -766,11 +768,42 @@ export default class FirearmModel extends WeaponModel {
   }
 
   burstInitiatives(actions: number[]) {
-    if (!this.#weapon.base.autofire_rpm) {
+    if (!this.hasBurst()) {
       /* No burst fire with this weapon. */
       return null;
     }
     return this.initiatives(this.mapBurstActions(actions), {});
+  }
+
+  autofireRPM() {
+    if (!this.#weapon.base.autofire_rpm) {
+      return null;
+    }
+    return Math.round(
+      this.#weapon.base.autofire_rpm /
+        parseFloat(this.#weapon.ammo.weapon_class_modifier_multiplier),
+    );
+  }
+
+  maxAutofireRounds() {
+    const rpm = this.autofireRPM() ?? 0;
+    if (rpm < 300) {
+      return null;
+    }
+    return Math.round(rpm / 15);
+  }
+
+  hasBurst() {
+    return (
+      this.maxAutofireRounds() !== null && !this.#weapon.base.autofire_only
+    );
+  }
+
+  hasSweep() {
+    return (
+      this.maxAutofireRounds() !== null &&
+      !this.#weapon.base.sweep_fire_disabled
+    );
   }
 
   weaponDamage({

@@ -123,6 +123,7 @@ export interface BaseFirearm extends GenericArmament {
   autofire_class: AutoFireClass;
   restricted_burst_rounds: number;
   autofire_only: boolean;
+  sweep_fire_disabled: boolean;
 
   // Both ROF and ROA (for firearms in CC) are derived attributes from other firearm characteristics.
   stock: string;
