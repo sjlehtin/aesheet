@@ -1,9 +1,9 @@
 import React from 'react';
-import StatBreakdown from "../react/StatBreakdown";
+import StatBreakdown from "StatBreakdown";
 
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import ValueBreakdown from "../react/ValueBreakdown";
+import ValueBreakdown from "ValueBreakdown";
 
 describe('StatBreakdown', function() {
 
