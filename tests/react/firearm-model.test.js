@@ -188,6 +188,42 @@ describe("FirearmModel", function () {
     expect(weapon.rof().value()).toBeCloseTo(1.82);
   });
 
+  it("calculates max rounds from autofire RPM", () => {
+    const weapon = createWeaponModel({
+      weapon: { base: { autofire_rpm: 600 } },
+    });
+
+    expect(weapon.hasSweep()).toBe(true);
+    expect(weapon.autofireRPM()).toEqual(600);
+    expect(weapon.maxAutofireRounds()).toEqual(40);
+    expect(weapon.maxBurstHits()).toEqual(5)
+  });
+
+  it("takes ammo weapon class modifier multiplier into account for burst fire", () => {
+    const weapon = createWeaponModel({
+      weapon: {
+        base: { autofire_rpm: 600 },
+        ammo: { weapon_class_modifier_multiplier: 2 },
+      },
+    });
+
+    expect(weapon.hasSweep()).toBe(true);
+    expect(weapon.autofireRPM()).toEqual(300);
+    expect(weapon.maxAutofireRounds()).toEqual(20);
+    expect(weapon.maxBurstHits()).toEqual(2)
+
+    const weapon2 = createWeaponModel({
+      weapon: {
+        base: { autofire_rpm: 600 },
+        ammo: { weapon_class_modifier_multiplier: 3 },
+      },
+    });
+    expect(weapon2.hasSweep()).toBe(false);
+    expect(weapon2.hasBurst()).toBe(false);
+    expect(weapon2.maxAutofireRounds()).toEqual(null);
+    expect(weapon2.maxBurstHits()).toEqual(0)
+  });
+
   it("gives different ROA for long guns and handguns", () => {
     const weapon = createWeaponModel({
       handler: {

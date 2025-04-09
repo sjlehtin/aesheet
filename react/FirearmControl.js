@@ -67,7 +67,7 @@ class FirearmControl extends React.Component {
   }
 
   renderBurstTable() {
-    if (!this.props.weapon.base.autofire_rpm) {
+    if (!this.firearm.hasBurst()) {
       return "";
     }
     const actions = [0.5, 1, 2, 3, 4];
@@ -161,19 +161,12 @@ class FirearmControl extends React.Component {
     );
   }
 
-  hasSweep() {
-    return (
-      this.props.weapon.base.autofire_rpm &&
-      !this.props.weapon.base.sweep_fire_disabled
-    );
-  }
-
   sweepAvailable() {
-    return this.hasSweep() && !this.props.inCloseCombat;
+    return this.firearm.hasSweep() && !this.props.inCloseCombat;
   }
 
   renderSweepTable() {
-    if (!this.hasSweep()) {
+    if (!this.firearm.hasSweep()) {
       return "";
     }
 
@@ -227,7 +220,7 @@ class FirearmControl extends React.Component {
         <tr key={sweep}>
           <td>{sweep}</td>
           <td>
-            {util.roundup(this.props.weapon.base.autofire_rpm / (6 * sweep))}
+            {util.roundup(this.firearm.maxAutofireRounds() / sweep)}
           </td>
           {checkCells}
         </tr>,
@@ -247,8 +240,8 @@ class FirearmControl extends React.Component {
           <thead>
             <tr>
               <th colSpan={4}>
-                Sweep fire {this.props.weapon.base.autofire_rpm}
-                {this.props.weapon.base.autofire_class}
+                Sweep fire {this.firearm.autofireRPM()}
+                {this.props.weapon.base.autofire_class} (RPT {this.firearm.maxAutofireRounds()})
               </th>
             </tr>
             <tr>
@@ -301,10 +294,6 @@ class FirearmControl extends React.Component {
         </table>
       </div>
     );
-  }
-
-  async handleScopeRemove() {
-    await this.handleScopeChanged(null);
   }
 
   handleScopeChanged(value) {
