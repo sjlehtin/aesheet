@@ -1,7 +1,7 @@
 import StatBreakdown from "./StatBreakdown";
-import React from "react";
+import ValueBreakdown from "./ValueBreakdown";
 
-export function BaseCheck({baseCheck}) {
+export function BaseCheck({baseCheck} : {baseCheck: ValueBreakdown}) {
     const baseCheckStyle = {
         display: 'inline-block',
         fontSize: "80%",
