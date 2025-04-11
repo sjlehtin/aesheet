@@ -1,8 +1,23 @@
-import React from "react";
-
 import { Button, FormCheck } from "react-bootstrap";
+import { CharacterEdge } from "./api";
+import { CSSProperties } from "react";
 
-export function EdgeRow({ edge, onRemove, onChange, style }) {
+interface PartialCharacterEdge {
+  id: number;
+  ignore_cost?: boolean;
+}
+
+export function EdgeRow({
+  edge,
+  onRemove,
+  onChange,
+  style,
+}: {
+  edge: CharacterEdge;
+  onRemove: (el: PartialCharacterEdge) => Promise<void>;
+  onChange: (el: PartialCharacterEdge) => Promise<void>;
+  style: CSSProperties;
+}) {
   let restPayload = { id: edge.id };
 
   return (
@@ -13,7 +28,7 @@ export function EdgeRow({ edge, onRemove, onChange, style }) {
       <td>
         <span>
           {edge.edge.cost}
-          {edge.ignore_cost === true ? "*" : ""}
+          {edge.ignore_cost ? "*" : ""}
         </span>
       </td>
       <td>
@@ -21,8 +36,8 @@ export function EdgeRow({ edge, onRemove, onChange, style }) {
           <FormCheck
             aria-label={"Ignore cost"}
             tabIndex={0}
-            onChange={(e) => {
-              onChange(
+            onChange={() => {
+              return onChange(
                 Object.assign(restPayload, {
                   ignore_cost: !edge.ignore_cost,
                 }),
@@ -30,7 +45,6 @@ export function EdgeRow({ edge, onRemove, onChange, style }) {
             }}
             checked={edge.ignore_cost}
             type={"checkbox"}
-            value={edge.ignore_cost}
           />
         </span>
       </td>
@@ -38,8 +52,8 @@ export function EdgeRow({ edge, onRemove, onChange, style }) {
         <Button
           style={{ float: "right", paddingRight: 5 }}
           size={"sm"}
-          onClick={(e) => {
-            onRemove(restPayload);
+          onClick={async () => {
+            return onRemove(restPayload);
           }}
         >
           Remove
