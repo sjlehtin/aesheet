@@ -346,19 +346,27 @@ class ArmorControl extends React.Component {
                 </tr>
               </thead>
               <tbody>
-              {
-                [["fit", "FIT"], ["ref", "REF"], "surprise", "climb", "stealth", "conceal", ["suspendedWeight", "Suspension"]].map((item) => {
-                  let val, descr
-                  if (typeof(item) === "string") {
-                    val = item
-                    descr = val[0].toUpperCase() + val.slice(1)
-                  } else {
-                    val = item[0]
-                    descr = item[1]
-                  }
-                  return <tr key={`mod-${val}`}><td>{descr}</td><td style={{paddingLeft: '1em'}}><StatBreakdown value={this.props.handler.getArmorStatMod(val)} label={`Stat mod for ${val}`} /></td></tr>
-                })
-              }
+                {[
+                  ["fit", "FIT"],
+                  ["ref", "REF"],
+                  ["surprise", "Surprise"],
+                  ["climb", "Climb"],
+                  ["stealth", "Stealth"],
+                  ["conceal", "Conceal"],
+                  ["suspendedWeight", "Suspension"],
+                ].map(([val, descr]) => {
+                  return (
+                    <tr key={`mod-${val}`}>
+                      <td>{descr}</td>
+                      <td style={{ paddingLeft: "1em" }}>
+                        <StatBreakdown
+                          value={this.props.handler.getArmorStatMod(val)}
+                          label={`Stat mod for ${val}`}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </Col>
