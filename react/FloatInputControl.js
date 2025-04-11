@@ -2,7 +2,14 @@ import React, { useState } from "react";
 import { FloatingLabel, Form } from "react-bootstrap";
 import { isFloat } from "./sheet-util";
 
-export default function FloatInputControl({ label, placeHolder, onChange, initialValue, defaultValue, ...extraProps }) {
+export default function FloatInputControl({
+  label,
+  placeHolder,
+  onChange,
+  initialValue,
+  defaultValue,
+  ...extraProps
+}) {
   if (isFloat(initialValue)) {
     if (Number.isInteger(initialValue)) {
       initialValue = initialValue.toFixed(1);
@@ -15,7 +22,11 @@ export default function FloatInputControl({ label, placeHolder, onChange, initia
 
   return (
     <>
-      <FloatingLabel controlId={`${label.toLowerCase()}-input`} label={label} className="mb-3">
+      <FloatingLabel
+        controlId={`${label.toLowerCase()}-input`}
+        label={label}
+        className="mb-3"
+      >
         <Form.Control
           onChange={(e) => {
             let isValid, floatValue;
