@@ -1,16 +1,22 @@
-import React from "react";
-import {Col,Row, Container, Form, Button} from 'react-bootstrap'
+import {Col, Container, Form, Button} from 'react-bootstrap'
 import useSwr from 'swr'
 import Loading from "./Loading";
 import {getData} from './sheet-rest'
 import {useState} from 'react'
+import {Sheet} from './api'
 
-
-export function AddSheetControl({campaign, sheets, addSheet}) {
+export function AddSheetControl({campaign, sheets, addSheet}: {campaign: number, sheets: [number], addSheet: (sheetId: number) => Promise<void>}) {
     const [selected, setSelected] = useState('')
 
-    const { data, error, isLoading } =
-        useSwr("/rest/sheets/", getData)
+    const {
+      data,
+      error,
+      isLoading,
+    }: {
+      data: [Sheet];
+      error: boolean|undefined;
+      isLoading: boolean|undefined;
+    } = useSwr("/rest/sheets/", getData);
 
     if (error) return <div>Got error loading sheet list</div>
     if (isLoading) return <Loading>Sheet list</Loading>
@@ -30,7 +36,7 @@ export function AddSheetControl({campaign, sheets, addSheet}) {
         <Col>
         <div><a href={"/sheets/add_sheet/"}>Create new sheet</a> <em>(Takes you out of this page)</em></div>
         {rows}
-            <Button disabled={!selected} onClick={async () => { if (!!selected) await addSheet(selected)}}>Add</Button>
+            <Button disabled={!selected} onClick={async () => { if (!!selected) await addSheet(parseInt(selected))}}>Add</Button>
         </Col>
     </Container>
 }

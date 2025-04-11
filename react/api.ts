@@ -184,3 +184,12 @@ export interface WoundChange {
   location?: string;
   damage_type?: string;
 }
+
+export interface Sheet {
+  id: number;
+  description: string;
+  owner: string;
+  campaign: number;
+  character_name: string;
+  character_total_xp: number;
+}
