@@ -43,7 +43,7 @@ export function isFloat(value: any) {
   if (typeof value === "number") {
     return true;
   }
-  if (isNaN(value)) {
+  if (Number.isNaN(parseFloat(value))) {
     return false;
   }
   if (isInt(value)) {
