@@ -18,7 +18,6 @@ export default function FloatInputControl({
     }
   }
   const [value, setValue] = useState(initialValue ? initialValue : "");
-  const [isValid, setIsValid] = useState(true);
 
   return (
     <>
@@ -37,13 +36,12 @@ export default function FloatInputControl({
               isValid = isFloat(e.target.value);
               floatValue = parseFloat(e.target.value);
             }
-            setIsValid(isValid);
             if (isValid) {
               onChange(floatValue);
             }
             setValue(e.target.value);
           }}
-          isValid={isValid}
+          isValid={value === "" || isFloat(value)}
           value={value}
           type={"text"}
           placeholder={placeHolder}
