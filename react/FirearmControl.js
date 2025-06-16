@@ -514,7 +514,7 @@ class FirearmControl extends React.Component {
           }
         }
       >
-        <p>
+        <div>
           On a successful CC check (ROF:{" "}
           <StatBreakdown
             label={"ROF"}
@@ -522,7 +522,7 @@ class FirearmControl extends React.Component {
             style={{ display: "inline-block" }}
           />
           ):
-        </p>
+        </div>
         <ul>
           {singleDescription ? (
             <li style={listItemStyle}>{singleDescription}</li>

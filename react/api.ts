@@ -5,11 +5,19 @@ export interface Skill {
 export interface Edge {
   id: number;
   name: string;
+  description: string;
 }
 
 export interface EdgeLevel {
   edge: Edge;
   level: number;
+  cost: number;
+}
+
+export interface CharacterEdge {
+  id: number;
+  edge: EdgeLevel;
+  ignore_cost: boolean;
 }
 
 export interface GenericBaseItem {
@@ -32,7 +40,7 @@ export interface GenericItem {
 export interface GenericArmament extends GenericBaseItem {
   draw_initiative: number;
   durability: number;
-  dp: number
+  dp: number;
 
   base_skill: Skill;
   required_skills: Skill[];
@@ -46,7 +54,7 @@ export interface PhysicalWeaponTemplate extends GenericArmament {
   leth: number;
   plus_leth: number;
 
-  bypass: number
+  bypass: number;
 }
 
 /* This represents a generic weapon attached to the sheet, not specifically CC.*/
@@ -183,4 +191,13 @@ export interface WoundChange {
   healed?: number;
   location?: string;
   damage_type?: string;
+}
+
+export interface Sheet {
+  id: number;
+  description: string;
+  owner: string;
+  campaign: number;
+  character_name: string;
+  character_total_xp: number;
 }
