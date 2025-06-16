@@ -218,6 +218,8 @@ const edgeLevelFactory = function (overrideFields) {
     "mov": 0,
     "dex": 0,
     "imm": 0,
+        "stamina": 0,
+        "mana": 0,
     "saves_vs_fire": 0,
     "saves_vs_cold": 0,
     "saves_vs_lightning": 0,

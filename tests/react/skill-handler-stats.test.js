@@ -40,12 +40,14 @@ describe('SkillHandler stats', function () {
 
     it('calculates hard mods', function () {
         var handler = factories.skillHandlerFactory({
-            character: {cur_ref: 50, cur_int: 50},
-            edges: [factories.edgeLevelFactory({dex: 10})]
+            character: {cur_ref: 50, cur_int: 50, cur_psy: 50, cur_wil: 50},
+            edges: [factories.edgeLevelFactory({dex: 10, stamina: 7, mana: 11})]
         });
 
         expect(handler.getBaseStats().dex).toEqual(60);
         expect(handler.getEffStats().dex.value()).toEqual(60);
+        expect(handler.getBaseStats().stamina).toEqual(32);
+        expect(handler.getBaseStats().mana).toEqual(36);
     });
 
     it('accounts for base mods', function () {

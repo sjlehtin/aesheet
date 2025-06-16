@@ -228,6 +228,9 @@ class Character(PrivateMixin, models.Model):
     base_mod_dex = models.IntegerField(default=0)
     base_mod_imm = models.IntegerField(default=0)
 
+    base_mod_stamina = models.IntegerField(default=0)
+    base_mod_mana = models.IntegerField(default=0)
+
     free_edges = models.IntegerField(default=2)
 
     edges = models.ManyToManyField(
@@ -241,7 +244,7 @@ class Character(PrivateMixin, models.Model):
         ordering = ["campaign", "name"]
 
     BASE_STATS = ["fit", "ref", "lrn", "int", "psy", "wil", "cha", "pos"]
-    DERIVED_STATS = ["mov", "dex", "imm"]
+    DERIVED_STATS = ["mov", "dex", "imm", "stamina", "mana"]
     ALL_STATS = BASE_STATS + DERIVED_STATS
 
     def __str__(self):
@@ -470,6 +473,9 @@ class StatModifier(models.Model):
     mov = models.IntegerField(default=0)
     dex = models.IntegerField(default=0)
     imm = models.IntegerField(default=0)
+
+    stamina = models.IntegerField(default=0)
+    mana = models.IntegerField(default=0)
 
     # TODO: not actually used yet.
     saves_vs_fire = models.IntegerField(default=0)

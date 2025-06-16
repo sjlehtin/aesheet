@@ -733,6 +733,7 @@ class SkillHandler {
 
       this._baseStats.stamina =
         util.roundup((this._baseStats.ref + this._baseStats.wil) / 4) +
+        this.getEdgeModifier("stamina") +
         this.character.bought_stamina;
 
       this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
@@ -741,6 +742,7 @@ class SkillHandler {
 
       this._baseStats.mana =
         util.roundup((this._baseStats.psy + this._baseStats.wil) / 4) +
+        this.getEdgeModifier("mana") +
         this.character.bought_mana;
     }
 
@@ -954,7 +956,7 @@ class SkillHandler {
       this._effStatsV2.imm = new ValueBreakdown();
 
       const baseImm = util.roundup(
-        (this._baseStats.fit + this._baseStats.psy) / 2,
+        (this._effStatsV2.fit.value() + this._effStatsV2.psy.value()) / 2,
       );
       this._effStatsV2.imm.add(baseImm, "(FIT + PSY) / 2");
       addStatMods("imm");
@@ -1141,6 +1143,8 @@ SkillHandler.allStatNames = SkillHandler.baseStatNames.concat([
   "mov",
   "dex",
   "imm",
+  "stamina",
+  "mana",
   "vision",
   "hear",
   "smell",

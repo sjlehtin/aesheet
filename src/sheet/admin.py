@@ -214,6 +214,7 @@ class EdgeLevelAdmin(admin.ModelAdmin):
                     'extra_skill_points', 'armor_l', 'armor_dr',
                     'cc_skill_levels', 'fit', 'ref', 'lrn', 'int',
                     'psy', 'wil', 'cha', 'pos', 'mov', 'dex', 'imm',
+                    'stamina', 'mana',
                     'run_multiplier', 'swim_multiplier', 'climb_multiplier',
                     'fly_multiplier', 'vision', 'hear', 'smell', 'surprise',
                     'toughness',
