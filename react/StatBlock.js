@@ -413,11 +413,6 @@ class StatBlock extends React.Component {
         this.setState({loading: false})
     }
 
-    mana(baseStats) {
-        return util.roundup((baseStats.psy + baseStats.wil)/ 4)
-            + this.state.char.bought_mana;
-    }
-
     bodyHealing(skillHandler) {
         let level = skillHandler.edgeLevel("Fast Healing");
         if (level > 0) {
@@ -893,7 +888,7 @@ class StatBlock extends React.Component {
             <td style={baseStyle}
                 aria-label={"Current mana"}>{skillHandler.getCurrentMana()}</td>
             <td style={baseStyle}
-                aria-label={"Maximum mana"}>{this.mana(baseStats)}</td>
+                aria-label={"Maximum mana"}>{baseStats.mana}</td>
             <td aria-label={"Mana recovery"}
                 style={recoveryStyle}>{manaRecovery(effStats, skillHandler)
             }</td>

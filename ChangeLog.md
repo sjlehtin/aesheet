@@ -1,9 +1,14 @@
 ## [Unreleased]
 
+### Added
+
+* Stamina and mana can be part of edge levels and other stats mods.
+
 ### Changed
 
 * SP addition uses a modal dialog now, making accidental additions harder.
 * Ammunition `weapon_class_modifier_multiplier` affects autofire RPM.
+* Effective IMM is calculated from effective FIT and PSY.
 
 ### Fixed
 
