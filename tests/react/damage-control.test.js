@@ -135,6 +135,27 @@ describe('DamageControl', function() {
         expect(el.value).toEqual("")
     });
 
+    it("allows healing stamina damage", async function () {
+        const user = userEvent.setup()
+        const spy = jest.fn().mockResolvedValue({})
+        renderDamageControl({
+            onMod: spy,
+            character: {cur_ref:40, cur_wil: 40},
+            sheet: factories.sheetFactory({stamina_damage: 12})
+        })
+
+        const el = await screen.findByRole("textbox", {name: "Stamina damage"})
+        expect(el.value).toEqual("")
+
+        await user.type(el, "6")
+        await user.click(screen.getByRole("button", {name: "Heal"}))
+        expect(spy).toHaveBeenCalledWith('stamina_damage', 12, 6);
+
+        // Stamina damage input should be empty after clear
+        expect(el.value).toEqual("")
+    });
+
+
     it("allows wounds to be passed", async () => {
         renderDamageControl({
             wounds: [{damage: 5, location: "H",

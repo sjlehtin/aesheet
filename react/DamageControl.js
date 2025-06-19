@@ -74,12 +74,15 @@ class DamageControl extends React.Component {
         this.setState({currentStaminaDamage: event.target.value});
     }
 
-    async handleClear(event) {
+    async handleHeal(event) {
+        const amount = this.state.currentStaminaDamage ?
+            parseInt(this.state.currentStaminaDamage) :
+            this.props.sheet.stamina_damage;
         this.setState({currentStaminaDamage: "",
             isBusy: true});
         await this.props.onMod('stamina_damage',
             this.props.sheet.stamina_damage,
-            0)
+            this.props.sheet.stamina_damage - amount)
         this.setState({isBusy: false});
     }
 
@@ -199,8 +202,8 @@ class DamageControl extends React.Component {
                                 <Button style={{marginLeft: ".5em"}}
                                         size="sm"
                                         disabled={this.state.isBusy || parseInt(this.props.sheet.stamina_damage) === 0}
-                                        id={"clear-stamina-damage"}
-                                        onClick={async (e) => await this.handleClear()}>Heal{loading}</Button>
+                                        id={"heal-stamina-damage"}
+                                        onClick={async (e) => await this.handleHeal()}>Heal{loading}</Button>
                             </Col>
                         </Row>
                         <WoundPenaltyBox handler={this.props.handler} />
