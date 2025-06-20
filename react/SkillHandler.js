@@ -884,8 +884,7 @@ class SkillHandler {
 
   getEffStats() {
     function calculateEncumbrancePenalty(weightCarried, fit) {
-      let encumbrancePenalty = util.roundup((-10 * weightCarried) / fit);
-      return encumbrancePenalty;
+      return util.roundup((-10 * weightCarried) / fit);
     }
 
     if (!this._effStatsV2) {
