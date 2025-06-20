@@ -37,6 +37,121 @@ export interface GenericItem {
   quality: GenericQuality;
 }
 
+export enum ArmorLocation {
+  Head = "h",
+  Torso = "t",
+  LeftLeg = "ll",
+  RightLeg = "rl",
+  LeftArm = "la",
+  RightArm = "ra"
+}
+
+export enum ArmorStatType {
+  Piercing = "p",
+  Slashing = "s",
+  Bludgeoning = "b",
+  Burn = "r",
+  DamageReduction = "dr",
+  DamagePoints = "dp",
+  ProtectionLevel = "pl"
+}
+
+export interface ArmorModifier {
+  name: string;
+
+  armor_h_p: string;
+  armor_h_s: string;
+  armor_h_b: string;
+  armor_h_r: string;
+  armor_h_dr: string;
+  armor_h_dp: string;
+  armor_h_pl: string;
+
+  // Torso armor values
+  armor_t_p: string;
+  armor_t_s: string;
+  armor_t_b: string;
+  armor_t_r: string;
+  armor_t_dr: string;
+  armor_t_dp: string;
+  armor_t_pl: string;
+
+  // Left leg armor values
+  armor_ll_p: string;
+  armor_ll_s: string;
+  armor_ll_b: string;
+  armor_ll_r: string;
+  armor_ll_dr: string;
+  armor_ll_dp: string;
+  armor_ll_pl: string;
+
+  // Left arm armor values
+  armor_la_p: string;
+  armor_la_s: string;
+  armor_la_b: string;
+  armor_la_r: string;
+  armor_la_dr: string;
+  armor_la_dp: string;
+  armor_la_pl: string;
+
+  // Right leg armor values
+  armor_rl_p: string;
+  armor_rl_s: string;
+  armor_rl_b: string;
+  armor_rl_r: string;
+  armor_rl_dr: string;
+  armor_rl_dp: string;
+  armor_rl_pl: string;
+
+  // Right arm armor values
+  armor_ra_p: string;
+  armor_ra_s: string;
+  armor_ra_b: string;
+  armor_ra_r: string;
+  armor_ra_dr: string;
+  armor_ra_dp: string;
+  armor_ra_pl: string;
+}
+
+export interface ArmorTemplate extends GenericBaseItem, ArmorModifier {
+
+  is_helm: boolean;
+  is_powered: boolean;
+}
+
+export interface ArmorSpecialQuality extends ArmorModifier {
+}
+
+export interface MiscellaneousItem extends GenericBaseItem {
+  name: string;
+  armor_qualities: ArmorSpecialQuality[];
+}
+
+export interface SheetMiscellaneousItem {
+  item: MiscellaneousItem;
+}
+
+export interface ArmorQuality extends GenericQuality{
+  name: string;
+
+  dp_multiplier: string;
+
+  armor_p: string;  // Piercing
+  armor_s: string;  // Slashing
+  armor_b: string;  // Bludgeoning
+  armor_r: string;  // Burn
+  armor_dr: string; // Damage Reduction
+
+  mod_encumbrance_class: number;
+}
+
+export interface Armor {
+  id: number;
+  name: string;
+  base: ArmorTemplate;
+  quality: ArmorQuality;
+}
+
 export interface GenericArmament extends GenericBaseItem {
   draw_initiative: number;
   durability: number;
