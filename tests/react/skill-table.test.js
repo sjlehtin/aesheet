@@ -154,30 +154,6 @@ describe('SkillTable', function() {
         expect(spy).toHaveBeenCalledWith({id: 42});
     });
 
-    it("calls the passed onCharacterSkillAdd handler", async function () {
-        const user = userEvent.setup()
-
-        let spy = jasmine.createSpy("callback");
-        const gardening = factories.skillFactory({name: "Gardening"});
-        const table = render(getSkillTable({
-            onCharacterSkillAdd: spy,
-            allSkills: [gardening,]
-        }));
-        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
-        await user.clear(skillInput)
-        await user.type(skillInput, "Gardening")
-        await user.click(screen.getByText("Gardening"))
-
-        const levelInput = within(screen.getByLabelText("Add skill level")).getByRole("combobox")
-        await user.clear(levelInput)
-        await user.type(levelInput, "3")
-
-        const addButton = screen.getByRole("button", {name: "Add skill"})
-        expect(addButton).not.toBeDisabled()
-        await user.click(addButton)
-        expect(spy).toHaveBeenCalledWith({skill: gardening.id, level: 3});
-    });
-
     it("can calculate sp costs", function () {
         const skill = factories.skillFactory({name: "Gardening", skill_cost_0: 1,
         skill_cost_1: 1, skill_cost_2: 2, skill_cost_3: 3});

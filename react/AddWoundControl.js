@@ -21,7 +21,7 @@ class AddWoundControl extends React.Component {
     }
 
     findEffect(wound) {
-        const threshold = this.props.handler.getDamageThreshold(wound.location)
+        const threshold = this.props.handler.getDamageThreshold(wound.location.toLowerCase())
 
         const toughness = this.props.handler?.getEdgeModifier("toughness") ?? 0;
         const effDamage = wound.damage - toughness;

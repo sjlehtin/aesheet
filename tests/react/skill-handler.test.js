@@ -62,6 +62,12 @@ describe('SkillHandler', function() {
 
         const newList = handler.getSkillList();
         expect(newList[0].skill__name).toEqual("Agriculture");
+
+        newList.splice(0, 1);
+
+        // Modifying the returned list should not modify the original.
+        const newList2 = handler.getSkillList();
+        expect(newList2[0].skill__name).toEqual("Agriculture");
     });
 
     it("finds missing skills while mangling from all requires", function () {

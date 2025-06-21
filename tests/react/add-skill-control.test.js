@@ -4,7 +4,6 @@ import { screen, render, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import AddSkillControl from 'AddSkillControl';
-import SkillTable from 'SkillTable';
 import * as factories from './factories';
 
 

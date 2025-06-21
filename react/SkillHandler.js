@@ -65,17 +65,23 @@ class SkillHandler {
     wounds = [],
     gravity = 1.0,
   }) {
-    this.props = {
-      // TODO: fix skilltable
-      character: character,
-      characterSkills: characterSkills,
-      allSkills: allSkills,
-    };
     this.character = character;
     this.staminaDamage = staminaDamage;
     this.weightCarried = weightCarried;
     this.edges = edges;
-    this.characterSkills = characterSkills;
+    // Store internal state in a new copy of the objects to avoid reusing it on re-render.
+    this.characterSkills = characterSkills.map((cs) => {
+      return {
+        ...cs,
+        _children: [],
+      };
+    });
+    this.edges = edges.map((edge) => {
+      return {
+        ...edge,
+        level: parseInt(edge.level),
+      }
+    });
     this.allSkills = allSkills;
     this.gravity = gravity;
     this.effects = effects;
@@ -89,6 +95,14 @@ class SkillHandler {
     });
 
     this.skillBonusMap = this.getSkillBonusMap();
+    this.characterSkillMap = SkillHandler.getItemMap(
+      this.characterSkills,
+      (item) => {
+        return item.skill__name;
+      },
+    );
+    this.skillMap = SkillHandler.getItemMap(this.allSkills);
+
     this.skillList = this.createSkillList();
 
     this._softMods = {};
@@ -469,32 +483,27 @@ class SkillHandler {
   }
 
   getSkillList() {
-    return this.skillList;
+    return [...this.skillList];
+  }
+
+  getCharacterSkillMap() {
+    return this.characterSkillMap;
+  }
+
+  getSkillMap() {
+    return this.skillMap;
   }
 
   createSkillList() {
-    // Make a deep copy of the list so as not accidentally mangle
-    // parent copy of the props.
-    const skillList = this.characterSkills.map((elem) => {
-      const obj = Object.assign({}, elem);
-      obj._children = [];
-      return obj;
-    });
+    const csMap = this.characterSkillMap;
+    const skillMap = this.skillMap;
 
-    this.characterSkillMap = SkillHandler.getItemMap(skillList, (item) => {
-      return item.skill__name;
-    });
-    this.skillMap = SkillHandler.getItemMap(this.allSkills);
-
-    var csMap = this.characterSkillMap;
-    var skillMap = this.skillMap;
-
-    var addChild = function (parent, child) {
+    const addChild = function (parent, child) {
       parent._children.push(child);
     };
 
     var root = [];
-    for (let cs of skillList) {
+    for (let cs of this.characterSkills) {
       var skill = skillMap[cs.skill__name];
       if (!skill) {
         cs._unknownSkill = true;
@@ -760,9 +769,9 @@ class SkillHandler {
 
   getDamageThreshold(givenLoc) {
     if (!this._thresholds) {
-      const divider = { H: 10, T: 5, RA: 15, RL: 10, LA: 15, LL: 10 };
+      const divider = { h: 10, t: 5, ra: 15, rl: 10, la: 15, ll: 10 };
       this._thresholds = {};
-      for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+      for (const loc of ["h", "t", "ra", "rl", "la", "ll"]) {
         this._thresholds[loc] =
           util.roundup(this.getBaseStats().fit / divider[loc]) +
           this.getEdgeModifier("toughness");
@@ -803,14 +812,14 @@ class SkillHandler {
       this._woundPenalties.bodyDamage = 0;
       this._woundPenalties.staminaDamage = 0;
 
-      let locationDamages = { H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0 };
+      let locationDamages = { h: 0, t: 0, ra: 0, la: 0, rl: 0, ll: 0 };
       for (const ww of this.wounds) {
         const damage = ww.damage - ww.healed;
-        locationDamages[ww.location] += damage;
+        locationDamages[ww.location.toLowerCase()] += damage;
       }
 
       // Cap body damage at threshold, rest is stamina damage.
-      for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+      for (const loc of ["h", "t", "ra", "rl", "la", "ll"]) {
         const threshold = this.getDamageThreshold(loc);
         if (locationDamages[loc] > threshold) {
           // Damage exceeding twice the threshold is ignored.
@@ -829,39 +838,39 @@ class SkillHandler {
         locationDamages,
       );
 
-      for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+      for (let loc of ["h", "t", "ra", "rl", "la", "ll"]) {
         locationDamages[loc] = Math.max(0, locationDamages[loc] - toughness);
       }
 
       const maxAAPenaltyPerLoc = {
-        H: -120,
-        T: -100,
-        RA: -10,
-        LA: -10,
-        RL: -10,
-        LL: -10,
+        h: -120,
+        t: -100,
+        ra: -10,
+        la: -10,
+        rl: -10,
+        ll: -10,
       };
       this._woundPenalties.aa = Math.max(
-        -10 * locationDamages.H,
-        maxAAPenaltyPerLoc.H,
+        -10 * locationDamages.h,
+        maxAAPenaltyPerLoc.h,
       );
       this._woundPenalties.aa += Math.max(
-        -5 * locationDamages.T,
-        maxAAPenaltyPerLoc.T,
+        -5 * locationDamages.t,
+        maxAAPenaltyPerLoc.t,
       );
       if (this.getEdgeModifier("pain_resistance") <= 0) {
-        for (let loc of ["RA", "LA", "RL", "LL"]) {
+        for (let loc of ["ra", "la", "rl", "ll"]) {
           this._woundPenalties.aa += Math.max(
             util.rounddown(locationDamages[loc] / 3) * -5,
             maxAAPenaltyPerLoc[loc],
           );
         }
       }
-      this._woundPenalties.mov = Math.max(-10 * locationDamages.RL, -75);
-      this._woundPenalties.mov += Math.max(-10 * locationDamages.LL, -75);
+      this._woundPenalties.mov = Math.max(-10 * locationDamages.rl, -75);
+      this._woundPenalties.mov += Math.max(-10 * locationDamages.ll, -75);
 
-      this._woundPenalties.la_fit_ref = -10 * locationDamages.LA;
-      this._woundPenalties.ra_fit_ref = -10 * locationDamages.RA;
+      this._woundPenalties.la_fit_ref = -10 * locationDamages.la;
+      this._woundPenalties.ra_fit_ref = -10 * locationDamages.ra;
     }
     return this._woundPenalties;
   }

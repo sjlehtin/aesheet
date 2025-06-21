@@ -300,7 +300,7 @@ export function ArmorControl({
     );
     row.push(
       <td style={descStyle} key={loc + "-2"}>
-        {loc}
+        {loc.toUpperCase()}
       </td>,
     );
     for (let col of ["p", "s", "b", "r", "dr", "dp", "pl"] as ArmorStatType[]) {
