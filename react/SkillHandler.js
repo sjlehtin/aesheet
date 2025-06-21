@@ -80,7 +80,7 @@ class SkillHandler {
       return {
         ...edge,
         level: parseInt(edge.level),
-      }
+      };
     });
     this.allSkills = allSkills;
     this.gravity = gravity;
@@ -433,9 +433,9 @@ class SkillHandler {
   }
 
   /* U is quarter-skill, i.e., using a pistol even without Basic
-           Firearms.  B is half-skill, i.e., the character has top-level skill,
-           but not the skill required.  Otherwise, if the character has the
-            skill, return the level of the skill. */
+             Firearms.  B is half-skill, i.e., the character has top-level skill,
+             but not the skill required.  Otherwise, if the character has the
+              skill, return the level of the skill. */
   skillLevel(skillName) {
     const cs = this.characterSkillMap[skillName];
     const skill = this.skillMap[skillName];
