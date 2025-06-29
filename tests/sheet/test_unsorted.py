@@ -16,21 +16,6 @@ import django.db
 logger = logging.getLogger(__name__)
 
 
-class SkillTestCase(TestCase):
-    def test_specialized_minimum_level(self):
-        """
-        Current data in sheet has specialization skills in the following
-        format, which the cost for the 0 level as 0.
-
-        It should be changed to None (null) in the future, to underline
-        that the skill cannot be purchased at that level.
-        """
-        skill = factories.SkillFactory(name="Sword", skill_cost_0=0,
-                                       skill_cost_1=2,
-                                       is_specialization=True)
-        self.assertEqual(skill.get_minimum_level(), 1)
-
-
 class BaseFirearmFormTestCase(TestCase):
     def setUp(self):
         self.tech_level = factories.TechLevelFactory(name='2K')

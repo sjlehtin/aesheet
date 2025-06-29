@@ -1,8 +1,12 @@
-## [Unreleased]
+## [0.29.1] - 2025-06-29
 
 ### Changed
 
 * Stamina damage can be partly healed by inserting a number to the field and pressing "Heal".
+
+### Fixed
+
+* Improve handling of skill level costs to not barf when GM is restructuring skill trees.
 
 ## [0.29.0] - 2025-06-16
 
