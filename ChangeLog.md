@@ -1,4 +1,4 @@
-## [Unreleased]
+## [0.29.1] - 2025-06-29
 
 ### Changed
 
@@ -6,7 +6,7 @@
 
 ### Fixed
 
-* Improve logging on expected skill values.
+* Improve handling of skill level costs to not barf when GM is restructuring skill trees.
 
 ## [0.29.0] - 2025-06-16
 

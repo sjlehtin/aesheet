@@ -402,18 +402,18 @@ class Skill(ExportedModel):
                 cost == 0 and self.is_specialization
             ):
                 return lvl
-        raise ValueError(f"Skill {self.name} is invalid")
+        return 0
 
     def get_maximum_level(self):
-        if self.skill_cost_3 is not None:
+        if self.skill_cost_3 is not None and self.skill_cost_3 > 0:
             return 8
 
         levels = [2, 1, 0]
         for lvl in levels:
             cost = getattr(self, "skill_cost_{}".format(lvl))
-            if cost is not None:
+            if cost is not None and cost > 0:
                 return lvl
-        raise ValueError("Skill is invalid")
+        return 0
 
     @classmethod
     def dont_export(cls):
