@@ -4,6 +4,10 @@
 
 * Stamina damage can be partly healed by inserting a number to the field and pressing "Heal".
 
+### Fixed
+
+* Improve logging on expected skill values.
+
 ## [0.29.0] - 2025-06-16
 
 ### Added

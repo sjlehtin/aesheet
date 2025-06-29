@@ -402,7 +402,7 @@ class Skill(ExportedModel):
                 cost == 0 and self.is_specialization
             ):
                 return lvl
-        raise ValueError("Skill is invalid")
+        raise ValueError(f"Skill {self.name} is invalid")
 
     def get_maximum_level(self):
         if self.skill_cost_3 is not None:
