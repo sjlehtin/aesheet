@@ -1,4 +1,4 @@
-import { SheetWeapon } from "./api"; // import * as util from "./sheet-util";
+import { Attribute, SheetWeapon } from "./api"; // import * as util from "./sheet-util";
 import SkillHandler from "./SkillHandler";
 import * as util from "./sheet-util";
 import ValueBreakdown from "./ValueBreakdown";
@@ -118,7 +118,7 @@ export default abstract class WeaponModel {
     return 0;
   }
 
-  abstract penaltyCounterStat(): string;
+  abstract penaltyCounterStat(): Attribute;
 
   abstract skillCheck(): ValueBreakdown | null;
 
@@ -284,8 +284,8 @@ export default abstract class WeaponModel {
     /* Martial arts expertise skill grants a bonus to damage. */
     const maeLevel = this.#handler.skillLevel("Martial arts expertise");
 
-    let ccFITBonus = this.#handler.getStat("fit") - 45;
-    if (maeLevel > 0) {
+    let ccFITBonus = this.#handler.getStat(Attribute.Fit) - 45;
+    if (maeLevel && maeLevel > 0) {
       ccFITBonus += maeLevel * 5;
     }
 

@@ -115,7 +115,6 @@ describe('SkillHandler', function() {
         expect(newList[3].indent).toEqual(2);
     });
 
-
     it("calculates indent for nested required skills while mangling", function () {
         const handler = factories.skillHandlerFactory({
             skills: [
@@ -176,7 +175,7 @@ describe('SkillHandler', function() {
         expect(handler.getEdgeSkillPoints()).toEqual(14)
     })
 
-    it("calcualate initial skill points", function () {
+    it("calculates initial skill points", function () {
         const handler =  factories.skillHandlerFactory({character: {
             start_lrn: 50, start_int: 38, start_psy: 47}
         });

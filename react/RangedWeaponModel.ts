@@ -1,4 +1,4 @@
-import { SheetRangedWeapon } from "./api"; // import * as util from "./sheet-util";
+import { Attribute, SheetRangedWeapon } from "./api"; // import * as util from "./sheet-util";
 import SkillHandler from "./SkillHandler";
 import { UseType } from "./WeaponModel";
 import ValueBreakdown from "./ValueBreakdown";
@@ -47,8 +47,8 @@ export default class RangedWeaponModel extends PhysicalWeaponModel {
     return this.roa(useType);
   }
 
-  penaltyCounterStat() {
-    return "FIT";
+  penaltyCounterStat(): Attribute {
+    return Attribute.Fit;
   }
 
   skillCheck() {
@@ -244,7 +244,7 @@ export default class RangedWeaponModel extends PhysicalWeaponModel {
       fitLethBonus = 0;
     } else {
       const quality = this.#weapon.quality;
-      let fit = this.#handler.getStat("fit");
+      let fit = this.#handler.getStat(Attribute.Fit);
       /* Cap the damage according to max pull of the bow.*/
       if (base.base_skill.name === "Bow" && quality.max_fit) {
         fit = Math.min(quality.max_fit, fit);

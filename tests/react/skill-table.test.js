@@ -94,7 +94,8 @@ describe('SkillTable', function() {
     test.todo("allows removing skills");
     test.todo("allows adding a new skill");
 
-    it ("filters out skills the character already has from the suggested skills", async function () {
+    // TODO: move to stat-block-skill.test.js
+    xit ("filters out skills the character already has from the suggested skills", async function () {
         const user = userEvent.setup()
 
         const gardening = factories.skillFactory("Gardening");

@@ -1,5 +1,6 @@
 import React from "react";
 import SkillHandler from "SkillHandler";
+import {Attribute} from "./api";
 
 export default function WoundPenaltyBox({ handler }) {
   const penalties = handler.getWoundPenalties();
@@ -37,7 +38,7 @@ export default function WoundPenaltyBox({ handler }) {
   }
 
   const excessPenalties = {};
-  for (const stat of SkillHandler.baseStatNames) {
+  for (const stat of Object.values(Attribute)) {
     excessPenalties[stat] = stats[stat] < -penalties.aa;
   }
 

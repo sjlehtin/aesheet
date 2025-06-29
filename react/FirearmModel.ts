@@ -1,4 +1,4 @@
-import { SheetFirearm } from "./api";
+import { Attribute, DerivedAttribute, SheetFirearm } from "./api";
 import * as util from "./sheet-util";
 import { isFloat } from "./sheet-util";
 import ValueBreakdown from "./ValueBreakdown";
@@ -496,7 +496,7 @@ export default class FirearmModel extends WeaponModel {
 
     if (
       util.isFloat(toRange) &&
-      toRange <= util.rounddown(this.#handler.getStat("int") / 2)
+      toRange <= util.rounddown(this.#handler.getStat(Attribute.Int) / 2)
     ) {
       effect.targetInitiative += this.#handler.skillLevel("Instinctive fire");
     }
@@ -558,7 +558,11 @@ export default class FirearmModel extends WeaponModel {
       return null;
     }
     if (this.#inCC) {
-      const ccCheck = this.#handler.skillCheck("Weapon combat", "MOV", true);
+      const ccCheck = this.#handler.skillCheck(
+        "Weapon combat",
+        DerivedAttribute.Mov,
+        true,
+      );
 
       if (!ccCheck) return null;
 
@@ -582,11 +586,11 @@ export default class FirearmModel extends WeaponModel {
     }
   }
 
-  penaltyCounterStat() {
+  penaltyCounterStat(): Attribute {
     if (this.#inCC) {
-      return "INT";
+      return Attribute.Int;
     } else {
-      return "FIT";
+      return Attribute.Fit;
     }
   }
 
@@ -740,7 +744,10 @@ export default class FirearmModel extends WeaponModel {
         const penalty = penaltyMultiplier * afClass;
         // TODO, use counterPenaltyV2
         bd.add(
-          FirearmModel.counterPenalty(penalty, this.#handler.getStat("fit")),
+          FirearmModel.counterPenalty(
+            penalty,
+            this.#handler.getStat(Attribute.Fit),
+          ),
           "sweep penalty",
         );
         bd.addBreakdown(autofirePenalty);

@@ -60,12 +60,16 @@ export default class ValueBreakdown {
     this.#breakdown.push({ value: 0, operation: "=", reason: description });
   }
 
-  addBreakdown(breakdown: ValueBreakdown) {
-    this.#value += breakdown.value();
-    this.#breakdown = [...this.#breakdown, ...breakdown.breakdown()];
-    // Inherit set value from the new bd unless already set here.
-    if (this.#setValue === null) {
-      this.#setValue = breakdown.#setValue;
+  addBreakdown(breakdown: ValueBreakdown|null) {
+    if (breakdown !== null) {
+      this.#value += breakdown.value();
+      this.#breakdown = [...this.#breakdown, ...breakdown.breakdown()];
+      // Inherit set value from the new bd unless already set here.
+      if (this.#setValue === null) {
+        this.#setValue = breakdown.#setValue;
+      }
+    } else {
+      this.set(0, "Passed null breakdown");
     }
   }
 

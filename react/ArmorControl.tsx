@@ -4,6 +4,7 @@ import { Button, Col, Row } from "react-bootstrap";
 import AddArmorControl from "./AddArmorControl";
 import StatBreakdown from "./StatBreakdown";
 import ValueBreakdown from "./ValueBreakdown";
+import SkillHandler, { ArmorPieceAttribute } from "./SkillHandler";
 
 import * as util from "./sheet-util";
 import {
@@ -12,25 +13,9 @@ import {
   ArmorQuality,
   ArmorStatType,
   ArmorTemplate,
+  EdgeModifierType,
   SheetMiscellaneousItem,
 } from "./api";
-
-interface SkillHandler {
-  getEdgeModifier(edgeType: string): number;
-
-  getSkillLevel?(skillName: string): number;
-
-  hasEdge?(edgeName: string): boolean;
-
-  getArmorStatMod(stat: string): number;
-
-  getDamageThreshold(location: ArmorLocation): number;
-
-  getWoundPenalties(): {
-    locationsDamages: { [loc: string]: number };
-    bodyDamage: number;
-  };
-}
 
 function getArmorStat(
   location: ArmorLocation,
@@ -148,9 +133,9 @@ function calculateArmorStats(
   }
 
   const fromEdgeLethalityReduction: number =
-    handler?.getEdgeModifier("armor_l") ?? 0;
+    handler?.getEdgeModifier(EdgeModifierType.LethalityReduction) ?? 0;
   const fromEdgeDamageReduction: number =
-    handler?.getEdgeModifier("armor_dr") ?? 0;
+    handler?.getEdgeModifier(EdgeModifierType.DamageReduction) ?? 0;
 
   for (let loc of ["h", "t", "ra", "la", "rl", "ll"] as ArmorLocation[]) {
     let locStats = {} as Partial<ArmorLocationStats>;
@@ -419,15 +404,17 @@ export function ArmorControl({
               </tr>
             </thead>
             <tbody>
-              {[
-                ["fit", "FIT"],
-                ["ref", "REF"],
-                ["surprise", "Surprise"],
-                ["climb", "Climb"],
-                ["stealth", "Stealth"],
-                ["conceal", "Conceal"],
-                ["suspendedWeight", "Suspension"],
-              ].map(([val, descr]) => {
+              {(
+                [
+                  ["fit", "FIT"],
+                  ["ref", "REF"],
+                  ["surprise", "Surprise"],
+                  ["climb", "Climb"],
+                  ["stealth", "Stealth"],
+                  ["conceal", "Conceal"],
+                  ["suspendedWeight", "Suspension"],
+                ] as [ArmorPieceAttribute, string][]
+              ).map(([val, descr]) => {
                 return (
                   <tr key={`mod-${val}`}>
                     <td>{descr}</td>

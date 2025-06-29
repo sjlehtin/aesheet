@@ -250,10 +250,6 @@ class Character(PrivateMixin, models.Model):
     def __str__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
-    # TODO: Remove after python 2.7 support no longer needed.
-    def __unicode__(self):
-        return self.__str__()
-
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_characters(user))

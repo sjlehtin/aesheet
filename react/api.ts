@@ -1,5 +1,80 @@
+export enum Attribute {
+  Fit = "fit",
+  Ref = "ref",
+  Lrn = "lrn",
+  Int = "int",
+  Psy = "psy",
+  Wil = "wil",
+  Cha = "cha",
+  Pos = "pos",
+}
+
+export enum DerivedAttribute {
+  Mov = "mov",
+  Dex = "dex",
+  Imm = "imm",
+  Stamina = "stamina",
+  Mana = "mana",
+  Body = "body",
+}
+
+export enum SenseAttribute {
+  Vision = "vision",
+  Hear = "hear",
+  Smell = "smell",
+  Surprise = "surprise",
+}
+
+export enum SkillAttribute {
+  Climb = "climb",
+  Stealth = "stealth",
+  Conceal = "conceal",
+  Swim = "swim",
+}
+
+export type AllAttributeValues =
+  | Attribute
+  | DerivedAttribute
+  | SkillAttribute
+  | SenseAttribute;
+
 export interface Skill {
   name: string;
+
+  skill_cost_0: number;
+  skill_cost_1: number;
+  skill_cost_2: number;
+  skill_cost_3: number;
+
+  stat: Attribute | DerivedAttribute;
+
+  required_skills: [Skill];
+
+  affected_by_armor_mod_stealth: boolean;
+  affected_by_armor_mod_conceal: boolean;
+  affected_by_armor_mod_climb: boolean;
+  affected_by_armor_mod_swim: boolean;
+
+  powered_ref_counter: number;
+  powered_fit_mod: number;
+}
+
+export interface CharacterSkill {
+  skill__name: string;
+  level: number;
+}
+
+export enum StatModifierType {
+  ClimbMultiplier = "climb_multiplier",
+  FlyMultiplier = "fly_multiplier",
+  RunMultiplier = "run_multiplier",
+  SwimMultiplier = "swim_multiplier",
+}
+
+export interface StatModifier extends Record<AllAttributeValues, number> {
+}
+
+export interface Effect extends StatModifier {
 }
 
 export interface Edge {
@@ -8,10 +83,30 @@ export interface Edge {
   description: string;
 }
 
-export interface EdgeLevel {
+export interface EdgeSkillBonus {
+  skill:number;
+  skill__name: string;
+  bonus: number;
+}
+
+export enum EdgeModifierType {
+  Stamina = "stamina",
+  Mana = "mana",
+  Toughness = "toughness",
+  PainResistance = "pain_resistance",
+  LethalityReduction = "armor_l",
+  DamageReduction = "armor_dr",
+}
+
+export interface EdgeLevel extends StatModifier {
   edge: Edge;
   level: number;
   cost: number;
+
+  edge_skill_bonuses: EdgeSkillBonus[]
+
+  extra_skill_points: number;
+  all_checks_mod: number;
 }
 
 export interface CharacterEdge {
@@ -54,6 +149,70 @@ export enum ArmorStatType {
   DamageReduction = "dr",
   DamagePoints = "dp",
   ProtectionLevel = "pl"
+}
+
+export enum ArmorStatModifierType {
+  HeadPiercing = "armor_h_p",
+  HeadSlashing = "armor_h_s",
+  HeadBludgeoning = "armor_h_b",
+  HeadBurn = "armor_h_r",
+  HeadDamageReduction = "armor_h_dr",
+  HeadDamagePoints = "armor_h_dp",
+  HeadProtectionLevel = "armor_h_pl",
+
+  TorsoPiercing = "armor_t_p",
+  TorsoSlashing = "armor_t_s",
+  TorsoBludgeoning = "armor_t_b",
+  TorsoBurn = "armor_t_r",
+  TorsoDamageReduction = "armor_t_dr",
+  TorsoDamagePoints = "armor_t_dp",
+  TorsoProtectionLevel = "armor_t_pl",
+
+  LeftLegPiercing = "armor_ll_p",
+  LeftLegSlashing = "armor_ll_s",
+  LeftLegBludgeoning = "armor_ll_b",
+  LeftLegBurn = "armor_ll_r",
+  LeftLegDamageReduction = "armor_ll_dr",
+  LeftLegDamagePoints = "armor_ll_dp",
+  LeftLegProtectionLevel = "armor_ll_pl",
+
+  LeftArmPiercing = "armor_la_p",
+  LeftArmSlashing = "armor_la_s",
+  LeftArmBludgeoning = "armor_la_b",
+  LeftArmBurn = "armor_la_r",
+  LeftArmDamageReduction = "armor_la_dr",
+  LeftArmDamagePoints = "armor_la_dp",
+  LeftArmProtectionLevel = "armor_la_pl",
+
+  RightLegPiercing = "armor_rl_p",
+  RightLegSlashing = "armor_rl_s",
+  RightLegBludgeoning = "armor_rl_b",
+  RightLegBurn = "armor_rl_r",
+  RightLegDamageReduction = "armor_rl_dr",
+  RightLegDamagePoints = "armor_rl_dp",
+  RightLegProtectionLevel = "armor_rl_pl",
+
+  RightArmPiercing = "armor_ra_p",
+  RightArmSlashing = "armor_ra_s",
+  RightArmBludgeoning = "armor_ra_b",
+  RightArmBurn = "armor_ra_r",
+  RightArmDamageReduction = "armor_ra_dr",
+  RightArmDamagePoints = "armor_ra_dp",
+  RightArmProtectionLevel = "armor_ra_pl",
+
+  ModFit = "mod_fit",
+  ModRef = "mod_ref",
+  ModPsy = "mod_psy",
+
+  ModVision = "mod_vision",
+  ModHear = "mod_hear",
+  ModSmell = "mod_smell",
+  ModSurprise = "mod_surprise",
+
+  ModClimb = "mod_climb",
+  ModStealth = "mod_stealth",
+  ModConceal = "mod_conceal",
+  ModSwim = "mod_swim",
 }
 
 export interface ArmorModifier {
@@ -111,6 +270,20 @@ export interface ArmorModifier {
   armor_ra_dr: string;
   armor_ra_dp: string;
   armor_ra_pl: string;
+
+  mod_fit: number;
+  mod_ref: number;
+  mod_psy: number;
+
+  mod_vision: number;
+  mod_hear: number;
+  mod_smell: number;
+  mod_surprise: number;
+
+  mod_climb: number;
+  mod_stealth: number;
+  mod_conceal: number;
+  mod_swim: number;
 }
 
 export interface ArmorTemplate extends GenericBaseItem, ArmorModifier {
@@ -315,4 +488,38 @@ export interface Sheet {
   campaign: number;
   character_name: string;
   character_total_xp: number;
+}
+
+export interface Character {
+  start_fit: number;
+  start_ref: number;
+  start_lrn: number;
+  start_int: number;
+  start_psy: number;
+  start_wil: number;
+  start_cha: number;
+  start_pos: number;
+
+  cur_fit: number;
+  cur_ref: number;
+  cur_lrn: number;
+  cur_int: number;
+  cur_psy: number;
+  cur_wil: number;
+  cur_cha: number;
+  cur_pos: number;
+
+  base_mod_fit: number;
+  base_mod_ref: number;
+  base_mod_lrn: number;
+  base_mod_int: number;
+  base_mod_psy: number;
+  base_mod_wil: number;
+  base_mod_cha: number;
+  base_mod_pos: number;
+
+  bought_mana: number;
+  bought_stamina: number;
+
+  gained_sp: number;
 }

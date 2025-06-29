@@ -1,4 +1,4 @@
-import { Weapon } from "./api"; // import * as util from "./sheet-util";
+import { Attribute, EdgeModifierType, Weapon } from "./api"; // import * as util from "./sheet-util";
 import SkillHandler from "./SkillHandler";
 import { UseType } from "./WeaponModel";
 import ValueBreakdown from "./ValueBreakdown";
@@ -65,8 +65,8 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
     );
   }
 
-  penaltyCounterStat(): string {
-    return "INT";
+  penaltyCounterStat(): Attribute {
+    return Attribute.Int;
   }
 
   wrongHandPenalty(useType: UseType): ValueBreakdown {
@@ -114,8 +114,8 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
     if (this.#weapon.base.is_natural_weapon) {
       return util.rounddown(
         this.#weapon.base.leth -
-          this.#handler.getEdgeModifier("armor_l") +
-          this.#handler.getEdgeModifier("toughness") / 2 +
+          this.#handler.getEdgeModifier(EdgeModifierType.LethalityReduction) +
+          this.#handler.getEdgeModifier(EdgeModifierType.Toughness) / 2 +
           2 * (this.#weapon.size - 1),
       );
     } else {
