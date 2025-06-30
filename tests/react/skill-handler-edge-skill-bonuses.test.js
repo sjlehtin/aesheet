@@ -32,4 +32,18 @@ describe('SkillHandler edge skill bonuses', function() {
         expect(handler.skillCheck("Surgery").value()).toEqual(43 + 5 + 13);
     });
 
+    it('handles a skill check with Lucky', function () {
+      const handler = factories.skillHandlerFactory({
+        skills: [{ skill: "Surgery", level: 1 }],
+        edges: [
+          {
+            edge: { name: "Lucky" },
+            level: 1,
+            all_checks_mod: 5
+          },
+        ],
+      });
+
+        expect(handler.skillCheck("Surgery").value()).toEqual((43 + 5 + 5));
+    });
 });
