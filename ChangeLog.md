@@ -1,3 +1,9 @@
+## [0.30.0] - 2025-07-01
+
+### Added
+
+* Added support for AC (all checks) modifier for edges, making it possible to add the Lucky edge effect.
+
 ## [0.29.1] - 2025-06-29
 
 ### Changed
