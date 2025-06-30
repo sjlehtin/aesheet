@@ -82,6 +82,7 @@ class SkillHandler {
     this.armor = armor;
     this.helm = helm;
     this.wounds = wounds;
+    this.acMod = new ValueBreakdown();
 
     this.edgeMap = SkillHandler.getItemMap(this.edges, (item) => {
       return item.edge.name;
@@ -99,6 +100,12 @@ class SkillHandler {
     for (const mod of this.effects) {
       for (let st of SkillHandler.allStatNames) {
         this._softMods[st] += mod[st];
+      }
+    }
+
+    for (const edge of this.edges) {
+      if (edge.all_checks_mod !== 0) {
+        this.acMod.add(edge.all_checks_mod, `AC mod from ${edge.edge.name} ${edge.level}`);
       }
     }
 
@@ -404,6 +411,8 @@ class SkillHandler {
     }
 
     if (skill) bd.addBreakdown(this.getSkillMod(skill));
+
+    bd.addBreakdown(this.acMod)
     bd.add(this.getACPenalty().value, "AC penalty");
 
     return bd;

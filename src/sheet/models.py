@@ -579,6 +579,7 @@ class EdgeLevel(ExportedModel, StatModifier):
     cost = models.DecimalField(max_digits=4, decimal_places=1)
     requires_hero = models.BooleanField(default=False)
     extra_skill_points = models.IntegerField(default=0)
+    all_checks_mod = models.IntegerField(default=0)
 
     # Deliberately not taking in ArmorSpecialQuality, as the prime use case
     # is Hardened Skin, which applies equally to each hit location.

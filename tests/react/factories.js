@@ -243,6 +243,7 @@ const edgeLevelFactory = function (overrideFields) {
     "edge": edge,
     "edge_skill_bonuses": edgeSkillBonuses,
     "extra_skill_points": 0,
+      "all_checks_mod": 0
     };
 
     const newEdgeLevel = Object.assign(baseEdgeLevel, overrideFields);

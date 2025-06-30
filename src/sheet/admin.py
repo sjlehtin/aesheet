@@ -218,7 +218,7 @@ class EdgeLevelAdmin(admin.ModelAdmin):
                     'run_multiplier', 'swim_multiplier', 'climb_multiplier',
                     'fly_multiplier', 'vision', 'hear', 'smell', 'surprise',
                     'toughness',
-                    'requires_hero')
+                    'requires_hero', 'all_checks_mod')
     list_editable = list_display[2:]
     list_filter = ('edge__name', )
     search_fields = ('edge__name', )
