@@ -6,11 +6,6 @@
  */
 
 /*
- * props:
- * characterSkills
- * allSkills
- * edges
- *
  * TODO: rename SkillHandler to CheckHandler (or CheckController).
  *
  * TODO: study Redux for handling state in a cleaner fashion.
@@ -45,12 +40,117 @@
 import * as util from "./sheet-util";
 import { getCounteredPenalty } from "./sheet-util";
 import ValueBreakdown from "./ValueBreakdown";
+import {
+  AllAttributeValues,
+  Armor,
+  ArmorLocation,
+  ArmorStatModifierType,
+  Attribute,
+  Character,
+  CharacterAttribute,
+  CharacterSkill,
+  DerivedAttribute,
+  EdgeLevel,
+  EdgeModifierType,
+  Effect,
+  SenseAttribute,
+  Skill,
+  SkillAttribute,
+  StatModifierType,
+} from "./api";
+
+const AllAttributes = {
+  ...Attribute,
+  ...DerivedAttribute,
+  ...SkillAttribute,
+  ...SenseAttribute,
+};
+
+export enum ArmorPieceAttribute {
+  fit = Attribute.Fit,
+  ref = Attribute.Ref,
+  surprise = SenseAttribute.Surprise,
+  climb = SkillAttribute.Climb,
+  stealth = SkillAttribute.Stealth,
+  conceal = SkillAttribute.Conceal,
+  suspendedWeight = "suspendedWeight",
+}
+
+interface WoundPenalties {
+  bodyDamage: number;
+  staminaDamage: number;
+  locationsDamages: { [loc in ArmorLocation]: number };
+  aa: number;
+  mov: number;
+  la_fit_ref: number;
+  ra_fit_ref: number;
+}
+
+type SkillAttributeTypes = Extract<
+  AllAttributeValues,
+  | SkillAttribute.Stealth
+  | SkillAttribute.Conceal
+  | SkillAttribute.Climb
+  | SkillAttribute.Swim
+>;
+
+const SkillsToMod: SkillAttributeTypes[] = [
+  SkillAttribute.Stealth,
+  SkillAttribute.Conceal,
+  SkillAttribute.Climb,
+  SkillAttribute.Swim,
+];
+
+interface SkillHandlerCharacterSkill extends CharacterSkill {
+  _children: SkillHandlerCharacterSkill[];
+  _parent: SkillHandlerCharacterSkill | undefined;
+  _missingRequired: string[];
+  _unknownSkill: boolean;
+  indent: number;
+}
+
+interface EdgeMod extends Record<AllAttributeValues, ValueBreakdown> {}
+
+interface ArmorMod extends EdgeMod {
+  suspendedWeight: number;
+}
 
 class SkillHandler {
-  #edgeMods;
-  #armorMods;
+  static BASE_VISION_RANGE = 9;
+  static BASE_HEARING_RANGE = 6;
+  static BASE_SMELL_RANGE = 3;
 
-  skillsToMod = ["stealth", "conceal", "climb", "swim"];
+  static STATUS_OK = 1;
+  static STATUS_WOUNDED = 5;
+  static STATUS_CRITICAL = 9;
+
+  _thresholds: Partial<{ [key in ArmorLocation]: number }> | undefined;
+  _baseStats: { [key: string]: number } | undefined;
+  _softMods: Record<AllAttributeValues, number>;
+
+  #edgeMods: EdgeMod | undefined;
+  #armorMods: ArmorMod | undefined;
+
+  _effStatsV2: Record<AllAttributeValues, ValueBreakdown> | undefined;
+  _woundPenalties: WoundPenalties | undefined;
+
+  character;
+  staminaDamage;
+  weightCarried;
+  characterSkills;
+  edges;
+  allSkills;
+  gravity;
+  effects;
+  armor;
+  helm;
+  wounds;
+  characterSkillMap;
+  skillMap;
+  skillBonusMap;
+  edgeMap;
+  skillList;
+  acMod;
 
   constructor({
     character,
@@ -58,24 +158,44 @@ class SkillHandler {
     characterSkills = [],
     allSkills = [],
     staminaDamage = 0,
-    armor = {},
-    helm = {},
+    armor = {} as Armor,
+    helm = {} as Armor,
     effects = [],
     edges = [],
     wounds = [],
     gravity = 1.0,
+  }: {
+    character: Character;
+    weightCarried: ValueBreakdown;
+    characterSkills: CharacterSkill[];
+    allSkills: Skill[];
+    staminaDamage: number;
+    armor: Armor;
+    helm: Armor;
+    effects: Effect[];
+    edges: EdgeLevel[];
+    wounds: any;
+    gravity: number;
   }) {
-    this.props = {
-      // TODO: fix skilltable
-      character: character,
-      characterSkills: characterSkills,
-      allSkills: allSkills,
-    };
     this.character = character;
     this.staminaDamage = staminaDamage;
     this.weightCarried = weightCarried;
-    this.edges = edges;
-    this.characterSkills = characterSkills;
+    // Store internal state in a new copy of the objects to avoid reusing it on re-render.
+    this.characterSkills = characterSkills.map((cs) => {
+      return {
+        ...cs,
+        _children: [],
+        _parent: undefined,
+        _missingRequired: [],
+        _unknownSkill: false,
+        indent: 0,
+      } as SkillHandlerCharacterSkill;
+    });
+    this.edges = edges.map((edge: EdgeLevel) => {
+      return {
+        ...edge,
+      };
+    });
     this.allSkills = allSkills;
     this.gravity = gravity;
     this.effects = effects;
@@ -86,54 +206,85 @@ class SkillHandler {
 
     this.edgeMap = SkillHandler.getItemMap(this.edges, (item) => {
       return item.edge.name;
-    });
+    }) as { [key: string]: EdgeLevel };
 
     this.skillBonusMap = this.getSkillBonusMap();
+    this.characterSkillMap = SkillHandler.getItemMap(
+      this.characterSkills,
+      (item) => {
+        return item.skill__name;
+      },
+    ) as { [key: string]: SkillHandlerCharacterSkill };
+    this.skillMap = SkillHandler.getItemMap(this.allSkills) as {
+      [key: string]: Skill;
+    };
+
     this.skillList = this.createSkillList();
 
-    this._softMods = {};
+    const softMods: Partial<Record<AllAttributeValues, number>> = {};
 
-    for (const st of SkillHandler.allStatNames) {
-      this._softMods[st] = 0;
-    }
+    for (const st of Object.values(AllAttributes) as AllAttributeValues[]) {
+      softMods[st] = 0;
 
-    for (const mod of this.effects) {
-      for (let st of SkillHandler.allStatNames) {
-        this._softMods[st] += mod[st];
+      for (const mod of this.effects) {
+        softMods[st] += mod[st];
       }
+      softMods[st] += (this.getArmorStatMod(st) as ValueBreakdown).value();
     }
+
+    this._softMods = softMods as Record<AllAttributeValues, number>;
 
     for (const edge of this.edges) {
       if (edge.all_checks_mod !== 0) {
-        this.acMod.add(edge.all_checks_mod, `AC mod from ${edge.edge.name} ${edge.level}`);
+        this.acMod.add(
+          edge.all_checks_mod,
+          `AC mod from ${edge.edge.name} ${edge.level}`,
+        );
       }
-    }
-
-    for (const st of SkillHandler.allStatNames) {
-      this._softMods[st] += this.getArmorStatMod(st).value();
     }
 
     this._baseStats = undefined;
-    this._effStats = undefined;
   }
 
-  getEdgeStatMod(stat) {
+  // TODO: Should be statmodifier
+  getEdgeStatMod(stat: AllAttributeValues) {
     if (!this.#edgeMods) {
-      this.#edgeMods = {};
-      for (let st of SkillHandler.allStatNames) {
-        this.#edgeMods[st] = new ValueBreakdown();
-      }
+      const edgeMods: EdgeMod = {
+        fit: new ValueBreakdown(),
+        ref: new ValueBreakdown(),
+        lrn: new ValueBreakdown(),
+        int: new ValueBreakdown(),
+        psy: new ValueBreakdown(),
+        wil: new ValueBreakdown(),
+        cha: new ValueBreakdown(),
+        pos: new ValueBreakdown(),
+        mov: new ValueBreakdown(),
+        dex: new ValueBreakdown(),
+        imm: new ValueBreakdown(),
+        stamina: new ValueBreakdown(),
+        mana: new ValueBreakdown(),
+        body: new ValueBreakdown(),
+        climb: new ValueBreakdown(),
+        stealth: new ValueBreakdown(),
+        conceal: new ValueBreakdown(),
+        swim: new ValueBreakdown(),
+        vision: new ValueBreakdown(),
+        hear: new ValueBreakdown(),
+        smell: new ValueBreakdown(),
+        surprise: new ValueBreakdown(),
+      };
 
       for (const mod of this.edges) {
-        for (let st of SkillHandler.allStatNames) {
-          this.#edgeMods[st].add(mod[st], mod.name);
+        for (const st of Object.values(AllAttributes) as AllAttributeValues[]) {
+          edgeMods[st].add(mod[st], mod.edge.name);
         }
       }
+      this.#edgeMods = edgeMods;
     }
     return this.#edgeMods[stat];
   }
 
-  getSkillBenefit(field) {
+  getSkillBenefit(field: "powered_ref_counter" | "powered_fit_mod") {
     const bd = new ValueBreakdown();
     for (let cs of this.characterSkills) {
       const skill = this.skillMap[cs.skill__name] ?? {};
@@ -142,16 +293,38 @@ class SkillHandler {
     return bd;
   }
 
-  getArmorStatMod(stat) {
+  getArmorStatMod(stat: AllAttributeValues | ArmorPieceAttribute) {
     if (!this.#armorMods) {
-      this.#armorMods = {};
-      for (let st of SkillHandler.allStatNames) {
-        this.#armorMods[st] = new ValueBreakdown();
-
+      let armorMods: ArmorMod = {
+        fit: new ValueBreakdown(),
+        ref: new ValueBreakdown(),
+        lrn: new ValueBreakdown(),
+        int: new ValueBreakdown(),
+        psy: new ValueBreakdown(),
+        wil: new ValueBreakdown(),
+        cha: new ValueBreakdown(),
+        pos: new ValueBreakdown(),
+        mov: new ValueBreakdown(),
+        dex: new ValueBreakdown(),
+        imm: new ValueBreakdown(),
+        stamina: new ValueBreakdown(),
+        mana: new ValueBreakdown(),
+        body: new ValueBreakdown(),
+        climb: new ValueBreakdown(),
+        stealth: new ValueBreakdown(),
+        conceal: new ValueBreakdown(),
+        swim: new ValueBreakdown(),
+        vision: new ValueBreakdown(),
+        hear: new ValueBreakdown(),
+        smell: new ValueBreakdown(),
+        surprise: new ValueBreakdown(),
+        suspendedWeight: 0,
+      };
+      for (const st of Object.values(AllAttributes) as AllAttributeValues[]) {
         const helmMod = this.getArmorPartMod(this.helm, st);
-        this.#armorMods[st].add(helmMod, "helm");
+        armorMods[st].add(helmMod, "helm");
         const armorMod = this.getArmorPartMod(this.armor, st);
-        this.#armorMods[st].add(armorMod, "armor");
+        armorMods[st].add(armorMod, "armor");
       }
 
       if (this.armor.base?.is_powered) {
@@ -164,21 +337,22 @@ class SkillHandler {
          * Power Armor skill increases the FIT bonus by +2 and
          * reduces the REF penalty by +3.
          */
-        this.#armorMods.ref.add(
+        armorMods.ref.add(
           getCounteredPenalty(
-            this.#armorMods.ref.value(),
+            armorMods.ref.value(),
             this.getSkillBenefit("powered_ref_counter").value(),
           ),
           "skill benefit",
         );
-        this.#armorMods.fit.add(
+        armorMods.fit.add(
           this.getSkillBenefit("powered_fit_mod").value(),
           "skill benefit",
         );
-        this.#armorMods.suspendedWeight = this.#armorMods.fit.value();
+        armorMods.suspendedWeight = armorMods.fit.value();
       } else {
-        this.#armorMods.suspendedWeight = 0;
+        armorMods.suspendedWeight = 0;
       }
+      this.#armorMods = armorMods as ArmorMod;
     }
     return this.#armorMods[stat];
   }
@@ -187,23 +361,26 @@ class SkillHandler {
     const bd = new ValueBreakdown();
     if (this.weightCarried) bd.addBreakdown(this.weightCarried);
     bd.add(
-      -Math.min(bd.value(), this.getArmorStatMod("suspendedWeight")),
+      -Math.min(
+        bd.value(),
+        this.getArmorStatMod(ArmorPieceAttribute.suspendedWeight) as number,
+      ),
       "power armor suspension",
     );
     bd.multiply(this.gravity, "from gravity");
     return bd;
   }
 
-  static getItemMap(
-    list,
-    accessor = (item) => {
+  static getItemMap<T>(
+    list: T[] | undefined,
+    accessor: (item: T) => string = (item: any) => {
       return item.name;
     },
-  ) {
+  ): Record<string, T> {
     if (!list) {
       return {};
     }
-    const newMap = {};
+    const newMap: Record<string, T> = {};
     for (let item of list) {
       newMap[accessor(item)] = item;
     }
@@ -215,10 +392,11 @@ class SkillHandler {
       return {};
     }
 
-    var skillBonusMap = {};
+    const skillBonusMap: Record<string, { bonus: number }> = {};
+
     for (let edge of this.edges) {
       for (let sb of edge.edge_skill_bonuses) {
-        if (!(sb.skill in skillBonusMap)) {
+        if (!(sb.skill__name in skillBonusMap)) {
           skillBonusMap[sb.skill__name] = {
             bonus: 0,
           };
@@ -230,14 +408,14 @@ class SkillHandler {
   }
 
   /* A base-level skill, i.e., Basic Artillery and the like. */
-  isBaseSkill(skillName) {
+  isBaseSkill(skillName: string) {
     const skill = this.skillMap[skillName];
 
     return skill.skill_cost_1 === null;
   }
 
-  getStat(stat) {
-    return this.getEffStats()[stat.toLowerCase()].value();
+  getStat(stat: Attribute) {
+    return this.getEffStats()[stat].value();
   }
 
   getEdgeSkillPoints() {
@@ -263,13 +441,14 @@ class SkillHandler {
 
   getInitiative() {
     return (
-      this.getStat("ref") / 10 +
-      this.getStat("int") / 20 +
-      this.getStat("psy") / 20 +
+      this.getStat(Attribute.Ref) / 10 +
+      this.getStat(Attribute.Int) / 20 +
+      this.getStat(Attribute.Psy) / 20 +
       SkillHandler.getInitPenaltyFromACPenalty(this.getACPenalty().value)
     );
   }
 
+  // TODO: return ValueBreakdown
   getACPenalty() {
     let breakdown = [];
     let penalty = 0;
@@ -353,7 +532,7 @@ class SkillHandler {
     return { value: penalty, breakdown: breakdown };
   }
 
-  static getInitPenaltyFromACPenalty(acPenalty) {
+  static getInitPenaltyFromACPenalty(acPenalty: number) {
     if (acPenalty > 0) {
       return 0;
     }
@@ -372,7 +551,11 @@ class SkillHandler {
    * a non-zero cost, calculate check defaulted to half-ability.
    */
 
-  skillCheck(skillName, stat, ignoreMissingSkill) {
+  skillCheck(
+    skillName: string,
+    stat: Attribute | DerivedAttribute | undefined = undefined,
+    ignoreMissingSkill = false,
+  ) {
     const skill = this.skillMap[skillName];
 
     if (!ignoreMissingSkill) {
@@ -391,9 +574,9 @@ class SkillHandler {
     const bd = new ValueBreakdown();
 
     const effStats = this.getEffStats();
-    const ability = effStats[stat.toLowerCase()].value();
+    const ability = effStats[stat.toLowerCase() as AllAttributeValues].value();
 
-    const level = this.skillLevel(skillName);
+    const level = this.skillLevelExt(skillName) ?? 0;
 
     if (level === "U" && !ignoreMissingSkill) {
       bd.add(Math.round(ability / 4), `1/4*${stat} (U)`);
@@ -402,7 +585,7 @@ class SkillHandler {
     } else {
       bd.add(ability, stat);
 
-      const levelBonus = level * 5;
+      const levelBonus = (level as number) * 5;
       bd.add(levelBonus, "skill level");
     }
 
@@ -412,17 +595,17 @@ class SkillHandler {
 
     if (skill) bd.addBreakdown(this.getSkillMod(skill));
 
-    bd.addBreakdown(this.acMod)
+    bd.addBreakdown(this.acMod);
     bd.add(this.getACPenalty().value, "AC penalty");
 
     return bd;
   }
 
   /* U is quarter-skill, i.e., using a pistol even without Basic
-           Firearms.  B is half-skill, i.e., the character has top-level skill,
-           but not the skill required.  Otherwise, if the character has the
-            skill, return the level of the skill. */
-  skillLevel(skillName) {
+             Firearms.  B is half-skill, i.e., the character has top-level skill,
+             but not the skill required.  Otherwise, if the character has the
+              skill, return the level of the skill. */
+  skillLevelExt(skillName: string) {
     const cs = this.characterSkillMap[skillName];
     const skill = this.skillMap[skillName];
 
@@ -449,7 +632,16 @@ class SkillHandler {
     }
   }
 
-  edgeLevel(edgeName, givenMap) {
+  skillLevel(skillName: string) {
+    const level = this.skillLevelExt(skillName);
+    if (typeof level === "number") {
+      return level;
+    } else {
+      return 0;
+    }
+  }
+
+  edgeLevel(edgeName: string, givenMap?: Record<string, EdgeLevel>) {
     if (givenMap === undefined) {
       givenMap = this.edgeMap;
     }
@@ -460,7 +652,7 @@ class SkillHandler {
     }
   }
 
-  hasSkill(skillName) {
+  hasSkill(skillName: string) {
     return skillName in this.characterSkillMap;
   }
 
@@ -469,40 +661,37 @@ class SkillHandler {
   }
 
   getSkillList() {
-    return this.skillList;
+    return [...this.skillList];
+  }
+
+  getCharacterSkillMap() {
+    return this.characterSkillMap;
+  }
+
+  getSkillMap() {
+    return this.skillMap;
   }
 
   createSkillList() {
-    // Make a deep copy of the list so as not accidentally mangle
-    // parent copy of the props.
-    const skillList = this.characterSkills.map((elem) => {
-      const obj = Object.assign({}, elem);
-      obj._children = [];
-      return obj;
-    });
+    const csMap = this.characterSkillMap;
+    const skillMap = this.skillMap;
 
-    this.characterSkillMap = SkillHandler.getItemMap(skillList, (item) => {
-      return item.skill__name;
-    });
-    this.skillMap = SkillHandler.getItemMap(this.allSkills);
-
-    var csMap = this.characterSkillMap;
-    var skillMap = this.skillMap;
-
-    var addChild = function (parent, child) {
+    const addChild = function (
+      parent: SkillHandlerCharacterSkill,
+      child: SkillHandlerCharacterSkill,
+    ) {
       parent._children.push(child);
     };
 
-    var root = [];
-    for (let cs of skillList) {
-      var skill = skillMap[cs.skill__name];
+    const root = [];
+    for (const cs of this.characterSkills) {
+      const skill = skillMap[cs.skill__name];
       if (!skill) {
         cs._unknownSkill = true;
         root.push(cs);
       } else {
         if (skill.required_skills.length > 0) {
           const parent = skill.required_skills[0].name;
-          cs._missingRequired = [];
           for (let sk of skill.required_skills) {
             if (!(sk.name in csMap)) {
               cs._missingRequired.push(sk.name);
@@ -519,14 +708,17 @@ class SkillHandler {
       }
     }
 
-    var finalList = [];
-    var compare = function (a, b) {
+    const finalList: SkillHandlerCharacterSkill[] = [];
+    const compare = function (a: CharacterSkill, b: CharacterSkill) {
       return (
         +(a.skill__name > b.skill__name) ||
         +(a.skill__name === b.skill__name) - 1
       );
     };
-    var depthFirst = function (cs, indent) {
+    const depthFirst = function (
+      cs: SkillHandlerCharacterSkill,
+      indent: number,
+    ) {
       cs.indent = indent;
       finalList.push(cs);
       for (let child of cs._children.sort(compare)) {
@@ -564,8 +756,10 @@ class SkillHandler {
   runningSpeed() {
     const bd = this.getBaseMovementSpeed();
 
-    const edgeRate = this.getEdgeModifier("run_multiplier") || 1.0;
-    const effRate = this.getEffectModifier("run_multiplier") || 1.0;
+    const edgeRate =
+      this.getEdgeModifier(StatModifierType.RunMultiplier) || 1.0;
+    const effRate =
+      this.getEffectModifier(StatModifierType.RunMultiplier) || 1.0;
     bd.multiply(edgeRate, "edges");
     bd.multiply(effRate, "effects");
 
@@ -581,7 +775,7 @@ class SkillHandler {
   }
 
   climbingSpeed() {
-    const level = this.skillLevel("Climbing");
+    const level = this.skillLevelExt("Climbing");
     const bd = this.getBaseMovementSpeed();
 
     bd.divide(30, "climbing");
@@ -591,8 +785,10 @@ class SkillHandler {
       bd.add(level, "skill level");
     }
 
-    const edgeRate = this.getEdgeModifier("climb_multiplier") || 1.0;
-    const effRate = this.getEffectModifier("climb_multiplier") || 1.0;
+    const edgeRate =
+      this.getEdgeModifier(StatModifierType.ClimbMultiplier) || 1.0;
+    const effRate =
+      this.getEffectModifier(StatModifierType.ClimbMultiplier) || 1.0;
     bd.multiply(edgeRate, "edges");
     bd.multiply(effRate, "effects");
 
@@ -602,7 +798,7 @@ class SkillHandler {
   }
 
   swimmingSpeed() {
-    const level = this.skillLevel("Swimming");
+    const level = this.skillLevelExt("Swimming");
     const bd = this.getBaseMovementSpeed();
     bd.divide(5, "swimming");
 
@@ -612,8 +808,10 @@ class SkillHandler {
       bd.add(level * 5, "skill level");
     }
 
-    const edgeRate = this.getEdgeModifier("swim_multiplier") || 1.0;
-    const effRate = this.getEffectModifier("swim_multiplier") || 1.0;
+    const edgeRate =
+      this.getEdgeModifier(StatModifierType.SwimMultiplier) || 1.0;
+    const effRate =
+      this.getEffectModifier(StatModifierType.SwimMultiplier) || 1.0;
     bd.multiply(edgeRate, "edges");
     bd.multiply(effRate, "effects");
 
@@ -623,7 +821,7 @@ class SkillHandler {
   }
 
   jumpingDistance() {
-    const level = this.skillLevel("Jumping");
+    const level = this.skillLevelExt("Jumping");
     const bd = this.getBaseMovementSpeed();
     bd.divide(12, "jumping");
     if (typeof level !== "number") {
@@ -632,8 +830,10 @@ class SkillHandler {
       bd.add(level * 0.75, "skill level");
     }
 
-    const edgeRate = this.getEdgeModifier("run_multiplier") || 1.0;
-    const effRate = this.getEffectModifier("run_multiplier") || 1.0;
+    const edgeRate =
+      this.getEdgeModifier(StatModifierType.RunMultiplier) || 1.0;
+    const effRate =
+      this.getEffectModifier(StatModifierType.RunMultiplier) || 1.0;
     bd.multiply(edgeRate, "edges");
     bd.multiply(effRate, "effects");
 
@@ -651,8 +851,8 @@ class SkillHandler {
   flyingSpeed() {
     let canFly = false;
     const bd = this.getBaseMovementSpeed();
-    const edgeRate = this.getEdgeModifier("fly_multiplier");
-    const effRate = this.getEffectModifier("fly_multiplier");
+    const edgeRate = this.getEdgeModifier(StatModifierType.FlyMultiplier);
+    const effRate = this.getEffectModifier(StatModifierType.FlyMultiplier);
     if (edgeRate) {
       bd.multiply(edgeRate, "edges");
       canFly = true;
@@ -671,52 +871,57 @@ class SkillHandler {
 
   // Stats.
 
-  getArmorPartMod(armor, givenStat) {
+  getArmorPartMod(armor: Armor, givenStat: AllAttributeValues) {
     let fromArmor = 0;
     let fromQuality = 0;
-    const stat = "mod_" + givenStat;
+    const stat = ("mod_" + givenStat) as ArmorStatModifierType;
+
     if (armor.base && stat in armor.base) {
       fromArmor += armor.base[stat];
     }
+
     if (armor.quality && stat in armor.quality) {
       fromQuality += armor.quality[stat];
     }
-    // Quality can not raise the stat, it only counters penalties.
-    // Outlined in the armor excel.
 
-    if (this.skillsToMod.indexOf(givenStat) >= 0) {
+    // Quality cannot raise the stat, it only counters penalties.
+    // Outlined in the armor xls.
+
+    if (SkillsToMod.includes(givenStat as SkillAttributeTypes)) {
       return fromArmor + fromQuality;
     } else {
       return fromArmor + getCounteredPenalty(fromArmor, fromQuality);
     }
   }
 
-  getSkillMod(skill) {
+  getSkillMod(skill: Skill) {
     const bd = new ValueBreakdown();
-    for (let mod of this.skillsToMod) {
+    for (let mod of SkillsToMod) {
       if (skill[`affected_by_armor_mod_${mod}`]) {
-        bd.addBreakdown(this.getArmorStatMod(mod));
+        bd.addBreakdown(this.getArmorStatMod(mod) as ValueBreakdown);
       }
     }
     return bd;
   }
 
-  getEdgeModifier(mod) {
+  getEdgeModifier(mod: EdgeModifierType | StatModifierType) {
     // Return the sum of modifiers from edges for modifier `mod`.
-    return this.getEffectModifier(mod, this.edges ?? []);
+    return this.getGenericModifier(mod, this.edges);
   }
 
-  getEffectModifier(mod, effects) {
-    // Return the sum of modifiers from effects for modifier `mod`.
-    if (!effects) {
-      effects = this.effects;
-      if (!effects) {
-        effects = [];
-      }
-    }
+  getEffectModifier(mod: EdgeModifierType | StatModifierType) {
+    return this.getGenericModifier(mod, this.effects);
+  }
+
+  getGenericModifier<T extends string>(
+    mod: T,
+    list: Record<T, string | number>[],
+  ) {
     let sum = 0;
-    for (let eff of effects) {
-      sum += parseFloat(eff[mod]);
+    for (let gen of list) {
+      const genElement = gen[mod];
+      sum +=
+        typeof genElement === "number" ? genElement : parseFloat(genElement);
     }
     return sum;
   }
@@ -724,57 +929,59 @@ class SkillHandler {
   getBaseStats() {
     if (!this._baseStats) {
       this._baseStats = {};
-      for (let st of SkillHandler.baseStatNames) {
+      for (const st of Object.values(Attribute) as Attribute[]) {
         this._baseStats[st] =
-          this.character["cur_" + st] +
-          this.character["base_mod_" + st] +
+          this.character[("cur_" + st) as CharacterAttribute] +
+          this.character[("base_mod_" + st) as CharacterAttribute] +
           this.getEdgeStatMod(st).value();
       }
       this._baseStats.mov =
         util.roundup((this._baseStats.fit + this._baseStats.ref) / 2) +
-        this.getEdgeStatMod("mov").value();
+        this.getEdgeStatMod(DerivedAttribute.Mov).value();
       this._baseStats.dex =
         util.roundup((this._baseStats.int + this._baseStats.ref) / 2) +
-        this.getEdgeStatMod("dex").value();
+        this.getEdgeStatMod(DerivedAttribute.Dex).value();
       this._baseStats.imm =
         util.roundup((this._baseStats.fit + this._baseStats.psy) / 2) +
-        this.getEdgeStatMod("imm").value();
+        this.getEdgeStatMod(DerivedAttribute.Imm).value();
 
       this._baseStats.stamina =
         util.roundup((this._baseStats.ref + this._baseStats.wil) / 4) +
-        this.getEdgeModifier("stamina") +
+        this.getEdgeModifier(EdgeModifierType.Stamina) +
         this.character.bought_stamina;
 
       this._baseStats.baseBody = util.roundup(this._baseStats.fit / 4);
       this._baseStats.body =
-        this._baseStats.baseBody + 2 * this.getEdgeModifier("toughness");
+        this._baseStats.baseBody +
+        2 * this.getEdgeModifier(EdgeModifierType.Toughness);
 
       this._baseStats.mana =
         util.roundup((this._baseStats.psy + this._baseStats.wil) / 4) +
-        this.getEdgeModifier("mana") +
+        this.getEdgeModifier(EdgeModifierType.Mana) +
         this.character.bought_mana;
     }
 
     return this._baseStats;
   }
 
-  getDamageThreshold(givenLoc) {
+  getDamageThreshold(givenLoc: ArmorLocation): number {
     if (!this._thresholds) {
-      const divider = { H: 10, T: 5, RA: 15, RL: 10, LA: 15, LL: 10 };
+      const divider = { h: 10, t: 5, ra: 15, rl: 10, la: 15, ll: 10 };
       this._thresholds = {};
-      for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+      for (const loc of ["h", "t", "ra", "rl", "la", "ll"] as ArmorLocation[]) {
         this._thresholds[loc] =
           util.roundup(this.getBaseStats().fit / divider[loc]) +
-          this.getEdgeModifier("toughness");
+          this.getEdgeModifier(EdgeModifierType.Toughness);
       }
     }
-    return this._thresholds[givenLoc];
+    return this._thresholds[givenLoc] ?? 0;
   }
 
   getStatus() {
     const woundPenalties = this.getWoundPenalties();
     const acPenalty = this.getACPenalty().value;
-    const painResistance = this.getEdgeModifier("pain_resistance") > 0;
+    const painResistance =
+      this.getEdgeModifier(EdgeModifierType.PainResistance) > 0;
     if (woundPenalties.aa > -10 && acPenalty > -10) {
       return SkillHandler.STATUS_OK;
     } else if (
@@ -795,73 +1002,73 @@ class SkillHandler {
     }
   }
 
-  getWoundPenalties() {
+  getWoundPenalties(): WoundPenalties {
     if (!this._woundPenalties) {
       // TODO: Use ValueBreakdown
-      this._woundPenalties = {};
 
-      this._woundPenalties.bodyDamage = 0;
-      this._woundPenalties.staminaDamage = 0;
+      const woundPenalties = {} as Partial<WoundPenalties>;
 
-      let locationDamages = { H: 0, T: 0, RA: 0, LA: 0, RL: 0, LL: 0 };
+      woundPenalties.bodyDamage = 0;
+      woundPenalties.staminaDamage = 0;
+
+      let locationDamages = { h: 0, t: 0, ra: 0, la: 0, rl: 0, ll: 0 };
       for (const ww of this.wounds) {
         const damage = ww.damage - ww.healed;
-        locationDamages[ww.location] += damage;
+        locationDamages[ww.location.toLowerCase() as ArmorLocation] += damage;
       }
 
       // Cap body damage at threshold, rest is stamina damage.
-      for (const loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+      for (const loc of ["h", "t", "ra", "rl", "la", "ll"] as ArmorLocation[]) {
         const threshold = this.getDamageThreshold(loc);
         if (locationDamages[loc] > threshold) {
           // Damage exceeding twice the threshold is ignored.
           const damage = Math.min(threshold, locationDamages[loc] - threshold);
 
-          this._woundPenalties.staminaDamage += damage;
+          woundPenalties.staminaDamage += damage;
           locationDamages[loc] = threshold;
         }
-        this._woundPenalties.bodyDamage += locationDamages[loc];
+        woundPenalties.bodyDamage += locationDamages[loc];
       }
 
-      const toughness = this.getEdgeModifier("toughness");
+      const toughness = this.getEdgeModifier(EdgeModifierType.Toughness);
 
-      this._woundPenalties.locationsDamages = Object.assign(
-        {},
-        locationDamages,
-      );
+      woundPenalties.locationsDamages = Object.assign({}, locationDamages);
 
-      for (let loc of ["H", "T", "RA", "RL", "LA", "LL"]) {
+      for (let loc of ["h", "t", "ra", "rl", "la", "ll"] as ArmorLocation[]) {
         locationDamages[loc] = Math.max(0, locationDamages[loc] - toughness);
       }
 
       const maxAAPenaltyPerLoc = {
-        H: -120,
-        T: -100,
-        RA: -10,
-        LA: -10,
-        RL: -10,
-        LL: -10,
+        h: -120,
+        t: -100,
+        ra: -10,
+        la: -10,
+        rl: -10,
+        ll: -10,
       };
-      this._woundPenalties.aa = Math.max(
-        -10 * locationDamages.H,
-        maxAAPenaltyPerLoc.H,
+      woundPenalties.aa = Math.max(
+        -10 * locationDamages.h,
+        maxAAPenaltyPerLoc.h,
       );
-      this._woundPenalties.aa += Math.max(
-        -5 * locationDamages.T,
-        maxAAPenaltyPerLoc.T,
+      woundPenalties.aa += Math.max(
+        -5 * locationDamages.t,
+        maxAAPenaltyPerLoc.t,
       );
-      if (this.getEdgeModifier("pain_resistance") <= 0) {
-        for (let loc of ["RA", "LA", "RL", "LL"]) {
-          this._woundPenalties.aa += Math.max(
+      if (this.getEdgeModifier(EdgeModifierType.PainResistance) <= 0) {
+        for (let loc of ["ra", "la", "rl", "ll"] as ArmorLocation[]) {
+          woundPenalties.aa += Math.max(
             util.rounddown(locationDamages[loc] / 3) * -5,
             maxAAPenaltyPerLoc[loc],
           );
         }
       }
-      this._woundPenalties.mov = Math.max(-10 * locationDamages.RL, -75);
-      this._woundPenalties.mov += Math.max(-10 * locationDamages.LL, -75);
+      woundPenalties.mov = Math.max(-10 * locationDamages.rl, -75);
+      woundPenalties.mov += Math.max(-10 * locationDamages.ll, -75);
 
-      this._woundPenalties.la_fit_ref = -10 * locationDamages.LA;
-      this._woundPenalties.ra_fit_ref = -10 * locationDamages.RA;
+      woundPenalties.la_fit_ref = -10 * locationDamages.la;
+      woundPenalties.ra_fit_ref = -10 * locationDamages.ra;
+
+      this._woundPenalties = woundPenalties as WoundPenalties;
     }
     return this._woundPenalties;
   }
@@ -883,23 +1090,42 @@ class SkillHandler {
   }
 
   getEffStats() {
-    function calculateEncumbrancePenalty(weightCarried, fit) {
-      let encumbrancePenalty = util.roundup((-10 * weightCarried) / fit);
-      return encumbrancePenalty;
+    function calculateEncumbrancePenalty(weightCarried: number, fit: number) {
+      return util.roundup((-10 * weightCarried) / fit);
     }
 
     if (!this._effStatsV2) {
-      this._effStats = {};
-      this._effStatsV2 = {};
-      this._effStats.breakdown = {};
+      const effStats: Record<AllAttributeValues, ValueBreakdown> = {
+        fit: new ValueBreakdown(),
+        ref: new ValueBreakdown(),
+        lrn: new ValueBreakdown(),
+        int: new ValueBreakdown(),
+        psy: new ValueBreakdown(),
+        wil: new ValueBreakdown(),
+        cha: new ValueBreakdown(),
+        pos: new ValueBreakdown(),
+        mov: new ValueBreakdown(),
+        dex: new ValueBreakdown(),
+        imm: new ValueBreakdown(),
+        stamina: new ValueBreakdown(),
+        mana: new ValueBreakdown(),
+        body: new ValueBreakdown(),
+        climb: new ValueBreakdown(),
+        stealth: new ValueBreakdown(),
+        conceal: new ValueBreakdown(),
+        swim: new ValueBreakdown(),
+        vision: new ValueBreakdown(),
+        hear: new ValueBreakdown(),
+        smell: new ValueBreakdown(),
+        surprise: new ValueBreakdown(),
+      };
 
       const baseStats = this.getBaseStats();
 
       const woundPenalties = this.getWoundPenalties();
 
-      for (let st of SkillHandler.baseStatNames) {
-        const bd = new ValueBreakdown();
-        this._effStatsV2[st] = bd;
+      for (const st of Object.values(AllAttributes) as AllAttributeValues[]) {
+        const bd = effStats[st];
 
         bd.add(baseStats[st], st.toUpperCase());
 
@@ -913,77 +1139,72 @@ class SkillHandler {
       // Encumbrance and armor are calculated after soft mods
       // (transient effects, such as spells) and hard mods (edges)
       // in the Excel combat sheet.
-      if (this._effStatsV2.fit.value() > 0) {
+      if (effStats.fit.value() > 0) {
         const encumbrancePenalty = calculateEncumbrancePenalty(
           this.getCarriedWeight().value(),
-          this._effStatsV2.fit.value(),
+          effStats.fit.value(),
         );
         if (encumbrancePenalty < 0) {
-          this.addEncumbrancePenalty(encumbrancePenalty);
+          effStats.fit.add(encumbrancePenalty, "encumbrance");
+          effStats.ref.add(encumbrancePenalty, "encumbrance");
         }
 
         if (this.gravity < 1.0) {
           const gravityPenalty = util.roundup(-25 * (1.0 - this.gravity));
 
-          this._effStatsV2.ref.add(gravityPenalty, "gravity");
+          effStats.ref.add(gravityPenalty, "gravity");
 
           // Low-G maneuver
           const level = this.skillLevel("Low-G maneuver");
-          if (typeof level === "number") {
-            const skillOffset = Math.min(level * 5, -gravityPenalty);
-            this._effStatsV2.ref.add(skillOffset, "low-g skill");
-          }
+          const skillOffset = Math.min(level * 5, -gravityPenalty);
+          effStats.ref.add(skillOffset, "low-g skill");
         }
       } else {
         // Effective FIT zero or negative, the character cannot move.
-        this._effStatsV2.ref.set(-100, "Eff-FIT negative");
-        this._effStatsV2.fit.set(-100, "Eff-FIT negative");
+        effStats.ref.set(-100, "Eff-FIT negative");
+        effStats.fit.set(-100, "Eff-FIT negative");
       }
 
-      const addStatMods = (stat) => {
-        this._effStatsV2[stat].add(this.getEdgeStatMod(stat).value(), "edges");
-        this._effStatsV2[stat].add(this._softMods[stat], "soft mods");
+      const addStatMods = (stat: DerivedAttribute) => {
+        effStats[stat].add(this.getEdgeStatMod(stat).value(), "edges");
+        effStats[stat].add(this._softMods[stat], "soft mods");
       };
 
-      this._effStatsV2.mov = new ValueBreakdown();
+      effStats.mov = new ValueBreakdown();
 
       const baseMov = util.roundup(
-        (this._effStatsV2.fit.value() + this._effStatsV2.ref.value()) / 2,
+        (effStats.fit.value() + effStats.ref.value()) / 2,
       );
-      this._effStatsV2.mov.add(baseMov, "(FIT + REF) / 2");
+      effStats.mov.add(baseMov, "(FIT + REF) / 2");
 
-      addStatMods("mov");
-      this._effStatsV2.mov.add(woundPenalties.mov, "wound penalties");
+      addStatMods(DerivedAttribute.Mov);
+      effStats.mov.add(woundPenalties.mov, "wound penalties");
 
-      this._effStatsV2.dex = new ValueBreakdown();
+      effStats.dex = new ValueBreakdown();
       const baseDex = util.roundup(
-        (this._effStatsV2.int.value() + this._effStatsV2.ref.value()) / 2,
+        (effStats.int.value() + effStats.ref.value()) / 2,
       );
-      this._effStatsV2.dex.add(baseDex, "(INT + REF) / 2");
-      addStatMods("dex");
+      effStats.dex.add(baseDex, "(INT + REF) / 2");
+      addStatMods(DerivedAttribute.Dex);
 
-      this._effStatsV2.imm = new ValueBreakdown();
+      effStats.imm = new ValueBreakdown();
 
       const baseImm = util.roundup(
-        (this._effStatsV2.fit.value() + this._effStatsV2.psy.value()) / 2,
+        (effStats.fit.value() + effStats.psy.value()) / 2,
       );
-      this._effStatsV2.imm.add(baseImm, "(FIT + PSY) / 2");
-      addStatMods("imm");
+      effStats.imm.add(baseImm, "(FIT + PSY) / 2");
+      addStatMods(DerivedAttribute.Imm);
 
-      for (const st of ["mov", "dex", "imm", ...SkillHandler.baseStatNames]) {
-        this._effStats[st] = this._effStatsV2[st].value();
-        this._effStats.breakdown[st] = this._effStatsV2[st].breakdown();
-      }
+      this._effStatsV2 = effStats as Record<AllAttributeValues, ValueBreakdown>;
     }
     return this._effStatsV2;
   }
 
-  addEncumbrancePenalty(encumbrancePenalty, tag = "encumbrance") {
-    this._effStatsV2.fit.add(encumbrancePenalty, tag);
-    this._effStatsV2.ref.add(encumbrancePenalty, tag);
-  }
-
-  detectionLevel(goodEdge, badEdge, givenMap) {
+  detectionLevel(
+    goodEdge: string,
+    badEdge: string,
+    givenMap: Record<string, EdgeLevel> | undefined = undefined,
+  ) {
     let level = -this.edgeLevel(badEdge, givenMap);
     if (!level) {
       level = this.edgeLevel(goodEdge, givenMap);
@@ -991,11 +1212,15 @@ class SkillHandler {
     return level;
   }
 
-  getTotalModifier(target) {
+  getTotalModifier(target: SenseAttribute) {
     return this.getEdgeStatMod(target).value() + this._softMods[target];
   }
 
-  visionCheck(range, darknessDetectionLevel, givenPerks) {
+  visionCheck(
+    range: number,
+    darknessDetectionLevel: number,
+    givenPerks: EdgeLevel[],
+  ) {
     const ranges = [2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
 
     if (darknessDetectionLevel > 0) {
@@ -1037,7 +1262,7 @@ class SkillHandler {
     return bd;
   }
 
-  dayVisionBaseCheck(givenPerks) {
+  dayVisionBaseCheck(givenPerks: EdgeLevel[]) {
     const perks = givenPerks
       ? SkillHandler.getItemMap(givenPerks, (item) => {
           return item.edge.name;
@@ -1045,8 +1270,8 @@ class SkillHandler {
       : {};
 
     const bd = new ValueBreakdown();
-    bd.addBreakdown(this.skillCheck("Search", "INT", true));
-    bd.add(this.getTotalModifier("vision"), "vision mods");
+    bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));
+    bd.add(this.getTotalModifier(SenseAttribute.Vision), "vision mods");
 
     bd.add(-5 * this.edgeLevel("Color Blind"), "from color blind");
 
@@ -1060,7 +1285,7 @@ class SkillHandler {
     };
   }
 
-  nightVisionBaseCheck(givenPerks) {
+  nightVisionBaseCheck(givenPerks: EdgeLevel[]) {
     const perks = givenPerks
       ? SkillHandler.getItemMap(givenPerks, (item) => {
           return item.edge.name;
@@ -1069,8 +1294,8 @@ class SkillHandler {
 
     const bd = new ValueBreakdown();
 
-    bd.addBreakdown(this.skillCheck("Search", "INT", true));
-    bd.add(this.getTotalModifier("vision"), "vision mods");
+    bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));
+    bd.add(this.getTotalModifier(SenseAttribute.Vision), "vision mods");
 
     let acuteVision = this.detectionLevel("Acute Vision", "Poor Vision");
     acuteVision += this.detectionLevel("Acute Vision", "Poor Vision", perks);
@@ -1092,17 +1317,19 @@ class SkillHandler {
   surpriseCheck() {
     const surpriseSkillCheck = this.skillCheck(
       "Tailing / Shadowing",
-      "PSY",
+      Attribute.Psy,
       true,
     )?.value();
-    return surpriseSkillCheck + this.getTotalModifier("surprise");
+    return (
+      (surpriseSkillCheck ?? 0) + this.getTotalModifier(SenseAttribute.Surprise)
+    );
   }
 
   smellCheck() {
     const bd = new ValueBreakdown();
 
-    bd.addBreakdown(this.skillCheck("Search", "INT", true));
-    bd.add(this.getTotalModifier("smell"), "smell mods");
+    bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));
+    bd.add(this.getTotalModifier(SenseAttribute.Smell), "smell mods");
 
     return {
       check: bd,
@@ -1116,8 +1343,8 @@ class SkillHandler {
   hearingCheck() {
     const bd = new ValueBreakdown();
 
-    bd.addBreakdown(this.skillCheck("Search", "INT", true));
-    bd.add(this.getTotalModifier("hear"), "hear mods");
+    bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));
+    bd.add(this.getTotalModifier(SenseAttribute.Hear), "hear mods");
 
     return {
       check: bd,
@@ -1127,49 +1354,17 @@ class SkillHandler {
 
   touchCheck() {
     const bd = new ValueBreakdown();
-    bd.addBreakdown(this.getArmorStatMod("climb"));
+    bd.addBreakdown(
+      this.getArmorStatMod(SkillAttribute.Climb) as ValueBreakdown,
+    );
     bd.divide(2, "touch coefficient");
     bd.roundup();
-    bd.addBreakdown(this.skillCheck("Search", "INT", true));
+    bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));
     return {
       check: bd,
       detectionLevel: this.edgeLevel("Acute Touch"),
     };
   }
 }
-
-SkillHandler.baseStatNames = [
-  "fit",
-  "ref",
-  "lrn",
-  "int",
-  "psy",
-  "wil",
-  "cha",
-  "pos",
-];
-SkillHandler.allStatNames = SkillHandler.baseStatNames.concat([
-  "mov",
-  "dex",
-  "imm",
-  "stamina",
-  "mana",
-  "vision",
-  "hear",
-  "smell",
-  "surprise",
-  "climb",
-  "stealth",
-  "conceal",
-  "swim",
-]);
-
-SkillHandler.BASE_VISION_RANGE = 9;
-SkillHandler.BASE_HEARING_RANGE = 6;
-SkillHandler.BASE_SMELL_RANGE = 3;
-
-SkillHandler.STATUS_OK = 1;
-SkillHandler.STATUS_WOUNDED = 5;
-SkillHandler.STATUS_CRITICAL = 9;
 
 export default SkillHandler;

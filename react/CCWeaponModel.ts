@@ -1,4 +1,4 @@
-import { Weapon } from "./api"; // import * as util from "./sheet-util";
+import { Attribute, EdgeModifierType, Weapon } from "./api"; // import * as util from "./sheet-util";
 import SkillHandler from "./SkillHandler";
 import { UseType } from "./WeaponModel";
 import ValueBreakdown from "./ValueBreakdown";
@@ -6,13 +6,8 @@ import * as util from "./sheet-util";
 import { PhysicalWeaponModel } from "./PhysicalWeaponModel";
 
 export default class CCWeaponModel extends PhysicalWeaponModel {
-  // static VISION_CHECK_PENALTY_LIMIT = 45;
-  // static VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95;
-  // static VISION_BUMPING_LIMIT = 95;
-
   #weapon: Weapon;
   #handler: SkillHandler;
-  // readonly #darknessDetectionLevel: number;
 
   readiedBaseI = -1;
   baseCheckBonusForSlowActions = 5;
@@ -21,12 +16,10 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
   constructor(
     handler: SkillHandler,
     weapon: Weapon, // TODO: rename to SheetCCWeapon or similar
-    // darknessDetectionLevel: number,
   ) {
     super(handler, weapon);
     this.#handler = handler;
     this.#weapon = weapon;
-    // this.#darknessDetectionLevel = darknessDetectionLevel;
   }
 
   roa(useType: UseType) {
@@ -65,8 +58,8 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
     );
   }
 
-  penaltyCounterStat(): string {
-    return "INT";
+  penaltyCounterStat(): Attribute {
+    return Attribute.Int;
   }
 
   wrongHandPenalty(useType: UseType): ValueBreakdown {
@@ -114,8 +107,8 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
     if (this.#weapon.base.is_natural_weapon) {
       return util.rounddown(
         this.#weapon.base.leth -
-          this.#handler.getEdgeModifier("armor_l") +
-          this.#handler.getEdgeModifier("toughness") / 2 +
+          this.#handler.getEdgeModifier(EdgeModifierType.LethalityReduction) +
+          this.#handler.getEdgeModifier(EdgeModifierType.Toughness) / 2 +
           2 * (this.#weapon.size - 1),
       );
     } else {

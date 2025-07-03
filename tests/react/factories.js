@@ -549,17 +549,21 @@ const armorTemplateFactory = function (overrideFields) {
         "armor_rl_pl": 0,
         "armor_la_pl": 0,
         "armor_ra_pl": 0,
+
         "mod_fit": 0,
         "mod_ref": 0,
         "mod_psy": 0,
-        "mod_vision": 0,
+
+      "mod_vision": 0,
         "mod_hear": 0,
         "mod_smell": 0,
         "mod_surprise": 0,
+
         "mod_stealth": 0,
         "mod_conceal": 0,
         "mod_climb": 0,
-        "mod_tumble": 0,
+        "mod_swim": 0,
+
         "weight": "1.00",
         "encumbrance_class": 0,
         "tech_level": 1
@@ -584,11 +588,17 @@ const armorQualityFactory = function (overrideFields) {
         "mod_fit": 0,
         "mod_ref": 0,
         "mod_psy": 0,
-        "mod_sensory": 0,
+
+      "mod_vision": 0,
+        "mod_hear": 0,
+        "mod_smell": 0,
+        "mod_surprise": 0,
+
         "mod_stealth": 0,
         "mod_conceal": 0,
         "mod_climb": 0,
-        "mod_tumble": 0,
+        "mod_swim": 0,
+
         "mod_weight_multiplier": "1.0",
         "mod_encumbrance_class": 0,
         "tech_level": 1

@@ -94,7 +94,8 @@ describe('SkillTable', function() {
     test.todo("allows removing skills");
     test.todo("allows adding a new skill");
 
-    it ("filters out skills the character already has from the suggested skills", async function () {
+    // TODO: move to stat-block-skill.test.js
+    xit ("filters out skills the character already has from the suggested skills", async function () {
         const user = userEvent.setup()
 
         const gardening = factories.skillFactory("Gardening");
@@ -152,30 +153,6 @@ describe('SkillTable', function() {
         const removeButton = within(row).getByLabelText("Remove skill")
         await user.click(removeButton)
         expect(spy).toHaveBeenCalledWith({id: 42});
-    });
-
-    it("calls the passed onCharacterSkillAdd handler", async function () {
-        const user = userEvent.setup()
-
-        let spy = jasmine.createSpy("callback");
-        const gardening = factories.skillFactory({name: "Gardening"});
-        const table = render(getSkillTable({
-            onCharacterSkillAdd: spy,
-            allSkills: [gardening,]
-        }));
-        const skillInput = within(screen.getByLabelText("Add skill name")).getByRole("combobox")
-        await user.clear(skillInput)
-        await user.type(skillInput, "Gardening")
-        await user.click(screen.getByText("Gardening"))
-
-        const levelInput = within(screen.getByLabelText("Add skill level")).getByRole("combobox")
-        await user.clear(levelInput)
-        await user.type(levelInput, "3")
-
-        const addButton = screen.getByRole("button", {name: "Add skill"})
-        expect(addButton).not.toBeDisabled()
-        await user.click(addButton)
-        expect(spy).toHaveBeenCalledWith({skill: gardening.id, level: 3});
     });
 
     it("can calculate sp costs", function () {

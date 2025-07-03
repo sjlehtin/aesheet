@@ -62,6 +62,12 @@ describe('SkillHandler', function() {
 
         const newList = handler.getSkillList();
         expect(newList[0].skill__name).toEqual("Agriculture");
+
+        newList.splice(0, 1);
+
+        // Modifying the returned list should not modify the original.
+        const newList2 = handler.getSkillList();
+        expect(newList2[0].skill__name).toEqual("Agriculture");
     });
 
     it("finds missing skills while mangling from all requires", function () {
@@ -108,7 +114,6 @@ describe('SkillHandler', function() {
         expect(newList[3].skill__name).toEqual("Florism");
         expect(newList[3].indent).toEqual(2);
     });
-
 
     it("calculates indent for nested required skills while mangling", function () {
         const handler = factories.skillHandlerFactory({
@@ -170,7 +175,7 @@ describe('SkillHandler', function() {
         expect(handler.getEdgeSkillPoints()).toEqual(14)
     })
 
-    it("calcualate initial skill points", function () {
+    it("calculates initial skill points", function () {
         const handler =  factories.skillHandlerFactory({character: {
             start_lrn: 50, start_int: 38, start_psy: 47}
         });

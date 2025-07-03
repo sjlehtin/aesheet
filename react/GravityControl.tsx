@@ -1,7 +1,6 @@
-import React from "react";
 import FloatInputControl from "./FloatInputControl";
 
-function GravityControl({ onChange, initialValue, ...extraProps }) {
+function GravityControl({ onChange, initialValue, ...extraProps } : { onChange: (val: string) => Promise<void>, initialValue: string}) {
   return (
     <FloatInputControl
       label="Gravity"

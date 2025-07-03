@@ -125,10 +125,10 @@ describe('ArmorControl', function() {
                 armor_h_dr: -36,
               }),
               quality: factories.armorQualityFactory({
-                armor_p: -0.5,
-                armor_s: -0.5,
-                armor_b: -0.5,
-                armor_r: -0.5,
+                armor_p: "-0.5",
+                armor_s: "-0.5",
+                armor_b: "-0.5",
+                armor_r: "-0.5",
                 armor_dr: 0,
                 dp_multiplier: 1.5,
               }),
@@ -191,9 +191,9 @@ describe('ArmorControl', function() {
             campaign={2}
             armor={factories.armorFactory({
               base: factories.armorTemplateFactory({
-                armor_h_r: 0,
+                armor_h_r: "0",
                 armor_h_dr: 0,
-                armor_t_p: -9.5,
+                armor_t_p: "-9.5",
                 armor_t_dr: -14,
               }),
               quality: factories.armorQualityFactory({ armor_dr: -3 }),
@@ -203,8 +203,8 @@ describe('ArmorControl', function() {
                 {
                   edge: "Hardened Skin",
                   level: 1,
-                  armor_l: -0.5,
-                  armor_dr: -2.0,
+                  armor_l: "-0.5",
+                  armor_dr: "-2.0",
                 },
               ],
             })}

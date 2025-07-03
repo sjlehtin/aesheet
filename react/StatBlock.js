@@ -7,7 +7,7 @@ import XPControl from './XPControl';
 import AddSPControl from './AddSPControl';
 import NoteBlock from './NoteBlock';
 import InitiativeBlock from './InitiativeBlock';
-import SkillTable from './SkillTable';
+import SkillTable, {filterSkills} from './SkillTable';
 import Loading from './Loading';
 import FirearmControl from './FirearmControl';
 import AddFirearmControl from './AddFirearmControl';
@@ -49,6 +49,7 @@ import ValueBreakdown from "./ValueBreakdown";
 import WoundPenaltyBox from "./WoundPenaltyBox";
 import VisionCheckIndicator from "./VisionCheckIndicator";
 import RangeControl from "./RangeControl";
+import AddSkillControl from "./AddSkillControl";
 
 export function staminaRecovery(effStats, skillHandler) {
     /* High stat: ROUNDDOWN((IMM-45)/15;0)*/
@@ -442,17 +443,6 @@ class StatBlock extends React.Component {
         this.setState({char: data});
     }
 
-    handleCharacterSkillAdd(skill) {
-        return rest.post(this.getCharacterSkillURL(), skill).then((json) => {
-            if (!("skill" in json) || !("id" in json)) {
-                throw Error("Got invalid reply", json);
-            }
-            var skillList = this.state.characterSkills;
-            skillList.push(json);
-            this.setState({characterSkills: skillList});
-        }).catch((err) => console.log("Failed skill add:", err));
-    }
-
     handleAddGainedSP(addedSP) {
         let data = this.state.char,
             newGained = data.gained_sp + addedSP;
@@ -488,8 +478,19 @@ class StatBlock extends React.Component {
         throw Error("No such item", givenItem);
     }
 
+    handleCharacterSkillAdd(skill) {
+        return rest.post(this.getCharacterSkillURL(), skill).then((json) => {
+            if (!("skill" in json) || !("id" in json)) {
+                throw Error("Got invalid reply", json);
+            }
+            var skillList = this.state.characterSkills;
+            skillList.push(json);
+            this.setState({characterSkills: skillList});
+        }).catch((err) => console.log("Failed skill add:", err));
+    }
+
     handleCharacterSkillRemove(skill) {
-        rest.del(this.getCharacterSkillURL(skill)).then((json) => {
+        return rest.del(this.getCharacterSkillURL(skill)).then((json) => {
             let index = StatBlock.findItemIndex(
                 this.state.characterSkills, skill);
             this.state.characterSkills.splice(index, 1);
@@ -789,8 +790,16 @@ class StatBlock extends React.Component {
         if (!skillHandler) {
             return <Loading>Skills</Loading>
         }
-        return <div className={"mr-2"}><SkillTable
-            style={{fontSize: "80%"}}
+        const style = {fontSize: "80%"};
+        return <div className={"mr-2"}>
+                  <Card style={this.props.style}>
+        <Card.Header>
+          <h4>Skills</h4>
+        </Card.Header>
+        <Card.Body className={"table-responsive p-0"}>
+
+            <SkillTable
+            style={style}
             skillHandler={skillHandler}
             onCharacterSkillRemove={
                       (skill) => this.handleCharacterSkillRemove(skill)}
@@ -798,7 +807,20 @@ class StatBlock extends React.Component {
                       (skill) => this.handleCharacterSkillModify(skill)}
             onCharacterSkillAdd={
                       (skill) => this.handleCharacterSkillAdd(skill)}
-            /></div>
+            />
+                </Card.Body>
+        <Card.Footer>
+          <AddSkillControl
+            allSkills={filterSkills(
+              this.state.allSkills,
+              skillHandler.getCharacterSkillMap(),
+            )}
+            onCharacterSkillAdd={(skill) => this.handleCharacterSkillAdd(skill)}
+            style={style}
+          />
+        </Card.Footer>
+      </Card>
+</div>;
     }
 
     renderStats(skillHandler) {
@@ -806,21 +828,21 @@ class StatBlock extends React.Component {
             return <Loading>Stats</Loading>;
         }
 
-        var baseStyle = {
+        const baseStyle = {
             textAlign: "right",
             paddingLeft: 5,
             minWidth: "2em"
         };
-        var effStyle = { fontWeight: "bold" };
+        let effStyle = { fontWeight: "bold" };
         effStyle = Object.assign(effStyle, baseStyle);
-        var statStyle = { fontWeight: "bold" };
+        const statStyle = { fontWeight: "bold" };
 
-        var rows, derivedRows, expendable;
+        let rows, derivedRows, expendable;
 
-        var baseStats = skillHandler.getBaseStats();
-        var effStats = skillHandler.getEffStats();
+        const baseStats = skillHandler.getBaseStats();
+        const effStats = skillHandler.getEffStats();
 
-        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+        const stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
             "pos"];
         rows = stats.map((st, ii) => {
             return <StatRow stat={st}
@@ -831,7 +853,6 @@ class StatBlock extends React.Component {
                             onMod={this.handleModification.bind(this)}
                             url={this.state.url} />;
         });
-
 
         derivedRows = <tbody>
             <tr>
@@ -1079,13 +1100,6 @@ class StatBlock extends React.Component {
         bd.add(this.state.carriedInventoryWeight, "inventory")
 
         return bd
-    }
-
-    rangeChanged(newRange) {
-        this.setState({
-            firearmRange: newRange.range,
-            firearmDarknessDetectionLevel: newRange.darknessDetectionLevel
-        });
     }
 
     gravityChanged(newGravity) {
@@ -1399,7 +1413,7 @@ class StatBlock extends React.Component {
             return <Loading>Damage controls</Loading>;
         }
         return <DamageControl
-                character={skillHandler.props.character}
+                character={this.state.character}
                 sheet={this.state.sheet}
                 handler={skillHandler}
                 wounds={this.state.woundList}
@@ -1447,8 +1461,7 @@ class StatBlock extends React.Component {
         return <SenseTable handler={handler}/>;
     }
 
-    renderWeightCarried () {
-        const skillHandler =  this.getSkillHandler();
+    renderWeightCarried (skillHandler) {
         if (this.state.loading || !skillHandler) {
             return <Loading>Inventory</Loading>
         }
@@ -1521,7 +1534,7 @@ class StatBlock extends React.Component {
                                 </Col>
                             </Row>
                             <Row>
-                                <Col md={6}>{this.renderWeightCarried()}</Col>
+                                <Col md={6}>{this.renderWeightCarried(skillHandler)}</Col>
                             </Row>
                         </Col>
                         <Col md={4}>

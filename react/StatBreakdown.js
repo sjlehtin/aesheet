@@ -3,7 +3,7 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export default function StatBreakdown({
   value: givenValue,
-  toFixed,
+  toFixed = -1, // TODO: make this optional parameter, so it can be null if not defined.
   breakdown: givenBreakdown = [],
   style = {},
   label = "Skill check",
@@ -15,14 +15,14 @@ export default function StatBreakdown({
 
   let calculatedToFixed = 2;
   let coerceMainValue = false;
-  if (toFixed !== undefined) {
+  if (toFixed >= 0) {
     coerceMainValue = true;
     calculatedToFixed = toFixed;
   }
 
   function renderValue(value) {
     if (coerceMainValue || !Number.isInteger(value)) {
-      value = value.toFixed(calculatedToFixed);
+      value = parseFloat(value).toFixed(calculatedToFixed);
     }
     return value;
   }

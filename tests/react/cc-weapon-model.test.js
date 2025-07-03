@@ -45,12 +45,6 @@ describe("CCWeaponModel", function () {
   it("can calculate effect of missing specialization skill checks", () => {
     const weapon = createWeaponModel({
       handler: {
-        // skills: [
-        //   {
-        //     skill__name: "Weapon combat",
-        //     level: 0,
-        //   },
-        // ],
       },
       weapon: {
         name: "Zweihänder",

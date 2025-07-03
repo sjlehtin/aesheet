@@ -25,7 +25,6 @@ describe('DamageControl', function() {
             props = {}
         }
         props.handler = factories.skillHandlerFactory({character: props.character})
-        props.character = props.handler.props.character
         props.sheet = factories.sheetFactory(props.sheet)
         if (props.wounds) {
             props.wounds = props.wounds.map(

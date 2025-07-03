@@ -1,12 +1,12 @@
 import { Table } from "react-bootstrap";
 import * as util from "./sheet-util";
 import StatBreakdown from "./StatBreakdown";
-import React from "react";
+import { RangeEffect } from "./FirearmModel";
 
-export function RangeInfo({ rangeEffect }) {
+export function RangeInfo({ rangeEffect }: { rangeEffect: RangeEffect }) {
   if (rangeEffect) {
     let bumping;
-    if (rangeEffect.bumpingAllowed && rangeEffect.bumpingLevel > 0) {
+    if (rangeEffect.bumpingAllowed && (rangeEffect.bumpingLevel ?? 0) > 0) {
       bumping = `yes (${rangeEffect.bumpingLevel})`;
     } else {
       bumping = `no`;

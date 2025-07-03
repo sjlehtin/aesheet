@@ -117,7 +117,8 @@ class ArmorQualityAdmin(admin.ModelAdmin):
 
                     'mod_fit', 'mod_ref', 'mod_psy',
 
-                    'mod_sensory', 'mod_stealth', 'mod_conceal', 'mod_climb',
+                    'mod_vision', 'mod_hear', 'mod_smell', 'mod_surprise',
+                    'mod_stealth', 'mod_conceal', 'mod_climb', 'mod_swim',
 
                     'mod_weight_multiplier', 'mod_encumbrance_class'
                     )
@@ -145,7 +146,7 @@ class ArmorTemplateAdmin(admin.ModelAdmin):
 
                     'mod_vision', 'mod_hear', 'mod_smell', 'mod_surprise',
 
-                    'mod_stealth', 'mod_conceal', 'mod_climb', 'mod_tumble',
+                    'mod_stealth', 'mod_conceal', 'mod_climb', 'mod_swim',
 
                     'weight', 'encumbrance_class'
                     )

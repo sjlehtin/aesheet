@@ -250,10 +250,6 @@ class Character(PrivateMixin, models.Model):
     def __str__(self):
         return "%s: %s %s" % (self.name, self.race, self.occupation)
 
-    # TODO: Remove after python 2.7 support no longer needed.
-    def __unicode__(self):
-        return self.__str__()
-
     @classmethod
     def get_by_campaign(cls, user):
         return get_by_campaign(get_characters(user))
@@ -1437,7 +1433,6 @@ class ArmorTemplate(ExportedModel):
     mod_stealth = models.IntegerField(default=0)
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
-    mod_tumble = models.IntegerField(default=0)
     mod_swim = models.IntegerField(default=0)
 
     weight = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)
@@ -1481,10 +1476,16 @@ class ArmorQuality(ExportedModel):
     mod_fit = models.IntegerField(default=0)
     mod_ref = models.IntegerField(default=0)
     mod_psy = models.IntegerField(default=0)
-    mod_sensory = models.IntegerField(default=0)
+
+    mod_vision = models.IntegerField(default=0)
+    mod_hear = models.IntegerField(default=0)
+    mod_smell = models.IntegerField(default=0)
+    mod_surprise = models.IntegerField(default=0)
+
     mod_stealth = models.IntegerField(default=0)
     mod_conceal = models.IntegerField(default=0)
     mod_climb = models.IntegerField(default=0)
+    mod_swim = models.IntegerField(default=0)
 
     mod_weight_multiplier = models.DecimalField(
         max_digits=4, decimal_places=1, default=1.0

@@ -3,11 +3,10 @@ import PropTypes from "prop-types";
 
 import * as util from "./sheet-util";
 
-import { Card, Table } from "react-bootstrap";
+import { Table } from "react-bootstrap";
 import SkillRow from "./SkillRow";
-import AddSkillControl from "./AddSkillControl";
 
-function filterSkills(skillList, characterSkills) {
+export function filterSkills(skillList, characterSkills) {
   const filtered = [];
   for (let skill of skillList) {
     if (!(skill.name in characterSkills)) {
@@ -22,28 +21,6 @@ class SkillTable extends React.Component {
     return this.props.skillHandler.getSkillList().filter((cs) => {
       return SkillTable.prefilledPhysicalSkills.indexOf(cs.skill__name) === -1;
     });
-  }
-
-  static getCharacterSkillMap(skillList) {
-    if (!skillList) {
-      return {};
-    }
-    let csMap = {};
-    for (let cs of skillList) {
-      csMap[cs.skill__name] = cs;
-    }
-    return csMap;
-  }
-
-  static getSkillMap(skillList) {
-    if (!skillList) {
-      return {};
-    }
-    var skillMap = {};
-    for (let skill of skillList) {
-      skillMap[skill.name] = skill;
-    }
-    return skillMap;
   }
 
   static spCost(cs, skill) {
@@ -85,14 +62,12 @@ class SkillTable extends React.Component {
   }
 
   render() {
+    const csMap = this.props.skillHandler.getCharacterSkillMap();
+    const skillMap = this.props.skillHandler.getSkillMap();
+
     var rows = [];
     var ii;
-    var csMap = SkillTable.getCharacterSkillMap(
-      this.props.skillHandler.props.characterSkills,
-    );
-    var skillMap = SkillTable.getSkillMap(
-      this.props.skillHandler.props.allSkills,
-    );
+
     var totalSP = 0,
       spCost;
     var skill;
@@ -183,11 +158,6 @@ class SkillTable extends React.Component {
     const opt = this.optimizeAgeSP();
 
     return (
-      <Card style={this.props.style}>
-        <Card.Header>
-          <h4>Skills</h4>
-        </Card.Header>
-        <Card.Body className={"table-responsive p-0"}>
           <Table aria-label={"Skills"} style={{ fontSize: "inherit" }} striped>
             <thead>
               <tr>
@@ -248,18 +218,6 @@ class SkillTable extends React.Component {
               </tr>
             </tfoot>
           </Table>
-        </Card.Body>
-        <Card.Footer>
-          <AddSkillControl
-            allSkills={filterSkills(
-              this.props.skillHandler.props.allSkills,
-              csMap,
-            )}
-            onCharacterSkillAdd={this.props.onCharacterSkillAdd}
-            style={this.props.style}
-          />
-        </Card.Footer>
-      </Card>
     );
   }
 }

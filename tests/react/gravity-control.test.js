@@ -10,7 +10,7 @@ describe('GravityControl', () => {
     it('calls the onChange when input is changed with valid value', async () => {
         const user = userEvent.setup()
         let spy = jest.fn();
-        render(<GravityControl onChange={spy} />)
+        render(<GravityControl initialValue={""} onChange={spy} />)
 
         const input = screen.getByRole("textbox", {name: "Gravity"});
 
@@ -41,7 +41,7 @@ describe('GravityControl', () => {
     it('accepts initial value', async () => {
         const user = userEvent.setup()
         let spy = jest.fn();
-        render(<GravityControl onChange={spy} initialValue={2.3}/>)
+        render(<GravityControl onChange={spy} initialValue={"2.3"}/>)
 
         const input = screen.getByRole("textbox", {name: "Gravity"});
 
@@ -55,7 +55,7 @@ describe('GravityControl', () => {
     it('renders initial value as float', async () => {
         const user = userEvent.setup()
         let spy = jest.fn();
-        render(<GravityControl onChange={spy} initialValue={1}/>)
+        render(<GravityControl onChange={spy} initialValue={"1.0"} />)
 
         const input = screen.getByRole("textbox", {name: "Gravity"});
 
