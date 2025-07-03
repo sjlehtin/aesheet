@@ -6,13 +6,8 @@ import * as util from "./sheet-util";
 import { PhysicalWeaponModel } from "./PhysicalWeaponModel";
 
 export default class CCWeaponModel extends PhysicalWeaponModel {
-  // static VISION_CHECK_PENALTY_LIMIT = 45;
-  // static VISION_TARGET_INITIATIVE_PENALTY_LIMIT = 95;
-  // static VISION_BUMPING_LIMIT = 95;
-
   #weapon: Weapon;
   #handler: SkillHandler;
-  // readonly #darknessDetectionLevel: number;
 
   readiedBaseI = -1;
   baseCheckBonusForSlowActions = 5;
@@ -21,12 +16,10 @@ export default class CCWeaponModel extends PhysicalWeaponModel {
   constructor(
     handler: SkillHandler,
     weapon: Weapon, // TODO: rename to SheetCCWeapon or similar
-    // darknessDetectionLevel: number,
   ) {
     super(handler, weapon);
     this.#handler = handler;
     this.#weapon = weapon;
-    // this.#darknessDetectionLevel = darknessDetectionLevel;
   }
 
   roa(useType: UseType) {
