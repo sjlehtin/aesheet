@@ -46,7 +46,8 @@ import {
   ArmorLocation,
   ArmorStatModifierType,
   Attribute,
-  Character, CharacterAttribute,
+  Character,
+  CharacterAttribute,
   CharacterSkill,
   DerivedAttribute,
   EdgeLevel,
@@ -55,7 +56,7 @@ import {
   SenseAttribute,
   Skill,
   SkillAttribute,
-  StatModifierType
+  StatModifierType,
 } from "./api";
 
 const AllAttributes = {
@@ -65,8 +66,7 @@ const AllAttributes = {
   ...SenseAttribute,
 };
 
-export enum ArmorPieceAttribute
-{
+export enum ArmorPieceAttribute {
   fit = Attribute.Fit,
   ref = Attribute.Ref,
   surprise = SenseAttribute.Surprise,
@@ -75,7 +75,6 @@ export enum ArmorPieceAttribute
   conceal = SkillAttribute.Conceal,
   suspendedWeight = "suspendedWeight",
 }
-
 
 interface WoundPenalties {
   bodyDamage: number;
@@ -87,10 +86,12 @@ interface WoundPenalties {
   ra_fit_ref: number;
 }
 
-
 type SkillAttributeTypes = Extract<
   AllAttributeValues,
-  SkillAttribute.Stealth | SkillAttribute.Conceal | SkillAttribute.Climb | SkillAttribute.Swim
+  | SkillAttribute.Stealth
+  | SkillAttribute.Conceal
+  | SkillAttribute.Climb
+  | SkillAttribute.Swim
 >;
 
 const SkillsToMod: SkillAttributeTypes[] = [
@@ -101,15 +102,14 @@ const SkillsToMod: SkillAttributeTypes[] = [
 ];
 
 interface SkillHandlerCharacterSkill extends CharacterSkill {
-    _children: SkillHandlerCharacterSkill[];
-    _parent: SkillHandlerCharacterSkill | undefined;
-    _missingRequired: string[];
-    _unknownSkill: boolean;
-    indent: number;
+  _children: SkillHandlerCharacterSkill[];
+  _parent: SkillHandlerCharacterSkill | undefined;
+  _missingRequired: string[];
+  _unknownSkill: boolean;
+  indent: number;
 }
 
-interface EdgeMod extends Record<AllAttributeValues, ValueBreakdown> {
-}
+interface EdgeMod extends Record<AllAttributeValues, ValueBreakdown> {}
 
 interface ArmorMod extends EdgeMod {
   suspendedWeight: number;
@@ -129,7 +129,7 @@ class SkillHandler {
   _softMods: Record<AllAttributeValues, number>;
 
   #edgeMods: EdgeMod | undefined;
-  #armorMods: ArmorMod|undefined;
+  #armorMods: ArmorMod | undefined;
 
   _effStatsV2: Record<AllAttributeValues, ValueBreakdown> | undefined;
   _woundPenalties: WoundPenalties | undefined;
@@ -249,7 +249,7 @@ class SkillHandler {
   // TODO: Should be statmodifier
   getEdgeStatMod(stat: AllAttributeValues) {
     if (!this.#edgeMods) {
-      const edgeMods : EdgeMod = {
+      const edgeMods: EdgeMod = {
         fit: new ValueBreakdown(),
         ref: new ValueBreakdown(),
         lrn: new ValueBreakdown(),
@@ -361,7 +361,10 @@ class SkillHandler {
     const bd = new ValueBreakdown();
     if (this.weightCarried) bd.addBreakdown(this.weightCarried);
     bd.add(
-      -Math.min(bd.value(), this.getArmorStatMod(ArmorPieceAttribute.suspendedWeight) as number),
+      -Math.min(
+        bd.value(),
+        this.getArmorStatMod(ArmorPieceAttribute.suspendedWeight) as number,
+      ),
       "power armor suspension",
     );
     bd.multiply(this.gravity, "from gravity");
@@ -906,20 +909,19 @@ class SkillHandler {
     return this.getGenericModifier(mod, this.edges);
   }
 
-  getEffectModifier(
-    mod: EdgeModifierType | StatModifierType,
-  ) {
+  getEffectModifier(mod: EdgeModifierType | StatModifierType) {
     return this.getGenericModifier(mod, this.effects);
   }
 
   getGenericModifier<T extends string>(
     mod: T,
-    list: Record<T, string|number>[],
+    list: Record<T, string | number>[],
   ) {
     let sum = 0;
     for (let gen of list) {
       const genElement = gen[mod];
-      sum += typeof genElement === "number" ? genElement : parseFloat(genElement);
+      sum +=
+        typeof genElement === "number" ? genElement : parseFloat(genElement);
     }
     return sum;
   }
@@ -929,8 +931,8 @@ class SkillHandler {
       this._baseStats = {};
       for (const st of Object.values(Attribute) as Attribute[]) {
         this._baseStats[st] =
-          this.character["cur_" + st as CharacterAttribute] +
-          this.character["base_mod_" + st as CharacterAttribute] +
+          this.character[("cur_" + st) as CharacterAttribute] +
+          this.character[("base_mod_" + st) as CharacterAttribute] +
           this.getEdgeStatMod(st).value();
       }
       this._baseStats.mov =
@@ -1318,7 +1320,9 @@ class SkillHandler {
       Attribute.Psy,
       true,
     )?.value();
-    return (surpriseSkillCheck ?? 0) + this.getTotalModifier(SenseAttribute.Surprise);
+    return (
+      (surpriseSkillCheck ?? 0) + this.getTotalModifier(SenseAttribute.Surprise)
+    );
   }
 
   smellCheck() {
@@ -1350,7 +1354,9 @@ class SkillHandler {
 
   touchCheck() {
     const bd = new ValueBreakdown();
-    bd.addBreakdown(this.getArmorStatMod(SkillAttribute.Climb) as ValueBreakdown);
+    bd.addBreakdown(
+      this.getArmorStatMod(SkillAttribute.Climb) as ValueBreakdown,
+    );
     bd.divide(2, "touch coefficient");
     bd.roundup();
     bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));

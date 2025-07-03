@@ -80,7 +80,8 @@ export enum EdgeModifierType {
   DamageReduction = "armor_dr",
 }
 
-export interface StatModifier extends Record<AllAttributeValues | StatModifierType, number> {
+export interface StatModifier
+  extends Record<AllAttributeValues | StatModifierType, number> {
   toughness: number;
   pain_resistance: number;
   armor_l: string;
@@ -542,7 +543,6 @@ export enum CharacterAttribute {
 }
 
 export interface Character extends Record<CharacterAttribute, number> {
-
   bought_mana: number;
   bought_stamina: number;
 
