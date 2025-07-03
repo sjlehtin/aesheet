@@ -71,7 +71,21 @@ export enum StatModifierType {
   SwimMultiplier = "swim_multiplier",
 }
 
-export interface StatModifier extends Record<AllAttributeValues, number> {}
+export enum EdgeModifierType {
+  Stamina = "stamina",
+  Mana = "mana",
+  Toughness = "toughness",
+  PainResistance = "pain_resistance",
+  LethalityReduction = "armor_l",
+  DamageReduction = "armor_dr",
+}
+
+export interface StatModifier extends Record<AllAttributeValues | StatModifierType, number> {
+  toughness: number;
+  pain_resistance: number;
+  armor_l: string;
+  armor_dr: string;
+}
 
 export interface Effect extends StatModifier {}
 
@@ -87,15 +101,6 @@ export interface EdgeSkillBonus {
   bonus: number;
 }
 
-export enum EdgeModifierType {
-  Stamina = "stamina",
-  Mana = "mana",
-  Toughness = "toughness",
-  PainResistance = "pain_resistance",
-  LethalityReduction = "armor_l",
-  DamageReduction = "armor_dr",
-}
-
 export interface EdgeLevel extends StatModifier {
   edge: Edge;
   level: number;
@@ -105,6 +110,11 @@ export interface EdgeLevel extends StatModifier {
 
   extra_skill_points: number;
   all_checks_mod: number;
+
+  armor_l: string;
+  armor_dr: string;
+  pain_resistance: number;
+  toughness: number;
 }
 
 export interface CharacterEdge {
@@ -150,53 +160,53 @@ export enum ArmorStatType {
 }
 
 export enum ArmorStatModifierType {
-  HeadPiercing = "armor_h_p",
-  HeadSlashing = "armor_h_s",
-  HeadBludgeoning = "armor_h_b",
-  HeadBurn = "armor_h_r",
-  HeadDamageReduction = "armor_h_dr",
-  HeadDamagePoints = "armor_h_dp",
-  HeadProtectionLevel = "armor_h_pl",
-
-  TorsoPiercing = "armor_t_p",
-  TorsoSlashing = "armor_t_s",
-  TorsoBludgeoning = "armor_t_b",
-  TorsoBurn = "armor_t_r",
-  TorsoDamageReduction = "armor_t_dr",
-  TorsoDamagePoints = "armor_t_dp",
-  TorsoProtectionLevel = "armor_t_pl",
-
-  LeftLegPiercing = "armor_ll_p",
-  LeftLegSlashing = "armor_ll_s",
-  LeftLegBludgeoning = "armor_ll_b",
-  LeftLegBurn = "armor_ll_r",
-  LeftLegDamageReduction = "armor_ll_dr",
-  LeftLegDamagePoints = "armor_ll_dp",
-  LeftLegProtectionLevel = "armor_ll_pl",
-
-  LeftArmPiercing = "armor_la_p",
-  LeftArmSlashing = "armor_la_s",
-  LeftArmBludgeoning = "armor_la_b",
-  LeftArmBurn = "armor_la_r",
-  LeftArmDamageReduction = "armor_la_dr",
-  LeftArmDamagePoints = "armor_la_dp",
-  LeftArmProtectionLevel = "armor_la_pl",
-
-  RightLegPiercing = "armor_rl_p",
-  RightLegSlashing = "armor_rl_s",
-  RightLegBludgeoning = "armor_rl_b",
-  RightLegBurn = "armor_rl_r",
-  RightLegDamageReduction = "armor_rl_dr",
-  RightLegDamagePoints = "armor_rl_dp",
-  RightLegProtectionLevel = "armor_rl_pl",
-
-  RightArmPiercing = "armor_ra_p",
-  RightArmSlashing = "armor_ra_s",
-  RightArmBludgeoning = "armor_ra_b",
-  RightArmBurn = "armor_ra_r",
-  RightArmDamageReduction = "armor_ra_dr",
-  RightArmDamagePoints = "armor_ra_dp",
-  RightArmProtectionLevel = "armor_ra_pl",
+  // HeadPiercing = "armor_h_p",
+  // HeadSlashing = "armor_h_s",
+  // HeadBludgeoning = "armor_h_b",
+  // HeadBurn = "armor_h_r",
+  // HeadDamageReduction = "armor_h_dr",
+  // HeadDamagePoints = "armor_h_dp",
+  // HeadProtectionLevel = "armor_h_pl",
+  //
+  // TorsoPiercing = "armor_t_p",
+  // TorsoSlashing = "armor_t_s",
+  // TorsoBludgeoning = "armor_t_b",
+  // TorsoBurn = "armor_t_r",
+  // TorsoDamageReduction = "armor_t_dr",
+  // TorsoDamagePoints = "armor_t_dp",
+  // TorsoProtectionLevel = "armor_t_pl",
+  //
+  // LeftLegPiercing = "armor_ll_p",
+  // LeftLegSlashing = "armor_ll_s",
+  // LeftLegBludgeoning = "armor_ll_b",
+  // LeftLegBurn = "armor_ll_r",
+  // LeftLegDamageReduction = "armor_ll_dr",
+  // LeftLegDamagePoints = "armor_ll_dp",
+  // LeftLegProtectionLevel = "armor_ll_pl",
+  //
+  // LeftArmPiercing = "armor_la_p",
+  // LeftArmSlashing = "armor_la_s",
+  // LeftArmBludgeoning = "armor_la_b",
+  // LeftArmBurn = "armor_la_r",
+  // LeftArmDamageReduction = "armor_la_dr",
+  // LeftArmDamagePoints = "armor_la_dp",
+  // LeftArmProtectionLevel = "armor_la_pl",
+  //
+  // RightLegPiercing = "armor_rl_p",
+  // RightLegSlashing = "armor_rl_s",
+  // RightLegBludgeoning = "armor_rl_b",
+  // RightLegBurn = "armor_rl_r",
+  // RightLegDamageReduction = "armor_rl_dr",
+  // RightLegDamagePoints = "armor_rl_dp",
+  // RightLegProtectionLevel = "armor_rl_pl",
+  //
+  // RightArmPiercing = "armor_ra_p",
+  // RightArmSlashing = "armor_ra_s",
+  // RightArmBludgeoning = "armor_ra_b",
+  // RightArmBurn = "armor_ra_r",
+  // RightArmDamageReduction = "armor_ra_dr",
+  // RightArmDamagePoints = "armor_ra_dp",
+  // RightArmProtectionLevel = "armor_ra_pl",
 
   ModFit = "mod_fit",
   ModRef = "mod_ref",
@@ -310,6 +320,22 @@ export interface ArmorQuality extends GenericQuality {
   armor_b: string; // Bludgeoning
   armor_r: string; // Burn
   armor_dr: string; // Damage Reduction
+
+  mod_fit: number;
+  mod_ref: number;
+  mod_psy: number;
+
+  mod_vision: number;
+  mod_hear: number;
+  mod_smell: number;
+  mod_surprise: number;
+
+  mod_climb: number;
+  mod_stealth: number;
+  mod_conceal: number;
+  mod_swim: number;
+
+  mod_weight_multiplier: string;
 
   mod_encumbrance_class: number;
 }
@@ -486,33 +512,36 @@ export interface Sheet {
   character_total_xp: number;
 }
 
-export interface Character {
-  start_fit: number;
-  start_ref: number;
-  start_lrn: number;
-  start_int: number;
-  start_psy: number;
-  start_wil: number;
-  start_cha: number;
-  start_pos: number;
+export enum CharacterAttribute {
+  StartFit = "start_fit",
+  StartRef = "start_ref",
+  StartLrn = "start_lrn",
+  StartInt = "start_int",
+  StartPsy = "start_psy",
+  StartWil = "start_wil",
+  StartCha = "start_cha",
+  StartPos = "start_pos",
 
-  cur_fit: number;
-  cur_ref: number;
-  cur_lrn: number;
-  cur_int: number;
-  cur_psy: number;
-  cur_wil: number;
-  cur_cha: number;
-  cur_pos: number;
+  CurFit = "cur_fit",
+  CurRef = "cur_ref",
+  CurLrn = "cur_lrn",
+  CurInt = "cur_int",
+  CurPsy = "cur_psy",
+  CurWil = "cur_wil",
+  CurCha = "cur_cha",
+  CurPos = "cur_pos",
 
-  base_mod_fit: number;
-  base_mod_ref: number;
-  base_mod_lrn: number;
-  base_mod_int: number;
-  base_mod_psy: number;
-  base_mod_wil: number;
-  base_mod_cha: number;
-  base_mod_pos: number;
+  BaseModFit = "base_mod_fit",
+  BaseModRef = "base_mod_ref",
+  BaseModLrn = "base_mod_lrn",
+  BaseModInt = "base_mod_int",
+  BaseModPsy = "base_mod_psy",
+  BaseModWil = "base_mod_wil",
+  BaseModCha = "base_mod_cha",
+  BaseModPos = "base_mod_pos",
+}
+
+export interface Character extends Record<CharacterAttribute, number> {
 
   bought_mana: number;
   bought_stamina: number;

@@ -44,9 +44,9 @@ import {
   AllAttributeValues,
   Armor,
   ArmorLocation,
-  ArmorStatModifierType, ArmorStatType, ArmorTemplate,
+  ArmorStatModifierType,
   Attribute,
-  Character,
+  Character, CharacterAttribute,
   CharacterSkill,
   DerivedAttribute,
   EdgeLevel,
@@ -108,7 +108,10 @@ interface SkillHandlerCharacterSkill extends CharacterSkill {
     indent: number;
 }
 
-interface ArmorMod extends Record<AllAttributeValues, ValueBreakdown> {
+interface EdgeMod extends Record<AllAttributeValues, ValueBreakdown> {
+}
+
+interface ArmorMod extends EdgeMod {
   suspendedWeight: number;
 }
 
@@ -125,7 +128,7 @@ class SkillHandler {
   _baseStats: { [key: string]: number } | undefined;
   _softMods: Record<AllAttributeValues, number>;
 
-  #edgeMods;
+  #edgeMods: EdgeMod | undefined;
   #armorMods: ArmorMod|undefined;
 
   _effStatsV2: Record<AllAttributeValues, ValueBreakdown> | undefined;
@@ -246,16 +249,37 @@ class SkillHandler {
   // TODO: Should be statmodifier
   getEdgeStatMod(stat: AllAttributeValues) {
     if (!this.#edgeMods) {
-      this.#edgeMods = {};
-      for (const st of Object.values(AllAttributes) as AllAttributeValues[]) {
-        this.#edgeMods[st] = new ValueBreakdown();
-      }
+      const edgeMods : EdgeMod = {
+        fit: new ValueBreakdown(),
+        ref: new ValueBreakdown(),
+        lrn: new ValueBreakdown(),
+        int: new ValueBreakdown(),
+        psy: new ValueBreakdown(),
+        wil: new ValueBreakdown(),
+        cha: new ValueBreakdown(),
+        pos: new ValueBreakdown(),
+        mov: new ValueBreakdown(),
+        dex: new ValueBreakdown(),
+        imm: new ValueBreakdown(),
+        stamina: new ValueBreakdown(),
+        mana: new ValueBreakdown(),
+        body: new ValueBreakdown(),
+        climb: new ValueBreakdown(),
+        stealth: new ValueBreakdown(),
+        conceal: new ValueBreakdown(),
+        swim: new ValueBreakdown(),
+        vision: new ValueBreakdown(),
+        hear: new ValueBreakdown(),
+        smell: new ValueBreakdown(),
+        surprise: new ValueBreakdown(),
+      };
 
       for (const mod of this.edges) {
         for (const st of Object.values(AllAttributes) as AllAttributeValues[]) {
-          this.#edgeMods[st].add(mod[st], mod.edge.name);
+          edgeMods[st].add(mod[st], mod.edge.name);
         }
       }
+      this.#edgeMods = edgeMods;
     }
     return this.#edgeMods[stat];
   }
@@ -337,7 +361,7 @@ class SkillHandler {
     const bd = new ValueBreakdown();
     if (this.weightCarried) bd.addBreakdown(this.weightCarried);
     bd.add(
-      -Math.min(bd.value(), this.getArmorStatMod(ArmorPieceAttribute.suspendedWeight)),
+      -Math.min(bd.value(), this.getArmorStatMod(ArmorPieceAttribute.suspendedWeight) as number),
       "power armor suspension",
     );
     bd.multiply(this.gravity, "from gravity");
@@ -547,7 +571,7 @@ class SkillHandler {
     const bd = new ValueBreakdown();
 
     const effStats = this.getEffStats();
-    const ability = effStats[stat.toLowerCase()].value();
+    const ability = effStats[stat.toLowerCase() as AllAttributeValues].value();
 
     const level = this.skillLevelExt(skillName) ?? 0;
 
@@ -852,6 +876,7 @@ class SkillHandler {
     if (armor.base && stat in armor.base) {
       fromArmor += armor.base[stat];
     }
+
     if (armor.quality && stat in armor.quality) {
       fromQuality += armor.quality[stat];
     }
@@ -870,7 +895,7 @@ class SkillHandler {
     const bd = new ValueBreakdown();
     for (let mod of SkillsToMod) {
       if (skill[`affected_by_armor_mod_${mod}`]) {
-        bd.addBreakdown(this.getArmorStatMod(mod));
+        bd.addBreakdown(this.getArmorStatMod(mod) as ValueBreakdown);
       }
     }
     return bd;
@@ -878,23 +903,23 @@ class SkillHandler {
 
   getEdgeModifier(mod: EdgeModifierType | StatModifierType) {
     // Return the sum of modifiers from edges for modifier `mod`.
-    return this.getEffectModifier(mod, this.edges);
+    return this.getGenericModifier(mod, this.edges);
   }
 
   getEffectModifier(
     mod: EdgeModifierType | StatModifierType,
-    effects: Effect[] | undefined = undefined,
   ) {
-    // Return the sum of modifiers from effects for modifier `mod`.
-    if (!effects) {
-      effects = this.effects;
-      if (!effects) {
-        effects = [];
-      }
-    }
+    return this.getGenericModifier(mod, this.effects);
+  }
+
+  getGenericModifier<T extends string>(
+    mod: T,
+    list: Record<T, string|number>[],
+  ) {
     let sum = 0;
-    for (let eff of effects) {
-      sum += parseFloat(eff[mod]);
+    for (let gen of list) {
+      const genElement = gen[mod];
+      sum += typeof genElement === "number" ? genElement : parseFloat(genElement);
     }
     return sum;
   }
@@ -904,8 +929,8 @@ class SkillHandler {
       this._baseStats = {};
       for (const st of Object.values(Attribute) as Attribute[]) {
         this._baseStats[st] =
-          this.character["cur_" + st] +
-          this.character["base_mod_" + st] +
+          this.character["cur_" + st as CharacterAttribute] +
+          this.character["base_mod_" + st as CharacterAttribute] +
           this.getEdgeStatMod(st).value();
       }
       this._baseStats.mov =
@@ -1293,7 +1318,7 @@ class SkillHandler {
       Attribute.Psy,
       true,
     )?.value();
-    return surpriseSkillCheck + this.getTotalModifier(SenseAttribute.Surprise);
+    return (surpriseSkillCheck ?? 0) + this.getTotalModifier(SenseAttribute.Surprise);
   }
 
   smellCheck() {
@@ -1325,7 +1350,7 @@ class SkillHandler {
 
   touchCheck() {
     const bd = new ValueBreakdown();
-    bd.addBreakdown(this.getArmorStatMod(SkillAttribute.Climb));
+    bd.addBreakdown(this.getArmorStatMod(SkillAttribute.Climb) as ValueBreakdown);
     bd.divide(2, "touch coefficient");
     bd.roundup();
     bd.addBreakdown(this.skillCheck("Search", Attribute.Int, true));
