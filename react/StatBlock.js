@@ -828,21 +828,21 @@ class StatBlock extends React.Component {
             return <Loading>Stats</Loading>;
         }
 
-        var baseStyle = {
+        const baseStyle = {
             textAlign: "right",
             paddingLeft: 5,
             minWidth: "2em"
         };
-        var effStyle = { fontWeight: "bold" };
+        let effStyle = { fontWeight: "bold" };
         effStyle = Object.assign(effStyle, baseStyle);
-        var statStyle = { fontWeight: "bold" };
+        const statStyle = { fontWeight: "bold" };
 
-        var rows, derivedRows, expendable;
+        let rows, derivedRows, expendable;
 
-        var baseStats = skillHandler.getBaseStats();
-        var effStats = skillHandler.getEffStats();
+        const baseStats = skillHandler.getBaseStats();
+        const effStats = skillHandler.getEffStats();
 
-        var stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
+        const stats = ["fit", "ref", "lrn", "int", "psy", "wil", "cha",
             "pos"];
         rows = stats.map((st, ii) => {
             return <StatRow stat={st}
@@ -853,7 +853,6 @@ class StatBlock extends React.Component {
                             onMod={this.handleModification.bind(this)}
                             url={this.state.url} />;
         });
-
 
         derivedRows = <tbody>
             <tr>
@@ -1476,7 +1475,6 @@ class StatBlock extends React.Component {
 
         if (skillHandler) {
             baseStats = skillHandler.getBaseStats();
-            console.log("Num skills", skillHandler.getSkillList().length)
         }
 
         const statusMap = new Map([
