@@ -1,3 +1,21 @@
+## [Unreleased] - TBR
+
+### Added
+
+* Added `mod_swim` to ArmorQuality and admin interface.
+
+### Changed
+
+* Harmonized modifiers between ArmorQuality and ArmorTemplate. Removed `mod_sensory`, it is now separated in to the same sense categories as there are in ArmorTemplate.
+
+### Fixed
+
+* Armor quality has an effect on sense checks, due to the harmonization above.
+
+### Removed
+
+* Removed `mod_tumble` from ArmorTemplate. It was already unused.
+
 ## [0.30.0] - 2025-07-01
 
 ### Added
