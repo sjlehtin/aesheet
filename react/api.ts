@@ -71,11 +71,9 @@ export enum StatModifierType {
   SwimMultiplier = "swim_multiplier",
 }
 
-export interface StatModifier extends Record<AllAttributeValues, number> {
-}
+export interface StatModifier extends Record<AllAttributeValues, number> {}
 
-export interface Effect extends StatModifier {
-}
+export interface Effect extends StatModifier {}
 
 export interface Edge {
   id: number;
@@ -84,7 +82,7 @@ export interface Edge {
 }
 
 export interface EdgeSkillBonus {
-  skill:number;
+  skill: number;
   skill__name: string;
   bonus: number;
 }
@@ -103,7 +101,7 @@ export interface EdgeLevel extends StatModifier {
   level: number;
   cost: number;
 
-  edge_skill_bonuses: EdgeSkillBonus[]
+  edge_skill_bonuses: EdgeSkillBonus[];
 
   extra_skill_points: number;
   all_checks_mod: number;
@@ -138,7 +136,7 @@ export enum ArmorLocation {
   LeftLeg = "ll",
   RightLeg = "rl",
   LeftArm = "la",
-  RightArm = "ra"
+  RightArm = "ra",
 }
 
 export enum ArmorStatType {
@@ -148,7 +146,7 @@ export enum ArmorStatType {
   Burn = "r",
   DamageReduction = "dr",
   DamagePoints = "dp",
-  ProtectionLevel = "pl"
+  ProtectionLevel = "pl",
 }
 
 export enum ArmorStatModifierType {
@@ -287,13 +285,11 @@ export interface ArmorModifier {
 }
 
 export interface ArmorTemplate extends GenericBaseItem, ArmorModifier {
-
   is_helm: boolean;
   is_powered: boolean;
 }
 
-export interface ArmorSpecialQuality extends ArmorModifier {
-}
+export interface ArmorSpecialQuality extends ArmorModifier {}
 
 export interface MiscellaneousItem extends GenericBaseItem {
   name: string;
@@ -304,15 +300,15 @@ export interface SheetMiscellaneousItem {
   item: MiscellaneousItem;
 }
 
-export interface ArmorQuality extends GenericQuality{
+export interface ArmorQuality extends GenericQuality {
   name: string;
 
   dp_multiplier: string;
 
-  armor_p: string;  // Piercing
-  armor_s: string;  // Slashing
-  armor_b: string;  // Bludgeoning
-  armor_r: string;  // Burn
+  armor_p: string; // Piercing
+  armor_s: string; // Slashing
+  armor_b: string; // Bludgeoning
+  armor_r: string; // Burn
   armor_dr: string; // Damage Reduction
 
   mod_encumbrance_class: number;

@@ -1,6 +1,6 @@
 import React from "react";
 import SkillHandler from "SkillHandler";
-import {Attribute} from "./api";
+import { Attribute } from "./api";
 
 export default function WoundPenaltyBox({ handler }) {
   const penalties = handler.getWoundPenalties();
