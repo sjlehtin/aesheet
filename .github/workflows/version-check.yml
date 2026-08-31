@@ -1,0 +1,45 @@
+name: Version bump check
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check version was bumped
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      run: |
+        set -e
+
+        base_version=$(git show "$BASE_SHA:package.json" | python3 -c "import json,sys; print(json.load(sys.stdin)['version'])")
+        head_version=$(python3 -c "import json; print(json.load(open('package.json'))['version'])")
+        setup_version=$(python3 -c "
+        import re
+        text = open('setup.py').read()
+        print(re.search(r\"version='([^']+)'\", text).group(1))
+        ")
+
+        echo "base package.json version: $base_version"
+        echo "head package.json version: $head_version"
+        echo "head setup.py version:     $setup_version"
+
+        if [ "$head_version" != "$setup_version" ]; then
+          echo "::error::package.json ($head_version) and setup.py ($setup_version) versions disagree"
+          exit 1
+        fi
+
+        python3 -c "
+        base = tuple(int(p) for p in '$base_version'.split('.'))
+        head = tuple(int(p) for p in '$head_version'.split('.'))
+        if head <= base:
+            print(f'::error::version was not bumped: base={base}, head={head}')
+            raise SystemExit(1)
+        "

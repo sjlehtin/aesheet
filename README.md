@@ -35,6 +35,22 @@ Full list of all todo items in the TODO.
 
 #### Deploying
 
+##### Releasing a new version
+
+Every PR to `main` must bump the version (enforced by the `version-check` CI check). On your feature
+branch:
+
+```sh
+pip install -e ".[dev]"
+bump-my-version bump {patch|minor|major}
+git push --follow-tags
+```
+
+This updates `package.json` and `setup.py` together, commits, and tags `vX.Y.Z` (the tag is pushed
+along with the branch via `--follow-tags`). Merging to `main` triggers the acceptance build/deploy;
+promoting to production is a separate, manually-triggered step (see the `promote-production` GitHub
+Action).
+
 ##### On build host
 
 ```bash
